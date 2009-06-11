@@ -1,0 +1,686 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>cses.smtp.server</name>
+    </assembly>
+    <members>
+        <member name="T:EricDaugherty.CSES.Common.EmailAddress">
+            <summary>
+            Stores a single EmailAddress.  The class will only
+            represent valid email addresses, and will never contain
+            an invalid address.
+            </summary>
+            <remarks>
+            This class provides a way to store and pass a valid email address
+            within the system.  This class can not be created with an invalid address,
+            so if parameter of this type is not null, the address can be assumed to
+            be valid.
+            </remarks>
+        </member>
+        <member name="M:EricDaugherty.CSES.Common.EmailAddress.#ctor(System.String)">
+            <summary>
+            Creates a new EmailAddress using a valid address.
+            </summary>
+            <exception cref="T:EricDaugherty.CSES.Common.InvalidEmailAddressException">
+            Thrown if the username or domain is invalid.
+            </exception>
+        </member>
+        <member name="M:EricDaugherty.CSES.Common.EmailAddress.#ctor(System.String,System.String)">
+            <summary>
+            Creates a new EmailAddress using valid name and domain.
+            </summary>
+            <exception cref="T:EricDaugherty.CSES.Common.InvalidEmailAddressException">
+            Thrown if the username or domain is invalid.
+            </exception>
+        </member>
+        <member name="M:EricDaugherty.CSES.Common.EmailAddress.ToString">
+            <summary>
+            Returns the email address as: "user@domain.com".;
+            </summary>
+            <returns>Value of Address Property.</returns>
+        </member>
+        <member name="M:EricDaugherty.CSES.Common.EmailAddress.VerifySpecialCharacters(System.String)">
+            <summary>
+            Checks the specified string to verify it does not
+            contain any of the following characters: ( ) &lt; &gt; @ , ; : \ " . [ ]  
+            </summary>
+            <param name="data">The string to test</param>
+            <exception cref="T:EricDaugherty.CSES.Common.InvalidEmailAddressException">
+            Thrown if the data contains any illegal special characters.
+            </exception>
+        </member>
+        <member name="P:EricDaugherty.CSES.Common.EmailAddress.Username">
+            <summary>
+            The username component of the EmailAddress.  This
+            consists of everything before the @.
+            </summary>
+            <exception cref="T:EricDaugherty.CSES.Common.InvalidEmailAddressException">
+            Thrown if the username is invalid.
+            </exception>
+        </member>
+        <member name="P:EricDaugherty.CSES.Common.EmailAddress.Domain">
+            <summary>
+            The domain component of the EmailAddress.  This
+            consists of everything after the @.
+            </summary>
+            <exception cref="T:EricDaugherty.CSES.Common.InvalidEmailAddressException">
+            Thrown if the domain is invalid.
+            </exception>
+        </member>
+        <member name="P:EricDaugherty.CSES.Common.EmailAddress.Address">
+            <summary>
+            The entire EmailAddress (username@domian)
+            </summary>
+            <exception cref="T:EricDaugherty.CSES.Common.InvalidEmailAddressException">
+            Thrown if the address is invalid.
+            </exception>
+        </member>
+        <member name="T:EricDaugherty.CSES.Common.InvalidEmailAddressException">
+            <summary>
+            Indicates that an email address is not valid.
+            </summary>
+            <remarks>
+            Thrown by the EmailAddress class when part of all of the email
+            address being set is invalid.
+            </remarks>
+        </member>
+        <member name="M:EricDaugherty.CSES.Common.InvalidEmailAddressException.#ctor(System.String)">
+            <summary>
+            Creates a new Exception with a user-displayable message.
+            </summary>
+        </member>
+        <member name="T:EricDaugherty.CSES.Mailbox.IFolder">
+            <summary>
+            The folder class defines the interface used to 
+            interact with a specific folder in a user's mailbox.
+            </summary>
+            <remarks>
+            Incomplete.
+            </remarks>
+        </member>
+        <member name="M:EricDaugherty.CSES.Mailbox.IFolder.addMessage(EricDaugherty.CSES.Common.EmailAddress,System.String)">
+            <summary>
+            Add a message to the current folder.
+            </summary>
+            <param name="fromAddress">The FROM address for the email.</param>
+            <param name="data">The raw message data.</param>
+        </member>
+        <member name="P:EricDaugherty.CSES.Mailbox.IFolder.MessageCount">
+            <summary>
+            The total number of messages in this folder
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.Mailbox.IFolder.Size">
+            <summary>
+            The total size of all messages in this folder.
+            </summary>
+        </member>
+        <member name="T:EricDaugherty.CSES.Mailbox.MailboxManager">
+            <summary>
+            Mailbox Manager is a singleton class that provides
+            access to the current mailbox implementation.
+            </summary>
+            <remarks>
+            Incomplete.
+            </remarks>
+        </member>
+        <member name="M:EricDaugherty.CSES.Mailbox.MailboxManager.#ctor">
+            <summary>
+            Private constructor used by the GetInstance method to
+            create the one and only singleton instance.
+            </summary>
+        </member>
+        <member name="T:EricDaugherty.CSES.Net.ConnectionProcessor">
+            <summary>
+            The delegate that is called when to process a new connection (Socket).
+            </summary>
+        </member>
+        <member name="T:EricDaugherty.CSES.Net.SimpleServer">
+            <summary>
+            This class provides a bare bones implementation
+            of a Server to allow the SMTPProcessor or POP3Processor
+            to handle incoming socket connections.
+            </summary>
+            <remarks>
+            This class provides a very simple server implementation that accepts
+            incoming Socket connections and passes the call to SMTPProcessor or
+            POP3Processor for processing.  This code is for example/test use only
+            and should not be considered a production solution.  
+            </remarks>
+        </member>
+        <member name="M:EricDaugherty.CSES.Net.SimpleServer.#ctor(System.Int32,EricDaugherty.CSES.Net.ConnectionProcessor)">
+            <summary>
+            Creates a new SimpleServer that listens on a specific
+            port for connections and passes them to the specified delagat
+            </summary>
+            <param name="port">The port to listen on.</param>
+            <param name="processor">The ConnectionProcessor that will handle the incoming connections.</param>
+        </member>
+        <member name="M:EricDaugherty.CSES.Net.SimpleServer.Start">
+            <summary>
+            Listens for new connections and starts a new thread to handle each
+            new connection.  Loops infinitely.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.Net.SimpleServer.Stop">
+            <summary>
+            Stop the server.  This notifies the listener to stop accepting new connections
+            and that the loop should exit.
+            </summary>
+        </member>
+        <member name="T:EricDaugherty.CSES.Net.ConnectionWrapper">
+            <summary>
+            Wraps the ConnectionProcessor and Socket to allow a new thread to be
+            started that kicks off the ConnectionProcessor's process( Socket) method.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.Net.ConnectionWrapper.#ctor(EricDaugherty.CSES.Net.ConnectionProcessor,System.Net.Sockets.Socket)">
+            <summary>
+            Create a ConnectionWrapper to allow for a thread start.
+            </summary>
+            <param name="processor"></param>
+            <param name="socket"></param>
+        </member>
+        <member name="M:EricDaugherty.CSES.Net.ConnectionWrapper.Start">
+            <summary>
+            Entry point for the Thread that will handle this Socket connection.
+            </summary>
+        </member>
+        <member name="T:EricDaugherty.CSES.SmtpSender.SMTPSender">
+            <summary>
+            This class provides the ability to deliver
+            an email message to a SMTP Server.
+            </summary>
+            <remarks>
+            Incomplete.
+            </remarks>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpSender.SMTPSender.DeliverMessage(System.String,EricDaugherty.CSES.Common.EmailAddress[],System.String)">
+            <summary>
+            Delivers an email message to the SMTP server for the specified
+            domain.  All addresses in the array should be for the same domain.
+            </summary>
+            <param name="domain">
+            The internet domain name to use to lookup the SMTP server address.
+            </param>
+            <param name="addresses">
+            A set of addresses that should all be delivered to.
+            </param>
+            <param name="data">
+            The raw message data.
+            </param>
+        </member>
+        <member name="T:EricDaugherty.CSES.SmtpServer.FileMessageSpool">
+            <summary>
+            Stores Spooled SMTPMessages as files.
+            </summary>
+        </member>
+        <member name="T:EricDaugherty.CSES.SmtpServer.IMessageSpool">
+            <summary>
+            Provides an interface for the SMTPProcessor to use
+            to store incoming messages.
+            </summary>
+            <remarks>
+            The IMessageSpool defines the interface that classes must implement
+            if they wish to provide custom message spooling of inbound messages.  If this
+            method returns false, the message will be rejected by the SMTP server.  Once this
+            method returns true, the message is considered delivered and the remote sender
+            will be notified.  
+            </remarks>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.IMessageSpool.SpoolMessage(EricDaugherty.CSES.SmtpServer.SMTPMessage)">
+            <summary>
+            Stores the specified message using the appropriate mechanism.  
+            Individual implementations
+            may vary.  Once this method returns with a value of true,
+            the message is considered delivered.
+            </summary>		
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.FileMessageSpool.#ctor(System.String)">
+            <summary>
+            Initialize the file spool with the correct directory.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.FileMessageSpool.SpoolMessage(EricDaugherty.CSES.SmtpServer.SMTPMessage)">
+            <summary>
+            Not Implemented.
+            </summary>
+            <remarks>
+            Interface method from IMessageSpool.
+            </remarks>
+            <param name='message'>The message to spool.</param>
+        </member>
+        <member name="T:EricDaugherty.CSES.SmtpServer.IRecipientFilter">
+            <summary>
+            Allows filtering of incoming email by recipient address.
+            </summary>
+            <remarks>
+            The IRecipientFilter defines the interface that classes must implement
+            if they wish to provide custom filtering of inbound messages.  If this
+            method returns false, the message will be rejected by the SMTP server.  The 
+            context (SMTPContext) parameter provides information about the sender 
+            (including the FROM email address)
+            while the recipient parameter provides the TO email address.
+            </remarks>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.IRecipientFilter.AcceptRecipient(EricDaugherty.CSES.SmtpServer.SMTPContext,EricDaugherty.CSES.Common.EmailAddress)">
+            <summary>
+            Tests the recipient EmailAddress to determine if
+            it should be accepted as a valid address.
+            </summary>
+            <returns>True if the address should be accepted.</returns>
+        </member>
+        <member name="T:EricDaugherty.CSES.SmtpServer.LocalRecipientFilter">
+            <summary>
+            Allows all email addresses addressed to the local domain specified
+            in the constructor.
+            </summary>	
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.LocalRecipientFilter.#ctor(System.String)">
+            <summary>
+            Specifies the domain to accept email for.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.LocalRecipientFilter.AcceptRecipient(EricDaugherty.CSES.SmtpServer.SMTPContext,EricDaugherty.CSES.Common.EmailAddress)">
+            <summary>
+            Accepts only local email.
+            </summary>
+            <param name='context'>The SMTPContext</param>
+            <param name='recipient'>TODO - add parameter description</param>
+        </member>
+        <member name="T:EricDaugherty.CSES.SmtpServer.MemoryMessageSpool">
+            <summary>
+            Provides a memory based IMessageSpool.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.MemoryMessageSpool.#ctor">
+            <summary>
+            Initializes the queue.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.MemoryMessageSpool.SpoolMessage(EricDaugherty.CSES.SmtpServer.SMTPMessage)">
+            <summary>
+            Addes the message to the in memory queue.
+            </summary>
+            <param name='message'>The message to queue.</param>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.MemoryMessageSpool.NextMessage">
+            <summary>Returns the oldest message in the spool.</summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.MemoryMessageSpool.ClearSpool">
+            <summary>Removes any messages from the spool.</summary>
+        </member>
+        <member name="T:EricDaugherty.CSES.SmtpServer.SMTPContext">
+            <summary>
+            Maintains the current state for a SMTP client connection.
+            </summary>
+            <remarks>
+            This class is similar to a HTTP Session.  It is used to maintain all
+            the state information about the current connection.
+            </remarks>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPContext.connectionId">
+            <summary>The unique ID assigned to this connection</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPContext.socket">
+            <summary>The socket to the client.</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPContext.lastCommand">
+            <summary>Last successful command received.</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPContext.clientDomain">
+            <summary>The client domain, as specified by the helo command.</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPContext.message">
+            <summary>The incoming message.</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPContext.encoding">
+            <summary>Encoding to use to send/receive data from the socket.</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPContext.inputBuffer">
+            <summary>
+            It is possible that more than one line will be in
+            the queue at any one time, so we need to store any input
+            that has been read from the socket but not requested by the
+            ReadLine command yet.
+            </summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPContext.log">
+            <summary>Default Logger</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPContext.ioLog">
+            <summary>Logs all IO.  Seperate from normal Logger.</summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPContext.#ctor(System.Int64,System.Net.Sockets.Socket)">
+            <summary>
+            Initialize this context for a given socket connection.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPContext.WriteLine(System.String)">
+            <summary>
+            Writes the string to the socket as an entire line.  This
+            method will append the end of line characters, so the data
+            parameter should not contain them.
+            </summary>
+            <param name="data">The data to write the the client.</param>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPContext.ReadLine">
+            <summary>
+            Reads an entire line from the socket.  This method
+            will block until an entire line has been read.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPContext.Reset">
+            <summary>
+            Resets this context for a new message
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPContext.Close">
+            <summary>
+            Closes the socket connection to the client and performs any cleanup.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPContext.ReadBuffer">
+            <summary>
+            Helper method that returns the first full line in
+            the input buffer, or null if there is no line in the buffer.
+            If a line is found, it will also be removed from the buffer.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPContext.ConnectionId">
+            <summary>
+            The unique connection id.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPContext.LastCommand">
+            <summary>
+            Last successful command received.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPContext.ClientDomain">
+            <summary>
+            The client domain, as specified by the helo command.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPContext.Socket">
+            <summary>
+            The Socket that is connected to the client.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPContext.Message">
+            <summary>
+            The SMTPMessage that is currently being received.
+            </summary>
+        </member>
+        <member name="T:EricDaugherty.CSES.SmtpServer.SMTPMessage">
+            <summary>
+            Stores an incoming SMTP Message.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPMessage.#ctor">
+            <summary>
+            Creates a new message.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPMessage.AddToAddress(EricDaugherty.CSES.Common.EmailAddress)">
+            <summary>Addes an address to the recipient list.</summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPMessage.AddData(System.String)">
+            <summary>Append data to message data.</summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPMessage.ParseHeaders(System.String)">
+            <summary>
+            Parses an entire message or message part and returns the header entries
+            as a hashtable.
+            </summary>
+            <param name="partData">The raw message or message part data.</param>
+            <returns>A hashtable of the header keys and values.</returns>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPMessage.Headers">
+            <summary>
+            A hash table of all the Headers in the email message.  They keys
+            are the header names, and the values are the assoicated values, including
+            any sub key/value pairs is the header.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPMessage.FromAddress">
+            <summary>
+            The email address of the person
+            that sent this email.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPMessage.ToAddresses">
+            <summary>
+            The addresses that this message will be
+            delivered to.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPMessage.Data">
+            <summary>Message data.</summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPMessage.MessageParts">
+            <summary>
+            Parses the message body and creates an Attachment object
+            for each attachment in the message.
+            </summary>
+        </member>
+        <member name="T:EricDaugherty.CSES.SmtpServer.SMTPMessagePart">
+            <summary>
+            Stores a single part of a multipart message.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPMessagePart.#ctor(System.String)">
+            <summary>
+            Creates a new message part.  The input string should be the body of 
+            the attachment, without the "------=_NextPart" separator strings.
+            The last 4 characters of the data will be "\r\n\r\n".
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPMessagePart.Headers">
+            <summary>
+            A hash table of all the Headers in the email message.  They keys
+            are the header names, and the values are the assoicated values, including
+            any sub key/value pairs is the header.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPMessagePart.HeaderData">
+            <summary>
+            The raw text that represents the header of the mime part.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPMessagePart.BodyData">
+            <summary>
+            The raw text that represents the actual mime part.
+            </summary>
+        </member>
+        <member name="T:EricDaugherty.CSES.SmtpServer.SMTPProcessor">
+            <summary>
+            SMTPProcessor handles a single SMTP client connection.  This
+            class provides an implementation of the RFC821 specification.
+            </summary>
+            <remarks>
+            	Created by: Eric Daugherty
+            </remarks>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.COMMAND_HELO">
+            <summary>HELO Command</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.COMMAND_RSET">
+            <summary>RSET Command</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.COMMAND_NOOP">
+            <summary>NOOP Command</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.COMMAND_QUIT">
+            <summary>QUIT Command</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.COMMAND_MAIL">
+            <summary>MAIL FROM Command</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.COMMAND_RCPT">
+            <summary>RCPT TO Command</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.COMMAND_DATA">
+            <summary>DATA Comand</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.connectionId">
+            <summary>
+            Every connection will be assigned a unique id to 
+            provide consistent log output and tracking.
+            </summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.recipientFilter">
+            <summary>Determines which recipients to accept for delivery.</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.messageSpool">
+            <summary>Incoming Message spool</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.domain">
+            <summary>Domain name for this server.</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.welcomeMessage">
+            <summary>The message to display to the client when they first connect.</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.heloResponse">
+            <summary>The response to the HELO command.</summary>
+        </member>
+        <member name="F:EricDaugherty.CSES.SmtpServer.SMTPProcessor.log">
+            <summary>Default Logger</summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.#ctor(System.String)">
+            <summary>
+            Initializes the SMTPProcessor with the appropriate 
+            interface implementations.  This allows the relay and
+            delivery behaviour of the SMTPProcessor to be defined
+            by the specific server.
+            </summary>
+            <param name="domain">
+            The domain name this server handles mail for.  This does not have to
+            be a valid domain name, but it will be included in the Welcome Message
+            and HELO response.
+            </param>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.#ctor(System.String,EricDaugherty.CSES.SmtpServer.IRecipientFilter)">
+            <summary>
+            Initializes the SMTPProcessor with the appropriate 
+            interface implementations.  This allows the relay and
+            delivery behaviour of the SMTPProcessor to be defined
+            by the specific server.
+            </summary>
+            <param name="domain">
+            The domain name this server handles mail for.  This does not have to
+            be a valid domain name, but it will be included in the Welcome Message
+            and HELO response.
+            </param>
+            <param name="recipientFilter">
+            The IRecipientFilter implementation is responsible for 
+            filtering the recipient addresses to determine which ones
+            to accept for delivery.
+            </param>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.#ctor(System.String,EricDaugherty.CSES.SmtpServer.IMessageSpool)">
+            <summary>
+            Initializes the SMTPProcessor with the appropriate 
+            interface implementations.  This allows the relay and
+            delivery behaviour of the SMTPProcessor to be defined
+            by the specific server.
+            </summary>
+            <param name="domain">
+            The domain name this server handles mail for.  This does not have to
+            be a valid domain name, but it will be included in the Welcome Message
+            and HELO response.
+            </param>
+            <param name="messageSpool">
+            The IRecipientFilter implementation is responsible for 
+            filtering the recipient addresses to determine which ones
+            to accept for delivery.
+            </param>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.#ctor(System.String,EricDaugherty.CSES.SmtpServer.IRecipientFilter,EricDaugherty.CSES.SmtpServer.IMessageSpool)">
+            <summary>
+            Initializes the SMTPProcessor with the appropriate 
+            interface implementations.  This allows the relay and
+            delivery behaviour of the SMTPProcessor to be defined
+            by the specific server.
+            </summary>
+            <param name="domain">
+            The domain name this server handles mail for.  This does not have to
+            be a valid domain name, but it will be included in the Welcome Message
+            and HELO response.
+            </param>
+            <param name="recipientFilter">
+            The IRecipientFilter implementation is responsible for 
+            filtering the recipient addresses to determine which ones
+            to accept for delivery.
+            </param>
+            <param name="messageSpool">
+            The IMessageSpool implementation is responsible for 
+            spooling the inbound message once it has been recieved from the sender.
+            </param>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.Initialize(System.String)">
+            <summary>
+            Provides common initialization logic for the constructors.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.ProcessConnection(System.Net.Sockets.Socket)">
+            <summary>
+            ProcessConnection handles a connected TCP Client
+            and performs all necessary interaction with this
+            client to comply with RFC821.  This method is thread 
+            safe.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.SendWelcomeMessage(EricDaugherty.CSES.SmtpServer.SMTPContext)">
+            <summary>
+            Sends the welcome greeting to the client.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.ProcessCommands(EricDaugherty.CSES.SmtpServer.SMTPContext)">
+            <summary>
+            Handles the command input from the client.  This
+            message returns when the client issues the quit command.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.Helo(EricDaugherty.CSES.SmtpServer.SMTPContext,System.String[])">
+            <summary>
+            Handles the HELO command.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.Rset(EricDaugherty.CSES.SmtpServer.SMTPContext)">
+            <summary>
+            Reset the connection state.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.Mail(EricDaugherty.CSES.SmtpServer.SMTPContext,System.String)">
+            <summary>
+            Handle the MAIL FROM:&lt;address&gt; command.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.Rcpt(EricDaugherty.CSES.SmtpServer.SMTPContext,System.String)">
+            <summary>
+            Handle the RCPT TO:&lt;address&gt; command.
+            </summary>
+        </member>
+        <member name="M:EricDaugherty.CSES.SmtpServer.SMTPProcessor.ParseAddress(System.String)">
+            <summary>
+            Parses a valid email address out of the input string and return it.
+            Null is returned if no address is found.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPProcessor.WelcomeMessage">
+            <summary>
+            Returns the welcome message to display to new client connections.
+            This method can be overridden to allow for user defined welcome messages.
+            Please refer to RFC 821 for the rules on acceptable welcome messages.
+            </summary>
+        </member>
+        <member name="P:EricDaugherty.CSES.SmtpServer.SMTPProcessor.HeloResponse">
+            <summary>
+            The response to the HELO command.  This response should
+            include the local server's domain name.  Please refer to RFC 821
+            for more details.
+            </summary>
+        </member>
+    </members>
+</doc>

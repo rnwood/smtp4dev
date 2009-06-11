@@ -1,0 +1,13 @@
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\bin\Debug\smtp4dev.exe
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\bin\Debug\smtp4dev.pdb
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\bin\Debug\cses.smtp.server.dll
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\bin\Debug\log4net.dll
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\bin\Debug\cses.smtp.server.xml
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\obj\Debug\ResolveAssemblyReference.cache
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\obj\Debug\smtp4dev.Properties.Resources.resources
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\obj\Debug\smtp4dev.csproj.GenerateResource.Cache
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\obj\Debug\smtp4dev.exe
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\obj\Debug\smtp4dev.pdb
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\bin\Debug\smtp4dev.exe.config
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\obj\Debug\smtp4dev.MainForm.resources
+C:\Users\robert.wood\Documents\Visual Studio 2008\Projects\smtp4dev\smtp4dev\obj\Debug\smtp4dev.OptionsForm.resources
