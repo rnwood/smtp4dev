@@ -1,0 +1,460 @@
+<Configuration>
+  <SettingsComponent>
+    <string />
+    <integer />
+    <boolean>
+      <setting name="livetemplates.csharp.usevar">True</setting>
+      <setting name="SolutionAnalysisEnabled">False</setting>
+    </boolean>
+  </SettingsComponent>
+  <NAntValidationSettings>
+    <NAntPath value="" />
+  </NAntValidationSettings>
+  <RecentFiles>
+    <RecentFiles>
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:RegistrySettings.cs" caret="0" scrollPosition="0|0" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.Designer.cs" caret="25933" scrollPosition="0|365" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:Email.cs" caret="592" scrollPosition="0|0" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:OptionsForm.cs" caret="1785" scrollPosition="0|38" />
+      <File id="13CABC51-730F-4BF9-AC6F-352C09A57C7E/f:TextFile1.txt" caret="0" scrollPosition="0|0" />
+      <File id="d:Setup/f:LICENSE.cses-smtp-server" caret="0" scrollPosition="0|0" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:OptionsForm.Designer.cs" caret="17613" scrollPosition="10|119" />
+      <File id="13CABC51-730F-4BF9-AC6F-352C09A57C7E/f:LICENSE.rtf" caret="0" scrollPosition="0|0" />
+      <File id="d:Setup/f:LICENSE.rtf" caret="0" scrollPosition="0|0" />
+      <File id="d:Setup/f:LICENSE" caret="1464" scrollPosition="0|0" />
+      <File id="13CABC51-730F-4BF9-AC6F-352C09A57C7E/f:LICENSE.log4net" caret="11644" scrollPosition="0|162" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="2538" scrollPosition="0|65" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:Program.cs" caret="545" scrollPosition="0|0" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/d:Properties/f:Settings.Designer.cs" caret="1327" scrollPosition="0|16" />
+    </RecentFiles>
+    <RecentEdits>
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:Program.cs" caret="428" scrollPosition="0|0" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="11458" scrollPosition="0|326" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="11458" scrollPosition="0|229" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.Designer.cs" caret="25933" scrollPosition="0|285" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.Designer.cs" caret="25933" scrollPosition="0|365" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:OptionsForm.Designer.cs" caret="17613" scrollPosition="0|114" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:OptionsForm.Designer.cs" caret="17613" scrollPosition="10|119" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:OptionsForm.cs" caret="1487" scrollPosition="0|33" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="11458" scrollPosition="0|72" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:OptionsForm.cs" caret="1785" scrollPosition="0|38" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="11458" scrollPosition="0|313" />
+      <File id="13CABC51-730F-4BF9-AC6F-352C09A57C7E/f:TextFile1.txt" caret="0" scrollPosition="0|0" />
+      <File id="d:Setup/f:LICENSE" caret="698" scrollPosition="0|0" />
+      <File id="d:Setup/f:LICENSE" caret="81" scrollPosition="0|0" />
+      <File id="d:Setup/f:LICENSE.rtf" caret="16321" scrollPosition="0|48" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="11458" scrollPosition="0|172" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="11458" scrollPosition="0|172" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="11458" scrollPosition="0|14" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="11458" scrollPosition="0|14" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="11458" scrollPosition="0|14" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="11458" scrollPosition="0|50" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="11458" scrollPosition="0|50" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:Program.cs" caret="531" scrollPosition="0|0" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="804" scrollPosition="0|15" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="1963" scrollPosition="0|43" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="2414" scrollPosition="0|43" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="2153" scrollPosition="0|43" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="2503" scrollPosition="0|67" />
+      <File id="957A6C18-3016-403E-A04D-926D050BDEAE/f:MainForm.cs" caret="2538" scrollPosition="0|65" />
+      <File id="13CABC51-730F-4BF9-AC6F-352C09A57C7E/f:LICENSE.log4net" caret="0" scrollPosition="0|0" />
+    </RecentEdits>
+  </RecentFiles>
+  <UnitTestRunner>
+    <Providers />
+  </UnitTestRunner>
+  <UnitTestRunnerMSTest>
+    <UseTestRunConfigFromMetadataFile>False</UseTestRunConfigFromMetadataFile>
+  </UnitTestRunnerMSTest>
+  <CompletionStatisticsManager>
+    <ItemStatistics item="Default">
+      <Item value="SMTPProcessor" priority="1" />
+      <Item value="new" priority="8" />
+      <Item value="p" priority="0" />
+      <Item value="SimpleServer" priority="0" />
+      <Item value="ConnectionProcessor" priority="2" />
+      <Item value="s" priority="0" />
+      <Item value="IMessageSpool" priority="1" />
+      <Item value="return" priority="7" />
+      <Item value="true" priority="15" />
+      <Item value="message" priority="6" />
+      <Item value="IRecipientFilter" priority="0" />
+      <Item value="public" priority="10" />
+      <Item value="void" priority="3" />
+      <Item value="ThreadStaticAttribute" priority="0" />
+      <Item value="ServerWork" priority="0" />
+      <Item value="Invoke" priority="1" />
+      <Item value="Delegate" priority="0" />
+      <Item value="MethodInvoker" priority="1" />
+      <Item value="notifyIcon1" priority="2" />
+      <Item value="ToolTipIcon" priority="2" />
+      <Item value="form" priority="2" />
+      <Item value="override" priority="4" />
+      <Item value="Visible" priority="11" />
+      <Item value="false" priority="10" />
+      <Item value="Properties" priority="13" />
+      <Item value="Resources" priority="4" />
+      <Item value="_server" priority="0" />
+      <Item value="Application" priority="5" />
+      <Item value="string" priority="5" />
+      <Item value="Select" priority="0" />
+      <Item value="to" priority="0" />
+      <Item value="private" priority="5" />
+      <Item value="List" priority="0" />
+      <Item value="SMTPMessage" priority="1" />
+      <Item value="List&lt;SMTPMessage&gt;" priority="0" />
+      <Item value="_messages" priority="8" />
+      <Item value="class" priority="0" />
+      <Item value="prop" priority="1" />
+      <Item value="Message" priority="5" />
+      <Item value="Email" priority="4" />
+      <Item value="email" priority="6" />
+      <Item value="bindingSource1" priority="1" />
+      <Item value="typeof" priority="0" />
+      <Item value="Show" priority="0" />
+      <Item value="ToAddresses" priority="0" />
+      <Item value="DateTime" priority="1" />
+      <Item value="_recieved" priority="0" />
+      <Item value="dataGridView1" priority="0" />
+      <Item value="DataGridViewRow" priority="0" />
+      <Item value="row" priority="0" />
+      <Item value="if" priority="18" />
+      <Item value="SelectedEmail" priority="6" />
+      <Item value="File" priority="0" />
+      <Item value="file" priority="0" />
+      <Item value="TempFileCollection" priority="1" />
+      <Item value="tempFiles" priority="0" />
+      <Item value="FileInfo" priority="1" />
+      <Item value="msgFile" priority="1" />
+      <Item value="Process" priority="0" />
+      <Item value="ViewSelectedEmail" priority="0" />
+      <Item value="Close" priority="0" />
+      <Item value="ClearEmails" priority="0" />
+      <Item value="notifyIcon" priority="0" />
+      <Item value="e" priority="9" />
+      <Item value="bool" priority="5" />
+      <Item value="_close" priority="0" />
+      <Item value="Quit" priority="0" />
+      <Item value="context" priority="0" />
+      <Item value="OptionsForm" priority="0" />
+      <Item value="Settings" priority="10" />
+      <Item value="for" priority="1" />
+      <Item value="mbox" priority="0" />
+      <Item value="DialogResult" priority="1" />
+      <Item value="DialogResult.OK" priority="1" />
+      <Item value="DialogResult.Cancel" priority="0" />
+      <Item value="Icon" priority="0" />
+      <Item value="saveFileDialog1" priority="1" />
+      <Item value="ASCIIEncoding" priority="0" />
+      <Item value="static" priority="1" />
+      <Item value="RegistryKey" priority="2" />
+      <Item value="Registry" priority="0" />
+      <Item value="Any" priority="0" />
+      <Item value="name" priority="0" />
+      <Item value="else" priority="4" />
+      <Item value="Environment" priority="2" />
+      <Item value="Assembly" priority="0" />
+      <Item value="checkBox3" priority="1" />
+      <Item value="RegistrySettings" priority="1" />
+      <Item value="statusLabel" priority="3" />
+      <Item value="StopServer" priority="3" />
+      <Item value="StartServer" priority="1" />
+      <Item value="stopListeningButton" priority="0" />
+      <Item value="startListeningButton" priority="0" />
+      <Item value="WelcomeMessage" priority="0" />
+      <Item value="listenForConnectionsToolStripMenuItem" priority="3" />
+      <Item value="checked" priority="0" />
+      <Item value="trayIcon" priority="2" />
+      <Item value="deleteButton" priority="0" />
+      <Item value="viewButton" priority="0" />
+      <Item value="saveButton" priority="0" />
+      <Item value="null" priority="1" />
+      <Item value="deleteAllButton" priority="0" />
+      <Item value="deleteAllMenuItem" priority="0" />
+      <Item value="messageGrid" priority="7" />
+      <Item value="ToAddressesNice" priority="0" />
+      <Item value="NotifyIcon" priority="1" />
+      <Item value="_viewed" priority="0" />
+      <Item value="Font" priority="0" />
+      <Item value="FontStyle" priority="0" />
+      <Item value="ViewEmail" priority="0" />
+      <Item value="checkBox2" priority="0" />
+      <Item value="checkBox4" priority="1" />
+      <Item value="WindowsFormsSection" priority="0" />
+      <Item value="WindowState" priority="1" />
+      <Item value="FormWindowState.Minimized" priority="0" />
+      <Item value="Activate" priority="1" />
+      <Item value="BringToFront" priority="1" />
+      <Item value="FormWindowState.Normal" priority="0" />
+      <Item value="try" priority="0" />
+      <Item value="exception" priority="1" />
+      <Item value="MARGINS" priority="0" />
+      <Item value="panel1" priority="4" />
+      <Item value="foreach" priority="0" />
+      <Item value="control" priority="0" />
+      <Item value="Color" priority="2" />
+      <Item value="Bottom" priority="0" />
+      <Item value="flowLayoutPanel2" priority="1" />
+      <Item value="SetupGlass" priority="0" />
+      <Item value="PlatformID.Win32Windows" priority="0" />
+      <Item value="BorderStyle" priority="0" />
+      <Item value="this" priority="0" />
+      <Item value="FormBorderStyle.None" priority="0" />
+      <Item value="ShowIcon" priority="0" />
+      <Item value="Text" priority="0" />
+      <Item value="Padding" priority="0" />
+      <Item value="UpdateControlStatus" priority="0" />
+      <Item value="checkBox6" priority="1" />
+      <Item value="checkBox1" priority="1" />
+      <Item value="checkBox5" priority="0" />
+      <Item value="checkBox7" priority="0" />
+      <Item value="ListChangedType.ItemAdded" priority="0" />
+      <Item value="_firstTimeShown" priority="3" />
+      <Item value="Go" priority="0" />
+      <Item value="subjectDataGridViewTextBoxColumn" priority="0" />
+      <Item value="appRunning" priority="1" />
+      <Item value="while" priority="0" />
+      <Item value="Thread" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:EricDaugherty.CSES.SmtpServer.SMTPProcessor">
+      <Item value="ProcessConnection" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:EricDaugherty.CSES.Net.SimpleServer">
+      <Item value="Start" priority="0" />
+      <Item value="Stop" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:EricDaugherty.CSES.SmtpServer.SMTPMessage">
+      <Item value="Data" priority="1" />
+      <Item value="ToAddresses" priority="1" />
+      <Item value="FromAddress" priority="1" />
+      <Item value="Headers" priority="2" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Console">
+      <Item value="WriteLine" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Threading.Thread">
+      <Item value="Start" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.NotifyIcon">
+      <Item value="ShowBalloonTip" priority="1" />
+      <Item value="Icon" priority="0" />
+      <Item value="Visible" priority="0" />
+      <Item value="Text" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:EricDaugherty.CSES.Common.EmailAddress">
+      <Item value="Address" priority="3" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Windows.Forms.ToolTipIcon">
+      <Item value="Info" priority="1" />
+      <Item value="Error" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:smtp4dev.Form1">
+      <Item value="Start" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@smtp4dev.Properties.Resources">
+      <Item value="Icon1" priority="2" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Windows.Forms.Application">
+      <Item value="Exit" priority="2" />
+      <Item value="Idle" priority="0" />
+      <Item value="DoEvents" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.String">
+      <Item value="Format" priority="2" />
+      <Item value="Join" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Collections.Generic.IEnumerable`1">
+      <Item value="ToArray" priority="0" />
+      <Item value="Select" priority="0" />
+      <Item value="FirstOrDefault" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Collections.Generic.List`1">
+      <Item value="Add" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:smtp4dev.Email">
+      <Item value="FromAddress" priority="0" />
+      <Item value="Subject" priority="0" />
+      <Item value="SaveToFile" priority="1" />
+      <Item value="ToAddresses" priority="0" />
+      <Item value="HasBeenViewed" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.BindingSource">
+      <Item value="DataSource" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.DateTime">
+      <Item value="Now" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.DataGridView">
+      <Item value="SelectedRows" priority="0" />
+      <Item value="Columns" priority="0" />
+      <Item value="Rows" priority="2" />
+      <Item value="FirstDisplayedScrollingRowIndex" priority="0" />
+      <Item value="RowCount" priority="2" />
+      <Item value="ClearSelection" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.DataGridViewSelectedRowCollection">
+      <Item value="Cast" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.DataGridViewRow">
+      <Item value="DataBoundItem" priority="1" />
+      <Item value="Selected" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.IO.FileInfo">
+      <Item value="OpenWrite" priority="0" />
+      <Item value="FullName" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.IO.File">
+      <Item value="WriteAllText" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.CodeDom.Compiler.TempFileCollection">
+      <Item value="AddExtension" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Diagnostics.Process">
+      <Item value="Start" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.FormClosingEventArgs">
+      <Item value="Cancel" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.ComponentModel.BindingList`1">
+      <Item value="Last" priority="0" />
+      <Item value="ListChanged" priority="0" />
+      <Item value="Count" priority="0" />
+      <Item value="Remove" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.ToolStripMenuItem">
+      <Item value="Enabled" priority="1" />
+      <Item value="Checked" priority="2" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:EricDaugherty.CSES.SmtpServer.SMTPContext">
+      <Item value="Socket" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:smtp4dev.OptionsForm">
+      <Item value="ShowDialog" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@smtp4dev.Properties.Settings">
+      <Item value="Default" priority="10" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:smtp4dev.Properties.Settings">
+      <Item value="BalloonNotifications" priority="0" />
+      <Item value="StartInTray" priority="0" />
+      <Item value="Save" priority="1" />
+      <Item value="Reload" priority="0" />
+      <Item value="PortNumber" priority="0" />
+      <Item value="ListenOnStartup" priority="0" />
+      <Item value="ScrollMessages" priority="0" />
+      <Item value="AutoViewNewMessages" priority="0" />
+      <Item value="Upgrade" priority="0" />
+      <Item value="BringToFrontOnNewMessage" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:smtp4dev.MainForm">
+      <Item value="Show" priority="2" />
+      <Item value="FormBorderStyle" priority="0" />
+      <Item value="StartPosition" priority="0" />
+      <Item value="Visible" priority="0" />
+      <Item value="Go" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.SaveFileDialog">
+      <Item value="ShowDialog" priority="0" />
+      <Item value="FileName" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Text.ASCIIEncoding">
+      <Item value="ASCII" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@Microsoft.Win32.Registry">
+      <Item value="CurrentUser" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:Microsoft.Win32.RegistryKey">
+      <Item value="OpenSubKey" priority="0" />
+      <Item value="CreateSubKey" priority="0" />
+      <Item value="GetValueNames" priority="0" />
+      <Item value="SetValue" priority="0" />
+      <Item value="DeleteValue" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Reflection.Assembly">
+      <Item value="GetEntryAssembly" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Reflection.Assembly">
+      <Item value="Location" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.CheckBox">
+      <Item value="Checked" priority="9" />
+      <Item value="Enabled" priority="2" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@smtp4dev.RegistrySettings">
+      <Item value="StartOnLogin" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.Label">
+      <Item value="Text" priority="2" />
+      <Item value="ForeColor" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.Button">
+      <Item value="Visible" priority="1" />
+      <Item value="Enabled" priority="3" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.PictureBox">
+      <Item value="Visible" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.DataGridViewCellValueEventArgs">
+      <Item value="ColumnIndex" priority="0" />
+      <Item value="Value" priority="0" />
+      <Item value="RowIndex" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.DataGridViewCellFormattingEventArgs">
+      <Item value="RowIndex" priority="0" />
+      <Item value="CellStyle" priority="1" />
+      <Item value="FormattingApplied" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.DataGridViewCellStyle">
+      <Item value="Font" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Drawing.FontStyle">
+      <Item value="Bold" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Exception">
+      <Item value="Message" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.Panel">
+      <Item value="BackColor" priority="0" />
+      <Item value="Height" priority="0" />
+      <Item value="Width" priority="0" />
+      <Item value="Controls" priority="0" />
+      <Item value="Margin" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Drawing.Color">
+      <Item value="Black" priority="1" />
+      <Item value="White" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.Control">
+      <Item value="ForeColor" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.FlowLayoutPanel">
+      <Item value="Height" priority="0" />
+      <Item value="BackColor" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Environment">
+      <Item value="OSVersion" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.OperatingSystem">
+      <Item value="Platform" priority="0" />
+      <Item value="Version" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Version">
+      <Item value="Major" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.PlatformID">
+      <Item value="Win32NT" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.FormBorderStyle">
+      <Item value="FixedToolWindow" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.Windows.Forms.Padding">
+      <Item value="Top" priority="1" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:System.ComponentModel.ListChangedEventArgs">
+      <Item value="ListChangedType" priority="0" />
+    </ItemStatistics>
+    <ItemStatistics item="Qualified:@System.Threading.Thread">
+      <Item value="Sleep" priority="0" />
+    </ItemStatistics>
+  </CompletionStatisticsManager>
+</Configuration>
