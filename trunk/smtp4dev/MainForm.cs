@@ -108,6 +108,14 @@ namespace smtp4dev
                                        {
                                            _messages.Add(email);
 
+                                           if (Properties.Settings.Default.MaxMessages > 0)
+                                           {
+                                               while (_messages.Count > Properties.Settings.Default.MaxMessages)
+                                               {
+                                                   _messages.RemoveAt(0);
+                                               }
+                                           }                                          
+
                                            if (Properties.Settings.Default.AutoViewNewMessages)
                                            {
                                                ViewMessage(email);
@@ -179,6 +187,7 @@ namespace smtp4dev
             email.SaveToFile(msgFile);
 
             Process.Start(msgFile.FullName);
+            messageGrid.Refresh();
         }
 
         private void deleteAllButton_Click(object sender, EventArgs e)
@@ -316,7 +325,7 @@ namespace smtp4dev
 
         private void messageGrid_SelectionChanged(object sender, EventArgs e)
         {
-            deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedEmail != null;
+            button1.Enabled = deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedEmail != null;
         }
 
         private void messageGrid_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
@@ -348,6 +357,16 @@ namespace smtp4dev
             {
                 Visible = false;
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            Email email = SelectedEmail;
+            TempFileCollection tempFiles = new TempFileCollection();
+            FileInfo msgFile = new FileInfo(tempFiles.AddExtension("txt"));
+            email.SaveToFile(msgFile);
+
+            Process.Start(msgFile.FullName);
         }
 
     }
