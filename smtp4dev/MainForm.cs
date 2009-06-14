@@ -185,7 +185,7 @@ namespace smtp4dev
             TempFileCollection tempFiles = new TempFileCollection();
             FileInfo msgFile = new FileInfo(tempFiles.AddExtension("eml"));
             email.SaveToFile(msgFile);
-
+             
             Process.Start(msgFile.FullName);
             messageGrid.Refresh();
         }
