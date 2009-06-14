@@ -16,7 +16,12 @@ namespace smtp4dev
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(true);
 
-            Properties.Settings.Default.Upgrade();
+            if (Properties.Settings.Default.SettingsUpgradeRequired)
+            {
+                Properties.Settings.Default.Upgrade();
+                Properties.Settings.Default.SettingsUpgradeRequired = false;
+                Properties.Settings.Default.Save();
+            }
 
             MainForm form = new MainForm();
             Application.Run(form);

@@ -33,13 +33,7 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_36C73155AF68987D4F261279CD235331"
-        "OwnerKey" = "8:_D68DF2A99B4D15C5642F54E0298DA811"
-        "MsmSig" = "8:_UNDEFINED"
-        }
-        "Entry"
-        {
-        "MsmKey" = "8:_36C73155AF68987D4F261279CD235331"
+        "MsmKey" = "8:_421B6B2738D0CB179BC7871DFF992118"
         "OwnerKey" = "8:_F0AE20B637364212A096DC3BB72EBAB7"
         "MsmSig" = "8:_UNDEFINED"
         }
@@ -51,14 +45,20 @@
         }
         "Entry"
         {
-        "MsmKey" = "8:_CC7B4E306DC14A46B1148BB6EC258F5C"
-        "OwnerKey" = "8:_UNDEFINED"
+        "MsmKey" = "8:_7A0E8BFDD81ECAF828252ACC0C40188A"
+        "OwnerKey" = "8:_421B6B2738D0CB179BC7871DFF992118"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
-        "MsmKey" = "8:_D68DF2A99B4D15C5642F54E0298DA811"
+        "MsmKey" = "8:_7A0E8BFDD81ECAF828252ACC0C40188A"
         "OwnerKey" = "8:_F0AE20B637364212A096DC3BB72EBAB7"
+        "MsmSig" = "8:_UNDEFINED"
+        }
+        "Entry"
+        {
+        "MsmKey" = "8:_CC7B4E306DC14A46B1148BB6EC258F5C"
+        "OwnerKey" = "8:_UNDEFINED"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
@@ -76,13 +76,13 @@
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_D68DF2A99B4D15C5642F54E0298DA811"
+        "OwnerKey" = "8:_421B6B2738D0CB179BC7871DFF992118"
         "MsmSig" = "8:_UNDEFINED"
         }
         "Entry"
         {
         "MsmKey" = "8:_UNDEFINED"
-        "OwnerKey" = "8:_36C73155AF68987D4F261279CD235331"
+        "OwnerKey" = "8:_7A0E8BFDD81ECAF828252ACC0C40188A"
         "MsmSig" = "8:_UNDEFINED"
         }
     }
@@ -250,20 +250,20 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_36C73155AF68987D4F261279CD235331"
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_421B6B2738D0CB179BC7871DFF992118"
             {
             "AssemblyRegister" = "3:1"
             "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:log4net, Version=1.2.0.30714, Culture=neutral"
+            "AssemblyAsmDisplayName" = "8:cses.smtp.server, Version=1.0.1655.23818, Culture=neutral"
                 "ScatterAssemblies"
                 {
-                    "_36C73155AF68987D4F261279CD235331"
+                    "_421B6B2738D0CB179BC7871DFF992118"
                     {
-                    "Name" = "8:log4net.dll"
+                    "Name" = "8:cses.smtp.server.dll"
                     "Attributes" = "3:512"
                     }
                 }
-            "SourcePath" = "8:log4net.dll"
+            "SourcePath" = "8:cses.smtp.server.dll"
             "TargetName" = "8:"
             "Tag" = "8:"
             "Folder" = "8:_7F95246AB7B1485F962CC47D8717B57E"
@@ -301,6 +301,37 @@
             "IsDependency" = "11:FALSE"
             "IsolateTo" = "8:"
             }
+            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_7A0E8BFDD81ECAF828252ACC0C40188A"
+            {
+            "AssemblyRegister" = "3:1"
+            "AssemblyIsInGAC" = "11:FALSE"
+            "AssemblyAsmDisplayName" = "8:log4net, Version=1.2.0.30714, Culture=neutral"
+                "ScatterAssemblies"
+                {
+                    "_7A0E8BFDD81ECAF828252ACC0C40188A"
+                    {
+                    "Name" = "8:log4net.dll"
+                    "Attributes" = "3:512"
+                    }
+                }
+            "SourcePath" = "8:log4net.dll"
+            "TargetName" = "8:"
+            "Tag" = "8:"
+            "Folder" = "8:_7F95246AB7B1485F962CC47D8717B57E"
+            "Condition" = "8:"
+            "Transitive" = "11:FALSE"
+            "Vital" = "11:TRUE"
+            "ReadOnly" = "11:FALSE"
+            "Hidden" = "11:FALSE"
+            "System" = "11:FALSE"
+            "Permanent" = "11:FALSE"
+            "SharedLegacy" = "11:FALSE"
+            "PackageAs" = "3:1"
+            "Register" = "3:1"
+            "Exclude" = "11:FALSE"
+            "IsDependency" = "11:TRUE"
+            "IsolateTo" = "8:"
+            }
             "{1FB2D0AE-D3B9-43D4-B9DD-F88EC61E35DE}:_CC7B4E306DC14A46B1148BB6EC258F5C"
             {
             "SourcePath" = "8:..\\LICENSE.rtf"
@@ -319,37 +350,6 @@
             "Register" = "3:1"
             "Exclude" = "11:TRUE"
             "IsDependency" = "11:FALSE"
-            "IsolateTo" = "8:"
-            }
-            "{9F6F8455-1EF1-4B85-886A-4223BCC8E7F7}:_D68DF2A99B4D15C5642F54E0298DA811"
-            {
-            "AssemblyRegister" = "3:1"
-            "AssemblyIsInGAC" = "11:FALSE"
-            "AssemblyAsmDisplayName" = "8:cses.smtp.server, Version=1.0.1655.23818, Culture=neutral"
-                "ScatterAssemblies"
-                {
-                    "_D68DF2A99B4D15C5642F54E0298DA811"
-                    {
-                    "Name" = "8:cses.smtp.server.dll"
-                    "Attributes" = "3:512"
-                    }
-                }
-            "SourcePath" = "8:cses.smtp.server.dll"
-            "TargetName" = "8:"
-            "Tag" = "8:"
-            "Folder" = "8:_7F95246AB7B1485F962CC47D8717B57E"
-            "Condition" = "8:"
-            "Transitive" = "11:FALSE"
-            "Vital" = "11:TRUE"
-            "ReadOnly" = "11:FALSE"
-            "Hidden" = "11:FALSE"
-            "System" = "11:FALSE"
-            "Permanent" = "11:FALSE"
-            "SharedLegacy" = "11:FALSE"
-            "PackageAs" = "3:1"
-            "Register" = "3:1"
-            "Exclude" = "11:FALSE"
-            "IsDependency" = "11:TRUE"
             "IsolateTo" = "8:"
             }
         }
@@ -419,14 +419,14 @@
         {
         "Name" = "8:Microsoft Visual Studio"
         "ProductName" = "8:smtp4dev"
-        "ProductCode" = "8:{BC652AC8-D4D5-4796-A676-F42DD882351D}"
-        "PackageCode" = "8:{1223181B-D11F-472E-88C4-BDBFA1BD0ACA}"
+        "ProductCode" = "8:{FC2F57EE-2963-4341-B216-E9085631238E}"
+        "PackageCode" = "8:{4E6203A1-AA9E-45A3-999A-731BC3D1A911}"
         "UpgradeCode" = "8:{542EEA02-7932-465A-B51C-79B20B6E26AF}"
         "RestartWWWService" = "11:FALSE"
         "RemovePreviousVersions" = "11:TRUE"
         "DetectNewerInstalledVersion" = "11:TRUE"
         "InstallAllUsers" = "11:TRUE"
-        "ProductVersion" = "8:1.0.0"
+        "ProductVersion" = "8:1.0.1"
         "Manufacturer" = "8:Robert Wood"
         "ARPHELPTELEPHONE" = "8:"
         "ARPHELPLINK" = "8:"
