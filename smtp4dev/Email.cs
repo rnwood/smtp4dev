@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Linq;
 using System.Text;
+using anmar.SharpMimeTools;
 using EricDaugherty.CSES.SmtpServer;
 
 namespace smtp4dev
@@ -15,6 +16,8 @@ namespace smtp4dev
         {
             _recieved = DateTime.Now;
             Message = message;
+
+            Subject = new SharpMessage(message.Data).Subject;
         }
 
         public SMTPMessage Message { get; private set; }
@@ -37,7 +40,7 @@ namespace smtp4dev
         {
             get
             {
-                return Message.ToAddresses.Select(to => to.Address).ToArray();
+                return Message.ToAddresses.Select(a => a.Address).ToArray();
             }
         }
 
@@ -51,10 +54,8 @@ namespace smtp4dev
 
         public string Subject
         {
-            get
-            {
-                return (string)Message.Headers["Subject"];
-            }
+            get;
+            private set;
         }
 
         public bool HasBeenViewed
