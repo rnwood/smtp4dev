@@ -36,6 +36,10 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\cses.smtp.server.dll</HintPath>
     </Reference>
+    <Reference Include="SharpMimeTools, Version=0.6.2377.29118, Culture=neutral, PublicKeyToken=e917783050dba165, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>lib\SharpMimeTools.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
