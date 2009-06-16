@@ -107,6 +107,7 @@
             <File Id="F02" Name="$(var.smtp4dev.TargetFileName).config" Source="$(var.smtp4dev.TargetPath).config"/>
             <File Id="F03" Name="cses.smtp.server.dll" Source="..\smtp4dev\bin\Debug\cses.smtp.server.dll"/>
             <File Id="F04" Name="log4net.dll" Source="..\smtp4dev\bin\Debug\log4net.dll"/>
+            <File Id="F05" Name="sharpmimetools.dll" Source="..\smtp4dev\bin\Debug\sharpmimetools.dll"/>
             <Shortcut Id="S01" Directory="StartMenuDir"
 Name="smtp4dev" Target="ProductFeature" Show="normal" Icon="Icon.exe"
 WorkingDirectory="TARGETDIR"/>
@@ -117,6 +118,7 @@ WorkingDirectory="TARGETDIR"/>
             <RemoveFile Id='R04' Directory='INSTALLLOCATION' Name='$(var.smtp4dev.TargetFileName).config' On='uninstall'/>
             <RemoveFile Id='R05' Directory='INSTALLLOCATION' Name='cses.smtp.server.dll' On='uninstall'/>
             <RemoveFile Id='R06' Directory='INSTALLLOCATION' Name='log4net.dll' On='uninstall'/>
+            <RemoveFile Id='R07' Directory='INSTALLLOCATION' Name='sharpmimetools.dll' On='uninstall'/>
           </Component>
 
           <Component Id='C02' Guid='9F86CD72-6AD5-445c-8C6E-A357E38C29BC'>
