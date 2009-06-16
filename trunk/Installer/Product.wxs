@@ -7,15 +7,16 @@
     <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
 
     <Upgrade Id="542EEA02-7932-465A-B51C-79B20B6E26AF">
-      <UpgradeVersion Minimum="1.0.0" IncludeMinimum="yes" Maximum="1.0.1" Property="THEUPGRADEVERSION"/>
+      <UpgradeVersion Minimum="1.0.0" Maximum="1.0.1" IncludeMaximum="yes" Property="THEUPGRADEVERSION"/>
     </Upgrade>
 
     <WixVariable Id="WixUILicenseRtf" Value="$(var.SolutionDir)license.rtf" />
+    <Property Id="ALLUSERS" Value="1"/>
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLLOCATION" />
     <Property Id="CREATESTARTUPITEM">
       <RegistrySearch Id="RS01" Root="HKCU" Type="file" Key="Software\Microsoft\Windows\CurrentVersion\Run" Name="smtp4dev"/>
     </Property>
-       
+
     <UI Id="WixUI_InstallDir">
       <TextStyle Id="WixUI_Font_Normal" FaceName="Tahoma" Size="8" />
       <TextStyle Id="WixUI_Font_Bigger" FaceName="Tahoma" Size="12" />
@@ -41,8 +42,7 @@
         <Control Id="Description" Type="Text" X="25" Y="23" Width="280" Height="15" Transparent="yes" NoPrefix="yes" Text="Enter the following information to personalize your installation" />
         <Control Id="BannerBitmap" Type="Bitmap" X="0" Y="0" Width="370" Height="44" TabSkip="no" Text="!(loc.InstallDirDlgBannerBitmap)" />
         <Control Id="BannerLine" Type="Line" X="0" Y="44" Width="370" Height="0" />
-
-        <Control Id="StartupItem" Type="CheckBox" X="20" Y="62" Width="320" Height="18" Property="CREATESTARTUPITEM" CheckBoxValue="1" Text="Start smtp4dev automatically at logon"/>
+        <Control Id="StartupItem" Type="CheckBox" X="20" Y="62" Width="320" Height="18" Property="CREATESTARTUPITEM" CheckBoxValue="1" Text="Start smtp4dev automatically at logon (current user only)"/>
         <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="370" Height="0" />
         <Control Id="Next" Type="PushButton" X="236" Y="243" Width="56" Height="17" Default="yes" Text="Next" />
         <Control Id="Back" Type="PushButton" X="180" Y="243" Width="56" Height="17" Text="Back" />
@@ -84,7 +84,7 @@
       <Publish Dialog="ExitDialog" Control="Finish" Event="DoAction" Value="LaunchApplication">
         WIXUI_EXITDIALOGOPTIONALCHECKBOX = 1 and NOT Installed
       </Publish>
- 
+
       <Property Id="ARPNOMODIFY" Value="1" />
     </UI>
     <UIRef Id="WixUI_Common" />
