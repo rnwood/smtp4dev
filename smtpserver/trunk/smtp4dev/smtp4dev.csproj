@@ -32,6 +32,12 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="PresentationCore">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="PresentationFramework">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
     <Reference Include="SharpMimeTools, Version=0.6.2377.29118, Culture=neutral, PublicKeyToken=e917783050dba165, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>lib\SharpMimeTools.dll</HintPath>
@@ -51,10 +57,20 @@
     <Reference Include="System.Drawing" />
     <Reference Include="System.Windows.Forms" />
     <Reference Include="System.Xml" />
+    <Reference Include="UIAutomationProvider">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="WindowsBase">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Behaviour.cs" />
     <Compile Include="Email.cs" />
+    <Compile Include="EmailInspectorWindow.xaml.cs">
+      <DependentUpon>EmailInspectorWindow.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="JoinStringArrayConvertor.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -101,6 +117,7 @@
     <None Include="Resources\Icon1.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Properties\DataSources\anmar.SharpMimeTools.SharpMimeMessage.datasource" />
     <None Include="Resources\Icon2.ico" />
   </ItemGroup>
   <ItemGroup>
@@ -108,6 +125,12 @@
       <Project>{C5BBE7C2-0EA0-4E50-95FF-BF07EA1B93FF}</Project>
       <Name>Rnwood.SmtpServer</Name>
     </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Page Include="EmailInspectorWindow.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
