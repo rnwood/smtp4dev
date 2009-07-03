@@ -8,14 +8,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
-using EricDaugherty.CSES.Common;
-using EricDaugherty.CSES.Net;
-using EricDaugherty.CSES.SmtpServer;
+using Rnwood.SmtpServer;
 using smtp4dev.Properties;
 
 namespace smtp4dev
 {
-    public partial class MainForm : Form, IMessageSpool, IRecipientFilter
+    public partial class MainForm : Form
     {
         public MainForm()
         {
@@ -79,12 +77,11 @@ namespace smtp4dev
             {
                 Application.DoEvents();
 
-                SMTPProcessor processor = new SMTPProcessor("localhost", this, this)
-                                              {
-                                                  WelcomeMessage = "220 localhost smtp4dev"
-                                              };
-                _server = new SimpleServer(Settings.Default.PortNumber, processor.ProcessConnection);
-                _server.Start();
+                Behaviour b = new Behaviour();
+                b.MessageReceived += MessageReceived;
+
+                _server = new Server(b);
+                _server.Run();
             }
             catch (Exception exception)
             {
@@ -98,54 +95,48 @@ namespace smtp4dev
             }
         }
 
-        private SimpleServer _server;
-
-        bool IMessageSpool.SpoolMessage(SMTPMessage message)
+        private void MessageReceived(object sender, MessageReceivedEventArgs e)
         {
-            Email email = new Email(message);
+            Email email = new Email(e.Message);
 
             Invoke((MethodInvoker)(() =>
-                                       {
-                                           _messages.Add(email);
+            {
+                _messages.Add(email);
 
-                                           if (Properties.Settings.Default.MaxMessages > 0)
-                                           {
-                                               while (_messages.Count > Properties.Settings.Default.MaxMessages)
-                                               {
-                                                   _messages.RemoveAt(0);
-                                               }
-                                           }                                          
+                if (Properties.Settings.Default.MaxMessages > 0)
+                {
+                    while (_messages.Count > Properties.Settings.Default.MaxMessages)
+                    {
+                        _messages.RemoveAt(0);
+                    }
+                }
 
-                                           if (Properties.Settings.Default.AutoViewNewMessages)
-                                           {
-                                               ViewMessage(email);
-                                           }
-                                           else if (!Visible && Properties.Settings.Default.BalloonNotifications)
-                                           {
-                                               string body = string.Format("From: {0}\nTo: {1}\nSubject: {2}\n<Click here to view more details>",
-                                                   email.FromAddress,
-                                                   string.Join(", ", email.ToAddresses),
-                                                   email.Subject);
+                if (Properties.Settings.Default.AutoViewNewMessages)
+                {
+                    ViewMessage(email);
+                }
+                else if (!Visible && Properties.Settings.Default.BalloonNotifications)
+                {
+                    string body = string.Format("From: {0}\nTo: {1}\nSubject: {2}\n<Click here to view more details>",
+                        email.FromAddress,
+                        string.Join(", ", email.ToAddresses),
+                        email.Subject);
 
-                                               trayIcon.ShowBalloonTip(3000, "Email Recieved", body, ToolTipIcon.Info);
-                                           }
+                    trayIcon.ShowBalloonTip(3000, "Email Recieved", body, ToolTipIcon.Info);
+                }
 
-                                           if (Visible && Properties.Settings.Default.BringToFrontOnNewMessage)
-                                           {
-                                               BringToFront();
-                                               Activate();
-                                           }
-                                       }));
-
-            return true;
+                if (Visible && Properties.Settings.Default.BringToFrontOnNewMessage)
+                {
+                    BringToFront();
+                    Activate();
+                }
+            }));
         }
+
+        private Server _server;
 
         private readonly BindingList<Email> _messages = new BindingList<Email>();
 
-        bool IRecipientFilter.AcceptRecipient(SMTPContext context, EmailAddress recipient)
-        {
-            return true;
-        }
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
         {
