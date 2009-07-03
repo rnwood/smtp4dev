@@ -35,6 +35,8 @@ namespace Rnwood.SmtpServer
 
         public void Run()
         {
+            _runThread = Thread.CurrentThread;
+
             foreach (Extension extension in Extensions)
             {
                 extension.ServerStartup(this);
@@ -45,16 +47,28 @@ namespace Rnwood.SmtpServer
 
             while (!_stop)
             {
-                TcpClient tcpClient = l.AcceptTcpClient();
-                new Thread(ConnectionThreadWork).Start(tcpClient);
+                try
+                {
+
+
+                    TcpClient tcpClient = l.AcceptTcpClient();
+                    new Thread(ConnectionThreadWork).Start(tcpClient);
+                }
+                catch (ThreadInterruptedException)
+                {
+                    //normal
+                }
             }
         }
 
         private volatile bool _stop;
+        private Thread _runThread;
 
         public void Stop()
         {
             _stop = true;
+
+            _runThread.Interrupt();
         }
 
         public List<Extension> Extensions
