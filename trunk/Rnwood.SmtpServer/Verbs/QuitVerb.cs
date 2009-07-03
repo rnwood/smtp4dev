@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+namespace Rnwood.SmtpServer
+{
+    public class QuitVerb : Verb
+    {
+        public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
+        {
+            connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel, "See you later aligator" ));
+            connectionProcessor.CloseConnection();
+            connectionProcessor.Session.SessionCompleted = true;
+        }
+    }
+}
