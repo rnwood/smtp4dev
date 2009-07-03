@@ -3,7 +3,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using anmar.SharpMimeTools;
-using EricDaugherty.CSES.SmtpServer;
+using Rnwood.SmtpServer;
 
 namespace smtp4dev
 {
@@ -12,21 +12,23 @@ namespace smtp4dev
         private DateTime _recieved;
         private bool _viewed;
 
-        public Email(SMTPMessage message)
+        public Email(Message message)
         {
             _recieved = DateTime.Now;
             Message = message;
+            MessageDetails = new SharpMessage(Message.Data);
 
             Subject = new SharpMessage(message.Data).Subject;
         }
 
-        public SMTPMessage Message { get; private set; }
+        public Message Message { get; private set; }
+        public SharpMessage MessageDetails { get; private set; }
 
         public string FromAddress
         {
             get
             {
-                return Message.FromAddress.Address;
+                return MessageDetails.FromAddress;
             }
         }
 
@@ -40,7 +42,7 @@ namespace smtp4dev
         {
             get
             {
-                return Message.ToAddresses.Select(a => a.Address).ToArray();
+                return MessageDetails.To.Cast<SharpMimeAddress>().Select(adr => adr.ToString()).ToArray();
             }
         }
 
