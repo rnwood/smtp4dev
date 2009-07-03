@@ -10,7 +10,7 @@ namespace Rnwood.SmtpServer
         public Message(Session session)
         {
             Session = session;
-            EnvelopeTo = new List<string>();
+            To = new List<string>();
         }
 
         public Session Session
@@ -18,13 +18,13 @@ namespace Rnwood.SmtpServer
             get; private set;
         }
 
-        public string EnvelopeFrom
+        public string From
         {
             get;
             internal set;
         }
 
-        public List<string> EnvelopeTo
+        public List<string> To
         {
             get;
             private set;

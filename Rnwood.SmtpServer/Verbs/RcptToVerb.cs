@@ -15,7 +15,7 @@ namespace Rnwood.SmtpServer
                 return;
             }
             
-            connectionProcessor.CurrentMessage.EnvelopeTo.Add(request.ArgumentsText);
+            connectionProcessor.CurrentMessage.To.Add(request.ArgumentsText);
             connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Recipient accepted"));
         }
     }
