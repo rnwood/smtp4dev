@@ -316,7 +316,7 @@ namespace smtp4dev
 
         private void messageGrid_SelectionChanged(object sender, EventArgs e)
         {
-            button1.Enabled = deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedEmail != null;
+            button2.Enabled = button1.Enabled = deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedEmail != null;
         }
 
         private void messageGrid_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
@@ -358,6 +358,12 @@ namespace smtp4dev
             email.SaveToFile(msgFile);
 
             Process.Start(msgFile.FullName);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            EmailInspectorWindow form = new EmailInspectorWindow(SelectedEmail);
+            form.Show();
         }
 
     }

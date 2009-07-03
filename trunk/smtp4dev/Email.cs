@@ -15,34 +15,33 @@ namespace smtp4dev
         public Email(Message message)
         {
             _recieved = DateTime.Now;
-            Message = message;
-            MessageDetails = new SharpMessage(Message.Data);
+            Envelope = message;
+            Contents = new SharpMessage(Envelope.Data);
 
-            Subject = new SharpMessage(message.Data).Subject;
         }
 
-        public Message Message { get; private set; }
-        public SharpMessage MessageDetails { get; private set; }
+        public Message Envelope { get; private set; }
+        public SharpMessage Contents { get; private set; }
 
         public string FromAddress
         {
             get
             {
-                return MessageDetails.FromAddress;
+                return Contents.FromAddress;
             }
         }
 
         public void SaveToFile(FileInfo file)
         {
             _viewed = true;
-            File.WriteAllText(file.FullName, Message.Data, Encoding.ASCII);
+            File.WriteAllText(file.FullName, Envelope.Data, Encoding.ASCII);
         }
 
         public string[] ToAddresses
         {
             get
             {
-                return MessageDetails.To.Cast<SharpMimeAddress>().Select(adr => adr.ToString()).ToArray();
+                return Contents.To.Cast<SharpMimeAddress>().Select(adr => adr.ToString()).ToArray();
             }
         }
 
@@ -56,8 +55,10 @@ namespace smtp4dev
 
         public string Subject
         {
-            get;
-            private set;
+            get
+            {
+                return Contents.Subject;
+            }
         }
 
         public bool HasBeenViewed

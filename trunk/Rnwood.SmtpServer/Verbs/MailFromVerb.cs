@@ -24,7 +24,7 @@ namespace Rnwood.SmtpServer
 
             try
             {
-                connectionProcessor.CurrentMessage.EnvelopeFrom = request.Arguments[0];
+                connectionProcessor.CurrentMessage.From = request.Arguments[0];
 
                 ParameterProcessorMap.Process(request.Arguments.Skip(1).ToArray(), true);
 
