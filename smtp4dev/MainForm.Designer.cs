@@ -48,10 +48,10 @@
             this.bindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.deleteAllButton = new System.Windows.Forms.Button();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
-            this.button1 = new System.Windows.Forms.Button();
             this.viewButton = new System.Windows.Forms.Button();
             this.saveButton = new System.Windows.Forms.Button();
             this.deleteButton = new System.Windows.Forms.Button();
+            this.button2 = new System.Windows.Forms.Button();
             this.optionsButton = new System.Windows.Forms.Button();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
@@ -64,7 +64,6 @@
             this.label2 = new System.Windows.Forms.Label();
             this.label1 = new System.Windows.Forms.Label();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
-            this.button2 = new System.Windows.Forms.Button();
             this.trayIconContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.messageGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.bindingSource)).BeginInit();
@@ -94,13 +93,13 @@
             this.optionsMenuItem,
             this.exitMenuItem});
             this.trayIconContextMenuStrip.Name = "contextMenuStrip";
-            this.trayIconContextMenuStrip.Size = new System.Drawing.Size(192, 136);
+            this.trayIconContextMenuStrip.Size = new System.Drawing.Size(191, 136);
             // 
             // showMenuItem
             // 
             this.showMenuItem.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.showMenuItem.Name = "showMenuItem";
-            this.showMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.showMenuItem.Size = new System.Drawing.Size(190, 22);
             this.showMenuItem.Text = "View Messages";
             this.showMenuItem.Click += new System.EventHandler(this.trayIcon_DoubleClick);
             // 
@@ -108,7 +107,7 @@
             // 
             this.viewLastMessageMenuItem.Enabled = false;
             this.viewLastMessageMenuItem.Name = "viewLastMessageMenuItem";
-            this.viewLastMessageMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.viewLastMessageMenuItem.Size = new System.Drawing.Size(190, 22);
             this.viewLastMessageMenuItem.Text = "View Last Message";
             this.viewLastMessageMenuItem.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
@@ -116,28 +115,28 @@
             // 
             this.deleteAllMenuItem.Enabled = false;
             this.deleteAllMenuItem.Name = "deleteAllMenuItem";
-            this.deleteAllMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.deleteAllMenuItem.Size = new System.Drawing.Size(190, 22);
             this.deleteAllMenuItem.Text = "Delete All Messages";
             this.deleteAllMenuItem.Click += new System.EventHandler(this.clearAllEmailsToolStripMenuItem_Click);
             // 
             // listenForConnectionsToolStripMenuItem
             // 
             this.listenForConnectionsToolStripMenuItem.Name = "listenForConnectionsToolStripMenuItem";
-            this.listenForConnectionsToolStripMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.listenForConnectionsToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
             this.listenForConnectionsToolStripMenuItem.Text = "Listen for connections";
             this.listenForConnectionsToolStripMenuItem.Click += new System.EventHandler(this.listenForConnectionsToolStripMenuItem_Click);
             // 
             // optionsMenuItem
             // 
             this.optionsMenuItem.Name = "optionsMenuItem";
-            this.optionsMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.optionsMenuItem.Size = new System.Drawing.Size(190, 22);
             this.optionsMenuItem.Text = "Options";
             this.optionsMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
             // 
             // exitMenuItem
             // 
             this.exitMenuItem.Name = "exitMenuItem";
-            this.exitMenuItem.Size = new System.Drawing.Size(191, 22);
+            this.exitMenuItem.Size = new System.Drawing.Size(190, 22);
             this.exitMenuItem.Text = "Exit";
             this.exitMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -228,7 +227,7 @@
             this.deleteAllButton.AutoSize = true;
             this.deleteAllButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.deleteAllButton.Enabled = false;
-            this.deleteAllButton.Location = new System.Drawing.Point(209, 3);
+            this.deleteAllButton.Location = new System.Drawing.Point(234, 3);
             this.deleteAllButton.Name = "deleteAllButton";
             this.deleteAllButton.Size = new System.Drawing.Size(62, 23);
             this.deleteAllButton.TabIndex = 2;
@@ -239,12 +238,11 @@
             // flowLayoutPanel1
             // 
             this.flowLayoutPanel1.AutoSize = true;
-            this.flowLayoutPanel1.Controls.Add(this.button1);
             this.flowLayoutPanel1.Controls.Add(this.viewButton);
+            this.flowLayoutPanel1.Controls.Add(this.button2);
             this.flowLayoutPanel1.Controls.Add(this.saveButton);
             this.flowLayoutPanel1.Controls.Add(this.deleteButton);
             this.flowLayoutPanel1.Controls.Add(this.deleteAllButton);
-            this.flowLayoutPanel1.Controls.Add(this.button2);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
             this.flowLayoutPanel1.Location = new System.Drawing.Point(0, 285);
@@ -252,25 +250,12 @@
             this.flowLayoutPanel1.Size = new System.Drawing.Size(514, 29);
             this.flowLayoutPanel1.TabIndex = 3;
             // 
-            // button1
-            // 
-            this.button1.AutoSize = true;
-            this.button1.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.button1.Enabled = false;
-            this.button1.Location = new System.Drawing.Point(434, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(77, 23);
-            this.button1.TabIndex = 6;
-            this.button1.Text = "View Source";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click);
-            // 
             // viewButton
             // 
             this.viewButton.AutoSize = true;
             this.viewButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.viewButton.Enabled = false;
-            this.viewButton.Location = new System.Drawing.Point(388, 3);
+            this.viewButton.Location = new System.Drawing.Point(471, 3);
             this.viewButton.Name = "viewButton";
             this.viewButton.Size = new System.Drawing.Size(40, 23);
             this.viewButton.TabIndex = 3;
@@ -283,7 +268,7 @@
             this.saveButton.AutoSize = true;
             this.saveButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.saveButton.Enabled = false;
-            this.saveButton.Location = new System.Drawing.Point(331, 3);
+            this.saveButton.Location = new System.Drawing.Point(356, 3);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(51, 23);
             this.saveButton.TabIndex = 4;
@@ -296,13 +281,26 @@
             this.deleteButton.AutoSize = true;
             this.deleteButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.deleteButton.Enabled = false;
-            this.deleteButton.Location = new System.Drawing.Point(277, 3);
+            this.deleteButton.Location = new System.Drawing.Point(302, 3);
             this.deleteButton.Name = "deleteButton";
             this.deleteButton.Size = new System.Drawing.Size(48, 23);
             this.deleteButton.TabIndex = 5;
             this.deleteButton.Text = "Delete";
             this.deleteButton.UseVisualStyleBackColor = true;
             this.deleteButton.Click += new System.EventHandler(this.deleteButton_Click);
+            // 
+            // button2
+            // 
+            this.button2.AutoSize = true;
+            this.button2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.button2.Enabled = false;
+            this.button2.Location = new System.Drawing.Point(413, 3);
+            this.button2.Name = "button2";
+            this.button2.Size = new System.Drawing.Size(52, 23);
+            this.button2.TabIndex = 7;
+            this.button2.Text = "Inspect";
+            this.button2.UseVisualStyleBackColor = true;
+            this.button2.Click += new System.EventHandler(this.button2_Click);
             // 
             // optionsButton
             // 
@@ -449,19 +447,6 @@
             this.pictureBox1.TabIndex = 2;
             this.pictureBox1.TabStop = false;
             // 
-            // button2
-            // 
-            this.button2.AutoSize = true;
-            this.button2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.button2.Enabled = false;
-            this.button2.Location = new System.Drawing.Point(151, 3);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(52, 23);
-            this.button2.TabIndex = 7;
-            this.button2.Text = "Inspect";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
-            // 
             // MainForm
             // 
             this.AcceptButton = this.viewButton;
@@ -529,7 +514,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn fromAddressDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn ToAddressesNice;
         private System.Windows.Forms.DataGridViewTextBoxColumn subjectDataGridViewTextBoxColumn;
-        private System.Windows.Forms.Button button1;
         private System.Windows.Forms.Button button2;
     }
 }
