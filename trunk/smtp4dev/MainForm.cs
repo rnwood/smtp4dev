@@ -316,7 +316,7 @@ namespace smtp4dev
 
         private void messageGrid_SelectionChanged(object sender, EventArgs e)
         {
-            button2.Enabled = button1.Enabled = deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedEmail != null;
+            button2.Enabled = deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedEmail != null;
         }
 
         private void messageGrid_CellValueNeeded(object sender, DataGridViewCellValueEventArgs e)
