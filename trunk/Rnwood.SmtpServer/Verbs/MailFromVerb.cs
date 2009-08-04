@@ -22,12 +22,21 @@ namespace Rnwood.SmtpServer
 
             connectionProcessor.NewMessage();
 
+            if (request.ArgumentsText.Length == 0)
+            {
+                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments, "Must specify from address or <>"));
+                return;
+            }
+
+            if (!request.ArgumentsText.StartsWith("<") || !request.ArgumentsText.EndsWith(">"))
+            {
+                connectionProcessor.CurrentMessage.From = request.ArgumentsText.TrimStart('<').TrimEnd('>');
+            }
+
+
             try
             {
-                connectionProcessor.CurrentMessage.From = request.Arguments[0];
-
                 ParameterProcessorMap.Process(request.Arguments.Skip(1).ToArray(), true);
-
                 connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Okey dokey"));
             }
             catch

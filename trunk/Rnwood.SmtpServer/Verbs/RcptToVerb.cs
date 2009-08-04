@@ -14,8 +14,14 @@ namespace Rnwood.SmtpServer
                 connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands, "No current message"));
                 return;
             }
-            
-            connectionProcessor.CurrentMessage.To.Add(request.ArgumentsText);
+
+            if (request.ArgumentsText.Length < 3 || !request.ArgumentsText.StartsWith("<") || !request.ArgumentsText.EndsWith(">"))
+            {
+                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments, "Must specify to address <address>"));
+                return;
+            }
+
+            connectionProcessor.CurrentMessage.ToList.Add(request.ArgumentsText.TrimStart('<').TrimEnd('>'));
             connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Recipient accepted"));
         }
     }

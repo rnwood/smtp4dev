@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
 using System.Text;
+using System.IO;
 
 namespace Rnwood.SmtpServer
 {
@@ -18,33 +19,40 @@ namespace Rnwood.SmtpServer
             }
 
             connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.StartMailInputEndWithDot, "End message with period"));
-            StringBuilder message = new StringBuilder();
-
-            do
+            using (MemoryStream dataStream = new MemoryStream())
             {
-                string line = connectionProcessor.ReadLine();
-
-                if (line != ".")
+                using (StreamWriter writer = new StreamWriter(dataStream, Encoding.Default))
                 {
-                    line = ProcessLine(line + "\r\n");
-                    message.Append(line);
-                }
-                else
-                {
-                    break;
-                }
+                    do
+                    {
+                        string line = connectionProcessor.ReadLine();
 
-            } while (true);
+                        if (line != ".")
+                        {
+                            line = ProcessLine(line);
+                            writer.WriteLine(line);
+                        }
+                        else
+                        {
+                            break;
+                        }
 
-            if (connectionProcessor.Server.MaxMessageSize.HasValue && message.Length > connectionProcessor.Server.MaxMessageSize.Value)
-            {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Message exceeds fixed size limit"));
-            }
-            else
-            {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted"));
-                connectionProcessor.CurrentMessage.Data = message.ToString();
-                connectionProcessor.CommitMessage();
+                    } while (true);
+
+                    writer.Flush();
+                    long? maxMessageSize = connectionProcessor.Server.Behaviour.GetMaximumMessageSize(connectionProcessor);
+
+                    if (maxMessageSize.HasValue && dataStream.Length > maxMessageSize.Value)
+                    {
+                        connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Message exceeds fixed size limit"));
+                    }
+                    else
+                    {
+                        connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted"));
+                        connectionProcessor.CurrentMessage.Data = dataStream.ToArray();
+                        connectionProcessor.CommitMessage();
+                    }
+                }
             }
         }
 
@@ -53,7 +61,7 @@ namespace Rnwood.SmtpServer
             //Remove escaping of end of message character
             if (line.StartsWith("."))
             {
-                line.Remove(0, 1);
+                line = line.Remove(0, 1);
             }
             return line;
         }

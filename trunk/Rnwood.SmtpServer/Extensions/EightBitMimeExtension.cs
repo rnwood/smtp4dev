@@ -7,10 +7,6 @@ namespace Rnwood.SmtpServer.Extensions
 {
     public class EightBitMimeExtension : Extension
     {
-        public override void ServerStartup(Server server)
-        {
-        }
-
         public override ExtensionProcessor CreateExtensionProcessor(ConnectionProcessor processor)
         {
             return new EightBitMimeExtensionProcessor(processor);
@@ -39,14 +35,21 @@ namespace Rnwood.SmtpServer.Extensions
     {
         public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
         {
-            connectionProcessor.SwitchReaderEncoding(Encoding.Default);
+            if (_eightBitMessage)
+            {
+                connectionProcessor.SwitchReaderEncoding(Encoding.Default);
+            }
+           
             try
             {
                 base.Process(connectionProcessor, request);
             }
             finally
             {
-                connectionProcessor.SwitchReaderEncodingToDefault();
+                if (_eightBitMessage)
+                {
+                    connectionProcessor.SwitchReaderEncodingToDefault();
+                }
             }
         }
 

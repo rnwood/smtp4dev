@@ -89,7 +89,7 @@
     </UI>
     <UIRef Id="WixUI_Common" />
 
-    <Icon Id="Icon.exe" SourceFile="$(var.smtp4dev.TargetPath)"/>
+    <Icon Id="Icon.exe" SourceFile="$(var.Rnwood.Smtp4dev.TargetPath)"/>
 
     <InstallExecuteSequence>
       <RemoveExistingProducts After="InstallInitialize" />
@@ -102,25 +102,25 @@
       <Directory Id="ProgramFilesFolder">
         <Directory Id="INSTALLLOCATION" Name="smtp4dev">
           <Component Id="ProductComponent" Guid="465231a4-9293-4fd3-bd7f-af872e61e2c2">
-            <File Id="F01" Name="$(var.smtp4dev.TargetFileName)" Source="$(var.smtp4dev.TargetPath)"
+            <File Id="F01" Name="$(var.Rnwood.Smtp4dev.TargetFileName)" Source="$(var.Rnwood.Smtp4dev.TargetPath)"
 />
-            <File Id="F02" Name="$(var.smtp4dev.TargetFileName).config" Source="$(var.smtp4dev.TargetPath).config"/>
-            <File Id="F03" Name="Rnwood.SmtpServer.dll" Source="..\smtp4dev\bin\Debug\Rnwood.SmtpServer.dll"/>
-            <File Id="F05" Name="sharpmimetools.dll" Source="..\smtp4dev\bin\Debug\sharpmimetools.dll"/>
+            <File Id="F02" Name="$(var.Rnwood.Smtp4dev.TargetFileName).config" Source="$(var.Rnwood.Smtp4dev.TargetPath).config"/>
+            <File Id="F03" Name="Rnwood.SmtpServer.dll" Source="..\Rnwood.Smtp4dev\bin\Debug\Rnwood.SmtpServer.dll"/>
+            <File Id="F05" Name="sharpmimetools.dll" Source="..\Rnwood.Smtp4dev\bin\Debug\sharpmimetools.dll"/>
             <Shortcut Id="S01" Directory="StartMenuDir"
 Name="smtp4dev" Target="ProductFeature" Show="normal" Icon="Icon.exe"
 WorkingDirectory="TARGETDIR"/>
-
+            <RegistryValue Id='REG01' Root='HKCR' Key='Microsoft Internet Mail Message\Shell\Inspect with smtp4dev\Command' Action='write' Type='string' Value='"[INSTALLLOCATION]$(var.Rnwood.Smtp4dev.TargetFileName)" "%L"' />
             <RemoveFolder Id="R01" Directory="StartMenuDir" On='uninstall' />
             <RemoveFolder Id="R02" Directory="INSTALLLOCATION" On='uninstall' />
-            <RemoveFile Id='R03' Directory='INSTALLLOCATION' Name='$(var.smtp4dev.TargetFileName)' On='uninstall'/>
-            <RemoveFile Id='R04' Directory='INSTALLLOCATION' Name='$(var.smtp4dev.TargetFileName).config' On='uninstall'/>
+            <RemoveFile Id='R03' Directory='INSTALLLOCATION' Name='$(var.Rnwood.Smtp4dev.TargetFileName)' On='uninstall'/>
+            <RemoveFile Id='R04' Directory='INSTALLLOCATION' Name='$(var.Rnwood.Smtp4dev.TargetFileName).config' On='uninstall'/>
             <RemoveFile Id='R07' Directory='INSTALLLOCATION' Name='sharpmimetools.dll' On='uninstall'/>
           </Component>
 
           <Component Id='C02' Guid='9F86CD72-6AD5-445c-8C6E-A357E38C29BC'>
             <Condition>CREATESTARTUPITEM = 1 or Installed</Condition>
-            <RegistryValue Root='HKCU' Key='Software\Microsoft\Windows\CurrentVersion\Run' Name='smtp4dev' Type='string' KeyPath ='yes' Value='[INSTALLLOCATION]$(var.smtp4dev.TargetFileName)'/>
+            <RegistryValue Root='HKCU' Key='Software\Microsoft\Windows\CurrentVersion\Run' Name='smtp4dev' Type='string' KeyPath ='yes' Value='[INSTALLLOCATION]$(var.Rnwood.Smtp4dev.TargetFileName)'/>
           </Component>
         </Directory>
       </Directory>

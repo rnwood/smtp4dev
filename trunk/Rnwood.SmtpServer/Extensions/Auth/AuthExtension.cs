@@ -12,11 +12,6 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         {
             return new AuthExtensionProcessor(processor);
         }
-
-        public override void ServerStartup(Server server)
-        {
-
-        }
     }
 
     public class AuthExtensionProcessor : ExtensionProcessor
@@ -43,7 +38,8 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
             if (mechanisms.Any())
             {
-                return new string[] { "AUTH=" + string.Join(" ", mechanisms.Select(m => m.Identifier).ToArray()) };
+                return new string[] { "AUTH=" + string.Join(" ", mechanisms.Select(m => m.Identifier).ToArray()),
+                "AUTH " + string.Join(" ", mechanisms.Select(m => m.Identifier).ToArray())};
             }
             else
             {

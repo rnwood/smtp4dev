@@ -12,10 +12,6 @@ namespace Rnwood.SmtpServer.Extensions
         {
         }
 
-        public override void ServerStartup(Server server)
-        {
-        }
-
         public override ExtensionProcessor CreateExtensionProcessor(ConnectionProcessor processor)
         {
             return new SizeExtensionProcessor(processor);
@@ -33,9 +29,11 @@ namespace Rnwood.SmtpServer.Extensions
 
             public override string[] GetEHLOKeywords()
             {
-                if (Processor.Server.MaxMessageSize.HasValue)
+                long? maxMessageSize = Processor.Server.Behaviour.GetMaximumMessageSize(Processor);
+
+                if (maxMessageSize.HasValue)
                 {
-                    return new[] { string.Format("SIZE={0}", Processor.Server.MaxMessageSize.Value) };
+                    return new[] { string.Format("SIZE={0}", maxMessageSize.Value) };
                 }
                 else
                 {
@@ -51,7 +49,9 @@ namespace Rnwood.SmtpServer.Extensions
 
                     if (int.TryParse(value, out messageSize) && messageSize > 0)
                     {
-                        if (Processor.Server.MaxMessageSize.HasValue && messageSize > Processor.Server.MaxMessageSize)
+                        long? maxMessageSize = Processor.Server.Behaviour.GetMaximumMessageSize(Processor);
+
+                        if (maxMessageSize.HasValue && messageSize > maxMessageSize)
                         {
                             throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Message exceeds fixes size limit"));
                         }

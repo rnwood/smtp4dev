@@ -12,6 +12,18 @@ namespace Rnwood.SmtpServer
             Messages = new List<Message>();
         }
 
+        public DateTime StartDate
+        {
+            get;
+            internal set;
+        }
+
+        public DateTime? EndDate
+        {
+            get;
+            internal set;
+        }
+
         public IPAddress ClientAddress
         {
             get;

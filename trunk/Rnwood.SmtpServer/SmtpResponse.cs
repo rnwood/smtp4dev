@@ -20,7 +20,7 @@ namespace Rnwood.SmtpServer
         /// <summary>
         /// Returns a <see cref="T:System.String"/> that represents the response.
         /// </summary>
-        public string ToString()
+        public override string ToString()
         {
             StringBuilder result = new StringBuilder();
             string[] lines = Message.Split('\n');
