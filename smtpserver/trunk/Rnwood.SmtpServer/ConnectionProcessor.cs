@@ -28,11 +28,13 @@ namespace Rnwood.SmtpServer
             VerbMap = new VerbMap();
             Session = new Session()
                               {
-                                  ClientAddress = ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address
+                                  ClientAddress = ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address,
+                                  StartDate = DateTime.Now
                               };
 
             Server = server;
             _tcpClient = tcpClient;
+            _tcpClient.ReceiveTimeout = 300;
 
             _currentReaderEncoding = _sevenBitASCIIEncoding = Encoding.GetEncoding("ASCII", new EncoderExceptionFallback(), new Encoder7BitTruncatingFallback());
             _stream = tcpClient.GetStream();
@@ -40,7 +42,7 @@ namespace Rnwood.SmtpServer
             if (server.Behaviour.RunOverSSL)
             {
                 SslStream sslStream = new SslStream(_stream);
-                sslStream.AuthenticateAsServer(new X509Certificate(Resources.localhost));
+                sslStream.AuthenticateAsServer(server.Behaviour.GetSSLCertificate(this));
                 _stream = sslStream;
                 Session.SecureConnection = true;
             }
@@ -60,7 +62,7 @@ namespace Rnwood.SmtpServer
 
         private void SetupReaderAndWriter()
         {
-            _writer = new StreamWriter(_stream, _currentReaderEncoding) { AutoFlush = true };
+            _writer = new StreamWriter(_stream, _currentReaderEncoding) { AutoFlush = true, NewLine = "\r\n" };
             _reader = new StreamReader(_stream, _currentReaderEncoding);
         }
 
@@ -80,12 +82,13 @@ namespace Rnwood.SmtpServer
             VerbMap.SetVerbProcessor("RSET", new RsetVerb());
             VerbMap.SetVerbProcessor("NOOP", new NoopVerb());
 
-            ExtensionProcessors = Server.Extensions.Select(e => e.CreateExtensionProcessor(this)).ToArray();
+            ExtensionProcessors = Server.Behaviour.GetExtensions(this).Select(e => e.CreateExtensionProcessor(this)).ToArray();
         }
 
         public ExtensionProcessor[] ExtensionProcessors
         {
-            get; private set;
+            get;
+            private set;
         }
 
         public void CloseConnection()
@@ -110,9 +113,9 @@ namespace Rnwood.SmtpServer
         {
             try
             {
-                WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady, "Raring for action"));
+                WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady, Server.Behaviour.DomainName + " smtp4dev ready"));
 
-                while (_tcpClient.Connected)
+                while (_tcpClient.Client.Connected)
                 {
                     SmtpRequest request = new SmtpRequest(ReadLine());
 
@@ -137,6 +140,9 @@ namespace Rnwood.SmtpServer
                                                            "Command unrecognised"));
                         }
                     }
+                    else if (request.IsEmpty)
+                    {
+                    }
                     else
                     {
                         WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
@@ -150,6 +156,9 @@ namespace Rnwood.SmtpServer
             }
 
             CloseConnection();
+
+            Session.EndDate = DateTime.Now;
+            Server.Behaviour.OnSessionCompleted(Session);
         }
 
         public MailVerb MailVerb

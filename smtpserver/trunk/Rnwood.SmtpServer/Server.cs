@@ -18,66 +18,58 @@ namespace Rnwood.SmtpServer
         public Server(ServerBehaviour behaviour)
         {
             Behaviour = behaviour;
-            Extensions = new List<Extension>();
-            AddStandardExtns();
         }
 
         public ServerBehaviour Behaviour { get; private set; }
 
-        private void AddStandardExtns()
-        {
-            Extensions.Add(new EightBitMimeExtension());
-            Extensions.Add(new StartTlsExtension());
-            Extensions.Add(new SizeExtension());
-            Extensions.Add(new AuthExtension());
-        }
-        
-
-        public void Run()
-        {
-            _runThread = Thread.CurrentThread;
-
-            foreach (Extension extension in Extensions)
-            {
-                extension.ServerStartup(this);
-            }
-
-            TcpListener l = new TcpListener(Behaviour.IpAddress, Behaviour.PortNumber);
-            l.Start();
-
-            while (!_stop)
-            {
-                try
-                {
-
-
-                    TcpClient tcpClient = l.AcceptTcpClient();
-                    new Thread(ConnectionThreadWork).Start(tcpClient);
-                }
-                catch (ThreadInterruptedException)
-                {
-                    //normal
-                }
-            }
-        }
-
-        private volatile bool _stop;
-        private Thread _runThread;
-
-        public void Stop()
-        {
-            _stop = true;
-
-            _runThread.Interrupt();
-        }
-
-        public List<Extension> Extensions
+        public bool IsRunning
         {
             get;
             private set;
         }
 
-        public long? MaxMessageSize { get; set; }
+        public void Run()
+        {
+            if (IsRunning)
+                throw new InvalidOperationException("Already running");
+
+            IsRunning = true;
+            _listener = new TcpListener(Behaviour.IpAddress, Behaviour.PortNumber);
+            _listener.Start();
+
+            try
+            {
+                while (true)
+                {
+                    TcpClient tcpClient = _listener.AcceptTcpClient();
+                    new Thread(ConnectionThreadWork).Start(tcpClient);
+                }
+            }
+            catch (SocketException e)
+            {
+                if (e.SocketErrorCode == SocketError.Interrupted)
+                {
+                    //normal - caused by _listener.Stop();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+        }
+
+        private TcpListener _listener;
+
+        public void Stop()
+        {
+            if (!IsRunning)
+            {
+                throw new InvalidOperationException("Not running");
+            }
+
+            IsRunning = false;
+            _listener.Stop();
+        }
 
         private void ConnectionThreadWork(object tcpClient)
         {
