@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using anmar.SharpMimeTools;
+using System.IO;
 
 namespace Rnwood.SmtpServer
 {
@@ -10,12 +12,20 @@ namespace Rnwood.SmtpServer
         public Message(Session session)
         {
             Session = session;
-            To = new List<string>();
+            ToList = new List<string>();
+            ReceivedDate = DateTime.Now;
         }
 
+        public DateTime ReceivedDate
+        {
+            get;
+            internal set;
+        }
+        
         public Session Session
         {
-            get; private set;
+            get;
+            private set;
         }
 
         public string From
@@ -24,12 +34,34 @@ namespace Rnwood.SmtpServer
             internal set;
         }
 
-        public List<string> To
+        internal List<string> ToList
         {
             get;
-            private set;
+            set;
         }
 
-        public string Data { get; internal set; }
+        public string[] To
+        {
+            get
+            {
+                return ToList.ToArray();
+            }
+        }
+
+        public byte[] Data { get; internal set; }
+
+        private SharpMimeMessage _contents;
+        public SharpMimeMessage Contents
+        {
+            get
+            {
+                if (_contents == null)
+                {
+                    _contents = new SharpMimeMessage(new MemoryStream(Data));
+                }
+
+                return _contents;
+            }
+        }
     }
 }
