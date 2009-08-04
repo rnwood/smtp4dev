@@ -15,11 +15,6 @@ namespace Rnwood.SmtpServer.Extensions
             return new StartTlsExtensionProcessor(processor);
         }
 
-        public override void ServerStartup(Server server)
-        {
-
-        }
-
         class StartTlsExtensionProcessor : ExtensionProcessor
         {
             public StartTlsExtensionProcessor(ConnectionProcessor processor)
@@ -46,11 +41,11 @@ namespace Rnwood.SmtpServer.Extensions
     {
         public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
         {
-            connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady, "Ready to start TLS"));           
+            connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady, "Ready to start TLS"));
             connectionProcessor.ApplyStreamFilter(stream =>
             {
                 SslStream sslStream = new SslStream(stream);
-                sslStream.AuthenticateAsServer(new X509Certificate(Resources.localhost));
+                sslStream.AuthenticateAsServer(connectionProcessor.Server.Behaviour.GetSSLCertificate(connectionProcessor), false, SslProtocols.Ssl2 | SslProtocols.Ssl3 | SslProtocols.Tls, false);
                 return sslStream;
             });
 

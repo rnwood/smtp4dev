@@ -24,6 +24,7 @@ namespace Rnwood.SmtpServer
             } else
             {
                 IsValid = false;
+                IsEmpty = true;
             }
         }
 
@@ -40,5 +41,6 @@ namespace Rnwood.SmtpServer
         }
 
         public bool IsValid { get; private set; }
+        public bool IsEmpty { get; private set; }
     }
 }
