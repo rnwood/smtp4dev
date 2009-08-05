@@ -1,0 +1,84 @@
+﻿<Window x:Class="Rnwood.Smtp4dev.MessageInspector.InspectorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Rnwood.Smtp4dev.MessageInspector"
+    Height="430" Width="926" Background="{x:Static SystemColors.ControlBrush}" Title="{Binding Path=Subject,StringFormat='Message: {0}', Mode=OneWay}" WindowStartupLocation="CenterScreen" WindowState="Maximized">
+
+    <Window.Resources>
+        <!--<smtp4dev:JoinStringArrayConvertor Separator=", " x:Key="joinStringArrayConvertor"/>-->
+    </Window.Resources>
+    <TabControl  Grid.Row="1" Margin="3">
+
+        <TabItem Header="View">
+            <WebBrowser Name="messageWebBrowser"/>
+        </TabItem>
+        <TabItem Header="Source">
+            <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+        </TabItem>
+
+        <TabItem Header="Parts">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TreeView Grid.Column="0" Margin="3" ItemsSource="{Binding .}" Name="treeView" SelectedItemChanged="treeView_SelectedItemChanged">
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate DataType="{x:Type local:MessageViewModel}" ItemsSource="{Binding Children}">
+                            <StackPanel Orientation="Horizontal" Margin="1">
+                                <Image Source="{Binding Icon}" Width="16" Height="16"/>
+                                <TextBlock Text="{Binding Name, Mode=OneWay}"/>
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+
+                </TreeView>
+                <Grid Grid.Column="1" Margin="3" DataContext="{Binding ElementName=treeView, Path=SelectedItem}" Name="partDetailsGrid" IsEnabled="False">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="10"/>
+                            <ColumnDefinition Width="auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="auto"/>
+                            <RowDefinition Height="auto"/>
+                        </Grid.RowDefinitions>
+                        <Label Grid.Row="0" Grid.Column="0">Type:</Label>
+                        <TextBlock Grid.Row="0" Grid.Column="1" Margin="3" Text="{Binding Type, Mode=OneWay}"/>
+                        <Label Grid.Row="0" Grid.Column="3">Size:</Label>
+                        <TextBlock Grid.Row="0" Grid.Column="4" Margin="3" Text="{Binding Size, Mode=OneWay, StringFormat='\{0} bytes'}"/>
+                        <Label Grid.Row="1" Grid.Column="0">Encoding:</Label>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Margin="3" Text="{Binding Encoding, Mode=OneWay}"/>
+                        <Label Grid.Row="1" Grid.Column="3">Disposition:</Label>
+                        <TextBlock Grid.Row="1" Grid.Column="4" Margin="3"  Text="{Binding Disposition, Mode=OneWay}"/>
+                    </Grid>
+
+                    <TabControl Grid.Row="1" Margin="3">
+                        <TabItem Header="View">
+                            <WebBrowser Name="partWebBrowser"/>
+                        </TabItem>
+                        <TabItem Header="Source">
+                            <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+                        </TabItem>
+                        <TabItem Header="Body (Decoded)">
+                            <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Body, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+                        </TabItem>
+
+                    </TabControl>
+                </Grid>
+            </Grid>
+        </TabItem>
+    </TabControl>
+</Window>
