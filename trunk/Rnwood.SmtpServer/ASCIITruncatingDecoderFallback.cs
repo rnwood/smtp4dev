@@ -5,9 +5,9 @@ using System.Text;
 
 namespace Rnwood.SmtpServer
 {
-    public class Encoder7BitTruncatingFallback : DecoderFallback
+    public class ASCIITruncatingDecoderFallback : DecoderFallback
     {
-        public Encoder7BitTruncatingFallback()
+        public ASCIITruncatingDecoderFallback()
         {
         }
 
