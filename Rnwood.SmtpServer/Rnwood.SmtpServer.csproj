@@ -51,7 +51,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Encoder7BitTruncatingFallback.cs" />
+    <Compile Include="ASCIITruncatingDecoderFallback.cs" />
     <Compile Include="Extension.cs" />
     <Compile Include="Extensions\Auth\AnonymousMechanism.cs" />
     <Compile Include="Extensions\Auth\AuthExtension.cs" />

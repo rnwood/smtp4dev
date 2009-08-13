@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Text;
+using System.Threading;
 using Rnwood.SmtpServer;
 using System.Security.Cryptography.X509Certificates;
 using Rnwood.SmtpServer.Extensions;
@@ -100,6 +101,11 @@ namespace Rnwood.Smtp4dev
             {
                 SessionCompleted(this, new SessionCompletedEventArgs(Session));
             }
+        }
+
+        public override int GetReceiveTimeout(ConnectionProcessor processor)
+        {
+            return Properties.Settings.Default.ReceiveTimeout;
         }
     }
 

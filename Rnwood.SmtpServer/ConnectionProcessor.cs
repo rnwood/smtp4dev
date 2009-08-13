@@ -34,9 +34,9 @@ namespace Rnwood.SmtpServer
 
             Server = server;
             _tcpClient = tcpClient;
-            _tcpClient.ReceiveTimeout = 300;
+            _tcpClient.ReceiveTimeout = Server.Behaviour.GetReceiveTimeout(this);
 
-            _currentReaderEncoding = _sevenBitASCIIEncoding = Encoding.GetEncoding("ASCII", new EncoderExceptionFallback(), new Encoder7BitTruncatingFallback());
+            _currentReaderEncoding = _sevenBitASCIIEncoding = Encoding.GetEncoding("ASCII", new EncoderExceptionFallback(), new ASCIITruncatingDecoderFallback());
             _stream = tcpClient.GetStream();
 
             if (server.Behaviour.RunOverSSL)
@@ -152,7 +152,7 @@ namespace Rnwood.SmtpServer
             }
             catch (IOException ioException)
             {
-
+                Session.SessionError = ioException.Message;
             }
 
             CloseConnection();
