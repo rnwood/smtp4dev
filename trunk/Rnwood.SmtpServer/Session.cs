@@ -54,7 +54,6 @@ namespace Rnwood.SmtpServer
         internal void AppendToLog(string text)
         {
             _log.AppendLine(text);
-            //Console.WriteLine(text);
         }
 
         public List<Message> Messages
@@ -70,5 +69,7 @@ namespace Rnwood.SmtpServer
         }
 
         public bool Authenticated { get; internal set; }
+
+        public string SessionError { get; internal set; }
     }
 }

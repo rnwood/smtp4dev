@@ -1,5 +1,5 @@
 ﻿<?xml version='1.0' encoding='utf-8'?>
-<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="smtp4dev.Properties" GeneratedClassName="Settings">
+<SettingsFile xmlns="http://schemas.microsoft.com/VisualStudio/2004/01/settings" CurrentProfile="(Default)" GeneratedClassNamespace="Rnwood.Smtp4dev.Properties" GeneratedClassName="Settings">
   <Profiles />
   <Settings>
     <Setting Name="StartInTray" Type="System.Boolean" Scope="User">
@@ -57,7 +57,10 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="IPAddress" Type="System.String" Scope="User">
-      <Value Profile="(Default)">127.0.0.1</Value>
+      <Value Profile="(Default)">0.0.0.0</Value>
+    </Setting>
+    <Setting Name="ReceiveTimeout" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">30000</Value>
     </Setting>
   </Settings>
 </SettingsFile>
