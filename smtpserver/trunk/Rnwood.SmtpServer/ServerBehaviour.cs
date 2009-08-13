@@ -27,5 +27,6 @@ namespace Rnwood.SmtpServer
         public abstract Extension[] GetExtensions(ConnectionProcessor processor);
 
         public abstract void OnSessionCompleted(Session Session);
+        public abstract int GetReceiveTimeout(ConnectionProcessor processor);
     }
 }
