@@ -266,7 +266,7 @@
             this.inspectMessageButton.TabIndex = 7;
             this.inspectMessageButton.Text = "Inspect";
             this.inspectMessageButton.UseVisualStyleBackColor = true;
-            this.inspectMessageButton.Click += new System.EventHandler(this.button2_Click);
+            this.inspectMessageButton.Click += new System.EventHandler(this.inspectButton_Click);
             // 
             // saveButton
             // 

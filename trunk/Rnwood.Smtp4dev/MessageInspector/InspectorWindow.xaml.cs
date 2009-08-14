@@ -42,6 +42,14 @@ namespace Rnwood.Smtp4dev.MessageInspector
             }
         }
 
+        public MessageViewModel SelectedPart
+        {
+            get
+            {
+                return treeView.SelectedItem as MessageViewModel;
+            }
+        }
+
         private void treeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
         {
             if (treeView.SelectedItem != null)
@@ -55,6 +63,16 @@ namespace Rnwood.Smtp4dev.MessageInspector
                 partDetailsGrid.IsEnabled = false;
                 partWebBrowser.Navigate(new Uri("about:blank"));
             }
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            SelectedPart.View();
+        }
+
+        private void Button_Click_1(object sender, RoutedEventArgs e)
+        {
+            SelectedPart.Save();
         }
     }
 }

@@ -67,8 +67,8 @@
                         <TabItem Header="Preview">
                             <DockPanel>
                                 <StackPanel DockPanel.Dock="Bottom" HorizontalAlignment="Left" Orientation="Horizontal">
-                                    <Button Margin="3">Open</Button>
-                                    <Button Margin="3">Save As...</Button>
+                                    <Button Margin="3" Click="Button_Click">Open</Button>
+                                    <Button Margin="3" Click="Button_Click_1">Save As...</Button>
                                 </StackPanel>
                                 <WebBrowser Name="partWebBrowser"/>
                             </DockPanel>

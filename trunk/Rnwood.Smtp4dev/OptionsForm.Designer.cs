@@ -67,6 +67,8 @@
             this.numericUpDown4 = new System.Windows.Forms.NumericUpDown();
             this.label8 = new System.Windows.Forms.Label();
             this.openSSLCertDialog = new System.Windows.Forms.OpenFileDialog();
+            this.checkBox13 = new System.Windows.Forms.CheckBox();
+            this.checkBox14 = new System.Windows.Forms.CheckBox();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -90,15 +92,19 @@
             this.tableLayoutPanel1.Controls.Add(this.checkBox6, 0, 1);
             this.tableLayoutPanel1.Controls.Add(this.checkBox1, 0, 2);
             this.tableLayoutPanel1.Controls.Add(this.checkBox2, 0, 3);
-            this.tableLayoutPanel1.Controls.Add(this.checkBox4, 0, 4);
-            this.tableLayoutPanel1.Controls.Add(this.checkBox7, 0, 5);
-            this.tableLayoutPanel1.Controls.Add(this.checkBox5, 0, 6);
-            this.tableLayoutPanel1.Controls.Add(this.label3, 0, 7);
-            this.tableLayoutPanel1.Controls.Add(this.numericUpDown2, 1, 7);
+            this.tableLayoutPanel1.Controls.Add(this.checkBox4, 0, 5);
+            this.tableLayoutPanel1.Controls.Add(this.checkBox7, 0, 7);
+            this.tableLayoutPanel1.Controls.Add(this.checkBox5, 0, 8);
+            this.tableLayoutPanel1.Controls.Add(this.label3, 0, 9);
+            this.tableLayoutPanel1.Controls.Add(this.numericUpDown2, 1, 9);
+            this.tableLayoutPanel1.Controls.Add(this.checkBox13, 0, 6);
+            this.tableLayoutPanel1.Controls.Add(this.checkBox14, 0, 4);
             this.tableLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel1.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel1.Name = "tableLayoutPanel1";
-            this.tableLayoutPanel1.RowCount = 9;
+            this.tableLayoutPanel1.RowCount = 11;
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
+            this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -164,13 +170,14 @@
             this.checkBox2.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBox2.AutoSize = true;
             this.checkBox2.Checked = global::Rnwood.Smtp4dev.Properties.Settings.Default.BalloonNotifications;
             this.checkBox2.CheckState = System.Windows.Forms.CheckState.Checked;
             this.tableLayoutPanel1.SetColumnSpan(this.checkBox2, 2);
             this.checkBox2.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::Rnwood.Smtp4dev.Properties.Settings.Default, "BalloonNotifications", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
             this.checkBox2.Location = new System.Drawing.Point(3, 72);
             this.checkBox2.Name = "checkBox2";
-            this.checkBox2.Size = new System.Drawing.Size(489, 35);
+            this.checkBox2.Size = new System.Drawing.Size(489, 17);
             this.checkBox2.TabIndex = 1;
             this.checkBox2.Text = "Show balloon notification when message arrives (when minimized to tray)";
             this.checkBox2.UseVisualStyleBackColor = true;
@@ -184,7 +191,7 @@
             this.checkBox4.Checked = global::Rnwood.Smtp4dev.Properties.Settings.Default.AutoViewNewMessages;
             this.tableLayoutPanel1.SetColumnSpan(this.checkBox4, 2);
             this.checkBox4.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::Rnwood.Smtp4dev.Properties.Settings.Default, "AutoViewNewMessages", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.checkBox4.Location = new System.Drawing.Point(3, 113);
+            this.checkBox4.Location = new System.Drawing.Point(3, 118);
             this.checkBox4.Name = "checkBox4";
             this.checkBox4.Size = new System.Drawing.Size(489, 17);
             this.checkBox4.TabIndex = 3;
@@ -202,7 +209,7 @@
             this.checkBox7.CheckState = System.Windows.Forms.CheckState.Checked;
             this.tableLayoutPanel1.SetColumnSpan(this.checkBox7, 2);
             this.checkBox7.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::Rnwood.Smtp4dev.Properties.Settings.Default, "BringToFrontOnNewMessage", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.checkBox7.Location = new System.Drawing.Point(3, 136);
+            this.checkBox7.Location = new System.Drawing.Point(3, 164);
             this.checkBox7.Name = "checkBox7";
             this.checkBox7.Size = new System.Drawing.Size(489, 17);
             this.checkBox7.TabIndex = 9;
@@ -219,7 +226,7 @@
             this.checkBox5.CheckState = System.Windows.Forms.CheckState.Checked;
             this.tableLayoutPanel1.SetColumnSpan(this.checkBox5, 2);
             this.checkBox5.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::Rnwood.Smtp4dev.Properties.Settings.Default, "ScrollMessages", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.checkBox5.Location = new System.Drawing.Point(3, 159);
+            this.checkBox5.Location = new System.Drawing.Point(3, 187);
             this.checkBox5.Name = "checkBox5";
             this.checkBox5.Size = new System.Drawing.Size(489, 17);
             this.checkBox5.TabIndex = 4;
@@ -230,7 +237,7 @@
             // 
             this.label3.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label3.AutoSize = true;
-            this.label3.Location = new System.Drawing.Point(3, 186);
+            this.label3.Location = new System.Drawing.Point(3, 214);
             this.label3.Name = "label3";
             this.label3.Size = new System.Drawing.Size(159, 13);
             this.label3.TabIndex = 10;
@@ -239,7 +246,7 @@
             // numericUpDown2
             // 
             this.numericUpDown2.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::Rnwood.Smtp4dev.Properties.Settings.Default, "MaxMessages", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.numericUpDown2.Location = new System.Drawing.Point(168, 182);
+            this.numericUpDown2.Location = new System.Drawing.Point(168, 210);
             this.numericUpDown2.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -398,7 +405,7 @@
             // numericUpDown3
             // 
             this.numericUpDown3.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::Rnwood.Smtp4dev.Properties.Settings.Default, "PortNumber", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.numericUpDown3.Location = new System.Drawing.Point(147, 58);
+            this.numericUpDown3.Location = new System.Drawing.Point(170, 58);
             this.numericUpDown3.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -438,10 +445,10 @@
             this.flowLayoutPanel2.Controls.Add(this.checkBox12);
             this.flowLayoutPanel2.Dock = System.Windows.Forms.DockStyle.Fill;
             this.flowLayoutPanel2.FlowDirection = System.Windows.Forms.FlowDirection.TopDown;
-            this.flowLayoutPanel2.Location = new System.Drawing.Point(144, 83);
+            this.flowLayoutPanel2.Location = new System.Drawing.Point(167, 83);
             this.flowLayoutPanel2.Margin = new System.Windows.Forms.Padding(0);
             this.flowLayoutPanel2.Name = "flowLayoutPanel2";
-            this.flowLayoutPanel2.Size = new System.Drawing.Size(351, 115);
+            this.flowLayoutPanel2.Size = new System.Drawing.Size(328, 115);
             this.flowLayoutPanel2.TabIndex = 12;
             // 
             // checkBox8
@@ -517,13 +524,13 @@
             this.tableLayoutPanel3.Controls.Add(this.textBox1, 0, 0);
             this.tableLayoutPanel3.Controls.Add(this.button3, 1, 0);
             this.tableLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tableLayoutPanel3.Location = new System.Drawing.Point(144, 198);
+            this.tableLayoutPanel3.Location = new System.Drawing.Point(167, 198);
             this.tableLayoutPanel3.Margin = new System.Windows.Forms.Padding(0);
             this.tableLayoutPanel3.Name = "tableLayoutPanel3";
             this.tableLayoutPanel3.RowCount = 1;
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel3.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 50F));
-            this.tableLayoutPanel3.Size = new System.Drawing.Size(351, 28);
+            this.tableLayoutPanel3.Size = new System.Drawing.Size(328, 28);
             this.tableLayoutPanel3.TabIndex = 14;
             // 
             // textBox1
@@ -533,7 +540,7 @@
             this.textBox1.Location = new System.Drawing.Point(3, 3);
             this.textBox1.Name = "textBox1";
             this.textBox1.ReadOnly = true;
-            this.textBox1.Size = new System.Drawing.Size(318, 22);
+            this.textBox1.Size = new System.Drawing.Size(295, 22);
             this.textBox1.TabIndex = 0;
             this.textBox1.Text = global::Rnwood.Smtp4dev.Properties.Settings.Default.SSLCertificatePath;
             // 
@@ -543,7 +550,7 @@
             this.button3.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.button3.Dock = System.Windows.Forms.DockStyle.Fill;
             this.button3.Font = new System.Drawing.Font("Microsoft Sans Serif", 6F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            this.button3.Location = new System.Drawing.Point(327, 3);
+            this.button3.Location = new System.Drawing.Point(304, 3);
             this.button3.Name = "button3";
             this.button3.Size = new System.Drawing.Size(21, 22);
             this.button3.TabIndex = 1;
@@ -559,7 +566,7 @@
             0,
             0,
             0});
-            this.numericUpDown1.Location = new System.Drawing.Point(147, 229);
+            this.numericUpDown1.Location = new System.Drawing.Point(170, 229);
             this.numericUpDown1.Maximum = new decimal(new int[] {
             -1530494976,
             232830,
@@ -576,9 +583,9 @@
                         | System.Windows.Forms.AnchorStyles.Left)
                         | System.Windows.Forms.AnchorStyles.Right)));
             this.textBox2.DataBindings.Add(new System.Windows.Forms.Binding("Text", global::Rnwood.Smtp4dev.Properties.Settings.Default, "DomainName", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.textBox2.Location = new System.Drawing.Point(147, 3);
+            this.textBox2.Location = new System.Drawing.Point(170, 3);
             this.textBox2.Name = "textBox2";
-            this.textBox2.Size = new System.Drawing.Size(345, 22);
+            this.textBox2.Size = new System.Drawing.Size(322, 22);
             this.textBox2.TabIndex = 19;
             this.textBox2.Text = global::Rnwood.Smtp4dev.Properties.Settings.Default.DomainName;
             // 
@@ -586,7 +593,7 @@
             // 
             this.ipAddressCombo.DropDownStyle = System.Windows.Forms.ComboBoxStyle.DropDownList;
             this.ipAddressCombo.FormattingEnabled = true;
-            this.ipAddressCombo.Location = new System.Drawing.Point(147, 31);
+            this.ipAddressCombo.Location = new System.Drawing.Point(170, 31);
             this.ipAddressCombo.Name = "ipAddressCombo";
             this.ipAddressCombo.Size = new System.Drawing.Size(184, 21);
             this.ipAddressCombo.TabIndex = 20;
@@ -597,9 +604,9 @@
             this.label6.AutoSize = true;
             this.label6.Location = new System.Drawing.Point(3, 35);
             this.label6.Name = "label6";
-            this.label6.Size = new System.Drawing.Size(88, 13);
+            this.label6.Size = new System.Drawing.Size(161, 13);
             this.label6.TabIndex = 21;
-            this.label6.Text = "Listen Interface:";
+            this.label6.Text = "Listen Interface: (0.0.0.0 = ALL)";
             // 
             // numericUpDown4
             // 
@@ -609,7 +616,7 @@
             0,
             0,
             0});
-            this.numericUpDown4.Location = new System.Drawing.Point(147, 257);
+            this.numericUpDown4.Location = new System.Drawing.Point(170, 257);
             this.numericUpDown4.Maximum = new decimal(new int[] {
             -1530494976,
             232830,
@@ -639,6 +646,38 @@
             // 
             this.openSSLCertDialog.Filter = "X509 Certificates|*.cer";
             this.openSSLCertDialog.Title = "Select SSL Certificate";
+            // 
+            // checkBox13
+            // 
+            this.checkBox13.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBox13.AutoSize = true;
+            this.checkBox13.Checked = global::Rnwood.Smtp4dev.Properties.Settings.Default.AutoInspectNewMessages;
+            this.tableLayoutPanel1.SetColumnSpan(this.checkBox13, 2);
+            this.checkBox13.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::Rnwood.Smtp4dev.Properties.Settings.Default, "AutoInspectNewMessages", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.checkBox13.Location = new System.Drawing.Point(3, 141);
+            this.checkBox13.Name = "checkBox13";
+            this.checkBox13.Size = new System.Drawing.Size(489, 17);
+            this.checkBox13.TabIndex = 12;
+            this.checkBox13.Text = "Automatically inspect messages when they arrive";
+            this.checkBox13.UseVisualStyleBackColor = true;
+            // 
+            // checkBox14
+            // 
+            this.checkBox14.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom)
+                        | System.Windows.Forms.AnchorStyles.Left)
+                        | System.Windows.Forms.AnchorStyles.Right)));
+            this.checkBox14.AutoSize = true;
+            this.checkBox14.Checked = global::Rnwood.Smtp4dev.Properties.Settings.Default.InspectOnBalloonClick;
+            this.tableLayoutPanel1.SetColumnSpan(this.checkBox14, 2);
+            this.checkBox14.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::Rnwood.Smtp4dev.Properties.Settings.Default, "InspectOnBalloonClick", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
+            this.checkBox14.Location = new System.Drawing.Point(3, 95);
+            this.checkBox14.Name = "checkBox14";
+            this.checkBox14.Size = new System.Drawing.Size(489, 17);
+            this.checkBox14.TabIndex = 13;
+            this.checkBox14.Text = "Inspect instead of viewing when ballon notification is clicked";
+            this.checkBox14.UseVisualStyleBackColor = true;
             // 
             // OptionsForm
             // 
@@ -718,5 +757,7 @@
         private System.Windows.Forms.Label label6;
         private System.Windows.Forms.NumericUpDown numericUpDown4;
         private System.Windows.Forms.Label label8;
+        private System.Windows.Forms.CheckBox checkBox13;
+        private System.Windows.Forms.CheckBox checkBox14;
     }
 }

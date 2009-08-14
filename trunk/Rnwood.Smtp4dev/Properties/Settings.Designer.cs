@@ -262,5 +262,29 @@ namespace Rnwood.Smtp4dev.Properties {
                 this["ReceiveTimeout"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool AutoInspectNewMessages {
+            get {
+                return ((bool)(this["AutoInspectNewMessages"]));
+            }
+            set {
+                this["AutoInspectNewMessages"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool InspectOnBalloonClick {
+            get {
+                return ((bool)(this["InspectOnBalloonClick"]));
+            }
+            set {
+                this["InspectOnBalloonClick"] = value;
+            }
+        }
     }
 }
