@@ -106,7 +106,7 @@
             this.optionsMenuItem,
             this.exitMenuItem});
             this.trayIconContextMenuStrip.Name = "contextMenuStrip";
-            this.trayIconContextMenuStrip.Size = new System.Drawing.Size(189, 158);
+            this.trayIconContextMenuStrip.Size = new System.Drawing.Size(189, 136);
             // 
             // showMenuItem
             // 
@@ -173,7 +173,6 @@
             this.messageGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.messageGrid.GridColor = System.Drawing.SystemColors.ControlLight;
             this.messageGrid.Location = new System.Drawing.Point(3, 3);
-            this.messageGrid.MultiSelect = false;
             this.messageGrid.Name = "messageGrid";
             this.messageGrid.ReadOnly = true;
             this.messageGrid.RowHeadersVisible = false;
