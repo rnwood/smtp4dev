@@ -8,6 +8,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
+using anmar.SharpMimeTools;
 using Rnwood.SmtpServer;
 using Rnwood.Smtp4dev.MessageInspector;
 
@@ -15,9 +16,11 @@ namespace Rnwood.Smtp4dev
 {
     public partial class MainForm : Form
     {
-        public MainForm()
+        public MainForm(LaunchInfo launchInfo)
         {
             InitializeComponent();
+
+            _launchInfo = launchInfo;
 
             messageBindingSource.DataSource = _messages;
             sessionBindingSource.DataSource = _sessions;
@@ -61,14 +64,7 @@ namespace Rnwood.Smtp4dev
             if (_firstTimeShown)
             {
                 _firstTimeShown = false;
-
-                Visible = true;
-                Visible = !Properties.Settings.Default.StartInTray;
-
-                if (Properties.Settings.Default.ListenOnStartup)
-                {
-                    StartServer();
-                }
+                ProcessLaunchInfo(_launchInfo, true);
             }
         }
 
@@ -147,6 +143,7 @@ namespace Rnwood.Smtp4dev
 
         private readonly BindingList<MessageViewModel> _messages = new BindingList<MessageViewModel>();
         private readonly BindingList<SessionViewModel> _sessions = new BindingList<SessionViewModel>();
+        private LaunchInfo _launchInfo;
 
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -174,7 +171,7 @@ namespace Rnwood.Smtp4dev
             get
             {
                 return
-                    (SessionViewModel)dataGridView1.SelectedRows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem).FirstOrDefault();
+                    (SessionViewModel)sessionsGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem).FirstOrDefault();
             }
         }
 
@@ -239,7 +236,10 @@ namespace Rnwood.Smtp4dev
 
         private void Quit()
         {
-            StopServer();
+            if (_server.IsRunning)
+            {
+                StopServer();
+            }
             Application.Exit();
         }
 
@@ -343,7 +343,7 @@ namespace Rnwood.Smtp4dev
 
         private void messageGrid_SelectionChanged(object sender, EventArgs e)
         {
-            button2.Enabled = deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedMessage != null;
+            inspectMessageButton.Enabled = deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedMessage != null;
         }
 
         private void messageGrid_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -367,16 +367,6 @@ namespace Rnwood.Smtp4dev
             }
         }
 
-        private void button1_Click(object sender, EventArgs e)
-        {
-            MessageViewModel message = SelectedMessage;
-            TempFileCollection tempFiles = new TempFileCollection();
-            FileInfo msgFile = new FileInfo(tempFiles.AddExtension("txt"));
-            message.SaveToFile(msgFile);
-
-            Process.Start(msgFile.FullName);
-        }
-
         private void button2_Click(object sender, EventArgs e)
         {
             InspectorWindow form = new InspectorWindow(SelectedMessage.Message.Contents);
@@ -388,5 +378,50 @@ namespace Rnwood.Smtp4dev
             SelectedSession.ViewLog();
         }
 
+        private void sessionsGrid_SelectionChanged(object sender, EventArgs e)
+        {
+            viewSessionButton.Enabled = SelectedSession != null;
+        }
+
+        public void ProcessLaunchInfo(LaunchInfo launchInfo, bool firstInstance)
+        {
+            if (launchInfo.Arguments.Length == 1)
+            {
+                string messageFilename = launchInfo.Arguments[0];
+                if (File.Exists(messageFilename))
+                {
+                    SharpMimeMessage message = new SharpMimeMessage(File.OpenRead(messageFilename));
+                    InspectorWindow messageInspector = new InspectorWindow(message);
+                    messageInspector.Show();
+                }
+                else
+                {
+                    throw new Exception("Specified file does not exist");
+                }
+
+
+            }
+            else if (launchInfo.Arguments.Length == 0)
+            {
+                if (firstInstance)
+                {
+                    Visible = true;
+                    Visible = !Properties.Settings.Default.StartInTray;
+
+                    if (Properties.Settings.Default.ListenOnStartup)
+                    {
+                        StartServer();
+                    }
+                }
+                else
+                {
+                    Visible = true;
+                }
+            }
+            else
+            {
+                throw new Exception("Invalid command line parameters");
+            }
+        }
     }
 }

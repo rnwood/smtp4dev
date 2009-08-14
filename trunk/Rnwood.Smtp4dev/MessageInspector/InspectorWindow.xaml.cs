@@ -38,12 +38,7 @@ namespace Rnwood.Smtp4dev.MessageInspector
             private set
             {
                 DataContext = value;
-
                 treeView.DataContext = new MessageViewModel[] { Message };
-
-                string tempFile = Path.GetTempFileName()+".mhtml";
-                File.WriteAllText(tempFile, Message.ToString(), Encoding.Default);
-                messageWebBrowser.Navigate(new Uri("file:///" + tempFile));
             }
         }
 

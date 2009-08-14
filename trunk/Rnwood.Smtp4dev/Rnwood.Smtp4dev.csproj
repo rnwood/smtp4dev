@@ -9,7 +9,7 @@
     <OutputType>WinExe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
     <RootNamespace>Rnwood.Smtp4dev</RootNamespace>
-    <AssemblyName>Rnwood.Smtp4dev</AssemblyName>
+    <AssemblyName>Smtp4dev</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
     <ApplicationIcon>Resources\Icon1.ico</ApplicationIcon>
@@ -46,6 +46,7 @@
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
+    <Reference Include="System.Runtime.Remoting" />
     <Reference Include="System.Xml.Linq">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -69,7 +70,6 @@
     <Compile Include="MessageInspector\InspectorWindow.xaml.cs">
       <DependentUpon>InspectorWindow.xaml</DependentUpon>
     </Compile>
-    <Compile Include="JoinStringArrayConvertor.cs" />
     <Compile Include="MessageViewModel.cs" />
     <Compile Include="MainForm.cs">
       <SubType>Form</SubType>
@@ -113,6 +113,7 @@
     </Compile>
     <Compile Include="RegistrySettings.cs" />
     <Compile Include="SessionViewModel.cs" />
+    <Compile Include="SingleInstanceManager.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />
@@ -137,10 +138,6 @@
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
-  </ItemGroup>
-  <ItemGroup>
-    <Resource Include="MessageInspector\document.png" />
-    <Resource Include="MessageInspector\folder.png" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
