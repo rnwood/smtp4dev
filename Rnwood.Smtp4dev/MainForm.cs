@@ -169,8 +169,23 @@ namespace Rnwood.Smtp4dev
         {
             get
             {
+                if (messageGrid.SelectedRows.Count != 1)
+                {
+                    return null;
+                }
+
                 return
-                    (MessageViewModel)messageGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem).FirstOrDefault();
+                    messageGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (MessageViewModel)row.DataBoundItem).Single();
+            }
+        }
+
+
+        public MessageViewModel[] SelectedMessages
+        {
+            get
+            {
+                return
+                    messageGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (MessageViewModel)row.DataBoundItem).ToArray();
             }
         }
 
@@ -185,14 +200,14 @@ namespace Rnwood.Smtp4dev
 
         private void viewButton_Click(object sender, EventArgs e)
         {
-            ViewSelectedMessage();
+            ViewSelectedMessages();
         }
 
-        private void ViewSelectedMessage()
+        private void ViewSelectedMessages()
         {
-            if (SelectedMessage != null)
+            foreach (MessageViewModel message in SelectedMessages)
             {
-                ViewMessage(SelectedMessage);
+                ViewMessage(message);
             }
         }
 
@@ -218,7 +233,7 @@ namespace Rnwood.Smtp4dev
 
         private void messageGrid_DoubleClick(object sender, EventArgs e)
         {
-            ViewSelectedMessage();
+            ViewSelectedMessages();
         }
 
         private void clearAllEmailsToolStripMenuItem_Click(object sender, EventArgs e)
@@ -309,13 +324,13 @@ namespace Rnwood.Smtp4dev
 
         private void saveButton_Click(object sender, EventArgs e)
         {
-            if (SelectedMessage != null)
+            foreach (MessageViewModel message in SelectedMessages)
             {
                 if (saveMessageFileDialog.ShowDialog() == DialogResult.OK)
                 {
                     try
                     {
-                        SelectedMessage.SaveToFile(new FileInfo(saveMessageFileDialog.FileName));
+                        message.SaveToFile(new FileInfo(saveMessageFileDialog.FileName));
                     }
                     catch (IOException ex)
                     {
@@ -330,7 +345,10 @@ namespace Rnwood.Smtp4dev
 
         private void deleteButton_Click(object sender, EventArgs e)
         {
-            _messages.Remove(SelectedMessage);
+            foreach (MessageViewModel message in SelectedMessages)
+            {
+                _messages.Remove(message);
+            }
         }
 
         private void stopListeningButton_Click(object sender, EventArgs e)
@@ -358,7 +376,7 @@ namespace Rnwood.Smtp4dev
 
         private void messageGrid_SelectionChanged(object sender, EventArgs e)
         {
-            inspectMessageButton.Enabled = deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedMessage != null;
+            inspectMessageButton.Enabled = deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedMessages.Length > 0;
         }
 
         private void messageGrid_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
@@ -384,7 +402,10 @@ namespace Rnwood.Smtp4dev
 
         private void inspectButton_Click(object sender, EventArgs e)
         {
-            InspectMessage(SelectedMessage);
+            foreach (MessageViewModel message in SelectedMessages)
+            {
+                InspectMessage(message);
+            }
         }
 
         private void InspectMessage(MessageViewModel message)
