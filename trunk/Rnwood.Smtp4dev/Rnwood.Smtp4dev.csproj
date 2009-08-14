@@ -78,6 +78,7 @@
       <DependentUpon>MainForm.cs</DependentUpon>
     </Compile>
     <Compile Include="MessageInspector\MessageViewModel.cs" />
+    <Compile Include="MIMEDatabase.cs" />
     <Compile Include="OptionsForm.cs">
       <SubType>Form</SubType>
     </Compile>

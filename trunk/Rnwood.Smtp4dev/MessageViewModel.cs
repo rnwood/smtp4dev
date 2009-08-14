@@ -59,5 +59,10 @@ namespace Rnwood.Smtp4dev
             get;
             private set;
         }
+
+        public void MarkAsViewed()
+        {
+            HasBeenViewed = true;
+        }
     }
 }
