@@ -5,18 +5,10 @@
     Height="430" Width="926" Background="{x:Static SystemColors.ControlBrush}" Title="{Binding Path=Subject,StringFormat='Message: {0}', Mode=OneWay}" WindowStartupLocation="CenterScreen" WindowState="Maximized">
 
     <Window.Resources>
-        <!--<smtp4dev:JoinStringArrayConvertor Separator=", " x:Key="joinStringArrayConvertor"/>-->
     </Window.Resources>
     <TabControl  Grid.Row="1" Margin="3">
 
-        <TabItem Header="View">
-            <WebBrowser Name="messageWebBrowser"/>
-        </TabItem>
-        <TabItem Header="Source">
-            <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
-        </TabItem>
-
-        <TabItem Header="Parts">
+        <TabItem Header="MIME Parts">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -30,7 +22,7 @@
                     <TreeView.ItemTemplate>
                         <HierarchicalDataTemplate DataType="{x:Type local:MessageViewModel}" ItemsSource="{Binding Children}">
                             <StackPanel Orientation="Horizontal" Margin="1">
-                                <Image Source="{Binding Icon}" Width="16" Height="16"/>
+                                <!--<Image Source="{Binding Icon}" Width="16" Height="16"/>-->
                                 <TextBlock Text="{Binding Name, Mode=OneWay}"/>
                             </StackPanel>
                         </HierarchicalDataTemplate>
@@ -66,19 +58,28 @@
                     </Grid>
 
                     <TabControl Grid.Row="1" Margin="3">
-                        <TabItem Header="View">
-                            <WebBrowser Name="partWebBrowser"/>
-                        </TabItem>
                         <TabItem Header="Source">
                             <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
                         </TabItem>
-                        <TabItem Header="Body (Decoded)">
+                        <TabItem Header="Body">
                             <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Body, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+                        </TabItem>
+                        <TabItem Header="Preview">
+                            <DockPanel>
+                                <StackPanel DockPanel.Dock="Bottom" HorizontalAlignment="Left" Orientation="Horizontal">
+                                    <Button Margin="3">Open</Button>
+                                    <Button Margin="3">Save As...</Button>
+                                </StackPanel>
+                                <WebBrowser Name="partWebBrowser"/>
+                            </DockPanel>
                         </TabItem>
 
                     </TabControl>
                 </Grid>
             </Grid>
+        </TabItem>
+        <TabItem Header="Message Source">
+            <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
         </TabItem>
     </TabControl>
 </Window>
