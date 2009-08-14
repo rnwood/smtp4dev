@@ -29,12 +29,7 @@
         private void InitializeComponent()
         {
             this.components = new System.ComponentModel.Container();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle1 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle2 = new System.Windows.Forms.DataGridViewCellStyle();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MainForm));
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle3 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle4 = new System.Windows.Forms.DataGridViewCellStyle();
-            System.Windows.Forms.DataGridViewCellStyle dataGridViewCellStyle5 = new System.Windows.Forms.DataGridViewCellStyle();
             this.trayIcon = new System.Windows.Forms.NotifyIcon(this.components);
             this.trayIconContextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
             this.showMenuItem = new System.Windows.Forms.ToolStripMenuItem();
@@ -51,7 +46,7 @@
             this.deleteAllButton = new System.Windows.Forms.Button();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.viewButton = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.inspectMessageButton = new System.Windows.Forms.Button();
             this.saveButton = new System.Windows.Forms.Button();
             this.deleteButton = new System.Windows.Forms.Button();
             this.optionsButton = new System.Windows.Forms.Button();
@@ -69,13 +64,13 @@
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.dataGridView1 = new System.Windows.Forms.DataGridView();
+            this.sessionsGrid = new System.Windows.Forms.DataGridView();
             this.StartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.clientDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.NumberOfMessages = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.sessionBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
-            this.button1 = new System.Windows.Forms.Button();
+            this.viewSessionButton = new System.Windows.Forms.Button();
             this.trayIconContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.messageGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).BeginInit();
@@ -88,7 +83,7 @@
             this.tabControl1.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.sessionsGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sessionBindingSource)).BeginInit();
             this.flowLayoutPanel3.SuspendLayout();
             this.SuspendLayout();
@@ -111,50 +106,55 @@
             this.optionsMenuItem,
             this.exitMenuItem});
             this.trayIconContextMenuStrip.Name = "contextMenuStrip";
-            this.trayIconContextMenuStrip.Size = new System.Drawing.Size(191, 136);
+            this.trayIconContextMenuStrip.Size = new System.Drawing.Size(189, 158);
             // 
             // showMenuItem
             // 
-            this.showMenuItem.Font = new System.Drawing.Font("Microsoft Sans Serif", 9F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.showMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.showMenuItem.Name = "showMenuItem";
-            this.showMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.showMenuItem.Size = new System.Drawing.Size(188, 22);
             this.showMenuItem.Text = "View Messages";
             this.showMenuItem.Click += new System.EventHandler(this.trayIcon_DoubleClick);
             // 
             // viewLastMessageMenuItem
             // 
             this.viewLastMessageMenuItem.Enabled = false;
+            this.viewLastMessageMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.viewLastMessageMenuItem.Name = "viewLastMessageMenuItem";
-            this.viewLastMessageMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.viewLastMessageMenuItem.Size = new System.Drawing.Size(188, 22);
             this.viewLastMessageMenuItem.Text = "View Last Message";
             this.viewLastMessageMenuItem.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
             // deleteAllMenuItem
             // 
             this.deleteAllMenuItem.Enabled = false;
+            this.deleteAllMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.deleteAllMenuItem.Name = "deleteAllMenuItem";
-            this.deleteAllMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.deleteAllMenuItem.Size = new System.Drawing.Size(188, 22);
             this.deleteAllMenuItem.Text = "Delete All Messages";
             this.deleteAllMenuItem.Click += new System.EventHandler(this.clearAllEmailsToolStripMenuItem_Click);
             // 
             // listenForConnectionsToolStripMenuItem
             // 
+            this.listenForConnectionsToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listenForConnectionsToolStripMenuItem.Name = "listenForConnectionsToolStripMenuItem";
-            this.listenForConnectionsToolStripMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.listenForConnectionsToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.listenForConnectionsToolStripMenuItem.Text = "Listen for connections";
             this.listenForConnectionsToolStripMenuItem.Click += new System.EventHandler(this.listenForConnectionsToolStripMenuItem_Click);
             // 
             // optionsMenuItem
             // 
+            this.optionsMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.optionsMenuItem.Name = "optionsMenuItem";
-            this.optionsMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.optionsMenuItem.Size = new System.Drawing.Size(188, 22);
             this.optionsMenuItem.Text = "Options";
             this.optionsMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
             // 
             // exitMenuItem
             // 
+            this.exitMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.exitMenuItem.Name = "exitMenuItem";
-            this.exitMenuItem.Size = new System.Drawing.Size(190, 22);
+            this.exitMenuItem.Size = new System.Drawing.Size(188, 22);
             this.exitMenuItem.Text = "Exit";
             this.exitMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -164,28 +164,12 @@
             this.messageGrid.AllowUserToResizeRows = false;
             this.messageGrid.AutoGenerateColumns = false;
             this.messageGrid.BackgroundColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle1.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle1.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle1.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.messageGrid.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             this.messageGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             this.messageGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.Recieved,
             this.subjectDataGridViewTextBoxColumn,
             this.ToAddressesNice});
             this.messageGrid.DataSource = this.messageBindingSource;
-            dataGridViewCellStyle2.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle2.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle2.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle2.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle2.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle2.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.messageGrid.DefaultCellStyle = dataGridViewCellStyle2;
             this.messageGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.messageGrid.GridColor = System.Drawing.SystemColors.ControlLight;
             this.messageGrid.Location = new System.Drawing.Point(3, 3);
@@ -208,7 +192,7 @@
             this.Recieved.HeaderText = "Recieved";
             this.Recieved.Name = "Recieved";
             this.Recieved.ReadOnly = true;
-            this.Recieved.Width = 78;
+            this.Recieved.Width = 77;
             // 
             // subjectDataGridViewTextBoxColumn
             // 
@@ -235,9 +219,9 @@
             this.deleteAllButton.AutoSize = true;
             this.deleteAllButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.deleteAllButton.Enabled = false;
-            this.deleteAllButton.Location = new System.Drawing.Point(220, 3);
+            this.deleteAllButton.Location = new System.Drawing.Point(212, 3);
             this.deleteAllButton.Name = "deleteAllButton";
-            this.deleteAllButton.Size = new System.Drawing.Size(62, 23);
+            this.deleteAllButton.Size = new System.Drawing.Size(66, 23);
             this.deleteAllButton.TabIndex = 2;
             this.deleteAllButton.Text = "Delete All";
             this.deleteAllButton.UseVisualStyleBackColor = true;
@@ -247,7 +231,7 @@
             // 
             this.flowLayoutPanel1.AutoSize = true;
             this.flowLayoutPanel1.Controls.Add(this.viewButton);
-            this.flowLayoutPanel1.Controls.Add(this.button2);
+            this.flowLayoutPanel1.Controls.Add(this.inspectMessageButton);
             this.flowLayoutPanel1.Controls.Add(this.saveButton);
             this.flowLayoutPanel1.Controls.Add(this.deleteButton);
             this.flowLayoutPanel1.Controls.Add(this.deleteAllButton);
@@ -263,35 +247,35 @@
             this.viewButton.AutoSize = true;
             this.viewButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.viewButton.Enabled = false;
-            this.viewButton.Location = new System.Drawing.Point(457, 3);
+            this.viewButton.Location = new System.Drawing.Point(455, 3);
             this.viewButton.Name = "viewButton";
-            this.viewButton.Size = new System.Drawing.Size(40, 23);
+            this.viewButton.Size = new System.Drawing.Size(42, 23);
             this.viewButton.TabIndex = 3;
             this.viewButton.Text = "View";
             this.viewButton.UseVisualStyleBackColor = true;
             this.viewButton.Click += new System.EventHandler(this.viewButton_Click);
             // 
-            // button2
+            // inspectMessageButton
             // 
-            this.button2.AutoSize = true;
-            this.button2.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.button2.Enabled = false;
-            this.button2.Location = new System.Drawing.Point(399, 3);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(52, 23);
-            this.button2.TabIndex = 7;
-            this.button2.Text = "Inspect";
-            this.button2.UseVisualStyleBackColor = true;
-            this.button2.Click += new System.EventHandler(this.button2_Click);
+            this.inspectMessageButton.AutoSize = true;
+            this.inspectMessageButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.inspectMessageButton.Enabled = false;
+            this.inspectMessageButton.Location = new System.Drawing.Point(395, 3);
+            this.inspectMessageButton.Name = "inspectMessageButton";
+            this.inspectMessageButton.Size = new System.Drawing.Size(54, 23);
+            this.inspectMessageButton.TabIndex = 7;
+            this.inspectMessageButton.Text = "Inspect";
+            this.inspectMessageButton.UseVisualStyleBackColor = true;
+            this.inspectMessageButton.Click += new System.EventHandler(this.button2_Click);
             // 
             // saveButton
             // 
             this.saveButton.AutoSize = true;
             this.saveButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.saveButton.Enabled = false;
-            this.saveButton.Location = new System.Drawing.Point(342, 3);
+            this.saveButton.Location = new System.Drawing.Point(340, 3);
             this.saveButton.Name = "saveButton";
-            this.saveButton.Size = new System.Drawing.Size(51, 23);
+            this.saveButton.Size = new System.Drawing.Size(49, 23);
             this.saveButton.TabIndex = 4;
             this.saveButton.Text = "Save...";
             this.saveButton.UseVisualStyleBackColor = true;
@@ -302,9 +286,9 @@
             this.deleteButton.AutoSize = true;
             this.deleteButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.deleteButton.Enabled = false;
-            this.deleteButton.Location = new System.Drawing.Point(288, 3);
+            this.deleteButton.Location = new System.Drawing.Point(284, 3);
             this.deleteButton.Name = "deleteButton";
-            this.deleteButton.Size = new System.Drawing.Size(48, 23);
+            this.deleteButton.Size = new System.Drawing.Size(50, 23);
             this.deleteButton.TabIndex = 5;
             this.deleteButton.Text = "Delete";
             this.deleteButton.UseVisualStyleBackColor = true;
@@ -315,9 +299,9 @@
             this.optionsButton.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.optionsButton.AutoSize = true;
             this.optionsButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.optionsButton.Location = new System.Drawing.Point(289, 3);
+            this.optionsButton.Location = new System.Drawing.Point(312, 3);
             this.optionsButton.Name = "optionsButton";
-            this.optionsButton.Size = new System.Drawing.Size(53, 23);
+            this.optionsButton.Size = new System.Drawing.Size(59, 23);
             this.optionsButton.TabIndex = 4;
             this.optionsButton.Text = "Options";
             this.optionsButton.UseVisualStyleBackColor = true;
@@ -372,7 +356,7 @@
             this.statusLabel.Location = new System.Drawing.Point(38, 8);
             this.statusLabel.Margin = new System.Windows.Forms.Padding(0, 0, 3, 0);
             this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(65, 13);
+            this.statusLabel.Size = new System.Drawing.Size(74, 13);
             this.statusLabel.TabIndex = 5;
             this.statusLabel.Text = "Not listening";
             this.statusLabel.TextAlign = System.Drawing.ContentAlignment.MiddleLeft;
@@ -382,9 +366,9 @@
             this.stopListeningButton.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.stopListeningButton.AutoSize = true;
             this.stopListeningButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.stopListeningButton.Location = new System.Drawing.Point(109, 3);
+            this.stopListeningButton.Location = new System.Drawing.Point(118, 3);
             this.stopListeningButton.Name = "stopListeningButton";
-            this.stopListeningButton.Size = new System.Drawing.Size(84, 23);
+            this.stopListeningButton.Size = new System.Drawing.Size(91, 23);
             this.stopListeningButton.TabIndex = 6;
             this.stopListeningButton.Text = "Stop Listening";
             this.stopListeningButton.UseVisualStyleBackColor = true;
@@ -396,9 +380,9 @@
             this.startListeningButton.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.startListeningButton.AutoSize = true;
             this.startListeningButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.startListeningButton.Location = new System.Drawing.Point(199, 3);
+            this.startListeningButton.Location = new System.Drawing.Point(215, 3);
             this.startListeningButton.Name = "startListeningButton";
-            this.startListeningButton.Size = new System.Drawing.Size(84, 23);
+            this.startListeningButton.Size = new System.Drawing.Size(91, 23);
             this.startListeningButton.TabIndex = 7;
             this.startListeningButton.Text = "Start Listening";
             this.startListeningButton.UseVisualStyleBackColor = true;
@@ -425,11 +409,11 @@
             // 
             this.label2.AutoSize = true;
             this.label2.BackColor = System.Drawing.Color.Transparent;
-            this.label2.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label2.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label2.ForeColor = System.Drawing.Color.Black;
             this.label2.Location = new System.Drawing.Point(43, 27);
             this.label2.Name = "label2";
-            this.label2.Size = new System.Drawing.Size(98, 13);
+            this.label2.Size = new System.Drawing.Size(108, 13);
             this.label2.TabIndex = 1;
             this.label2.Text = "rob@rnwood.co.uk";
             // 
@@ -437,11 +421,11 @@
             // 
             this.label1.AutoSize = true;
             this.label1.BackColor = System.Drawing.Color.Transparent;
-            this.label1.Font = new System.Drawing.Font("Microsoft Sans Serif", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.label1.Font = new System.Drawing.Font("Segoe UI", 11.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.label1.ForeColor = System.Drawing.Color.Black;
             this.label1.Location = new System.Drawing.Point(43, 8);
             this.label1.Name = "label1";
-            this.label1.Size = new System.Drawing.Size(80, 18);
+            this.label1.Size = new System.Drawing.Size(79, 20);
             this.label1.TabIndex = 0;
             this.label1.Text = "smtp4dev";
             // 
@@ -480,7 +464,7 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.dataGridView1);
+            this.tabPage2.Controls.Add(this.sessionsGrid);
             this.tabPage2.Controls.Add(this.flowLayoutPanel3);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
@@ -490,52 +474,29 @@
             this.tabPage2.Text = "Sessions";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // dataGridView1
+            // sessionsGrid
             // 
-            this.dataGridView1.AllowUserToAddRows = false;
-            this.dataGridView1.AllowUserToDeleteRows = false;
-            this.dataGridView1.AutoGenerateColumns = false;
-            this.dataGridView1.BackgroundColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle3.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle3.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle3.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle3.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle3.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle3.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle3.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView1.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle3;
-            this.dataGridView1.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            this.dataGridView1.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
+            this.sessionsGrid.AllowUserToAddRows = false;
+            this.sessionsGrid.AllowUserToDeleteRows = false;
+            this.sessionsGrid.AutoGenerateColumns = false;
+            this.sessionsGrid.BackgroundColor = System.Drawing.SystemColors.Window;
+            this.sessionsGrid.ColumnHeadersHeightSizeMode = System.Windows.Forms.DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            this.sessionsGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.StartDate,
             this.clientDataGridViewTextBoxColumn,
             this.NumberOfMessages});
-            this.dataGridView1.DataSource = this.sessionBindingSource;
-            dataGridViewCellStyle4.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle4.BackColor = System.Drawing.SystemColors.Window;
-            dataGridViewCellStyle4.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle4.ForeColor = System.Drawing.SystemColors.ControlText;
-            dataGridViewCellStyle4.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle4.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle4.WrapMode = System.Windows.Forms.DataGridViewTriState.False;
-            this.dataGridView1.DefaultCellStyle = dataGridViewCellStyle4;
-            this.dataGridView1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.dataGridView1.GridColor = System.Drawing.SystemColors.ControlLight;
-            this.dataGridView1.Location = new System.Drawing.Point(3, 3);
-            this.dataGridView1.MultiSelect = false;
-            this.dataGridView1.Name = "dataGridView1";
-            this.dataGridView1.ReadOnly = true;
-            dataGridViewCellStyle5.Alignment = System.Windows.Forms.DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle5.BackColor = System.Drawing.SystemColors.Control;
-            dataGridViewCellStyle5.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
-            dataGridViewCellStyle5.ForeColor = System.Drawing.SystemColors.WindowText;
-            dataGridViewCellStyle5.SelectionBackColor = System.Drawing.SystemColors.Highlight;
-            dataGridViewCellStyle5.SelectionForeColor = System.Drawing.SystemColors.HighlightText;
-            dataGridViewCellStyle5.WrapMode = System.Windows.Forms.DataGridViewTriState.True;
-            this.dataGridView1.RowHeadersDefaultCellStyle = dataGridViewCellStyle5;
-            this.dataGridView1.RowHeadersVisible = false;
-            this.dataGridView1.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.dataGridView1.Size = new System.Drawing.Size(500, 203);
-            this.dataGridView1.TabIndex = 0;
+            this.sessionsGrid.DataSource = this.sessionBindingSource;
+            this.sessionsGrid.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.sessionsGrid.GridColor = System.Drawing.SystemColors.ControlLight;
+            this.sessionsGrid.Location = new System.Drawing.Point(3, 3);
+            this.sessionsGrid.MultiSelect = false;
+            this.sessionsGrid.Name = "sessionsGrid";
+            this.sessionsGrid.ReadOnly = true;
+            this.sessionsGrid.RowHeadersVisible = false;
+            this.sessionsGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
+            this.sessionsGrid.Size = new System.Drawing.Size(500, 203);
+            this.sessionsGrid.TabIndex = 0;
+            this.sessionsGrid.SelectionChanged += new System.EventHandler(this.sessionsGrid_SelectionChanged);
             // 
             // StartDate
             // 
@@ -561,7 +522,7 @@
             this.NumberOfMessages.HeaderText = "No of Msgs";
             this.NumberOfMessages.Name = "NumberOfMessages";
             this.NumberOfMessages.ReadOnly = true;
-            this.NumberOfMessages.Width = 86;
+            this.NumberOfMessages.Width = 91;
             // 
             // sessionBindingSource
             // 
@@ -570,7 +531,7 @@
             // flowLayoutPanel3
             // 
             this.flowLayoutPanel3.AutoSize = true;
-            this.flowLayoutPanel3.Controls.Add(this.button1);
+            this.flowLayoutPanel3.Controls.Add(this.viewSessionButton);
             this.flowLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.flowLayoutPanel3.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
             this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 206);
@@ -578,15 +539,16 @@
             this.flowLayoutPanel3.Size = new System.Drawing.Size(500, 29);
             this.flowLayoutPanel3.TabIndex = 1;
             // 
-            // button1
+            // viewSessionButton
             // 
-            this.button1.Location = new System.Drawing.Point(422, 3);
-            this.button1.Name = "button1";
-            this.button1.Size = new System.Drawing.Size(75, 23);
-            this.button1.TabIndex = 0;
-            this.button1.Text = "View Log";
-            this.button1.UseVisualStyleBackColor = true;
-            this.button1.Click += new System.EventHandler(this.button1_Click_1);
+            this.viewSessionButton.Enabled = false;
+            this.viewSessionButton.Location = new System.Drawing.Point(422, 3);
+            this.viewSessionButton.Name = "viewSessionButton";
+            this.viewSessionButton.Size = new System.Drawing.Size(75, 23);
+            this.viewSessionButton.TabIndex = 0;
+            this.viewSessionButton.Text = "View Log";
+            this.viewSessionButton.UseVisualStyleBackColor = true;
+            this.viewSessionButton.Click += new System.EventHandler(this.button1_Click_1);
             // 
             // MainForm
             // 
@@ -597,7 +559,7 @@
             this.Controls.Add(this.tabControl1);
             this.Controls.Add(this.flowLayoutPanel2);
             this.Controls.Add(this.panel1);
-            this.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
+            this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.Name = "MainForm";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "smtp4dev";
@@ -621,7 +583,7 @@
             this.tabPage1.PerformLayout();
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.dataGridView1)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.sessionsGrid)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sessionBindingSource)).EndInit();
             this.flowLayoutPanel3.ResumeLayout(false);
             this.ResumeLayout(false);
@@ -659,17 +621,17 @@
         private System.Windows.Forms.PictureBox pictureBox3;
         private System.Windows.Forms.ToolStripMenuItem listenForConnectionsToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn fromAddressDataGridViewTextBoxColumn;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button inspectMessageButton;
         private System.Windows.Forms.TabControl tabControl1;
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
-        private System.Windows.Forms.DataGridView dataGridView1;
+        private System.Windows.Forms.DataGridView sessionsGrid;
         private System.Windows.Forms.BindingSource sessionBindingSource;
         private System.Windows.Forms.DataGridViewTextBoxColumn StartDate;
         private System.Windows.Forms.DataGridViewTextBoxColumn clientDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn NumberOfMessages;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
-        private System.Windows.Forms.Button button1;
+        private System.Windows.Forms.Button viewSessionButton;
         private System.Windows.Forms.DataGridViewTextBoxColumn Recieved;
         private System.Windows.Forms.DataGridViewTextBoxColumn subjectDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn ToAddressesNice;

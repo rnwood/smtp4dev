@@ -33,27 +33,6 @@ namespace Rnwood.Smtp4dev.MessageInspector
             }
         }
 
-        public ImageSource Icon
-        {
-            get
-            {
-                BitmapImage i = new BitmapImage();
-                i.BeginInit();
-
-                if (Message.IsMultipart)
-                {
-                    i.UriSource = new Uri("folder.png", UriKind.Relative);
-                }
-                else
-                {
-                    i.UriSource = new Uri("document.png", UriKind.Relative);
-                }
-                i.EndInit();
-
-                return i;
-            }
-        }
-
         public string Body
         {
             get
