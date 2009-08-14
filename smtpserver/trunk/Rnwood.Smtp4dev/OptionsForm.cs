@@ -4,6 +4,7 @@ using System.ComponentModel;
 using System.Data;
 using System.Drawing;
 using System.Linq;
+using System.Net.Sockets;
 using System.Text;
 using System.Windows.Forms;
 using System.Net.NetworkInformation;
@@ -22,7 +23,7 @@ namespace Rnwood.Smtp4dev
 
             UpdateControlStatus();
 
-            ipAddressCombo.DataSource = new[] { IPAddress.Any }.Concat(NetworkInterface.GetAllNetworkInterfaces().SelectMany(ni => ni.GetIPProperties().UnicastAddresses).Select(ua => ua.Address)).ToList();
+            ipAddressCombo.DataSource = new[] { IPAddress.Any }.Concat(NetworkInterface.GetAllNetworkInterfaces().SelectMany(ni => ni.GetIPProperties().UnicastAddresses).Where(ua => ua.Address.AddressFamily == AddressFamily.InterNetwork).Select(ua => ua.Address)).ToList();
             ipAddressCombo.SelectedItem = IPAddress.Parse(Properties.Settings.Default.IPAddress);
         }
 

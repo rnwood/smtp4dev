@@ -117,9 +117,17 @@ namespace Rnwood.Smtp4dev
                     }
                 }
 
-                if (Properties.Settings.Default.AutoViewNewMessages)
+                if (Properties.Settings.Default.AutoViewNewMessages || Properties.Settings.Default.AutoInspectNewMessages)
                 {
-                    ViewMessage(message);
+                    if (Properties.Settings.Default.AutoViewNewMessages)
+                    {
+                        ViewMessage(message);
+                    }
+
+                    if (Properties.Settings.Default.AutoInspectNewMessages)
+                    {
+                        InspectMessage(message);
+                    }
                 }
                 else if (!Visible && Properties.Settings.Default.BalloonNotifications)
                 {
@@ -279,7 +287,14 @@ namespace Rnwood.Smtp4dev
         {
             if (_messages.Count > 0)
             {
-                ViewMessage(_messages.Last());
+                if (Properties.Settings.Default.InspectOnBalloonClick)
+                {
+                    InspectMessage(_messages.Last());
+                }
+                else
+                {
+                    ViewMessage(_messages.Last());
+                }
             }
             else
             {
@@ -367,10 +382,19 @@ namespace Rnwood.Smtp4dev
             }
         }
 
-        private void button2_Click(object sender, EventArgs e)
+        private void inspectButton_Click(object sender, EventArgs e)
         {
-            InspectorWindow form = new InspectorWindow(SelectedMessage.Message.Contents);
+            InspectMessage(SelectedMessage);
+        }
+
+        private void InspectMessage(MessageViewModel message)
+        {
+            message.MarkAsViewed();
+
+            InspectorWindow form = new InspectorWindow(message.Message.Contents);
             form.Show();
+
+            messageGrid.Refresh();
         }
 
         private void button1_Click_1(object sender, EventArgs e)
@@ -385,6 +409,17 @@ namespace Rnwood.Smtp4dev
 
         public void ProcessLaunchInfo(LaunchInfo launchInfo, bool firstInstance)
         {
+            if (firstInstance)
+            {
+                Visible = true;
+                Visible = !Properties.Settings.Default.StartInTray;
+
+                if (Properties.Settings.Default.ListenOnStartup)
+                {
+                    StartServer();
+                }
+            }
+
             if (launchInfo.Arguments.Length == 1)
             {
                 string messageFilename = launchInfo.Arguments[0];
@@ -398,22 +433,10 @@ namespace Rnwood.Smtp4dev
                 {
                     throw new Exception("Specified file does not exist");
                 }
-
-
             }
             else if (launchInfo.Arguments.Length == 0)
             {
-                if (firstInstance)
-                {
-                    Visible = true;
-                    Visible = !Properties.Settings.Default.StartInTray;
-
-                    if (Properties.Settings.Default.ListenOnStartup)
-                    {
-                        StartServer();
-                    }
-                }
-                else
+                if (!firstInstance)
                 {
                     Visible = true;
                 }

@@ -1,10 +1,14 @@
 ﻿using System;
+using System.CodeDom.Compiler;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Text;
 using anmar.SharpMimeTools;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
+using Microsoft.Win32;
 
 namespace Rnwood.Smtp4dev.MessageInspector
 {
@@ -77,9 +81,64 @@ namespace Rnwood.Smtp4dev.MessageInspector
         {
             get
             {
-                return Message.Name??"Unnamed" + ": " + Message.Header.TopLevelMediaType + "/" + Message.Header.SubType + " (" + Message.Size + " bytes)";
+                return Message.Name??"Unnamed" + ": " + MimeType + " (" + Message.Size + " bytes)";
             }
         }
 
+        protected string MimeType
+        {
+            get { return Message.Header.TopLevelMediaType + "/" + Message.Header.SubType; }
+        }
+
+        public string Subject
+        {
+            get
+            {
+                return Message.Header.Subject;
+            }
+        }
+
+        public void Save()
+        {
+            SaveFileDialog dialog = new SaveFileDialog();
+
+            string filename = (Message.Name ?? "Unnamed");
+
+            if (string.IsNullOrEmpty(Path.GetExtension(Message.Name)))
+            {
+                filename = filename + (MIMEDatabase.GetExtension(MimeType));
+            }
+
+            dialog.FileName = filename;
+            dialog.Filter = "File (*.*)|*.*";
+
+            if (dialog.ShowDialog() == true)
+            {
+                using (FileStream stream = File.OpenWrite(dialog.FileName))
+                {
+                    Message.DumpBody(stream);
+                }
+            }
+        }
+
+        public void View()
+        {
+            string extn = Path.GetExtension(Message.Name ?? "Unnamed");
+
+            if (string.IsNullOrEmpty(extn))
+            {
+                extn = MIMEDatabase.GetExtension(MimeType) ?? ".part";
+            }
+
+            TempFileCollection tempFiles = new TempFileCollection();
+            FileInfo msgFile = new FileInfo(tempFiles.AddExtension(extn.TrimStart('.')));
+
+            using (FileStream stream = msgFile.OpenWrite())
+            {
+                Message.DumpBody(stream);
+            }
+
+            Process.Start(msgFile.FullName);
+        }
     }
 }
