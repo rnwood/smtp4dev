@@ -27,20 +27,36 @@ namespace Rnwood.SmtpServer
 
         public IServerBehaviour Behaviour { get; private set; }
 
+        /// <summary>
+        /// Gets or sets a value indicating whether the server is currently running.
+        /// </summary>
         public bool IsRunning
         {
             get;
             private set;
         }
 
+        /// <summary>
+        /// Runs the server synchronously. This method blocks until the server is stopped.
+        /// </summary>
         public void Run()
         {
             if (IsRunning)
                 throw new InvalidOperationException("Already running");
 
-            IsRunning = true;
             _listener = new TcpListener(Behaviour.IpAddress, Behaviour.PortNumber);
             _listener.Start();
+
+            IsRunning = true;
+
+            Core();
+        }
+
+        private Thread _coreThread;
+
+        private void Core()
+        {
+            _coreThread = Thread.CurrentThread;
 
             try
             {
@@ -63,6 +79,20 @@ namespace Rnwood.SmtpServer
             }
         }
 
+        public void Start()
+        {
+            if (IsRunning)
+                throw new InvalidOperationException("Already running");
+
+            _listener = new TcpListener(Behaviour.IpAddress, Behaviour.PortNumber);
+            _listener.Start();
+
+            IsRunning = true;
+
+            new Thread(Core).Start();
+        }
+
+
         private TcpListener _listener;
 
         public void Stop()
@@ -74,6 +104,8 @@ namespace Rnwood.SmtpServer
 
             IsRunning = false;
             _listener.Stop();
+
+            _coreThread.Join();
         }
 
         private void ConnectionThreadWork(object tcpClient)

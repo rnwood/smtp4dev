@@ -1,5 +1,6 @@
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Extensions.Auth;
 
 namespace Rnwood.SmtpServer
