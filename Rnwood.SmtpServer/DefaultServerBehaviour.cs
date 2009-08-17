@@ -11,6 +11,15 @@ namespace Rnwood.SmtpServer
 {
     public class DefaultServerBehaviour : IServerBehaviour
     {
+        public DefaultServerBehaviour() : this(25)
+        {
+        }
+
+        public DefaultServerBehaviour(int portNumber)
+        {
+            _portNumber = portNumber;
+        }
+
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
         public virtual void OnMessageReceived(Message message)
@@ -33,8 +42,10 @@ namespace Rnwood.SmtpServer
 
         public virtual int PortNumber
         {
-            get { return 25; }
+            get { return _portNumber; }
         }
+
+        private int _portNumber;
 
         public virtual bool RunOverSSL
         {

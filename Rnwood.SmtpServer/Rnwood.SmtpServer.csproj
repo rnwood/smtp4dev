@@ -55,7 +55,7 @@
     <Compile Include="Extensions\Auth\AuthenticationRequest.cs" />
     <Compile Include="Extensions\Auth\AuthenticationResult.cs" />
     <Compile Include="DefaultServerBehaviour.cs" />
-    <Compile Include="Extension.cs" />
+    <Compile Include="Extensions\Extension.cs" />
     <Compile Include="Extensions\Auth\AnonymousMechanism.cs" />
     <Compile Include="Extensions\Auth\AuthExtension.cs" />
     <Compile Include="Extensions\Auth\AuthMechanism.cs" />
@@ -87,12 +87,12 @@
     <Compile Include="Verbs\NoopVerb.cs" />
     <Compile Include="Verbs\RcptToVerb.cs" />
     <Compile Include="Verbs\RcptVerb.cs" />
-    <Compile Include="Verb.cs" />
+    <Compile Include="Verbs\Verb.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Verbs\QuitVerb.cs" />
     <Compile Include="Server.cs" />
     <Compile Include="SmtpRequest.cs" />
-    <Compile Include="VerbMap.cs" />
+    <Compile Include="Verbs\VerbMap.cs" />
     <Compile Include="Verbs\RsetVerb.cs" />
   </ItemGroup>
   <ItemGroup>

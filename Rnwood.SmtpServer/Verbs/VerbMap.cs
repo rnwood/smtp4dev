@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace Rnwood.SmtpServer
+namespace Rnwood.SmtpServer.Verbs
 {
     public class VerbMap
     {
@@ -27,6 +27,4 @@ namespace Rnwood.SmtpServer
             return null;
         }
     }
-
-
 }
