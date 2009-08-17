@@ -1,2 +1,1 @@
-Message inpector from command line
-Single instance app
+Test as non-admin account

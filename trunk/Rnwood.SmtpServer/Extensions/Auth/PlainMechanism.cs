@@ -62,7 +62,19 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             string username = decodedDataParts[1];
             string password = decodedDataParts[2];
 
-            return AuthMechanismProcessorStatus.Success;
+            AuthenticationResult result = ConnectionProcessor.Server.Behaviour.ValidateAuthenticationRequest(ConnectionProcessor,
+                                                                               new UsernameAndPasswordAuthenticationRequest
+                                                                                   (username, password));
+
+            switch (result)
+            {
+                case AuthenticationResult.Success:
+                    return AuthMechanismProcessorStatus.Success;
+                    break;
+                default:
+                    return AuthMechanismProcessorStatus.Failed;
+                    break;
+            }
         }
 
         private static string DecodeBase64(string data)

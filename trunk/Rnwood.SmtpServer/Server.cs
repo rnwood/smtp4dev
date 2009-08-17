@@ -15,12 +15,17 @@ namespace Rnwood.SmtpServer
 {
     public class Server
     {
-        public Server(ServerBehaviour behaviour)
+        public Server() : this(new DefaultServerBehaviour())
+        {
+            
+        }
+
+        public Server(IServerBehaviour behaviour)
         {
             Behaviour = behaviour;
         }
 
-        public ServerBehaviour Behaviour { get; private set; }
+        public IServerBehaviour Behaviour { get; private set; }
 
         public bool IsRunning
         {
