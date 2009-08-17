@@ -11,9 +11,9 @@ using Rnwood.SmtpServer.Extensions.Auth;
 
 namespace Rnwood.Smtp4dev
 {
-    public class Smtp4DevServerBehaviour : ServerBehaviour
+    public class ServerBehaviour : IServerBehaviour
     {
-        public override void OnMessageReceived(Message message)
+        public void OnMessageReceived(Message message)
         {
             if (MessageReceived != null)
             {
@@ -25,29 +25,29 @@ namespace Rnwood.Smtp4dev
 
         public event EventHandler<SessionCompletedEventArgs> SessionCompleted;
 
-        public override string DomainName
+        public string DomainName
         {
             get { return Properties.Settings.Default.DomainName; }
         }
 
-        public override IPAddress IpAddress
+        public IPAddress IpAddress
         {
             get 
             {     
                 return IPAddress.Parse(Properties.Settings.Default.IPAddress); }
         }
 
-        public override int PortNumber
+        public int PortNumber
         {
             get { return Properties.Settings.Default.PortNumber; }
         }
 
-        public override bool RunOverSSL
+        public bool RunOverSSL
         {
             get { return Properties.Settings.Default.EnableSSL; }
         }
 
-        public override System.Security.Cryptography.X509Certificates.X509Certificate GetSSLCertificate(ConnectionProcessor processor)
+        public System.Security.Cryptography.X509Certificates.X509Certificate GetSSLCertificate(ConnectionProcessor processor)
         {
             if (string.IsNullOrEmpty(Properties.Settings.Default.SSLCertificatePath))
             {
@@ -62,7 +62,7 @@ namespace Rnwood.Smtp4dev
         private AuthExtension _authExtension = new AuthExtension();
         private SizeExtension _sizeExtension = new SizeExtension();
 
-        public override Extension[] GetExtensions(ConnectionProcessor processor)
+        public Extension[] GetExtensions(ConnectionProcessor processor)
         {
             List<Extension> extensions = new List<Extension>();
 
@@ -89,13 +89,13 @@ namespace Rnwood.Smtp4dev
             return extensions.ToArray();
         }
 
-        public override long? GetMaximumMessageSize(ConnectionProcessor processor)
+        public long? GetMaximumMessageSize(ConnectionProcessor processor)
         {
             long value = Properties.Settings.Default.MaximumMessageSize;
             return value != 0 ? value : (long?) null;
         }
 
-        public override void OnSessionCompleted(Session Session)
+        public void OnSessionCompleted(Session Session)
         {
             if (SessionCompleted != null)
             {
@@ -103,31 +103,15 @@ namespace Rnwood.Smtp4dev
             }
         }
 
-        public override int GetReceiveTimeout(ConnectionProcessor processor)
+        public int GetReceiveTimeout(ConnectionProcessor processor)
         {
             return Properties.Settings.Default.ReceiveTimeout;
         }
-    }
 
-    public class SessionCompletedEventArgs : EventArgs
-    {
-        public SessionCompletedEventArgs(Session session)
+        public AuthenticationResult ValidateAuthenticationRequest(ConnectionProcessor processor, AuthenticationRequest authenticationRequest)
         {
-            Session = session;
+            return AuthenticationResult.Success;
         }
-
-        public Session Session { get; private set; }
-
     }
 
-    public class MessageReceivedEventArgs : EventArgs
-    {
-        public MessageReceivedEventArgs(Message message)
-        {
-            Message = message;
-        }
-
-        public Message Message { get; private set; }
-
-    }
 }

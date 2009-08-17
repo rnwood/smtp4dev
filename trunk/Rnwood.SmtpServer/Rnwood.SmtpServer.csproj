@@ -52,6 +52,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ASCIITruncatingDecoderFallback.cs" />
+    <Compile Include="Extensions\Auth\AuthenticationRequest.cs" />
+    <Compile Include="Extensions\Auth\AuthenticationResult.cs" />
+    <Compile Include="DefaultServerBehaviour.cs" />
     <Compile Include="Extension.cs" />
     <Compile Include="Extensions\Auth\AnonymousMechanism.cs" />
     <Compile Include="Extensions\Auth\AuthExtension.cs" />
@@ -59,17 +62,19 @@
     <Compile Include="Extensions\Auth\AuthMechanismMap.cs" />
     <Compile Include="Extensions\Auth\AuthMechanismProcessor.cs" />
     <Compile Include="Extensions\Auth\AuthMechanismProcessorStatus.cs" />
+    <Compile Include="Extensions\Auth\CramMd5AuthenticationRequest.cs" />
     <Compile Include="Extensions\Auth\CramMd5Mechanism.cs" />
     <Compile Include="Extensions\Auth\LoginMechanism.cs" />
     <Compile Include="Extensions\Auth\PlainMechanism.cs" />
+    <Compile Include="Extensions\Auth\UsernameAndPasswordAuthenticationRequest.cs" />
     <Compile Include="Extensions\SizeExtension.cs" />
     <Compile Include="Extensions\StartTlsExtension.cs" />
     <Compile Include="Extensions\EightBitMimeExtension.cs" />
+    <Compile Include="IServerBehaviour.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="IParameterProcessor.cs" />
     <Compile Include="ParameterParser.cs" />
     <Compile Include="ParameterProcessorMap.cs" />
-    <Compile Include="ServerBehaviour.cs" />
     <Compile Include="Session.cs" />
     <Compile Include="SmtpResponse.cs" />
     <Compile Include="SmtpServerException.cs" />

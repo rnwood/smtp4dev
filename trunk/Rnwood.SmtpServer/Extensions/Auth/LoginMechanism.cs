@@ -37,21 +37,25 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         }
 
         States State
-        { get; set;
+        {
+            get;
+            set;
         }
 
         public override AuthMechanismProcessorStatus ProcessResponse(string data)
         {
+            string username = null;
+
             switch (State)
             {
                 case States.Initial:
-                    ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,Convert.ToBase64String(Encoding.ASCII.GetBytes("Username:"))));
+                    ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, Convert.ToBase64String(Encoding.ASCII.GetBytes("Username:"))));
                     State = States.WaitingForUsername;
                     return AuthMechanismProcessorStatus.Continue;
 
                 case States.WaitingForUsername:
 
-                    string username= DecodeBase64(data);
+                    username = DecodeBase64(data);
 
                     ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, Convert.ToBase64String(Encoding.ASCII.GetBytes("Password:"))));
                     State = States.WaitingForPassword;
@@ -60,7 +64,20 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 case States.WaitingForPassword:
                     string password = DecodeBase64(data);
                     State = States.Completed;
-                    return AuthMechanismProcessorStatus.Success;
+
+                    AuthenticationResult result = ConnectionProcessor.Server.Behaviour.ValidateAuthenticationRequest(ConnectionProcessor,
+                                                                   new UsernameAndPasswordAuthenticationRequest
+                                                                       (username, password));
+
+                    switch (result)
+                    {
+                        case AuthenticationResult.Success:
+                            return AuthMechanismProcessorStatus.Success;
+                            break;
+                        default:
+                            return AuthMechanismProcessorStatus.Failed;
+                            break;
+                    }
 
                 default:
                     throw new NotImplementedException();
