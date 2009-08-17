@@ -8,6 +8,7 @@ using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using Rnwood.SmtpServer;
+using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer
