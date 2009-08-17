@@ -5,6 +5,7 @@ using System.Linq;
 using System.Net.Mail;
 using System.Text;
 using System.IO;
+using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer
 {
