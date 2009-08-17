@@ -67,6 +67,19 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 string username = responseparts[0];
                 string hash = responseparts[1];
 
+                AuthenticationResult result = ConnectionProcessor.Server.Behaviour.ValidateAuthenticationRequest(ConnectionProcessor,
+                                                                   new CramMd5AuthenticationRequest(username, _challenge, hash));
+
+                switch (result)
+                {
+                    case AuthenticationResult.Success:
+                        return AuthMechanismProcessorStatus.Success;
+                        break;
+                    default:
+                        return AuthMechanismProcessorStatus.Failed;
+                        break;
+                }
+
                 return AuthMechanismProcessorStatus.Success;
             }
         }

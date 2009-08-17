@@ -74,7 +74,7 @@ namespace Rnwood.Smtp4dev
             {
                 Application.DoEvents();
 
-                Smtp4DevServerBehaviour b = new Smtp4DevServerBehaviour();
+                ServerBehaviour b = new ServerBehaviour();
                 b.MessageReceived += MessageReceived;
                 b.SessionCompleted += new EventHandler<SessionCompletedEventArgs>(b_SessionCompleted);
 

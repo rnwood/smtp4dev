@@ -110,7 +110,8 @@
             <Shortcut Id="S01" Directory="StartMenuDir"
 Name="smtp4dev" Target="ProductFeature" Show="normal" Icon="Icon.exe"
 WorkingDirectory="TARGETDIR"/>
-            <RegistryValue Id='REG01' Root='HKCR' Key='Microsoft Internet Mail Message\Shell\Inspect with smtp4dev\Command' Action='write' Type='string' Value='"[INSTALLLOCATION]$(var.Rnwood.Smtp4dev.TargetFileName)" "%L"' />
+            <RegistryKey Id='REG01' Root='HKCR' Key='Microsoft Internet Mail Message\Shell\Inspect with smtp4dev' Action='createAndRemoveOnUninstall' />
+            <RegistryValue Id='REG02' Root='HKCR' Key='Microsoft Internet Mail Message\Shell\Inspect with smtp4dev\Command' Action='write' Type='string' Value='"[INSTALLLOCATION]$(var.Rnwood.Smtp4dev.TargetFileName)" "%L"' />
             <RemoveFolder Id="R01" Directory="StartMenuDir" On='uninstall' />
             <RemoveFolder Id="R02" Directory="INSTALLLOCATION" On='uninstall' />
             <RemoveFile Id='R03' Directory='INSTALLLOCATION' Name='$(var.Rnwood.Smtp4dev.TargetFileName)' On='uninstall'/>
