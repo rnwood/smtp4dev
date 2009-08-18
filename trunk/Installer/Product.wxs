@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*" Name="smtp4dev" Language="1033" Version="1.1.0" Manufacturer="Robert Wood" UpgradeCode="542EEA02-7932-465A-B51C-79B20B6E26AF">
+  <Product Id="*" Name="smtp4dev" Language="1033" Version="2.0.0" Manufacturer="Robert Wood" UpgradeCode="542EEA02-7932-465A-B51C-79B20B6E26AF">
 
     <Package InstallerVersion="200" Compressed="yes" />
 
     <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
 
     <Upgrade Id="542EEA02-7932-465A-B51C-79B20B6E26AF">
-      <UpgradeVersion Minimum="1.0.0" Maximum="1.1.0" IncludeMaximum="yes" Property="THEUPGRADEVERSION"/>
+      <UpgradeVersion Minimum="1.0.0" Maximum="2.0.0" IncludeMaximum="yes" Property="THEUPGRADEVERSION"/>
     </Upgrade>
 
     <WixVariable Id="WixUILicenseRtf" Value="$(var.SolutionDir)license.rtf" />
@@ -105,8 +105,8 @@
             <File Id="F01" Name="$(var.Rnwood.Smtp4dev.TargetFileName)" Source="$(var.Rnwood.Smtp4dev.TargetPath)"
 />
             <File Id="F02" Name="$(var.Rnwood.Smtp4dev.TargetFileName).config" Source="$(var.Rnwood.Smtp4dev.TargetPath).config"/>
-            <File Id="F03" Name="Rnwood.SmtpServer.dll" Source="..\Rnwood.Smtp4dev\bin\Debug\Rnwood.SmtpServer.dll"/>
-            <File Id="F05" Name="sharpmimetools.dll" Source="..\Rnwood.Smtp4dev\bin\Debug\sharpmimetools.dll"/>
+            <File Id="F03" Name="Rnwood.SmtpServer.dll" Source="..\Rnwood.Smtp4dev\bin\Release\Rnwood.SmtpServer.dll"/>
+            <File Id="F05" Name="sharpmimetools.dll" Source="..\Rnwood.Smtp4dev\bin\Release\sharpmimetools.dll"/>
             <Shortcut Id="S01" Directory="StartMenuDir"
 Name="smtp4dev" Target="ProductFeature" Show="normal" Icon="Icon.exe"
 WorkingDirectory="TARGETDIR"/>
