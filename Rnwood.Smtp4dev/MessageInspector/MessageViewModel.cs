@@ -9,15 +9,34 @@ using anmar.SharpMimeTools;
 using System.Windows.Media;
 using System.Windows.Media.Imaging;
 using Microsoft.Win32;
+using System.Collections;
+using System.ComponentModel;
 
 namespace Rnwood.Smtp4dev.MessageInspector
 {
-    public class MessageViewModel
+    public class MessageViewModel : INotifyPropertyChanged
     {
         public MessageViewModel(SharpMimeMessage message)
         {
             Message = message;
         }
+
+        private bool _isSelected;
+        public bool IsSelected
+        {
+            get
+            {
+                return _isSelected;
+            }
+
+            set
+            {
+                _isSelected = value;
+                OnPropertyChanged("IsSelected");
+            }
+        }
+
+
 
         public SharpMimeMessage Message { get; private set; }
 
@@ -26,6 +45,14 @@ namespace Rnwood.Smtp4dev.MessageInspector
             get
             {
                 return Message.Cast<SharpMimeMessage>().Select(part => new MessageViewModel(part)).ToArray();
+            }
+        }
+
+        public HeaderViewModel[] Headers
+        {
+            get
+            {
+                return Message.Header.Cast<DictionaryEntry>().Select(de => new HeaderViewModel((string)de.Key, (string)de.Value)).ToArray();
             }
         }
 
@@ -81,7 +108,7 @@ namespace Rnwood.Smtp4dev.MessageInspector
         {
             get
             {
-                return Message.Name??"Unnamed" + ": " + MimeType + " (" + Message.Size + " bytes)";
+                return Message.Name ?? "Unnamed" + ": " + MimeType + " (" + Message.Size + " bytes)";
             }
         }
 
@@ -140,5 +167,32 @@ namespace Rnwood.Smtp4dev.MessageInspector
 
             Process.Start(msgFile.FullName);
         }
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        protected virtual void OnPropertyChanged(string propertyName)
+        {
+            if (PropertyChanged != null)
+            {
+                PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
+            }
+        }
+
+        #endregion
+    }
+
+
+    public class HeaderViewModel
+    {
+        public HeaderViewModel(string key, string value)
+        {
+            Key = key;
+            Value = value;
+        }
+
+        public string Key { get; private set; }
+        public string Value { get; private set; }
     }
 }
