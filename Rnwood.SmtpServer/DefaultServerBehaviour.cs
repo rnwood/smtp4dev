@@ -52,17 +52,17 @@ namespace Rnwood.SmtpServer
             get { return false; }
         }
 
-        public virtual long? GetMaximumMessageSize(ConnectionProcessor processor)
+        public virtual long? GetMaximumMessageSize(IConnectionProcessor processor)
         {
             return null;
         }
 
-        public virtual X509Certificate GetSSLCertificate(ConnectionProcessor processor)
+        public virtual X509Certificate GetSSLCertificate(IConnectionProcessor processor)
         {
             return null;
         }
 
-        public virtual Extension[] GetExtensions(ConnectionProcessor processor)
+        public virtual Extension[] GetExtensions(IConnectionProcessor processor)
         {
             return new Extension[] { new EightBitMimeExtension(), new SizeExtension() };
         }
@@ -77,12 +77,12 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        public virtual int GetReceiveTimeout(ConnectionProcessor processor)
+        public virtual int GetReceiveTimeout(IConnectionProcessor processor)
         {
             return (int) new TimeSpan(0, 5, 0).TotalMilliseconds;
         }
 
-        public virtual AuthenticationResult ValidateAuthenticationRequest(ConnectionProcessor processor, AuthenticationRequest request)
+        public virtual AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor, AuthenticationRequest request)
         {
             return AuthenticationResult.Failure;
         }

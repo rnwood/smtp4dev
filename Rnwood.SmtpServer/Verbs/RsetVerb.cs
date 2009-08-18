@@ -11,7 +11,7 @@ namespace Rnwood.SmtpServer.Verbs
         {
         }
 
-        public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
         {
             connectionProcessor.AbortMessage();
         }

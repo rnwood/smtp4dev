@@ -12,7 +12,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             get { return "ANONYMOUS"; }
         }
 
-        public override AuthMechanismProcessor CreateAuthMechanismProcessor(ConnectionProcessor connectionProcessor)
+        public override AuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
         {
             return new AnonymousMechanismProcessor();
         }
