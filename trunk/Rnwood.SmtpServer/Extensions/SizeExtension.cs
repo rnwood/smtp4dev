@@ -12,20 +12,20 @@ namespace Rnwood.SmtpServer.Extensions
         {
         }
 
-        public override ExtensionProcessor CreateExtensionProcessor(ConnectionProcessor processor)
+        public override ExtensionProcessor CreateExtensionProcessor(IConnectionProcessor processor)
         {
             return new SizeExtensionProcessor(processor);
         }
 
         class SizeExtensionProcessor : ExtensionProcessor, IParameterProcessor
         {
-            public SizeExtensionProcessor(ConnectionProcessor processor)
+            public SizeExtensionProcessor(IConnectionProcessor processor)
             {
                 Processor = processor;
                 processor.MailVerb.FromSubVerb.ParameterProcessorMap.SetProcessor("SIZE", this);
             }
 
-            public ConnectionProcessor Processor { get; private set; }
+            public IConnectionProcessor Processor { get; private set; }
 
             public override string[] GetEHLOKeywords()
             {

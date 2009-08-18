@@ -47,7 +47,7 @@ namespace Rnwood.Smtp4dev
             get { return Properties.Settings.Default.EnableSSL; }
         }
 
-        public System.Security.Cryptography.X509Certificates.X509Certificate GetSSLCertificate(ConnectionProcessor processor)
+        public System.Security.Cryptography.X509Certificates.X509Certificate GetSSLCertificate(IConnectionProcessor processor)
         {
             if (string.IsNullOrEmpty(Properties.Settings.Default.SSLCertificatePath))
             {
@@ -62,7 +62,7 @@ namespace Rnwood.Smtp4dev
         private AuthExtension _authExtension = new AuthExtension();
         private SizeExtension _sizeExtension = new SizeExtension();
 
-        public Extension[] GetExtensions(ConnectionProcessor processor)
+        public Extension[] GetExtensions(IConnectionProcessor processor)
         {
             List<Extension> extensions = new List<Extension>();
 
@@ -89,7 +89,7 @@ namespace Rnwood.Smtp4dev
             return extensions.ToArray();
         }
 
-        public long? GetMaximumMessageSize(ConnectionProcessor processor)
+        public long? GetMaximumMessageSize(IConnectionProcessor processor)
         {
             long value = Properties.Settings.Default.MaximumMessageSize;
             return value != 0 ? value : (long?) null;
@@ -103,12 +103,12 @@ namespace Rnwood.Smtp4dev
             }
         }
 
-        public int GetReceiveTimeout(ConnectionProcessor processor)
+        public int GetReceiveTimeout(IConnectionProcessor processor)
         {
             return Properties.Settings.Default.ReceiveTimeout;
         }
 
-        public AuthenticationResult ValidateAuthenticationRequest(ConnectionProcessor processor, AuthenticationRequest authenticationRequest)
+        public AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor, AuthenticationRequest authenticationRequest)
         {
             return AuthenticationResult.Success;
         }

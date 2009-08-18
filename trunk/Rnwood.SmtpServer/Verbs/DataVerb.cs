@@ -11,7 +11,7 @@ namespace Rnwood.SmtpServer
 {
     public class DataVerb : Verb
     {
-        public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
         {
             if (connectionProcessor.CurrentMessage == null)
             {

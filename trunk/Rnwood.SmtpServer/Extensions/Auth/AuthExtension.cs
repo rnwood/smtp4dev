@@ -9,7 +9,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 {
     public class AuthExtension : Extension
     {
-        public override ExtensionProcessor CreateExtensionProcessor(ConnectionProcessor processor)
+        public override ExtensionProcessor CreateExtensionProcessor(IConnectionProcessor processor)
         {
             return new AuthExtensionProcessor(processor);
         }
@@ -17,7 +17,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
     public class AuthExtensionProcessor : ExtensionProcessor
     {
-        public AuthExtensionProcessor(ConnectionProcessor processor)
+        public AuthExtensionProcessor(IConnectionProcessor processor)
         {
             MechanismMap = new AuthMechanismMap();
             MechanismMap.Add(new CramMd5Mechanism());
@@ -63,7 +63,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         }
 
 
-        public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
         {
             if (request.Arguments.Length > 0)
             {

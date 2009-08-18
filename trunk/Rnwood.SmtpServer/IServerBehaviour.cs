@@ -12,11 +12,11 @@ namespace Rnwood.SmtpServer
         IPAddress IpAddress { get; }
         int PortNumber { get; }
         bool RunOverSSL { get; }
-        long? GetMaximumMessageSize(ConnectionProcessor processor);
-        X509Certificate GetSSLCertificate(ConnectionProcessor processor);
-        Extension[] GetExtensions(ConnectionProcessor processor);
+        long? GetMaximumMessageSize(IConnectionProcessor processor);
+        X509Certificate GetSSLCertificate(IConnectionProcessor processor);
+        Extension[] GetExtensions(IConnectionProcessor processor);
         void OnSessionCompleted(Session Session);
-        int GetReceiveTimeout(ConnectionProcessor processor);
-        AuthenticationResult ValidateAuthenticationRequest(ConnectionProcessor processor, AuthenticationRequest authenticationRequest);
+        int GetReceiveTimeout(IConnectionProcessor processor);
+        AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor, AuthenticationRequest authenticationRequest);
     }
 }
