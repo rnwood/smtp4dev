@@ -7,6 +7,6 @@ namespace Rnwood.SmtpServer.Verbs
 {
     public abstract class Verb
     {
-        public abstract void Process(ConnectionProcessor connectionProcessor, SmtpRequest request);
+        public abstract void Process(IConnectionProcessor connectionProcessor, SmtpRequest request);
     }
 }

@@ -110,7 +110,7 @@ namespace Rnwood.SmtpServer
 
         private void ConnectionThreadWork(object tcpClient)
         {
-            ConnectionProcessor connectionProcessor = new ConnectionProcessor(this, (TcpClient)tcpClient);
+            NotConnectionProcessor connectionProcessor = new NotConnectionProcessor(this, (TcpClient)tcpClient);
             connectionProcessor.Start();
         }
     }

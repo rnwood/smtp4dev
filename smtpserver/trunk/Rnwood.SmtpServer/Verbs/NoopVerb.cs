@@ -7,7 +7,7 @@ namespace Rnwood.SmtpServer.Verbs
 {
     public class NoopVerb : Verb
     {
-        public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
         {
             connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Sucessfully did nothing"));
         }

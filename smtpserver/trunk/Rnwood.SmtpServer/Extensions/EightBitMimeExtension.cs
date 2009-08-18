@@ -7,14 +7,14 @@ namespace Rnwood.SmtpServer.Extensions
 {
     public class EightBitMimeExtension : Extension
     {
-        public override ExtensionProcessor CreateExtensionProcessor(ConnectionProcessor processor)
+        public override ExtensionProcessor CreateExtensionProcessor(IConnectionProcessor processor)
         {
             return new EightBitMimeExtensionProcessor(processor);
         }
 
         class EightBitMimeExtensionProcessor : ExtensionProcessor
         {
-            public EightBitMimeExtensionProcessor(ConnectionProcessor processor)
+            public EightBitMimeExtensionProcessor(IConnectionProcessor processor)
             {
                 EightBitMimeDataVerb verb = new EightBitMimeDataVerb();
                 processor.VerbMap.SetVerbProcessor("DATA", verb);
@@ -33,7 +33,7 @@ namespace Rnwood.SmtpServer.Extensions
 
     public class EightBitMimeDataVerb : DataVerb, IParameterProcessor
     {
-        public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
         {
             if (_eightBitMessage)
             {
