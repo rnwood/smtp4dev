@@ -13,7 +13,7 @@ using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer
 {
-    public class NotConnectionProcessor : IConnectionProcessor
+    public class ConnectionProcessor : IConnectionProcessor
     {
         private TcpClient _tcpClient;
         private StreamWriter _writer;
@@ -24,7 +24,7 @@ namespace Rnwood.SmtpServer
             private set;
         }
 
-        public NotConnectionProcessor(Server server, TcpClient tcpClient)
+        public ConnectionProcessor(Server server, TcpClient tcpClient)
         {
             VerbMap = new VerbMap();
             Session = new Session()
