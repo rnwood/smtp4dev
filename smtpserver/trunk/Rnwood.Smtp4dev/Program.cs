@@ -40,9 +40,9 @@ namespace Rnwood.Smtp4dev
                 {
                     sim.SendLaunchInfoToFirstInstance(new LaunchInfo(Environment.CurrentDirectory, args));
                 }
-                catch (Exception)
+                catch (Exception e)
                 {
-                    MessageBox.Show("Failed to process command line", "smtp4dev", MessageBoxButtons.OK,
+                    MessageBox.Show("Error processing command line parameters: " + e.Message, "smtp4dev", MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);
                 }
 

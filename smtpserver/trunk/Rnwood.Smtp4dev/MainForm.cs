@@ -64,7 +64,16 @@ namespace Rnwood.Smtp4dev
             if (_firstTimeShown)
             {
                 _firstTimeShown = false;
-                ProcessLaunchInfo(_launchInfo, true);
+
+                try
+                {
+                    ProcessLaunchInfo(_launchInfo, true);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show("Error processing command line parameters: " + ex.Message, "smtp4dev", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    Close();
+                }
             }
         }
 

@@ -39,6 +39,7 @@ namespace Rnwood.Smtp4dev.MessageInspector
             {
                 DataContext = value;
                 treeView.DataContext = new MessageViewModel[] { Message };
+                SelectedPart = Message;
             }
         }
 
@@ -48,6 +49,11 @@ namespace Rnwood.Smtp4dev.MessageInspector
             {
                 return treeView.SelectedItem as MessageViewModel;
             }
+
+            set
+            {
+                value.IsSelected = true;
+            }
         }
 
         private void treeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -55,13 +61,9 @@ namespace Rnwood.Smtp4dev.MessageInspector
             if (treeView.SelectedItem != null)
             {
                 partDetailsGrid.IsEnabled = true;
-                string tempFile = Path.GetTempFileName() + ".mhtml";
-                File.WriteAllText(tempFile, ((MessageViewModel)treeView.SelectedItem).Data ?? "", Encoding.Default);
-                partWebBrowser.Navigate(new Uri("file:///" + tempFile));
             } else
             {
                 partDetailsGrid.IsEnabled = false;
-                partWebBrowser.Navigate(new Uri("about:blank"));
             }
         }
 
