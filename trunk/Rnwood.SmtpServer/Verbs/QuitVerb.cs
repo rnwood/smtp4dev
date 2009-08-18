@@ -8,7 +8,7 @@ namespace Rnwood.SmtpServer
 {
     public class QuitVerb : Verb
     {
-        public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
         {
             connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel, "See you later aligator" ));
             connectionProcessor.CloseConnection();

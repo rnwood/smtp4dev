@@ -8,7 +8,7 @@ namespace Rnwood.SmtpServer
 {
     public class HeloVerb : Verb
     {
-        public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
         {
             if (!string.IsNullOrEmpty(connectionProcessor.Session.ClientName))
             {

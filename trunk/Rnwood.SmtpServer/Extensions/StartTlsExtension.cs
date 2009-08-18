@@ -11,20 +11,20 @@ namespace Rnwood.SmtpServer.Extensions
 {
     public class StartTlsExtension : Extension
     {
-        public override ExtensionProcessor CreateExtensionProcessor(ConnectionProcessor processor)
+        public override ExtensionProcessor CreateExtensionProcessor(IConnectionProcessor processor)
         {
             return new StartTlsExtensionProcessor(processor);
         }
 
         class StartTlsExtensionProcessor : ExtensionProcessor
         {
-            public StartTlsExtensionProcessor(ConnectionProcessor processor)
+            public StartTlsExtensionProcessor(IConnectionProcessor processor)
             {
                 Processor = processor;
                 processor.VerbMap.SetVerbProcessor("STARTTLS", new StartTlsVerb());
             }
 
-            public ConnectionProcessor Processor { get; private set; }
+            public IConnectionProcessor Processor { get; private set; }
 
             public override string[] GetEHLOKeywords()
             {
@@ -40,7 +40,7 @@ namespace Rnwood.SmtpServer.Extensions
 
     public class StartTlsVerb : Verb
     {
-        public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
         {
             connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady, "Ready to start TLS"));
             connectionProcessor.ApplyStreamFilter(stream =>

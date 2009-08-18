@@ -29,7 +29,7 @@ namespace Rnwood.SmtpServer
         }
 
 
-        public override void Process(ConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
         {
             SmtpRequest subrequest = new SmtpRequest(request.ArgumentsText);
             Verb verbProcessor = SubVerbMap.GetVerbProcessor(subrequest.Verb);

@@ -12,7 +12,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             get { return "CRAM-MD5"; }
         }
 
-        public override AuthMechanismProcessor CreateAuthMechanismProcessor(ConnectionProcessor connectionProcessor)
+        public override AuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
         {
             return new CramMd5MechanismProcessor(connectionProcessor);
         }
@@ -20,12 +20,12 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
     public class CramMd5MechanismProcessor : AuthMechanismProcessor
     {
-        public CramMd5MechanismProcessor(ConnectionProcessor processor)
+        public CramMd5MechanismProcessor(IConnectionProcessor processor)
         {
             ConnectionProcessor = processor;
         }
 
-        protected ConnectionProcessor ConnectionProcessor { get; set; }
+        protected IConnectionProcessor ConnectionProcessor { get; set; }
         private Random _random = new Random();
 
         enum States

@@ -12,6 +12,6 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             get;
         }
 
-        public abstract AuthMechanismProcessor CreateAuthMechanismProcessor(ConnectionProcessor connectionProcessor);
+        public abstract AuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor);
     }
 }

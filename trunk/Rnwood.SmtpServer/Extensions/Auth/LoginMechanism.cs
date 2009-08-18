@@ -13,7 +13,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             get { return "LOGIN"; }
         }
 
-        public override AuthMechanismProcessor CreateAuthMechanismProcessor(ConnectionProcessor connectionProcessor)
+        public override AuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
         {
             return new LoginMechanismProcessor(connectionProcessor);
         }
@@ -21,12 +21,12 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
     public class LoginMechanismProcessor : AuthMechanismProcessor
     {
-        public LoginMechanismProcessor(ConnectionProcessor processor)
+        public LoginMechanismProcessor(IConnectionProcessor processor)
         {
             ConnectionProcessor = processor;
         }
 
-        protected ConnectionProcessor ConnectionProcessor { get; private set; }
+        protected IConnectionProcessor ConnectionProcessor { get; private set; }
 
         enum States
         {

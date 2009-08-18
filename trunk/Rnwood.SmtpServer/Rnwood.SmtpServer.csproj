@@ -70,6 +70,7 @@
     <Compile Include="Extensions\SizeExtension.cs" />
     <Compile Include="Extensions\StartTlsExtension.cs" />
     <Compile Include="Extensions\EightBitMimeExtension.cs" />
+    <Compile Include="IConnectionProcessor.cs" />
     <Compile Include="IServerBehaviour.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="IParameterProcessor.cs" />
