@@ -207,6 +207,15 @@ namespace Rnwood.Smtp4dev
             }
         }
 
+        public SessionViewModel[] SelectedSessions
+        {
+            get
+            {
+                return
+                    sessionsGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (SessionViewModel)row.DataBoundItem).ToArray();
+            }
+        }
+
         private void viewButton_Click(object sender, EventArgs e)
         {
             ViewSelectedMessages();
@@ -429,12 +438,15 @@ namespace Rnwood.Smtp4dev
 
         private void button1_Click_1(object sender, EventArgs e)
         {
-            SelectedSession.ViewLog();
+            foreach (SessionViewModel session in SelectedSessions)
+            {
+                session.ViewLog();
+            }
         }
 
         private void sessionsGrid_SelectionChanged(object sender, EventArgs e)
         {
-            viewSessionButton.Enabled = SelectedSession != null;
+            viewSessionButton.Enabled = deleteSessionButton.Enabled = SelectedSessions.Length > 0;
         }
 
         public void ProcessLaunchInfo(LaunchInfo launchInfo, bool firstInstance)
@@ -474,6 +486,14 @@ namespace Rnwood.Smtp4dev
             else
             {
                 throw new Exception("Invalid command line parameters");
+            }
+        }
+
+        private void deleteSessionButton_Click(object sender, EventArgs e)
+        {
+            foreach (SessionViewModel session in SelectedSessions)
+            {
+                _sessions.Remove(session);
             }
         }
     }
