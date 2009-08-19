@@ -40,9 +40,7 @@
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.messageGrid = new System.Windows.Forms.DataGridView();
             this.Recieved = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.subjectDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ToAddressesNice = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.messageBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.deleteAllButton = new System.Windows.Forms.Button();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.viewButton = new System.Windows.Forms.Button();
@@ -66,14 +64,16 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.sessionsGrid = new System.Windows.Forms.DataGridView();
             this.StartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clientDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.NumberOfMessages = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.sessionBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.viewSessionButton = new System.Windows.Forms.Button();
+            this.deleteSessionButton = new System.Windows.Forms.Button();
+            this.subjectDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.messageBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.clientDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.sessionBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.trayIconContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.messageGrid)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -84,8 +84,9 @@
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sessionsGrid)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sessionBindingSource)).BeginInit();
             this.flowLayoutPanel3.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.sessionBindingSource)).BeginInit();
             this.SuspendLayout();
             // 
             // trayIcon
@@ -193,14 +194,6 @@
             this.Recieved.ReadOnly = true;
             this.Recieved.Width = 77;
             // 
-            // subjectDataGridViewTextBoxColumn
-            // 
-            this.subjectDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.subjectDataGridViewTextBoxColumn.DataPropertyName = "Subject";
-            this.subjectDataGridViewTextBoxColumn.HeaderText = "Subject";
-            this.subjectDataGridViewTextBoxColumn.Name = "subjectDataGridViewTextBoxColumn";
-            this.subjectDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
             // ToAddressesNice
             // 
             this.ToAddressesNice.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
@@ -208,10 +201,6 @@
             this.ToAddressesNice.HeaderText = "To";
             this.ToAddressesNice.Name = "ToAddressesNice";
             this.ToAddressesNice.ReadOnly = true;
-            // 
-            // messageBindingSource
-            // 
-            this.messageBindingSource.DataSource = typeof(Rnwood.Smtp4dev.MessageViewModel);
             // 
             // deleteAllButton
             // 
@@ -488,7 +477,6 @@
             this.sessionsGrid.Dock = System.Windows.Forms.DockStyle.Fill;
             this.sessionsGrid.GridColor = System.Drawing.SystemColors.ControlLight;
             this.sessionsGrid.Location = new System.Drawing.Point(3, 3);
-            this.sessionsGrid.MultiSelect = false;
             this.sessionsGrid.Name = "sessionsGrid";
             this.sessionsGrid.ReadOnly = true;
             this.sessionsGrid.RowHeadersVisible = false;
@@ -506,14 +494,6 @@
             this.StartDate.ReadOnly = true;
             this.StartDate.Width = 83;
             // 
-            // clientDataGridViewTextBoxColumn
-            // 
-            this.clientDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.clientDataGridViewTextBoxColumn.DataPropertyName = "Client";
-            this.clientDataGridViewTextBoxColumn.HeaderText = "Client";
-            this.clientDataGridViewTextBoxColumn.Name = "clientDataGridViewTextBoxColumn";
-            this.clientDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
             // NumberOfMessages
             // 
             this.NumberOfMessages.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
@@ -523,14 +503,11 @@
             this.NumberOfMessages.ReadOnly = true;
             this.NumberOfMessages.Width = 91;
             // 
-            // sessionBindingSource
-            // 
-            this.sessionBindingSource.DataSource = typeof(Rnwood.Smtp4dev.SessionViewModel);
-            // 
             // flowLayoutPanel3
             // 
             this.flowLayoutPanel3.AutoSize = true;
             this.flowLayoutPanel3.Controls.Add(this.viewSessionButton);
+            this.flowLayoutPanel3.Controls.Add(this.deleteSessionButton);
             this.flowLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.flowLayoutPanel3.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
             this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 206);
@@ -540,14 +517,53 @@
             // 
             // viewSessionButton
             // 
+            this.viewSessionButton.AutoSize = true;
+            this.viewSessionButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.viewSessionButton.Enabled = false;
-            this.viewSessionButton.Location = new System.Drawing.Point(422, 3);
+            this.viewSessionButton.Location = new System.Drawing.Point(433, 3);
             this.viewSessionButton.Name = "viewSessionButton";
-            this.viewSessionButton.Size = new System.Drawing.Size(75, 23);
+            this.viewSessionButton.Size = new System.Drawing.Size(64, 23);
             this.viewSessionButton.TabIndex = 0;
             this.viewSessionButton.Text = "View Log";
             this.viewSessionButton.UseVisualStyleBackColor = true;
             this.viewSessionButton.Click += new System.EventHandler(this.button1_Click_1);
+            // 
+            // deleteSessionButton
+            // 
+            this.deleteSessionButton.AutoSize = true;
+            this.deleteSessionButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.deleteSessionButton.Enabled = false;
+            this.deleteSessionButton.Location = new System.Drawing.Point(377, 3);
+            this.deleteSessionButton.Name = "deleteSessionButton";
+            this.deleteSessionButton.Size = new System.Drawing.Size(50, 23);
+            this.deleteSessionButton.TabIndex = 1;
+            this.deleteSessionButton.Text = "Delete";
+            this.deleteSessionButton.UseVisualStyleBackColor = true;
+            this.deleteSessionButton.Click += new System.EventHandler(this.deleteSessionButton_Click);
+            // 
+            // subjectDataGridViewTextBoxColumn
+            // 
+            this.subjectDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.subjectDataGridViewTextBoxColumn.DataPropertyName = "Subject";
+            this.subjectDataGridViewTextBoxColumn.HeaderText = "Subject";
+            this.subjectDataGridViewTextBoxColumn.Name = "subjectDataGridViewTextBoxColumn";
+            this.subjectDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // messageBindingSource
+            // 
+            this.messageBindingSource.DataSource = typeof(Rnwood.Smtp4dev.MessageViewModel);
+            // 
+            // clientDataGridViewTextBoxColumn
+            // 
+            this.clientDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.clientDataGridViewTextBoxColumn.DataPropertyName = "Client";
+            this.clientDataGridViewTextBoxColumn.HeaderText = "Client";
+            this.clientDataGridViewTextBoxColumn.Name = "clientDataGridViewTextBoxColumn";
+            this.clientDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // sessionBindingSource
+            // 
+            this.sessionBindingSource.DataSource = typeof(Rnwood.Smtp4dev.SessionViewModel);
             // 
             // MainForm
             // 
@@ -567,7 +583,6 @@
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
             this.trayIconContextMenuStrip.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.messageGrid)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).EndInit();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
@@ -583,8 +598,10 @@
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sessionsGrid)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sessionBindingSource)).EndInit();
             this.flowLayoutPanel3.ResumeLayout(false);
+            this.flowLayoutPanel3.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.sessionBindingSource)).EndInit();
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -634,6 +651,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn Recieved;
         private System.Windows.Forms.DataGridViewTextBoxColumn subjectDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn ToAddressesNice;
+        private System.Windows.Forms.Button deleteSessionButton;
     }
 }
 
