@@ -69,9 +69,12 @@
                             <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
                         </TabItem>
                         <TabItem Header="Headers">
-                            <my:DataGrid Margin="3" Name="dataGrid1" ItemsSource="{Binding Headers}" IsReadOnly="True" AutoGenerateColumns="False">
+                            <my:DataGrid Margin="3" Padding="3" Name="dataGrid1" ItemsSource="{Binding Headers}" IsReadOnly="True" AutoGenerateColumns="False" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="1" BorderBrush="Black">
+
                                 <my:DataGrid.Columns>
-                                    <my:DataGridTextColumn Binding="{Binding Key, Mode=OneWay}" Width="*" Header="Name"/>
+                                    <my:DataGridTextColumn Binding="{Binding Key, Mode=OneWay}" Width="*" Header="Name">
+
+                                    </my:DataGridTextColumn>
                                     <my:DataGridTextColumn Binding="{Binding Value, Mode=OneWay}"  Width="2*" Header="Value"/>
                                 </my:DataGrid.Columns>
                             </my:DataGrid>
@@ -90,7 +93,7 @@
             </Grid>
         </TabItem>
         <TabItem Header="Source">
-            <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+            <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Source, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
         </TabItem>
     </TabControl>
 </Window>

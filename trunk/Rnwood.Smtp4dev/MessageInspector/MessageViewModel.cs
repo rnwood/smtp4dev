@@ -56,6 +56,14 @@ namespace Rnwood.Smtp4dev.MessageInspector
             }
         }
 
+        public string Source
+        {
+            get
+            {
+                return Message.ToString();
+            }
+        }
+
         public string Data
         {
             get
