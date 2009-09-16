@@ -1,3 +1,6 @@
+SharpMimeTools has been modified for use in smtp4dev. The modified source can be found in the lib directory.
+A patch containing the modification has been passed to the original author for consideration.
+
 		  GNU LESSER GENERAL PUBLIC LICENSE
 		       Version 2.1, February 1999
 
