@@ -8,22 +8,22 @@ namespace Rnwood.SmtpServer.Extensions.Auth
     public class AuthMechanismMap
     {
 
-        private Dictionary<string, AuthMechanism> _map = new Dictionary<string, AuthMechanism>();
+        private Dictionary<string, IAuthMechanism> _map = new Dictionary<string, IAuthMechanism>();
 
-        public void Add(AuthMechanism mechanism)
+        public void Add(IAuthMechanism mechanism)
         {
             _map[mechanism.Identifier] = mechanism;
         }
 
-        public AuthMechanism Get(string identifier)
+        public IAuthMechanism Get(string identifier)
         {
-            AuthMechanism result;
+            IAuthMechanism result;
             _map.TryGetValue(identifier, out result);
 
             return result;
         }
 
-        public IEnumerable<AuthMechanism> GetAll()
+        public IEnumerable<IAuthMechanism> GetAll()
         {
             return _map.Values;
         }

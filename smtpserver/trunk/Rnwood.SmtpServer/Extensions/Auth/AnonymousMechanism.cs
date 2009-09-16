@@ -5,22 +5,27 @@ using System.Text;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class AnonymousMechanism : AuthMechanism
+    public class AnonymousMechanism : IAuthMechanism
     {
-        public override string Identifier
+        public string Identifier
         {
             get { return "ANONYMOUS"; }
         }
 
-        public override AuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
+        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
         {
             return new AnonymousMechanismProcessor();
         }
+
+        public bool IsPlainText
+        {
+            get { return false; }
+        }
     }
 
-    public class AnonymousMechanismProcessor : AuthMechanismProcessor
+    public class AnonymousMechanismProcessor : IAuthMechanismProcessor
     {
-        public override AuthMechanismProcessorStatus ProcessResponse(string data)
+        public AuthMechanismProcessorStatus ProcessResponse(string data)
         {
             return AuthMechanismProcessorStatus.Success;
         }
