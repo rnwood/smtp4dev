@@ -1,0 +1,145 @@
+<?xml version="1.0"?>
+<!-- SharpMimeTools build file -->
+<project name="anmar.SharpMimeTools" default="debug">
+	<property name="project.name" value="SharpMimeTools" />
+	<property name="build.defines" value="" />
+	<property name="build.debug" value="false" />
+	<property name="build.basedir" value="${project::get-base-directory()}" />
+	<property name="build.dir" value="" />
+	<property name="build.ref.platform" value="" />
+	<property name="build.ref.platform.version" value="" />
+	<property name="build.doc" value="true" />
+	<fileset id="source">
+		<include name="${build.basedir}/src/*.cs" />
+	</fileset>
+	<fileset id="general">
+		<include name="${build.basedir}/SharpMimeTools.cmbx" />
+		<include name="${build.basedir}/SharpMimeTools.prjx" />
+	</fileset>
+	<fileset id="docs">
+		<include name="${build.basedir}/changelog.txt" />
+		<include name="${build.basedir}/license.txt" />
+		<include name="${build.basedir}/doc/readme.txt" />
+		<include name="${build.basedir}/doc/TODO.txt" />
+	</fileset>
+	<target name="build" depends="build-pre">
+		<mkdir dir="${build.dir}" unless="${directory::exists(build.dir)}" />
+		<csc target="library" define="${build.defines}" warnaserror="false" debug="${build.debug}" output="${build.dir}/${project.name}.dll" doc="${build.dir}/../${project.name}.xml">
+			<sources failonempty="true" refid="source" />
+			<references>
+				<include name="System.Web.dll" />
+				<include name="${build.ref.platform}/log4net.dll" if="${string::index-of(build.defines, ',LOG,')!=-1}" />
+			</references>
+		</csc>
+	</target>
+	<target name="debug" description="Debug build">
+		<property name="build.debug" value="true" />
+		<property name="build.config" value="debug" />
+		<property name="build.defines" value="DEBUG,LOG" />
+		<call target="build" />
+	</target>
+	<target name="release" description="Release build">
+		<property name="build.debug" value="false" />
+		<property name="build.config" value="release" />
+		<property name="build.defines" value="RELEASE" />
+		<call target="build" />
+	</target>
+	<target name="release-doc" description="Release build (with documentation)">
+		<call target="release" />
+		<call target="build-doc" />
+	</target>
+	<target name="release-log" description="Release build (with logging compiled)">
+		<property name="build.debug" value="false" />
+		<property name="build.config" value="release-log" />
+		<property name="build.defines" value="RELEASE,LOG" />
+		<call target="build" />
+	</target>
+	<target name="build-pre">
+		<call target="set-folders" />
+		<call target="set-framework-config" />
+	</target>
+	<target name="set-folders">
+		<property name="build.dir.framework" value="${framework::get-family(framework::get-target-framework())}/${framework::get-version(framework::get-target-framework())}" />
+		<property name="build.ref.platform" value="${build.basedir}/bin/${framework::get-family(framework::get-target-framework())}" />
+		<property name="build.ref.platform.version" value="${build.ref.platform}/${framework::get-version(framework::get-target-framework())}" />
+		<property name="build.dir" value="${build.ref.platform.version}/${build.config}" />
+	</target>
+
+	<target name="build-doc">
+		<if test="${build.doc}">
+			<move file="${build.dir}/../${project.name}.xml" todir="${build.dir}" />
+			<ndoc>
+				<referencepaths>
+					<include name="${build.ref.platform.version}" />
+					<include name="${build.ref.platform}" />
+				</referencepaths>
+				<assemblies basedir="${build.dir}/">
+					<include name="${project.name}.dll" />
+				</assemblies>
+				<documenters>
+					<documenter name="MSDN">
+						<!-- MSDN Settings -->
+						<property name="HtmlHelpName" value="sharpmimetools" />
+						<property name="LinkToSdkDocVersion" value="SDK_v1_1" />
+						<property name="OutputDirectory" value="${build.basedir}/doc/sdk/" />
+						<property name="OutputTarget" value="Web" />
+						<property name="RootPageContainsNamespaces" value="False" />
+						<property name="ShowVisualBasic" value="False" />
+						<property name="Title" value="SharpMimeTools Documented Class Library" />
+
+						<!-- Global Settings -->
+						<property name="CleanIntermediates" value="true" />
+						<property name="CopyrightText" value="Copyright (C) 2003-${datetime::get-year(datetime::now())} Angel Marin. All Rights Reserved." />
+						<property name="CopyrightHref" value="http://anmar.eu.org/projects/sharpmimetools/" />
+						<property name="FeedbackEmailAddress" value="anmar at anmar.eu.org" />
+						<property name="Preliminary" value="true" />
+						<property name="SdkDocLanguage" value="en" />
+						<!-- Show Attributes Settings -->
+						<property name="DocumentAttributes" value="False" />
+						<!-- Show Missing Documentation Settings -->
+						<property name="ShowMissingSummaries" value="False" />
+						<property name="ShowMissingRemarks" value="False" />
+						<property name="ShowMissingParams" value="False" />
+						<property name="ShowMissingReturns" value="False" />
+						<property name="ShowMissingValues" value="False" />
+						<!-- Visibility Documentation Settings -->
+						<property name="DocumentEmptyNamespaces" value="False" />
+						<property name="DocumentExplicitInterfaceImplementations" value="True" />
+						<property name="DocumentInheritedMembers" value="InstanceAndStatic" />
+					</documenter>
+				</documenters>
+			</ndoc>
+			<move file="${build.dir}/${project.name}.xml" todir="${build.dir}/../" />
+		</if>
+	</target>
+
+	<!-- Framework targets -->
+	<target name="set-framework-config">
+		<if test="${not(target::exists('set-'+framework::get-target-framework()+'-config'))}">
+            <fail message="The '${framework::get-target-framework()}' framework is not supported" />
+        </if>
+        <call target="set-${framework::get-target-framework()}-config" />
+	</target>
+	<!-- Set default .NET config values -->
+	<target name="set-net-config" />
+	<!-- Set default .NET 1.1 config values  -->
+	<target name="set-net-1.1-config" depends="set-net-config">
+		<property name="build.defines" value="${build.defines},NET_1_1,API_1_1" />
+	</target>
+	<!-- Set default .NET 2.0 config values  -->
+	<target name="set-net-2.0-config" depends="set-net-config">
+		<property name="build.defines" value="${build.defines},NET_2_0,API_2_0" />
+	</target>
+	<!-- Set default Mono config values  -->
+	<target name="set-mono-config">
+		<property name="build.defines" value="${build.defines},MONO" />
+	</target>
+	<!-- Set default Mono 1.0 config values  -->
+	<target name="set-mono-1.0-config" depends="set-mono-config">
+		<property name="build.defines" value="${build.defines},MONO,MONO_1_0,API_1_1" />
+	</target>
+	<!-- Set default Mono 2.0 config values  -->
+	<target name="set-mono-2.0-config" depends="set-mono-config">
+		<property name="build.defines" value="${build.defines},MONO,MONO_2_0,API_2_0" />
+	</target>
+</project>
