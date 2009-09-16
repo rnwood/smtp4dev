@@ -1,0 +1,42 @@
+<Project name="SharpMimeTools" fileversion="2.0" language="C#" clr-version="Net_1_1" ctype="DotNetProject">
+  <Configurations active="Release">
+    <Configuration name="Debug" ctype="DotNetProjectConfiguration">
+      <Output directory="./bin" assembly="SharpMimeTools" />
+      <Build debugmode="True" target="Library" />
+      <Execution runwithwarnings="False" consolepause="True" runtime="MsNet" clr-version="Net_1_1" />
+      <CodeGeneration compiler="Csc" warninglevel="4" optimize="False" unsafecodeallowed="False" generateoverflowchecks="False" mainclass="" definesymbols="DEBUG,LOG" generatexmldocumentation="False" ctype="CSharpCompilerParameters" />
+    </Configuration>
+    <Configuration name="Release" ctype="DotNetProjectConfiguration">
+      <Output directory="./bin" assembly="SharpMimeTools" />
+      <Build debugmode="False" target="Library" />
+      <Execution runwithwarnings="True" consolepause="True" runtime="MsNet" clr-version="Net_1_1" />
+      <CodeGeneration compiler="Csc" warninglevel="4" optimize="True" unsafecodeallowed="False" generateoverflowchecks="False" mainclass="" generatexmldocumentation="True" ctype="CSharpCompilerParameters" />
+    </Configuration>
+  </Configurations>
+  <DeploymentInformation strategy="File">
+    <excludeFiles />
+  </DeploymentInformation>
+  <Contents>
+    <File name="./src/ABNF.cs" subtype="Code" buildaction="Compile" />
+    <File name="./src/AssemblyInfo.cs" subtype="Code" buildaction="Compile" />
+    <File name="./src/SharpMimeAddress.cs" subtype="Code" buildaction="Compile" />
+    <File name="./src/SharpMimeHeader.cs" subtype="Code" buildaction="Compile" />
+    <File name="./src/SharpMimeMessage.cs" subtype="Code" buildaction="Compile" />
+    <File name="./src/SharpMimeMessageCollection.cs" subtype="Code" buildaction="Compile" />
+    <File name="./src/SharpMimeMessageStream.cs" subtype="Code" buildaction="Compile" />
+    <File name="./src/SharpMimeTools.cs" subtype="Code" buildaction="Compile" />
+    <File name="./changelog.txt" subtype="Code" buildaction="Nothing" />
+    <File name="./license.txt" subtype="Code" buildaction="Nothing" />
+    <File name="./doc/readme.txt" subtype="Code" buildaction="Nothing" />
+    <File name="./doc/TODO.txt" subtype="Code" buildaction="Nothing" />
+    <File name="./SharpMimeTools.build" subtype="Code" buildaction="Nothing" />
+    <File name="./src/SharpMessage.cs" subtype="Code" buildaction="Compile" />
+    <File name="./src/SharpTnefMessage.cs" subtype="Code" buildaction="Compile" />
+    <File name="./src/SharpDecodeOptions.cs" subtype="Code" buildaction="Compile" />
+  </Contents>
+  <References>
+    <ProjectReference type="Assembly" localcopy="True" refto="./bin/log4net.dll" />
+    <ProjectReference type="Gac" localcopy="True" refto="System, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=b77a5c561934e089" />
+    <ProjectReference type="Gac" localcopy="True" refto="System.Web, Version=1.0.5000.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a" />
+  </References>
+</Project>
