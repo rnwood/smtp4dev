@@ -44,7 +44,7 @@ namespace Rnwood.Smtp4dev.MessageInspector
         {
             get
             {
-                return Message.Cast<SharpMimeMessage>().Select(part => new MessageViewModel(part)).ToArray();
+                return Message.Select(part => new MessageViewModel(part)).ToArray();
             }
         }
 
@@ -52,7 +52,7 @@ namespace Rnwood.Smtp4dev.MessageInspector
         {
             get
             {
-                return Message.Header.Cast<DictionaryEntry>().Select(de => new HeaderViewModel((string)de.Key, (string)de.Value)).ToArray();
+                return Message.Header.Select(de => new HeaderViewModel((string)de.Key, (string)de.Value)).ToArray();
             }
         }
 

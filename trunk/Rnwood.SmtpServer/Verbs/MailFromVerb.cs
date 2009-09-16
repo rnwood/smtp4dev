@@ -21,18 +21,16 @@ namespace Rnwood.SmtpServer
                 return;
             }
 
-            connectionProcessor.NewMessage();
-
             if (request.ArgumentsText.Length == 0)
             {
                 connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments, "Must specify from address or <>"));
                 return;
             }
 
-            if (!request.ArgumentsText.StartsWith("<") || !request.ArgumentsText.EndsWith(">"))
-            {
-                connectionProcessor.CurrentMessage.From = request.ArgumentsText.TrimStart('<').TrimEnd('>');
-            }
+            string from = request.ArgumentsText.TrimStart('<').TrimEnd('>');
+            connectionProcessor.Server.Behaviour.OnMessageStart(connectionProcessor, from);
+            connectionProcessor.NewMessage();
+            connectionProcessor.CurrentMessage.From = from;
 
 
             try

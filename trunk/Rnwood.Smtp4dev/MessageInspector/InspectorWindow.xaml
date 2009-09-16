@@ -38,39 +38,21 @@
                 </TreeView>
                 <Grid Grid.Column="1" Margin="3" DataContext="{Binding ElementName=treeView, Path=SelectedItem}" Name="partDetailsGrid" IsEnabled="False">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-                    <Grid Grid.Row="0">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="*"/>
-                            <ColumnDefinition Width="10"/>
-                            <ColumnDefinition Width="auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-                        <Grid.RowDefinitions>
-                            <RowDefinition Height="auto"/>
-                            <RowDefinition Height="auto"/>
-                        </Grid.RowDefinitions>
-                        <Label Grid.Row="0" Grid.Column="0">Type:</Label>
-                        <TextBox Grid.Row="0" Grid.Column="1" Margin="3" IsReadOnly="True" Text="{Binding Type, Mode=OneWay}"/>
-                        <Label Grid.Row="0" Grid.Column="3">Size:</Label>
-                        <TextBox Grid.Row="0" Grid.Column="4" Margin="3" IsReadOnly="True" Text="{Binding Size, Mode=OneWay, StringFormat='\{0} bytes'}"/>
-                        <Label Grid.Row="1" Grid.Column="0">Encoding:</Label>
-                        <TextBox Grid.Row="1" Grid.Column="1" Margin="3" IsReadOnly="True" Text="{Binding Encoding, Mode=OneWay}"/>
-                        <Label Grid.Row="1" Grid.Column="3">Disposition:</Label>
-                        <TextBox Grid.Row="1" Grid.Column="4" Margin="3" IsReadOnly="True" Text="{Binding Disposition, Mode=OneWay}"/>
-                    </Grid>
 
-                    <TabControl Grid.Row="1" Margin="3">
+                    <TabControl Grid.Row="0" Margin="3">
                         <TabItem Header="Source">
                             <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
                         </TabItem>
                         <TabItem Header="Headers">
-                            <my:DataGrid Margin="3" Padding="3" Name="dataGrid1" ItemsSource="{Binding Headers}" IsReadOnly="True" AutoGenerateColumns="False" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="1" BorderBrush="Black">
-
+                            <my:DataGrid Margin="3" Name="dataGrid1" ItemsSource="{Binding Headers}" IsReadOnly="True" AutoGenerateColumns="False" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="1" BorderBrush="Black" HeadersVisibility="Column">
+                                <my:DataGrid.CellStyle>
+                                    <Style TargetType="{x:Type my:DataGridCell}">
+                                        <Setter Property="Padding" Value="50"/>
+                                    </Style>
+                                </my:DataGrid.CellStyle>
                                 <my:DataGrid.Columns>
                                     <my:DataGridTextColumn Binding="{Binding Key, Mode=OneWay}" Width="*" Header="Name">
 

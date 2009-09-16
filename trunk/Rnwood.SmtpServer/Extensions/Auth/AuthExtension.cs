@@ -19,6 +19,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
     {
         public AuthExtensionProcessor(IConnectionProcessor processor)
         {
+            _processor = processor;
             MechanismMap = new AuthMechanismMap();
             MechanismMap.Add(new CramMd5Mechanism());
             MechanismMap.Add(new PlainMechanism());
@@ -26,6 +27,8 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             MechanismMap.Add(new AnonymousMechanism());
             processor.VerbMap.SetVerbProcessor("AUTH", new AuthVerb(this));
         }
+
+        private IConnectionProcessor _processor;
 
         public AuthMechanismMap MechanismMap
         {
@@ -35,17 +38,22 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
         public override string[] GetEHLOKeywords()
         {
-            IEnumerable<AuthMechanism> mechanisms = MechanismMap.GetAll();
+            IEnumerable<IAuthMechanism> mechanisms = MechanismMap.GetAll();
 
             if (mechanisms.Any())
             {
-                return new string[] { "AUTH=" + string.Join(" ", mechanisms.Select(m => m.Identifier).ToArray()),
+                return new string[] { "AUTH=" + string.Join(" ", mechanisms.Where(IsMechanismEnabled).Select(m => m.Identifier).ToArray()),
                 "AUTH " + string.Join(" ", mechanisms.Select(m => m.Identifier).ToArray())};
             }
             else
             {
                 return new string[0];
             }
+        }
+
+        public bool IsMechanismEnabled(IAuthMechanism mechanism)
+        {
+            return _processor.Server.Behaviour.IsAuthMechanismEnabled(_processor, mechanism);
         }
     }
 
@@ -73,7 +81,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 }
 
                 string mechanismId = request.Arguments[0];
-                AuthMechanism mechanism = AuthExtensionProcessor.MechanismMap.Get(mechanismId);
+                IAuthMechanism mechanism = AuthExtensionProcessor.MechanismMap.Get(mechanismId);
 
                 if (mechanism == null)
                 {
@@ -81,7 +89,13 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                         new SmtpResponse(StandardSmtpResponseCode.CommandParameterNotImplemented, "Specified AUTH mechanism not supported"));
                 }
 
-                AuthMechanismProcessor authMechanismProcessor = mechanism.CreateAuthMechanismProcessor(connectionProcessor);
+                if (!AuthExtensionProcessor.IsMechanismEnabled(mechanism))
+                {
+                    throw new SmtpServerException(
+                        new SmtpResponse(StandardSmtpResponseCode.AuthenticationFailure, "Specified AUTH mechanism not allowed right now (might require secure connection etc)"));
+                }
+
+                IAuthMechanismProcessor authMechanismProcessor = mechanism.CreateAuthMechanismProcessor(connectionProcessor);
 
                 AuthMechanismProcessorStatus status = authMechanismProcessor.ProcessResponse(string.Join(" ", request.Arguments.Skip(1).ToArray()));
                 while (status == AuthMechanismProcessorStatus.Continue)

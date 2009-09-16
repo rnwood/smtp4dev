@@ -5,20 +5,25 @@ using System.Text;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class PlainMechanism : AuthMechanism
+    public class PlainMechanism : IAuthMechanism
     {
-        public override string Identifier
+        public string Identifier
         {
             get { return "PLAIN"; }
         }
 
-        public override AuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
+        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
         {
             return new PlainMechanismProcessor(connectionProcessor);
         }
+
+        public bool IsPlainText
+        {
+            get { return true; }
+        }
     }
 
-    public class PlainMechanismProcessor : AuthMechanismProcessor
+    public class PlainMechanismProcessor : IAuthMechanismProcessor
     {
         public PlainMechanismProcessor(IConnectionProcessor connectionProcessor)
         {
@@ -35,7 +40,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
         States State { get; set; }
 
-        public override AuthMechanismProcessorStatus ProcessResponse(string data)
+        public AuthMechanismProcessorStatus ProcessResponse(string data)
         {
             if (string.IsNullOrEmpty(data))
             {
@@ -45,11 +50,11 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                                                "Missing auth data"));
                 }
 
-                ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,""));
+                ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, ""));
                 State = States.AwaitingResponse;
                 return AuthMechanismProcessorStatus.Continue;
             }
-            
+
             string decodedData = DecodeBase64(data);
             string[] decodedDataParts = decodedData.Split('\0');
 

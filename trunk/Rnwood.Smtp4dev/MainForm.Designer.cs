@@ -72,6 +72,8 @@
             this.messageBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.clientDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.sessionBindingSource = new System.Windows.Forms.BindingSource(this.components);
+            this.tabImageList = new System.Windows.Forms.ImageList(this.components);
+            this.panel2 = new System.Windows.Forms.Panel();
             this.trayIconContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.messageGrid)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -87,6 +89,7 @@
             this.flowLayoutPanel3.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sessionBindingSource)).BeginInit();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // trayIcon
@@ -178,7 +181,7 @@
             this.messageGrid.ReadOnly = true;
             this.messageGrid.RowHeadersVisible = false;
             this.messageGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.messageGrid.Size = new System.Drawing.Size(500, 203);
+            this.messageGrid.Size = new System.Drawing.Size(494, 196);
             this.messageGrid.TabIndex = 1;
             this.messageGrid.VirtualMode = true;
             this.messageGrid.DoubleClick += new System.EventHandler(this.messageGrid_DoubleClick);
@@ -207,7 +210,7 @@
             this.deleteAllButton.AutoSize = true;
             this.deleteAllButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.deleteAllButton.Enabled = false;
-            this.deleteAllButton.Location = new System.Drawing.Point(212, 3);
+            this.deleteAllButton.Location = new System.Drawing.Point(206, 3);
             this.deleteAllButton.Name = "deleteAllButton";
             this.deleteAllButton.Size = new System.Drawing.Size(66, 23);
             this.deleteAllButton.TabIndex = 2;
@@ -225,9 +228,9 @@
             this.flowLayoutPanel1.Controls.Add(this.deleteAllButton);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 206);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 199);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
-            this.flowLayoutPanel1.Size = new System.Drawing.Size(500, 29);
+            this.flowLayoutPanel1.Size = new System.Drawing.Size(494, 29);
             this.flowLayoutPanel1.TabIndex = 3;
             // 
             // viewButton
@@ -235,7 +238,7 @@
             this.viewButton.AutoSize = true;
             this.viewButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.viewButton.Enabled = false;
-            this.viewButton.Location = new System.Drawing.Point(455, 3);
+            this.viewButton.Location = new System.Drawing.Point(449, 3);
             this.viewButton.Name = "viewButton";
             this.viewButton.Size = new System.Drawing.Size(42, 23);
             this.viewButton.TabIndex = 3;
@@ -248,7 +251,7 @@
             this.inspectMessageButton.AutoSize = true;
             this.inspectMessageButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.inspectMessageButton.Enabled = false;
-            this.inspectMessageButton.Location = new System.Drawing.Point(395, 3);
+            this.inspectMessageButton.Location = new System.Drawing.Point(389, 3);
             this.inspectMessageButton.Name = "inspectMessageButton";
             this.inspectMessageButton.Size = new System.Drawing.Size(54, 23);
             this.inspectMessageButton.TabIndex = 7;
@@ -261,7 +264,7 @@
             this.saveButton.AutoSize = true;
             this.saveButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.saveButton.Enabled = false;
-            this.saveButton.Location = new System.Drawing.Point(340, 3);
+            this.saveButton.Location = new System.Drawing.Point(334, 3);
             this.saveButton.Name = "saveButton";
             this.saveButton.Size = new System.Drawing.Size(49, 23);
             this.saveButton.TabIndex = 4;
@@ -274,7 +277,7 @@
             this.deleteButton.AutoSize = true;
             this.deleteButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.deleteButton.Enabled = false;
-            this.deleteButton.Location = new System.Drawing.Point(284, 3);
+            this.deleteButton.Location = new System.Drawing.Point(278, 3);
             this.deleteButton.Name = "deleteButton";
             this.deleteButton.Size = new System.Drawing.Size(50, 23);
             this.deleteButton.TabIndex = 5;
@@ -287,11 +290,13 @@
             this.optionsButton.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.optionsButton.AutoSize = true;
             this.optionsButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
+            this.optionsButton.Image = ((System.Drawing.Image)(resources.GetObject("optionsButton.Image")));
             this.optionsButton.Location = new System.Drawing.Point(312, 3);
             this.optionsButton.Name = "optionsButton";
-            this.optionsButton.Size = new System.Drawing.Size(59, 23);
+            this.optionsButton.Size = new System.Drawing.Size(75, 23);
             this.optionsButton.TabIndex = 4;
             this.optionsButton.Text = "Options";
+            this.optionsButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
             this.optionsButton.UseVisualStyleBackColor = true;
             this.optionsButton.Click += new System.EventHandler(this.optionsButton_Click);
             // 
@@ -432,20 +437,22 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.Location = new System.Drawing.Point(0, 50);
+            this.tabControl1.ImageList = this.tabImageList;
+            this.tabControl1.Location = new System.Drawing.Point(3, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
-            this.tabControl1.Size = new System.Drawing.Size(514, 264);
+            this.tabControl1.Size = new System.Drawing.Size(508, 258);
             this.tabControl1.TabIndex = 5;
             // 
             // tabPage1
             // 
             this.tabPage1.Controls.Add(this.messageGrid);
             this.tabPage1.Controls.Add(this.flowLayoutPanel1);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.ImageIndex = 0;
+            this.tabPage1.Location = new System.Drawing.Point(4, 23);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(506, 238);
+            this.tabPage1.Size = new System.Drawing.Size(500, 231);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Messages";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -454,10 +461,11 @@
             // 
             this.tabPage2.Controls.Add(this.sessionsGrid);
             this.tabPage2.Controls.Add(this.flowLayoutPanel3);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.ImageIndex = 1;
+            this.tabPage2.Location = new System.Drawing.Point(4, 23);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(506, 238);
+            this.tabPage2.Size = new System.Drawing.Size(500, 231);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Sessions";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -481,7 +489,7 @@
             this.sessionsGrid.ReadOnly = true;
             this.sessionsGrid.RowHeadersVisible = false;
             this.sessionsGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.sessionsGrid.Size = new System.Drawing.Size(500, 203);
+            this.sessionsGrid.Size = new System.Drawing.Size(494, 196);
             this.sessionsGrid.TabIndex = 0;
             this.sessionsGrid.SelectionChanged += new System.EventHandler(this.sessionsGrid_SelectionChanged);
             // 
@@ -510,9 +518,9 @@
             this.flowLayoutPanel3.Controls.Add(this.deleteSessionButton);
             this.flowLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.flowLayoutPanel3.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 206);
+            this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 199);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
-            this.flowLayoutPanel3.Size = new System.Drawing.Size(500, 29);
+            this.flowLayoutPanel3.Size = new System.Drawing.Size(494, 29);
             this.flowLayoutPanel3.TabIndex = 1;
             // 
             // viewSessionButton
@@ -520,7 +528,7 @@
             this.viewSessionButton.AutoSize = true;
             this.viewSessionButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.viewSessionButton.Enabled = false;
-            this.viewSessionButton.Location = new System.Drawing.Point(433, 3);
+            this.viewSessionButton.Location = new System.Drawing.Point(427, 3);
             this.viewSessionButton.Name = "viewSessionButton";
             this.viewSessionButton.Size = new System.Drawing.Size(64, 23);
             this.viewSessionButton.TabIndex = 0;
@@ -533,7 +541,7 @@
             this.deleteSessionButton.AutoSize = true;
             this.deleteSessionButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
             this.deleteSessionButton.Enabled = false;
-            this.deleteSessionButton.Location = new System.Drawing.Point(377, 3);
+            this.deleteSessionButton.Location = new System.Drawing.Point(371, 3);
             this.deleteSessionButton.Name = "deleteSessionButton";
             this.deleteSessionButton.Size = new System.Drawing.Size(50, 23);
             this.deleteSessionButton.TabIndex = 1;
@@ -565,13 +573,30 @@
             // 
             this.sessionBindingSource.DataSource = typeof(Rnwood.Smtp4dev.SessionViewModel);
             // 
+            // tabImageList
+            // 
+            this.tabImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("tabImageList.ImageStream")));
+            this.tabImageList.TransparentColor = System.Drawing.Color.Transparent;
+            this.tabImageList.Images.SetKeyName(0, "email.png");
+            this.tabImageList.Images.SetKeyName(1, "page_white_text.png");
+            // 
+            // panel2
+            // 
+            this.panel2.Controls.Add(this.tabControl1);
+            this.panel2.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.panel2.Location = new System.Drawing.Point(0, 50);
+            this.panel2.Name = "panel2";
+            this.panel2.Padding = new System.Windows.Forms.Padding(3);
+            this.panel2.Size = new System.Drawing.Size(514, 264);
+            this.panel2.TabIndex = 2;
+            // 
             // MainForm
             // 
             this.AcceptButton = this.viewButton;
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(514, 347);
-            this.Controls.Add(this.tabControl1);
+            this.Controls.Add(this.panel2);
             this.Controls.Add(this.flowLayoutPanel2);
             this.Controls.Add(this.panel1);
             this.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
@@ -581,6 +606,7 @@
             this.SizeChanged += new System.EventHandler(this.MainForm_SizeChanged);
             this.VisibleChanged += new System.EventHandler(this.MainForm_VisibleChanged);
             this.FormClosed += new System.Windows.Forms.FormClosedEventHandler(this.MainForm_FormClosed);
+            this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.trayIconContextMenuStrip.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.messageGrid)).EndInit();
             this.flowLayoutPanel1.ResumeLayout(false);
@@ -602,6 +628,7 @@
             this.flowLayoutPanel3.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.sessionBindingSource)).EndInit();
+            this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -652,6 +679,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn subjectDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn ToAddressesNice;
         private System.Windows.Forms.Button deleteSessionButton;
+        private System.Windows.Forms.ImageList tabImageList;
+        private System.Windows.Forms.Panel panel2;
     }
 }
 

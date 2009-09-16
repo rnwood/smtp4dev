@@ -45,7 +45,7 @@ namespace Rnwood.SmtpServer
             get { return _portNumber; }
         }
 
-        private int _portNumber;
+        private readonly int _portNumber;
 
         public virtual bool RunOverSSL
         {
@@ -85,6 +85,15 @@ namespace Rnwood.SmtpServer
         public virtual AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor, AuthenticationRequest request)
         {
             return AuthenticationResult.Failure;
+        }
+
+        public virtual void OnMessageStart(IConnectionProcessor processor, string from)
+        {
+        }
+
+        public virtual bool IsAuthMechanismEnabled(IConnectionProcessor processor, IAuthMechanism authMechanism)
+        {
+            return true;
         }
     }
 

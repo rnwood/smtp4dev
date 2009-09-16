@@ -5,8 +5,8 @@ using System.Text;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public abstract class AuthMechanismProcessor
+    public interface IAuthMechanismProcessor
     {
-        public abstract AuthMechanismProcessorStatus ProcessResponse(string data);
+        AuthMechanismProcessorStatus ProcessResponse(string data);
     }
 }
