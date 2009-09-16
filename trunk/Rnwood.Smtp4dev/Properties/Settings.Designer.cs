@@ -286,5 +286,41 @@ namespace Rnwood.Smtp4dev.Properties {
                 this["InspectOnBalloonClick"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RequireSecureConnection {
+            get {
+                return ((bool)(this["RequireSecureConnection"]));
+            }
+            set {
+                this["RequireSecureConnection"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RequireAuthentication {
+            get {
+                return ((bool)(this["RequireAuthentication"]));
+            }
+            set {
+                this["RequireAuthentication"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool OnlyAllowClearTextAuthOverSecureConnection {
+            get {
+                return ((bool)(this["OnlyAllowClearTextAuthOverSecureConnection"]));
+            }
+            set {
+                this["OnlyAllowClearTextAuthOverSecureConnection"] = value;
+            }
+        }
     }
 }

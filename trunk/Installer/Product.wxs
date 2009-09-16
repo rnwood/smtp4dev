@@ -11,6 +11,8 @@
     </Upgrade>
 
     <WixVariable Id="WixUILicenseRtf" Value="$(var.SolutionDir)license.rtf" />
+    <WixVariable Id="WixUIBannerBmp" Value ="Bitmaps\bannrbmp.bmp"/>
+
     <Property Id="ALLUSERS" Value="1"/>
     <Property Id="WIXUI_INSTALLDIR" Value="INSTALLLOCATION" />
     <Property Id="CREATESTARTUPITEM">
