@@ -1,0 +1,22 @@
+<Combine name="SharpMimeTools" fileversion="2.0">
+  <Configurations active="Debug">
+    <Configuration name="Debug" ctype="CombineConfiguration">
+      <Entry build="True" name="SharpMimeTools" configuration="Release" />
+    </Configuration>
+    <Configuration name="Release" ctype="CombineConfiguration">
+      <Entry build="True" name="SharpMimeTools" configuration="Release" />
+    </Configuration>
+    <Configuration name="ReleaseMono" ctype="CombineConfiguration">
+      <Entry build="True" name="SharpMimeTools" configuration="Release" />
+    </Configuration>
+    <Configuration name="DebugMono" ctype="CombineConfiguration">
+      <Entry build="True" name="SharpMimeTools" configuration="Release" />
+    </Configuration>
+  </Configurations>
+  <StartMode startupentry="SharpMimeTools" single="True">
+    <Execute type="None" entry="SharpMimeTools" />
+  </StartMode>
+  <Entries>
+    <Entry filename="./SharpMimeTools.mdp" />
+  </Entries>
+</Combine>
