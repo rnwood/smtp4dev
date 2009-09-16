@@ -6,20 +6,25 @@ using System.Text;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class LoginMechanism : AuthMechanism
+    public class LoginMechanism : IAuthMechanism
     {
-        public override string Identifier
+        public string Identifier
         {
             get { return "LOGIN"; }
         }
 
-        public override AuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
+        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
         {
             return new LoginMechanismProcessor(connectionProcessor);
         }
+
+        public bool IsPlainText
+        {
+            get { return true; }
+        }
     }
 
-    public class LoginMechanismProcessor : AuthMechanismProcessor
+    public class LoginMechanismProcessor : IAuthMechanismProcessor
     {
         public LoginMechanismProcessor(IConnectionProcessor processor)
         {
@@ -42,7 +47,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             set;
         }
 
-        public override AuthMechanismProcessorStatus ProcessResponse(string data)
+        public AuthMechanismProcessorStatus ProcessResponse(string data)
         {
             string username = null;
 

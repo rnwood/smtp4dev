@@ -18,5 +18,7 @@ namespace Rnwood.SmtpServer
         void OnSessionCompleted(Session Session);
         int GetReceiveTimeout(IConnectionProcessor processor);
         AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor, AuthenticationRequest authenticationRequest);
+        void OnMessageStart(IConnectionProcessor processor, string from);
+        bool IsAuthMechanismEnabled(IConnectionProcessor processor, IAuthMechanism authMechanism);
     }
 }

@@ -496,5 +496,14 @@ namespace Rnwood.Smtp4dev
                 _sessions.Remove(session);
             }
         }
+
+        private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            if (Properties.Settings.Default.MinimizeToSysTray)
+            {
+                WindowState = FormWindowState.Minimized;
+                e.Cancel = true;
+            }
+        }
     }
 }

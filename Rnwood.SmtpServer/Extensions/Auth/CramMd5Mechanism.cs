@@ -5,20 +5,25 @@ using System.Text;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class CramMd5Mechanism : AuthMechanism
+    public class CramMd5Mechanism : IAuthMechanism
     {
-        public override string Identifier
+        public string Identifier
         {
             get { return "CRAM-MD5"; }
         }
 
-        public override AuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
+        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
         {
             return new CramMd5MechanismProcessor(connectionProcessor);
         }
+
+        public bool IsPlainText
+        {
+            get { return false; }
+        }
     }
 
-    public class CramMd5MechanismProcessor : AuthMechanismProcessor
+    public class CramMd5MechanismProcessor : IAuthMechanismProcessor
     {
         public CramMd5MechanismProcessor(IConnectionProcessor processor)
         {
@@ -37,7 +42,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         private string _challenge;
 
 
-        public override AuthMechanismProcessorStatus ProcessResponse(string data)
+        public AuthMechanismProcessorStatus ProcessResponse(string data)
         {
             if (_challenge == null)
             {

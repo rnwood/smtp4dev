@@ -58,9 +58,9 @@
     <Compile Include="Extensions\Extension.cs" />
     <Compile Include="Extensions\Auth\AnonymousMechanism.cs" />
     <Compile Include="Extensions\Auth\AuthExtension.cs" />
-    <Compile Include="Extensions\Auth\AuthMechanism.cs" />
+    <Compile Include="Extensions\Auth\IAuthMechanism.cs" />
     <Compile Include="Extensions\Auth\AuthMechanismMap.cs" />
-    <Compile Include="Extensions\Auth\AuthMechanismProcessor.cs" />
+    <Compile Include="Extensions\Auth\IAuthMechanismProcessor.cs" />
     <Compile Include="Extensions\Auth\AuthMechanismProcessorStatus.cs" />
     <Compile Include="Extensions\Auth\CramMd5AuthenticationRequest.cs" />
     <Compile Include="Extensions\Auth\CramMd5Mechanism.cs" />
