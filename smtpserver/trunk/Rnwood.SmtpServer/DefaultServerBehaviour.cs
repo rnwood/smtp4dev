@@ -11,16 +11,31 @@ namespace Rnwood.SmtpServer
 {
     public class DefaultServerBehaviour : IServerBehaviour
     {
-        public DefaultServerBehaviour() : this(25)
+        public DefaultServerBehaviour(X509Certificate sslCertificate)
+            : this(587, sslCertificate)
+        {
+        }
+
+        public DefaultServerBehaviour()
+            : this(25, null)
         {
         }
 
         public DefaultServerBehaviour(int portNumber)
+            : this(portNumber, null)
         {
-            _portNumber = portNumber;
+        }
+
+        public DefaultServerBehaviour(int portNumber, X509Certificate sslCertificate)
+        {
+            PortNumber = portNumber;
+            RunOverSSL = sslCertificate != null;
+            _sslCertificate = sslCertificate;
         }
 
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+        
+        private X509Certificate _sslCertificate;
 
         public virtual void OnMessageReceived(Message message)
         {
@@ -42,14 +57,14 @@ namespace Rnwood.SmtpServer
 
         public virtual int PortNumber
         {
-            get { return _portNumber; }
+            get;
+            private set;
         }
-
-        private readonly int _portNumber;
 
         public virtual bool RunOverSSL
         {
-            get { return false; }
+            get;
+            private set;
         }
 
         public virtual long? GetMaximumMessageSize(IConnectionProcessor processor)
@@ -59,7 +74,7 @@ namespace Rnwood.SmtpServer
 
         public virtual X509Certificate GetSSLCertificate(IConnectionProcessor processor)
         {
-            return null;
+            return _sslCertificate;
         }
 
         public virtual Extension[] GetExtensions(IConnectionProcessor processor)
@@ -67,19 +82,28 @@ namespace Rnwood.SmtpServer
             return new Extension[] { new EightBitMimeExtension(), new SizeExtension() };
         }
 
-        public event EventHandler<SessionCompletedEventArgs> SessionCompleted;
+        public event EventHandler<SessionEventArgs> SessionCompleted;
+        public event EventHandler<SessionEventArgs> SessionStarted;
 
         public virtual void OnSessionCompleted(Session session)
         {
             if (SessionCompleted != null)
             {
-                SessionCompleted(this, new SessionCompletedEventArgs(session));
+                SessionCompleted(this, new SessionEventArgs(session));
+            }
+        }
+
+        public void OnSessionStarted(IConnectionProcessor processor, Session session)
+        {
+            if (SessionStarted != null)
+            {
+                SessionStarted(this, new SessionEventArgs(session));
             }
         }
 
         public virtual int GetReceiveTimeout(IConnectionProcessor processor)
         {
-            return (int) new TimeSpan(0, 5, 0).TotalMilliseconds;
+            return (int)new TimeSpan(0, 5, 0).TotalMilliseconds;
         }
 
         public virtual AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor, AuthenticationRequest request)
@@ -93,7 +117,7 @@ namespace Rnwood.SmtpServer
 
         public virtual bool IsAuthMechanismEnabled(IConnectionProcessor processor, IAuthMechanism authMechanism)
         {
-            return true;
+            return false;
         }
     }
 
@@ -108,9 +132,9 @@ namespace Rnwood.SmtpServer
 
     }
 
-    public class SessionCompletedEventArgs : EventArgs
+    public class SessionEventArgs : EventArgs
     {
-        public SessionCompletedEventArgs(Session session)
+        public SessionEventArgs(Session session)
         {
             Session = session;
         }

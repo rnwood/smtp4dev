@@ -85,7 +85,7 @@ namespace Rnwood.Smtp4dev
 
                 ServerBehaviour b = new ServerBehaviour();
                 b.MessageReceived += MessageReceived;
-                b.SessionCompleted += new EventHandler<SessionCompletedEventArgs>(b_SessionCompleted);
+                b.SessionCompleted += new EventHandler<SessionEventArgs>(b_SessionCompleted);
 
                 _server = new Server(b);
                 _server.Run();
@@ -102,7 +102,7 @@ namespace Rnwood.Smtp4dev
             }
         }
 
-        void b_SessionCompleted(object sender, SessionCompletedEventArgs e)
+        void b_SessionCompleted(object sender, SessionEventArgs e)
         {
             Invoke((MethodInvoker)(() =>
                                             {
