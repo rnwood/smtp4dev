@@ -16,6 +16,7 @@ namespace Rnwood.SmtpServer
         X509Certificate GetSSLCertificate(IConnectionProcessor processor);
         Extension[] GetExtensions(IConnectionProcessor processor);
         void OnSessionCompleted(Session Session);
+        void OnSessionStarted(IConnectionProcessor processor, Session session);
         int GetReceiveTimeout(IConnectionProcessor processor);
         AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor, AuthenticationRequest authenticationRequest);
         void OnMessageStart(IConnectionProcessor processor, string from);
