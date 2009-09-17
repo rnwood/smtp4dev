@@ -39,15 +39,7 @@ namespace Rnwood.SmtpServer
 
             _currentReaderEncoding = _sevenBitASCIIEncoding = Encoding.GetEncoding("ASCII", new EncoderExceptionFallback(), new ASCIITruncatingDecoderFallback());
             _stream = tcpClient.GetStream();
-
-            if (server.Behaviour.RunOverSSL)
-            {
-                SslStream sslStream = new SslStream(_stream);
-                sslStream.AuthenticateAsServer(server.Behaviour.GetSSLCertificate(this));
-                _stream = sslStream;
-                Session.SecureConnection = true;
-            }
-
+            
             SetupReaderAndWriter();
             SetupVerbs();
         }
@@ -114,6 +106,16 @@ namespace Rnwood.SmtpServer
         {
             try
             {
+                Server.Behaviour.OnSessionStarted(this, Session);
+
+                if (Server.Behaviour.RunOverSSL)
+                {
+                    SslStream sslStream = new SslStream(_stream);
+                    sslStream.AuthenticateAsServer(Server.Behaviour.GetSSLCertificate(this));
+                    _stream = sslStream;
+                    Session.SecureConnection = true;
+                }
+
                 WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady, Server.Behaviour.DomainName + " smtp4dev ready"));
 
                 while (_tcpClient.Client.Connected)

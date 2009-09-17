@@ -29,9 +29,13 @@ namespace Rnwood.Smtp4dev
             }
         }
 
+        public void OnSessionStarted(IConnectionProcessor processor, Session session)
+        {
+        }
+
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
 
-        public event EventHandler<SessionCompletedEventArgs> SessionCompleted;
+        public event EventHandler<SessionEventArgs> SessionCompleted;
 
         public string DomainName
         {
@@ -60,31 +64,31 @@ namespace Rnwood.Smtp4dev
         {
             if (string.IsNullOrEmpty(Properties.Settings.Default.SSLCertificatePath))
             {
-                RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows", false);
-                string sdkPath = (string)key.GetValue("CurrentInstallFolder", null);
+                //RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows", false);
+                //string sdkPath = (string)key.GetValue("CurrentInstallFolder", null);
 
-                if (sdkPath != null)
-                {
-                    string makeCertPath = sdkPath + "\\bin\\makecert.exe";
-                    string makeCertArgs =
-                        "-r -pe -n CN=\"{0}\" -e {1} -eku 1.3.6.1.5.5.7.3.1 -sky exchange -ss my -sp \"Microsoft RSA SChannel Cryptographic Provider\" -sy 12";
+                //if (sdkPath != null)
+                //{
+                //    string makeCertPath = sdkPath + "\\bin\\makecert.exe";
+                //    string makeCertArgs =
+                //        "-r -pe -n CN=\"{0}\" -e {1} -eku 1.3.6.1.5.5.7.3.1 -sky exchange -ss my -sp \"Microsoft RSA SChannel Cryptographic Provider\" -sy 12";
 
-                    if (Directory.Exists(sdkPath))
-                    {
-                        ProcessStartInfo psi = new ProcessStartInfo(makeCertPath, string.Format(makeCertArgs, DomainName, DateTime.Today.AddYears(1).ToString("MM/dd/yyyy"))) { CreateNoWindow = true, UseShellExecute = false };
-                        Process process = Process.Start(psi);
-                        process.Start();
-                        process.WaitForExit();
+                //    if (Directory.Exists(sdkPath))
+                //    {
+                //        ProcessStartInfo psi = new ProcessStartInfo(makeCertPath, string.Format(makeCertArgs, DomainName, DateTime.Today.AddYears(1).ToString("MM/dd/yyyy"))) { CreateNoWindow = true, UseShellExecute = false };
+                //        Process process = Process.Start(psi);
+                //        process.Start();
+                //        process.WaitForExit();
 
-                        if (process.ExitCode == 0)
-                        {
-                            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-                            store.Open(OpenFlags.ReadOnly);
+                //        if (process.ExitCode == 0)
+                //        {
+                //            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
+                //            store.Open(OpenFlags.ReadOnly);
 
-                            return store.Certificates.Find(X509FindType.FindBySubjectName, DomainName, false)[0];
-                        }
-                    }
-                }
+                //            return store.Certificates.Find(X509FindType.FindBySubjectName, DomainName, false)[0];
+                //        }
+                //    }
+                //}
 
                 return null;
             }
@@ -134,7 +138,7 @@ namespace Rnwood.Smtp4dev
         {
             if (SessionCompleted != null)
             {
-                SessionCompleted(this, new SessionCompletedEventArgs(Session));
+                SessionCompleted(this, new SessionEventArgs(Session));
             }
         }
 
