@@ -1,19 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
+﻿#region
+
 using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
-using System.Windows.Input;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
-using System.Windows.Shapes;
 using anmar.SharpMimeTools;
-using Path=System.IO.Path;
+
+#endregion
 
 namespace Rnwood.Smtp4dev.MessageInspector
 {
@@ -30,30 +20,21 @@ namespace Rnwood.Smtp4dev.MessageInspector
 
         public MessageViewModel Message
         {
-            get
-            {
-                return DataContext as MessageViewModel;
-            }
+            get { return DataContext as MessageViewModel; }
 
             private set
             {
                 DataContext = value;
-                treeView.DataContext = new MessageViewModel[] { Message };
+                treeView.DataContext = new[] {Message};
                 SelectedPart = Message;
             }
         }
 
         public MessageViewModel SelectedPart
         {
-            get
-            {
-                return treeView.SelectedItem as MessageViewModel;
-            }
+            get { return treeView.SelectedItem as MessageViewModel; }
 
-            set
-            {
-                value.IsSelected = true;
-            }
+            set { value.IsSelected = true; }
         }
 
         private void treeView_SelectedItemChanged(object sender, RoutedPropertyChangedEventArgs<object> e)
@@ -61,7 +42,8 @@ namespace Rnwood.Smtp4dev.MessageInspector
             if (treeView.SelectedItem != null)
             {
                 partDetailsGrid.IsEnabled = true;
-            } else
+            }
+            else
             {
                 partDetailsGrid.IsEnabled = false;
             }

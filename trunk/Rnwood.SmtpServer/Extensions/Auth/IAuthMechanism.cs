@@ -1,19 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Rnwood.SmtpServer.Extensions.Auth
+﻿namespace Rnwood.SmtpServer.Extensions.Auth
 {
     public interface IAuthMechanism
     {
-        string Identifier
-        {
-            get;
-        }
-
-        IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor);
+        string Identifier { get; }
 
         bool IsPlainText { get; }
+        IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor);
     }
 }

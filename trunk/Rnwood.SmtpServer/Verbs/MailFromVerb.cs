@@ -1,8 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region
+
 using System.Linq;
-using System.Text;
 using Rnwood.SmtpServer.Verbs;
+
+#endregion
 
 namespace Rnwood.SmtpServer
 {
@@ -13,21 +14,26 @@ namespace Rnwood.SmtpServer
             ParameterProcessorMap = new ParameterProcessorMap();
         }
 
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
+        public ParameterProcessorMap ParameterProcessorMap { get; private set; }
+
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
         {
             if (connectionProcessor.CurrentMessage != null)
             {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands, "You already told me who the message was from"));
+                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                                                                   "You already told me who the message was from"));
                 return;
             }
 
-            if (request.ArgumentsText.Length == 0)
+            if (command.ArgumentsText.Length == 0)
             {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments, "Must specify from address or <>"));
+                connectionProcessor.WriteResponse(
+                    new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments,
+                                     "Must specify from address or <>"));
                 return;
             }
 
-            string from = request.ArgumentsText.TrimStart('<').TrimEnd('>');
+            string from = command.ArgumentsText.TrimStart('<').TrimEnd('>');
             connectionProcessor.Server.Behaviour.OnMessageStart(connectionProcessor, from);
             connectionProcessor.NewMessage();
             connectionProcessor.CurrentMessage.From = from;
@@ -35,7 +41,7 @@ namespace Rnwood.SmtpServer
 
             try
             {
-                ParameterProcessorMap.Process(request.Arguments.Skip(1).ToArray(), true);
+                ParameterProcessorMap.Process(command.Arguments.Skip(1).ToArray(), true);
                 connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Okey dokey"));
             }
             catch
@@ -43,12 +49,6 @@ namespace Rnwood.SmtpServer
                 connectionProcessor.AbortMessage();
                 throw;
             }
-        }
-
-        public ParameterProcessorMap ParameterProcessorMap
-        {
-            get;
-            private set;
         }
     }
 }

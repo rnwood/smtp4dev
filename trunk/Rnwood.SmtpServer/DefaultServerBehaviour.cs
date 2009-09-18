@@ -1,16 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region
+
+using System;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Extensions.Auth;
+
+#endregion
 
 namespace Rnwood.SmtpServer
 {
     public class DefaultServerBehaviour : IServerBehaviour
     {
+        private readonly X509Certificate _sslCertificate;
+
         public DefaultServerBehaviour(X509Certificate sslCertificate)
             : this(587, sslCertificate)
         {
@@ -33,9 +36,7 @@ namespace Rnwood.SmtpServer
             _sslCertificate = sslCertificate;
         }
 
-        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
-        
-        private X509Certificate _sslCertificate;
+        #region IServerBehaviour Members
 
         public virtual void OnMessageReceived(Message message)
         {
@@ -55,17 +56,9 @@ namespace Rnwood.SmtpServer
             get { return IPAddress.Any; }
         }
 
-        public virtual int PortNumber
-        {
-            get;
-            private set;
-        }
+        public virtual int PortNumber { get; private set; }
 
-        public virtual bool RunOverSSL
-        {
-            get;
-            private set;
-        }
+        public virtual bool RunOverSSL { get; private set; }
 
         public virtual long? GetMaximumMessageSize(IConnectionProcessor processor)
         {
@@ -79,11 +72,8 @@ namespace Rnwood.SmtpServer
 
         public virtual Extension[] GetExtensions(IConnectionProcessor processor)
         {
-            return new Extension[] { new EightBitMimeExtension(), new SizeExtension() };
+            return new Extension[] {new EightBitMimeExtension(), new SizeExtension()};
         }
-
-        public event EventHandler<SessionEventArgs> SessionCompleted;
-        public event EventHandler<SessionEventArgs> SessionStarted;
 
         public virtual void OnSessionCompleted(Session session)
         {
@@ -103,10 +93,11 @@ namespace Rnwood.SmtpServer
 
         public virtual int GetReceiveTimeout(IConnectionProcessor processor)
         {
-            return (int)new TimeSpan(0, 5, 0).TotalMilliseconds;
+            return (int) new TimeSpan(0, 5, 0).TotalMilliseconds;
         }
 
-        public virtual AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor, AuthenticationRequest request)
+        public virtual AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor,
+                                                                          AuthenticationRequest request)
         {
             return AuthenticationResult.Failure;
         }
@@ -119,6 +110,16 @@ namespace Rnwood.SmtpServer
         {
             return false;
         }
+
+        public void OnCommandReceived(IConnectionProcessor processor, SmtpCommand command)
+        {
+        }
+
+        #endregion
+
+        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+        public event EventHandler<SessionEventArgs> SessionCompleted;
+        public event EventHandler<SessionEventArgs> SessionStarted;
     }
 
     public class MessageReceivedEventArgs : EventArgs
@@ -129,7 +130,6 @@ namespace Rnwood.SmtpServer
         }
 
         public Message Message { get; private set; }
-
     }
 
     public class SessionEventArgs : EventArgs
@@ -140,6 +140,5 @@ namespace Rnwood.SmtpServer
         }
 
         public Session Session { get; private set; }
-
     }
 }

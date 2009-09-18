@@ -1,14 +1,14 @@
-﻿using System;
+﻿#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
     public class AuthMechanismMap
     {
-
-        private Dictionary<string, IAuthMechanism> _map = new Dictionary<string, IAuthMechanism>();
+        private readonly Dictionary<string, IAuthMechanism> _map = new Dictionary<string, IAuthMechanism>();
 
         public void Add(IAuthMechanism mechanism)
         {

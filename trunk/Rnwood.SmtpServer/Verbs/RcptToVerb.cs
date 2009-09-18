@@ -1,28 +1,32 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿#region
+
 using Rnwood.SmtpServer.Verbs;
+
+#endregion
 
 namespace Rnwood.SmtpServer
 {
     public class RcptToVerb : Verb
     {
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
         {
             if (connectionProcessor.CurrentMessage == null)
             {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands, "No current message"));
+                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                                                                   "No current message"));
                 return;
             }
 
-            if (request.ArgumentsText.Length < 3 || !request.ArgumentsText.StartsWith("<") || !request.ArgumentsText.EndsWith(">"))
+            if (command.ArgumentsText.Length < 3 || !command.ArgumentsText.StartsWith("<") ||
+                !command.ArgumentsText.EndsWith(">"))
             {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments, "Must specify to address <address>"));
+                connectionProcessor.WriteResponse(
+                    new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments,
+                                     "Must specify to address <address>"));
                 return;
             }
 
-            connectionProcessor.CurrentMessage.ToList.Add(request.ArgumentsText.TrimStart('<').TrimEnd('>'));
+            connectionProcessor.CurrentMessage.ToList.Add(command.ArgumentsText.TrimStart('<').TrimEnd('>'));
             connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Recipient accepted"));
         }
     }

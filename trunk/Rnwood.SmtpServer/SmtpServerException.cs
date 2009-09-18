@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿#region
+
+using System;
+
+#endregion
 
 namespace Rnwood.SmtpServer
 {
@@ -12,7 +13,8 @@ namespace Rnwood.SmtpServer
             SmtpResponse = smtpResponse;
         }
 
-        public SmtpServerException(SmtpResponse smtpResponse, Exception innerException) : base(smtpResponse.Message, innerException)
+        public SmtpServerException(SmtpResponse smtpResponse, Exception innerException)
+            : base(smtpResponse.Message, innerException)
         {
             SmtpResponse = smtpResponse;
         }
