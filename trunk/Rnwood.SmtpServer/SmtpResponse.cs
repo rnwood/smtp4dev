@@ -1,7 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region
+
 using System.Text;
+
+#endregion
 
 namespace Rnwood.SmtpServer
 {
@@ -13,8 +14,23 @@ namespace Rnwood.SmtpServer
             Message = string.Format(message, args);
         }
 
-        public SmtpResponse(StandardSmtpResponseCode code, string message, params object[] args) : this((int) code, message, args)
+        public SmtpResponse(StandardSmtpResponseCode code, string message, params object[] args)
+            : this((int) code, message, args)
         {
+        }
+
+        public int Code { get; private set; }
+
+        public string Message { get; private set; }
+
+        public bool IsError
+        {
+            get { return Code >= 500 && Code <= 599; }
+        }
+
+        public bool IsSuccess
+        {
+            get { return Code >= 200 && Code <= 299; }
         }
 
         /// <summary>
@@ -41,34 +57,6 @@ namespace Rnwood.SmtpServer
 
             return result.ToString();
         }
-
-        public int Code
-        {
-            get;
-            private set;
-        }
-
-        public string Message
-        {
-            get;
-            private set;
-        }
-
-        public bool IsError
-        {
-            get
-            {
-                return Code >= 500 && Code <= 599;
-            }
-        }
-
-        public bool IsSuccess
-        {
-            get
-            {
-                return Code >= 200 && Code <= 299;
-            }
-        }
     }
 
     public enum StandardSmtpResponseCode
@@ -92,5 +80,4 @@ namespace Rnwood.SmtpServer
         AuthenticationContinue = 334,
         AuthenitcationOK = 235
     }
-
 }

@@ -1,40 +1,47 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region
+
+using System;
 using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Windows.Forms;
+using Rnwood.Smtp4dev.Properties;
+
+#endregion
 
 namespace Rnwood.Smtp4dev
 {
-    static class Program
+    internal static class Program
     {
         /// <summary>
         /// The main entry point for the application.
         /// </summary>
         [STAThread]
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(true);
 
             LaunchInfo launchInfo = new LaunchInfo(Environment.CurrentDirectory, args);
-            SingleInstanceManager sim = new SingleInstanceManager(string.Format("SMTP4DEV{0}-65D4ED7D-1942-4f39-9F04-66875C67F04A-SESSION{1}", typeof(Program).Assembly.GetName().Version, Process.GetCurrentProcess().SessionId));
+            SingleInstanceManager sim =
+                new SingleInstanceManager(string.Format("SMTP4DEV{0}-65D4ED7D-1942-4f39-9F04-66875C67F04A-SESSION{1}",
+                                                        typeof (Program).Assembly.GetName().Version,
+                                                        Process.GetCurrentProcess().SessionId));
             if (sim.IsFirstInstance)
             {
-                if (Properties.Settings.Default.SettingsUpgradeRequired)
+                if (Settings.Default.SettingsUpgradeRequired)
                 {
-                    Properties.Settings.Default.Upgrade();
-                    Properties.Settings.Default.SettingsUpgradeRequired = false;
-                    Properties.Settings.Default.Save();
+                    Settings.Default.Upgrade();
+                    Settings.Default.SettingsUpgradeRequired = false;
+                    Settings.Default.Save();
                 }
-                
+
                 MainForm form = new MainForm(launchInfo);
-                sim.LaunchInfoReceived += ((s, ea) => form.Invoke( (MethodInvoker) (() => form.ProcessLaunchInfo(ea.LaunchInfo, false))));
+                sim.LaunchInfoReceived +=
+                    ((s, ea) => form.Invoke((MethodInvoker) (() => form.ProcessLaunchInfo(ea.LaunchInfo, false))));
                 sim.ListenForLaunches();
 
                 Application.Run(form);
-            } else
+            }
+            else
             {
                 try
                 {
@@ -42,10 +49,10 @@ namespace Rnwood.Smtp4dev
                 }
                 catch (Exception e)
                 {
-                    MessageBox.Show("Error processing command line parameters: " + e.Message, "smtp4dev", MessageBoxButtons.OK,
+                    MessageBox.Show("Error processing command line parameters: " + e.Message, "smtp4dev",
+                                    MessageBoxButtons.OK,
                                     MessageBoxIcon.Error);
                 }
-
             }
         }
     }

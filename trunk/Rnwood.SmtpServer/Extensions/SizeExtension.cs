@@ -1,23 +1,22 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region
+
+using System;
 using System.Net.Mail;
-using System.Text;
+
+#endregion
 
 namespace Rnwood.SmtpServer.Extensions
 {
     public class SizeExtension : Extension
     {
-        public SizeExtension()
-        {
-        }
-
         public override ExtensionProcessor CreateExtensionProcessor(IConnectionProcessor processor)
         {
             return new SizeExtensionProcessor(processor);
         }
 
-        class SizeExtensionProcessor : ExtensionProcessor, IParameterProcessor
+        #region Nested type: SizeExtensionProcessor
+
+        private class SizeExtensionProcessor : ExtensionProcessor, IParameterProcessor
         {
             public SizeExtensionProcessor(IConnectionProcessor processor)
             {
@@ -27,19 +26,7 @@ namespace Rnwood.SmtpServer.Extensions
 
             public IConnectionProcessor Processor { get; private set; }
 
-            public override string[] GetEHLOKeywords()
-            {
-                long? maxMessageSize = Processor.Server.Behaviour.GetMaximumMessageSize(Processor);
-
-                if (maxMessageSize.HasValue)
-                {
-                    return new[] { string.Format("SIZE={0}", maxMessageSize.Value) };
-                }
-                else
-                {
-                    return new[] { "SIZE" };
-                }
-            }
+            #region IParameterProcessor Members
 
             public void SetParameter(string key, string value)
             {
@@ -53,7 +40,9 @@ namespace Rnwood.SmtpServer.Extensions
 
                         if (maxMessageSize.HasValue && messageSize > maxMessageSize)
                         {
-                            throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Message exceeds fixes size limit"));
+                            throw new SmtpServerException(
+                                new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation,
+                                                 "Message exceeds fixes size limit"));
                         }
                     }
                     else
@@ -62,6 +51,24 @@ namespace Rnwood.SmtpServer.Extensions
                     }
                 }
             }
+
+            #endregion
+
+            public override string[] GetEHLOKeywords()
+            {
+                long? maxMessageSize = Processor.Server.Behaviour.GetMaximumMessageSize(Processor);
+
+                if (maxMessageSize.HasValue)
+                {
+                    return new[] {string.Format("SIZE={0}", maxMessageSize.Value)};
+                }
+                else
+                {
+                    return new[] {"SIZE"};
+                }
+            }
         }
+
+        #endregion
     }
 }

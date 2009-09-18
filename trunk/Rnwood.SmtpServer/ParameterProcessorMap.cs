@@ -1,13 +1,16 @@
-﻿using System;
+﻿#region
+
 using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.InteropServices;
-using System.Text;
+
+#endregion
 
 namespace Rnwood.SmtpServer
 {
     public class ParameterProcessorMap
     {
+        private readonly Dictionary<string, IParameterProcessor> _processors =
+            new Dictionary<string, IParameterProcessor>();
+
         public void SetProcessor(string key, IParameterProcessor processor)
         {
             _processors[key] = processor;
@@ -19,8 +22,6 @@ namespace Rnwood.SmtpServer
             _processors.TryGetValue(key, out result);
             return result;
         }
-
-        private Dictionary<string, IParameterProcessor> _processors = new Dictionary<string, IParameterProcessor>();
 
         public void Process(string[] tokens, bool throwOnUnknownParameter)
         {
@@ -41,13 +42,13 @@ namespace Rnwood.SmtpServer
                 if (parameterProcessor != null)
                 {
                     parameterProcessor.SetParameter(parameter.Name, parameter.Value);
-                } else if (throwOnUnknownParameter)
+                }
+                else if (throwOnUnknownParameter)
                 {
                     throw new SmtpServerException(
                         new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments,
                                          "Parameter {0} is not recognised", parameter.Name));
                 }
-
             }
         }
     }

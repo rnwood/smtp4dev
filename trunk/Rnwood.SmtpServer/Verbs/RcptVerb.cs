@@ -1,8 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿#region
+
 using Rnwood.SmtpServer.Verbs;
+
+#endregion
 
 namespace Rnwood.SmtpServer
 {
@@ -14,15 +14,11 @@ namespace Rnwood.SmtpServer
             SubVerbMap.SetVerbProcessor("TO", new RcptToVerb());
         }
 
-        public VerbMap SubVerbMap
-        {
-            get;
-            private set;
-        }
+        public VerbMap SubVerbMap { get; private set; }
 
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
         {
-            SmtpRequest subrequest = new SmtpRequest(request.ArgumentsText);
+            SmtpCommand subrequest = new SmtpCommand(command.ArgumentsText);
             Verb verbProcessor = SubVerbMap.GetVerbProcessor(subrequest.Verb);
 
             if (verbProcessor != null)
@@ -31,7 +27,9 @@ namespace Rnwood.SmtpServer
             }
             else
             {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.CommandParameterNotImplemented, "Subcommand {0} not implemented", subrequest.Verb));
+                connectionProcessor.WriteResponse(
+                    new SmtpResponse(StandardSmtpResponseCode.CommandParameterNotImplemented,
+                                     "Subcommand {0} not implemented", subrequest.Verb));
             }
         }
     }

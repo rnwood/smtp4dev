@@ -1,14 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region
+
 using System.Text;
+
+#endregion
 
 namespace Rnwood.SmtpServer
 {
     public class ASCIITruncatingDecoderFallback : DecoderFallback
     {
-        public ASCIITruncatingDecoderFallback()
+        public override int MaxCharCount
         {
+            get { return 1; }
         }
 
         public override DecoderFallbackBuffer CreateFallbackBuffer()
@@ -16,31 +18,34 @@ namespace Rnwood.SmtpServer
             return new Buffer();
         }
 
-        public override int MaxCharCount
-        {
-            get { return 1; }
-        }
+        #region Nested type: Buffer
 
-        class Buffer : DecoderFallbackBuffer
+        private class Buffer : DecoderFallbackBuffer
         {
+            private int _fallbackIndex;
+            private string _fallbackString;
+
+            public override int Remaining
+            {
+                get { return _fallbackString.Length - _fallbackIndex; }
+            }
+
             public override bool Fallback(byte[] bytesUnknown, int index)
             {
                 byte unknownChar = bytesUnknown[0];
-                _fallbackString = Encoding.ASCII.GetString(new []{(byte)(unknownChar & (2^8)-1)});
+                _fallbackString = Encoding.ASCII.GetString(new[] {(byte) (unknownChar & (2 ^ 8) - 1)});
                 _fallbackIndex = 0;
 
                 return true;
             }
-
-            private string _fallbackString;
-            private int _fallbackIndex;
 
             public override char GetNextChar()
             {
                 if (Remaining > 0)
                 {
                     return _fallbackString[_fallbackIndex++];
-                } else
+                }
+                else
                 {
                     return '\0';
                 }
@@ -48,7 +53,7 @@ namespace Rnwood.SmtpServer
 
             public override bool MovePrevious()
             {
-                if (_fallbackIndex >0)
+                if (_fallbackIndex > 0)
                 {
                     _fallbackIndex--;
                     return true;
@@ -56,11 +61,8 @@ namespace Rnwood.SmtpServer
 
                 return false;
             }
-
-            public override int Remaining
-            {
-                get { return _fallbackString.Length - _fallbackIndex; }
-            }
         }
+
+        #endregion
     }
 }
