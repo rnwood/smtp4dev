@@ -1,13 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
+﻿#region
+
+using System;
 using System.Text;
+
+#endregion
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
     public class LoginMechanism : IAuthMechanism
     {
+        #region IAuthMechanism Members
+
         public string Identifier
         {
             get { return "LOGIN"; }
@@ -22,6 +25,8 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         {
             get { return true; }
         }
+
+        #endregion
     }
 
     public class LoginMechanismProcessor : IAuthMechanismProcessor
@@ -33,19 +38,9 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
         protected IConnectionProcessor ConnectionProcessor { get; private set; }
 
-        enum States
-        {
-            Initial,
-            WaitingForUsername,
-            WaitingForPassword,
-            Completed
-        }
+        private States State { get; set; }
 
-        States State
-        {
-            get;
-            set;
-        }
+        #region IAuthMechanismProcessor Members
 
         public AuthMechanismProcessorStatus ProcessResponse(string data)
         {
@@ -54,7 +49,9 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             switch (State)
             {
                 case States.Initial:
-                    ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, Convert.ToBase64String(Encoding.ASCII.GetBytes("Username:"))));
+                    ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
+                                                                       Convert.ToBase64String(
+                                                                           Encoding.ASCII.GetBytes("Username:"))));
                     State = States.WaitingForUsername;
                     return AuthMechanismProcessorStatus.Continue;
 
@@ -62,7 +59,9 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
                     username = DecodeBase64(data);
 
-                    ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, Convert.ToBase64String(Encoding.ASCII.GetBytes("Password:"))));
+                    ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
+                                                                       Convert.ToBase64String(
+                                                                           Encoding.ASCII.GetBytes("Password:"))));
                     State = States.WaitingForPassword;
                     return AuthMechanismProcessorStatus.Continue;
 
@@ -70,9 +69,10 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                     string password = DecodeBase64(data);
                     State = States.Completed;
 
-                    AuthenticationResult result = ConnectionProcessor.Server.Behaviour.ValidateAuthenticationRequest(ConnectionProcessor,
-                                                                   new UsernameAndPasswordAuthenticationRequest
-                                                                       (username, password));
+                    AuthenticationResult result =
+                        ConnectionProcessor.Server.Behaviour.ValidateAuthenticationRequest(ConnectionProcessor,
+                                                                                           new UsernameAndPasswordAuthenticationRequest
+                                                                                               (username, password));
 
                     switch (result)
                     {
@@ -86,9 +86,10 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
                 default:
                     throw new NotImplementedException();
-
             }
         }
+
+        #endregion
 
         private static string DecodeBase64(string data)
         {
@@ -102,5 +103,17 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                                                                "Bad Base64 data"));
             }
         }
+
+        #region Nested type: States
+
+        private enum States
+        {
+            Initial,
+            WaitingForUsername,
+            WaitingForPassword,
+            Completed
+        }
+
+        #endregion
     }
 }

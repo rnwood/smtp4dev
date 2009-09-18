@@ -1,13 +1,8 @@
 ﻿#region
 
 using System;
-using System.Collections.Generic;
-using System.Net;
-using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Threading;
-using Rnwood.SmtpServer.Extensions;
-using Rnwood.SmtpServer.Extensions.Auth;
 
 #endregion
 
@@ -15,9 +10,11 @@ namespace Rnwood.SmtpServer
 {
     public class Server
     {
+        private Thread _coreThread;
+        private TcpListener _listener;
+
         public Server() : this(new DefaultServerBehaviour())
         {
-            
         }
 
         public Server(IServerBehaviour behaviour)
@@ -30,11 +27,7 @@ namespace Rnwood.SmtpServer
         /// <summary>
         /// Gets or sets a value indicating whether the server is currently running.
         /// </summary>
-        public bool IsRunning
-        {
-            get;
-            private set;
-        }
+        public bool IsRunning { get; private set; }
 
         /// <summary>
         /// Runs the server synchronously. This method blocks until the server is stopped.
@@ -51,8 +44,6 @@ namespace Rnwood.SmtpServer
 
             Core();
         }
-
-        private Thread _coreThread;
 
         private void Core()
         {
@@ -79,6 +70,9 @@ namespace Rnwood.SmtpServer
             }
         }
 
+        /// <summary>
+        /// Starts this server on .
+        /// </summary>
         public void Start()
         {
             if (IsRunning)
@@ -92,8 +86,6 @@ namespace Rnwood.SmtpServer
             new Thread(Core).Start();
         }
 
-
-        private TcpListener _listener;
 
         public void Stop()
         {
@@ -110,7 +102,7 @@ namespace Rnwood.SmtpServer
 
         private void ConnectionThreadWork(object tcpClient)
         {
-            ConnectionProcessor connectionProcessor = new ConnectionProcessor(this, (TcpClient)tcpClient);
+            ConnectionProcessor connectionProcessor = new ConnectionProcessor(this, (TcpClient) tcpClient);
             connectionProcessor.Start();
         }
     }

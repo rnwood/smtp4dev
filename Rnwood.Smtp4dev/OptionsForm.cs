@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Drawing;
+﻿#region
+
+using System;
 using System.Linq;
-using System.Net.Sockets;
-using System.Text;
-using System.Windows.Forms;
-using System.Net.NetworkInformation;
 using System.Net;
+using System.Net.NetworkInformation;
+using System.Net.Sockets;
+using System.Windows.Forms;
+using Rnwood.Smtp4dev.Properties;
+
+#endregion
 
 namespace Rnwood.Smtp4dev
 {
@@ -18,40 +18,41 @@ namespace Rnwood.Smtp4dev
         {
             InitializeComponent();
 
-            Icon = Properties.Resources.Icon1;
+            Icon = Resources.Icon1;
             checkBox3.Checked = RegistrySettings.StartOnLogin;
 
             UpdateControlStatus();
 
-            ipAddressCombo.DataSource = new[] { IPAddress.Any }.Concat(NetworkInterface.GetAllNetworkInterfaces().SelectMany(ni => ni.GetIPProperties().UnicastAddresses).Where(ua => ua.Address.AddressFamily == AddressFamily.InterNetwork).Select(ua => ua.Address)).ToList();
-            ipAddressCombo.SelectedItem = IPAddress.Parse(Properties.Settings.Default.IPAddress);
+            ipAddressCombo.DataSource =
+                new[] {IPAddress.Any}.Concat(
+                    NetworkInterface.GetAllNetworkInterfaces().SelectMany(ni => ni.GetIPProperties().UnicastAddresses).
+                        Where(ua => ua.Address.AddressFamily == AddressFamily.InterNetwork).Select(ua => ua.Address)).
+                    ToList();
+            ipAddressCombo.SelectedItem = IPAddress.Parse(Settings.Default.IPAddress);
         }
 
 
         private void button2_Click(object sender, EventArgs e)
         {
             RegistrySettings.StartOnLogin = checkBox3.Checked;
-            Properties.Settings.Default.IPAddress = ((IPAddress)ipAddressCombo.SelectedItem).ToString();
-            Properties.Settings.Default.Save();
+            Settings.Default.IPAddress = (ipAddressCombo.SelectedItem).ToString();
+            Settings.Default.Save();
             DialogResult = DialogResult.OK;
         }
 
         private void button1_Click(object sender, EventArgs e)
         {
-            Properties.Settings.Default.Reload();
+            Settings.Default.Reload();
             DialogResult = DialogResult.Cancel;
         }
 
         protected override void OnLoad(EventArgs e)
         {
             base.OnLoad(e);
-
-
         }
 
         private void OptionsForm_Load(object sender, EventArgs e)
         {
-
         }
 
         private void checkBox4_CheckedChanged(object sender, EventArgs e)
@@ -85,7 +86,7 @@ namespace Rnwood.Smtp4dev
         {
             if (openSSLCertDialog.ShowDialog() == DialogResult.OK)
             {
-                Properties.Settings.Default.SSLCertificatePath = openSSLCertDialog.FileName;
+                Settings.Default.SSLCertificatePath = openSSLCertDialog.FileName;
             }
         }
     }

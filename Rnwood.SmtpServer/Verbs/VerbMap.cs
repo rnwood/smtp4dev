@@ -1,13 +1,15 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+
+#endregion
 
 namespace Rnwood.SmtpServer.Verbs
 {
     public class VerbMap
     {
-        private Dictionary<string, Verb> _processorVerbs = new Dictionary<string, Verb>();
+        private readonly Dictionary<string, Verb> _processorVerbs = new Dictionary<string, Verb>();
 
         public void SetVerbProcessor(string verb, Verb verbProcessor)
         {

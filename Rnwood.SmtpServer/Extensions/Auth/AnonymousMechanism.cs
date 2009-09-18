@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Rnwood.SmtpServer.Extensions.Auth
+﻿namespace Rnwood.SmtpServer.Extensions.Auth
 {
     public class AnonymousMechanism : IAuthMechanism
     {
+        #region IAuthMechanism Members
+
         public string Identifier
         {
             get { return "ANONYMOUS"; }
@@ -21,13 +18,19 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         {
             get { return false; }
         }
+
+        #endregion
     }
 
     public class AnonymousMechanismProcessor : IAuthMechanismProcessor
     {
+        #region IAuthMechanismProcessor Members
+
         public AuthMechanismProcessorStatus ProcessResponse(string data)
         {
             return AuthMechanismProcessorStatus.Success;
         }
+
+        #endregion
     }
 }

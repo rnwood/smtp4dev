@@ -1,9 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
+﻿#region
+
 using System.Linq;
 using System.Reflection;
-using System.Text;
 using Microsoft.Win32;
+
+#endregion
 
 namespace Rnwood.Smtp4dev
 {
@@ -22,10 +23,13 @@ namespace Rnwood.Smtp4dev
             {
                 if (value)
                 {
-                    Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run").SetValue("smtp4dev", Assembly.GetEntryAssembly().Location);
-                } else
+                    Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run").SetValue(
+                        "smtp4dev", Assembly.GetEntryAssembly().Location);
+                }
+                else
                 {
-                    Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run").DeleteValue("smtp4dev", false);
+                    Registry.CurrentUser.CreateSubKey(@"Software\Microsoft\Windows\CurrentVersion\Run").DeleteValue(
+                        "smtp4dev", false);
                 }
             }
         }

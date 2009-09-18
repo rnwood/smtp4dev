@@ -1,12 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region
+
+using System;
 using System.Text;
+
+#endregion
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
     public class PlainMechanism : IAuthMechanism
     {
+        #region IAuthMechanism Members
+
         public string Identifier
         {
             get { return "PLAIN"; }
@@ -21,16 +25,13 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         {
             get { return true; }
         }
+
+        #endregion
     }
 
     public class PlainMechanismProcessor : IAuthMechanismProcessor
     {
-        public PlainMechanismProcessor(IConnectionProcessor connectionProcessor)
-        {
-            ConnectionProcessor = connectionProcessor;
-        }
-
-        protected IConnectionProcessor ConnectionProcessor { get; private set; }
+        #region States enum
 
         public enum States
         {
@@ -38,7 +39,18 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             AwaitingResponse
         }
 
-        States State { get; set; }
+        #endregion
+
+        public PlainMechanismProcessor(IConnectionProcessor connectionProcessor)
+        {
+            ConnectionProcessor = connectionProcessor;
+        }
+
+        protected IConnectionProcessor ConnectionProcessor { get; private set; }
+
+        private States State { get; set; }
+
+        #region IAuthMechanismProcessor Members
 
         public AuthMechanismProcessorStatus ProcessResponse(string data)
         {
@@ -47,7 +59,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 if (State == States.AwaitingResponse)
                 {
                     throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationFailure,
-                                               "Missing auth data"));
+                                                                   "Missing auth data"));
                 }
 
                 ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, ""));
@@ -61,15 +73,16 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             if (decodedDataParts.Length != 3)
             {
                 throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationFailure,
-                           "Auth data in incorrect format"));
+                                                               "Auth data in incorrect format"));
             }
 
             string username = decodedDataParts[1];
             string password = decodedDataParts[2];
 
-            AuthenticationResult result = ConnectionProcessor.Server.Behaviour.ValidateAuthenticationRequest(ConnectionProcessor,
-                                                                               new UsernameAndPasswordAuthenticationRequest
-                                                                                   (username, password));
+            AuthenticationResult result =
+                ConnectionProcessor.Server.Behaviour.ValidateAuthenticationRequest(ConnectionProcessor,
+                                                                                   new UsernameAndPasswordAuthenticationRequest
+                                                                                       (username, password));
 
             switch (result)
             {
@@ -81,6 +94,8 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                     break;
             }
         }
+
+        #endregion
 
         private static string DecodeBase64(string data)
         {

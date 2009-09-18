@@ -1,14 +1,18 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using anmar.SharpMimeTools;
 using System.IO;
+using anmar.SharpMimeTools;
+
+#endregion
 
 namespace Rnwood.SmtpServer
 {
     public class Message
     {
+        private SharpMimeMessage _contents;
+
         public Message(Session session)
         {
             Session = session;
@@ -16,41 +20,21 @@ namespace Rnwood.SmtpServer
             ReceivedDate = DateTime.Now;
         }
 
-        public DateTime ReceivedDate
-        {
-            get;
-            internal set;
-        }
-        
-        public Session Session
-        {
-            get;
-            private set;
-        }
+        public DateTime ReceivedDate { get; internal set; }
 
-        public string From
-        {
-            get;
-            internal set;
-        }
+        public Session Session { get; private set; }
 
-        internal List<string> ToList
-        {
-            get;
-            set;
-        }
+        public string From { get; internal set; }
+
+        internal List<string> ToList { get; set; }
 
         public string[] To
         {
-            get
-            {
-                return ToList.ToArray();
-            }
+            get { return ToList.ToArray(); }
         }
 
         public byte[] Data { get; internal set; }
 
-        private SharpMimeMessage _contents;
         public SharpMimeMessage Contents
         {
             get

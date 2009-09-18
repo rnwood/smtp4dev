@@ -1,25 +1,26 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Net.Mail;
-using System.Text;
-using System.Threading;
-using Microsoft.Win32;
-using Rnwood.SmtpServer;
 using System.Security.Cryptography.X509Certificates;
+using Rnwood.Smtp4dev.Properties;
+using Rnwood.SmtpServer;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Extensions.Auth;
+
+#endregion
 
 namespace Rnwood.Smtp4dev
 {
     public class ServerBehaviour : IServerBehaviour
     {
-        public ServerBehaviour()
-        {
-        }
+        private readonly AuthExtension _authExtension = new AuthExtension();
+        private readonly EightBitMimeExtension _eightBitMimeExtension = new EightBitMimeExtension();
+        private readonly SizeExtension _sizeExtension = new SizeExtension();
+        private readonly StartTlsExtension _startTLSExtension = new StartTlsExtension();
+
+        #region IServerBehaviour Members
 
         public void OnMessageReceived(Message message)
         {
@@ -33,36 +34,33 @@ namespace Rnwood.Smtp4dev
         {
         }
 
-        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
-
-        public event EventHandler<SessionEventArgs> SessionCompleted;
+        public void OnCommandReceived(IConnectionProcessor processor, SmtpCommand command)
+        {
+        }
 
         public string DomainName
         {
-            get { return Properties.Settings.Default.DomainName; }
+            get { return Settings.Default.DomainName; }
         }
 
         public IPAddress IpAddress
         {
-            get
-            {
-                return IPAddress.Parse(Properties.Settings.Default.IPAddress);
-            }
+            get { return IPAddress.Parse(Settings.Default.IPAddress); }
         }
 
         public int PortNumber
         {
-            get { return Properties.Settings.Default.PortNumber; }
+            get { return Settings.Default.PortNumber; }
         }
 
         public bool RunOverSSL
         {
-            get { return Properties.Settings.Default.EnableSSL; }
+            get { return Settings.Default.EnableSSL; }
         }
 
-        public System.Security.Cryptography.X509Certificates.X509Certificate GetSSLCertificate(IConnectionProcessor processor)
+        public X509Certificate GetSSLCertificate(IConnectionProcessor processor)
         {
-            if (string.IsNullOrEmpty(Properties.Settings.Default.SSLCertificatePath))
+            if (string.IsNullOrEmpty(Settings.Default.SSLCertificatePath))
             {
                 //RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows", false);
                 //string sdkPath = (string)key.GetValue("CurrentInstallFolder", null);
@@ -93,34 +91,29 @@ namespace Rnwood.Smtp4dev
                 return null;
             }
 
-            return new X509Certificate(Properties.Settings.Default.SSLCertificatePath);
+            return new X509Certificate(Settings.Default.SSLCertificatePath);
         }
-
-        private StartTlsExtension _startTLSExtension = new StartTlsExtension();
-        private EightBitMimeExtension _eightBitMimeExtension = new EightBitMimeExtension();
-        private AuthExtension _authExtension = new AuthExtension();
-        private SizeExtension _sizeExtension = new SizeExtension();
 
         public Extension[] GetExtensions(IConnectionProcessor processor)
         {
             List<Extension> extensions = new List<Extension>();
 
-            if (Properties.Settings.Default.Enable8BITMIME)
+            if (Settings.Default.Enable8BITMIME)
             {
                 extensions.Add(_eightBitMimeExtension);
             }
 
-            if (Properties.Settings.Default.EnableSTARTTLS)
+            if (Settings.Default.EnableSTARTTLS)
             {
                 extensions.Add(_startTLSExtension);
             }
 
-            if (Properties.Settings.Default.EnableAUTH)
+            if (Settings.Default.EnableAUTH)
             {
                 extensions.Add(_authExtension);
             }
 
-            if (Properties.Settings.Default.EnableSIZE)
+            if (Settings.Default.EnableSIZE)
             {
                 extensions.Add(_sizeExtension);
             }
@@ -130,8 +123,8 @@ namespace Rnwood.Smtp4dev
 
         public long? GetMaximumMessageSize(IConnectionProcessor processor)
         {
-            long value = Properties.Settings.Default.MaximumMessageSize;
-            return value != 0 ? value : (long?)null;
+            long value = Settings.Default.MaximumMessageSize;
+            return value != 0 ? value : (long?) null;
         }
 
         public void OnSessionCompleted(Session Session)
@@ -144,36 +137,44 @@ namespace Rnwood.Smtp4dev
 
         public int GetReceiveTimeout(IConnectionProcessor processor)
         {
-            return Properties.Settings.Default.ReceiveTimeout;
+            return Settings.Default.ReceiveTimeout;
         }
 
-        public AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor, AuthenticationRequest authenticationRequest)
+        public AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor,
+                                                                  AuthenticationRequest authenticationRequest)
         {
             return AuthenticationResult.Success;
         }
 
         public void OnMessageStart(IConnectionProcessor processor, string from)
         {
-            if (Properties.Settings.Default.RequireAuthentication && !processor.Session.Authenticated)
+            if (Settings.Default.RequireAuthentication && !processor.Session.Authenticated)
             {
-                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands, "Must authenticate before sending mail"));
+                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                                                               "Must authenticate before sending mail"));
             }
 
-            if (Properties.Settings.Default.RequireSecureConnection && !processor.Session.SecureConnection)
+            if (Settings.Default.RequireSecureConnection && !processor.Session.SecureConnection)
             {
-                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands, "Mail must be sent over secure connection"));
+                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                                                               "Mail must be sent over secure connection"));
             }
         }
 
         public bool IsAuthMechanismEnabled(IConnectionProcessor processor, IAuthMechanism authMechanism)
         {
-            if (Properties.Settings.Default.OnlyAllowClearTextAuthOverSecureConnection)
+            if (Settings.Default.OnlyAllowClearTextAuthOverSecureConnection)
             {
                 return (!authMechanism.IsPlainText) || processor.Session.SecureConnection;
             }
 
             return true;
         }
-    }
 
+        #endregion
+
+        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+
+        public event EventHandler<SessionEventArgs> SessionCompleted;
+    }
 }

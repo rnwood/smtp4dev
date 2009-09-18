@@ -1,11 +1,13 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region
+
+using System;
+using System.CodeDom.Compiler;
+using System.Diagnostics;
+using System.IO;
 using System.Text;
 using Rnwood.SmtpServer;
-using System.CodeDom.Compiler;
-using System.IO;
-using System.Diagnostics;
+
+#endregion
 
 namespace Rnwood.Smtp4dev
 {
@@ -20,34 +22,25 @@ namespace Rnwood.Smtp4dev
 
         public string Client
         {
-            get
-            {
-                return Session.ClientAddress.ToString();
-            }
+            get { return Session.ClientAddress.ToString(); }
         }
 
         public int NumberOfMessages
         {
-            get
-            {
-                return Session.Messages.Count;
-            }
+            get { return Session.Messages.Count; }
         }
 
         public DateTime StartDate
         {
-            get
-            {
-                return Session.StartDate;
-            }
+            get { return Session.StartDate; }
         }
 
         public void ViewLog()
         {
             TempFileCollection tempFiles = new TempFileCollection();
             FileInfo msgFile = new FileInfo(tempFiles.AddExtension("txt"));
-            File.WriteAllText(msgFile.FullName, Session.Log ,Encoding.ASCII);
-            Process.Start(msgFile.FullName); 
+            File.WriteAllText(msgFile.FullName, Session.Log, Encoding.ASCII);
+            Process.Start(msgFile.FullName);
         }
     }
 }
