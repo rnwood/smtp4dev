@@ -1,8 +1,12 @@
+#region
+
 using System;
 using System.IO;
 using System.Text;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Verbs;
+
+#endregion
 
 namespace Rnwood.SmtpServer
 {

@@ -1,25 +1,26 @@
-﻿using System;
-using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Mail;
-using System.Text;
+﻿#region
+
 using System.IO;
+using System.Text;
 using Rnwood.SmtpServer.Verbs;
+
+#endregion
 
 namespace Rnwood.SmtpServer
 {
     public class DataVerb : Verb
     {
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
         {
             if (connectionProcessor.CurrentMessage == null)
             {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands, "Bad sequence of commands"));
+                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                                                                   "Bad sequence of commands"));
                 return;
             }
 
-            connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.StartMailInputEndWithDot, "End message with period"));
+            connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.StartMailInputEndWithDot,
+                                                               "End message with period"));
             using (MemoryStream dataStream = new MemoryStream())
             {
                 using (StreamWriter writer = new StreamWriter(dataStream, Encoding.Default))
@@ -37,15 +38,17 @@ namespace Rnwood.SmtpServer
                         {
                             break;
                         }
-
                     } while (true);
 
                     writer.Flush();
-                    long? maxMessageSize = connectionProcessor.Server.Behaviour.GetMaximumMessageSize(connectionProcessor);
+                    long? maxMessageSize =
+                        connectionProcessor.Server.Behaviour.GetMaximumMessageSize(connectionProcessor);
 
                     if (maxMessageSize.HasValue && dataStream.Length > maxMessageSize.Value)
                     {
-                        connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Message exceeds fixed size limit"));
+                        connectionProcessor.WriteResponse(
+                            new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation,
+                                             "Message exceeds fixed size limit"));
                     }
                     else
                     {
@@ -66,6 +69,5 @@ namespace Rnwood.SmtpServer
             }
             return line;
         }
-
     }
 }

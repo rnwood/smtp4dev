@@ -1,33 +1,29 @@
-﻿using System;
+﻿#region
+
 using System.CodeDom.Compiler;
-using System.Collections.Generic;
+using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Text;
 using anmar.SharpMimeTools;
-using System.Windows.Media;
-using System.Windows.Media.Imaging;
 using Microsoft.Win32;
-using System.Collections;
-using System.ComponentModel;
+
+#endregion
 
 namespace Rnwood.Smtp4dev.MessageInspector
 {
     public class MessageViewModel : INotifyPropertyChanged
     {
+        private bool _isSelected;
+
         public MessageViewModel(SharpMimeMessage message)
         {
             Message = message;
         }
 
-        private bool _isSelected;
         public bool IsSelected
         {
-            get
-            {
-                return _isSelected;
-            }
+            get { return _isSelected; }
 
             set
             {
@@ -37,87 +33,56 @@ namespace Rnwood.Smtp4dev.MessageInspector
         }
 
 
-
         public SharpMimeMessage Message { get; private set; }
 
         public MessageViewModel[] Children
         {
-            get
-            {
-                return Message.Select(part => new MessageViewModel(part)).ToArray();
-            }
+            get { return Message.Select(part => new MessageViewModel(part)).ToArray(); }
         }
 
         public HeaderViewModel[] Headers
         {
-            get
-            {
-                return Message.Header.Select(de => new HeaderViewModel((string)de.Key, (string)de.Value)).ToArray();
-            }
+            get { return Message.Header.Select(de => new HeaderViewModel(de.Key, de.Value)).ToArray(); }
         }
 
         public string Source
         {
-            get
-            {
-                return Message.ToString();
-            }
+            get { return Message.ToString(); }
         }
 
         public string Data
         {
-            get
-            {
-                return Message.Header.RawHeaders + "\r\n\r\n" + Message.Body;
-            }
+            get { return Message.Header.RawHeaders + "\r\n\r\n" + Message.Body; }
         }
 
         public string Body
         {
-            get
-            {
-                return Message.BodyDecoded;
-            }
+            get { return Message.BodyDecoded; }
         }
 
         public string Type
         {
-            get
-            {
-                return Message.Header.TopLevelMediaType + "/" + Message.Header.SubType;
-            }
+            get { return Message.Header.TopLevelMediaType + "/" + Message.Header.SubType; }
         }
 
         public long Size
         {
-            get
-            {
-                return Message.Size;
-            }
+            get { return Message.Size; }
         }
 
         public string Disposition
         {
-            get
-            {
-                return Message.Header.ContentDisposition;
-            }
+            get { return Message.Header.ContentDisposition; }
         }
 
         public string Encoding
         {
-            get
-            {
-                return Message.Header.ContentTransferEncoding;
-            }
+            get { return Message.Header.ContentTransferEncoding; }
         }
 
         public string Name
         {
-            get
-            {
-                return Message.Name ?? "Unnamed" + ": " + MimeType + " (" + Message.Size + " bytes)";
-            }
+            get { return Message.Name ?? "Unnamed" + ": " + MimeType + " (" + Message.Size + " bytes)"; }
         }
 
         protected string MimeType
@@ -127,11 +92,14 @@ namespace Rnwood.Smtp4dev.MessageInspector
 
         public string Subject
         {
-            get
-            {
-                return Message.Header.Subject;
-            }
+            get { return Message.Header.Subject; }
         }
+
+        #region INotifyPropertyChanged Members
+
+        public event PropertyChangedEventHandler PropertyChanged;
+
+        #endregion
 
         public void Save()
         {
@@ -176,10 +144,6 @@ namespace Rnwood.Smtp4dev.MessageInspector
             Process.Start(msgFile.FullName);
         }
 
-        #region INotifyPropertyChanged Members
-
-        public event PropertyChangedEventHandler PropertyChanged;
-
         protected virtual void OnPropertyChanged(string propertyName)
         {
             if (PropertyChanged != null)
@@ -187,8 +151,6 @@ namespace Rnwood.Smtp4dev.MessageInspector
                 PropertyChanged(this, new PropertyChangedEventArgs(propertyName));
             }
         }
-
-        #endregion
     }
 
 

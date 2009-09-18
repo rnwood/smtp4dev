@@ -1,7 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿#region
+
+using System;
 using System.Text;
+
+#endregion
 
 namespace Rnwood.SmtpServer.Extensions
 {
@@ -12,7 +14,9 @@ namespace Rnwood.SmtpServer.Extensions
             return new EightBitMimeExtensionProcessor(processor);
         }
 
-        class EightBitMimeExtensionProcessor : ExtensionProcessor
+        #region Nested type: EightBitMimeExtensionProcessor
+
+        private class EightBitMimeExtensionProcessor : ExtensionProcessor
         {
             public EightBitMimeExtensionProcessor(IConnectionProcessor processor)
             {
@@ -26,34 +30,18 @@ namespace Rnwood.SmtpServer.Extensions
 
             public override string[] GetEHLOKeywords()
             {
-                return new[] { "8BITMIME" };
+                return new[] {"8BITMIME"};
             }
         }
+
+        #endregion
     }
 
     public class EightBitMimeDataVerb : DataVerb, IParameterProcessor
     {
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpRequest request)
-        {
-            if (_eightBitMessage)
-            {
-                connectionProcessor.SwitchReaderEncoding(Encoding.Default);
-            }
-           
-            try
-            {
-                base.Process(connectionProcessor, request);
-            }
-            finally
-            {
-                if (_eightBitMessage)
-                {
-                    connectionProcessor.SwitchReaderEncodingToDefault();
-                }
-            }
-        }
+        private bool _eightBitMessage;
 
-        private bool _eightBitMessage = false;
+        #region IParameterProcessor Members
 
         public void SetParameter(string key, string value)
         {
@@ -62,12 +50,38 @@ namespace Rnwood.SmtpServer.Extensions
                 if (value.Equals("8BITMIME", StringComparison.InvariantCultureIgnoreCase))
                 {
                     _eightBitMessage = true;
-                } else if (value.Equals("7BIT", StringComparison.InvariantCultureIgnoreCase))
+                }
+                else if (value.Equals("7BIT", StringComparison.InvariantCultureIgnoreCase))
                 {
                     _eightBitMessage = false;
-                } else
+                }
+                else
                 {
-                    throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments, "BODY parameter value invalid - must be either 7BIT or 8BITMIME"));
+                    throw new SmtpServerException(
+                        new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments,
+                                         "BODY parameter value invalid - must be either 7BIT or 8BITMIME"));
+                }
+            }
+        }
+
+        #endregion
+
+        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        {
+            if (_eightBitMessage)
+            {
+                connectionProcessor.SwitchReaderEncoding(Encoding.Default);
+            }
+
+            try
+            {
+                base.Process(connectionProcessor, command);
+            }
+            finally
+            {
+                if (_eightBitMessage)
+                {
+                    connectionProcessor.SwitchReaderEncodingToDefault();
                 }
             }
         }

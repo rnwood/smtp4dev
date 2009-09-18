@@ -1,21 +1,31 @@
-﻿using System;
+﻿#region
+
+using System;
 using System.CodeDom.Compiler;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 using anmar.SharpMimeTools;
-using Rnwood.SmtpServer;
 using Rnwood.Smtp4dev.MessageInspector;
+using Rnwood.Smtp4dev.Properties;
+using Rnwood.SmtpServer;
+
+#endregion
 
 namespace Rnwood.Smtp4dev
 {
     public partial class MainForm : Form
     {
+        private readonly LaunchInfo _launchInfo;
+        private readonly BindingList<MessageViewModel> _messages = new BindingList<MessageViewModel>();
+        private readonly BindingList<SessionViewModel> _sessions = new BindingList<SessionViewModel>();
+        private bool _firstTimeShown = true;
+        private Server _server;
+
         public MainForm(LaunchInfo launchInfo)
         {
             InitializeComponent();
@@ -26,14 +36,59 @@ namespace Rnwood.Smtp4dev
             sessionBindingSource.DataSource = _sessions;
             _messages.ListChanged += _messages_ListChanged;
 
-            Icon = Properties.Resources.Icon1;
-            trayIcon.Icon = Properties.Resources.Icon2;
+            Icon = Resources.Icon1;
+            trayIcon.Icon = Resources.Icon2;
+        }
 
+        public MessageViewModel SelectedMessage
+        {
+            get
+            {
+                if (messageGrid.SelectedRows.Count != 1)
+                {
+                    return null;
+                }
+
+                return
+                    messageGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (MessageViewModel) row.DataBoundItem)
+                        .Single();
+            }
+        }
+
+
+        public MessageViewModel[] SelectedMessages
+        {
+            get
+            {
+                return
+                    messageGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (MessageViewModel) row.DataBoundItem)
+                        .ToArray();
+            }
+        }
+
+        public SessionViewModel SelectedSession
+        {
+            get
+            {
+                return
+                    (SessionViewModel)
+                    sessionsGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem).FirstOrDefault();
+            }
+        }
+
+        public SessionViewModel[] SelectedSessions
+        {
+            get
+            {
+                return
+                    sessionsGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (SessionViewModel) row.DataBoundItem)
+                        .ToArray();
+            }
         }
 
         private void StartServer()
         {
-            trayIcon.Icon = Properties.Resources.Icon1;
+            trayIcon.Icon = Resources.Icon1;
             listenForConnectionsToolStripMenuItem.Checked = true;
             statusLabel.Text = "Listening";
             pictureBox2.Visible = stopListeningButton.Visible = true;
@@ -42,20 +97,19 @@ namespace Rnwood.Smtp4dev
             new Thread(ServerWork).Start();
         }
 
-        void _messages_ListChanged(object sender, ListChangedEventArgs e)
+        private void _messages_ListChanged(object sender, ListChangedEventArgs e)
         {
             deleteAllMenuItem.Enabled = deleteAllButton.Enabled = viewLastMessageMenuItem.Enabled = _messages.Count > 0;
             trayIcon.Text = string.Format("smtp4dev ({0} messages)", _messages.Count);
 
-            if (e.ListChangedType == ListChangedType.ItemAdded && Properties.Settings.Default.ScrollMessages && messageGrid.RowCount > 0)
+            if (e.ListChangedType == ListChangedType.ItemAdded && Settings.Default.ScrollMessages &&
+                messageGrid.RowCount > 0)
             {
                 messageGrid.ClearSelection();
                 messageGrid.Rows[messageGrid.RowCount - 1].Selected = true;
                 messageGrid.FirstDisplayedScrollingRowIndex = messageGrid.RowCount - 1;
             }
         }
-
-        private bool _firstTimeShown = true;
 
         protected override void OnShown(EventArgs e)
         {
@@ -71,13 +125,14 @@ namespace Rnwood.Smtp4dev
                 }
                 catch (Exception ex)
                 {
-                    MessageBox.Show("Error processing command line parameters: " + ex.Message, "smtp4dev", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    MessageBox.Show("Error processing command line parameters: " + ex.Message, "smtp4dev",
+                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
                     Close();
                 }
             }
         }
 
-        void ServerWork()
+        private void ServerWork()
         {
             try
             {
@@ -85,82 +140,77 @@ namespace Rnwood.Smtp4dev
 
                 ServerBehaviour b = new ServerBehaviour();
                 b.MessageReceived += MessageReceived;
-                b.SessionCompleted += new EventHandler<SessionEventArgs>(b_SessionCompleted);
+                b.SessionCompleted += b_SessionCompleted;
 
                 _server = new Server(b);
                 _server.Run();
             }
             catch (Exception exception)
             {
-                Invoke((MethodInvoker)(() =>
+                Invoke((MethodInvoker) (() =>
                                             {
                                                 StopServer();
                                                 statusLabel.Text = "Server failed: " + exception.Message;
 
-                                                trayIcon.ShowBalloonTip(3000, "Server failed", exception.Message, ToolTipIcon.Error);
+                                                trayIcon.ShowBalloonTip(3000, "Server failed", exception.Message,
+                                                                        ToolTipIcon.Error);
                                             }));
             }
         }
 
-        void b_SessionCompleted(object sender, SessionEventArgs e)
+        private void b_SessionCompleted(object sender, SessionEventArgs e)
         {
-            Invoke((MethodInvoker)(() =>
-                                            {
-                                                _sessions.Add(new SessionViewModel(e.Session));
-                                            }));
+            Invoke((MethodInvoker) (() => { _sessions.Add(new SessionViewModel(e.Session)); }));
         }
 
         private void MessageReceived(object sender, MessageReceivedEventArgs e)
         {
             MessageViewModel message = new MessageViewModel(e.Message);
 
-            Invoke((MethodInvoker)(() =>
-            {
-                _messages.Add(message);
+            Invoke((MethodInvoker) (() =>
+                                        {
+                                            _messages.Add(message);
 
-                if (Properties.Settings.Default.MaxMessages > 0)
-                {
-                    while (_messages.Count > Properties.Settings.Default.MaxMessages)
-                    {
-                        _messages.RemoveAt(0);
-                    }
-                }
+                                            if (Settings.Default.MaxMessages > 0)
+                                            {
+                                                while (_messages.Count > Settings.Default.MaxMessages)
+                                                {
+                                                    _messages.RemoveAt(0);
+                                                }
+                                            }
 
-                if (Properties.Settings.Default.AutoViewNewMessages || Properties.Settings.Default.AutoInspectNewMessages)
-                {
-                    if (Properties.Settings.Default.AutoViewNewMessages)
-                    {
-                        ViewMessage(message);
-                    }
+                                            if (Settings.Default.AutoViewNewMessages ||
+                                                Settings.Default.AutoInspectNewMessages)
+                                            {
+                                                if (Settings.Default.AutoViewNewMessages)
+                                                {
+                                                    ViewMessage(message);
+                                                }
 
-                    if (Properties.Settings.Default.AutoInspectNewMessages)
-                    {
-                        InspectMessage(message);
-                    }
-                }
-                else if (!Visible && Properties.Settings.Default.BalloonNotifications)
-                {
-                    string body = string.Format("From: {0}\nTo: {1}\nSubject: {2}\n<Click here to view more details>",
-                        message.From,
-                        message.To,
-                        message.Subject);
+                                                if (Settings.Default.AutoInspectNewMessages)
+                                                {
+                                                    InspectMessage(message);
+                                                }
+                                            }
+                                            else if (!Visible && Settings.Default.BalloonNotifications)
+                                            {
+                                                string body =
+                                                    string.Format(
+                                                        "From: {0}\nTo: {1}\nSubject: {2}\n<Click here to view more details>",
+                                                        message.From,
+                                                        message.To,
+                                                        message.Subject);
 
-                    trayIcon.ShowBalloonTip(3000, "Message Recieved", body, ToolTipIcon.Info);
-                }
+                                                trayIcon.ShowBalloonTip(3000, "Message Recieved", body, ToolTipIcon.Info);
+                                            }
 
-                if (Visible && Properties.Settings.Default.BringToFrontOnNewMessage)
-                {
-                    BringToFront();
-                    Activate();
-                }
-            }));
+                                            if (Visible && Settings.Default.BringToFrontOnNewMessage)
+                                            {
+                                                BringToFront();
+                                                Activate();
+                                            }
+                                        }));
         }
-
-        private Server _server;
-
-        private readonly BindingList<MessageViewModel> _messages = new BindingList<MessageViewModel>();
-        private readonly BindingList<SessionViewModel> _sessions = new BindingList<SessionViewModel>();
-        private LaunchInfo _launchInfo;
 
 
         private void exitToolStripMenuItem_Click(object sender, EventArgs e)
@@ -172,48 +222,6 @@ namespace Rnwood.Smtp4dev
         private void trayIcon_DoubleClick(object sender, EventArgs e)
         {
             Visible = true;
-        }
-
-        public MessageViewModel SelectedMessage
-        {
-            get
-            {
-                if (messageGrid.SelectedRows.Count != 1)
-                {
-                    return null;
-                }
-
-                return
-                    messageGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (MessageViewModel)row.DataBoundItem).Single();
-            }
-        }
-
-
-        public MessageViewModel[] SelectedMessages
-        {
-            get
-            {
-                return
-                    messageGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (MessageViewModel)row.DataBoundItem).ToArray();
-            }
-        }
-
-        public SessionViewModel SelectedSession
-        {
-            get
-            {
-                return
-                    (SessionViewModel)sessionsGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => row.DataBoundItem).FirstOrDefault();
-            }
-        }
-
-        public SessionViewModel[] SelectedSessions
-        {
-            get
-            {
-                return
-                    sessionsGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (SessionViewModel)row.DataBoundItem).ToArray();
-            }
         }
 
         private void viewButton_Click(object sender, EventArgs e)
@@ -286,7 +294,7 @@ namespace Rnwood.Smtp4dev
 
         private void StopServer()
         {
-            trayIcon.Icon = Properties.Resources.Icon2;
+            trayIcon.Icon = Resources.Icon2;
             listenForConnectionsToolStripMenuItem.Checked = false;
             statusLabel.Text = "Not listening";
             pictureBox2.Visible = stopListeningButton.Visible = false;
@@ -320,7 +328,7 @@ namespace Rnwood.Smtp4dev
         {
             if (_messages.Count > 0)
             {
-                if (Properties.Settings.Default.InspectOnBalloonClick)
+                if (Settings.Default.InspectOnBalloonClick)
                 {
                     InspectMessage(_messages.Last());
                 }
@@ -355,8 +363,6 @@ namespace Rnwood.Smtp4dev
                         MessageBox.Show(string.Format("Failed to save: {0}", ex.Message), "Error", MessageBoxButtons.OK,
                                         MessageBoxIcon.Error);
                     }
-
-
                 }
             }
         }
@@ -394,14 +400,15 @@ namespace Rnwood.Smtp4dev
 
         private void messageGrid_SelectionChanged(object sender, EventArgs e)
         {
-            inspectMessageButton.Enabled = deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedMessages.Length > 0;
+            inspectMessageButton.Enabled =
+                deleteButton.Enabled = viewButton.Enabled = saveButton.Enabled = SelectedMessages.Length > 0;
         }
 
         private void messageGrid_CellFormatting(object sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.RowIndex >= 0)
             {
-                MessageViewModel message = (MessageViewModel)messageGrid.Rows[e.RowIndex].DataBoundItem;
+                MessageViewModel message = (MessageViewModel) messageGrid.Rows[e.RowIndex].DataBoundItem;
 
                 if (!message.HasBeenViewed)
                 {
@@ -454,9 +461,9 @@ namespace Rnwood.Smtp4dev
             if (firstInstance)
             {
                 Visible = true;
-                Visible = !Properties.Settings.Default.StartInTray;
+                Visible = !Settings.Default.StartInTray;
 
-                if (Properties.Settings.Default.ListenOnStartup)
+                if (Settings.Default.ListenOnStartup)
                 {
                     StartServer();
                 }
@@ -499,7 +506,7 @@ namespace Rnwood.Smtp4dev
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (Properties.Settings.Default.MinimizeToSysTray)
+            if (Settings.Default.MinimizeToSysTray)
             {
                 WindowState = FormWindowState.Minimized;
                 e.Cancel = true;

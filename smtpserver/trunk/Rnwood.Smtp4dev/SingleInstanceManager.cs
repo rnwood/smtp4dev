@@ -1,21 +1,19 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.IO.Pipes;
-using System.Linq;
-using System.Runtime.InteropServices;
+﻿#region
+
+using System;
 using System.Runtime.Remoting;
 using System.Runtime.Remoting.Channels;
 using System.Runtime.Remoting.Channels.Ipc;
-using System.Text;
 using System.Threading;
-using System.Xml.Serialization;
+
+#endregion
 
 namespace Rnwood.Smtp4dev
 {
     public class SingleInstanceManager : MarshalByRefObject, IFirstInstanceServer
     {
+        private Mutex _mutex;
+
         public SingleInstanceManager(string applicationId)
         {
             ApplicationId = applicationId;
@@ -27,11 +25,16 @@ namespace Rnwood.Smtp4dev
 
         public bool IsFirstInstance { get; private set; }
 
-        private Mutex _mutex;
-        public string ApplicationId
-        { get;
-            private set;
+        public string ApplicationId { get; private set; }
+
+        #region IFirstInstanceServer Members
+
+        void IFirstInstanceServer.ProcessLaunchInfo(LaunchInfo launchInfo)
+        {
+            OnLaunchInfoReceived(launchInfo);
         }
+
+        #endregion
 
         public void SendLaunchInfoToFirstInstance(LaunchInfo launchInfo)
         {
@@ -43,18 +46,15 @@ namespace Rnwood.Smtp4dev
             IpcClientChannel channel = new IpcClientChannel(ApplicationId, null);
             ChannelServices.RegisterChannel(channel);
 
-            IFirstInstanceServer server = (IFirstInstanceServer) Activator.GetObject(typeof (IFirstInstanceServer), string.Format("ipc://{0}/{0}", ApplicationId));
+            IFirstInstanceServer server =
+                (IFirstInstanceServer)
+                Activator.GetObject(typeof (IFirstInstanceServer), string.Format("ipc://{0}/{0}", ApplicationId));
             server.ProcessLaunchInfo(launchInfo);
         }
 
         public override object InitializeLifetimeService()
         {
             return null;
-        }
-
-        void IFirstInstanceServer.ProcessLaunchInfo(LaunchInfo launchInfo)
-        {
-            OnLaunchInfoReceived(launchInfo);
         }
 
         public event EventHandler<LaunchInfoReceivedEventArgs> LaunchInfoReceived;
@@ -69,7 +69,7 @@ namespace Rnwood.Smtp4dev
             IpcServerChannel channel = new IpcServerChannel(ApplicationId);
             ChannelServices.RegisterChannel(channel);
 
-            RemotingServices.Marshal(this, ApplicationId, typeof(IFirstInstanceServer));
+            RemotingServices.Marshal(this, ApplicationId, typeof (IFirstInstanceServer));
         }
 
         protected virtual void OnLaunchInfoReceived(LaunchInfo launchInfo)
