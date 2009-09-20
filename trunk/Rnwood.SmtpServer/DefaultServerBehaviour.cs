@@ -38,7 +38,7 @@ namespace Rnwood.SmtpServer
 
         #region IServerBehaviour Members
 
-        public virtual void OnMessageReceived(Message message)
+        public virtual void OnMessageReceived(IConnection connection, Message message)
         {
             if (MessageReceived != null)
             {
@@ -60,22 +60,22 @@ namespace Rnwood.SmtpServer
 
         public virtual bool RunOverSSL { get; private set; }
 
-        public virtual long? GetMaximumMessageSize(IConnectionProcessor processor)
+        public virtual long? GetMaximumMessageSize(IConnection connection)
         {
             return null;
         }
 
-        public virtual X509Certificate GetSSLCertificate(IConnectionProcessor processor)
+        public virtual X509Certificate GetSSLCertificate(IConnection connection)
         {
             return _sslCertificate;
         }
 
-        public virtual Extension[] GetExtensions(IConnectionProcessor processor)
+        public virtual IExtension[] GetExtensions(IConnection connection)
         {
-            return new Extension[] {new EightBitMimeExtension(), new SizeExtension()};
+            return new IExtension[] {new EightBitMimeExtension(), new SizeExtension()};
         }
 
-        public virtual void OnSessionCompleted(Session session)
+        public virtual void OnSessionCompleted(IConnection connection, Session session)
         {
             if (SessionCompleted != null)
             {
@@ -83,7 +83,7 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        public void OnSessionStarted(IConnectionProcessor processor, Session session)
+        public void OnSessionStarted(IConnection connection, Session session)
         {
             if (SessionStarted != null)
             {
@@ -91,27 +91,27 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        public virtual int GetReceiveTimeout(IConnectionProcessor processor)
+        public virtual int GetReceiveTimeout(IConnection connection)
         {
             return (int) new TimeSpan(0, 5, 0).TotalMilliseconds;
         }
 
-        public virtual AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor,
-                                                                          AuthenticationRequest request)
+        public virtual AuthenticationResult ValidateAuthenticationRequest(IConnection connection,
+                                                                          IAuthenticationRequest request)
         {
             return AuthenticationResult.Failure;
         }
 
-        public virtual void OnMessageStart(IConnectionProcessor processor, string from)
+        public virtual void OnMessageStart(IConnection connection, string from)
         {
         }
 
-        public virtual bool IsAuthMechanismEnabled(IConnectionProcessor processor, IAuthMechanism authMechanism)
+        public virtual bool IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism)
         {
             return false;
         }
 
-        public void OnCommandReceived(IConnectionProcessor processor, SmtpCommand command)
+        public void OnCommandReceived(IConnection connection, SmtpCommand command)
         {
         }
 

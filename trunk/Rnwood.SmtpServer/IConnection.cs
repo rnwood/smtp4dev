@@ -10,10 +10,10 @@ using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer
 {
-    public interface IConnectionProcessor
+    public interface IConnection
     {
         Server Server { get; }
-        ExtensionProcessor[] ExtensionProcessors { get; }
+        IExtensionProcessor[] ExtensionProcessors { get; }
         VerbMap VerbMap { get; }
         MailVerb MailVerb { get; }
         Session Session { get; }

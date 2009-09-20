@@ -6,14 +6,14 @@ using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer
 {
-    public class QuitVerb : Verb
+    public class QuitVerb : IVerb
     {
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        public void Process(IConnection connection, SmtpCommand command)
         {
-            connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel,
+            connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel,
                                                                "See you later aligator"));
-            connectionProcessor.CloseConnection();
-            connectionProcessor.Session.SessionCompleted = true;
+            connection.CloseConnection();
+            connection.Session.CompletedNormally = true;
         }
     }
 }

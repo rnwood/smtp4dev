@@ -1,10 +1,10 @@
 ﻿namespace Rnwood.SmtpServer.Verbs
 {
-    public class RsetVerb : Verb
+    public class RsetVerb : IVerb
     {
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        public void Process(IConnection connection, SmtpCommand command)
         {
-            connectionProcessor.AbortMessage();
+            connection.AbortMessage();
         }
     }
 }

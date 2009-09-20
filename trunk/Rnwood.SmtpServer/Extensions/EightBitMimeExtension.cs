@@ -7,28 +7,28 @@ using System.Text;
 
 namespace Rnwood.SmtpServer.Extensions
 {
-    public class EightBitMimeExtension : Extension
+    public class EightBitMimeExtension : IExtension
     {
-        public override ExtensionProcessor CreateExtensionProcessor(IConnectionProcessor processor)
+        public IExtensionProcessor CreateExtensionProcessor(IConnection connection)
         {
-            return new EightBitMimeExtensionProcessor(processor);
+            return new EightBitMimeExtensionProcessor(connection);
         }
 
         #region Nested type: EightBitMimeExtensionProcessor
 
-        private class EightBitMimeExtensionProcessor : ExtensionProcessor
+        private class EightBitMimeExtensionProcessor : IExtensionProcessor
         {
-            public EightBitMimeExtensionProcessor(IConnectionProcessor processor)
+            public EightBitMimeExtensionProcessor(IConnection connection)
             {
                 EightBitMimeDataVerb verb = new EightBitMimeDataVerb();
-                processor.VerbMap.SetVerbProcessor("DATA", verb);
+                connection.VerbMap.SetVerbProcessor("DATA", verb);
 
-                MailVerb mailVerbProcessor = processor.MailVerb;
+                MailVerb mailVerbProcessor = connection.MailVerb;
                 MailFromVerb mailFromProcessor = mailVerbProcessor.FromSubVerb;
                 mailFromProcessor.ParameterProcessorMap.SetProcessor("BODY", verb);
             }
 
-            public override string[] GetEHLOKeywords()
+            public string[] GetEHLOKeywords()
             {
                 return new[] {"8BITMIME"};
             }
@@ -66,22 +66,22 @@ namespace Rnwood.SmtpServer.Extensions
 
         #endregion
 
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        public void Process(IConnection connection, SmtpCommand command)
         {
             if (_eightBitMessage)
             {
-                connectionProcessor.SwitchReaderEncoding(Encoding.Default);
+                connection.SwitchReaderEncoding(Encoding.Default);
             }
 
             try
             {
-                base.Process(connectionProcessor, command);
+                base.Process(connection, command);
             }
             finally
             {
                 if (_eightBitMessage)
                 {
-                    connectionProcessor.SwitchReaderEncodingToDefault();
+                    connection.SwitchReaderEncodingToDefault();
                 }
             }
         }

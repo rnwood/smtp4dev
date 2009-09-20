@@ -1,12 +1,12 @@
 ﻿namespace Rnwood.SmtpServer.Extensions
 {
-    public abstract class Extension
+    public interface IExtension
     {
-        public abstract ExtensionProcessor CreateExtensionProcessor(IConnectionProcessor processor);
+        IExtensionProcessor CreateExtensionProcessor(IConnection connection);
     }
 
-    public abstract class ExtensionProcessor
+    public interface IExtensionProcessor
     {
-        public abstract string[] GetEHLOKeywords();
+        string[] GetEHLOKeywords();
     }
 }
