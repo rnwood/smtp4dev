@@ -12,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("smtp4dev")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Robert Wood <rob@rnwood.co.uk>")]
+[assembly: AssemblyCompany("Robert Wood")]
 [assembly: AssemblyProduct("smtp4dev")]
 [assembly: AssemblyCopyright("Copyright © Robert Wood 2009")]
 [assembly: AssemblyTrademark("")]
@@ -39,4 +39,4 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("2.0.0.*")]
+[assembly: AssemblyVersion("2.0.1.*")]
