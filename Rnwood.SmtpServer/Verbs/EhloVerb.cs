@@ -9,13 +9,13 @@ using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer
 {
-    public class EhloVerb : Verb
+    public class EhloVerb : IVerb
     {
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        public void Process(IConnection connection, SmtpCommand command)
         {
-            if (!string.IsNullOrEmpty(connectionProcessor.Session.ClientName))
+            if (!string.IsNullOrEmpty(connection.Session.ClientName))
             {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
                                                                    "You already said HELO"));
                 return;
             }
@@ -24,13 +24,13 @@ namespace Rnwood.SmtpServer
             text.AppendLine("Nice to meet you.");
 
             IEnumerable<string> extnNames =
-                connectionProcessor.ExtensionProcessors.SelectMany(extn => extn.GetEHLOKeywords());
+                connection.ExtensionProcessors.SelectMany(extn => extn.GetEHLOKeywords());
             foreach (string extnName in extnNames)
             {
                 text.AppendLine(extnName);
             }
 
-            connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, text.ToString().TrimEnd()));
+            connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, text.ToString().TrimEnd()));
         }
     }
 }

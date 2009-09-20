@@ -16,9 +16,9 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             get { return "PLAIN"; }
         }
 
-        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
+        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnection connection)
         {
-            return new PlainMechanismProcessor(connectionProcessor);
+            return new PlainMechanismProcessor(connection);
         }
 
         public bool IsPlainText
@@ -41,12 +41,12 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
         #endregion
 
-        public PlainMechanismProcessor(IConnectionProcessor connectionProcessor)
+        public PlainMechanismProcessor(IConnection connection)
         {
-            ConnectionProcessor = connectionProcessor;
+            Connection = connection;
         }
 
-        protected IConnectionProcessor ConnectionProcessor { get; private set; }
+        protected IConnection Connection { get; private set; }
 
         private States State { get; set; }
 
@@ -62,7 +62,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                                                                    "Missing auth data"));
                 }
 
-                ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, ""));
+                Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, ""));
                 State = States.AwaitingResponse;
                 return AuthMechanismProcessorStatus.Continue;
             }
@@ -79,11 +79,10 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             string username = decodedDataParts[1];
             string password = decodedDataParts[2];
 
-            AuthenticationResult result =
-                ConnectionProcessor.Server.Behaviour.ValidateAuthenticationRequest(ConnectionProcessor,
-                                                                                   new UsernameAndPasswordAuthenticationRequest
-                                                                                       (username, password));
+            Credentials = new UsernameAndPasswordAuthenticationRequest(username, password);
 
+            AuthenticationResult result =
+                Connection.Server.Behaviour.ValidateAuthenticationRequest(Connection, Credentials);
             switch (result)
             {
                 case AuthenticationResult.Success:
@@ -94,6 +93,8 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                     break;
             }
         }
+
+        public IAuthenticationRequest Credentials { get; private set; }
 
         #endregion
 

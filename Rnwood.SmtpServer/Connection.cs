@@ -14,7 +14,7 @@ using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer
 {
-    public class ConnectionProcessor : IConnectionProcessor
+    public class Connection : IConnection
     {
         private readonly Encoding _currentReaderEncoding;
         private readonly Encoding _sevenBitASCIIEncoding;
@@ -24,7 +24,7 @@ namespace Rnwood.SmtpServer
         private Stream _stream;
         private StreamWriter _writer;
 
-        public ConnectionProcessor(Server server, TcpClient tcpClient)
+        public Connection(Server server, TcpClient tcpClient)
         {
             VerbMap = new VerbMap();
             Session = new Session()
@@ -60,7 +60,7 @@ namespace Rnwood.SmtpServer
             SwitchReaderEncoding(_sevenBitASCIIEncoding);
         }
 
-        public ExtensionProcessor[] ExtensionProcessors { get; private set; }
+        public IExtensionProcessor[] ExtensionProcessors { get; private set; }
 
         public void CloseConnection()
         {
@@ -116,7 +116,7 @@ namespace Rnwood.SmtpServer
             Session.Messages.Add(message);
             CurrentMessage = null;
 
-            Server.Behaviour.OnMessageReceived(message);
+            Server.Behaviour.OnMessageReceived(this, message);
         }
 
         public void AbortMessage()
@@ -171,7 +171,7 @@ namespace Rnwood.SmtpServer
 
                     if (command.IsValid)
                     {
-                        Verb verbProcessor = VerbMap.GetVerbProcessor(command.Verb);
+                        IVerb verbProcessor = VerbMap.GetVerbProcessor(command.Verb);
 
                         if (verbProcessor != null)
                         {
@@ -208,7 +208,7 @@ namespace Rnwood.SmtpServer
             CloseConnection();
 
             Session.EndDate = DateTime.Now;
-            Server.Behaviour.OnSessionCompleted(Session);
+            Server.Behaviour.OnSessionCompleted(this, Session);
         }
     }
 }

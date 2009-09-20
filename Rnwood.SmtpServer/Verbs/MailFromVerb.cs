@@ -7,7 +7,7 @@ using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer
 {
-    public class MailFromVerb : Verb
+    public class MailFromVerb : IVerb
     {
         public MailFromVerb()
         {
@@ -16,37 +16,37 @@ namespace Rnwood.SmtpServer
 
         public ParameterProcessorMap ParameterProcessorMap { get; private set; }
 
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        public void Process(IConnection connection, SmtpCommand command)
         {
-            if (connectionProcessor.CurrentMessage != null)
+            if (connection.CurrentMessage != null)
             {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
                                                                    "You already told me who the message was from"));
                 return;
             }
 
             if (command.ArgumentsText.Length == 0)
             {
-                connectionProcessor.WriteResponse(
+                connection.WriteResponse(
                     new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments,
                                      "Must specify from address or <>"));
                 return;
             }
 
             string from = command.ArgumentsText.TrimStart('<').TrimEnd('>');
-            connectionProcessor.Server.Behaviour.OnMessageStart(connectionProcessor, from);
-            connectionProcessor.NewMessage();
-            connectionProcessor.CurrentMessage.From = from;
+            connection.Server.Behaviour.OnMessageStart(connection, from);
+            connection.NewMessage();
+            connection.CurrentMessage.From = from;
 
 
             try
             {
                 ParameterProcessorMap.Process(command.Arguments.Skip(1).ToArray(), true);
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Okey dokey"));
+                connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Okey dokey"));
             }
             catch
             {
-                connectionProcessor.AbortMessage();
+                connection.AbortMessage();
                 throw;
             }
         }

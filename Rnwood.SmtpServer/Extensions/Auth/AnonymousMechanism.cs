@@ -9,9 +9,9 @@
             get { return "ANONYMOUS"; }
         }
 
-        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
+        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnection connection)
         {
-            return new AnonymousMechanismProcessor();
+            return new AnonymousMechanismProcessor(connection);
         }
 
         public bool IsPlainText
@@ -24,11 +24,37 @@
 
     public class AnonymousMechanismProcessor : IAuthMechanismProcessor
     {
+        public AnonymousMechanismProcessor(IConnection connection)
+        {
+            Connection = connection;
+        }
+
+        protected IConnection Connection { get; private set; }
+
         #region IAuthMechanismProcessor Members
 
         public AuthMechanismProcessorStatus ProcessResponse(string data)
         {
-            return AuthMechanismProcessorStatus.Success;
+            Credentials = new AnonymousAuthenticationRequest();
+
+            AuthenticationResult result =
+    Connection.Server.Behaviour.ValidateAuthenticationRequest(Connection, Credentials);
+
+            switch (result)
+            {
+                case AuthenticationResult.Success:
+                    return AuthMechanismProcessorStatus.Success;
+                    break;
+                default:
+                    return AuthMechanismProcessorStatus.Failed;
+                    break;
+            }
+        }
+
+        public IAuthenticationRequest Credentials
+        {
+            get;
+            private set;
         }
 
         #endregion

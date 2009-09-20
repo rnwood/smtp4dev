@@ -8,18 +8,18 @@ using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer
 {
-    public class DataVerb : Verb
+    public class DataVerb : IVerb
     {
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        public void Process(IConnection connection, SmtpCommand command)
         {
-            if (connectionProcessor.CurrentMessage == null)
+            if (connection.CurrentMessage == null)
             {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
                                                                    "Bad sequence of commands"));
                 return;
             }
 
-            connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.StartMailInputEndWithDot,
+            connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.StartMailInputEndWithDot,
                                                                "End message with period"));
             using (MemoryStream dataStream = new MemoryStream())
             {
@@ -27,7 +27,7 @@ namespace Rnwood.SmtpServer
                 {
                     do
                     {
-                        string line = connectionProcessor.ReadLine();
+                        string line = connection.ReadLine();
 
                         if (line != ".")
                         {
@@ -42,19 +42,19 @@ namespace Rnwood.SmtpServer
 
                     writer.Flush();
                     long? maxMessageSize =
-                        connectionProcessor.Server.Behaviour.GetMaximumMessageSize(connectionProcessor);
+                        connection.Server.Behaviour.GetMaximumMessageSize(connection);
 
                     if (maxMessageSize.HasValue && dataStream.Length > maxMessageSize.Value)
                     {
-                        connectionProcessor.WriteResponse(
+                        connection.WriteResponse(
                             new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation,
                                              "Message exceeds fixed size limit"));
                     }
                     else
                     {
-                        connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted"));
-                        connectionProcessor.CurrentMessage.Data = dataStream.ToArray();
-                        connectionProcessor.CommitMessage();
+                        connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted"));
+                        connection.CurrentMessage.Data = dataStream.ToArray();
+                        connection.CommitMessage();
                     }
                 }
             }

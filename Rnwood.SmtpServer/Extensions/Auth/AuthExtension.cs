@@ -8,32 +8,32 @@ using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class AuthExtension : Extension
+    public class AuthExtension : IExtension
     {
-        public override ExtensionProcessor CreateExtensionProcessor(IConnectionProcessor processor)
+        public IExtensionProcessor CreateExtensionProcessor(IConnection connection)
         {
-            return new AuthExtensionProcessor(processor);
+            return new AuthExtensionProcessor(connection);
         }
     }
 
-    public class AuthExtensionProcessor : ExtensionProcessor
+    public class AuthExtensionProcessor : IExtensionProcessor
     {
-        private readonly IConnectionProcessor _processor;
+        private readonly IConnection _processor;
 
-        public AuthExtensionProcessor(IConnectionProcessor processor)
+        public AuthExtensionProcessor(IConnection connection)
         {
-            _processor = processor;
+            _processor = connection;
             MechanismMap = new AuthMechanismMap();
             MechanismMap.Add(new CramMd5Mechanism());
             MechanismMap.Add(new PlainMechanism());
             MechanismMap.Add(new LoginMechanism());
             MechanismMap.Add(new AnonymousMechanism());
-            processor.VerbMap.SetVerbProcessor("AUTH", new AuthVerb(this));
+            connection.VerbMap.SetVerbProcessor("AUTH", new AuthVerb(this));
         }
 
         public AuthMechanismMap MechanismMap { get; private set; }
 
-        public override string[] GetEHLOKeywords()
+        public string[] GetEHLOKeywords()
         {
             IEnumerable<IAuthMechanism> mechanisms = MechanismMap.GetAll();
 
@@ -59,7 +59,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         }
     }
 
-    public class AuthVerb : Verb
+    public class AuthVerb : IVerb
     {
         public AuthVerb(AuthExtensionProcessor authExtensionProcessor)
         {
@@ -69,11 +69,11 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         public AuthExtensionProcessor AuthExtensionProcessor { get; private set; }
 
 
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        public void Process(IConnection connection, SmtpCommand command)
         {
             if (command.Arguments.Length > 0)
             {
-                if (connectionProcessor.Session.Authenticated)
+                if (connection.Session.Authenticated)
                 {
                     throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
                                                                    "Already authenticated"));
@@ -97,25 +97,26 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 }
 
                 IAuthMechanismProcessor authMechanismProcessor =
-                    mechanism.CreateAuthMechanismProcessor(connectionProcessor);
+                    mechanism.CreateAuthMechanismProcessor(connection);
 
                 AuthMechanismProcessorStatus status =
                     authMechanismProcessor.ProcessResponse(string.Join(" ", command.Arguments.Skip(1).ToArray()));
                 while (status == AuthMechanismProcessorStatus.Continue)
                 {
-                    string response = connectionProcessor.ReadLine();
+                    string response = connection.ReadLine();
                     status = authMechanismProcessor.ProcessResponse(response);
                 }
 
                 if (status == AuthMechanismProcessorStatus.Success)
                 {
-                    connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenitcationOK,
+                    connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenitcationOK,
                                                                        "Authenticated OK"));
-                    connectionProcessor.Session.Authenticated = true;
+                    connection.Session.Authenticated = true;
+                    connection.Session.AuthenticationCredentials = authMechanismProcessor.Credentials;
                 }
                 else
                 {
-                    connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationFailure,
+                    connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationFailure,
                                                                        "Authentication failure"));
                 }
             }

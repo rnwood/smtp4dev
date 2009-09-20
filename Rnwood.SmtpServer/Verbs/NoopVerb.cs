@@ -1,10 +1,10 @@
 ﻿namespace Rnwood.SmtpServer.Verbs
 {
-    public class NoopVerb : Verb
+    public class NoopVerb : IVerb
     {
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        public void Process(IConnection connection, SmtpCommand command)
         {
-            connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Sucessfully did nothing"));
+            connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Sucessfully did nothing"));
         }
     }
 }
