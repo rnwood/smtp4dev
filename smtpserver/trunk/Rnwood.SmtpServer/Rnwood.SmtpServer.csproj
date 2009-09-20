@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C5BBE7C2-0EA0-4E50-95FF-BF07EA1B93FF}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -52,6 +52,9 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ASCIITruncatingDecoderFallback.cs" />
+    <Compile Include="Connection.cs" />
+    <Compile Include="DefaultServer.cs" />
+    <Compile Include="Extensions\Auth\AnonymousAuthenticationRequest.cs" />
     <Compile Include="Extensions\Auth\AuthenticationRequest.cs" />
     <Compile Include="Extensions\Auth\AuthenticationResult.cs" />
     <Compile Include="DefaultServerBehaviour.cs" />
@@ -70,7 +73,7 @@
     <Compile Include="Extensions\SizeExtension.cs" />
     <Compile Include="Extensions\StartTlsExtension.cs" />
     <Compile Include="Extensions\EightBitMimeExtension.cs" />
-    <Compile Include="IConnectionProcessor.cs" />
+    <Compile Include="IConnection.cs" />
     <Compile Include="IServerBehaviour.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="IParameterProcessor.cs" />
@@ -82,13 +85,12 @@
     <Compile Include="Verbs\DataVerb.cs" />
     <Compile Include="Verbs\EhloVerb.cs" />
     <Compile Include="Verbs\HeloVerb.cs" />
+    <Compile Include="Verbs\IVerb.cs" />
     <Compile Include="Verbs\MailFromVerb.cs" />
     <Compile Include="Verbs\MailVerb.cs" />
-    <Compile Include="ConnectionProcessor.cs" />
     <Compile Include="Verbs\NoopVerb.cs" />
     <Compile Include="Verbs\RcptToVerb.cs" />
     <Compile Include="Verbs\RcptVerb.cs" />
-    <Compile Include="Verbs\Verb.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Verbs\QuitVerb.cs" />
     <Compile Include="Server.cs" />

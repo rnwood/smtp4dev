@@ -6,7 +6,7 @@ using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer
 {
-    public class RcptVerb : Verb
+    public class RcptVerb : IVerb
     {
         public RcptVerb()
         {
@@ -16,18 +16,18 @@ namespace Rnwood.SmtpServer
 
         public VerbMap SubVerbMap { get; private set; }
 
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        public void Process(IConnection connection, SmtpCommand command)
         {
             SmtpCommand subrequest = new SmtpCommand(command.ArgumentsText);
-            Verb verbProcessor = SubVerbMap.GetVerbProcessor(subrequest.Verb);
+            IVerb verbProcessor = SubVerbMap.GetVerbProcessor(subrequest.Verb);
 
             if (verbProcessor != null)
             {
-                verbProcessor.Process(connectionProcessor, subrequest);
+                verbProcessor.Process(connection, subrequest);
             }
             else
             {
-                connectionProcessor.WriteResponse(
+                connection.WriteResponse(
                     new SmtpResponse(StandardSmtpResponseCode.CommandParameterNotImplemented,
                                      "Subcommand {0} not implemented", subrequest.Verb));
             }

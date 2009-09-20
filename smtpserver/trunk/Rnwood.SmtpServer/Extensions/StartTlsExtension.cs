@@ -8,28 +8,28 @@ using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Extensions
 {
-    public class StartTlsExtension : Extension
+    public class StartTlsExtension : IExtension
     {
-        public override ExtensionProcessor CreateExtensionProcessor(IConnectionProcessor processor)
+        public IExtensionProcessor CreateExtensionProcessor(IConnection connection)
         {
-            return new StartTlsExtensionProcessor(processor);
+            return new StartTlsExtensionProcessor(connection);
         }
 
         #region Nested type: StartTlsExtensionProcessor
 
-        private class StartTlsExtensionProcessor : ExtensionProcessor
+        private class StartTlsExtensionProcessor : IExtensionProcessor
         {
-            public StartTlsExtensionProcessor(IConnectionProcessor processor)
+            public StartTlsExtensionProcessor(IConnection connection)
             {
-                Processor = processor;
-                processor.VerbMap.SetVerbProcessor("STARTTLS", new StartTlsVerb());
+                connection = connection;
+                connection.VerbMap.SetVerbProcessor("STARTTLS", new StartTlsVerb());
             }
 
-            public IConnectionProcessor Processor { get; private set; }
+            public IConnection connection { get; private set; }
 
-            public override string[] GetEHLOKeywords()
+            public string[] GetEHLOKeywords()
             {
-                if (!Processor.Session.SecureConnection)
+                if (!connection.Session.SecureConnection)
                 {
                     return new[] {"STARTTLS"};
                 }
@@ -41,24 +41,24 @@ namespace Rnwood.SmtpServer.Extensions
         #endregion
     }
 
-    public class StartTlsVerb : Verb
+    public class StartTlsVerb : IVerb
     {
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        public void Process(IConnection connection, SmtpCommand command)
         {
-            connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady,
+            connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady,
                                                                "Ready to start TLS"));
-            connectionProcessor.ApplyStreamFilter(stream =>
+            connection.ApplyStreamFilter(stream =>
                                                       {
                                                           SslStream sslStream = new SslStream(stream);
                                                           sslStream.AuthenticateAsServer(
-                                                              connectionProcessor.Server.Behaviour.GetSSLCertificate(
-                                                                  connectionProcessor), false,
+                                                              connection.Server.Behaviour.GetSSLCertificate(
+                                                                  connection), false,
                                                               SslProtocols.Ssl2 | SslProtocols.Ssl3 | SslProtocols.Tls,
                                                               false);
                                                           return sslStream;
                                                       });
 
-            connectionProcessor.Session.SecureConnection = true;
+            connection.Session.SecureConnection = true;
         }
     }
 }
