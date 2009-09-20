@@ -9,12 +9,12 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("ConsoleApplication1")]
+[assembly: AssemblyTitle("Rnwood.SmtpServer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Hewlett-Packard Company")]
-[assembly: AssemblyProduct("ConsoleApplication1")]
-[assembly: AssemblyCopyright("Copyright © Hewlett-Packard Company 2009")]
+[assembly: AssemblyCompany("Robert Wood")]
+[assembly: AssemblyProduct("Rnwood.SmtpServer")]
+[assembly: AssemblyCopyright("Copyright © Robert Wood 2009")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -39,5 +39,5 @@ using System.Runtime.InteropServices;
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
 
-[assembly: AssemblyVersion("1.0.0.0")]
-[assembly: AssemblyFileVersion("1.0.0.0")]
+[assembly: AssemblyVersion("2.0.1.*")]
+[assembly: AssemblyFileVersion("2.0.1.*")]

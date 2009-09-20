@@ -9,12 +9,12 @@ using System.Runtime.InteropServices;
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
 
-[assembly: AssemblyTitle("Rnwood.SmtpServer.Example")]
+[assembly: AssemblyTitle("SimpleServer")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Figure Out Ltd")]
-[assembly: AssemblyProduct("Rnwood.SmtpServer.Example")]
-[assembly: AssemblyCopyright("Copyright © Figure Out Ltd 2009")]
+[assembly: AssemblyCompany("Robert Wood")]
+[assembly: AssemblyProduct("SimpleServer")]
+[assembly: AssemblyCopyright("Copyright © Robert Wood 2009")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 

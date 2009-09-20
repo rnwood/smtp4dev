@@ -3,13 +3,13 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{08B47A5D-D87C-4D48-856F-D30FDCCDB7F0}</ProjectGuid>
     <OutputType>Exe</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>Rnwood.SmtpServer.Example</RootNamespace>
-    <AssemblyName>Rnwood.SmtpServer.Example</AssemblyName>
+    <RootNamespace>SimpleServer</RootNamespace>
+    <AssemblyName>SimpleServer</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -49,7 +49,7 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\Rnwood.SmtpServer\Rnwood.SmtpServer.csproj">
+    <ProjectReference Include="..\..\Rnwood.SmtpServer.csproj">
       <Project>{C5BBE7C2-0EA0-4E50-95FF-BF07EA1B93FF}</Project>
       <Name>Rnwood.SmtpServer</Name>
     </ProjectReference>
