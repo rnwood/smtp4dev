@@ -12,9 +12,9 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Rnwood.SmtpServer.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Figure Out Ltd")]
+[assembly: AssemblyCompany("Robert Wood")]
 [assembly: AssemblyProduct("Rnwood.SmtpServer.Tests")]
-[assembly: AssemblyCopyright("Copyright © Figure Out Ltd 2009")]
+[assembly: AssemblyCopyright("Copyright © Robert Wood 2009")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
