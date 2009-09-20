@@ -22,7 +22,7 @@ namespace Rnwood.Smtp4dev
 
         #region IServerBehaviour Members
 
-        public void OnMessageReceived(Message message)
+        public void OnMessageReceived(IConnection connection, Message message)
         {
             if (MessageReceived != null)
             {
@@ -30,11 +30,11 @@ namespace Rnwood.Smtp4dev
             }
         }
 
-        public void OnSessionStarted(IConnectionProcessor processor, Session session)
+        public void OnSessionStarted(IConnection connection, Session session)
         {
         }
 
-        public void OnCommandReceived(IConnectionProcessor processor, SmtpCommand command)
+        public void OnCommandReceived(IConnection connection, SmtpCommand command)
         {
         }
 
@@ -58,7 +58,7 @@ namespace Rnwood.Smtp4dev
             get { return Settings.Default.EnableSSL; }
         }
 
-        public X509Certificate GetSSLCertificate(IConnectionProcessor processor)
+        public X509Certificate GetSSLCertificate(IConnection connection)
         {
             if (string.IsNullOrEmpty(Settings.Default.SSLCertificatePath))
             {
@@ -94,9 +94,9 @@ namespace Rnwood.Smtp4dev
             return new X509Certificate(Settings.Default.SSLCertificatePath);
         }
 
-        public Extension[] GetExtensions(IConnectionProcessor processor)
+        public IExtension[] GetExtensions(IConnection connection)
         {
-            List<Extension> extensions = new List<Extension>();
+            List<IExtension> extensions = new List<IExtension>();
 
             if (Settings.Default.Enable8BITMIME)
             {
@@ -121,13 +121,13 @@ namespace Rnwood.Smtp4dev
             return extensions.ToArray();
         }
 
-        public long? GetMaximumMessageSize(IConnectionProcessor processor)
+        public long? GetMaximumMessageSize(IConnection connection)
         {
             long value = Settings.Default.MaximumMessageSize;
             return value != 0 ? value : (long?) null;
         }
 
-        public void OnSessionCompleted(Session Session)
+        public void OnSessionCompleted(IConnection connection, Session Session)
         {
             if (SessionCompleted != null)
             {
@@ -135,37 +135,37 @@ namespace Rnwood.Smtp4dev
             }
         }
 
-        public int GetReceiveTimeout(IConnectionProcessor processor)
+        public int GetReceiveTimeout(IConnection connection)
         {
             return Settings.Default.ReceiveTimeout;
         }
 
-        public AuthenticationResult ValidateAuthenticationRequest(IConnectionProcessor processor,
-                                                                  AuthenticationRequest authenticationRequest)
+        public AuthenticationResult ValidateAuthenticationRequest(IConnection connection,
+                                                                  IAuthenticationRequest authenticationRequest)
         {
             return AuthenticationResult.Success;
         }
 
-        public void OnMessageStart(IConnectionProcessor processor, string from)
+        public void OnMessageStart(IConnection connection, string from)
         {
-            if (Settings.Default.RequireAuthentication && !processor.Session.Authenticated)
+            if (Settings.Default.RequireAuthentication && !connection.Session.Authenticated)
             {
                 throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
                                                                "Must authenticate before sending mail"));
             }
 
-            if (Settings.Default.RequireSecureConnection && !processor.Session.SecureConnection)
+            if (Settings.Default.RequireSecureConnection && !connection.Session.SecureConnection)
             {
                 throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
                                                                "Mail must be sent over secure connection"));
             }
         }
 
-        public bool IsAuthMechanismEnabled(IConnectionProcessor processor, IAuthMechanism authMechanism)
+        public bool IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism)
         {
             if (Settings.Default.OnlyAllowClearTextAuthOverSecureConnection)
             {
-                return (!authMechanism.IsPlainText) || processor.Session.SecureConnection;
+                return (!authMechanism.IsPlainText) || connection.Session.SecureConnection;
             }
 
             return true;

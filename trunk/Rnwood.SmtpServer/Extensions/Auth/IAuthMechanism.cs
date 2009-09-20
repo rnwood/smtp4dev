@@ -5,6 +5,6 @@
         string Identifier { get; }
 
         bool IsPlainText { get; }
-        IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor);
+        IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnection connection);
     }
 }

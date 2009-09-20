@@ -16,9 +16,9 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             get { return "LOGIN"; }
         }
 
-        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
+        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnection connection)
         {
-            return new LoginMechanismProcessor(connectionProcessor);
+            return new LoginMechanismProcessor(connection);
         }
 
         public bool IsPlainText
@@ -31,12 +31,12 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
     public class LoginMechanismProcessor : IAuthMechanismProcessor
     {
-        public LoginMechanismProcessor(IConnectionProcessor processor)
+        public LoginMechanismProcessor(IConnection connection)
         {
-            ConnectionProcessor = processor;
+            Connection = connection;
         }
 
-        protected IConnectionProcessor ConnectionProcessor { get; private set; }
+        protected IConnection Connection { get; private set; }
 
         private States State { get; set; }
 
@@ -49,7 +49,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             switch (State)
             {
                 case States.Initial:
-                    ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
+                    Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
                                                                        Convert.ToBase64String(
                                                                            Encoding.ASCII.GetBytes("Username:"))));
                     State = States.WaitingForUsername;
@@ -59,7 +59,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
                     username = DecodeBase64(data);
 
-                    ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
+                    Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
                                                                        Convert.ToBase64String(
                                                                            Encoding.ASCII.GetBytes("Password:"))));
                     State = States.WaitingForPassword;
@@ -69,10 +69,11 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                     string password = DecodeBase64(data);
                     State = States.Completed;
 
+                    Credentials = new UsernameAndPasswordAuthenticationRequest(username, password);
+
                     AuthenticationResult result =
-                        ConnectionProcessor.Server.Behaviour.ValidateAuthenticationRequest(ConnectionProcessor,
-                                                                                           new UsernameAndPasswordAuthenticationRequest
-                                                                                               (username, password));
+                        Connection.Server.Behaviour.ValidateAuthenticationRequest(Connection,
+                                                                                           Credentials);
 
                     switch (result)
                     {
@@ -88,6 +89,8 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                     throw new NotImplementedException();
             }
         }
+
+        public IAuthenticationRequest Credentials { get; set; }
 
         #endregion
 

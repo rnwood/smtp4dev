@@ -1,6 +1,6 @@
 ﻿namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class UsernameAndPasswordAuthenticationRequest : AuthenticationRequest
+    public class UsernameAndPasswordAuthenticationRequest : IAuthenticationRequest
     {
         public UsernameAndPasswordAuthenticationRequest(string username, string password)
         {

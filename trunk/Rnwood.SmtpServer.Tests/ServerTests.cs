@@ -20,7 +20,7 @@ namespace Rnwood.SmtpServer.Tests
 
         private Server NewServer()
         {
-            return new Server(new DefaultServerBehaviour(2525));
+            return new DefaultServer(2525);
         }
 
         [Test]

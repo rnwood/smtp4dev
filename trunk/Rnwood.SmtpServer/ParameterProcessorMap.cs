@@ -11,9 +11,9 @@ namespace Rnwood.SmtpServer
         private readonly Dictionary<string, IParameterProcessor> _processors =
             new Dictionary<string, IParameterProcessor>();
 
-        public void SetProcessor(string key, IParameterProcessor processor)
+        public void SetProcessor(string key, IParameterProcessor connection)
         {
-            _processors[key] = processor;
+            _processors[key] = connection;
         }
 
         public IParameterProcessor GetProcessor(string key)

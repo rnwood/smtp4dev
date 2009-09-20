@@ -6,19 +6,19 @@ using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer
 {
-    public class HeloVerb : Verb
+    public class HeloVerb : IVerb
     {
-        public override void Process(IConnectionProcessor connectionProcessor, SmtpCommand command)
+        public void Process(IConnection connection, SmtpCommand command)
         {
-            if (!string.IsNullOrEmpty(connectionProcessor.Session.ClientName))
+            if (!string.IsNullOrEmpty(connection.Session.ClientName))
             {
-                connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
                                                                    "You already said HELO"));
                 return;
             }
 
-            connectionProcessor.Session.ClientName = command.Arguments[0];
-            connectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Nice to meet you"));
+            connection.Session.ClientName = command.Arguments[0];
+            connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Nice to meet you"));
         }
     }
 }

@@ -13,10 +13,6 @@ namespace Rnwood.SmtpServer
         private Thread _coreThread;
         private TcpListener _listener;
 
-        public Server() : this(new DefaultServerBehaviour())
-        {
-        }
-
         public Server(IServerBehaviour behaviour)
         {
             Behaviour = behaviour;
@@ -71,8 +67,10 @@ namespace Rnwood.SmtpServer
         }
 
         /// <summary>
-        /// Starts this server on .
+        /// Runs the server asynchronously. This method returns once the server has been started.
+        /// To stop the server call the <see cref="Stop()"/> method.
         /// </summary>
+        /// <exception cref="System.InvalidOperationException">if the server is already running.</exception>
         public void Start()
         {
             if (IsRunning)
@@ -87,6 +85,10 @@ namespace Rnwood.SmtpServer
         }
 
 
+        /// <summary>
+        /// Stops the running server. Any existing connections are continued.
+        /// </summary>
+        /// <exception cref="System.InvalidOperationException">if the server is not running.</exception>
         public void Stop()
         {
             if (!IsRunning)
@@ -102,8 +104,8 @@ namespace Rnwood.SmtpServer
 
         private void ConnectionThreadWork(object tcpClient)
         {
-            ConnectionProcessor connectionProcessor = new ConnectionProcessor(this, (TcpClient) tcpClient);
-            connectionProcessor.Start();
+            Connection connection = new Connection(this, (TcpClient) tcpClient);
+            connection.Start();
         }
     }
 }

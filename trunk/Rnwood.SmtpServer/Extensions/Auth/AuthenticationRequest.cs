@@ -1,6 +1,6 @@
 ﻿namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public abstract class AuthenticationRequest
+    public interface IAuthenticationRequest
     {
     }
 }

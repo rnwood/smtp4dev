@@ -7,24 +7,24 @@ using System.Net.Mail;
 
 namespace Rnwood.SmtpServer.Extensions
 {
-    public class SizeExtension : Extension
+    public class SizeExtension : IExtension
     {
-        public override ExtensionProcessor CreateExtensionProcessor(IConnectionProcessor processor)
+        public IExtensionProcessor CreateExtensionProcessor(IConnection connection)
         {
-            return new SizeExtensionProcessor(processor);
+            return new SizeExtensionProcessor(connection);
         }
 
         #region Nested type: SizeExtensionProcessor
 
-        private class SizeExtensionProcessor : ExtensionProcessor, IParameterProcessor
+        private class SizeExtensionProcessor : IExtensionProcessor, IParameterProcessor
         {
-            public SizeExtensionProcessor(IConnectionProcessor processor)
+            public SizeExtensionProcessor(IConnection connection)
             {
-                Processor = processor;
-                processor.MailVerb.FromSubVerb.ParameterProcessorMap.SetProcessor("SIZE", this);
+                connection = connection;
+                connection.MailVerb.FromSubVerb.ParameterProcessorMap.SetProcessor("SIZE", this);
             }
 
-            public IConnectionProcessor Processor { get; private set; }
+            public IConnection connection { get; private set; }
 
             #region IParameterProcessor Members
 
@@ -36,7 +36,7 @@ namespace Rnwood.SmtpServer.Extensions
 
                     if (int.TryParse(value, out messageSize) && messageSize > 0)
                     {
-                        long? maxMessageSize = Processor.Server.Behaviour.GetMaximumMessageSize(Processor);
+                        long? maxMessageSize = connection.Server.Behaviour.GetMaximumMessageSize(connection);
 
                         if (maxMessageSize.HasValue && messageSize > maxMessageSize)
                         {
@@ -54,9 +54,9 @@ namespace Rnwood.SmtpServer.Extensions
 
             #endregion
 
-            public override string[] GetEHLOKeywords()
+            public string[] GetEHLOKeywords()
             {
-                long? maxMessageSize = Processor.Server.Behaviour.GetMaximumMessageSize(Processor);
+                long? maxMessageSize = connection.Server.Behaviour.GetMaximumMessageSize(connection);
 
                 if (maxMessageSize.HasValue)
                 {

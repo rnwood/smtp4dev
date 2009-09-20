@@ -16,9 +16,9 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             get { return "CRAM-MD5"; }
         }
 
-        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnectionProcessor connectionProcessor)
+        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnection connection)
         {
-            return new CramMd5MechanismProcessor(connectionProcessor);
+            return new CramMd5MechanismProcessor(connection);
         }
 
         public bool IsPlainText
@@ -35,12 +35,12 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
         private string _challenge;
 
-        public CramMd5MechanismProcessor(IConnectionProcessor processor)
+        public CramMd5MechanismProcessor(IConnection connection)
         {
-            ConnectionProcessor = processor;
+            Connection = connection;
         }
 
-        protected IConnectionProcessor ConnectionProcessor { get; set; }
+        protected IConnection Connection { get; set; }
 
         #region IAuthMechanismProcessor Members
 
@@ -53,11 +53,11 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 challenge.Append(".");
                 challenge.Append(DateTime.Now.Ticks.ToString());
                 challenge.Append("@");
-                challenge.Append(ConnectionProcessor.Server.Behaviour.DomainName);
+                challenge.Append(Connection.Server.Behaviour.DomainName);
                 _challenge = challenge.ToString();
 
                 string base64Challenge = Convert.ToBase64String(Encoding.ASCII.GetBytes(challenge.ToString()));
-                ConnectionProcessor.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
+                Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
                                                                    base64Challenge));
                 return AuthMechanismProcessorStatus.Continue;
             }
@@ -75,10 +75,10 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 string username = responseparts[0];
                 string hash = responseparts[1];
 
+                Credentials = new CramMd5AuthenticationRequest(username, _challenge, hash);
+
                 AuthenticationResult result =
-                    ConnectionProcessor.Server.Behaviour.ValidateAuthenticationRequest(ConnectionProcessor,
-                                                                                       new CramMd5AuthenticationRequest(
-                                                                                           username, _challenge, hash));
+                    Connection.Server.Behaviour.ValidateAuthenticationRequest(Connection, Credentials);
 
                 switch (result)
                 {
@@ -89,10 +89,10 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                         return AuthMechanismProcessorStatus.Failed;
                         break;
                 }
-
-                return AuthMechanismProcessorStatus.Success;
             }
         }
+
+        public IAuthenticationRequest Credentials { get; private set; }
 
         #endregion
 

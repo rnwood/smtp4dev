@@ -9,16 +9,16 @@ namespace Rnwood.SmtpServer.Verbs
 {
     public class VerbMap
     {
-        private readonly Dictionary<string, Verb> _processorVerbs = new Dictionary<string, Verb>();
+        private readonly Dictionary<string, IVerb> _processorVerbs = new Dictionary<string, IVerb>();
 
-        public void SetVerbProcessor(string verb, Verb verbProcessor)
+        public void SetVerbProcessor(string verb, IVerb verbProcessor)
         {
             _processorVerbs[verb] = verbProcessor;
         }
 
-        public Verb GetVerbProcessor(string verb)
+        public IVerb GetVerbProcessor(string verb)
         {
-            foreach (KeyValuePair<string, Verb> processorEntry in _processorVerbs)
+            foreach (KeyValuePair<string, IVerb> processorEntry in _processorVerbs)
             {
                 if (string.Equals(processorEntry.Key, verb, StringComparison.InvariantCultureIgnoreCase))
                 {
