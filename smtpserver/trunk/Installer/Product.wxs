@@ -107,8 +107,9 @@
             <File Id="F01" Name="$(var.Rnwood.Smtp4dev.TargetFileName)" Source="$(var.Rnwood.Smtp4dev.TargetPath)"
 />
             <File Id="F02" Name="$(var.Rnwood.Smtp4dev.TargetFileName).config" Source="$(var.Rnwood.Smtp4dev.TargetPath).config"/>
-            <File Id="F03" Name="Rnwood.SmtpServer.dll" Source="..\Rnwood.Smtp4dev\bin\Release\Rnwood.SmtpServer.dll"/>
-            <File Id="F05" Name="sharpmimetools.dll" Source="..\Rnwood.Smtp4dev\bin\Release\sharpmimetools.dll"/>
+            <File Id="F03" Name="$(var.Rnwood.SmtpServer.TargetFileName)" Source="$(var.Rnwood.SmtpServer.TargetPath)"/>
+            <File Id="F05" Name="sharpmimetools.dll" Source="..\lib\sharpmimetools.dll"/>
+            <File Id="F06" Name="log4net.dll" Source="..\lib\log4net.dll"/>
             <Shortcut Id="S01" Directory="StartMenuDir"
 Name="smtp4dev" Target="ProductFeature" Show="normal" Icon="Icon.exe"
 WorkingDirectory="TARGETDIR"/>

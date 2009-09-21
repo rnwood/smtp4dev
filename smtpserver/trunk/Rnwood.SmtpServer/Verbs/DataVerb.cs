@@ -10,7 +10,7 @@ namespace Rnwood.SmtpServer
 {
     public class DataVerb : IVerb
     {
-        public void Process(IConnection connection, SmtpCommand command)
+        public virtual void Process(IConnection connection, SmtpCommand command)
         {
             if (connection.CurrentMessage == null)
             {

@@ -150,7 +150,7 @@ namespace Rnwood.Smtp4dev
         {
             if (Settings.Default.RequireAuthentication && !connection.Session.Authenticated)
             {
-                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationRequired,
                                                                "Must authenticate before sending mail"));
             }
 

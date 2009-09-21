@@ -21,15 +21,15 @@ namespace Rnwood.SmtpServer.Extensions
         {
             public StartTlsExtensionProcessor(IConnection connection)
             {
-                connection = connection;
-                connection.VerbMap.SetVerbProcessor("STARTTLS", new StartTlsVerb());
+                Connection = connection;
+                Connection.VerbMap.SetVerbProcessor("STARTTLS", new StartTlsVerb());
             }
 
-            public IConnection connection { get; private set; }
+            public IConnection Connection { get; private set; }
 
             public string[] GetEHLOKeywords()
             {
-                if (!connection.Session.SecureConnection)
+                if (!Connection.Session.SecureConnection)
                 {
                     return new[] {"STARTTLS"};
                 }
