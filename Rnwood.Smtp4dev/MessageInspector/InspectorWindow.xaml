@@ -75,7 +75,7 @@
             </Grid>
         </TabItem>
         <TabItem Header="Source">
-            <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Source, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+            <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
         </TabItem>
     </TabControl>
 </Window>

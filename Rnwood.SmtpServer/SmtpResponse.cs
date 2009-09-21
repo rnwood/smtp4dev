@@ -69,6 +69,7 @@ namespace Rnwood.SmtpServer
         CommandParameterNotImplemented = 504,
         ExceededStorageAllocation = 552,
         AuthenticationFailure = 535,
+        AuthenticationRequired = 530,
 
         SystemStatusOrHelpReply = 211,
         HelpMessage = 214,

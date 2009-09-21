@@ -20,11 +20,11 @@ namespace Rnwood.SmtpServer.Extensions
         {
             public SizeExtensionProcessor(IConnection connection)
             {
-                connection = connection;
-                connection.MailVerb.FromSubVerb.ParameterProcessorMap.SetProcessor("SIZE", this);
+                Connection = connection;
+                Connection.MailVerb.FromSubVerb.ParameterProcessorMap.SetProcessor("SIZE", this);
             }
 
-            public IConnection connection { get; private set; }
+            public IConnection Connection { get; private set; }
 
             #region IParameterProcessor Members
 
@@ -36,7 +36,7 @@ namespace Rnwood.SmtpServer.Extensions
 
                     if (int.TryParse(value, out messageSize) && messageSize > 0)
                     {
-                        long? maxMessageSize = connection.Server.Behaviour.GetMaximumMessageSize(connection);
+                        long? maxMessageSize = Connection.Server.Behaviour.GetMaximumMessageSize(Connection);
 
                         if (maxMessageSize.HasValue && messageSize > maxMessageSize)
                         {
@@ -56,7 +56,7 @@ namespace Rnwood.SmtpServer.Extensions
 
             public string[] GetEHLOKeywords()
             {
-                long? maxMessageSize = connection.Server.Behaviour.GetMaximumMessageSize(connection);
+                long? maxMessageSize = Connection.Server.Behaviour.GetMaximumMessageSize(Connection);
 
                 if (maxMessageSize.HasValue)
                 {

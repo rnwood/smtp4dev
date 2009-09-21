@@ -3,6 +3,7 @@
 using System;
 using System.IO;
 using Rnwood.SmtpServer;
+using anmar.SharpMimeTools;
 
 #endregion
 
@@ -34,7 +35,21 @@ namespace Rnwood.Smtp4dev
 
         public string Subject
         {
-            get { return Message.Contents.Header.Subject; }
+            get { return Parts.Header.Subject; }
+        }
+
+        private SharpMimeMessage _contents;
+        public SharpMimeMessage Parts
+        {
+            get
+            {
+                if (_contents == null)
+                {
+                    _contents = new SharpMimeMessage(new MemoryStream(Message.Data));
+                }
+
+                return _contents;
+            }
         }
 
         public bool HasBeenViewed { get; private set; }

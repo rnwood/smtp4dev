@@ -104,6 +104,13 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 while (status == AuthMechanismProcessorStatus.Continue)
                 {
                     string response = connection.ReadLine();
+
+                    if (response == "*")
+                    {
+                        connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments, "Authentication aborted"));
+                        return;
+                    }
+
                     status = authMechanismProcessor.ProcessResponse(response);
                 }
 
