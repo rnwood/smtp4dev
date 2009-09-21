@@ -7,6 +7,8 @@ using System.IO;
 using System.Linq;
 using anmar.SharpMimeTools;
 using Microsoft.Win32;
+using System.Collections.Specialized;
+using System.Collections;
 
 #endregion
 
@@ -37,17 +39,13 @@ namespace Rnwood.Smtp4dev.MessageInspector
 
         public MessageViewModel[] Children
         {
-            get { return Message.Select(part => new MessageViewModel(part)).ToArray(); }
+            get { return Message.Cast<SharpMimeMessage>().Select(part => new MessageViewModel(part)).ToArray(); }
         }
 
         public HeaderViewModel[] Headers
         {
-            get { return Message.Header.Select(de => new HeaderViewModel(de.Key, de.Value)).ToArray(); }
-        }
-
-        public string Source
-        {
-            get { return Message.ToString(); }
+            get {
+                return Message.Header.Cast<DictionaryEntry>().Select(de => new HeaderViewModel((string) de.Key, (string)de.Value)).ToArray(); }
         }
 
         public string Data

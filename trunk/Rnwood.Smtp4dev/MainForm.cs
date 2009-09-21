@@ -437,7 +437,7 @@ namespace Rnwood.Smtp4dev
         {
             message.MarkAsViewed();
 
-            InspectorWindow form = new InspectorWindow(message.Message.Contents);
+            InspectorWindow form = new InspectorWindow(message.Parts);
             form.Show();
 
             messageGrid.Refresh();
