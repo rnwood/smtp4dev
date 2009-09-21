@@ -66,7 +66,7 @@ namespace Rnwood.SmtpServer.Extensions
 
         #endregion
 
-        public void Process(IConnection connection, SmtpCommand command)
+        public override void Process(IConnection connection, SmtpCommand command)
         {
             if (_eightBitMessage)
             {
