@@ -34,6 +34,8 @@ namespace Rnwood.SmtpServer
 
         void OnMessageReceived(IConnection connection, Message message);
 
+        void OnMessageRecipientAdding(IConnection connection, Message message, string recipient);
+
         /// <summary>
         /// Gets the maximum allowed size of the message for the specified connection.
         /// </summary>
