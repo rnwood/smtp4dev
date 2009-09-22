@@ -26,7 +26,9 @@ namespace Rnwood.SmtpServer
                 return;
             }
 
-            connection.CurrentMessage.ToList.Add(command.ArgumentsText.TrimStart('<').TrimEnd('>'));
+            string address = command.ArgumentsText.TrimStart('<').TrimEnd('>');
+            connection.Server.Behaviour.OnMessageRecipientAdding(connection, connection.CurrentMessage, address);
+            connection.CurrentMessage.ToList.Add(address);
             connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Recipient accepted"));
         }
     }
