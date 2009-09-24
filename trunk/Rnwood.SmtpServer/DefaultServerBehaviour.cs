@@ -1,10 +1,12 @@
 ﻿#region
 
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Extensions.Auth;
+using System.Linq;
 
 #endregion
 
@@ -32,7 +34,6 @@ namespace Rnwood.SmtpServer
         public DefaultServerBehaviour(int portNumber, X509Certificate sslCertificate)
         {
             PortNumber = portNumber;
-            RunOverSSL = sslCertificate != null;
             _sslCertificate = sslCertificate;
         }
 
@@ -58,7 +59,15 @@ namespace Rnwood.SmtpServer
 
         public virtual int PortNumber { get; private set; }
 
-        public virtual bool RunOverSSL { get; private set; }
+        public bool IsSSLEnabled(IConnection connection)
+        {
+            return _sslCertificate != null;
+        }
+
+        public bool IsSessionLoggingEnabled(IConnection connection)
+        {
+            return false;
+        }
 
         public virtual long? GetMaximumMessageSize(IConnection connection)
         {
@@ -70,9 +79,20 @@ namespace Rnwood.SmtpServer
             return _sslCertificate;
         }
 
-        public virtual IExtension[] GetExtensions(IConnection connection)
+        public void OnMessageRecipientAdding(IConnection connection, Message message, string recipient)
         {
-            return new IExtension[] {new EightBitMimeExtension(), new SizeExtension()};
+        }
+
+        public virtual IEnumerable<IExtension> GetExtensions(IConnection connection)
+        {
+            List<IExtension> extensions = new List<IExtension>(new IExtension[] { new EightBitMimeExtension(), new SizeExtension() });
+
+            if (_sslCertificate != null)
+            {
+                extensions.Add(new StartTlsExtension());
+            }
+
+            return extensions;
         }
 
         public virtual void OnSessionCompleted(IConnection connection, Session session)
@@ -93,12 +113,17 @@ namespace Rnwood.SmtpServer
 
         public virtual int GetReceiveTimeout(IConnection connection)
         {
-            return (int) new TimeSpan(0, 5, 0).TotalMilliseconds;
+            return (int)new TimeSpan(0, 5, 0).TotalMilliseconds;
         }
 
-        public virtual AuthenticationResult ValidateAuthenticationRequest(IConnection connection,
+        public virtual AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
                                                                           IAuthenticationRequest request)
         {
+            if (AuthenticationCredentialsValidationRequired != null)
+            {
+                AuthenticationCredentialsValidationRequired(this, new AuthenticationCredentialsValidationEventArgs(request));
+            }
+
             return AuthenticationResult.Failure;
         }
 
@@ -120,6 +145,19 @@ namespace Rnwood.SmtpServer
         public event EventHandler<MessageReceivedEventArgs> MessageReceived;
         public event EventHandler<SessionEventArgs> SessionCompleted;
         public event EventHandler<SessionEventArgs> SessionStarted;
+        public event EventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequired;
+    }
+
+    public class AuthenticationCredentialsValidationEventArgs : EventArgs
+    {
+        public AuthenticationCredentialsValidationEventArgs(IAuthenticationRequest credentials)
+        {
+            Credentials = credentials;
+        }
+
+        public IAuthenticationRequest Credentials { get; private set; }
+
+        public AuthenticationResult AuthenticationResult { get; set; }
     }
 
     public class MessageReceivedEventArgs : EventArgs

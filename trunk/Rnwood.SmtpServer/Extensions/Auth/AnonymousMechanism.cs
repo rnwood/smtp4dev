@@ -38,7 +38,7 @@
             Credentials = new AnonymousAuthenticationRequest();
 
             AuthenticationResult result =
-    Connection.Server.Behaviour.ValidateAuthenticationRequest(Connection, Credentials);
+    Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials);
 
             switch (result)
             {
