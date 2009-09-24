@@ -1,5 +1,6 @@
 #region
 
+using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Rnwood.SmtpServer.Extensions;
@@ -26,11 +27,12 @@ namespace Rnwood.SmtpServer
         /// </summary>
         /// <value>The TCP port number.</value>
         int PortNumber { get; }
+
         /// <summary>
         /// Gets a value indicating whether to run in SSL mode.
         /// </summary>
         /// <value><c>true</c> if the server should run in SSL mode otherwise, <c>false</c>.</value>
-        bool RunOverSSL { get; }
+        bool IsSSLEnabled(IConnection connection);
 
         void OnMessageReceived(IConnection connection, Message message);
 
@@ -50,12 +52,14 @@ namespace Rnwood.SmtpServer
         /// <returns></returns>
         X509Certificate GetSSLCertificate(IConnection connection);
 
+        bool IsSessionLoggingEnabled(IConnection connection);
+
         /// <summary>
         /// Gets the extensions that should be enabled for the specified connection.
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <returns></returns>
-        IExtension[] GetExtensions(IConnection connection);
+        IEnumerable<IExtension> GetExtensions(IConnection connection);
 
         /// <summary>
         /// Called when a SMTP session is completed.
@@ -85,7 +89,7 @@ namespace Rnwood.SmtpServer
         /// <param name="connection">The connection.</param>
         /// <param name="authenticationRequest">The authentication request.</param>
         /// <returns></returns>
-        AuthenticationResult ValidateAuthenticationRequest(IConnection connection,
+        AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
                                                            IAuthenticationRequest authenticationRequest);
 
         /// <summary>

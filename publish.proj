@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<Version>2.0alpha1</Version>
+		<Version>2.0alpha2</Version>
 		<MSBuildCommunityTasksPath>.</MSBuildCommunityTasksPath>
 	</PropertyGroup>
 
@@ -24,7 +24,7 @@
 		<Exec Command="svn export --force . Publish\Source"/>
 		
 		<ItemGroup>
-			<SourceFiles Include="Publish\Source\**\*.*" Exclude="Publish\*"/>
+			<SourceFiles Include="Publish\Source\**\*.*" Exclude="Publish\*;**\*.pdb" />
 		</ItemGroup>
 		
 		<Zip Files="@(SourceFiles)" ZipFileName="Publish\smtp4dev-$(Version)-source.zip" WorkingDirectory="Publish\Source" ZipLevel="9" />
