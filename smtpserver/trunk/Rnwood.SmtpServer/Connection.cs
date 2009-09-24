@@ -153,7 +153,7 @@ namespace Rnwood.SmtpServer
             {
                 Server.Behaviour.OnSessionStarted(this, Session);
 
-                if (Server.Behaviour.RunOverSSL)
+                if (Server.Behaviour.IsSSLEnabled(this))
                 {
                     SslStream sslStream = new SslStream(_stream);
                     sslStream.AuthenticateAsServer(Server.Behaviour.GetSSLCertificate(this));
