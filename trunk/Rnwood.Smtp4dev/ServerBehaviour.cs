@@ -30,6 +30,11 @@ namespace Rnwood.Smtp4dev
             }
         }
 
+        public void OnMessageRecipientAdding(IConnection connection, Message message, string recipient)
+        {
+            
+        }
+
         public void OnSessionStarted(IConnection connection, Session session)
         {
         }
@@ -53,9 +58,14 @@ namespace Rnwood.Smtp4dev
             get { return Settings.Default.PortNumber; }
         }
 
-        public bool RunOverSSL
+        public bool IsSSLEnabled(IConnection connection)
         {
-            get { return Settings.Default.EnableSSL; }
+            return Settings.Default.EnableSSL;
+        }
+
+        public bool IsSessionLoggingEnabled(IConnection connection)
+        {
+            return true;
         }
 
         public X509Certificate GetSSLCertificate(IConnection connection)
@@ -94,7 +104,7 @@ namespace Rnwood.Smtp4dev
             return new X509Certificate(Settings.Default.SSLCertificatePath);
         }
 
-        public IExtension[] GetExtensions(IConnection connection)
+        public IEnumerable<IExtension> GetExtensions(IConnection connection)
         {
             List<IExtension> extensions = new List<IExtension>();
 
@@ -118,7 +128,7 @@ namespace Rnwood.Smtp4dev
                 extensions.Add(_sizeExtension);
             }
 
-            return extensions.ToArray();
+            return extensions;
         }
 
         public long? GetMaximumMessageSize(IConnection connection)
@@ -140,7 +150,7 @@ namespace Rnwood.Smtp4dev
             return Settings.Default.ReceiveTimeout;
         }
 
-        public AuthenticationResult ValidateAuthenticationRequest(IConnection connection,
+        public AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
                                                                   IAuthenticationRequest authenticationRequest)
         {
             return AuthenticationResult.Success;

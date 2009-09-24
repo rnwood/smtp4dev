@@ -25,6 +25,7 @@ namespace Rnwood.Smtp4dev
         private readonly BindingList<SessionViewModel> _sessions = new BindingList<SessionViewModel>();
         private bool _firstTimeShown = true;
         private Server _server;
+        private bool _quitting;
 
         public MainForm(LaunchInfo launchInfo)
         {
@@ -289,6 +290,8 @@ namespace Rnwood.Smtp4dev
             {
                 StopServer();
             }
+            trayIcon.Visible = false;
+            _quitting = true;
             Application.Exit();
         }
 
@@ -506,10 +509,13 @@ namespace Rnwood.Smtp4dev
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (Settings.Default.MinimizeToSysTray)
+            if (!_quitting)
             {
-                WindowState = FormWindowState.Minimized;
-                e.Cancel = true;
+                if (Settings.Default.MinimizeToSysTray)
+                {
+                    WindowState = FormWindowState.Minimized;
+                    e.Cancel = true;
+                }
             }
         }
     }

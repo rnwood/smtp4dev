@@ -82,7 +82,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             Credentials = new UsernameAndPasswordAuthenticationRequest(username, password);
 
             AuthenticationResult result =
-                Connection.Server.Behaviour.ValidateAuthenticationRequest(Connection, Credentials);
+                Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials);
             switch (result)
             {
                 case AuthenticationResult.Success:
