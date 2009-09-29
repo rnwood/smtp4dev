@@ -13,6 +13,7 @@ using anmar.SharpMimeTools;
 using Rnwood.Smtp4dev.MessageInspector;
 using Rnwood.Smtp4dev.Properties;
 using Rnwood.SmtpServer;
+using Message=Rnwood.SmtpServer.Message;
 
 #endregion
 
@@ -150,7 +151,9 @@ namespace Rnwood.Smtp4dev
             {
                 Invoke((MethodInvoker) (() =>
                                             {
+
                                                 StopServer();
+                                                
                                                 statusLabel.Text = "Server failed: " + exception.Message;
 
                                                 trayIcon.ShowBalloonTip(3000, "Server failed", exception.Message,
@@ -256,6 +259,7 @@ namespace Rnwood.Smtp4dev
         private void DeleteAllMessages()
         {
             _messages.Clear();
+            _sessions.Clear();
         }
 
         private void messageGrid_DoubleClick(object sender, EventArgs e)
@@ -302,7 +306,11 @@ namespace Rnwood.Smtp4dev
             statusLabel.Text = "Not listening";
             pictureBox2.Visible = stopListeningButton.Visible = false;
             pictureBox3.Visible = startListeningButton.Visible = true;
-            _server.Stop();
+
+            if (_server.IsRunning)
+            {
+                _server.Stop();
+            }
         }
 
         private void toolStripMenuItem1_Click(object sender, EventArgs e)
@@ -375,6 +383,11 @@ namespace Rnwood.Smtp4dev
             foreach (MessageViewModel message in SelectedMessages)
             {
                 _messages.Remove(message);
+            }
+
+            foreach (SessionViewModel session in _sessions.Where(s => !_messages.Any(mvm => s.Session.Messages.Contains(mvm.Message))).ToArray())
+            {
+                _sessions.Remove(session);
             }
         }
 
@@ -504,6 +517,11 @@ namespace Rnwood.Smtp4dev
             foreach (SessionViewModel session in SelectedSessions)
             {
                 _sessions.Remove(session);
+
+                foreach (MessageViewModel message in _messages.Where(mvm => session.Session.Messages.Any( m => mvm.Message == m)).ToArray())
+                {
+                    _messages.Remove(message);
+                }
             }
         }
 
