@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{957A6C18-3016-403E-A04D-926D050BDEAE}</ProjectGuid>
     <OutputType>WinExe</OutputType>
@@ -139,6 +139,10 @@
     <None Include="Resources\root.cer" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Rnwood.AutoUpdate\Rnwood.AutoUpdate.csproj">
+      <Project>{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}</Project>
+      <Name>Rnwood.AutoUpdate</Name>
+    </ProjectReference>
     <ProjectReference Include="..\Rnwood.SmtpServer\Rnwood.SmtpServer.csproj">
       <Project>{C5BBE7C2-0EA0-4E50-95FF-BF07EA1B93FF}</Project>
       <Name>Rnwood.SmtpServer</Name>

@@ -22,6 +22,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Examples", "Examples", "{FD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleServer", "Rnwood.SmtpServer\Examples\SimpleServer\SimpleServer.csproj", "{08B47A5D-D87C-4D48-856F-D30FDCCDB7F0}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rnwood.AutoUpdate", "Rnwood.AutoUpdate\Rnwood.AutoUpdate.csproj", "{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -81,6 +83,16 @@ Global
 		{08B47A5D-D87C-4D48-856F-D30FDCCDB7F0}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{08B47A5D-D87C-4D48-856F-D30FDCCDB7F0}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{08B47A5D-D87C-4D48-856F-D30FDCCDB7F0}.Release|x86.ActiveCfg = Release|Any CPU
+		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

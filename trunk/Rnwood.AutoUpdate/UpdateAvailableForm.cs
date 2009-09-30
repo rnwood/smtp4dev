@@ -18,7 +18,7 @@ namespace Rnwood.AutoUpdate
             InitializeComponent();
             label1.Text = string.Format(label1.Text, "smtp4dev");
             Release = release;
-            currentVersion.Text = CurrentVersion.ToString();
+            currVersion.Text = currentVersion.ToString();
             updateVersion.Text = release.Version.ToString();
             detailsLink.Text = release.DetailsURL.ToString();
         }
@@ -27,7 +27,18 @@ namespace Rnwood.AutoUpdate
 
         private void detailsLink_LinkClicked(object sender, LinkLabelLinkClickedEventArgs e)
         {
-            Process.Start(Release.DetailsURL.ToString());
+            try
+            {
+                Process.Start(Release.DetailsURL.ToString());
+            }
+            catch
+            {
+                MessageBox.Show(
+                    "Failed to launch release details. Please check you have an active Internet connection and try again.",
+                    "Update error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+
+
         }
     }
 }
