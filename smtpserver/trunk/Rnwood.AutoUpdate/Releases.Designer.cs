@@ -57,15 +57,14 @@ namespace Rnwood.AutoUpdate
         private releaseStatus statusField;
 
         [System.Xml.Serialization.XmlElementAttribute(DataType = "anyURI")]
-        public Uri InstallerURL { get; set; }
+        public string InstallerURL { get; set; }
 
         [System.Xml.Serialization.XmlElementAttribute(DataType = "anyURI")]
-        public Uri DetailsURL { get; set; }
+        public string DetailsURL { get; set; }
 
         [System.Xml.Serialization.XmlAttributeAttribute()]
-        public Version Version { get; set; }
-
-
+        public string version { get; set; }
+        
         public Release()
         {
             this.statusField = releaseStatus.release;
@@ -73,7 +72,7 @@ namespace Rnwood.AutoUpdate
 
         [System.Xml.Serialization.XmlAttributeAttribute()]
         [System.ComponentModel.DefaultValueAttribute(releaseStatus.release)]
-        public releaseStatus Status
+        public releaseStatus status
         {
             get
             {

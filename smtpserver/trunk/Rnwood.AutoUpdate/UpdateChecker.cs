@@ -9,9 +9,9 @@ using System.Windows.Forms;
 
 namespace Rnwood.AutoUpdate
 {
-    public class AutoUpdater
+    public class UpdateChecker
     {
-        public AutoUpdater(Uri releaseFileUrl, Version currentVersion)
+        public UpdateChecker(Uri releaseFileUrl, Version currentVersion)
         {
             ReleaseFileUrl = releaseFileUrl;
             CurrentVersion = currentVersion;
@@ -28,8 +28,19 @@ namespace Rnwood.AutoUpdate
                 UpdateAvailableForm form = new UpdateAvailableForm(latestRelease, CurrentVersion);
                 if (form.ShowDialog() == System.Windows.Forms.DialogResult.OK)
                 {
-                    latestRelease.InitiateDownload();
-                    Application.Exit();
+                    try
+                    {
+                        latestRelease.InitiateDownload();
+                        Environment.Exit(0);
+                    }
+                    catch
+                    {
+                        MessageBox.Show(
+                            "Failed to initiate download. Please check you have an active Internet connection and try again.",
+                            "Update error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                    
+                    
                 }
             }
 
@@ -38,7 +49,7 @@ namespace Rnwood.AutoUpdate
         public Release GetLatestRelease(bool includePreRelease)
         {
             Release[] releases = GetReleases();
-            return releases.FirstOrDefault(r => includePreRelease || r.Status == releaseStatus.release);
+            return releases.FirstOrDefault(r => includePreRelease || r.status == releaseStatus.release);
         }
 
         private Release[] _releases;
@@ -51,7 +62,8 @@ namespace Rnwood.AutoUpdate
                 using (Stream stream = webClient.OpenRead(ReleaseFileUrl))
                 {
                     XmlSerializer ser = new XmlSerializer(typeof(Releases));
-                    _releases = ((Releases)ser.Deserialize(stream)).Release.OrderByDescending(r => r.Version).ToArray();
+                    Releases releases = ((Releases)ser.Deserialize(stream));
+                    _releases = releases.Release.OrderByDescending(r => r.Version).ToArray();
                 }
             }
             return _releases;
