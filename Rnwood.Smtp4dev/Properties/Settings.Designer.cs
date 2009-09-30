@@ -322,5 +322,16 @@ namespace Rnwood.Smtp4dev.Properties {
                 this["OnlyAllowClearTextAuthOverSecureConnection"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        public global::System.Nullable<System.DateTime> LastUpdateCheck {
+            get {
+                return ((global::System.Nullable<System.DateTime>)(this["LastUpdateCheck"]));
+            }
+            set {
+                this["LastUpdateCheck"] = value;
+            }
+        }
     }
 }

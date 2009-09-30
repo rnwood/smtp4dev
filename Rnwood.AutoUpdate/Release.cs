@@ -12,5 +12,13 @@ namespace Rnwood.AutoUpdate
         {
             Process.Start(InstallerURL.ToString());
         }
+
+        public Version Version
+        {
+            get
+            {
+                return new Version(version);
+            }
+        }
     }
 }
