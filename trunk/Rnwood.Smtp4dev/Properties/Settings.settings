@@ -77,5 +77,8 @@
     <Setting Name="OnlyAllowClearTextAuthOverSecureConnection" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
+    <Setting Name="LastUpdateCheck" Type="System.Nullable&lt;System.DateTime&gt;" Scope="User">
+      <Value Profile="(Default)" />
+    </Setting>
   </Settings>
 </SettingsFile>
