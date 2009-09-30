@@ -1,11 +1,18 @@
 ﻿#region
 
 using System;
+using System.Text;
+using System.IO;
 
 #endregion
 
 namespace Rnwood.SmtpServer.Example
 {
+    /// <summary>
+    /// A simple example use of Rnwood.SmtpServer.
+    /// Prints a message to the console when a session is established, completed
+    /// or a message is received.
+    /// </summary>
     internal class Program
     {
         private static void Main(string[] args)
@@ -38,6 +45,9 @@ namespace Rnwood.SmtpServer.Example
         {
             Console.WriteLine(string.Format("MESSAGE RECEIVED - Envelope From:{0} Envelope To:{1}", e.Message.From,
                                             string.Join(", ", e.Message.To)));
+
+            //If you wanted to write the message out to a file, then could do this...
+            //File.WriteAllBytes("myfile.eml", e.Message.Data);
         }
     }
 }
