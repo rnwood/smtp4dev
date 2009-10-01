@@ -19,7 +19,7 @@ namespace Rnwood.AutoUpdate
             label1.Text = string.Format(label1.Text, "smtp4dev");
             Release = release;
             currVersion.Text = currentVersion.ToString();
-            updateVersion.Text = release.Version.ToString();
+            updateVersion.Text =  release.name + " (" + release.Version.ToString() + ")";
             detailsLink.Text = release.DetailsURL.ToString();
         }
 
