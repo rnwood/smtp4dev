@@ -89,5 +89,20 @@ namespace Rnwood.Smtp4dev
                 Settings.Default.SSLCertificatePath = openSSLCertDialog.FileName;
             }
         }
+
+        private void checkForUpdateButton_Click(object sender, EventArgs e)
+        {
+            try
+            {
+                if (!Program.CheckForUpdateCore())
+                {
+                    MessageBox.Show("No update available", "Update", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show("Error checking for update.\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
     }
 }

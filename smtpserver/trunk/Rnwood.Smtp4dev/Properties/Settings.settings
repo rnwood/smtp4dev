@@ -80,5 +80,17 @@
     <Setting Name="LastUpdateCheck" Type="System.Nullable&lt;System.DateTime&gt;" Scope="User">
       <Value Profile="(Default)" />
     </Setting>
+    <Setting Name="UpdateURL" Type="(Web Service URL)" Scope="Application">
+      <Value Profile="(Default)">file:///c:/temp/releases.xml</Value>
+    </Setting>
+    <Setting Name="EnableUpdateCheck" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
+    <Setting Name="UpdateCheckInterval" Type="System.Int32" Scope="User">
+      <Value Profile="(Default)">1</Value>
+    </Setting>
+    <Setting Name="UpdateCheckIncludePrerelease" Type="System.Boolean" Scope="Application">
+      <Value Profile="(Default)">True</Value>
+    </Setting>
   </Settings>
 </SettingsFile>

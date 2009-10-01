@@ -17,9 +17,10 @@
   <xs:element name="Release">
     <xs:complexType>
       <xs:sequence>
-        <xs:element name="InstallerURL" type="xs:anyURI"/>
+        <xs:element name="URL" type="xs:anyURI"/>
         <xs:element name="DetailsURL" type="xs:anyURI"/>
       </xs:sequence>
+      <xs:attribute name="name" type="xs:string" use="required"/>
       <xs:attribute name="version" type="versionNumber" use="required"/>
       <xs:attribute name="status" type="releaseStatus" use="optional" default="release"/>
     </xs:complexType>

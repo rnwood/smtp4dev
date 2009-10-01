@@ -36,14 +36,7 @@ namespace Rnwood.Smtp4dev
                     Settings.Default.Save();
                 }
 
-                if ((!Settings.Default.LastUpdateCheck.HasValue) || Settings.Default.LastUpdateCheck.Value.AddDays(1) < DateTime.Now)
-                {
-                    Settings.Default.LastUpdateCheck = DateTime.Now;
-                    Settings.Default.Save();
-
-                    UpdateChecker updateChecker = new UpdateChecker(new Uri("file:///c:/temp/releases.xml"), typeof(Program).Assembly.GetName().Version);
-                    updateChecker.CheckForUpdate();
-                }
+                CheckForUpdate();
 
                 MainForm form = new MainForm(launchInfo);
                 sim.LaunchInfoReceived +=
@@ -65,6 +58,33 @@ namespace Rnwood.Smtp4dev
                                     MessageBoxIcon.Error);
                 }
             }
+        }
+
+        private static void CheckForUpdate()
+        {
+            if (Settings.Default.EnableUpdateCheck)
+            {
+                if ((!Settings.Default.LastUpdateCheck.HasValue) || Settings.Default.LastUpdateCheck.Value.AddDays(1) < DateTime.Now)
+                {
+                    Settings.Default.LastUpdateCheck = DateTime.Now;
+                    Settings.Default.Save();
+
+                    try
+                    {
+                        CheckForUpdateCore();
+                    }
+                    catch
+                    {
+                        // don't want to annoy the user
+                    }
+                }
+            }
+        }
+
+        internal static bool CheckForUpdateCore()
+        {
+            UpdateChecker updateChecker = new UpdateChecker(new Uri(Properties.Settings.Default.UpdateURL), typeof(Program).Assembly.GetName().Version);
+            return updateChecker.CheckForUpdate(Properties.Settings.Default.UpdateCheckIncludePrerelease);
         }
     }
 }

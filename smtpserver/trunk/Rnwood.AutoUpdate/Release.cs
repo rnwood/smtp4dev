@@ -10,7 +10,7 @@ namespace Rnwood.AutoUpdate
     {
         public void InitiateDownload()
         {
-            Process.Start(InstallerURL.ToString());
+            Process.Start(URL.ToString());
         }
 
         public Version Version
