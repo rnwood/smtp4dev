@@ -24,6 +24,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SimpleServer", "Rnwood.Smtp
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rnwood.AutoUpdate", "Rnwood.AutoUpdate\Rnwood.AutoUpdate.csproj", "{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsService", "Rnwood.SmtpServer\Examples\WindowsService\WindowsService.csproj", "{B6D12678-5E09-4AFA-AADA-615619889EBA}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -93,6 +95,16 @@ Global
 		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
 		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{4439D0A4-0B45-4DE5-9B2E-DF6C36686308}.Release|x86.ActiveCfg = Release|Any CPU
+		{B6D12678-5E09-4AFA-AADA-615619889EBA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6D12678-5E09-4AFA-AADA-615619889EBA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6D12678-5E09-4AFA-AADA-615619889EBA}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{B6D12678-5E09-4AFA-AADA-615619889EBA}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{B6D12678-5E09-4AFA-AADA-615619889EBA}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{B6D12678-5E09-4AFA-AADA-615619889EBA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6D12678-5E09-4AFA-AADA-615619889EBA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6D12678-5E09-4AFA-AADA-615619889EBA}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{B6D12678-5E09-4AFA-AADA-615619889EBA}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+		{B6D12678-5E09-4AFA-AADA-615619889EBA}.Release|x86.ActiveCfg = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -102,5 +114,6 @@ Global
 		{C5BBE7C2-0EA0-4E50-95FF-BF07EA1B93FF} = {5718B0F5-3130-43B6-BF4C-077854718955}
 		{FD5F0B9D-06E8-45F0-9F96-AC7747396F3E} = {5718B0F5-3130-43B6-BF4C-077854718955}
 		{08B47A5D-D87C-4D48-856F-D30FDCCDB7F0} = {FD5F0B9D-06E8-45F0-9F96-AC7747396F3E}
+		{B6D12678-5E09-4AFA-AADA-615619889EBA} = {FD5F0B9D-06E8-45F0-9F96-AC7747396F3E}
 	EndGlobalSection
 EndGlobal

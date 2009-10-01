@@ -31,6 +31,11 @@
     </WixExtension>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\Rnwood.AutoUpdate\Rnwood.AutoUpdate.csproj">
+      <Name>Rnwood.AutoUpdate</Name>
+      <Project>{4439d0a4-0b45-4de5-9b2e-df6c36686308}</Project>
+      <Private>True</Private>
+    </ProjectReference>
     <ProjectReference Include="..\Rnwood.Smtp4dev\Rnwood.Smtp4dev.csproj">
       <Name>Rnwood.Smtp4dev</Name>
       <Project>{957a6c18-3016-403e-a04d-926d050bdeae}</Project>

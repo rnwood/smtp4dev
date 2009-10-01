@@ -111,6 +111,7 @@
             <File Id="F05" Name="sharpmimetools.dll" Source="..\lib\sharpmimetools.dll"/>
             <File Id="F06" Name="log4net.dll" Source="..\lib\log4net.dll"/>
             <File Id="F07" Name="WPFToolkit.dll" Source="$(var.Rnwood.Smtp4dev.TargetPath)\..\WPFToolkit.dll"/>
+            <File Id="F08" Name="$(var.Rnwood.AutoUpdate.TargetFileName)" Source="$(var.Rnwood.AutoUpdate.TargetPath)"/>
             <Shortcut Id="S01" Directory="StartMenuDir"
 Name="smtp4dev" Target="ProductFeature" Show="normal" Icon="Icon.exe"
 WorkingDirectory="TARGETDIR"/>
@@ -122,6 +123,7 @@ WorkingDirectory="TARGETDIR"/>
             <RemoveFile Id='R04' Directory='INSTALLLOCATION' Name='$(var.Rnwood.Smtp4dev.TargetFileName).config' On='uninstall'/>
             <RemoveFile Id='R07' Directory='INSTALLLOCATION' Name='sharpmimetools.dll' On='uninstall'/>
             <RemoveFile Id='R08' Directory='INSTALLLOCATION' Name='WPFToolkit.dll' On='uninstall'/>
+            <RemoveFile Id='R09' Directory='INSTALLLOCATION' Name='$(var.Rnwood.AutoUpdate.TargetFileName)' On='uninstall'/>
           </Component>
 
           <Component Id='C02' Guid='9F86CD72-6AD5-445c-8C6E-A357E38C29BC'>

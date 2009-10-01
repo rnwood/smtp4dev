@@ -20,10 +20,11 @@ namespace Rnwood.AutoUpdate
         public Uri ReleaseFileUrl { get; private set; }
         public Version CurrentVersion { get; private set; }
 
-        public void CheckForUpdate()
+        public bool CheckForUpdate(bool includePrerelease)
         {
-            Release latestRelease = GetLatestRelease(false);
-            if (latestRelease.Version > CurrentVersion)
+            Release latestRelease = GetLatestRelease(includePrerelease);
+
+            if (latestRelease != null && latestRelease.Version > CurrentVersion)
             {
                 UpdateAvailableForm form = new UpdateAvailableForm(latestRelease, CurrentVersion);
                 if (form.ShowDialog() == System.Windows.Forms.DialogResult.OK)
@@ -39,11 +40,16 @@ namespace Rnwood.AutoUpdate
                             "Failed to initiate download. Please check you have an active Internet connection and try again.",
                             "Update error", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
-                    
-                    
+
+
+                }
+                else
+                {
+                    return true;
                 }
             }
 
+            return false;
         }
 
         public Release GetLatestRelease(bool includePreRelease)
@@ -54,7 +60,7 @@ namespace Rnwood.AutoUpdate
 
         private Release[] _releases;
 
-        private Release[] GetReleases()
+        public Release[] GetReleases()
         {
             if (_releases == null)
             {
