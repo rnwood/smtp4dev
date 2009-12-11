@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<Version>2.0alpha2</Version>
+		<Version>2.0beta1</Version>
 		<MSBuildCommunityTasksPath>.</MSBuildCommunityTasksPath>
 	</PropertyGroup>
 
@@ -39,14 +39,14 @@
 		
 		<Message Text="Building release version"/>
 		<MSBuild Projects="smtp4dev.sln" Targets="Build" Properties="Configuration=Release"/>
-		
 		<ItemGroup>
-			<BinaryFiles Include="Rnwood.Smtp4dev\bin\Release\**"/>
+			<BinaryFiles Include="Publish\smtp4dev.exe"/>
 			<ServerBinaryFiles Include="Rnwood.SmtpServer\bin\Release\**"/>
 		</ItemGroup>
 		
 		<Message Text="Zipping up standalone binaries"/>
-		<Zip Files="@(BinaryFiles)" ZipFileName="Publish\smtp4dev-$(Version)-binaries.zip" WorkingDirectory="Rnwood.Smtp4dev\bin\Release" ZipLevel="9" />
+		<Exec Command="&quot;C:\program files\Microsoft\ILMerge\ilmerge.exe&quot; /wildcards /out:Publish\smtp4dev.exe Rnwood.Smtp4dev\bin\Release\smtp4dev.exe Rnwood.Smtp4dev\bin\Release\*.dll"/>
+		<Zip Files="@(BinaryFiles)" ZipFileName="Publish\smtp4dev-$(Version)-binaries.zip" WorkingDirectory="Publish" ZipLevel="9" />
 		<Zip Files="@(ServerBinaryFiles)" ZipFileName="Publish\Rnwood.SmtpServer-$(Version)-binaries.zip" WorkingDirectory="Rnwood.SmtpServer\bin\Release" ZipLevel="9" />
 			
 		<Message Text="Copying installer"/>

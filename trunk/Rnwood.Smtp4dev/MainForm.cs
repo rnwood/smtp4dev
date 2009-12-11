@@ -21,18 +21,14 @@ namespace Rnwood.Smtp4dev
 {
     public partial class MainForm : Form
     {
-        private readonly LaunchInfo _launchInfo;
         private readonly BindingList<MessageViewModel> _messages = new BindingList<MessageViewModel>();
         private readonly BindingList<SessionViewModel> _sessions = new BindingList<SessionViewModel>();
-        private bool _firstTimeShown = true;
         private Server _server;
         private bool _quitting;
 
-        public MainForm(LaunchInfo launchInfo)
+        public MainForm()
         {
             InitializeComponent();
-
-            _launchInfo = launchInfo;
 
             messageBindingSource.DataSource = _messages;
             sessionBindingSource.DataSource = _sessions;
@@ -92,7 +88,7 @@ namespace Rnwood.Smtp4dev
         {
             trayIcon.Icon = Resources.Icon1;
             listenForConnectionsToolStripMenuItem.Checked = true;
-            statusLabel.Text = "Listening";
+            statusLabel.Text = string.Format("Listening on port {0}", Settings.Default.PortNumber);
             pictureBox2.Visible = stopListeningButton.Visible = true;
             pictureBox3.Visible = startListeningButton.Visible = false;
 
@@ -102,7 +98,7 @@ namespace Rnwood.Smtp4dev
         private void _messages_ListChanged(object sender, ListChangedEventArgs e)
         {
             deleteAllMenuItem.Enabled = deleteAllButton.Enabled = viewLastMessageMenuItem.Enabled = _messages.Count > 0;
-            trayIcon.Text = string.Format("smtp4dev ({0} messages)", _messages.Count);
+            trayIcon.Text = string.Format("smtp4dev ({1} messages)", Settings.Default.PortNumber, _messages.Count);
 
             if (e.ListChangedType == ListChangedType.ItemAdded && Settings.Default.ScrollMessages &&
                 messageGrid.RowCount > 0)
@@ -110,27 +106,6 @@ namespace Rnwood.Smtp4dev
                 messageGrid.ClearSelection();
                 messageGrid.Rows[messageGrid.RowCount - 1].Selected = true;
                 messageGrid.FirstDisplayedScrollingRowIndex = messageGrid.RowCount - 1;
-            }
-        }
-
-        protected override void OnShown(EventArgs e)
-        {
-            base.OnShown(e);
-
-            if (_firstTimeShown)
-            {
-                _firstTimeShown = false;
-
-                try
-                {
-                    ProcessLaunchInfo(_launchInfo, true);
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show("Error processing command line parameters: " + ex.Message, "smtp4dev",
-                                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    Close();
-                }
             }
         }
 
@@ -470,46 +445,6 @@ namespace Rnwood.Smtp4dev
         private void sessionsGrid_SelectionChanged(object sender, EventArgs e)
         {
             viewSessionButton.Enabled = deleteSessionButton.Enabled = SelectedSessions.Length > 0;
-        }
-
-        public void ProcessLaunchInfo(LaunchInfo launchInfo, bool firstInstance)
-        {
-            if (firstInstance)
-            {
-                Visible = true;
-                Visible = !Settings.Default.StartInTray;
-
-                if (Settings.Default.ListenOnStartup)
-                {
-                    StartServer();
-                }
-            }
-
-            if (launchInfo.Arguments.Length == 1)
-            {
-                string messageFilename = launchInfo.Arguments[0];
-                if (File.Exists(messageFilename))
-                {
-                    SharpMimeMessage message = new SharpMimeMessage(File.OpenRead(messageFilename));
-                    InspectorWindow messageInspector = new InspectorWindow(message);
-                    messageInspector.Show();
-                }
-                else
-                {
-                    throw new Exception("Specified file does not exist");
-                }
-            }
-            else if (launchInfo.Arguments.Length == 0)
-            {
-                if (!firstInstance)
-                {
-                    Visible = true;
-                }
-            }
-            else
-            {
-                throw new Exception("Invalid command line parameters");
-            }
         }
 
         private void deleteSessionButton_Click(object sender, EventArgs e)
