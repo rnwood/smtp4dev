@@ -81,8 +81,8 @@
             this.label13 = new System.Windows.Forms.Label();
             this.label12 = new System.Windows.Forms.Label();
             this.checkBox18 = new System.Windows.Forms.CheckBox();
-            this.openSSLCertDialog = new System.Windows.Forms.OpenFileDialog();
             this.checkForUpdateButton = new System.Windows.Forms.Button();
+            this.openSSLCertDialog = new System.Windows.Forms.OpenFileDialog();
             this.tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numericUpDown2)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
@@ -797,6 +797,7 @@
             this.tableLayoutPanel4.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tableLayoutPanel4.Location = new System.Drawing.Point(3, 3);
             this.tableLayoutPanel4.Name = "tableLayoutPanel4";
+            this.tableLayoutPanel4.Padding = new System.Windows.Forms.Padding(0, 3, 0, 0);
             this.tableLayoutPanel4.RowCount = 4;
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
             this.tableLayoutPanel4.RowStyles.Add(new System.Windows.Forms.RowStyle());
@@ -808,7 +809,7 @@
             // numericUpDown5
             // 
             this.numericUpDown5.DataBindings.Add(new System.Windows.Forms.Binding("Value", global::Rnwood.Smtp4dev.Properties.Settings.Default, "UpdateCheckInterval", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.numericUpDown5.Location = new System.Drawing.Point(170, 23);
+            this.numericUpDown5.Location = new System.Drawing.Point(170, 26);
             this.numericUpDown5.Maximum = new decimal(new int[] {
             65535,
             0,
@@ -832,7 +833,7 @@
             // 
             this.label13.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label13.AutoSize = true;
-            this.label13.Location = new System.Drawing.Point(3, 27);
+            this.label13.Location = new System.Drawing.Point(3, 30);
             this.label13.Name = "label13";
             this.label13.Size = new System.Drawing.Size(114, 13);
             this.label13.TabIndex = 21;
@@ -842,7 +843,7 @@
             // 
             this.label12.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.label12.AutoSize = true;
-            this.label12.Location = new System.Drawing.Point(3, 3);
+            this.label12.Location = new System.Drawing.Point(3, 6);
             this.label12.Name = "label12";
             this.label12.Size = new System.Drawing.Size(161, 13);
             this.label12.TabIndex = 19;
@@ -854,27 +855,27 @@
             this.checkBox18.Checked = global::Rnwood.Smtp4dev.Properties.Settings.Default.EnableUpdateCheck;
             this.checkBox18.CheckState = System.Windows.Forms.CheckState.Checked;
             this.checkBox18.DataBindings.Add(new System.Windows.Forms.Binding("Checked", global::Rnwood.Smtp4dev.Properties.Settings.Default, "EnableUpdateCheck", true, System.Windows.Forms.DataSourceUpdateMode.OnPropertyChanged));
-            this.checkBox18.Location = new System.Drawing.Point(170, 3);
+            this.checkBox18.Location = new System.Drawing.Point(170, 6);
             this.checkBox18.Name = "checkBox18";
             this.checkBox18.Size = new System.Drawing.Size(15, 14);
             this.checkBox18.TabIndex = 20;
             this.checkBox18.UseVisualStyleBackColor = true;
             // 
-            // openSSLCertDialog
-            // 
-            this.openSSLCertDialog.Filter = "X509 Certificates|*.cer";
-            this.openSSLCertDialog.Title = "Select SSL Certificate";
-            // 
             // checkForUpdateButton
             // 
             this.checkForUpdateButton.AutoSize = true;
-            this.checkForUpdateButton.Location = new System.Drawing.Point(170, 51);
+            this.checkForUpdateButton.Location = new System.Drawing.Point(170, 54);
             this.checkForUpdateButton.Name = "checkForUpdateButton";
             this.checkForUpdateButton.Size = new System.Drawing.Size(132, 23);
             this.checkForUpdateButton.TabIndex = 23;
             this.checkForUpdateButton.Text = "Check for update now";
             this.checkForUpdateButton.UseVisualStyleBackColor = true;
             this.checkForUpdateButton.Click += new System.EventHandler(this.checkForUpdateButton_Click);
+            // 
+            // openSSLCertDialog
+            // 
+            this.openSSLCertDialog.Filter = "X509 Certificates|*.cer";
+            this.openSSLCertDialog.Title = "Select SSL Certificate";
             // 
             // OptionsForm
             // 

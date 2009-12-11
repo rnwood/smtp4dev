@@ -337,7 +337,7 @@ namespace Rnwood.Smtp4dev.Properties {
         [global::System.Configuration.ApplicationScopedSettingAttribute()]
         [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
         [global::System.Configuration.SpecialSettingAttribute(global::System.Configuration.SpecialSetting.WebServiceUrl)]
-        [global::System.Configuration.DefaultSettingValueAttribute("file:///c:/temp/releases.xml")]
+        [global::System.Configuration.DefaultSettingValueAttribute("https://smtp4dev.svn.codeplex.com/svn/trunk/releases.xml")]
         public string UpdateURL {
             get {
                 return ((string)(this["UpdateURL"]));

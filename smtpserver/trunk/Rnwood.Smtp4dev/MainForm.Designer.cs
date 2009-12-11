@@ -40,7 +40,9 @@
             this.exitMenuItem = new System.Windows.Forms.ToolStripMenuItem();
             this.messageGrid = new System.Windows.Forms.DataGridView();
             this.Recieved = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.subjectDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ToAddressesNice = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.messageBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.deleteAllButton = new System.Windows.Forms.Button();
             this.flowLayoutPanel1 = new System.Windows.Forms.FlowLayoutPanel();
             this.viewButton = new System.Windows.Forms.Button();
@@ -64,18 +66,16 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.sessionsGrid = new System.Windows.Forms.DataGridView();
             this.StartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clientDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.NumberOfMessages = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.sessionBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.viewSessionButton = new System.Windows.Forms.Button();
             this.deleteSessionButton = new System.Windows.Forms.Button();
-            this.subjectDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.messageBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.clientDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.sessionBindingSource = new System.Windows.Forms.BindingSource(this.components);
-            this.tabImageList = new System.Windows.Forms.ImageList(this.components);
             this.panel2 = new System.Windows.Forms.Panel();
             this.trayIconContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.messageGrid)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
@@ -86,9 +86,8 @@
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sessionsGrid)).BeginInit();
-            this.flowLayoutPanel3.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.sessionBindingSource)).BeginInit();
+            this.flowLayoutPanel3.SuspendLayout();
             this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -110,13 +109,13 @@
             this.optionsMenuItem,
             this.exitMenuItem});
             this.trayIconContextMenuStrip.Name = "contextMenuStrip";
-            this.trayIconContextMenuStrip.Size = new System.Drawing.Size(189, 136);
+            this.trayIconContextMenuStrip.Size = new System.Drawing.Size(200, 136);
             // 
             // showMenuItem
             // 
             this.showMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.showMenuItem.Name = "showMenuItem";
-            this.showMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.showMenuItem.Size = new System.Drawing.Size(199, 22);
             this.showMenuItem.Text = "View Messages";
             this.showMenuItem.Click += new System.EventHandler(this.trayIcon_DoubleClick);
             // 
@@ -125,7 +124,7 @@
             this.viewLastMessageMenuItem.Enabled = false;
             this.viewLastMessageMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.viewLastMessageMenuItem.Name = "viewLastMessageMenuItem";
-            this.viewLastMessageMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.viewLastMessageMenuItem.Size = new System.Drawing.Size(199, 22);
             this.viewLastMessageMenuItem.Text = "View Last Message";
             this.viewLastMessageMenuItem.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
             // 
@@ -134,7 +133,7 @@
             this.deleteAllMenuItem.Enabled = false;
             this.deleteAllMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.deleteAllMenuItem.Name = "deleteAllMenuItem";
-            this.deleteAllMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.deleteAllMenuItem.Size = new System.Drawing.Size(199, 22);
             this.deleteAllMenuItem.Text = "Delete All Messages";
             this.deleteAllMenuItem.Click += new System.EventHandler(this.clearAllEmailsToolStripMenuItem_Click);
             // 
@@ -142,7 +141,7 @@
             // 
             this.listenForConnectionsToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listenForConnectionsToolStripMenuItem.Name = "listenForConnectionsToolStripMenuItem";
-            this.listenForConnectionsToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.listenForConnectionsToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
             this.listenForConnectionsToolStripMenuItem.Text = "Listen for connections";
             this.listenForConnectionsToolStripMenuItem.Click += new System.EventHandler(this.listenForConnectionsToolStripMenuItem_Click);
             // 
@@ -150,7 +149,7 @@
             // 
             this.optionsMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.optionsMenuItem.Name = "optionsMenuItem";
-            this.optionsMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.optionsMenuItem.Size = new System.Drawing.Size(199, 22);
             this.optionsMenuItem.Text = "Options";
             this.optionsMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
             // 
@@ -158,7 +157,7 @@
             // 
             this.exitMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.exitMenuItem.Name = "exitMenuItem";
-            this.exitMenuItem.Size = new System.Drawing.Size(188, 22);
+            this.exitMenuItem.Size = new System.Drawing.Size(199, 22);
             this.exitMenuItem.Text = "Exit";
             this.exitMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -181,7 +180,7 @@
             this.messageGrid.ReadOnly = true;
             this.messageGrid.RowHeadersVisible = false;
             this.messageGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.messageGrid.Size = new System.Drawing.Size(494, 196);
+            this.messageGrid.Size = new System.Drawing.Size(494, 197);
             this.messageGrid.TabIndex = 1;
             this.messageGrid.VirtualMode = true;
             this.messageGrid.DoubleClick += new System.EventHandler(this.messageGrid_DoubleClick);
@@ -197,6 +196,14 @@
             this.Recieved.ReadOnly = true;
             this.Recieved.Width = 77;
             // 
+            // subjectDataGridViewTextBoxColumn
+            // 
+            this.subjectDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.subjectDataGridViewTextBoxColumn.DataPropertyName = "Subject";
+            this.subjectDataGridViewTextBoxColumn.HeaderText = "Subject";
+            this.subjectDataGridViewTextBoxColumn.Name = "subjectDataGridViewTextBoxColumn";
+            this.subjectDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
             // ToAddressesNice
             // 
             this.ToAddressesNice.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
@@ -204,6 +211,10 @@
             this.ToAddressesNice.HeaderText = "To";
             this.ToAddressesNice.Name = "ToAddressesNice";
             this.ToAddressesNice.ReadOnly = true;
+            // 
+            // messageBindingSource
+            // 
+            this.messageBindingSource.DataSource = typeof(Rnwood.Smtp4dev.MessageViewModel);
             // 
             // deleteAllButton
             // 
@@ -228,7 +239,7 @@
             this.flowLayoutPanel1.Controls.Add(this.deleteAllButton);
             this.flowLayoutPanel1.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.flowLayoutPanel1.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 199);
+            this.flowLayoutPanel1.Location = new System.Drawing.Point(3, 200);
             this.flowLayoutPanel1.Name = "flowLayoutPanel1";
             this.flowLayoutPanel1.Size = new System.Drawing.Size(494, 29);
             this.flowLayoutPanel1.TabIndex = 3;
@@ -290,10 +301,9 @@
             this.optionsButton.Anchor = System.Windows.Forms.AnchorStyles.Left;
             this.optionsButton.AutoSize = true;
             this.optionsButton.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-            this.optionsButton.Image = ((System.Drawing.Image)(resources.GetObject("optionsButton.Image")));
             this.optionsButton.Location = new System.Drawing.Point(312, 3);
             this.optionsButton.Name = "optionsButton";
-            this.optionsButton.Size = new System.Drawing.Size(75, 23);
+            this.optionsButton.Size = new System.Drawing.Size(59, 23);
             this.optionsButton.TabIndex = 4;
             this.optionsButton.Text = "Options";
             this.optionsButton.TextImageRelation = System.Windows.Forms.TextImageRelation.ImageBeforeText;
@@ -328,6 +338,7 @@
             this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.pictureBox2.TabIndex = 8;
             this.pictureBox2.TabStop = false;
+            this.pictureBox2.Visible = false;
             // 
             // pictureBox3
             // 
@@ -437,7 +448,6 @@
             this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Controls.Add(this.tabPage2);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.tabControl1.ImageList = this.tabImageList;
             this.tabControl1.Location = new System.Drawing.Point(3, 3);
             this.tabControl1.Name = "tabControl1";
             this.tabControl1.SelectedIndex = 0;
@@ -448,11 +458,10 @@
             // 
             this.tabPage1.Controls.Add(this.messageGrid);
             this.tabPage1.Controls.Add(this.flowLayoutPanel1);
-            this.tabPage1.ImageIndex = 0;
-            this.tabPage1.Location = new System.Drawing.Point(4, 23);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
             this.tabPage1.Name = "tabPage1";
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(500, 231);
+            this.tabPage1.Size = new System.Drawing.Size(500, 232);
             this.tabPage1.TabIndex = 0;
             this.tabPage1.Text = "Messages";
             this.tabPage1.UseVisualStyleBackColor = true;
@@ -461,11 +470,10 @@
             // 
             this.tabPage2.Controls.Add(this.sessionsGrid);
             this.tabPage2.Controls.Add(this.flowLayoutPanel3);
-            this.tabPage2.ImageIndex = 1;
-            this.tabPage2.Location = new System.Drawing.Point(4, 23);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(500, 231);
+            this.tabPage2.Size = new System.Drawing.Size(500, 232);
             this.tabPage2.TabIndex = 1;
             this.tabPage2.Text = "Sessions";
             this.tabPage2.UseVisualStyleBackColor = true;
@@ -489,7 +497,7 @@
             this.sessionsGrid.ReadOnly = true;
             this.sessionsGrid.RowHeadersVisible = false;
             this.sessionsGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
-            this.sessionsGrid.Size = new System.Drawing.Size(494, 196);
+            this.sessionsGrid.Size = new System.Drawing.Size(494, 197);
             this.sessionsGrid.TabIndex = 0;
             this.sessionsGrid.SelectionChanged += new System.EventHandler(this.sessionsGrid_SelectionChanged);
             // 
@@ -502,6 +510,14 @@
             this.StartDate.ReadOnly = true;
             this.StartDate.Width = 83;
             // 
+            // clientDataGridViewTextBoxColumn
+            // 
+            this.clientDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.clientDataGridViewTextBoxColumn.DataPropertyName = "Client";
+            this.clientDataGridViewTextBoxColumn.HeaderText = "Client";
+            this.clientDataGridViewTextBoxColumn.Name = "clientDataGridViewTextBoxColumn";
+            this.clientDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
             // NumberOfMessages
             // 
             this.NumberOfMessages.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
@@ -511,6 +527,10 @@
             this.NumberOfMessages.ReadOnly = true;
             this.NumberOfMessages.Width = 91;
             // 
+            // sessionBindingSource
+            // 
+            this.sessionBindingSource.DataSource = typeof(Rnwood.Smtp4dev.SessionViewModel);
+            // 
             // flowLayoutPanel3
             // 
             this.flowLayoutPanel3.AutoSize = true;
@@ -518,7 +538,7 @@
             this.flowLayoutPanel3.Controls.Add(this.deleteSessionButton);
             this.flowLayoutPanel3.Dock = System.Windows.Forms.DockStyle.Bottom;
             this.flowLayoutPanel3.FlowDirection = System.Windows.Forms.FlowDirection.RightToLeft;
-            this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 199);
+            this.flowLayoutPanel3.Location = new System.Drawing.Point(3, 200);
             this.flowLayoutPanel3.Name = "flowLayoutPanel3";
             this.flowLayoutPanel3.Size = new System.Drawing.Size(494, 29);
             this.flowLayoutPanel3.TabIndex = 1;
@@ -549,37 +569,6 @@
             this.deleteSessionButton.UseVisualStyleBackColor = true;
             this.deleteSessionButton.Click += new System.EventHandler(this.deleteSessionButton_Click);
             // 
-            // subjectDataGridViewTextBoxColumn
-            // 
-            this.subjectDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.subjectDataGridViewTextBoxColumn.DataPropertyName = "Subject";
-            this.subjectDataGridViewTextBoxColumn.HeaderText = "Subject";
-            this.subjectDataGridViewTextBoxColumn.Name = "subjectDataGridViewTextBoxColumn";
-            this.subjectDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // messageBindingSource
-            // 
-            this.messageBindingSource.DataSource = typeof(Rnwood.Smtp4dev.MessageViewModel);
-            // 
-            // clientDataGridViewTextBoxColumn
-            // 
-            this.clientDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.clientDataGridViewTextBoxColumn.DataPropertyName = "Client";
-            this.clientDataGridViewTextBoxColumn.HeaderText = "Client";
-            this.clientDataGridViewTextBoxColumn.Name = "clientDataGridViewTextBoxColumn";
-            this.clientDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // sessionBindingSource
-            // 
-            this.sessionBindingSource.DataSource = typeof(Rnwood.Smtp4dev.SessionViewModel);
-            // 
-            // tabImageList
-            // 
-            this.tabImageList.ImageStream = ((System.Windows.Forms.ImageListStreamer)(resources.GetObject("tabImageList.ImageStream")));
-            this.tabImageList.TransparentColor = System.Drawing.Color.Transparent;
-            this.tabImageList.Images.SetKeyName(0, "email.png");
-            this.tabImageList.Images.SetKeyName(1, "page_white_text.png");
-            // 
             // panel2
             // 
             this.panel2.Controls.Add(this.tabControl1);
@@ -609,6 +598,7 @@
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MainForm_FormClosing);
             this.trayIconContextMenuStrip.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.messageGrid)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).EndInit();
             this.flowLayoutPanel1.ResumeLayout(false);
             this.flowLayoutPanel1.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
@@ -624,10 +614,9 @@
             this.tabPage2.ResumeLayout(false);
             this.tabPage2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.sessionsGrid)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.sessionBindingSource)).EndInit();
             this.flowLayoutPanel3.ResumeLayout(false);
             this.flowLayoutPanel3.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.sessionBindingSource)).EndInit();
             this.panel2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
@@ -679,7 +668,6 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn subjectDataGridViewTextBoxColumn;
         private System.Windows.Forms.DataGridViewTextBoxColumn ToAddressesNice;
         private System.Windows.Forms.Button deleteSessionButton;
-        private System.Windows.Forms.ImageList tabImageList;
         private System.Windows.Forms.Panel panel2;
     }
 }
