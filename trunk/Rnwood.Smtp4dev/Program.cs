@@ -22,61 +22,40 @@ namespace Rnwood.Smtp4dev
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(true);
 
-            LaunchInfo launchInfo = new LaunchInfo(Environment.CurrentDirectory, args);
-            SingleInstanceManager sim =
-                new SingleInstanceManager(string.Format("SMTP4DEV{0}-65D4ED7D-1942-4f39-9F04-66875C67F04A-SESSION{1}",
-                                                        typeof(Program).Assembly.GetName().Version,
-                                                        Process.GetCurrentProcess().SessionId));
-            if (sim.IsFirstInstance)
+            if (Settings.Default.SettingsUpgradeRequired)
             {
-                if (Settings.Default.SettingsUpgradeRequired)
-                {
-                    Settings.Default.Upgrade();
-                    Settings.Default.SettingsUpgradeRequired = false;
-                    Settings.Default.Save();
-                }
-
-                CheckForUpdate();
-
-                MainForm form = new MainForm(launchInfo);
-                sim.LaunchInfoReceived +=
-                    ((s, ea) => form.Invoke((MethodInvoker)(() => form.ProcessLaunchInfo(ea.LaunchInfo, false))));
-                sim.ListenForLaunches();
-
-                Application.Run(form);
+                Settings.Default.Upgrade();
+                Settings.Default.SettingsUpgradeRequired = false;
+                Settings.Default.Save();
             }
-            else
-            {
-                try
-                {
-                    sim.SendLaunchInfoToFirstInstance(new LaunchInfo(Environment.CurrentDirectory, args));
-                }
-                catch (Exception e)
-                {
-                    MessageBox.Show("Error processing command line parameters: " + e.Message, "smtp4dev",
-                                    MessageBoxButtons.OK,
-                                    MessageBoxIcon.Error);
-                }
-            }
+
+            CheckForUpdate();
+
+            MainForm form = new MainForm();
+            Application.Run(form);
         }
 
         private static void CheckForUpdate()
         {
             if (Settings.Default.EnableUpdateCheck)
             {
-                if ((!Settings.Default.LastUpdateCheck.HasValue) || Settings.Default.LastUpdateCheck.Value.AddDays(1) < DateTime.Now)
+                if ((!Settings.Default.LastUpdateCheck.HasValue) || Settings.Default.LastUpdateCheck.Value.AddDays(Properties.Settings.Default.UpdateCheckInterval) < DateTime.Now)
                 {
                     Settings.Default.LastUpdateCheck = DateTime.Now;
-                    Settings.Default.Save();
-
+                    
                     try
                     {
                         CheckForUpdateCore();
                     }
-                    catch
+                    catch (Exception e)
                     {
-                        // don't want to annoy the user
+                        if (MessageBox.Show(string.Format("Failed to check for update ({0})\nPlease check Internet connection and proxy settings.\nWould you like smtp4dev to try again next time it is launched?", e.Message), "smtp4dev", MessageBoxButtons.YesNo) == DialogResult.No)
+                        {
+                            Settings.Default.EnableUpdateCheck = false;
+                        }
                     }
+
+                    Settings.Default.Save();
                 }
             }
         }
