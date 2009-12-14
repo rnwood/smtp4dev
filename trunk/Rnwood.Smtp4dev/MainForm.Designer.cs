@@ -51,8 +51,8 @@
             this.deleteButton = new System.Windows.Forms.Button();
             this.optionsButton = new System.Windows.Forms.Button();
             this.flowLayoutPanel2 = new System.Windows.Forms.FlowLayoutPanel();
-            this.pictureBox2 = new System.Windows.Forms.PictureBox();
-            this.pictureBox3 = new System.Windows.Forms.PictureBox();
+            this.runningPicture = new System.Windows.Forms.PictureBox();
+            this.notRunningPicture = new System.Windows.Forms.PictureBox();
             this.statusLabel = new System.Windows.Forms.Label();
             this.stopListeningButton = new System.Windows.Forms.Button();
             this.startListeningButton = new System.Windows.Forms.Button();
@@ -78,8 +78,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).BeginInit();
             this.flowLayoutPanel1.SuspendLayout();
             this.flowLayoutPanel2.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.runningPicture)).BeginInit();
+            ((System.ComponentModel.ISupportInitialize)(this.notRunningPicture)).BeginInit();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabControl1.SuspendLayout();
@@ -126,7 +126,7 @@
             this.viewLastMessageMenuItem.Name = "viewLastMessageMenuItem";
             this.viewLastMessageMenuItem.Size = new System.Drawing.Size(199, 22);
             this.viewLastMessageMenuItem.Text = "View Last Message";
-            this.viewLastMessageMenuItem.Click += new System.EventHandler(this.toolStripMenuItem1_Click);
+            this.viewLastMessageMenuItem.Click += new System.EventHandler(this.viewLastMessageMenuItem_Click);
             // 
             // deleteAllMenuItem
             // 
@@ -315,8 +315,8 @@
             this.flowLayoutPanel2.AutoSize = true;
             this.flowLayoutPanel2.BackColor = System.Drawing.SystemColors.Control;
             this.flowLayoutPanel2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
-            this.flowLayoutPanel2.Controls.Add(this.pictureBox2);
-            this.flowLayoutPanel2.Controls.Add(this.pictureBox3);
+            this.flowLayoutPanel2.Controls.Add(this.runningPicture);
+            this.flowLayoutPanel2.Controls.Add(this.notRunningPicture);
             this.flowLayoutPanel2.Controls.Add(this.statusLabel);
             this.flowLayoutPanel2.Controls.Add(this.stopListeningButton);
             this.flowLayoutPanel2.Controls.Add(this.startListeningButton);
@@ -329,28 +329,28 @@
             // 
             // pictureBox2
             // 
-            this.pictureBox2.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pictureBox2.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
-            this.pictureBox2.Location = new System.Drawing.Point(3, 6);
-            this.pictureBox2.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
-            this.pictureBox2.Name = "pictureBox2";
-            this.pictureBox2.Size = new System.Drawing.Size(16, 16);
-            this.pictureBox2.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox2.TabIndex = 8;
-            this.pictureBox2.TabStop = false;
-            this.pictureBox2.Visible = false;
+            this.runningPicture.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.runningPicture.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
+            this.runningPicture.Location = new System.Drawing.Point(3, 6);
+            this.runningPicture.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.runningPicture.Name = "pictureBox2";
+            this.runningPicture.Size = new System.Drawing.Size(16, 16);
+            this.runningPicture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.runningPicture.TabIndex = 8;
+            this.runningPicture.TabStop = false;
+            this.runningPicture.Visible = false;
             // 
             // pictureBox3
             // 
-            this.pictureBox3.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.pictureBox3.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
-            this.pictureBox3.Location = new System.Drawing.Point(22, 6);
-            this.pictureBox3.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
-            this.pictureBox3.Name = "pictureBox3";
-            this.pictureBox3.Size = new System.Drawing.Size(16, 16);
-            this.pictureBox3.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
-            this.pictureBox3.TabIndex = 9;
-            this.pictureBox3.TabStop = false;
+            this.notRunningPicture.Anchor = System.Windows.Forms.AnchorStyles.Left;
+            this.notRunningPicture.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
+            this.notRunningPicture.Location = new System.Drawing.Point(22, 6);
+            this.notRunningPicture.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
+            this.notRunningPicture.Name = "pictureBox3";
+            this.notRunningPicture.Size = new System.Drawing.Size(16, 16);
+            this.notRunningPicture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
+            this.notRunningPicture.TabIndex = 9;
+            this.notRunningPicture.TabStop = false;
             // 
             // statusLabel
             // 
@@ -603,8 +603,8 @@
             this.flowLayoutPanel1.PerformLayout();
             this.flowLayoutPanel2.ResumeLayout(false);
             this.flowLayoutPanel2.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
-            ((System.ComponentModel.ISupportInitialize)(this.pictureBox3)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.runningPicture)).EndInit();
+            ((System.ComponentModel.ISupportInitialize)(this.notRunningPicture)).EndInit();
             this.panel1.ResumeLayout(false);
             this.panel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -649,8 +649,8 @@
         private System.Windows.Forms.Label statusLabel;
         private System.Windows.Forms.Button stopListeningButton;
         private System.Windows.Forms.Button startListeningButton;
-        private System.Windows.Forms.PictureBox pictureBox2;
-        private System.Windows.Forms.PictureBox pictureBox3;
+        private System.Windows.Forms.PictureBox runningPicture;
+        private System.Windows.Forms.PictureBox notRunningPicture;
         private System.Windows.Forms.ToolStripMenuItem listenForConnectionsToolStripMenuItem;
         private System.Windows.Forms.DataGridViewTextBoxColumn fromAddressDataGridViewTextBoxColumn;
         private System.Windows.Forms.Button inspectMessageButton;

@@ -60,16 +60,9 @@ namespace Rnwood.Smtp4dev.Properties {
             }
         }
         
-        internal static System.Drawing.Icon Icon1 {
+        internal static System.Drawing.Icon ListeningIcon {
             get {
-                object obj = ResourceManager.GetObject("Icon1", resourceCulture);
-                return ((System.Drawing.Icon)(obj));
-            }
-        }
-        
-        internal static System.Drawing.Icon Icon2 {
-            get {
-                object obj = ResourceManager.GetObject("Icon2", resourceCulture);
+                object obj = ResourceManager.GetObject("ListeningIcon", resourceCulture);
                 return ((System.Drawing.Icon)(obj));
             }
         }
@@ -78,6 +71,13 @@ namespace Rnwood.Smtp4dev.Properties {
             get {
                 object obj = ResourceManager.GetObject("localhost", resourceCulture);
                 return ((byte[])(obj));
+            }
+        }
+        
+        internal static System.Drawing.Icon NotListeningIcon {
+            get {
+                object obj = ResourceManager.GetObject("NotListeningIcon", resourceCulture);
+                return ((System.Drawing.Icon)(obj));
             }
         }
         
