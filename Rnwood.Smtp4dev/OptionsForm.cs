@@ -18,7 +18,7 @@ namespace Rnwood.Smtp4dev
         {
             InitializeComponent();
 
-            Icon = Resources.Icon1;
+            Icon = Resources.ListeningIcon;
             checkBox3.Checked = RegistrySettings.StartOnLogin;
 
             UpdateControlStatus();
