@@ -38,11 +38,12 @@
                 </TreeView>
                 <Grid Grid.Column="1" Margin="3" DataContext="{Binding ElementName=treeView, Path=SelectedItem}" Name="partDetailsGrid" IsEnabled="False">
                     <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
                         <RowDefinition Height="*"/>
                     </Grid.RowDefinitions>
 
-
-                    <TabControl Grid.Row="0" Margin="3">
+                    <Label>Selected Part:</Label>
+                    <TabControl Grid.Row="1" Margin="3">
                         <TabItem Header="Source">
                             <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
                         </TabItem>
@@ -74,7 +75,7 @@
                 </Grid>
             </Grid>
         </TabItem>
-        <TabItem Header="Source">
+        <TabItem Header="Message Source">
             <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
         </TabItem>
     </TabControl>
