@@ -13,7 +13,7 @@ using anmar.SharpMimeTools;
 using Rnwood.Smtp4dev.MessageInspector;
 using Rnwood.Smtp4dev.Properties;
 using Rnwood.SmtpServer;
-using Message=Rnwood.SmtpServer.Message;
+using Message = Rnwood.SmtpServer.Message;
 
 #endregion
 
@@ -34,8 +34,29 @@ namespace Rnwood.Smtp4dev
             sessionBindingSource.DataSource = _sessions;
             _messages.ListChanged += _messages_ListChanged;
 
-            Icon = Resources.Icon1;
-            trayIcon.Icon = Resources.Icon2;
+            Icon = Resources.ListeningIcon;
+            trayIcon.Icon = Resources.NotListeningIcon;
+        }
+
+        private bool _firstShown = true;
+
+        protected override void OnShown(EventArgs e)
+        {
+            base.OnShown(e);
+
+            if (_firstShown)
+            {
+
+                Visible = true;
+                Visible = !Settings.Default.StartInTray;
+
+                if (Settings.Default.ListenOnStartup)
+                {
+                    StartServer();
+                }
+            }
+
+            _firstShown = false;
         }
 
         public MessageViewModel SelectedMessage
@@ -48,7 +69,7 @@ namespace Rnwood.Smtp4dev
                 }
 
                 return
-                    messageGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (MessageViewModel) row.DataBoundItem)
+                    messageGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (MessageViewModel)row.DataBoundItem)
                         .Single();
             }
         }
@@ -59,7 +80,7 @@ namespace Rnwood.Smtp4dev
             get
             {
                 return
-                    messageGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (MessageViewModel) row.DataBoundItem)
+                    messageGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (MessageViewModel)row.DataBoundItem)
                         .ToArray();
             }
         }
@@ -79,26 +100,27 @@ namespace Rnwood.Smtp4dev
             get
             {
                 return
-                    sessionsGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (SessionViewModel) row.DataBoundItem)
+                    sessionsGrid.SelectedRows.Cast<DataGridViewRow>().Select(row => (SessionViewModel)row.DataBoundItem)
                         .ToArray();
             }
         }
 
         private void StartServer()
         {
-            trayIcon.Icon = Resources.Icon1;
+            new Thread(ServerWork).Start();
+
+            trayIcon.Text = string.Format("smtp4dev (listening on :{0})\n{1} messages", Settings.Default.PortNumber, _messages.Count);
+            trayIcon.Icon = Resources.ListeningIcon;
             listenForConnectionsToolStripMenuItem.Checked = true;
             statusLabel.Text = string.Format("Listening on port {0}", Settings.Default.PortNumber);
-            pictureBox2.Visible = stopListeningButton.Visible = true;
-            pictureBox3.Visible = startListeningButton.Visible = false;
-
-            new Thread(ServerWork).Start();
+            runningPicture.Visible = stopListeningButton.Visible = true;
+            notRunningPicture.Visible = startListeningButton.Visible = false;
         }
 
         private void _messages_ListChanged(object sender, ListChangedEventArgs e)
         {
             deleteAllMenuItem.Enabled = deleteAllButton.Enabled = viewLastMessageMenuItem.Enabled = _messages.Count > 0;
-            trayIcon.Text = string.Format("smtp4dev ({1} messages)", Settings.Default.PortNumber, _messages.Count);
+            trayIcon.Text = string.Format("smtp4dev (listening on :{0})\n{1} messages", Settings.Default.PortNumber, _messages.Count);
 
             if (e.ListChangedType == ListChangedType.ItemAdded && Settings.Default.ScrollMessages &&
                 messageGrid.RowCount > 0)
@@ -116,19 +138,19 @@ namespace Rnwood.Smtp4dev
                 Application.DoEvents();
 
                 ServerBehaviour b = new ServerBehaviour();
-                b.MessageReceived += MessageReceived;
-                b.SessionCompleted += b_SessionCompleted;
+                b.MessageReceived += OnMessageReceived;
+                b.SessionCompleted += OnSessionCompleted;
 
                 _server = new Server(b);
                 _server.Run();
             }
             catch (Exception exception)
             {
-                Invoke((MethodInvoker) (() =>
+                Invoke((MethodInvoker)(() =>
                                             {
 
                                                 StopServer();
-                                                
+
                                                 statusLabel.Text = "Server failed: " + exception.Message;
 
                                                 trayIcon.ShowBalloonTip(3000, "Server failed", exception.Message,
@@ -137,16 +159,16 @@ namespace Rnwood.Smtp4dev
             }
         }
 
-        private void b_SessionCompleted(object sender, SessionEventArgs e)
+        private void OnSessionCompleted(object sender, SessionEventArgs e)
         {
-            Invoke((MethodInvoker) (() => { _sessions.Add(new SessionViewModel(e.Session)); }));
+            Invoke((MethodInvoker)(() => { _sessions.Add(new SessionViewModel(e.Session)); }));
         }
 
-        private void MessageReceived(object sender, MessageReceivedEventArgs e)
+        private void OnMessageReceived(object sender, MessageReceivedEventArgs e)
         {
             MessageViewModel message = new MessageViewModel(e.Message);
 
-            Invoke((MethodInvoker) (() =>
+            Invoke((MethodInvoker)(() =>
                                         {
                                             _messages.Add(message);
 
@@ -276,19 +298,20 @@ namespace Rnwood.Smtp4dev
 
         private void StopServer()
         {
-            trayIcon.Icon = Resources.Icon2;
-            listenForConnectionsToolStripMenuItem.Checked = false;
-            statusLabel.Text = "Not listening";
-            pictureBox2.Visible = stopListeningButton.Visible = false;
-            pictureBox3.Visible = startListeningButton.Visible = true;
-
             if (_server.IsRunning)
             {
                 _server.Stop();
             }
+
+            trayIcon.Icon = Resources.NotListeningIcon;
+            listenForConnectionsToolStripMenuItem.Checked = false;
+            statusLabel.Text = "Not listening";
+            runningPicture.Visible = stopListeningButton.Visible = false;
+            notRunningPicture.Visible = startListeningButton.Visible = true;
+            trayIcon.Text = string.Format("smtp4dev (not listening)\n{1} messages", Settings.Default.PortNumber, _messages.Count);
         }
 
-        private void toolStripMenuItem1_Click(object sender, EventArgs e)
+        private void viewLastMessageMenuItem_Click(object sender, EventArgs e)
         {
             ViewMessage(_messages.Last());
         }
@@ -399,7 +422,7 @@ namespace Rnwood.Smtp4dev
         {
             if (e.RowIndex >= 0)
             {
-                MessageViewModel message = (MessageViewModel) messageGrid.Rows[e.RowIndex].DataBoundItem;
+                MessageViewModel message = (MessageViewModel)messageGrid.Rows[e.RowIndex].DataBoundItem;
 
                 if (!message.HasBeenViewed)
                 {
@@ -453,7 +476,7 @@ namespace Rnwood.Smtp4dev
             {
                 _sessions.Remove(session);
 
-                foreach (MessageViewModel message in _messages.Where(mvm => session.Session.Messages.Any( m => mvm.Message == m)).ToArray())
+                foreach (MessageViewModel message in _messages.Where(mvm => session.Session.Messages.Any(m => mvm.Message == m)).ToArray())
                 {
                     _messages.Remove(message);
                 }
