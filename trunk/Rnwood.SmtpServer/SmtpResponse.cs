@@ -39,7 +39,7 @@ namespace Rnwood.SmtpServer
         public override string ToString()
         {
             StringBuilder result = new StringBuilder();
-            string[] lines = Message.Split('\n');
+            string[] lines = Message.Split(new string[]{"\r\n"}, System.StringSplitOptions.None);
 
             for (int l = 0; l < lines.Length; l++)
             {
