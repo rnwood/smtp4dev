@@ -433,7 +433,7 @@ namespace Rnwood.Smtp4dev
 
         private void MainForm_SizeChanged(object sender, EventArgs e)
         {
-            if (WindowState == FormWindowState.Minimized)
+            if (WindowState == FormWindowState.Minimized && Properties.Settings.Default.MinimizeToSysTray)
             {
                 Visible = false;
             }

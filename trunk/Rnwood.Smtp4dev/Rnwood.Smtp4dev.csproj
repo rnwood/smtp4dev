@@ -74,6 +74,9 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="..\SolutionInfo.cs">
+      <Link>SolutionInfo.cs</Link>
+    </Compile>
     <Compile Include="ServerBehaviour.cs" />
     <Compile Include="MessageInspector\InspectorWindow.xaml.cs">
       <DependentUpon>InspectorWindow.xaml</DependentUpon>
