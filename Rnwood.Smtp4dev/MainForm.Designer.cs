@@ -191,7 +191,7 @@
             // 
             this.Recieved.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
             this.Recieved.DataPropertyName = "ReceivedDate";
-            this.Recieved.HeaderText = "Recieved";
+            this.Recieved.HeaderText = "Received";
             this.Recieved.Name = "Recieved";
             this.Recieved.ReadOnly = true;
             this.Recieved.Width = 77;

@@ -12,10 +12,6 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyTitle("Rnwood.SmtpServer.Tests")]
 [assembly: AssemblyDescription("")]
 [assembly: AssemblyConfiguration("")]
-[assembly: AssemblyCompany("Robert Wood")]
-[assembly: AssemblyProduct("Rnwood.SmtpServer.Tests")]
-[assembly: AssemblyCopyright("Copyright © Robert Wood 2009")]
-[assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
 // Setting ComVisible to false makes the types in this assembly not visible 
@@ -38,6 +34,3 @@ using System.Runtime.InteropServices;
 // You can specify all the values or you can default the Build and Revision Numbers 
 // by using the '*' as shown below:
 // [assembly: AssemblyVersion("1.0.*")]
-
-[assembly: AssemblyVersion("2.0.4.*")]
-[assembly: AssemblyFileVersion("2.0.4.*")]
