@@ -13,13 +13,6 @@ namespace Rnwood.SmtpServer
     {
         public static Regex COMMANDREGEX = new Regex("(?'verb'[^ :]+)[ :]+(?'arguments'.*)");
 
-        public static Regex ARGUMENTSREGEX = new Regex("^[^<>]*" +
-                     "(" +
-                       "(?'Open'<)+" +
-                       "(?'Close-Open'>)+" +
-                     ")*" +
-                     "(?(Open)(?!))$");
-
         public SmtpCommand(string text)
         {
             Text = text;
@@ -79,7 +72,7 @@ namespace Rnwood.SmtpServer
             {
                 arguments.Add(currentArgument.ToString());
             }
-            return arguments.ToArray()`;
+            return arguments.ToArray();
         }
         public string Text { get; private set; }
 
