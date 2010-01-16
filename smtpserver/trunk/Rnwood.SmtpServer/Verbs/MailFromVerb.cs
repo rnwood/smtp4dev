@@ -34,10 +34,10 @@ namespace Rnwood.SmtpServer
             }
 
             string from = command.Arguments.First();
-            if (from.StartsWith('<'))
+            if (from.StartsWith("<"))
                 from = from.Remove(0, 1);
 
-            if (from.EndsWith('>'))
+            if (from.EndsWith(">"))
                 from = from.Remove(from.Length - 1, 1);
 
             connection.Server.Behaviour.OnMessageStart(connection, from);
