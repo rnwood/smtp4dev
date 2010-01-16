@@ -2,6 +2,8 @@
 
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Text;
+using System.Collections.Generic;
 
 #endregion
 
@@ -9,7 +11,14 @@ namespace Rnwood.SmtpServer
 {
     public class SmtpCommand
     {
-        public static Regex SPLITREGEX = new Regex("[ :]");
+        public static Regex COMMANDREGEX = new Regex("(?'verb'[^ :]+)[ :]+(?'arguments'.*)");
+
+        public static Regex ARGUMENTSREGEX = new Regex("^[^<>]*" +
+                     "(" +
+                       "(?'Open'<)+" +
+                       "(?'Close-Open'>)+" +
+                     ")*" +
+                     "(?(Open)(?!))$");
 
         public SmtpCommand(string text)
         {
@@ -17,19 +26,61 @@ namespace Rnwood.SmtpServer
 
             if (!string.IsNullOrEmpty(text))
             {
-                string[] commandParts = SPLITREGEX.Split(text).Where(part => !string.IsNullOrEmpty(part)).ToArray();
-                Verb = commandParts[0];
-                Arguments = commandParts.Skip(1).ToArray();
-                ArgumentsText = string.Join(" ", Arguments);
+                Match match = COMMANDREGEX.Match(text);
+
+                if (match.Success)
+
+                    Verb = match.Groups["verb"].Value;
+                ArgumentsText = match.Groups["arguments"].Value ?? "";
+                Arguments = ParseArguments(ArgumentsText);;
+
                 IsValid = true;
+                return;
             }
-            else
-            {
-                IsValid = false;
-                IsEmpty = true;
-            }
+
+            IsValid = false;
+            IsEmpty = true;
         }
 
+        private string[] ParseArguments(string argumentsText)
+        {
+            int ltCount = 0;
+            List<string> arguments = new List<string>();
+            StringBuilder currentArgument = new StringBuilder();
+            foreach (char character in argumentsText)
+            {
+                switch (character)
+                {
+                    case '<':
+                        ltCount++;
+                        goto default;
+                    case '>':
+                        ltCount--;
+                        goto default;
+                    case ' ':
+                    case ':':
+                        if (ltCount == 0)
+                        {
+                            arguments.Add(currentArgument.ToString());
+                            currentArgument = new StringBuilder();
+                        }
+                        else
+                        {
+                            goto default;
+                        }
+                        break;
+                    default:
+                        currentArgument.Append(character);
+                        break;
+                }
+            }
+
+            if (currentArgument.Length != 0)
+            {
+                arguments.Add(currentArgument.ToString());
+            }
+            return arguments.ToArray()`;
+        }
         public string Text { get; private set; }
 
         public string ArgumentsText { get; private set; }
