@@ -33,7 +33,13 @@ namespace Rnwood.SmtpServer
                 return;
             }
 
-            string from = command.ArgumentsText.TrimStart('<').TrimEnd('>');
+            string from = command.Arguments.First();
+            if (from.StartsWith('<'))
+                from = from.Remove(0, 1);
+
+            if (from.EndsWith('>'))
+                from = from.Remove(from.Length - 1, 1);
+
             connection.Server.Behaviour.OnMessageStart(connection, from);
             connection.NewMessage();
             connection.CurrentMessage.From = from;
