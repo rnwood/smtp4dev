@@ -15,7 +15,8 @@ namespace Rnwood.SmtpServer.Tests
             SmtpCommand command = new SmtpCommand("DATA");
             Assert.IsTrue(command.IsValid);
             Assert.AreEqual("DATA", command.Verb);
-
+            Assert.AreEqual("", command.ArgumentsText);
+            Assert.AreEqual(0, command.Arguments.Length);
         }
 
         [Test]

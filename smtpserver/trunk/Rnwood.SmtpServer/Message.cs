@@ -10,7 +10,7 @@ namespace Rnwood.SmtpServer
 {
     public class Message
     {
-        public Message(Session session)
+        public Message(ISession session)
         {
             Session = session;
             ToList = new List<string>();
@@ -19,7 +19,7 @@ namespace Rnwood.SmtpServer
 
         public DateTime ReceivedDate { get; internal set; }
 
-        public Session Session { get; private set; }
+        public ISession Session { get; private set; }
 
         public string From { get; internal set; }
 

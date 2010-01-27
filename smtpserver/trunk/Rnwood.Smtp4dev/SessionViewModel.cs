@@ -13,12 +13,12 @@ namespace Rnwood.Smtp4dev
 {
     public class SessionViewModel
     {
-        public SessionViewModel(Session session)
+        public SessionViewModel(ISession session)
         {
             Session = session;
         }
 
-        public Session Session { get; private set; }
+        public ISession Session { get; private set; }
 
         public string Client
         {

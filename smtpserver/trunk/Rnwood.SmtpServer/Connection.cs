@@ -48,7 +48,7 @@ namespace Rnwood.SmtpServer
 
         #region IConnectionProcessor Members
 
-        public Server Server { get; private set; }
+        public IServer Server { get; private set; }
 
         public void SwitchReaderEncoding(Encoding encoding)
         {
@@ -100,7 +100,7 @@ namespace Rnwood.SmtpServer
             return text;
         }
 
-        public Session Session { get; private set; }
+        public ISession Session { get; private set; }
 
         public Message CurrentMessage { get; private set; }
 
