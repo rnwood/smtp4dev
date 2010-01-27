@@ -2,7 +2,7 @@
 
 using System.Net.Sockets;
 using System.Threading;
-using NUnit.Framework;
+using MbUnit.Framework;
 
 #endregion
 
@@ -20,7 +20,7 @@ namespace Rnwood.SmtpServer.Tests
 
         private Server NewServer()
         {
-            return new DefaultServer(2525);
+            return new DefaultServer(Ports.AssignAutomatically);
         }
 
         [Test]
@@ -56,9 +56,7 @@ namespace Rnwood.SmtpServer.Tests
         }
 
         [Test]
-        [ExpectedException(typeof (SocketException),
-            ExpectedMessage =
-                "Only one usage of each socket address (protocol/network address/port) is normally permitted")]
+        [ExpectedException(typeof (SocketException))]
         public void Start_StartupExceptionThrown()
         {
             Server server1 = StartServer();
@@ -73,6 +71,18 @@ namespace Rnwood.SmtpServer.Tests
             Server server = StartServer();
             server.Stop();
             Assert.IsFalse(server.IsRunning);
+        }
+
+        [Test]
+        public void Start_CanConnect()
+        {
+            Server server = StartServer();
+
+            TcpClient client = new TcpClient();
+            client.Connect("localhost", server.PortNumber);
+            client.Close();
+
+            server.Stop();
         }
     }
 }
