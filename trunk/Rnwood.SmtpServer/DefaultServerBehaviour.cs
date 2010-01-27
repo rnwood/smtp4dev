@@ -95,7 +95,7 @@ namespace Rnwood.SmtpServer
             return extensions;
         }
 
-        public virtual void OnSessionCompleted(IConnection connection, Session session)
+        public virtual void OnSessionCompleted(IConnection connection, ISession session)
         {
             if (SessionCompleted != null)
             {
@@ -103,7 +103,7 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        public void OnSessionStarted(IConnection connection, Session session)
+        public void OnSessionStarted(IConnection connection, ISession session)
         {
             if (SessionStarted != null)
             {
@@ -172,11 +172,11 @@ namespace Rnwood.SmtpServer
 
     public class SessionEventArgs : EventArgs
     {
-        public SessionEventArgs(Session session)
+        public SessionEventArgs(ISession session)
         {
             Session = session;
         }
 
-        public Session Session { get; private set; }
+        public ISession Session { get; private set; }
     }
 }
