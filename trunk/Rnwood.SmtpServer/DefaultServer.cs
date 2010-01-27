@@ -41,8 +41,62 @@ namespace Rnwood.SmtpServer
         /// </summary>
         /// <param name="portNumber">The port number.</param>
         /// <param name="sslCertificate">The SSL certificate.</param>
-        public DefaultServer(int portNumber, X509Certificate sslCertificate) : base(new DefaultServerBehaviour(portNumber, sslCertificate))
-        {            
+        public DefaultServer(int portNumber, X509Certificate sslCertificate)
+            : this(new DefaultServerBehaviour(portNumber, sslCertificate))
+        {
         }
+
+        /// <summary>
+        /// Initializes a new SMTP over SSL server on the specified standard port number
+        /// </summary>
+        /// <param name="portNumber">The port number.</param>
+        /// <param name="sslCertificate">The SSL certificate.</param>
+        public DefaultServer(Ports port)
+            : this(new DefaultServerBehaviour((int)port))
+        {
+        }
+
+        private DefaultServer(DefaultServerBehaviour behaviour) : base(behaviour)
+        {
+        }
+
+        protected DefaultServerBehaviour Behaviour
+        {
+            get
+            {
+                return (DefaultServerBehaviour) base.Behaviour;
+            }
+        }
+
+        public event EventHandler<MessageReceivedEventArgs> MessageReceived
+        {
+            add { Behaviour.MessageReceived += value; }
+            remove { Behaviour.MessageReceived -= value; }
+        }
+
+        public event EventHandler<SessionEventArgs> SessionCompleted
+        {
+            add { Behaviour.SessionCompleted += value; }
+            remove { Behaviour.SessionCompleted -= value; }
+        }
+
+        public event EventHandler<SessionEventArgs> SessionStarted
+        {
+            add { Behaviour.SessionStarted += value; }
+            remove { Behaviour.SessionStarted -= value; }
+        }
+
+        public event EventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequired
+        {
+            add { Behaviour.AuthenticationCredentialsValidationRequired += value; }
+            remove { Behaviour.AuthenticationCredentialsValidationRequired -= value; }
+        }
+    }
+
+    public enum Ports
+    {
+        AssignAutomatically = 0,
+        SMTP = 25,
+        SMTPOverSSL=465
     }
 }

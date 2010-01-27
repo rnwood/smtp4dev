@@ -11,7 +11,7 @@ namespace Rnwood.SmtpServer
 {
     public class SmtpCommand
     {
-        public static Regex COMMANDREGEX = new Regex("(?'verb'[^ :]+)[ :]+(?'arguments'.*)");
+        public static Regex COMMANDREGEX = new Regex("(?'verb'[^ :]+)[ :]*(?'arguments'.*)");
 
         public SmtpCommand(string text)
         {
@@ -22,13 +22,13 @@ namespace Rnwood.SmtpServer
                 Match match = COMMANDREGEX.Match(text);
 
                 if (match.Success)
-
+                {
                     Verb = match.Groups["verb"].Value;
-                ArgumentsText = match.Groups["arguments"].Value ?? "";
-                Arguments = ParseArguments(ArgumentsText);;
-
-                IsValid = true;
-                return;
+                    ArgumentsText = match.Groups["arguments"].Value ?? "";
+                    Arguments = ParseArguments(ArgumentsText);
+                    IsValid = true;
+                    return;
+                }
             }
 
             IsValid = false;
