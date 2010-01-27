@@ -1,6 +1,7 @@
 ﻿#region
 
 using System;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 
@@ -39,6 +40,14 @@ namespace Rnwood.SmtpServer
             IsRunning = true;
 
             Core();
+        }
+
+        public int PortNumber
+        {
+            get
+            {
+                return ((IPEndPoint)_listener.LocalEndpoint).Port;
+            }
         }
 
         private void Core()

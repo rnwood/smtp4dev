@@ -16,4 +16,12 @@ Publish
 Publish
 _ReSharper.sln
 _ReSharper.smtp4dev
+</Value></Property><Property><Name>svn:ignore</Name><Value>*.cache
+*.suo
+*.user
+Publish
+_ReSharper.sln
+_ReSharper.smtp4dev
+LocalTestRun.testrunconfig
+smtp4dev.vsmdi
 </Value></Property></Properties></ItemProperties>
