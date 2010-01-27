@@ -66,14 +66,14 @@ namespace Rnwood.SmtpServer
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <param name="Session">The session.</param>
-        void OnSessionCompleted(IConnection connection, Session Session);
+        void OnSessionCompleted(IConnection connection, ISession Session);
 
         /// <summary>
         /// Called when a new SMTP session is started.
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <param name="session">The session.</param>
-        void OnSessionStarted(IConnection connection, Session session);
+        void OnSessionStarted(IConnection connection, ISession session);
 
         /// <summary>
         /// Gets the receive timeout that should be used for the specified connection.

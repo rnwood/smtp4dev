@@ -35,7 +35,7 @@ namespace Rnwood.Smtp4dev
             
         }
 
-        public void OnSessionStarted(IConnection connection, Session session)
+        public void OnSessionStarted(IConnection connection, ISession session)
         {
         }
 
@@ -137,7 +137,7 @@ namespace Rnwood.Smtp4dev
             return value != 0 ? value : (long?) null;
         }
 
-        public void OnSessionCompleted(IConnection connection, Session Session)
+        public void OnSessionCompleted(IConnection connection, ISession Session)
         {
             if (SessionCompleted != null)
             {
