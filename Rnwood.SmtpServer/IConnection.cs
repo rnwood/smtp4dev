@@ -12,11 +12,11 @@ namespace Rnwood.SmtpServer
 {
     public interface IConnection
     {
-        Server Server { get; }
+        IServer Server { get; }
         IExtensionProcessor[] ExtensionProcessors { get; }
         VerbMap VerbMap { get; }
         MailVerb MailVerb { get; }
-        Session Session { get; }
+        ISession Session { get; }
         Message CurrentMessage { get; }
         void SwitchReaderEncoding(Encoding encoding);
         void SwitchReaderEncodingToDefault();

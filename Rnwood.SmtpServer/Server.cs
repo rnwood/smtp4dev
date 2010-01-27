@@ -9,7 +9,7 @@ using System.Threading;
 
 namespace Rnwood.SmtpServer
 {
-    public class Server
+    public class Server : IServer
     {
         private Thread _coreThread;
         private TcpListener _listener;
