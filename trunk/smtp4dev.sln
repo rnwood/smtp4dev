@@ -8,6 +8,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		LICENSE = LICENSE
 		LICENSE.rtf = LICENSE.rtf
 		LICENSE.sharpmimetools = LICENSE.sharpmimetools
+		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
+		smtp4dev.vsmdi = smtp4dev.vsmdi
 		SolutionInfo.cs = SolutionInfo.cs
 	EndProjectSection
 EndProject
@@ -28,6 +30,9 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsService", "Rnwood.SmtpServer\Examples\WindowsService\WindowsService.csproj", "{B6D12678-5E09-4AFA-AADA-615619889EBA}"
 EndProject
 Global
+	GlobalSection(TestCaseManagementSettings) = postSolution
+		CategoryFile = smtp4dev.vsmdi
+	EndGlobalSection
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
 		Debug|Mixed Platforms = Debug|Mixed Platforms

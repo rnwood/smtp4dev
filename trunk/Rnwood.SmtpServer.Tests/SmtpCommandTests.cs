@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using NUnit.Framework;
+using MbUnit.Framework;
 
 namespace Rnwood.SmtpServer.Tests
 {
@@ -10,7 +10,16 @@ namespace Rnwood.SmtpServer.Tests
     public class SmtpCommandTests
     {
         [Test]
-        public void MailFrom()
+        public void Parsing_SingleToken()
+        {
+            SmtpCommand command = new SmtpCommand("DATA");
+            Assert.IsTrue(command.IsValid);
+            Assert.AreEqual("DATA", command.Verb);
+
+        }
+
+        [Test]
+        public void Parsing_MailFrom_WithDisplayName()
         {
             SmtpCommand command = new SmtpCommand("MAIL FROM:<Robert Wood<rob@rnwood.co.uk>> ARG1 ARG2");
             Assert.IsTrue(command.IsValid);
@@ -18,6 +27,19 @@ namespace Rnwood.SmtpServer.Tests
             Assert.AreEqual("FROM:<Robert Wood<rob@rnwood.co.uk>> ARG1 ARG2", command.ArgumentsText);
             Assert.AreEqual("FROM", command.Arguments[0]);
             Assert.AreEqual("<Robert Wood<rob@rnwood.co.uk>>", command.Arguments[1]);
+            Assert.AreEqual("ARG1", command.Arguments[2]);
+            Assert.AreEqual("ARG2", command.Arguments[3]);
+        }
+
+        [Test]
+        public void Parsing_MailFrom_EmailOnly()
+        {
+            SmtpCommand command = new SmtpCommand("MAIL FROM:<rob@rnwood.co.uk> ARG1 ARG2");
+            Assert.IsTrue(command.IsValid);
+            Assert.AreEqual("MAIL", command.Verb);
+            Assert.AreEqual("FROM:<rob@rnwood.co.uk> ARG1 ARG2", command.ArgumentsText);
+            Assert.AreEqual("FROM", command.Arguments[0]);
+            Assert.AreEqual("<rob@rnwood.co.uk>", command.Arguments[1]);
             Assert.AreEqual("ARG1", command.Arguments[2]);
             Assert.AreEqual("ARG2", command.Arguments[3]);
         }
