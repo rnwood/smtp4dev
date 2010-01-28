@@ -57,10 +57,13 @@ namespace Rnwood.SmtpServer.Tests
 
         [Test]
         [ExpectedException(typeof (SocketException))]
-        public void Start_StartupExceptionThrown()
+        public void StartOnInusePort_StartupExceptionThrown()
         {
-            Server server1 = StartServer();
-            Server server2 = StartServer();
+            Server server1 = new DefaultServer(Ports.AssignAutomatically);
+            server1.Start();
+
+            Server server2 = new DefaultServer(server1.PortNumber);
+            server2.Start();
 
             server1.Stop();
         }
