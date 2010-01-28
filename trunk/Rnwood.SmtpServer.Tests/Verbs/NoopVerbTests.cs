@@ -14,14 +14,12 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         [Test]
         public void Noop()
         {
-            Mock<IConnection> connection = new Mock<IConnection>();
-            Mock<ISession> session = new Mock<ISession>();
-            connection.SetupGet(c => c.Session).Returns(session.Object);
+            Mocks mocks = new Mocks();
 
             NoopVerb verb = new NoopVerb();
-            verb.Process(connection.Object, new SmtpCommand("NOOP"));
+            verb.Process(mocks.Connection.Object, new SmtpCommand("NOOP"));
 
-            connection.Verify(c => c.WriteResponse(It.Is<SmtpResponse>(r => r.Code == (int)StandardSmtpResponseCode.OK)));
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         }
     }
 }

@@ -57,12 +57,14 @@
       <Link>SolutionInfo.cs</Link>
     </Compile>
     <Compile Include="ClientTests.cs" />
+    <Compile Include="Mocks.cs" />
     <Compile Include="ServerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SmtpCommandTests.cs" />
     <Compile Include="Verbs\DataVerbTests.cs" />
     <Compile Include="Verbs\HeloVerbTests.cs" />
     <Compile Include="Verbs\NoopVerbTests.cs" />
+    <Compile Include="Verbs\RcptToVerbTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rnwood.SmtpServer\Rnwood.SmtpServer.csproj">
