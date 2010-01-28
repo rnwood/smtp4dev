@@ -13,37 +13,94 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         [Test]
         public void Data()
         {
-            Mock<IConnection> connection = new Mock<IConnection>();
-            Mock<ISession> session = new Mock<ISession>();
-            connection.SetupGet(c => c.Session).Returns(session.Object);
-            connection.SetupGet(c => c.CurrentMessage).Returns(new Message(session.Object));
-            connection.Setup(c => c.Server.Behaviour.GetMaximumMessageSize(It.IsAny<IConnection>())).Returns((long?)null);
+            //Check escaping of end of message character ".." is decoded to "."
+            //but the .. after B should be left alone
+            TestGoodData(new string[] { "A", "..", "B..", "." }, "A\r\n.\r\nB..");
+        }
 
-            string[] message = new string[] { "A", "B", "." };
+        [Test]
+        public void Data_EmptyMessage()
+        {
+            TestGoodData(new string[] { "." }, "");
+        }
+
+        [Test]
+        public void Data_7BitTruncation()
+        {
+            TestGoodData(new string[] { "\u0215", "." }, "\u0087");
+        }
+
+        private void TestGoodData(string[] messageData, string expectedData)
+        {
+            Mocks mocks = new Mocks();
+
+            Message message = new Message(mocks.Session.Object);
+            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
+            mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).Returns((long?)null);
+
             int messageLine = 0;
-
-            connection.Setup(c => c.ReadLine()).Returns(() => message[messageLine++]);
+            mocks.Connection.Setup(c => c.ReadLine()).Returns(() => messageData[messageLine++]);
 
             DataVerb verb = new DataVerb();
-            verb.Process(connection.Object, new SmtpCommand("DATA"));
+            verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
 
-            connection.Verify(c => c.WriteResponse(It.Is<SmtpResponse>(r => r.Code == (int)StandardSmtpResponseCode.StartMailInputEndWithDot)));
-            connection.Verify(c => c.WriteResponse(It.Is<SmtpResponse>(r => r.Code == (int)StandardSmtpResponseCode.OK)));
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
 
-            
+            Assert.AreEqual(expectedData, Encoding.ASCII.GetString(message.Data));
+        }
+
+        [Test]
+        public void MessageAboveFixedSize()
+        {
+            Mocks mocks = new Mocks();
+
+            Message message = new Message(mocks.Session.Object);
+            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
+            mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).Returns(10);
+
+            string[] messageData = new string[] { new string('x', 11), "." };
+            int messageLine = 0;
+            mocks.Connection.Setup(c => c.ReadLine()).Returns(() => messageData[messageLine++]);
+
+            DataVerb verb = new DataVerb();
+            verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
+
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.ExceededStorageAllocation);
+
+            Assert.IsNull(message.Data);
+        }
+
+        [Test]
+        public void MessageInsideFixedSize()
+        {
+            Mocks mocks = new Mocks();
+
+            Message message = new Message(mocks.Session.Object);
+            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
+            mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).Returns(10);
+
+            string[] messageData = new string[] { new string('x', 10), "." };
+            int messageLine = 0;
+            mocks.Connection.Setup(c => c.ReadLine()).Returns(() => messageData[messageLine++]);
+
+            DataVerb verb = new DataVerb();
+            verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
+
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         }
 
         [Test]
         public void Data_NoCurrentMessage_ReturnsError()
         {
-            Mock<IConnection> connection = new Mock<IConnection>();
-            Mock<ISession> session = new Mock<ISession>();
-            connection.SetupGet(c => c.Session).Returns(session.Object);
+            Mocks mocks = new Mocks();
 
             DataVerb verb = new DataVerb();
-            verb.Process(connection.Object, new SmtpCommand("DATA"));
+            verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
 
-            connection.Verify(c => c.WriteResponse(It.Is<SmtpResponse>(r => r.Code == (int)StandardSmtpResponseCode.BadSequenceOfCommands)));
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
         }
     }
 }

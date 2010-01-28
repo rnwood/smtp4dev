@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.IO;
 using System.Text;
 using Rnwood.SmtpServer.Verbs;
@@ -25,6 +26,8 @@ namespace Rnwood.SmtpServer
             {
                 using (StreamWriter writer = new StreamWriter(dataStream, Encoding.Default))
                 {
+                    bool firstLine = true;
+
                     do
                     {
                         string line = connection.ReadLine();
@@ -32,12 +35,19 @@ namespace Rnwood.SmtpServer
                         if (line != ".")
                         {
                             line = ProcessLine(line);
-                            writer.WriteLine(line);
+
+                            if (!firstLine)
+                                writer.Write(Environment.NewLine);
+
+                            writer.Write(line);
                         }
                         else
                         {
                             break;
                         }
+
+                        firstLine = false;
+
                     } while (true);
 
                     writer.Flush();
