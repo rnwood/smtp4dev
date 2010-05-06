@@ -45,7 +45,7 @@ namespace Rnwood.Smtp4dev
             {
                 if (_contents == null)
                 {
-                    _contents = new SharpMimeMessage(new MemoryStream(Message.Data));
+                    _contents = new SharpMimeMessage(Message.GetData());
                 }
 
                 return _contents;
@@ -57,7 +57,20 @@ namespace Rnwood.Smtp4dev
         public void SaveToFile(FileInfo file)
         {
             HasBeenViewed = true;
-            File.WriteAllBytes(file.FullName, Message.Data);
+
+            byte[] data = new byte[64 * 1024];
+            int bytesRead;
+
+            using (Stream dataStream = Message.GetData(false))
+            {
+                using (FileStream fileStream = file.OpenWrite())
+                {
+                    while ((bytesRead = dataStream.Read(data, 0, data.Length)) > 0)
+                    {
+                        fileStream.Write(data, 0, bytesRead);
+                    }
+                }
+            }
         }
 
         public void MarkAsViewed()

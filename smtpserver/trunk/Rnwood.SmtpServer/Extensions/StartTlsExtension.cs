@@ -27,14 +27,17 @@ namespace Rnwood.SmtpServer.Extensions
 
             public IConnection Connection { get; private set; }
 
-            public string[] GetEHLOKeywords()
+            public string[] EHLOKeywords
             {
-                if (!Connection.Session.SecureConnection)
+                get
                 {
-                    return new[] {"STARTTLS"};
-                }
+                    if (!Connection.Session.SecureConnection)
+                    {
+                        return new[] {"STARTTLS"};
+                    }
 
-                return new string[] {};
+                    return new string[] {};
+                }
             }
         }
 

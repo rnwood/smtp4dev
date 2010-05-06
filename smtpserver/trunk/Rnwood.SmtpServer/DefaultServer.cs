@@ -60,7 +60,7 @@ namespace Rnwood.SmtpServer
         {
         }
 
-        protected DefaultServerBehaviour Behaviour
+        new protected DefaultServerBehaviour Behaviour
         {
             get
             {
@@ -68,7 +68,7 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        public event EventHandler<MessageReceivedEventArgs> MessageReceived
+        public event EventHandler<MessageEventArgs> MessageReceived
         {
             add { Behaviour.MessageReceived += value; }
             remove { Behaviour.MessageReceived -= value; }
@@ -90,6 +90,12 @@ namespace Rnwood.SmtpServer
         {
             add { Behaviour.AuthenticationCredentialsValidationRequired += value; }
             remove { Behaviour.AuthenticationCredentialsValidationRequired -= value; }
+        }
+
+        public event EventHandler<MessageEventArgs> MessageCompleted
+        {
+            add { Behaviour.MessageCompleted += value; }
+            remove { Behaviour.MessageCompleted -= value; }
         }
     }
 
