@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using MbUnit.Framework;
@@ -27,7 +28,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         [Test]
         public void Data_7BitTruncation()
         {
-            TestGoodData(new string[] { "\u0215", "." }, "\u0087");
+            TestGoodData(new string[] { ((char) (0x41+128)).ToString(), "." }, "\u0041");
         }
 
         private void TestGoodData(string[] messageData, string expectedData)
@@ -47,7 +48,10 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
 
-            Assert.AreEqual(expectedData, Encoding.ASCII.GetString(message.Data));
+            using (StreamReader dataReader = new StreamReader(message.GetData(), Encoding.ASCII))
+            {
+                Assert.AreEqual(expectedData, dataReader.ReadToEnd());
+            }
         }
 
         [Test]
@@ -68,8 +72,6 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.ExceededStorageAllocation);
-
-            Assert.IsNull(message.Data);
         }
 
         [Test]

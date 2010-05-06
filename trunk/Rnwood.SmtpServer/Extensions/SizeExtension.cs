@@ -54,17 +54,20 @@ namespace Rnwood.SmtpServer.Extensions
 
             #endregion
 
-            public string[] GetEHLOKeywords()
+            public string[] EHLOKeywords
             {
-                long? maxMessageSize = Connection.Server.Behaviour.GetMaximumMessageSize(Connection);
+                get
+                {
+                    long? maxMessageSize = Connection.Server.Behaviour.GetMaximumMessageSize(Connection);
 
-                if (maxMessageSize.HasValue)
-                {
-                    return new[] {string.Format("SIZE={0}", maxMessageSize.Value)};
-                }
-                else
-                {
-                    return new[] {"SIZE"};
+                    if (maxMessageSize.HasValue)
+                    {
+                        return new[] {string.Format("SIZE={0}", maxMessageSize.Value)};
+                    }
+                    else
+                    {
+                        return new[] {"SIZE"};
+                    }
                 }
             }
         }

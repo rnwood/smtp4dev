@@ -99,6 +99,8 @@ namespace Rnwood.SmtpServer
         /// <param name="from">From.</param>
         void OnMessageStart(IConnection connection, string from);
 
+        IMessage CreateMessage(IConnection connection);
+
         /// <summary>
         /// Determines whether the speficied auth mechanism should be enabled for the specified connecton.
         /// </summary>
@@ -115,5 +117,7 @@ namespace Rnwood.SmtpServer
         /// <param name="connection">The connection.</param>
         /// <param name="command">The command.</param>
         void OnCommandReceived(IConnection connection, SmtpCommand command);
+
+        void OnMessageCompleted(IConnection connection);
     }
 }
