@@ -33,23 +33,27 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
         public AuthMechanismMap MechanismMap { get; private set; }
 
-        public string[] GetEHLOKeywords()
+        public string[] EHLOKeywords
         {
-            IEnumerable<IAuthMechanism> mechanisms = MechanismMap.GetAll();
+            get
+            {
+                IEnumerable<IAuthMechanism> mechanisms = MechanismMap.GetAll();
 
-            if (mechanisms.Any())
-            {
-                return new[]
-                           {
-                               "AUTH=" +
-                               string.Join(" ", mechanisms.Where(IsMechanismEnabled).Select(m => m.Identifier).ToArray())
-                               ,
-                               "AUTH " + string.Join(" ", mechanisms.Select(m => m.Identifier).ToArray())
-                           };
-            }
-            else
-            {
-                return new string[0];
+                if (mechanisms.Any())
+                {
+                    return new[]
+                               {
+                                   "AUTH=" +
+                                   string.Join(" ",
+                                               mechanisms.Where(IsMechanismEnabled).Select(m => m.Identifier).ToArray())
+                                   ,
+                                   "AUTH " + string.Join(" ", mechanisms.Select(m => m.Identifier).ToArray())
+                               };
+                }
+                else
+                {
+                    return new string[0];
+                }
             }
         }
 

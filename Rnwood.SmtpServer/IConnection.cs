@@ -18,8 +18,9 @@ namespace Rnwood.SmtpServer
         MailVerb MailVerb { get; }
         ISession Session { get; }
         Message CurrentMessage { get; }
-        void SwitchReaderEncoding(Encoding encoding);
-        void SwitchReaderEncodingToDefault();
+        Encoding ReaderEncoding { get; }
+        void SetReaderEncoding(Encoding encoding);
+        void SetReaderEncodingToDefault();
         void CloseConnection();
         void ApplyStreamFilter(Func<Stream, Stream> filter);
         void WriteLine(string text, params object[] arg);

@@ -22,11 +22,16 @@ namespace Rnwood.Smtp4dev
 
         #region IServerBehaviour Members
 
+        public void OnMessageCompleted(IConnection connection)
+        {
+            
+        }
+
         public void OnMessageReceived(IConnection connection, Message message)
         {
             if (MessageReceived != null)
             {
-                MessageReceived(this, new MessageReceivedEventArgs(message));
+                MessageReceived(this, new MessageEventArgs(message));
             }
         }
 
@@ -181,9 +186,14 @@ namespace Rnwood.Smtp4dev
             return true;
         }
 
+        public IMessage CreateMessage(IConnection connection)
+        {
+            return new Message(connection.Session);
+        }
+
         #endregion
 
-        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+        public event EventHandler<MessageEventArgs> MessageReceived;
 
         public event EventHandler<SessionEventArgs> SessionCompleted;
     }

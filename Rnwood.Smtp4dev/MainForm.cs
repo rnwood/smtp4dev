@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using System.Windows.Forms;
 using anmar.SharpMimeTools;
+using Microsoft.Win32;
 using Rnwood.Smtp4dev.MessageInspector;
 using Rnwood.Smtp4dev.Properties;
 using Rnwood.SmtpServer;
@@ -164,7 +165,7 @@ namespace Rnwood.Smtp4dev
             Invoke((MethodInvoker)(() => { _sessions.Add(new SessionViewModel(e.Session)); }));
         }
 
-        private void OnMessageReceived(object sender, MessageReceivedEventArgs e)
+        private void OnMessageReceived(object sender, MessageEventArgs e)
         {
             MessageViewModel message = new MessageViewModel(e.Message);
 
@@ -243,6 +244,22 @@ namespace Rnwood.Smtp4dev
             TempFileCollection tempFiles = new TempFileCollection();
             FileInfo msgFile = new FileInfo(tempFiles.AddExtension("eml"));
             message.SaveToFile(msgFile);
+
+            if (Registry.ClassesRoot.OpenSubKey(".eml", false) == null || string.IsNullOrEmpty((string)Registry.ClassesRoot.OpenSubKey(".eml", false).GetValue(null)))
+            {
+                switch (MessageBox.Show(this,
+                                        "You don't appear to have a viewer application associated with .eml files!\nWould you like to download Windows Live Mail (free from live.com website)?",
+                                        "View Message", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question))
+                {
+                    case DialogResult.Yes:
+                        Process.Start("http://download.live.com/wlmail");
+                        return;
+                        break;
+                    case DialogResult.Cancel:
+                        return;
+                        break;
+                }
+            }
 
             Process.Start(msgFile.FullName);
             messageGrid.Refresh();

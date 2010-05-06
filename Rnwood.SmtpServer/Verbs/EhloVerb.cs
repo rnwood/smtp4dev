@@ -23,9 +23,7 @@ namespace Rnwood.SmtpServer
             StringBuilder text = new StringBuilder();
             text.AppendLine("Nice to meet you.");
 
-            IEnumerable<string> extnNames =
-                connection.ExtensionProcessors.SelectMany(extn => extn.GetEHLOKeywords());
-            foreach (string extnName in extnNames)
+            foreach (string extnName in connection.ExtensionProcessors.SelectMany(extn => extn.EHLOKeywords))
             {
                 text.AppendLine(extnName);
             }

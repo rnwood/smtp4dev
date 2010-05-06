@@ -16,8 +16,13 @@ namespace Rnwood.SmtpServer
 {
     public class Connection : IConnection
     {
-        private readonly Encoding _currentReaderEncoding;
-        private readonly Encoding _sevenBitASCIIEncoding;
+
+
+        public Encoding ReaderEncoding
+        {
+            get; private set;
+        }
+
         private readonly TcpClient _tcpClient;
         private StreamReader _reader;
 
@@ -37,9 +42,8 @@ namespace Rnwood.SmtpServer
             _tcpClient = tcpClient;
             _tcpClient.ReceiveTimeout = Server.Behaviour.GetReceiveTimeout(this);
 
-            _currentReaderEncoding =
-                _sevenBitASCIIEncoding =
-                Encoding.GetEncoding("ASCII", new EncoderExceptionFallback(), new ASCIITruncatingDecoderFallback());
+            ReaderEncoding =
+                new ASCIISevenBitTruncatingEncoding();
             _stream = tcpClient.GetStream();
 
             SetupReaderAndWriter();
@@ -50,14 +54,14 @@ namespace Rnwood.SmtpServer
 
         public IServer Server { get; private set; }
 
-        public void SwitchReaderEncoding(Encoding encoding)
+        public void SetReaderEncoding(Encoding encoding)
         {
             SetupReaderAndWriter();
         }
 
-        public void SwitchReaderEncodingToDefault()
+        public void SetReaderEncodingToDefault()
         {
-            SwitchReaderEncoding(_sevenBitASCIIEncoding);
+            SetReaderEncoding(new ASCIISevenBitTruncatingEncoding());
         }
 
         public IExtensionProcessor[] ExtensionProcessors { get; private set; }
@@ -128,8 +132,8 @@ namespace Rnwood.SmtpServer
 
         private void SetupReaderAndWriter()
         {
-            _writer = new StreamWriter(_stream, _currentReaderEncoding) {AutoFlush = true, NewLine = "\r\n"};
-            _reader = new StreamReader(_stream, _currentReaderEncoding);
+            _writer = new StreamWriter(_stream, ReaderEncoding) {AutoFlush = true, NewLine = "\r\n"};
+            _reader = new StreamReader(_stream, ReaderEncoding);
         }
 
         private void SetupVerbs()
@@ -157,8 +161,9 @@ namespace Rnwood.SmtpServer
                 {
                     SslStream sslStream = new SslStream(_stream);
                     sslStream.AuthenticateAsServer(Server.Behaviour.GetSSLCertificate(this));
-                    _stream = sslStream;
                     Session.SecureConnection = true;
+                    _stream = sslStream;
+                    SetupReaderAndWriter();
                 }
 
                 WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady,
