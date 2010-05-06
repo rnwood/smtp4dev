@@ -28,9 +28,9 @@ namespace Rnwood.SmtpServer.Extensions
                 mailFromProcessor.ParameterProcessorMap.SetProcessor("BODY", verb);
             }
 
-            public string[] GetEHLOKeywords()
+            public string[] EHLOKeywords
             {
-                return new[] {"8BITMIME"};
+                get { return new[] {"8BITMIME"}; }
             }
         }
 
@@ -70,7 +70,7 @@ namespace Rnwood.SmtpServer.Extensions
         {
             if (_eightBitMessage)
             {
-                connection.SwitchReaderEncoding(Encoding.Default);
+                connection.SetReaderEncoding(Encoding.Default);
             }
 
             try
@@ -81,7 +81,7 @@ namespace Rnwood.SmtpServer.Extensions
             {
                 if (_eightBitMessage)
                 {
-                    connection.SwitchReaderEncodingToDefault();
+                    connection.SetReaderEncodingToDefault();
                 }
             }
         }

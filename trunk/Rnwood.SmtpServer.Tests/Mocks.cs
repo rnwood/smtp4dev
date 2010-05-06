@@ -17,6 +17,7 @@ namespace Rnwood.SmtpServer.Tests
 
             Connection.SetupGet(c => c.Session).Returns(Session.Object);
             Connection.SetupGet(c => c.Server).Returns(Server.Object);
+            Connection.SetupGet(c => c.ReaderEncoding).Returns(new ASCIISevenBitTruncatingEncoding());
             Server.SetupGet(s => s.Behaviour).Returns(ServerBehaviour.Object);
         }
 

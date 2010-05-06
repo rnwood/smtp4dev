@@ -51,7 +51,7 @@
     <Compile Include="..\SolutionInfo.cs">
       <Link>SolutionInfo.cs</Link>
     </Compile>
-    <Compile Include="ASCIITruncatingDecoderFallback.cs" />
+    <Compile Include="ASCIISevenBitTruncatingEncoding.cs" />
     <Compile Include="Connection.cs" />
     <Compile Include="DefaultServer.cs" />
     <Compile Include="Extensions\Auth\AnonymousAuthenticationRequest.cs" />
@@ -74,6 +74,7 @@
     <Compile Include="Extensions\StartTlsExtension.cs" />
     <Compile Include="Extensions\EightBitMimeExtension.cs" />
     <Compile Include="IConnection.cs" />
+    <Compile Include="IMessage.cs" />
     <Compile Include="IServer.cs" />
     <Compile Include="IServerBehaviour.cs" />
     <Compile Include="ICompletedSession.cs" />

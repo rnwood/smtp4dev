@@ -43,7 +43,7 @@ namespace Rnwood.SmtpServer
         {
             if (MessageReceived != null)
             {
-                MessageReceived(this, new MessageReceivedEventArgs(message));
+                MessageReceived(this, new MessageEventArgs(message));
             }
         }
 
@@ -131,6 +131,7 @@ namespace Rnwood.SmtpServer
         {
         }
 
+
         public virtual bool IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism)
         {
             return false;
@@ -140,9 +141,23 @@ namespace Rnwood.SmtpServer
         {
         }
 
+        public IMessage CreateMessage(IConnection connection)
+        {
+            return new Message(connection.Session);
+        }
+
+        public virtual void OnMessageCompleted(IConnection connection)
+        {
+            if (MessageCompleted != null)
+            {
+                MessageCompleted(this, new MessageEventArgs(connection.CurrentMessage));
+            }
+        }
+
         #endregion
 
-        public event EventHandler<MessageReceivedEventArgs> MessageReceived;
+        public event EventHandler<MessageEventArgs> MessageCompleted;
+        public event EventHandler<MessageEventArgs> MessageReceived;
         public event EventHandler<SessionEventArgs> SessionCompleted;
         public event EventHandler<SessionEventArgs> SessionStarted;
         public event EventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequired;
@@ -160,9 +175,9 @@ namespace Rnwood.SmtpServer
         public AuthenticationResult AuthenticationResult { get; set; }
     }
 
-    public class MessageReceivedEventArgs : EventArgs
+    public class MessageEventArgs : EventArgs
     {
-        public MessageReceivedEventArgs(Message message)
+        public MessageEventArgs(Message message)
         {
             Message = message;
         }
