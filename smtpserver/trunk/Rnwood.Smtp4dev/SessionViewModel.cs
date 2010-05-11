@@ -20,6 +20,14 @@ namespace Rnwood.Smtp4dev
 
         public ISession Session { get; private set; }
 
+        public bool SecureConnection
+        {
+            get
+            {
+                return Session.SecureConnection;
+            }
+        }
+
         public string Client
         {
             get { return Session.ClientAddress.ToString(); }

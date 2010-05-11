@@ -65,14 +65,15 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.sessionsGrid = new System.Windows.Forms.DataGridView();
-            this.StartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clientDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.NumberOfMessages = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.sessionBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.viewSessionButton = new System.Windows.Forms.Button();
             this.deleteSessionButton = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
+            this.StartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clientDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SecureConnection = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.NumberOfMessages = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.trayIconContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.messageGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).BeginInit();
@@ -109,13 +110,13 @@
             this.optionsMenuItem,
             this.exitMenuItem});
             this.trayIconContextMenuStrip.Name = "contextMenuStrip";
-            this.trayIconContextMenuStrip.Size = new System.Drawing.Size(200, 136);
+            this.trayIconContextMenuStrip.Size = new System.Drawing.Size(189, 136);
             // 
             // showMenuItem
             // 
             this.showMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Bold, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.showMenuItem.Name = "showMenuItem";
-            this.showMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.showMenuItem.Size = new System.Drawing.Size(188, 22);
             this.showMenuItem.Text = "View Messages";
             this.showMenuItem.Click += new System.EventHandler(this.trayIcon_DoubleClick);
             // 
@@ -124,7 +125,7 @@
             this.viewLastMessageMenuItem.Enabled = false;
             this.viewLastMessageMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.viewLastMessageMenuItem.Name = "viewLastMessageMenuItem";
-            this.viewLastMessageMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.viewLastMessageMenuItem.Size = new System.Drawing.Size(188, 22);
             this.viewLastMessageMenuItem.Text = "View Last Message";
             this.viewLastMessageMenuItem.Click += new System.EventHandler(this.viewLastMessageMenuItem_Click);
             // 
@@ -133,7 +134,7 @@
             this.deleteAllMenuItem.Enabled = false;
             this.deleteAllMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.deleteAllMenuItem.Name = "deleteAllMenuItem";
-            this.deleteAllMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.deleteAllMenuItem.Size = new System.Drawing.Size(188, 22);
             this.deleteAllMenuItem.Text = "Delete All Messages";
             this.deleteAllMenuItem.Click += new System.EventHandler(this.clearAllEmailsToolStripMenuItem_Click);
             // 
@@ -141,7 +142,7 @@
             // 
             this.listenForConnectionsToolStripMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.listenForConnectionsToolStripMenuItem.Name = "listenForConnectionsToolStripMenuItem";
-            this.listenForConnectionsToolStripMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.listenForConnectionsToolStripMenuItem.Size = new System.Drawing.Size(188, 22);
             this.listenForConnectionsToolStripMenuItem.Text = "Listen for connections";
             this.listenForConnectionsToolStripMenuItem.Click += new System.EventHandler(this.listenForConnectionsToolStripMenuItem_Click);
             // 
@@ -149,7 +150,7 @@
             // 
             this.optionsMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.optionsMenuItem.Name = "optionsMenuItem";
-            this.optionsMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.optionsMenuItem.Size = new System.Drawing.Size(188, 22);
             this.optionsMenuItem.Text = "Options";
             this.optionsMenuItem.Click += new System.EventHandler(this.optionsToolStripMenuItem_Click);
             // 
@@ -157,7 +158,7 @@
             // 
             this.exitMenuItem.Font = new System.Drawing.Font("Segoe UI", 8.25F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.exitMenuItem.Name = "exitMenuItem";
-            this.exitMenuItem.Size = new System.Drawing.Size(199, 22);
+            this.exitMenuItem.Size = new System.Drawing.Size(188, 22);
             this.exitMenuItem.Text = "Exit";
             this.exitMenuItem.Click += new System.EventHandler(this.exitToolStripMenuItem_Click);
             // 
@@ -327,26 +328,26 @@
             this.flowLayoutPanel2.Size = new System.Drawing.Size(514, 33);
             this.flowLayoutPanel2.TabIndex = 4;
             // 
-            // pictureBox2
+            // runningPicture
             // 
             this.runningPicture.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.runningPicture.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox2.Image")));
+            this.runningPicture.Image = ((System.Drawing.Image)(resources.GetObject("runningPicture.Image")));
             this.runningPicture.Location = new System.Drawing.Point(3, 6);
             this.runningPicture.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
-            this.runningPicture.Name = "pictureBox2";
+            this.runningPicture.Name = "runningPicture";
             this.runningPicture.Size = new System.Drawing.Size(16, 16);
             this.runningPicture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.runningPicture.TabIndex = 8;
             this.runningPicture.TabStop = false;
             this.runningPicture.Visible = false;
             // 
-            // pictureBox3
+            // notRunningPicture
             // 
             this.notRunningPicture.Anchor = System.Windows.Forms.AnchorStyles.Left;
-            this.notRunningPicture.Image = ((System.Drawing.Image)(resources.GetObject("pictureBox3.Image")));
+            this.notRunningPicture.Image = ((System.Drawing.Image)(resources.GetObject("notRunningPicture.Image")));
             this.notRunningPicture.Location = new System.Drawing.Point(22, 6);
             this.notRunningPicture.Margin = new System.Windows.Forms.Padding(3, 3, 0, 3);
-            this.notRunningPicture.Name = "pictureBox3";
+            this.notRunningPicture.Name = "notRunningPicture";
             this.notRunningPicture.Size = new System.Drawing.Size(16, 16);
             this.notRunningPicture.SizeMode = System.Windows.Forms.PictureBoxSizeMode.Zoom;
             this.notRunningPicture.TabIndex = 9;
@@ -488,6 +489,7 @@
             this.sessionsGrid.Columns.AddRange(new System.Windows.Forms.DataGridViewColumn[] {
             this.StartDate,
             this.clientDataGridViewTextBoxColumn,
+            this.SecureConnection,
             this.NumberOfMessages});
             this.sessionsGrid.DataSource = this.sessionBindingSource;
             this.sessionsGrid.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -500,32 +502,6 @@
             this.sessionsGrid.Size = new System.Drawing.Size(494, 197);
             this.sessionsGrid.TabIndex = 0;
             this.sessionsGrid.SelectionChanged += new System.EventHandler(this.sessionsGrid_SelectionChanged);
-            // 
-            // StartDate
-            // 
-            this.StartDate.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.StartDate.DataPropertyName = "StartDate";
-            this.StartDate.HeaderText = "Date/Time";
-            this.StartDate.Name = "StartDate";
-            this.StartDate.ReadOnly = true;
-            this.StartDate.Width = 83;
-            // 
-            // clientDataGridViewTextBoxColumn
-            // 
-            this.clientDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.clientDataGridViewTextBoxColumn.DataPropertyName = "Client";
-            this.clientDataGridViewTextBoxColumn.HeaderText = "Client";
-            this.clientDataGridViewTextBoxColumn.Name = "clientDataGridViewTextBoxColumn";
-            this.clientDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // NumberOfMessages
-            // 
-            this.NumberOfMessages.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.NumberOfMessages.DataPropertyName = "NumberOfMessages";
-            this.NumberOfMessages.HeaderText = "No of Msgs";
-            this.NumberOfMessages.Name = "NumberOfMessages";
-            this.NumberOfMessages.ReadOnly = true;
-            this.NumberOfMessages.Width = 91;
             // 
             // sessionBindingSource
             // 
@@ -578,6 +554,41 @@
             this.panel2.Padding = new System.Windows.Forms.Padding(3);
             this.panel2.Size = new System.Drawing.Size(514, 264);
             this.panel2.TabIndex = 2;
+            // 
+            // StartDate
+            // 
+            this.StartDate.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.StartDate.DataPropertyName = "StartDate";
+            this.StartDate.HeaderText = "Date/Time";
+            this.StartDate.Name = "StartDate";
+            this.StartDate.ReadOnly = true;
+            this.StartDate.Width = 83;
+            // 
+            // clientDataGridViewTextBoxColumn
+            // 
+            this.clientDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.clientDataGridViewTextBoxColumn.DataPropertyName = "Client";
+            this.clientDataGridViewTextBoxColumn.HeaderText = "Client";
+            this.clientDataGridViewTextBoxColumn.Name = "clientDataGridViewTextBoxColumn";
+            this.clientDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // SecureConnection
+            // 
+            this.SecureConnection.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.SecureConnection.DataPropertyName = "SecureConnection";
+            this.SecureConnection.HeaderText = "Secure";
+            this.SecureConnection.Name = "SecureConnection";
+            this.SecureConnection.ReadOnly = true;
+            this.SecureConnection.Width = 47;
+            // 
+            // NumberOfMessages
+            // 
+            this.NumberOfMessages.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.NumberOfMessages.DataPropertyName = "NumberOfMessages";
+            this.NumberOfMessages.HeaderText = "No of Msgs";
+            this.NumberOfMessages.Name = "NumberOfMessages";
+            this.NumberOfMessages.ReadOnly = true;
+            this.NumberOfMessages.Width = 91;
             // 
             // MainForm
             // 
@@ -659,9 +670,6 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.DataGridView sessionsGrid;
         private System.Windows.Forms.BindingSource sessionBindingSource;
-        private System.Windows.Forms.DataGridViewTextBoxColumn StartDate;
-        private System.Windows.Forms.DataGridViewTextBoxColumn clientDataGridViewTextBoxColumn;
-        private System.Windows.Forms.DataGridViewTextBoxColumn NumberOfMessages;
         private System.Windows.Forms.FlowLayoutPanel flowLayoutPanel3;
         private System.Windows.Forms.Button viewSessionButton;
         private System.Windows.Forms.DataGridViewTextBoxColumn Recieved;
@@ -669,6 +677,10 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn ToAddressesNice;
         private System.Windows.Forms.Button deleteSessionButton;
         private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.DataGridViewTextBoxColumn StartDate;
+        private System.Windows.Forms.DataGridViewTextBoxColumn clientDataGridViewTextBoxColumn;
+        private System.Windows.Forms.DataGridViewCheckBoxColumn SecureConnection;
+        private System.Windows.Forms.DataGridViewTextBoxColumn NumberOfMessages;
     }
 }
 

@@ -5,5 +5,5 @@ using System.Reflection;
 [assembly: AssemblyProduct("smtp4dev")]
 [assembly: AssemblyCopyright("Copyright © Robert N Wood 2009")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyVersion("2.0.4.0")]
-[assembly: AssemblyFileVersion("2.0.4.0")]
+[assembly: AssemblyVersion("2.0.5.0")]
+[assembly: AssemblyFileVersion("2.0.5.0")]
