@@ -17,6 +17,8 @@ namespace Rnwood.SmtpServer
             ReceivedDate = DateTime.Now;
         }
 
+        public bool SecureConnection { get; set; }
+
         public DateTime ReceivedDate { get; set; }
 
         public ISession Session { get; private set; }
