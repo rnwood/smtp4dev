@@ -10,6 +10,8 @@ namespace Rnwood.SmtpServer
         string From { get; set; }
         string[] To { get; }
 
+        bool SecureConnection { get; set; }
+
         Stream GetData();
         Stream GetData(bool forWriting);
     }

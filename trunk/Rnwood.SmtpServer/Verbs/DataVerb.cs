@@ -20,6 +20,7 @@ namespace Rnwood.SmtpServer
                 return;
             }
 
+            connection.CurrentMessage.SecureConnection = connection.Session.SecureConnection;
             connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.StartMailInputEndWithDot,
                                                                "End message with period"));
 
