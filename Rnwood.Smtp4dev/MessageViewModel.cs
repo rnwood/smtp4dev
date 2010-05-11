@@ -35,7 +35,7 @@ namespace Rnwood.Smtp4dev
 
         public string Subject
         {
-            get { return Parts.Header.Subject; }
+            get { return SharpMimeTools.rfc2047decode(Parts.Header.Subject); }
         }
 
         private SharpMimeMessage _contents;
