@@ -70,6 +70,8 @@ namespace Rnwood.SmtpServer
         ExceededStorageAllocation = 552,
         AuthenticationFailure = 535,
         AuthenticationRequired = 530,
+        RecipientRejected = 550,
+        TransactionFailed = 554,
 
         SystemStatusOrHelpReply = 211,
         HelpMessage = 214,
@@ -79,6 +81,6 @@ namespace Rnwood.SmtpServer
         UserNotLocalWillForwardTo = 251,
         StartMailInputEndWithDot = 354,
         AuthenticationContinue = 334,
-        AuthenitcationOK = 235
+        AuthenticationOK = 235
     }
 }

@@ -47,7 +47,7 @@ namespace Rnwood.SmtpServer
 
             try
             {
-                ParameterProcessorMap.Process(command.Arguments.Skip(1).ToArray(), true);
+                ParameterProcessorMap.Process(connection, command.Arguments.Skip(1).ToArray(), true);
                 connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Okey dokey"));
             }
             catch

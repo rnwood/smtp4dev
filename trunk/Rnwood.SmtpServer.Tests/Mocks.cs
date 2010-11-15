@@ -11,7 +11,7 @@ namespace Rnwood.SmtpServer.Tests
         public Mocks()
         {
             Connection = new Mock<IConnection>();
-            Session = new Mock<ISession>();
+            Session = new Mock<IEditableSession>();
             Server = new Mock<IServer>();
             ServerBehaviour = new Mock<IServerBehaviour>();
 
@@ -22,7 +22,7 @@ namespace Rnwood.SmtpServer.Tests
         }
 
         public Mock<IConnection> Connection { get; private set; }
-        public Mock<ISession> Session { get; private set; }
+        public Mock<IEditableSession> Session { get; private set; }
         public Mock<IServer> Server { get; private set; }
         public Mock<IServerBehaviour> ServerBehaviour { get; private set; }
 

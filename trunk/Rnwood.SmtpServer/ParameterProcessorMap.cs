@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 
 #endregion
@@ -9,11 +10,11 @@ namespace Rnwood.SmtpServer
     public class ParameterProcessorMap
     {
         private readonly Dictionary<string, IParameterProcessor> _processors =
-            new Dictionary<string, IParameterProcessor>();
+            new Dictionary<string, IParameterProcessor>(StringComparer.InvariantCultureIgnoreCase);
 
-        public void SetProcessor(string key, IParameterProcessor connection)
+        public void SetProcessor(string key, IParameterProcessor processor)
         {
-            _processors[key] = connection;
+            _processors[key] = processor;
         }
 
         public IParameterProcessor GetProcessor(string key)
@@ -23,17 +24,17 @@ namespace Rnwood.SmtpServer
             return result;
         }
 
-        public void Process(string[] tokens, bool throwOnUnknownParameter)
+        public void Process(IConnection connection, string[] tokens, bool throwOnUnknownParameter)
         {
-            Process(new ParameterParser(tokens), throwOnUnknownParameter);
+            Process(connection, new ParameterParser(tokens), throwOnUnknownParameter);
         }
 
-        public void Process(string parametersString, bool throwOnUnknownParameter)
+        public void Process(IConnection connection, string parametersString, bool throwOnUnknownParameter)
         {
-            Process(new ParameterParser(parametersString), throwOnUnknownParameter);
+            Process(connection, new ParameterParser(parametersString), throwOnUnknownParameter);
         }
 
-        public void Process(ParameterParser parameters, bool throwOnUnknownParameter)
+        public void Process(IConnection connection, ParameterParser parameters, bool throwOnUnknownParameter)
         {
             foreach (Parameter parameter in parameters.Parameters)
             {
@@ -41,7 +42,7 @@ namespace Rnwood.SmtpServer
 
                 if (parameterProcessor != null)
                 {
-                    parameterProcessor.SetParameter(parameter.Name, parameter.Value);
+                    parameterProcessor.SetParameter(connection, parameter.Name, parameter.Value);
                 }
                 else if (throwOnUnknownParameter)
                 {

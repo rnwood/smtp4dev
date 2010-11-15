@@ -29,7 +29,7 @@ namespace Rnwood.SmtpServer
 
             string address = command.ArgumentsText.Remove(0, 1).Remove(command.ArgumentsText.Length - 2);
             connection.Server.Behaviour.OnMessageRecipientAdding(connection, connection.CurrentMessage, address);
-            connection.CurrentMessage.ToList.Add(address);
+            connection.CurrentMessage.AddTo(address);
             connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Recipient accepted"));
         }
     }

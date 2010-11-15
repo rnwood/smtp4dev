@@ -33,7 +33,7 @@ namespace Rnwood.SmtpServer.Example
         private static void SessionCompleted(object sender, SessionEventArgs e)
         {
             Console.WriteLine(string.Format("SESSION END - Address:{0} NoOfMessages:{1} Error:{2}",
-                                            e.Session.ClientAddress, e.Session.Messages.Count, e.Session.SessionError));
+                                            e.Session.ClientAddress, e.Session.GetMessages().Length, e.Session.SessionError));
         }
 
         private static void SessionStarted(object sender, SessionEventArgs e)
