@@ -8,16 +8,21 @@ using System.IO;
 
 namespace Rnwood.SmtpServer
 {
-    public class Message : IMessage
+    public abstract class AbstractMessage : IEditableMessage
     {
-        public Message(ISession session)
+        public AbstractMessage(ISession session)
         {
             Session = session;
-            ToList = new List<string>();
             ReceivedDate = DateTime.Now;
         }
 
         public bool SecureConnection { get; set; }
+
+        public bool EightBitTransport
+        {
+            get;
+            set;
+        }
 
         public DateTime ReceivedDate { get; set; }
 
@@ -25,58 +30,30 @@ namespace Rnwood.SmtpServer
 
         public string From { get; set; }
 
-        internal List<string> ToList { get; set; }
+        private List<string> _toList = new List<string>();
+
+        public void AddTo(string to)
+        {
+            _toList.Add(to);
+        }
 
         public string[] To
         {
-            get { return ToList.ToArray(); }
+            get { return _toList.ToArray(); }
         }
 
-        private byte[] _data;
+        public long? DeclaredMessageSize
+        {
+            get;
+            set;
+        }
 
         public Stream GetData()
         {
             return GetData(false);
         }
 
-        public Stream GetData(bool forWriting)
-        {
-            if (forWriting)
-            {
-                CloseNotifyingMemoryStream stream = new CloseNotifyingMemoryStream();
-                stream.Closing += (s, ea) =>
-                                      {
-                                          _data = new byte[stream.Length];
-                                          stream.Position = 0;
-                                          stream.Read(_data, 0, _data.Length);
-                                      };
-
-                return stream;
-            }
-            else
-            {
-                return new MemoryStream(_data, false);
-            }
-        }
-
-
-        class CloseNotifyingMemoryStream : MemoryStream
-        {
-            public event EventHandler Closing;
-
-            public override void Close()
-            {
-                if (Closing != null)
-                {
-
-                    Closing(this, EventArgs.Empty);
-                }
-
-                base.Close();
-            }
-        }
-
+        public abstract Stream GetData(bool forWriting);
+        public abstract void Dispose();
     }
-
-
 }

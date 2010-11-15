@@ -1,8 +1,10 @@
 #region
 
+using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Extensions.Auth;
 
@@ -34,9 +36,9 @@ namespace Rnwood.SmtpServer
         /// <value><c>true</c> if the server should run in SSL mode otherwise, <c>false</c>.</value>
         bool IsSSLEnabled(IConnection connection);
 
-        void OnMessageReceived(IConnection connection, Message message);
+        void OnMessageReceived(IConnection connection, IMessage message);
 
-        void OnMessageRecipientAdding(IConnection connection, Message message, string recipient);
+        void OnMessageRecipientAdding(IConnection connection, IMessage message, string recipient);
 
         /// <summary>
         /// Gets the maximum allowed size of the message for the specified connection.
@@ -99,7 +101,7 @@ namespace Rnwood.SmtpServer
         /// <param name="from">From.</param>
         void OnMessageStart(IConnection connection, string from);
 
-        IMessage CreateMessage(IConnection connection);
+        IEditableMessage OnCreateNewMessage(IConnection connection);
 
         /// <summary>
         /// Determines whether the speficied auth mechanism should be enabled for the specified connecton.
@@ -119,5 +121,7 @@ namespace Rnwood.SmtpServer
         void OnCommandReceived(IConnection connection, SmtpCommand command);
 
         void OnMessageCompleted(IConnection connection);
+        Encoding GetDefaultEncoding(IConnection connection);
+        IEditableSession OnCreateNewSession(Connection connection, IPAddress clientAddress, DateTime startDate);
     }
 }

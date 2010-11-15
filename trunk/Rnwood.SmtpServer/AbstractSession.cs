@@ -2,21 +2,19 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
-using System.Text;
 using Rnwood.SmtpServer.Extensions.Auth;
 
 #endregion
 
 namespace Rnwood.SmtpServer
 {
-    public class Session : ISession, ICompletedSession
+    public abstract class AbstractSession : IEditableSession
     {
-        private readonly StringBuilder _log = new StringBuilder();
-
-        internal Session()
+        public AbstractSession()
         {
-            Messages = new List<Message>();
+            _messages = new List<IMessage>();
         }
 
         public DateTime StartDate { get; set; }
@@ -29,12 +27,19 @@ namespace Rnwood.SmtpServer
 
         public bool SecureConnection { get; set; }
 
-        public string Log
+        public abstract TextReader GetLog();
+        
+        public IMessage[] GetMessages()
         {
-            get { return _log.ToString(); }
+            return _messages.ToArray();
         }
 
-        public List<Message> Messages { get; set; }
+        public void AddMessage(IMessage message)
+        {
+            _messages.Add(message);
+        }
+
+        private List<IMessage> _messages;
 
         public bool CompletedNormally { get; set; }
 
@@ -44,9 +49,8 @@ namespace Rnwood.SmtpServer
 
         public string SessionError { get; set; }
 
-        public void AppendToLog(string text)
-        {
-            _log.AppendLine(text);
-        }
+        public abstract void AppendToLog(string text);
+
+        
     }
 }

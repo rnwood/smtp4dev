@@ -26,7 +26,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         private void TestGoodAddress(string address, string expectedAddress)
         {
             Mocks mocks = new Mocks();
-            Message message = new Message(mocks.Session.Object);
+            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
             mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
 
             RcptToVerb verb = new RcptToVerb();
@@ -58,7 +58,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         private void TestBadAddress(string address)
         {
             Mocks mocks = new Mocks();
-            Message message = new Message(mocks.Session.Object);
+            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
             mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
 
             RcptToVerb verb = new RcptToVerb();

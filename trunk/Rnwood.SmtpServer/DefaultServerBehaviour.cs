@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Extensions.Auth;
 using System.Linq;
@@ -39,7 +40,17 @@ namespace Rnwood.SmtpServer
 
         #region IServerBehaviour Members
 
-        public virtual void OnMessageReceived(IConnection connection, Message message)
+        public IEditableSession OnCreateNewSession(Connection connection, IPAddress clientAddress, DateTime startDate)
+        {
+            return new MemorySession(clientAddress, startDate);
+        }
+
+        public virtual Encoding GetDefaultEncoding(IConnection connection)
+        {
+            return new ASCIISevenBitTruncatingEncoding();
+        }
+
+        public virtual void OnMessageReceived(IConnection connection, IMessage message)
         {
             if (MessageReceived != null)
             {
@@ -79,7 +90,7 @@ namespace Rnwood.SmtpServer
             return _sslCertificate;
         }
 
-        public void OnMessageRecipientAdding(IConnection connection, Message message, string recipient)
+        public virtual void OnMessageRecipientAdding(IConnection connection, IMessage message, string recipient)
         {
         }
 
@@ -103,7 +114,7 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        public void OnSessionStarted(IConnection connection, ISession session)
+        public virtual void OnSessionStarted(IConnection connection, ISession session)
         {
             if (SessionStarted != null)
             {
@@ -137,13 +148,17 @@ namespace Rnwood.SmtpServer
             return false;
         }
 
-        public void OnCommandReceived(IConnection connection, SmtpCommand command)
+        public virtual void OnCommandReceived(IConnection connection, SmtpCommand command)
         {
+            if (CommandReceived != null)
+            {
+                CommandReceived(this, new CommandEventArgs(command));
+            }
         }
 
-        public IMessage CreateMessage(IConnection connection)
+        public virtual IEditableMessage OnCreateNewMessage(IConnection connection)
         {
-            return new Message(connection.Session);
+            return new MemoryMessage(connection.Session);
         }
 
         public virtual void OnMessageCompleted(IConnection connection)
@@ -156,42 +171,11 @@ namespace Rnwood.SmtpServer
 
         #endregion
 
+        public event EventHandler<CommandEventArgs> CommandReceived;
         public event EventHandler<MessageEventArgs> MessageCompleted;
         public event EventHandler<MessageEventArgs> MessageReceived;
         public event EventHandler<SessionEventArgs> SessionCompleted;
         public event EventHandler<SessionEventArgs> SessionStarted;
         public event EventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequired;
-    }
-
-    public class AuthenticationCredentialsValidationEventArgs : EventArgs
-    {
-        public AuthenticationCredentialsValidationEventArgs(IAuthenticationRequest credentials)
-        {
-            Credentials = credentials;
-        }
-
-        public IAuthenticationRequest Credentials { get; private set; }
-
-        public AuthenticationResult AuthenticationResult { get; set; }
-    }
-
-    public class MessageEventArgs : EventArgs
-    {
-        public MessageEventArgs(Message message)
-        {
-            Message = message;
-        }
-
-        public Message Message { get; private set; }
-    }
-
-    public class SessionEventArgs : EventArgs
-    {
-        public SessionEventArgs(ISession session)
-        {
-            Session = session;
-        }
-
-        public ISession Session { get; private set; }
     }
 }

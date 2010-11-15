@@ -35,7 +35,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         {
             Mocks mocks = new Mocks();
 
-            Message message = new Message(mocks.Session.Object);
+            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
             mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
             mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).Returns((long?)null);
 
@@ -59,7 +59,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         {
             Mocks mocks = new Mocks();
 
-            Message message = new Message(mocks.Session.Object);
+            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
             mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
             mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).Returns(10);
 
@@ -79,7 +79,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         {
             Mocks mocks = new Mocks();
 
-            Message message = new Message(mocks.Session.Object);
+            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
             mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
             mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).Returns(10);
 

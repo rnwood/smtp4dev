@@ -16,8 +16,8 @@ namespace Rnwood.SmtpServer
         IExtensionProcessor[] ExtensionProcessors { get; }
         VerbMap VerbMap { get; }
         MailVerb MailVerb { get; }
-        ISession Session { get; }
-        Message CurrentMessage { get; }
+        IEditableSession Session { get; }
+        IEditableMessage CurrentMessage { get; }
         Encoding ReaderEncoding { get; }
         void SetReaderEncoding(Encoding encoding);
         void SetReaderEncodingToDefault();
@@ -26,7 +26,7 @@ namespace Rnwood.SmtpServer
         void WriteLine(string text, params object[] arg);
         void WriteResponse(SmtpResponse response);
         string ReadLine();
-        Message NewMessage();
+        IEditableMessage NewMessage();
         void CommitMessage();
         void AbortMessage();
     }

@@ -9,6 +9,10 @@ namespace Rnwood.SmtpServer.Extensions
 {
     public class EightBitMimeExtension : IExtension
     {
+        public EightBitMimeExtension()
+        {
+        }
+
         public IExtensionProcessor CreateExtensionProcessor(IConnection connection)
         {
             return new EightBitMimeExtensionProcessor(connection);
@@ -16,9 +20,10 @@ namespace Rnwood.SmtpServer.Extensions
 
         #region Nested type: EightBitMimeExtensionProcessor
 
-        private class EightBitMimeExtensionProcessor : IExtensionProcessor
+        private class EightBitMimeExtensionProcessor : ExtensionProcessor
         {
             public EightBitMimeExtensionProcessor(IConnection connection)
+                : base(connection)
             {
                 EightBitMimeDataVerb verb = new EightBitMimeDataVerb();
                 connection.VerbMap.SetVerbProcessor("DATA", verb);
@@ -28,9 +33,9 @@ namespace Rnwood.SmtpServer.Extensions
                 mailFromProcessor.ParameterProcessorMap.SetProcessor("BODY", verb);
             }
 
-            public string[] EHLOKeywords
+            public override string[] EHLOKeywords
             {
-                get { return new[] {"8BITMIME"}; }
+                get { return new[] { "8BITMIME" }; }
             }
         }
 
@@ -39,21 +44,23 @@ namespace Rnwood.SmtpServer.Extensions
 
     public class EightBitMimeDataVerb : DataVerb, IParameterProcessor
     {
-        private bool _eightBitMessage;
+        public EightBitMimeDataVerb()
+        {
+        }
 
         #region IParameterProcessor Members
 
-        public void SetParameter(string key, string value)
+        public void SetParameter(IConnection connection, string key, string value)
         {
             if (key.Equals("BODY", StringComparison.InvariantCultureIgnoreCase))
             {
                 if (value.Equals("8BITMIME", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    _eightBitMessage = true;
+                    connection.CurrentMessage.EightBitTransport = true;
                 }
                 else if (value.Equals("7BIT", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    _eightBitMessage = false;
+                    connection.CurrentMessage.EightBitTransport = false;
                 }
                 else
                 {
@@ -68,7 +75,7 @@ namespace Rnwood.SmtpServer.Extensions
 
         public override void Process(IConnection connection, SmtpCommand command)
         {
-            if (_eightBitMessage)
+            if (connection.CurrentMessage != null && connection.CurrentMessage.EightBitTransport)
             {
                 connection.SetReaderEncoding(Encoding.Default);
             }
@@ -79,10 +86,7 @@ namespace Rnwood.SmtpServer.Extensions
             }
             finally
             {
-                if (_eightBitMessage)
-                {
-                    connection.SetReaderEncodingToDefault();
-                }
+                connection.SetReaderEncodingToDefault();
             }
         }
     }
