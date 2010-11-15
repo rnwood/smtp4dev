@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using System.Text;
 using Rnwood.Smtp4dev.Properties;
 using Rnwood.SmtpServer;
 using Rnwood.SmtpServer.Extensions;
@@ -22,12 +23,32 @@ namespace Rnwood.Smtp4dev
 
         #region IServerBehaviour Members
 
-        public void OnMessageCompleted(IConnection connection)
+        public IEditableSession OnCreateNewSession(Connection connection, IPAddress clientAddress, DateTime startDate)
         {
-
+            return new MemorySession(clientAddress, startDate);
         }
 
-        public void OnMessageReceived(IConnection connection, Message message)
+        public Encoding GetDefaultEncoding(IConnection connection)
+        {
+            if (Settings.Default.DefaultTo8Bit)
+            {
+                return Encoding.Default;
+            }
+
+            return new ASCIISevenBitTruncatingEncoding();
+        }
+
+        public void OnMessageCompleted(IConnection connection)
+        {
+            if (Settings.Default.RejectMessages)
+            {
+                throw new SmtpServerException(
+                    new SmtpResponse(StandardSmtpResponseCode.TransactionFailed,
+                                     "Message rejected - transaction failed"));
+            }
+        }
+
+        public void OnMessageReceived(IConnection connection, IMessage message)
         {
             if (MessageReceived != null)
             {
@@ -35,9 +56,13 @@ namespace Rnwood.Smtp4dev
             }
         }
 
-        public void OnMessageRecipientAdding(IConnection connection, Message message, string recipient)
+        public void OnMessageRecipientAdding(IConnection connection, IMessage message, string recipient)
         {
-
+            if (Settings.Default.RejectRecipients)
+            {
+                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.RecipientRejected,
+                                                               "Recipient rejected - mailbox unavailable"));
+            }
         }
 
         public void OnSessionStarted(IConnection connection, ISession session)
@@ -163,6 +188,11 @@ namespace Rnwood.Smtp4dev
         public AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
                                                                   IAuthenticationRequest authenticationRequest)
         {
+            if (Settings.Default.FailAuthentication)
+            {
+                return AuthenticationResult.Failure;
+            }
+
             return AuthenticationResult.Success;
         }
 
@@ -191,9 +221,9 @@ namespace Rnwood.Smtp4dev
             return true;
         }
 
-        public IMessage CreateMessage(IConnection connection)
+        public IEditableMessage OnCreateNewMessage(IConnection connection)
         {
-            return new Message(connection.Session);
+            return new TempFileMessage(connection.Session);
         }
 
         #endregion

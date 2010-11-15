@@ -65,15 +65,15 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.sessionsGrid = new System.Windows.Forms.DataGridView();
+            this.StartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.clientDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.SecureConnection = new System.Windows.Forms.DataGridViewCheckBoxColumn();
+            this.NumberOfMessages = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.sessionBindingSource = new System.Windows.Forms.BindingSource(this.components);
             this.flowLayoutPanel3 = new System.Windows.Forms.FlowLayoutPanel();
             this.viewSessionButton = new System.Windows.Forms.Button();
             this.deleteSessionButton = new System.Windows.Forms.Button();
             this.panel2 = new System.Windows.Forms.Panel();
-            this.StartDate = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.clientDataGridViewTextBoxColumn = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.SecureConnection = new System.Windows.Forms.DataGridViewCheckBoxColumn();
-            this.NumberOfMessages = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.trayIconContextMenuStrip.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.messageGrid)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.messageBindingSource)).BeginInit();
@@ -501,7 +501,43 @@
             this.sessionsGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.sessionsGrid.Size = new System.Drawing.Size(494, 197);
             this.sessionsGrid.TabIndex = 0;
+            this.sessionsGrid.DoubleClick += new System.EventHandler(this.sessionsGrid_DoubleClick);
             this.sessionsGrid.SelectionChanged += new System.EventHandler(this.sessionsGrid_SelectionChanged);
+            // 
+            // StartDate
+            // 
+            this.StartDate.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.StartDate.DataPropertyName = "StartDate";
+            this.StartDate.HeaderText = "Date/Time";
+            this.StartDate.Name = "StartDate";
+            this.StartDate.ReadOnly = true;
+            this.StartDate.Width = 83;
+            // 
+            // clientDataGridViewTextBoxColumn
+            // 
+            this.clientDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
+            this.clientDataGridViewTextBoxColumn.DataPropertyName = "Client";
+            this.clientDataGridViewTextBoxColumn.HeaderText = "Client";
+            this.clientDataGridViewTextBoxColumn.Name = "clientDataGridViewTextBoxColumn";
+            this.clientDataGridViewTextBoxColumn.ReadOnly = true;
+            // 
+            // SecureConnection
+            // 
+            this.SecureConnection.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.SecureConnection.DataPropertyName = "SecureConnection";
+            this.SecureConnection.HeaderText = "Secure";
+            this.SecureConnection.Name = "SecureConnection";
+            this.SecureConnection.ReadOnly = true;
+            this.SecureConnection.Width = 47;
+            // 
+            // NumberOfMessages
+            // 
+            this.NumberOfMessages.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
+            this.NumberOfMessages.DataPropertyName = "NumberOfMessages";
+            this.NumberOfMessages.HeaderText = "No of Msgs";
+            this.NumberOfMessages.Name = "NumberOfMessages";
+            this.NumberOfMessages.ReadOnly = true;
+            this.NumberOfMessages.Width = 91;
             // 
             // sessionBindingSource
             // 
@@ -554,41 +590,6 @@
             this.panel2.Padding = new System.Windows.Forms.Padding(3);
             this.panel2.Size = new System.Drawing.Size(514, 264);
             this.panel2.TabIndex = 2;
-            // 
-            // StartDate
-            // 
-            this.StartDate.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.StartDate.DataPropertyName = "StartDate";
-            this.StartDate.HeaderText = "Date/Time";
-            this.StartDate.Name = "StartDate";
-            this.StartDate.ReadOnly = true;
-            this.StartDate.Width = 83;
-            // 
-            // clientDataGridViewTextBoxColumn
-            // 
-            this.clientDataGridViewTextBoxColumn.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.Fill;
-            this.clientDataGridViewTextBoxColumn.DataPropertyName = "Client";
-            this.clientDataGridViewTextBoxColumn.HeaderText = "Client";
-            this.clientDataGridViewTextBoxColumn.Name = "clientDataGridViewTextBoxColumn";
-            this.clientDataGridViewTextBoxColumn.ReadOnly = true;
-            // 
-            // SecureConnection
-            // 
-            this.SecureConnection.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.SecureConnection.DataPropertyName = "SecureConnection";
-            this.SecureConnection.HeaderText = "Secure";
-            this.SecureConnection.Name = "SecureConnection";
-            this.SecureConnection.ReadOnly = true;
-            this.SecureConnection.Width = 47;
-            // 
-            // NumberOfMessages
-            // 
-            this.NumberOfMessages.AutoSizeMode = System.Windows.Forms.DataGridViewAutoSizeColumnMode.AllCells;
-            this.NumberOfMessages.DataPropertyName = "NumberOfMessages";
-            this.NumberOfMessages.HeaderText = "No of Msgs";
-            this.NumberOfMessages.Name = "NumberOfMessages";
-            this.NumberOfMessages.ReadOnly = true;
-            this.NumberOfMessages.Width = 91;
             // 
             // MainForm
             // 

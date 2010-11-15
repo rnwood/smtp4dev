@@ -388,5 +388,53 @@ namespace Rnwood.Smtp4dev.Properties {
                 this["SSLCertificatePassword"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool FailAuthentication {
+            get {
+                return ((bool)(this["FailAuthentication"]));
+            }
+            set {
+                this["FailAuthentication"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RejectRecipients {
+            get {
+                return ((bool)(this["RejectRecipients"]));
+            }
+            set {
+                this["RejectRecipients"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool RejectMessages {
+            get {
+                return ((bool)(this["RejectMessages"]));
+            }
+            set {
+                this["RejectMessages"] = value;
+            }
+        }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("True")]
+        public bool DefaultTo8Bit {
+            get {
+                return ((bool)(this["DefaultTo8Bit"]));
+            }
+            set {
+                this["DefaultTo8Bit"] = value;
+            }
+        }
     }
 }

@@ -14,7 +14,6 @@ using Microsoft.Win32;
 using Rnwood.Smtp4dev.MessageInspector;
 using Rnwood.Smtp4dev.Properties;
 using Rnwood.SmtpServer;
-using Message = Rnwood.SmtpServer.Message;
 
 #endregion
 
@@ -25,7 +24,6 @@ namespace Rnwood.Smtp4dev
         private readonly BindingList<MessageViewModel> _messages = new BindingList<MessageViewModel>();
         private readonly BindingList<SessionViewModel> _sessions = new BindingList<SessionViewModel>();
         private Server _server;
-        private bool _quitting;
 
         public MainForm()
         {
@@ -223,6 +221,7 @@ namespace Rnwood.Smtp4dev
 
         private void trayIcon_DoubleClick(object sender, EventArgs e)
         {
+            Thread.Sleep(200);
             Visible = true;
         }
 
@@ -272,8 +271,10 @@ namespace Rnwood.Smtp4dev
 
         private void DeleteAllMessages()
         {
-            _messages.Clear();
-            _sessions.Clear();
+            foreach (SessionViewModel session in _sessions.ToArray())
+            {
+                DeleteSession(session);   
+            }
         }
 
         private void messageGrid_DoubleClick(object sender, EventArgs e)
@@ -309,7 +310,6 @@ namespace Rnwood.Smtp4dev
                 StopServer();
             }
             trayIcon.Visible = false;
-            _quitting = true;
             Application.Exit();
         }
 
@@ -395,15 +395,35 @@ namespace Rnwood.Smtp4dev
 
         private void deleteButton_Click(object sender, EventArgs e)
         {
-            foreach (MessageViewModel message in SelectedMessages)
+            foreach (MessageViewModel message in SelectedMessages.ToArray())
             {
-                _messages.Remove(message);
+                DeleteMessage(message);
             }
 
-            foreach (SessionViewModel session in _sessions.Where(s => !_messages.Any(mvm => s.Session.Messages.Contains(mvm.Message))).ToArray())
+            foreach (SessionViewModel session in _sessions.Where(s => !_messages.Any(mvm => s.Session.GetMessages().Contains(mvm.Message))).ToArray())
             {
-                _sessions.Remove(session);
+                DeleteSession(session);
             }
+        }
+
+        private void DeleteSession(SessionViewModel session)
+        {
+            _sessions.Remove(session);
+
+            foreach (MessageViewModel message in _messages.Where(mvm => session.Session.GetMessages().Any(m => mvm.Message == m)).ToArray())
+            {
+                DeleteMessage(message);
+            }
+
+            foreach (IMessage m in session.Session.GetMessages())
+            {
+                m.Dispose();
+            }
+        }
+
+        private void DeleteMessage(MessageViewModel message)
+        {
+            _messages.Remove(message);
         }
 
         private void stopListeningButton_Click(object sender, EventArgs e)
@@ -470,11 +490,15 @@ namespace Rnwood.Smtp4dev
 
             InspectorWindow form = new InspectorWindow(message.Parts);
             form.Show();
-
             messageGrid.Refresh();
         }
 
         private void button1_Click_1(object sender, EventArgs e)
+        {
+            ViewSelectedSessions();
+        }
+
+        private void ViewSelectedSessions()
         {
             foreach (SessionViewModel session in SelectedSessions)
             {
@@ -489,20 +513,15 @@ namespace Rnwood.Smtp4dev
 
         private void deleteSessionButton_Click(object sender, EventArgs e)
         {
-            foreach (SessionViewModel session in SelectedSessions)
+            foreach (SessionViewModel session in SelectedSessions.ToArray())
             {
-                _sessions.Remove(session);
-
-                foreach (MessageViewModel message in _messages.Where(mvm => session.Session.Messages.Any(m => mvm.Message == m)).ToArray())
-                {
-                    _messages.Remove(message);
-                }
+                DeleteSession(session);
             }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (!_quitting)
+            if (e.CloseReason == CloseReason.UserClosing)
             {
                 if (Settings.Default.MinimizeToSysTray)
                 {
@@ -510,6 +529,11 @@ namespace Rnwood.Smtp4dev
                     e.Cancel = true;
                 }
             }
+        }
+
+        private void sessionsGrid_DoubleClick(object sender, EventArgs e)
+        {
+            ViewSelectedSessions();
         }
     }
 }

@@ -35,7 +35,7 @@ namespace Rnwood.Smtp4dev
 
         public int NumberOfMessages
         {
-            get { return Session.Messages.Count; }
+            get { return Session.GetMessages().Length; }
         }
 
         public DateTime StartDate
@@ -47,7 +47,18 @@ namespace Rnwood.Smtp4dev
         {
             TempFileCollection tempFiles = new TempFileCollection();
             FileInfo msgFile = new FileInfo(tempFiles.AddExtension("txt"));
-            File.WriteAllText(msgFile.FullName, Session.Log, Encoding.ASCII);
+
+            using (TextReader inStream = Session.GetLog())
+            using (StreamWriter outStream = msgFile.CreateText())
+            {
+                string line;
+
+                while ((line = inStream.ReadLine()) != null)
+                {
+                    outStream.WriteLine(line);
+                }
+            }
+
             Process.Start(msgFile.FullName);
         }
     }
