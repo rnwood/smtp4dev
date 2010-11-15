@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.21022</ProductVersion>
+    <ProductVersion>9.0.30729</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C5BBE7C2-0EA0-4E50-95FF-BF07EA1B93FF}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -52,6 +52,8 @@
       <Link>SolutionInfo.cs</Link>
     </Compile>
     <Compile Include="ASCIISevenBitTruncatingEncoding.cs" />
+    <Compile Include="AuthenticationCredentialsValidationEventArgs.cs" />
+    <Compile Include="CommandEventArgs.cs" />
     <Compile Include="Connection.cs" />
     <Compile Include="DefaultServer.cs" />
     <Compile Include="Extensions\Auth\AnonymousAuthenticationRequest.cs" />
@@ -70,6 +72,7 @@
     <Compile Include="Extensions\Auth\LoginMechanism.cs" />
     <Compile Include="Extensions\Auth\PlainMechanism.cs" />
     <Compile Include="Extensions\Auth\UsernameAndPasswordAuthenticationRequest.cs" />
+    <Compile Include="Extensions\ExtensionProcessor.cs" />
     <Compile Include="Extensions\SizeExtension.cs" />
     <Compile Include="Extensions\StartTlsExtension.cs" />
     <Compile Include="Extensions\EightBitMimeExtension.cs" />
@@ -78,13 +81,18 @@
     <Compile Include="IServer.cs" />
     <Compile Include="IServerBehaviour.cs" />
     <Compile Include="ICompletedSession.cs" />
+    <Compile Include="MemoryMessage.cs" />
+    <Compile Include="MemorySession.cs" />
     <Compile Include="Message.cs" />
     <Compile Include="IParameterProcessor.cs" />
+    <Compile Include="MessageEventArgs.cs" />
     <Compile Include="ParameterParser.cs" />
     <Compile Include="ParameterProcessorMap.cs" />
-    <Compile Include="Session.cs" />
+    <Compile Include="AbstractSession.cs" />
+    <Compile Include="SessionEventArgs.cs" />
     <Compile Include="SmtpResponse.cs" />
     <Compile Include="SmtpServerException.cs" />
+    <Compile Include="TempFileMessage.cs" />
     <Compile Include="Verbs\DataVerb.cs" />
     <Compile Include="Verbs\EhloVerb.cs" />
     <Compile Include="Verbs\HeloVerb.cs" />

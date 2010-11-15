@@ -11,12 +11,12 @@ namespace Rnwood.Smtp4dev
 {
     public class MessageViewModel
     {
-        public MessageViewModel(Message message)
+        public MessageViewModel(IMessage message)
         {
             Message = message;
         }
 
-        public Message Message { get; private set; }
+        public IMessage Message { get; private set; }
 
         public string From
         {
@@ -61,7 +61,7 @@ namespace Rnwood.Smtp4dev
             byte[] data = new byte[64 * 1024];
             int bytesRead;
 
-            using (Stream dataStream = Message.GetData(false))
+            using (Stream dataStream = Message.GetData())
             {
                 using (FileStream fileStream = file.OpenWrite())
                 {

@@ -12,6 +12,8 @@ using System.Collections;
 
 #endregion
 
+
+
 namespace Rnwood.Smtp4dev.MessageInspector
 {
     public class MessageViewModel : INotifyPropertyChanged
@@ -44,8 +46,10 @@ namespace Rnwood.Smtp4dev.MessageInspector
 
         public HeaderViewModel[] Headers
         {
-            get {
-                return Message.Header.Cast<DictionaryEntry>().Select(de => new HeaderViewModel((string) de.Key, (string)de.Value)).ToArray(); }
+            get
+            {
+                return Message.Header.Cast<DictionaryEntry>().Select(de => new HeaderViewModel((string)de.Key, (string)de.Value)).ToArray();
+            }
         }
 
         public string Data
@@ -55,7 +59,10 @@ namespace Rnwood.Smtp4dev.MessageInspector
 
         public string Body
         {
-            get { return Message.BodyDecoded; }
+            get
+            {
+                return Message.BodyDecoded;
+            }
         }
 
         public string Type

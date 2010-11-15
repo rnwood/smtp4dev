@@ -120,7 +120,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
                 if (status == AuthMechanismProcessorStatus.Success)
                 {
-                    connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenitcationOK,
+                    connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationOK,
                                                                        "Authenticated OK"));
                     connection.Session.Authenticated = true;
                     connection.Session.AuthenticationCredentials = authMechanismProcessor.Credentials;

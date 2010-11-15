@@ -32,21 +32,16 @@ namespace Rnwood.SmtpServer
         public Connection(Server server, TcpClient tcpClient)
         {
             VerbMap = new VerbMap();
-            Session = new Session()
-                          {
-                              ClientAddress = ((IPEndPoint) tcpClient.Client.RemoteEndPoint).Address,
-                              StartDate = DateTime.Now
-                          };
+            Session = server.Behaviour.OnCreateNewSession(this, ((IPEndPoint) tcpClient.Client.RemoteEndPoint).Address,
+                                                          DateTime.Now);
 
             Server = server;
             _tcpClient = tcpClient;
             _tcpClient.ReceiveTimeout = Server.Behaviour.GetReceiveTimeout(this);
 
-            ReaderEncoding =
-                new ASCIISevenBitTruncatingEncoding();
             _stream = tcpClient.GetStream();
+            SetReaderEncodingToDefault();
 
-            SetupReaderAndWriter();
             SetupVerbs();
         }
 
@@ -56,12 +51,13 @@ namespace Rnwood.SmtpServer
 
         public void SetReaderEncoding(Encoding encoding)
         {
+            ReaderEncoding = encoding;
             SetupReaderAndWriter();
         }
 
         public void SetReaderEncodingToDefault()
         {
-            SetReaderEncoding(new ASCIISevenBitTruncatingEncoding());
+            SetReaderEncoding(Server.Behaviour.GetDefaultEncoding(this));
         }
 
         public IExtensionProcessor[] ExtensionProcessors { get; private set; }
@@ -104,20 +100,20 @@ namespace Rnwood.SmtpServer
             return text;
         }
 
-        public ISession Session { get; private set; }
+        public IEditableSession Session { get; private set; }
 
-        public Message CurrentMessage { get; private set; }
+        public IEditableMessage CurrentMessage { get; private set; }
 
-        public Message NewMessage()
+        public IEditableMessage NewMessage()
         {
-            CurrentMessage = new Message(Session);
+            CurrentMessage = Server.Behaviour.OnCreateNewMessage(this);
             return CurrentMessage;
         }
 
         public void CommitMessage()
         {
-            Message message = CurrentMessage;
-            Session.Messages.Add(message);
+            IMessage message = CurrentMessage;
+            Session.AddMessage(message);
             CurrentMessage = null;
 
             Server.Behaviour.OnMessageReceived(this, message);
