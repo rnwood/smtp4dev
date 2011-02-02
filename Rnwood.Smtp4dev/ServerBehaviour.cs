@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
@@ -220,10 +221,17 @@ namespace Rnwood.Smtp4dev
 
             return true;
         }
-
+        
         public IEditableMessage OnCreateNewMessage(IConnection connection)
         {
-            return new TempFileMessage(connection.Session);
+            if (!Settings.Default.MessageFolder.Exists)
+            {
+                Settings.Default.MessageFolder.Create();
+            }
+
+            string filename = DateTime.Now.ToString("yyyy-MM-dd_HHmmss-ffff") + ".eml";
+            
+            return new FileMessage(connection.Session, new FileInfo(Path.Combine(Settings.Default.MessageFolder.FullName, filename)), false);
         }
 
         #endregion

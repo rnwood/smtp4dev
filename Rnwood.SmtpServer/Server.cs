@@ -1,6 +1,8 @@
 ﻿#region
 
 using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
@@ -56,10 +58,27 @@ namespace Rnwood.SmtpServer
 
             try
             {
-                while (true)
+                while (IsRunning)
                 {
                     TcpClient tcpClient = _listener.AcceptTcpClient();
-                    new Thread(ConnectionThreadWork).Start(tcpClient);
+
+                    while (_activeThreads.Count > 0)
+                    {
+                        try
+                        {
+                            Thread.Sleep(Timeout.Infinite);
+                        } catch (ThreadInterruptedException)
+                        {
+                            //cool
+                        }
+                    }
+
+                    if (IsRunning)
+                    {
+                        Thread thread = new Thread(ConnectionThreadWork);
+                        _activeThreads.Add(thread);
+                        thread.Start(tcpClient);
+                    }
                 }
             }
             catch (SocketException e)
@@ -111,10 +130,14 @@ namespace Rnwood.SmtpServer
             _coreThread.Join();
         }
 
+        private IList _activeThreads = ArrayList.Synchronized(new List<Thread>());
+
         private void ConnectionThreadWork(object tcpClient)
         {
             Connection connection = new Connection(this, (TcpClient) tcpClient);
             connection.Start();
+            _activeThreads.Remove(Thread.CurrentThread);
+            _coreThread.Interrupt();
         }
     }
 }
