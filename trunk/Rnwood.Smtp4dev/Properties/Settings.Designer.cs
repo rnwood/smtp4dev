@@ -436,5 +436,17 @@ namespace Rnwood.Smtp4dev.Properties {
                 this["DefaultTo8Bit"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("")]
+        public string CustomMessageFolder {
+            get {
+                return ((string)(this["CustomMessageFolder"]));
+            }
+            set {
+                this["CustomMessageFolder"] = value;
+            }
+        }
     }
 }
