@@ -22,6 +22,7 @@ namespace Rnwood.Smtp4dev
     public partial class MainForm : Form
     {
         private readonly BindingList<MessageViewModel> _messages = new BindingList<MessageViewModel>();
+        private readonly BindingList<MessageViewModel> _filteredMessages = new BindingList<MessageViewModel>();
         private readonly BindingList<SessionViewModel> _sessions = new BindingList<SessionViewModel>();
         private Server _server;
 
@@ -29,7 +30,7 @@ namespace Rnwood.Smtp4dev
         {
             InitializeComponent();
 
-            messageBindingSource.DataSource = _messages;
+            messageBindingSource.DataSource = _filteredMessages;
             sessionBindingSource.DataSource = _sessions;
             _messages.ListChanged += _messages_ListChanged;
 
@@ -116,17 +117,41 @@ namespace Rnwood.Smtp4dev
             notRunningPicture.Visible = startListeningButton.Visible = false;
         }
 
+
+
         private void _messages_ListChanged(object sender, ListChangedEventArgs e)
         {
             deleteAllMenuItem.Enabled = deleteAllButton.Enabled = viewLastMessageMenuItem.Enabled = _messages.Count > 0;
             trayIcon.Text = string.Format("smtp4dev (listening on :{0})\n{1} messages", Settings.Default.PortNumber, _messages.Count);
 
+            if (e.ListChangedType == ListChangedType.ItemAdded)
+            {
+                MessageViewModel message = _messages[e.NewIndex];
+                if (message.MatchesFilter(filterTextbox.Text))
+                {
+                    _filteredMessages.Add(message);
+                }
+            } else
+            {
+                UpdateFilteredMessages();
+            }
+
+
             if (e.ListChangedType == ListChangedType.ItemAdded && Settings.Default.ScrollMessages &&
-                messageGrid.RowCount > 0)
+                _filteredMessages.Contains(_messages[e.NewIndex]))
             {
                 messageGrid.ClearSelection();
                 messageGrid.Rows[messageGrid.RowCount - 1].Selected = true;
                 messageGrid.FirstDisplayedScrollingRowIndex = messageGrid.RowCount - 1;
+            }
+        }
+
+        private void UpdateFilteredMessages()
+        {
+            _filteredMessages.Clear();
+            foreach (var message in _messages.Where(m => m.MatchesFilter(filterTextbox.Text)))
+            {
+                _filteredMessages.Add(message);
             }
         }
 
@@ -167,7 +192,7 @@ namespace Rnwood.Smtp4dev
         {
             MessageViewModel message = new MessageViewModel(e.Message);
 
-            Invoke((MethodInvoker)(() =>
+            /*Invoke((MethodInvoker)(() =>
                                         {
                                             _messages.Add(message);
 
@@ -210,6 +235,7 @@ namespace Rnwood.Smtp4dev
                                                 Activate();
                                             }
                                         }));
+             */
         }
 
 
@@ -273,7 +299,7 @@ namespace Rnwood.Smtp4dev
         {
             foreach (SessionViewModel session in _sessions.ToArray())
             {
-                DeleteSession(session);   
+                DeleteSession(session);
             }
         }
 
@@ -534,6 +560,11 @@ namespace Rnwood.Smtp4dev
         private void sessionsGrid_DoubleClick(object sender, EventArgs e)
         {
             ViewSelectedSessions();
+        }
+
+        private void filterTextbox_TextChanged(object sender, EventArgs e)
+        {
+            UpdateFilteredMessages();
         }
     }
 }

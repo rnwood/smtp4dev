@@ -92,7 +92,8 @@
     <Compile Include="SessionEventArgs.cs" />
     <Compile Include="SmtpResponse.cs" />
     <Compile Include="SmtpServerException.cs" />
-    <Compile Include="TempFileMessage.cs" />
+    <Compile Include="FileMessage.cs" />
+    <Compile Include="StandardSmtpResponseCode.cs" />
     <Compile Include="Verbs\DataVerb.cs" />
     <Compile Include="Verbs\EhloVerb.cs" />
     <Compile Include="Verbs\HeloVerb.cs" />
