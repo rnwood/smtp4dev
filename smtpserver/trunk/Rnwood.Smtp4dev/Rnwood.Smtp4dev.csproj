@@ -121,8 +121,8 @@
       <DependentUpon>Settings.settings</DependentUpon>
       <DesignTimeSharedInput>True</DesignTimeSharedInput>
     </Compile>
-    <Compile Include="RegistrySettings.cs" />
     <Compile Include="SessionViewModel.cs" />
+    <Compile Include="Settings.cs" />
     <Compile Include="SingleInstanceManager.cs" />
   </ItemGroup>
   <ItemGroup>

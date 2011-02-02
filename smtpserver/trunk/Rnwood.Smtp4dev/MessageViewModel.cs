@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using Rnwood.SmtpServer;
 using anmar.SharpMimeTools;
+using System.Linq;
 
 #endregion
 
@@ -76,6 +77,12 @@ namespace Rnwood.Smtp4dev
         public void MarkAsViewed()
         {
             HasBeenViewed = true;
+        }
+
+        public bool MatchesFilter(string text)
+        {
+            string[] searchText = new string[] { Subject, To, From };
+            return searchText.Any(st => st.IndexOf(text, StringComparison.CurrentCultureIgnoreCase) > -1);
         }
     }
 }
