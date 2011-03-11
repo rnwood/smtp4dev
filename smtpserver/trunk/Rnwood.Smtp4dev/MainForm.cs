@@ -36,6 +36,9 @@ namespace Rnwood.Smtp4dev
 
             Icon = Resources.ListeningIcon;
             trayIcon.Icon = Resources.NotListeningIcon;
+
+            versionLabel.Text
+                = versionLabel.Text + " v" + typeof (Program).Assembly.GetName().Version.ToString();
         }
 
         private bool _firstShown = true;
@@ -131,7 +134,8 @@ namespace Rnwood.Smtp4dev
                 {
                     _filteredMessages.Add(message);
                 }
-            } else
+            }
+            else if (e.ListChangedType == ListChangedType.ItemDeleted)
             {
                 UpdateFilteredMessages();
             }
@@ -192,7 +196,7 @@ namespace Rnwood.Smtp4dev
         {
             MessageViewModel message = new MessageViewModel(e.Message);
 
-            /*Invoke((MethodInvoker)(() =>
+            BeginInvoke((MethodInvoker)(() =>
                                         {
                                             _messages.Add(message);
 
@@ -235,7 +239,6 @@ namespace Rnwood.Smtp4dev
                                                 Activate();
                                             }
                                         }));
-             */
         }
 
 

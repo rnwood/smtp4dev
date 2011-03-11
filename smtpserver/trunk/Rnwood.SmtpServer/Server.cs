@@ -52,6 +52,8 @@ namespace Rnwood.SmtpServer
             }
         }
 
+        private System.Threading.Semaphore _threadSempaphore = new Semaphore(1, 1);
+
         private void Core()
         {
             _coreThread = Thread.CurrentThread;
@@ -60,18 +62,9 @@ namespace Rnwood.SmtpServer
             {
                 while (IsRunning)
                 {
-                    TcpClient tcpClient = _listener.AcceptTcpClient();
+                    _threadSempaphore.WaitOne();
 
-                    while (_activeThreads.Count > 0)
-                    {
-                        try
-                        {
-                            Thread.Sleep(Timeout.Infinite);
-                        } catch (ThreadInterruptedException)
-                        {
-                            //cool
-                        }
-                    }
+                    TcpClient tcpClient = _listener.AcceptTcpClient();
 
                     if (IsRunning)
                     {
@@ -137,7 +130,7 @@ namespace Rnwood.SmtpServer
             Connection connection = new Connection(this, (TcpClient) tcpClient);
             connection.Start();
             _activeThreads.Remove(Thread.CurrentThread);
-            _coreThread.Interrupt();
+            _threadSempaphore.Release();
         }
     }
 }
