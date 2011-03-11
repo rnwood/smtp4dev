@@ -5,9 +5,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rnwood.Smtp4dev", "Rnwood.S
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{13CABC51-730F-4BF9-AC6F-352C09A57C7E}"
 	ProjectSection(SolutionItems) = preProject
-		LICENSE = LICENSE
 		LICENSE.rtf = LICENSE.rtf
-		LICENSE.sharpmimetools = LICENSE.sharpmimetools
 		LocalTestRun.testrunconfig = LocalTestRun.testrunconfig
 		smtp4dev.vsmdi = smtp4dev.vsmdi
 		SolutionInfo.cs = SolutionInfo.cs

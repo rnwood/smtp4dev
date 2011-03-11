@@ -17,6 +17,9 @@ namespace Rnwood.SmtpServer
         {
             Text = text;
 
+            IsValid = false;
+            IsEmpty = true;
+
             if (!string.IsNullOrEmpty(text))
             {
                 Match match = COMMANDREGEX.Match(text);
@@ -27,12 +30,10 @@ namespace Rnwood.SmtpServer
                     ArgumentsText = match.Groups["arguments"].Value ?? "";
                     Arguments = ParseArguments(ArgumentsText);
                     IsValid = true;
-                    return;
                 }
             }
 
-            IsValid = false;
-            IsEmpty = true;
+
         }
 
         private string[] ParseArguments(string argumentsText)

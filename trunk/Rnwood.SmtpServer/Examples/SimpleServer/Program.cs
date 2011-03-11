@@ -29,8 +29,6 @@ namespace Rnwood.SmtpServer.Example
             
             
             server.Stop();
-
-            Assert.Equals(1, messages.Count);
         }
 
         private static void SessionCompleted(object sender, SessionEventArgs e)
