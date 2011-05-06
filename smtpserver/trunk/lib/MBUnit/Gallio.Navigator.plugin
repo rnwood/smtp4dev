@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.Navigator"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio Navigator</name>
+    <version>3.2.0.0</version>
+    <description>.</description>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+    <dependency pluginId="Gallio.VisualStudio.Interop" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.Navigator.plugin" />
+    <file path="Gallio.Navigator.exe" />
+    <file path="Gallio.Navigator.exe.config" />
+    <file path="Gallio.Navigator.Readme.txt" />
+  </files>
+</plugin>

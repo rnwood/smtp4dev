@@ -1,0 +1,106 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.MbUnit2Adapter"
+        recommendedInstallationPath="MbUnit2"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>MbUnit v2 Adapter Plugin</name>
+    <version>3.2.0.0</version>
+    <description>Provides support for running MbUnit v2 tests.</description>
+    <icon>plugin://Gallio.MbUnit2Adapter/Resources/MbUnit.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.MbUnit2Adapter.plugin" />
+    <file path="Gallio.MbUnit2Adapter.dll" />
+    <file path="MbUnit.Framework.dll" />
+    <file path="MbUnit.Framework.dll.tdnet" />
+    <file path="MbUnit.Framework.xml" />
+    <file path="MbUnit.Framework.2.0.dll" />
+    <file path="MbUnit.Framework.2.0.xml" />
+    <file path="QuickGraph.dll" />
+    <file path="QuickGraph.xml" />
+    <file path="QuickGraph.Algorithms.dll" />
+    <file path="QuickGraph.Algorithms.xml" />
+    <file path="Refly.dll" />
+    <file path="Refly.xml" />
+    <file path="TestFu.dll" />
+    <file path="TestFu.xml" />
+    <file path="Resources\MbUnit.ico" />
+    <file path="Readme.txt" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio.MbUnit2Adapter, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null"
+              codeBase="Gallio.MbUnit2Adapter.dll"
+              qualifyPartialName="true" />
+
+    <assembly fullName="MbUnit.Framework, Version=2.4.2.175, Culture=neutral, PublicKeyToken=5e72ecd30bc408d5"
+              codeBase="MbUnit.Framework.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.4.0.0-2.4.65535.65535" />
+      </bindingRedirects>
+    </assembly>
+
+    <assembly fullName="MbUnit.Framework.2.0, Version=2.4.2.175, Culture=neutral, PublicKeyToken=5e72ecd30bc408d5"
+              codeBase="MbUnit.Framework.2.0.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.4.0.0-2.4.65535.65535" />
+      </bindingRedirects>
+    </assembly>
+
+    <assembly fullName="QuickGraph.Algorithms, Version=2.4.2.175, Culture=neutral, PublicKeyToken=975e84d0c8d6464d"
+              codeBase="QuickGraph.Algorithms.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.4.0.0-2.4.65535.65535" />
+      </bindingRedirects>
+    </assembly>
+
+    <assembly fullName="QuickGraph, Version=2.4.2.175, Culture=neutral, PublicKeyToken=975e84d0c8d6464d"
+              codeBase="QuickGraph.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.4.0.0-2.4.65535.65535" />
+      </bindingRedirects>
+    </assembly>
+
+    <assembly fullName="Refly, Version=2.4.2.175, Culture=neutral, PublicKeyToken=829676e11975a31c"
+              codeBase="Refly.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.4.0.0-2.4.65535.65535" />
+      </bindingRedirects>
+    </assembly>
+
+    <assembly fullName="TestFu, Version=2.4.2.175, Culture=neutral, PublicKeyToken=5e72ecd30bc408d5"
+              codeBase="TestFu.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.4.0.0-2.4.65535.65535" />
+      </bindingRedirects>
+    </assembly>
+  </assemblies>
+
+  <components>
+    <component componentId="MbUnit2Adapter.TestFramework"
+               serviceId="Gallio.TestFramework"
+               componentType="Gallio.MbUnit2Adapter.Model.MbUnit2TestFramework, Gallio.MbUnit2Adapter">
+      <traits>
+        <name>MbUnit v2</name>
+        <frameworkAssemblies>MbUnit.Framework</frameworkAssemblies>
+        <version>2.4.2.175</version>
+        <icon>plugin://Gallio.MbUnit2Adapter/Resources/MbUnit.ico</icon>
+        <fileTypes>Assembly</fileTypes>
+      </traits>
+    </component>
+
+    <component componentId="MbUnit2Adapter.TestKinds.MbUnitTestAssembly"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>MbUnit v2 Assembly</name>
+        <description>MbUnit v2 Test Assembly</description>
+        <icon>plugin://Gallio.MbUnit2Adapter/Resources/MbUnit.ico</icon>
+      </traits>
+    </component>
+  </components>
+</plugin>

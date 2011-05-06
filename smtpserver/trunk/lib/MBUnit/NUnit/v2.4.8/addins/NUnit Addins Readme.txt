@@ -1,0 +1,1 @@
+Put your Addins in this folder so that Gallio can find them.

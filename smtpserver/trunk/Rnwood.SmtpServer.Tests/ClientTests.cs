@@ -12,17 +12,24 @@ namespace Rnwood.SmtpServer.Tests
     {
 
         [Test]
+        [Timeout(10)]
+        [Disable]
         public void SmtpClient_NonSSL()
         {
             DefaultServer server = new DefaultServer(Ports.AssignAutomatically);
-            server.Start();
-
-            SmtpClient client = new SmtpClient("localhost", server.PortNumber);
-            client.Send("from@from.com", "to@to.com", "subject", "body");
-
-            server.Stop();
-
+            //server.Behaviour.ReceiveTimeout = TimeSpan.FromMilliseconds(500);
             
+            int portNumber = server.Start();
+
+            try
+            {
+                SmtpClient client = new SmtpClient("localhost", portNumber);
+                client.Send("from@from.com", "to@to.com", "subject", "body");
+            }
+            finally
+            {
+                server.Stop(ServerStopBehaviour.KillExistingConnections);
+            }
         }
     }
 }

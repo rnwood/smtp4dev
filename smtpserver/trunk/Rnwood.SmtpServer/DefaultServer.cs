@@ -60,7 +60,7 @@ namespace Rnwood.SmtpServer
         {
         }
 
-        new protected DefaultServerBehaviour Behaviour
+        new public DefaultServerBehaviour Behaviour
         {
             get
             {
@@ -97,12 +97,5 @@ namespace Rnwood.SmtpServer
             add { Behaviour.MessageCompleted += value; }
             remove { Behaviour.MessageCompleted -= value; }
         }
-    }
-
-    public enum Ports
-    {
-        AssignAutomatically = 0,
-        SMTP = 25,
-        SMTPOverSSL=465
     }
 }

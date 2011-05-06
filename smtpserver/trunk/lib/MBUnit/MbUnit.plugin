@@ -1,0 +1,56 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="MbUnit"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>MbUnit v3</name>
+    <version>3.2.0.0</version>
+    <description>Provides support for running MbUnit v3 tests.</description>
+    <icon>plugin://MbUnit/Resources/MbUnit.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="MbUnit.plugin" />
+    <file path="MbUnit.dll" />
+    <file path="MbUnit.dll.tdnet" />
+    <file path="MbUnit.pdb" />
+    <file path="MbUnit.xml" />
+
+    <file path="NHamcrest.dll" />
+    
+    <file path="Resources\MbUnit.ico" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="MbUnit, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e"
+              codeBase="MbUnit.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+
+  <components>
+    <component componentId="MbUnit.TestFramework"
+               serviceId="Gallio.TestFramework"
+               componentType="MbUnit.Core.MbUnitTestFramework, MbUnit">
+      <traits>
+        <name>MbUnit v3</name>
+        <frameworkAssemblies>MbUnit, Version=3.2.0.0</frameworkAssemblies>
+        <icon>plugin://MbUnit/Resources/MbUnit.ico</icon>
+        <version>3.2.0.0</version>
+        <fileTypes>Assembly</fileTypes>
+      </traits>
+    </component>
+
+    <component componentId="MbUnit.TestKinds.MbUnitTestAssembly"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>MbUnit v3 Assembly</name>
+        <description>MbUnit v3 Test Assembly</description>
+        <icon>plugin://MbUnit/Resources/MbUnit.ico</icon>
+      </traits>
+    </component>
+  </components>
+</plugin>

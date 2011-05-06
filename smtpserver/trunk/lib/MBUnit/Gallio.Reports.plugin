@@ -1,0 +1,241 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.Reports"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio Reports Library</name>
+    <version>3.2.0.0</version>
+    <description>Provides several common report formats including Xml, Html, XHtml, MHtml and Text.</description>
+    <icon>plugin://Gallio/Resources/Gallio.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.Reports.plugin" />
+    <file path="Gallio.Reports.dll" />
+    <file path="Gallio.Reports.xml" />
+    <file path="Resources\css\Gallio-Report.css" />
+    <file path="Resources\img\Failed.gif" />
+    <file path="Resources\img\FullStop.gif" />
+    <file path="Resources\img\GallioTestReportHeader.png" />
+    <file path="Resources\img\header-background.gif" />
+    <file path="Resources\img\Ignored.gif" />
+    <file path="Resources\img\Minus.gif" />
+    <file path="Resources\img\Passed.gif" />
+    <file path="Resources\img\Plus.gif" />
+    <file path="Resources\img\UnknownTestKind.png" />
+    <file path="Resources\js\Gallio-Report.js" />
+    <file path="Resources\js\expressInstall.swf" />
+    <file path="Resources\js\player.swf" />
+    <file path="Resources\js\swfobject.js" />
+    <file path="Resources\xsl\Gallio-Report.ccnet-details-condensed.xsl" />
+    <file path="Resources\xsl\Gallio-Report.ccnet-details.xsl" />
+    <file path="Resources\xsl\Gallio-Report.common.xsl" />
+    <file path="Resources\xsl\Gallio-Report.html-condensed.xsl" />
+    <file path="Resources\xsl\Gallio-Report.html.xsl" />
+    <file path="Resources\xsl\Gallio-Report.html+xhtml.xsl" />
+    <file path="Resources\xsl\Gallio-Report.txt.xsl" />
+    <file path="Resources\xsl\Gallio-Report.txt-common.xsl" />
+    <file path="Resources\xsl\Gallio-Report.txt-condensed.xsl" />
+    <file path="Resources\xsl\Gallio-Report.xhtml-condensed.xsl" />
+    <file path="Resources\xsl\Gallio-Report.xhtml.xsl" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio.Reports, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e"
+              codeBase="Gallio.Reports.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+
+  <components>
+    <component componentId="ReportFormatter.Xml"
+               serviceId="Gallio.ReportFormatter"
+               componentType="Gallio.Reports.XmlReportFormatter, Gallio.Reports">
+      <parameters>
+        <defaultAttachmentContentDisposition>Link</defaultAttachmentContentDisposition>
+      </parameters>
+      <traits>
+        <name>Xml</name>
+        <description>
+          Generates XML reports with linked attachment files.
+
+          Supported report formatter properties:
+          - AttachmentContentDisposition: Specifies how attachments should be stored.  "Absent", "Link" or "Inline".  Default is "Link".
+        </description>
+      </traits>
+    </component>
+
+    <component componentId="ReportFormatter.Xml-Inline"
+               serviceId="Gallio.ReportFormatter"
+               componentType="Gallio.Reports.XmlReportFormatter, Gallio.Reports">
+      <parameters>
+        <defaultAttachmentContentDisposition>Inline</defaultAttachmentContentDisposition>
+      </parameters>
+      <traits>
+        <name>Xml-Inline</name>
+        <description>Generates XML reports with inline encoded attachments.</description>
+      </traits>
+    </component>
+
+    <component componentId="ReportFormatter.Text"
+               serviceId="Gallio.ReportFormatter"
+               componentType="Gallio.Reports.XsltReportFormatter, Gallio.Reports">
+      <parameters>
+        <extension>txt</extension>
+        <contentType>text/plain</contentType>
+        <defaultAttachmentContentDisposition>Absent</defaultAttachmentContentDisposition>
+        <resourceDirectory>plugin://Gallio.Reports/Resources/</resourceDirectory>
+        <xsltPath>xsl/Gallio-Report.txt.xsl</xsltPath>
+        <resourcePaths></resourcePaths>
+      </parameters>
+      <traits>
+        <name>Text</name>
+        <description>Generates plain text reports.</description>
+      </traits>
+    </component>
+
+    <component componentId="ReportFormatter.Text-Condensed"
+           serviceId="Gallio.ReportFormatter"
+           componentType="Gallio.Reports.XsltReportFormatter, Gallio.Reports">
+      <parameters>
+        <extension>txt</extension>
+        <contentType>text/plain</contentType>
+        <defaultAttachmentContentDisposition>Absent</defaultAttachmentContentDisposition>
+        <resourceDirectory>plugin://Gallio.Reports/Resources/</resourceDirectory>
+        <xsltPath>xsl/Gallio-Report.txt-condensed.xsl</xsltPath>
+        <resourcePaths></resourcePaths>
+      </parameters>
+      <traits>
+        <name>Text-Condensed</name>
+        <description>Generates plain text reports without passing tests.</description>
+      </traits>
+    </component>
+    
+    <component componentId="ReportFormatter.Html"
+               serviceId="Gallio.ReportFormatter"
+               componentType="Gallio.Reports.XsltReportFormatter, Gallio.Reports">
+      <parameters>
+        <extension>html</extension>
+        <contentType>text/html</contentType>
+        <defaultAttachmentContentDisposition>Link</defaultAttachmentContentDisposition>
+        <resourceDirectory>plugin://Gallio.Reports/Resources/</resourceDirectory>
+        <xsltPath>xsl/Gallio-Report.html.xsl</xsltPath>
+        <resourcePaths>css;js;img</resourcePaths>
+      </parameters>
+      <traits>
+        <name>Html</name>
+        <description>
+          Generates HTML reports.
+
+          Supported report formatter properties:
+          - AttachmentContentDisposition: Specifies how attachments should be stored.  "Absent", "Link" or "Inline".  Default is "Link".
+        </description>
+      </traits>
+    </component>
+
+    <component componentId="ReportFormatter.Html-Condensed"
+               serviceId="Gallio.ReportFormatter"
+               componentType="Gallio.Reports.XsltReportFormatter, Gallio.Reports">
+      <parameters>
+        <extension>html</extension>
+        <contentType>text/html</contentType>
+        <defaultAttachmentContentDisposition>Link</defaultAttachmentContentDisposition>
+        <resourceDirectory>plugin://Gallio.Reports/Resources/</resourceDirectory>
+        <xsltPath>xsl/Gallio-Report.html-condensed.xsl</xsltPath>
+        <resourcePaths>css;js;img</resourcePaths>
+      </parameters>
+      <traits>
+        <name>Html-Condensed</name>
+        <description>
+          Generates HTML reports that omit passing tests.
+
+          Supported report formatter properties:
+          - AttachmentContentDisposition: Specifies how attachments should be stored.  "Absent", "Link" or "Inline".  Default is "Link".
+        </description>
+      </traits>
+    </component>
+
+    <component componentId="ReportFormatter.XHtml"
+               serviceId="Gallio.ReportFormatter"
+               componentType="Gallio.Reports.XsltReportFormatter, Gallio.Reports">
+      <parameters>
+        <extension>xhtml</extension>
+        <contentType>text/xhtml+xml</contentType>
+        <defaultAttachmentContentDisposition>Link</defaultAttachmentContentDisposition>
+        <resourceDirectory>plugin://Gallio.Reports/Resources/</resourceDirectory>
+        <xsltPath>xsl/Gallio-Report.xhtml.xsl</xsltPath>
+        <resourcePaths>css;js;img</resourcePaths>
+      </parameters>
+      <traits>
+        <name>XHtml</name>
+        <description>
+          Generates XHTML reports.
+
+          Supported report formatter properties:
+          - AttachmentContentDisposition: Specifies how attachments should be stored.  "Absent", "Link" or "Inline".  Default is "Link".
+        </description>
+      </traits>
+    </component>
+
+    <component componentId="ReportFormatter.XHtml-Condensed"
+               serviceId="Gallio.ReportFormatter"
+               componentType="Gallio.Reports.XsltReportFormatter, Gallio.Reports">
+      <parameters>
+        <extension>xhtml</extension>
+        <contentType>text/xhtml+xml</contentType>
+        <defaultAttachmentContentDisposition>Link</defaultAttachmentContentDisposition>
+        <resourceDirectory>plugin://Gallio.Reports/Resources/</resourceDirectory>
+        <xsltPath>xsl/Gallio-Report.xhtml-condensed.xsl</xsltPath>
+        <resourcePaths>css;js;img</resourcePaths>
+      </parameters>
+      <traits>
+        <name>XHtml-Condensed</name>
+        <description>
+          Generates XHTML reports that omit passing tests.
+
+          Supported report formatter properties:
+          - AttachmentContentDisposition: Specifies how attachments should be stored.  "Absent", "Link" or "Inline".  Default is "Link".
+        </description>
+      </traits>
+    </component>
+
+    <component componentId="ReportFormatter.MHtml"
+               serviceId="Gallio.ReportFormatter"
+               componentType="Gallio.Reports.MHtmlReportFormatter, Gallio.Reports">
+      <parameters>
+        <htmlReportFormatter>${ReportFormatter.Html}</htmlReportFormatter>
+      </parameters>
+      <traits>
+        <name>MHtml</name>
+        <description>Generates MHTML reports.</description>
+      </traits>
+    </component>
+
+    <component componentId="ReportFormatter.MHtml-Condensed"
+               serviceId="Gallio.ReportFormatter"
+               componentType="Gallio.Reports.MHtmlReportFormatter, Gallio.Reports">
+      <parameters>
+        <htmlReportFormatter>${ReportFormatter.Html-Condensed}</htmlReportFormatter>
+      </parameters>
+      <traits>
+        <name>MHtml-Condensed</name>
+        <description>Generates MHTML reports that omit passing tests.</description>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.Reports.Installer"
+               serviceId="Gallio.Installer"
+               componentType="Gallio.Reports.ReportResourcesInstaller, Gallio.Reports">
+      <parameters>
+        <testKindImageDir>plugin://Gallio.Reports/Resources/img/testkinds/</testKindImageDir>
+        <generatedCssFile>plugin://Gallio.Reports/Resources/css/Gallio-Report.Generated.css</generatedCssFile>
+      </parameters>
+      <traits>
+        <requiresElevation>true</requiresElevation>
+      </traits>
+    </component>
+  </components>
+</plugin>

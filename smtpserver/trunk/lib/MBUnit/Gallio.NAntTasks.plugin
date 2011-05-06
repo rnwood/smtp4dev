@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.NAntTasks"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio NAnt Tasks</name>
+    <version>3.2.0.0</version>
+    <description>Provides NAnt tasks for running tests with Gallio.</description>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.NAntTasks.plugin" />
+    <file path="Gallio.NAntTasks.dll" />
+    <file path="Gallio.NAntTasks.xml" />
+  </files>
+</plugin>
