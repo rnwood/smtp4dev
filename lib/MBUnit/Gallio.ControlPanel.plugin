@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.ControlPanel"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio Control Panel</name>
+    <version>3.2.0.0</version>
+    <description>An application for configuring preferences and managing the Gallio installation.</description>
+    <icon>plugin://Gallio.ControlPanel/Resources/Gallio.ControlPanel.ico</icon>
+  </traits>
+
+  <files>
+    <file path="Gallio.ControlPanel.plugin" />
+    <file path="Gallio.ControlPanel.exe" />
+    <file path="Gallio.ControlPanel.exe.config" />
+    <file path="Resources\Gallio.ControlPanel.ico" />
+  </files>
+</plugin>

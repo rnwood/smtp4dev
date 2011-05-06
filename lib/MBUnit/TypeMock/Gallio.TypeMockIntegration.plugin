@@ -1,0 +1,57 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.TypeMockIntegration"
+        recommendedInstallationPath="TypeMock"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>TypeMock Integration Plugin</name>
+    <version>3.2.0.0</version>
+    <description>Provides support for running tests with TypeMock.</description>
+	<icon>plugin://Gallio.TypeMockIntegration/Resources/Typemock.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.TypeMockIntegration.plugin" />
+    <file path="Gallio.TypeMockIntegration.dll" />
+    <file path="TypeMock.Integration.dll" />
+	<file path="Resources\Typemock.ico" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio.TypeMockIntegration, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null"
+              codeBase="Gallio.TypeMockIntegration.dll"
+              qualifyPartialName="true" />
+
+    <assembly fullName="TypeMock.Integration, Version=5.1.2.0, Culture=neutral, PublicKeyToken=null"
+              codeBase="TypeMock.Integration.dll" />
+  </assemblies>
+
+  <components>
+    <component componentId="TypeMockIntegration.TypeMockHostFactory"
+               serviceId="Gallio.HostFactory"
+               componentType="Gallio.TypeMockIntegration.TypeMockHostFactory, Gallio.TypeMockIntegration" />
+
+    <component componentId="TypeMockIntegration.TypeMockTestRunnerFactory"
+               serviceId="Gallio.TestRunnerFactory"
+               componentType="Gallio.Runner.DefaultTestRunnerFactory, Gallio">
+      <parameters>
+        <testIsolationProvider>${TypeMockIntegration.TypeMockTestIsolationProvider}</testIsolationProvider>
+      </parameters>
+      <traits>
+        <name>TypeMock</name>
+        <description>Runs tests in an external process with TypeMock.Net.  TypeMock.Net v4 or v5 must be installed for this mode to work.</description>
+      </traits>
+    </component>
+
+    <component componentId="TypeMockIntegration.TypeMockTestIsolationProvider"
+               serviceId="Gallio.TestIsolationProvider"
+               componentType="Gallio.Model.Isolation.HostedTestIsolationProvider, Gallio">
+      <parameters>
+        <hostFactory>${TypeMockIntegration.TypeMockHostFactory}</hostFactory>
+      </parameters>
+    </component>
+  </components>
+</plugin>

@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.RSpecAdapter"
+        recommendedInstallationPath="RSpec"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>RSpec Adapter Plugin</name>
+    <version>3.2.0.0</version>
+    <description>Provides support for running RSpec tests.</description>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+    <dependency pluginId="Gallio.DLRIntegration" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.RSpecAdapter.plugin" />
+    <file path="Gallio.RSpecAdapter.dll" />
+    <!-- The following tokens are replaced during the build. -->
+    <file path="libs\rspec-1.2.7\examples\failing\diffing_spec.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\failing_implicit_docstrings_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\failure_in_after.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\failure_in_before.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\mocking_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\mocking_with_flexmock.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\mocking_with_mocha.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\mocking_with_rr.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\partial_mock_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\pending_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\predicate_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\raising_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\README.txt"/>
+    <file path="libs\rspec-1.2.7\examples\failing\spec_helper.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\syntax_error_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\team_spec.rb"/>
+    <file path="libs\rspec-1.2.7\examples\failing\timeout_behaviour.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\custom_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\custom_matchers.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\dynamic_spec.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\file_accessor.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\file_accessor_spec.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\filtered_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\filtered_formatter_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\greeter_spec.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\helper_method_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\implicit_docstrings_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\io_processor.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\io_processor_spec.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\mocking_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\multi_threaded_example_group_runner.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\nested_classes_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\options_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\options_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\partial_mock_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\pending_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\predicate_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\shared_example_group_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\shared_stack_examples.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\simple_matcher_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\spec_helper.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\stack.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\stack_spec.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\stack_spec_with_nested_example_groups.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\stubbing_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\passing\yielding_example.rb"/>
+    <file path="libs\rspec-1.2.7\examples\ruby1.9.compatibility\access_to_constants_spec.rb"/>
+    <file path="libs\rspec-1.2.7\History.rdoc"/>
+    <file path="libs\rspec-1.2.7\lib\autotest\discover.rb"/>
+    <file path="libs\rspec-1.2.7\lib\autotest\rspec.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\adapters\mock_frameworks\flexmock.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\adapters\mock_frameworks\mocha.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\adapters\mock_frameworks\rr.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\adapters\mock_frameworks\rspec.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\autorun.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\deprecation.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\dsl.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\dsl\main.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\args_and_options.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\before_and_after_hooks.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\errors.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\example_group.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\example_group_factory.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\example_group_hierarchy.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\example_group_methods.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\example_group_proxy.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\example_matcher.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\example_methods.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\example_proxy.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\module_reopening_fix.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\pending.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\predicate_matchers.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\shared_example_group.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\example\subject.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\expectations.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\expectations\errors.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\expectations\extensions.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\expectations\extensions\kernel.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\expectations\fail_with.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\expectations\handler.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\interop\test.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\interop\test\unit\autorunner.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\interop\test\unit\testcase.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\interop\test\unit\testresult.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\interop\test\unit\testsuite_adapter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\interop\test\unit\ui\console\testrunner.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\be.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\be_close.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\be_instance_of.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\be_kind_of.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\change.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\compatibility.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\dsl.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\eql.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\equal.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\errors.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\exist.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\extensions\instance_exec.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\generated_descriptions.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\has.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\have.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\include.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\match.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\matcher.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\match_array.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\method_missing.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\operator_matcher.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\pretty.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\raise_error.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\respond_to.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\satisfy.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\simple_matcher.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\throw_symbol.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\matchers\wrap_expectation.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\argument_expectation.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\argument_matchers.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\errors.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\error_generator.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\extensions.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\extensions\object.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\framework.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\message_expectation.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\methods.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\mock.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\order_group.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\proxy.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\space.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\mocks\spec_methods.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\rake\spectask.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\rake\verify_rcov.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\ruby.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\backtrace_tweaker.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\class_and_arguments_parser.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\command_line.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\configuration.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\differs\default.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\differs\load-diff-lcs.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\drb_command_line.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\example_group_runner.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\extensions\kernel.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\base_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\base_text_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\failing_examples_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\failing_example_groups_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\html_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\nested_text_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\no_op_method_missing.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\profile_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\progress_bar_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\silent_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\snippet_extractor.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\specdoc_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\formatter\text_mate_formatter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\heckle_runner.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\heckle_runner_unsupported.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\line_number_query.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\options.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\option_parser.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\runner\reporter.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\test\unit.rb"/>
+    <file path="libs\rspec-1.2.7\lib\spec\version.rb"/>
+    <file path="libs\rspec-1.2.7\License.txt"/>
+    <file path="libs\rspec-1.2.7\Manifest.txt"/>
+    <file path="libs\rspec-1.2.7\README.rdoc"/>
+    <file path="libs\rspec-1.2.7\Ruby1.9.rdoc"/>
+    <file path="libs\rspec-1.2.7\TODO.txt"/>
+    <file path="libs\rspec-1.2.7\Upgrade.rdoc"/>
+    <file path="scripts\driver.rb"/>
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio.RSpecAdapter, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null"
+              codeBase="Gallio.RSpecAdapter.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+
+  <components>    
+    <component componentId="RSpecAdapter.FileTypeRecognizers.RSpecSource"
+               serviceId="Gallio.FileTypeRecognizer">
+      <traits>
+        <id>RSpecSource</id>
+        <superTypeId>RubySource</superTypeId>
+        <description>An RSpec source file.</description>
+        <fileNameRegex>.*_spec\.rb</fileNameRegex>
+      </traits>
+    </component>
+
+    <component componentId="RSpecAdapter.TestFramework"
+               serviceId="Gallio.TestFramework"
+               componentType="Gallio.RSpecAdapter.Model.RSpecTestFramework, Gallio.RSpecAdapter">
+      <traits>
+        <name>RSpec</name>
+        <fileTypes>RSpecSource</fileTypes>
+      </traits>
+    </component>
+
+    <component componentId="RSpecAdapter.TestKinds.File"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>RSpec File</name>
+        <description>An RSpec file.</description>
+        <icon>plugin://Gallio/Resources/Assembly.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="RSpecAdapter.TestKinds.ExampleGroup"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>RSpec Example Group</name>
+        <description>An RSpec example group.</description>
+        <icon>plugin://Gallio/Resources/Fixture.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="RSpecAdapter.TestKinds.Example"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>RSpec Example</name>
+        <description>An RSpec example.</description>
+        <icon>plugin://Gallio/Resources/Test.ico</icon>
+      </traits>
+    </component>
+  </components>
+</plugin>

@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.MSBuildTasks"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio MSBuild Tasks</name>
+    <version>3.2.0.0</version>
+    <description>Provides MSBuild tasks for running tests with Gallio.</description>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.MSBuildTasks.plugin" />
+    <file path="Gallio.MSBuildTasks.dll" />
+    <file path="Gallio.MSBuildTasks.xml" />
+  </files>
+</plugin>
