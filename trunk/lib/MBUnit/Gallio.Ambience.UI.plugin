@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.Ambience.UI"
+        recommendedInstallationPath=""
+        enableCondition="${minFramework:NET35}"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio Ambience UI</name>
+    <version>3.2.0.0</version>
+    <description>Ambience UI components.</description>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+    <dependency pluginId="Gallio.UI" />
+    <dependency pluginId="Gallio.Ambience" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.Ambience.UI.plugin" />
+    <file path="Gallio.Ambience.UI.dll" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio.Ambience.UI, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e"
+              codeBase="Gallio.Ambience.UI.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+
+  <components>
+    <component componentId="Ambience.UI.PlaceholderPreferencePaneProvider"
+               serviceId="Gallio.UI.PreferencePaneProvider">
+      <traits>
+        <path>Ambience</path>
+      </traits>
+    </component>
+
+    <component componentId="Ambience.UI.ServerPreferencePaneProvider"
+               serviceId="Gallio.UI.PreferencePaneProvider"
+               componentType="Gallio.Ambience.UI.Preferences.AmbienceServerPreferencePaneProvider, Gallio.Ambience.UI">
+      <traits>
+        <path>Ambience/Server</path>
+        <scope>Machine</scope>
+      </traits>
+    </component>
+  </components>
+</plugin>

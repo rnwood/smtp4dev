@@ -1,0 +1,35 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio35"
+        recommendedInstallationPath=""
+        enableCondition="${minFramework:NET35}"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio Extensions for .Net 3.5</name>
+    <version>3.2.0.0</version>
+    <description>Provides additional Gallio features for use with .Net 3.5.</description>
+    <icon>plugin://Gallio/Resources/Gallio.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio35.plugin" />
+    <file path="Gallio35.dll" />
+    <file path="Gallio35.pdb" />
+    <file path="Gallio35.xml" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio35, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e"
+              codeBase="Gallio35.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+
+  <components>
+    <component componentId="Gallio35.ExpressionFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.ExpressionFormattingRule, Gallio35" />
+  </components>
+</plugin>

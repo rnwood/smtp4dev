@@ -3,10 +3,10 @@
 using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Security;
-using System.Net.Sockets;
+using System.Runtime.InteropServices;
 using System.Text;
+using System.Threading;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Verbs;
 
@@ -17,29 +17,24 @@ namespace Rnwood.SmtpServer
     public class Connection : IConnection
     {
 
+        public IConnectionChannel Channel { get; private set; }
 
-        public Encoding ReaderEncoding
+
+        public Connection(IServer server, Func<Connection, IConnectionChannel> channelCreator) : this(server, channelCreator, new VerbMap())
         {
-            get; private set;
         }
 
-        private readonly TcpClient _tcpClient;
-        private StreamReader _reader;
-
-        private Stream _stream;
-        private StreamWriter _writer;
-
-        public Connection(Server server, TcpClient tcpClient)
+        public Connection(IServer server, Func<Connection, IConnectionChannel> channelCreator, IVerbMap verbMap)
         {
-            VerbMap = new VerbMap();
-            Session = server.Behaviour.OnCreateNewSession(this, ((IPEndPoint) tcpClient.Client.RemoteEndPoint).Address,
-                                                          DateTime.Now);
-
+            VerbMap = verbMap;
             Server = server;
-            _tcpClient = tcpClient;
-            _tcpClient.ReceiveTimeout = Server.Behaviour.GetReceiveTimeout(this);
+            Channel = channelCreator(this);
+            Session = server.Behaviour.OnCreateNewSession(this, Channel.ClientIPAddress, DateTime.Now);
 
-            _stream = tcpClient.GetStream();
+            
+
+            Channel.ReceiveTimeout = Server.Behaviour.GetReceiveTimeout(this);
+
             SetReaderEncodingToDefault();
 
             SetupVerbs();
@@ -49,43 +44,24 @@ namespace Rnwood.SmtpServer
 
         public IServer Server { get; private set; }
 
-        public void SetReaderEncoding(Encoding encoding)
-        {
-            ReaderEncoding = encoding;
-            SetupReaderAndWriter();
-        }
 
-        public void SetReaderEncodingToDefault()
-        {
-            SetReaderEncoding(Server.Behaviour.GetDefaultEncoding(this));
-        }
 
         public IExtensionProcessor[] ExtensionProcessors { get; private set; }
 
-        public void CloseConnection()
-        {
-            _writer.Flush();
-            _tcpClient.Close();
-        }
 
-        public VerbMap VerbMap { get; private set; }
+        public IVerbMap VerbMap { get; private set; }
 
-        public void ApplyStreamFilter(Func<Stream, Stream> filter)
-        {
-            _stream = filter(_stream);
-            SetupReaderAndWriter();
-        }
 
         public MailVerb MailVerb
         {
-            get { return (MailVerb) VerbMap.GetVerbProcessor("MAIL"); }
+            get { return (MailVerb)VerbMap.GetVerbProcessor("MAIL"); }
         }
 
         public void WriteLine(string text, params object[] arg)
         {
             string formattedText = string.Format(text, arg);
             Session.AppendToLog(formattedText);
-            _writer.WriteLine(formattedText);
+            Channel.WriteLine(formattedText);
         }
 
         public void WriteResponse(SmtpResponse response)
@@ -95,7 +71,7 @@ namespace Rnwood.SmtpServer
 
         public string ReadLine()
         {
-            string text = _reader.ReadLine();
+            string text = Channel.ReadLine();
             Session.AppendToLog(text);
             return text;
         }
@@ -126,11 +102,6 @@ namespace Rnwood.SmtpServer
 
         #endregion
 
-        private void SetupReaderAndWriter()
-        {
-            _writer = new StreamWriter(_stream, ReaderEncoding) {AutoFlush = true, NewLine = "\r\n"};
-            _reader = new StreamReader(_stream, ReaderEncoding);
-        }
 
         private void SetupVerbs()
         {
@@ -147,25 +118,34 @@ namespace Rnwood.SmtpServer
                 Server.Behaviour.GetExtensions(this).Select(e => e.CreateExtensionProcessor(this)).ToArray();
         }
 
-        public void Start()
+        private Thread _processThread;
+
+        public void AbortProcessing()
+        {
+            lock (this)
+            {
+                if (_processThread != null)
+                {
+                    _processThread.Interrupt();
+                }
+            }
+        }
+
+        public void Process()
         {
             try
             {
+                _processThread = Thread.CurrentThread;
+
                 Server.Behaviour.OnSessionStarted(this, Session);
 
-                if (Server.Behaviour.IsSSLEnabled(this))
-                {
-                    SslStream sslStream = new SslStream(_stream);
-                    sslStream.AuthenticateAsServer(Server.Behaviour.GetSSLCertificate(this));
-                    Session.SecureConnection = true;
-                    _stream = sslStream;
-                    SetupReaderAndWriter();
-                }
 
                 WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady,
                                                Server.Behaviour.DomainName + " smtp4dev ready"));
 
-                while (_tcpClient.Client.Connected)
+                int numberOfInvalidCommands = 0;
+
+                while (Channel.IsConnected)
                 {
                     SmtpCommand command = new SmtpCommand(ReadLine());
                     Server.Behaviour.OnCommandReceived(this, command);
@@ -176,6 +156,8 @@ namespace Rnwood.SmtpServer
 
                         if (verbProcessor != null)
                         {
+                            numberOfInvalidCommands = 0;
+
                             try
                             {
                                 verbProcessor.Process(this, command);
@@ -187,8 +169,19 @@ namespace Rnwood.SmtpServer
                         }
                         else
                         {
-                            WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
-                                                           "Command unrecognised"));
+                            numberOfInvalidCommands++;
+
+                            if (numberOfInvalidCommands >= Server.Behaviour.MaximumNumberOfSequentialBadCommands)
+                            {
+                                WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel,
+                                                               "Command unrecognised - closing connection because of too many bad commands in a row"));
+                                CloseConnection();
+                            }
+                            else
+                            {
+                                WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
+                                                               "Command unrecognised ({0} tries left)", Server.Behaviour.MaximumNumberOfSequentialBadCommands-numberOfInvalidCommands));
+                            }
                         }
                     }
                     else if (command.IsEmpty)
@@ -206,10 +199,35 @@ namespace Rnwood.SmtpServer
                 Session.SessionError = ioException.Message;
             }
 
-            CloseConnection();
+            Channel.Close();
 
             Session.EndDate = DateTime.Now;
             Server.Behaviour.OnSessionCompleted(this, Session);
+
+            lock (this)
+            {
+                _processThread = null;
+            }
+        }
+
+        public void CloseConnection()
+        {
+            Channel.Close();
+        }
+
+        public void Kill()
+        {
+            Channel.Close();
+        }
+
+        public void SetReaderEncoding(Encoding encoding)
+        {
+            Channel.SetReaderEncoding(encoding);
+        }
+
+        public void SetReaderEncodingToDefault()
+        {
+            SetReaderEncoding(Server.Behaviour.GetDefaultEncoding(this));
         }
     }
 }

@@ -1,0 +1,85 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.NUnitAdapterLatest"
+        recommendedInstallationPath="NUnit\Latest"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>NUnit v2.5.4+ Adapter Plugin</name>
+    <version>3.2.0.0</version>
+    <description>Provides support for running NUnit v2.5.4+ tests.</description>
+    <icon>plugin://Gallio.NUnitAdapterLatest/Resources/NUnit.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.NUnitAdapterLatest.plugin" />
+    <file path="Gallio.NUnitAdapterLatest.dll" />
+    <file path="license.txt" />
+    <file path="Readme.txt" />
+    <file path="nunit.core.dll" />
+    <file path="nunit.core.interfaces.dll" />
+    <file path="nunit.framework.dll" />
+    <file path="nunit.framework.dll.tdnet" />
+    <file path="nunit.framework.xml" />
+    <file path="nunit.mocks.dll" />
+    <file path="nunit.util.dll" />
+    <file path="addins\NUnit Addins Readme.txt" />
+    <file path="Resources\NUnit.ico" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio.NUnitAdapterLatest, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null"
+              codeBase="Gallio.NUnitAdapterLatest.dll"
+              qualifyPartialName="true" />
+
+    <assembly fullName="nunit.core, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77"
+              codeBase="nunit.core.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.5.4.0-2.5.65535.65535" />
+      </bindingRedirects>
+    </assembly>
+
+    <assembly fullName="nunit.core.interfaces, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77"
+              codeBase="nunit.core.interfaces.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.5.4.0-2.5.65535.65535" />
+      </bindingRedirects>
+    </assembly>
+
+    <assembly fullName="nunit.util, Version=2.5.9.10348, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77"
+              codeBase="nunit.util.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.5.4.0-2.5.65535.65535" />
+      </bindingRedirects>
+    </assembly>
+  </assemblies>
+
+  <probingPaths>
+    <probingPath>Latest</probingPath>
+  </probingPaths>
+
+  <components>
+    <component componentId="NUnitAdapterLatest.TestFramework"
+               serviceId="Gallio.TestFramework"
+               componentType="Gallio.NUnitAdapter.Model.NUnitTestFramework, Gallio.NUnitAdapterLatest">
+      <traits>
+        <name>NUnit v2.5.4+</name>
+        <frameworkAssemblies>nunit.framework, Version=2.5.4.0-2.5.65535.65535</frameworkAssemblies>
+        <version>2.5.9.10348</version>
+        <fileTypes>Assembly</fileTypes>
+        <icon>plugin://Gallio.NUnitAdapterLatest/Resources/NUnit.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="NUnitAdapterLatest.TestKinds.NUnitTestAssembly"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>NUnit v2.5.4+ Assembly</name>
+        <description>NUnit v2.5.4+ Test Assembly</description>
+        <icon>plugin://Gallio.NUnitAdapterLatest/Resources/NUnit.ico</icon>
+      </traits>
+    </component>
+  </components>
+</plugin>

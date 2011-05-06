@@ -1,11 +1,10 @@
 ﻿#region
 
 using System.Linq;
-using Rnwood.SmtpServer.Verbs;
 
 #endregion
 
-namespace Rnwood.SmtpServer
+namespace Rnwood.SmtpServer.Verbs
 {
     public class MailFromVerb : IVerb
     {

@@ -1,23 +1,16 @@
 ﻿#region
 
-using Rnwood.SmtpServer.Verbs;
+
 
 #endregion
 
-namespace Rnwood.SmtpServer
+namespace Rnwood.SmtpServer.Verbs
 {
     public class HeloVerb : IVerb
     {
         public void Process(IConnection connection, SmtpCommand command)
         {
-            if (!string.IsNullOrEmpty(connection.Session.ClientName))
-            {
-                connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
-                                                                   "You already said HELO"));
-                return;
-            }
-
-            connection.Session.ClientName = command.Arguments[0];
+            connection.Session.ClientName = string.Join(" ", command.Arguments);
             connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Nice to meet you"));
         }
     }

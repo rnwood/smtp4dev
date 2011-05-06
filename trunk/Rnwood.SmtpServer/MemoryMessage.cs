@@ -12,9 +12,9 @@ namespace Rnwood.SmtpServer
 
         private byte[] _data;
 
-        public override Stream GetData(bool forWriting)
+        public override Stream GetData(DataAccessMode dataAccessMode)
         {
-            if (forWriting)
+            if (dataAccessMode == DataAccessMode.ForWriting)
             {
                 CloseNotifyingMemoryStream stream = new CloseNotifyingMemoryStream();
                 stream.Closing += (s, ea) =>
@@ -26,7 +26,10 @@ namespace Rnwood.SmtpServer
 
                 return stream;
             }
-            else
+            else if (_data == null)
+            {
+                throw new InvalidOperationException("Cannot read data before it has been written");
+            } else
             {
                 return new MemoryStream(_data, false);
             }

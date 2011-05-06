@@ -1,10 +1,10 @@
 ﻿#region
 
-using Rnwood.SmtpServer.Verbs;
+
 
 #endregion
 
-namespace Rnwood.SmtpServer
+namespace Rnwood.SmtpServer.Verbs
 {
     public class MailVerb : IVerb
     {
@@ -14,7 +14,7 @@ namespace Rnwood.SmtpServer
             SubVerbMap.SetVerbProcessor("FROM", new MailFromVerb());
         }
 
-        public VerbMap SubVerbMap { get; private set; }
+        public IVerbMap SubVerbMap { get; private set; }
 
         public MailFromVerb FromSubVerb
         {
