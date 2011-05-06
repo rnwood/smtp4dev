@@ -1,0 +1,28 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="MbUnit.Compatibility"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>MbUnit v3 Extensions for Backwards Compatibility</name>
+    <version>3.2.0.0</version>
+    <description>Provides extensions for MbUnit v3 to assist with test migration from MbUnit v2.</description>
+    <icon>plugin://MbUnit/Resources/MbUnit.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="MbUnit.Compatibility.plugin" />
+    <file path="MbUnit.Compatibility.dll" />
+    <file path="MbUnit.Compatibility.pdb" />
+    <file path="MbUnit.Compatibility.xml" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="MbUnit.Compatibility, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e"
+              codeBase="MbUnit.Compatibility.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+</plugin>

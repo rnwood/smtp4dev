@@ -22,6 +22,8 @@ namespace Rnwood.SmtpServer
 
             if (!string.IsNullOrEmpty(text))
             {
+                IsEmpty = false;
+
                 Match match = COMMANDREGEX.Match(text);
 
                 if (match.Success)

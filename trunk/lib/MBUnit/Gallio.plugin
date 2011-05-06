@@ -1,0 +1,658 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio</name>
+    <version>3.2.0.0</version>
+    <description>The heart of Gallio.</description>
+    <icon>plugin://Gallio/Resources/Gallio.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="BuiltIn" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.plugin" />
+    <file path="Gallio.dll" />
+    <file path="Gallio.pdb" />
+    <file path="Gallio.xml" />
+    <file path="Gallio.XmlSerializers.dll" />
+    <file path="Gallio.Host.exe" />
+    <file path="Gallio.Host.exe.config" />
+    <file path="Gallio.Host.x86.exe" />
+    <file path="Gallio.Host.x86.exe.config" />
+    <file path="Gallio.Host.Elevated.exe" />
+    <file path="Gallio.Host.Elevated.exe.config" />
+    <file path="Gallio.Host.Elevated.x86.exe" />
+    <file path="Gallio.Host.Elevated.x86.exe.config" />
+
+    <file path="Resources\Assembly.ico" />
+    <file path="Resources\Container.ico" />
+    <file path="Resources\Fixture.ico" />
+    <file path="Resources\Gallio.ico" />
+    <file path="Resources\Test.ico" />
+    <file path="Resources\Unsupported.ico" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e"
+              codeBase="Gallio.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+
+  <services>
+    <service serviceId="Gallio.Common.Concurrency.ProcessCreator"
+             serviceType="Gallio.Common.Concurrency.IProcessCreator, Gallio" />
+
+    <service serviceId="Gallio.Common.Concurrency.ProcessFinder"
+             serviceType="Gallio.Common.Concurrency.IProcessFinder, Gallio" />
+
+    <service serviceId="Gallio.FileSystem"
+             serviceType="Gallio.Common.IO.IFileSystem, Gallio" />
+
+    <service serviceId="Gallio.XmlSerializer"
+             serviceType="Gallio.Common.Xml.IXmlSerializer, Gallio" />
+    
+    <service serviceId="Gallio.HostFactory"
+             serviceType="Gallio.Runtime.Hosting.IHostFactory, Gallio" />
+
+    <service serviceId="Gallio.Debugger"
+             serviceType="Gallio.Runtime.Debugging.IDebugger, Gallio" />
+
+    <service serviceId="Gallio.DebuggerManager"
+             serviceType="Gallio.Runtime.Debugging.IDebuggerManager, Gallio" />
+
+    <service serviceId="Gallio.FileTypeRecognizer"
+             serviceType="Gallio.Runtime.FileTypes.IFileTypeRecognizer, Gallio"
+             defaultComponentType="Gallio.Runtime.FileTypes.SimpleFileTypeRecognizer, Gallio" />
+
+    <service serviceId="Gallio.FileTypeManager"
+             serviceType="Gallio.Runtime.FileTypes.IFileTypeManager, Gallio" />
+
+    <service serviceId="Gallio.UtilityCommandManager"
+             serviceType="Gallio.Runtime.UtilityCommands.IUtilityCommandManager, Gallio" />
+
+    <service serviceId="Gallio.UtilityCommand"
+             serviceType="Gallio.Runtime.UtilityCommands.IUtilityCommand, Gallio" />
+
+    <service serviceId="Gallio.InstallerManager"
+             serviceType="Gallio.Runtime.Installer.IInstallerManager, Gallio" />
+
+    <service serviceId="Gallio.Installer"
+             serviceType="Gallio.Runtime.Installer.IInstaller, Gallio" />
+
+    <service serviceId="Gallio.Converter"
+             serviceType="Gallio.Runtime.Conversions.IConverter, Gallio" />
+
+    <service serviceId="Gallio.ConversionRule"
+             serviceType="Gallio.Runtime.Conversions.IConversionRule, Gallio" />
+
+    <service serviceId="Gallio.Formatter"
+             serviceType="Gallio.Runtime.Formatting.IFormatter, Gallio" />
+
+    <service serviceId="Gallio.FormattingRule"
+             serviceType="Gallio.Runtime.Formatting.IFormattingRule, Gallio" />
+
+    <service serviceId="Gallio.ElevatedCommand"
+             serviceType="Gallio.Runtime.Security.IElevatedCommand, Gallio" />
+
+    <service serviceId="Gallio.ElevationManager"
+             serviceType="Gallio.Runtime.Security.IElevationManager, Gallio" />
+
+    <service serviceId="Gallio.PreferenceManager"
+             serviceType="Gallio.Runtime.Preferences.IPreferenceManager, Gallio" />
+
+    <service serviceId="Gallio.TestFramework"
+             serviceType="Gallio.Model.ITestFramework, Gallio" />
+
+    <service serviceId="Gallio.TestFrameworkManager"
+             serviceType="Gallio.Model.ITestFrameworkManager, Gallio" />
+
+    <service serviceId="Gallio.TestKind"
+             serviceType="Gallio.Model.ITestKind, Gallio"
+             defaultComponentType="Gallio.Model.DefaultTestKind, Gallio"/>
+
+    <service serviceId="Gallio.TestKindManager"
+             serviceType="Gallio.Model.ITestKindManager, Gallio" />
+
+    <service serviceId="Gallio.TestContextTracker"
+             serviceType="Gallio.Model.Contexts.ITestContextTracker, Gallio" />
+
+    <service serviceId="Gallio.TestRunnerFactory"
+             serviceType="Gallio.Runner.ITestRunnerFactory, Gallio" />
+
+    <service serviceId="Gallio.TestIsolationProvider"
+             serviceType="Gallio.Model.Isolation.ITestIsolationProvider, Gallio" />
+
+    <service serviceId="Gallio.ReportFormatter"
+             serviceType="Gallio.Runner.Reports.IReportFormatter, Gallio" />
+
+    <service serviceId="Gallio.TestRunnerManager"
+             serviceType="Gallio.Runner.ITestRunnerManager, Gallio" />
+
+    <service serviceId="Gallio.TestEnvironment"
+             serviceType="Gallio.Model.Environments.ITestEnvironment, Gallio" />
+
+    <service serviceId="Gallio.TestEnvironmentManager"
+             serviceType="Gallio.Model.Environments.ITestEnvironmentManager, Gallio" />
+
+    <service serviceId="Gallio.ReportManager"
+             serviceType="Gallio.Runner.Reports.IReportManager, Gallio" />
+
+    <service serviceId="Gallio.TestProjectManager"
+             serviceType="Gallio.Runner.Projects.ITestProjectManager, Gallio" />
+
+    <service serviceId="Gallio.TestRunnerExtensionFactory"
+             serviceType="Gallio.Runner.Extensions.ITestRunnerExtensionFactory, Gallio" />
+
+    <service serviceId="Gallio.TestRunnerExtensionManager"
+             serviceType="Gallio.Runner.Extensions.ITestRunnerExtensionManager, Gallio" />
+
+    <service serviceId="Gallio.PatternTestController"
+             serviceType="Gallio.Framework.Pattern.PatternTestController, Gallio" />
+
+    <service serviceId="Gallio.ExtensionPoints"
+             serviceType="Gallio.Runtime.Extensibility.IExtensionPoints, Gallio" />
+
+    <service serviceId="Gallio.ComparisonSemantics"
+             serviceType="Gallio.Framework.IComparisonSemantics, Gallio" />
+  </services>
+  
+  <components>
+    <component componentId="Gallio.FallbackTestFramework"
+               serviceId="Gallio.TestFramework"
+               componentType="Gallio.Model.FallbackTestFramework, Gallio">
+      <traits>
+        <name>Fallback</name>
+        <icon>plugin://Gallio/Resources/Gallio.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.TestFrameworkManager"
+               serviceId="Gallio.TestFrameworkManager"
+               componentType="Gallio.Model.DefaultTestFrameworkManager, Gallio">
+      <parameters>
+        <fallbackTestFrameworkHandle>${Gallio.FallbackTestFramework}</fallbackTestFrameworkHandle>
+      </parameters>
+    </component>
+
+    <component componentId="Gallio.TestRunnerManager"
+               serviceId="Gallio.TestRunnerManager"
+               componentType="Gallio.Runner.DefaultTestRunnerManager, Gallio" />
+
+    <component componentId="Gallio.TestEnvironmentManager"
+               serviceId="Gallio.TestEnvironmentManager"
+               componentType="Gallio.Model.Environments.DefaultTestEnvironmentManager, Gallio" />
+
+    <component componentId="Gallio.ConsoleTestEnvironment"
+               serviceId="Gallio.TestEnvironment"
+               componentType="Gallio.Model.Environments.ConsoleTestEnvironment, Gallio" />
+
+    <component componentId="Gallio.TraceTestEnvironment"
+               serviceId="Gallio.TestEnvironment"
+               componentType="Gallio.Model.Environments.TraceTestEnvironment, Gallio" />
+
+    <component componentId="Gallio.UnhandledExceptionTestEnvironment"
+               serviceId="Gallio.TestEnvironment"
+               componentType="Gallio.Model.Environments.UnhandledExceptionTestEnvironment, Gallio" />
+
+    <component componentId="Gallio.CustomTestEnvironment"
+               serviceId="Gallio.TestEnvironment"
+               componentType="Gallio.Model.Environments.CustomTestEnvironment, Gallio" />
+
+    <component componentId="Gallio.WindowsFormsTestEnvironment"
+               serviceId="Gallio.TestEnvironment"
+               componentType="Gallio.Model.Environments.WindowsFormsTestEnvironment, Gallio" />
+
+    <component componentId="Gallio.ReportManager"
+               serviceId="Gallio.ReportManager"
+               componentType="Gallio.Runner.Reports.DefaultReportManager, Gallio" />
+
+    <component componentId="Gallio.TestProjectManager"
+               serviceId="Gallio.TestProjectManager"
+               componentType="Gallio.Runner.Projects.DefaultTestProjectManager, Gallio" />
+
+    <component componentId="Gallio.TestContextTracker"
+               serviceId="Gallio.TestContextTracker"
+               componentType="Gallio.Model.Contexts.DefaultTestContextTracker, Gallio" />
+
+    <component componentId="Gallio.PatternTestController"
+               serviceId="Gallio.PatternTestController"
+               componentType="Gallio.Framework.Pattern.PatternTestController, Gallio" />
+
+    <component componentId="Gallio.DebuggerManager"
+               serviceId="Gallio.DebuggerManager"
+               componentType="Gallio.Runtime.Debugging.DefaultDebuggerManager, Gallio" />
+
+    <component componentId="Gallio.ElevationManager"
+               serviceId="Gallio.ElevationManager"
+               componentType="Gallio.Runtime.Security.DefaultElevationManager, Gallio" />
+
+    <component componentId="Gallio.PreferenceManager"
+               serviceId="Gallio.PreferenceManager"
+               componentType="Gallio.Runtime.Preferences.FilePreferenceManager, Gallio" />
+    
+    <component componentId="Gallio.ExtensionPoints"
+               serviceId="Gallio.ExtensionPoints"
+               componentType="Gallio.Runtime.Extensibility.DefaultExtensionPoints, Gallio" />
+	
+    <component componentId="Gallio.ComparisonSemantics"
+               serviceId="Gallio.ComparisonSemantics"
+               componentType="Gallio.Framework.DefaultComparisonSemantics, Gallio" />
+
+    <!-- Host Factories -->
+    
+    <component componentId="Gallio.LocalHostFactory"
+               serviceId="Gallio.HostFactory"
+               componentType="Gallio.Runtime.Hosting.LocalHostFactory, Gallio" />
+
+    <component componentId="Gallio.IsolatedAppDomainHostFactory"
+               serviceId="Gallio.HostFactory"
+               componentType="Gallio.Runtime.Hosting.IsolatedAppDomainHostFactory, Gallio" />
+
+    <component componentId="Gallio.IsolatedProcessHostFactory"
+               serviceId="Gallio.HostFactory"
+               componentType="Gallio.Runtime.Hosting.IsolatedProcessHostFactory, Gallio" />
+
+    <!-- Test Runner Factories -->
+
+    <component componentId="Gallio.LocalTestRunnerFactory"
+               serviceId="Gallio.TestRunnerFactory"
+               componentType="Gallio.Runner.DefaultTestRunnerFactory, Gallio">
+      <parameters>
+        <testIsolationProvider>${Gallio.LocalTestIsolationProvider}</testIsolationProvider>
+      </parameters>
+      <traits>
+        <name>Local</name>
+        <description>Runs tests locally within the same process and AppDomain as the test runner application.  Each test isolation context runs locally.  This mode offers no isolation between tests and the test runner; it does not support loading test assembly configuration files or using a different runtime version or processor architecture.</description>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.IsolatedAppDomainTestRunnerFactory"
+               serviceId="Gallio.TestRunnerFactory"
+               componentType="Gallio.Runner.DefaultTestRunnerFactory, Gallio">
+      <parameters>
+        <testIsolationProvider>${Gallio.IsolatedAppDomainTestIsolationProvider}</testIsolationProvider>
+      </parameters>
+      <traits>
+        <name>IsolatedAppDomain</name>
+        <description>Runs tests within an isolated AppDomain of the same process as the test runner application.  Each test isolation context runs in its own AppDomain.  This mode provides lightweight but limited isolation between tests and the test runner; it does not support using different runtime version or processor architecture.</description>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.IsolatedProcessTestRunnerFactory"
+               serviceId="Gallio.TestRunnerFactory"
+               componentType="Gallio.Runner.DefaultTestRunnerFactory, Gallio">
+      <parameters>
+        <testIsolationProvider>${Gallio.IsolatedProcessTestIsolationProvider}</testIsolationProvider>
+      </parameters>
+      <traits>
+        <name>IsolatedProcess</name>
+        <description>Runs tests within an isolated process external to the test runner.  Each test isolation context runs in its own process.  This mode protects the test runner application from most faults that may occur during test execution; it supports all features.</description>
+      </traits>
+    </component>
+    
+    <!-- Test Isolation Providers -->
+    
+    <component componentId="Gallio.LocalTestIsolationProvider"
+               serviceId="Gallio.TestIsolationProvider"
+               componentType="Gallio.Model.Isolation.HostedTestIsolationProvider, Gallio">
+      <parameters>
+        <hostFactory>${Gallio.LocalHostFactory}</hostFactory>
+      </parameters>
+    </component>
+
+    <component componentId="Gallio.IsolatedAppDomainTestIsolationProvider"
+               serviceId="Gallio.TestIsolationProvider"
+               componentType="Gallio.Model.Isolation.HostedTestIsolationProvider, Gallio">
+      <parameters>
+        <hostFactory>${Gallio.IsolatedAppDomainHostFactory}</hostFactory>
+      </parameters>
+    </component>
+
+    <component componentId="Gallio.IsolatedProcessTestIsolationProvider"
+               serviceId="Gallio.TestIsolationProvider"
+               componentType="Gallio.Model.Isolation.HostedTestIsolationProvider, Gallio">
+      <parameters>
+        <hostFactory>${Gallio.IsolatedProcessHostFactory}</hostFactory>
+      </parameters>
+    </component>
+
+    <component componentId="Gallio.TestRunnerExtensionManager"
+               serviceId="Gallio.TestRunnerExtensionManager"
+               componentType="Gallio.Runner.Extensions.DefaultTestRunnerExtensionManager, Gallio" />
+
+    <!-- Converters -->
+    <component componentId="Gallio.Converter"
+               serviceId="Gallio.Converter"
+               componentType="Gallio.Runtime.Conversions.RuleBasedConverter, Gallio" />
+
+    <component componentId="Gallio.ArrayToArrayConversionRule"
+               serviceId="Gallio.ConversionRule"
+               componentType="Gallio.Runtime.Conversions.ArrayToArrayConversionRule, Gallio" />
+
+    <component componentId="Gallio.ConvertibleToConvertibleConversionRule"
+               serviceId="Gallio.ConversionRule"
+               componentType="Gallio.Runtime.Conversions.ConvertibleToConvertibleConversionRule, Gallio" />
+
+    <component componentId="Gallio.ObjectToStringConversionRule"
+               serviceId="Gallio.ConversionRule"
+               componentType="Gallio.Runtime.Conversions.ObjectToStringConversionRule, Gallio" />
+
+    <component componentId="Gallio.StringToXmlDocumentConversionRule"
+               serviceId="Gallio.ConversionRule"
+               componentType="Gallio.Runtime.Conversions.StringToXmlDocumentConversionRule, Gallio" />
+
+    <component componentId="Gallio.XPathNavigableToXPathNavigatorConversionRule"
+               serviceId="Gallio.ConversionRule"
+               componentType="Gallio.Runtime.Conversions.XPathNavigableToXPathNavigatorConversionRule, Gallio" />
+
+    <component componentId="Gallio.XPathNavigatorToStringConversionRule"
+               serviceId="Gallio.ConversionRule"
+               componentType="Gallio.Runtime.Conversions.XPathNavigatorToStringConversionRule, Gallio" />
+
+    <component componentId="Gallio.XPathNavigatorToXmlSerializableTypeConversionRule"
+               serviceId="Gallio.ConversionRule"
+               componentType="Gallio.Runtime.Conversions.XPathNavigatorToXmlSerializableTypeConversionRule, Gallio" />
+
+    <component componentId="Gallio.StringToEnumConversionRule"
+               serviceId="Gallio.ConversionRule"
+               componentType="Gallio.Runtime.Conversions.StringToEnumConversionRule, Gallio" />
+
+    <!-- Formatters -->
+    <component componentId="Gallio.Formatter"
+               serviceId="Gallio.Formatter"
+               componentType="Gallio.Runtime.Formatting.RuleBasedFormatter, Gallio" />
+
+    <component componentId="Gallio.BooleanFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.BooleanFormattingRule, Gallio" />
+
+    <component componentId="Gallio.ByteFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.ByteFormattingRule, Gallio" />
+
+    <component componentId="Gallio.CharFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.CharFormattingRule, Gallio" />
+
+    <component componentId="Gallio.ConvertToStringFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.ConvertToStringFormattingRule, Gallio" />
+
+    <component componentId="Gallio.DateTimeFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.DateTimeFormattingRule, Gallio" />
+
+    <component componentId="Gallio.DBNullFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.DBNullFormattingRule, Gallio" />
+
+    <component componentId="Gallio.DecimalFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.DecimalFormattingRule, Gallio" />
+
+    <component componentId="Gallio.DictionaryEntryFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.DictionaryEntryFormattingRule, Gallio" />
+
+    <component componentId="Gallio.DoubleFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.DoubleFormattingRule, Gallio" />
+
+    <component componentId="Gallio.EnumerableFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.EnumerableFormattingRule, Gallio" />
+
+    <component componentId="Gallio.IntegerFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.IntegerFormattingRule, Gallio" />
+
+    <component componentId="Gallio.KeyValuePairFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.KeyValuePairFormattingRule, Gallio" />
+
+    <component componentId="Gallio.SByteFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.SByteFormattingRule, Gallio" />
+
+    <component componentId="Gallio.SingleFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.SingleFormattingRule, Gallio" />
+
+    <component componentId="Gallio.StringFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.StringFormattingRule, Gallio" />
+
+    <component componentId="Gallio.TypeFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.TypeFormattingRule, Gallio" />
+
+    <component componentId="Gallio.MemberInfoFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.MemberInfoFormattingRule, Gallio" />
+
+    <component componentId="Gallio.XPathNavigableFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.XPathNavigableFormattingRule, Gallio" />
+
+    <component componentId="Gallio.StructuralFormattingRule"
+               serviceId="Gallio.FormattingRule"
+               componentType="Gallio.Runtime.Formatting.StructuralFormattingRule, Gallio" />
+    
+    <!-- File types -->
+
+    <component componentId="Gallio.FileTypeManager"
+               serviceId="Gallio.FileTypeManager"
+               componentType="Gallio.Runtime.FileTypes.FileTypeManager, Gallio" />
+
+    <component componentId="Gallio.FileTypeRecognizers.Project"
+               serviceId="Gallio.FileTypeRecognizer">
+      <traits>
+        <id>Project</id>
+        <description>A Gallio project file.</description>
+        <fileNameRegex>.*\.gallio</fileNameRegex>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.FileTypeRecognizers.Executable"
+               serviceId="Gallio.FileTypeRecognizer">
+      <traits>
+        <id>Executable</id>
+        <description>A library or program file.</description>
+        <fileNameRegex>.*\.(dll|exe)</fileNameRegex>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.FileTypeRecognizers.Assembly"
+               serviceId="Gallio.FileTypeRecognizer"
+               componentType="Gallio.Runtime.FileTypes.AssemblyFileTypeRecognizer, Gallio">
+      <traits>
+        <id>Assembly</id>
+        <description>A .Net assembly.</description>
+        <superTypeId>Executable</superTypeId>
+      </traits>
+    </component>
+    
+    <!-- Common helpers -->
+
+    <component componentId="Gallio.Common.Concurrency.ProcessCreator"
+               serviceId="Gallio.Common.Concurrency.ProcessCreator"
+               componentType="Gallio.Common.Concurrency.ProcessCreator, Gallio" />
+
+    <component componentId="Gallio.Common.Concurrency.ProcessFinder"
+               serviceId="Gallio.Common.Concurrency.ProcessFinder"
+               componentType="Gallio.Common.Concurrency.ProcessFinder, Gallio" />
+
+    <component componentId="Gallio.FileSystem" 
+               serviceId="Gallio.FileSystem" 
+               componentType="Gallio.Common.IO.FileSystem, Gallio" />
+
+    <component componentId="Gallio.XmlSerializer" 
+               serviceId="Gallio.XmlSerializer" 
+               componentType="Gallio.Common.Xml.DefaultXmlSerializer, Gallio" />
+    
+    <!-- Utility commands -->
+
+    <component componentId="Gallio.UtilityCommandManager"
+               serviceId="Gallio.UtilityCommandManager"
+               componentType="Gallio.Runtime.UtilityCommands.DefaultUtilityCommandManager, Gallio" />
+
+    <component componentId="Gallio.ClearCurrentUserPluginCacheUtilityCommand"
+               serviceId="Gallio.UtilityCommand"
+               componentType="Gallio.Runtime.UtilityCommands.ClearCurrentUserPluginCacheUtilityCommand, Gallio">
+      <traits>
+        <!-- Note: This particular command name is special and is also hardcoded in the Gallio.Utility.exe program itself
+                   because we want to be able to run the command without initializing the runtime itself.
+        -->
+        <name>ClearCurrentUserPluginCache</name>
+        <description>Clears the plugin cache of the current user.</description>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.FormatReportUtilityCommand"
+               serviceId="Gallio.UtilityCommand"
+               componentType="Gallio.Runtime.UtilityCommands.FormatReportUtilityCommand, Gallio">
+      <traits>
+        <name>FormatReport</name>
+        <description>Formats an existing XML test report. The command must be used with the following syntax: 
+		"FormatReport {file} /ReportType:{type} [/ReportNameFormat:{format} /ReportOutput:{dir} /ReportArchive]"
+		- {file} is the relative or absolute path of the existing XML test report.
+		- ReportType (short form: /rt) specifies the type of the output report ('txt', 'txt-common', 'txt-condensed', 'html', 'html+xhtml', 'html-condensed', 'xhtml', 'xhtml-condensed', 'ccnet-details', or 'ccnet-details-condensed')
+		- ReportNameFormat (short form: /rnf) specifies the format of the output report (optional; if not specified, the same name is kept). The tags '{0}' and '{1}' are replaced respectively by the date and the time of the test run, or by the curent date/time if not applicable.
+		- ReportOutput (short form: /ro) specifies the output directory (optional; if not specified the current directory is used).
+		- ReportArchive (short form: /ra) compresses the output report in a file archive (zip).</description>
+      </traits>
+    </component>
+	
+    <component componentId="Gallio.VerifyInstallationUtilityCommand"
+               serviceId="Gallio.UtilityCommand"
+               componentType="Gallio.Runtime.UtilityCommands.VerifyInstallationUtilityCommand, Gallio">
+      <traits>
+        <name>VerifyInstallation</name>
+        <description>Checks for runtime installation errors.</description>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.SetupUtilityCommand"
+               serviceId="Gallio.UtilityCommand"
+               componentType="Gallio.Runtime.Installer.SetupUtilityCommand, Gallio">
+      <traits>
+        <name>Setup</name>
+        <description>Installs or uninstalls components.</description>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.ResetInstallationIdUtilityCommand"
+               serviceId="Gallio.UtilityCommand"
+               componentType="Gallio.Runtime.UtilityCommands.ResetInstallationIdUtilityCommand, Gallio">
+      <traits>
+        <name>ResetInstallationId</name>
+        <description>Resets the installation id.  The plugin list will be refreshed the next time a Gallio application is started.</description>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.ResetInstallationIdElevatedCommand"
+               serviceId="Gallio.ElevatedCommand"
+               componentType="Gallio.Runtime.UtilityCommands.ResetInstallationIdElevatedCommand, Gallio" />
+
+    <!-- Installers -->
+
+    <component componentId="Gallio.InstallerElevatedCommand"
+               serviceId="Gallio.ElevatedCommand"
+               componentType="Gallio.Runtime.Installer.InstallerElevatedCommand, Gallio" />
+
+    <component componentId="Gallio.InstallerManager"
+               serviceId="Gallio.InstallerManager"
+               componentType="Gallio.Runtime.Installer.DefaultInstallerManager, Gallio" />
+    
+    <!-- Test Kinds -->
+
+    <component componentId="Gallio.TestKindManager"
+               serviceId="Gallio.TestKindManager"
+               componentType="Gallio.Model.DefaultTestKindManager, Gallio" />
+    
+    <component componentId="Gallio.TestKinds.Root"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>Root</name>
+        <description>The root node of the test tree.</description>
+        <icon>plugin://Gallio/Resources/Assembly.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.TestKinds.Assembly"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>Assembly</name>
+        <description>A test assembly.</description>
+        <icon>plugin://Gallio/Resources/Assembly.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.TestKinds.File"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>File</name>
+        <description>A test file.</description>
+        <icon>plugin://Gallio/Resources/Container.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.TestKinds.Namespace"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>Namespace</name>
+        <description>A test namespace.</description>
+        <icon>plugin://Gallio/Resources/Container.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.TestKinds.Group"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>Group</name>
+        <description>A test group.</description>
+        <icon>plugin://Gallio/Resources/Container.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.TestKinds.Suite"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>Suite</name>
+        <description>A test suite.</description>
+        <icon>plugin://Gallio/Resources/Container.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.TestKinds.Fixture"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>Fixture</name>
+        <description>A test fixture.</description>
+        <icon>plugin://Gallio/Resources/Fixture.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.TestKinds.Test"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>Test</name>
+        <description>A test case.</description>
+        <icon>plugin://Gallio/Resources/Test.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.TestKinds.Unsupported"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>Unsupported</name>
+        <description>An unsupported test.</description>
+        <icon>plugin://Gallio/Resources/Unsupported.ico</icon>
+      </traits>
+    </component>
+  </components>
+</plugin>

@@ -44,5 +44,41 @@ namespace Rnwood.SmtpServer.Tests
             Assert.AreEqual("ARG1", command.Arguments[2]);
             Assert.AreEqual("ARG2", command.Arguments[3]);
         }
+
+        [Test]
+        public void IsEmpty_EmptyString()
+        {
+            SmtpCommand command = new SmtpCommand("");
+            Assert.IsTrue(command.IsEmpty);
+        }
+
+
+        [Test]
+        public void IsEmpty_Null()
+        {
+            SmtpCommand command = new SmtpCommand(null);
+            Assert.IsTrue(command.IsEmpty);
+        }
+
+        [Test]
+        public void IsEmpty_NotEmpty()
+        {
+            SmtpCommand command = new SmtpCommand("BLAH");
+            Assert.IsFalse(command.IsEmpty);
+        }
+
+        [Test]
+        public void IsValid_ValidCommand()
+        {
+            SmtpCommand command = new SmtpCommand("VERB ARG1 ARG2");
+            Assert.IsTrue(command.IsValid);
+        }
+
+        [Test]
+        public void IsValid_AllSpaces_Invalid()
+        {
+            SmtpCommand command = new SmtpCommand("       ");
+            Assert.IsFalse(command.IsValid);
+        }
     }
 }

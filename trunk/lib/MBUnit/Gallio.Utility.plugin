@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.Utility"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio Utility</name>
+    <version>3.2.0.0</version>
+    <description>A command-line utility for performing maintenance tasks related to the Gallio installation.</description>
+    <icon>plugin://Gallio.Utility/Resources/Gallio.Utility.ico</icon>
+  </traits>
+
+  <files>
+    <file path="Gallio.Utility.plugin" />
+    <file path="Gallio.Utility.exe" />
+    <file path="Gallio.Utility.exe.config" />
+    <file path="Resources\Gallio.Utility.ico" />
+  </files>
+</plugin>

@@ -1,0 +1,818 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Gallio.MSBuildTasks</name>
+    </assembly>
+    <members>
+        <member name="T:Gallio.MSBuildTasks.Gallio">
+            <summary>
+            An MSBuild task that provides support for running Gallio tests.
+            </summary>
+            <remarks>
+            In order for MSBuild to find this task, the Gallio.MSBuildTasks.dll has to be loaded with
+            the UsingTask directive:
+            <code>
+            <![CDATA[
+            <UsingTask AssemblyFile="[Path-to-assembly]\Gallio.MSBuildTasks.dll" TaskName="Gallio" />
+            ]]>
+            </code>
+            The AssemblyFile attribute must be set to the path where the Gallio.MSBuildTasks.dll assembly resides,
+            and the TaskName attribute <strong>must</strong> be set to "Gallio", otherwise MSBuild won't load the task.
+            </remarks>
+            <example>
+            The following code is an example build file that shows how to load the task, specify the test files
+            and assemblies and set some of the task's properties:
+            <code>
+            <![CDATA[
+            <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+                <!-- This is needed by MSBuild to locate the Gallio task -->
+                <UsingTask AssemblyFile="[Path-to-assembly]\Gallio.MSBuildTasks.dll" TaskName="Gallio" />
+                <!-- Specify the test files and assemblies -->
+                <ItemGroup>
+                  <TestFile Include="[Path-to-test-assembly1]/TestAssembly1.dll" />
+                  <TestFile Include="[Path-to-test-assembly2]/TestAssembly2.dll" />
+                  <TestFile Include="[Path-to-test-script1]/TestScript1_spec.rb" />
+                  <TestFile Include="[Path-to-test-script2]/TestScript2.xml" />
+                </ItemGroup>
+                <Target Name="RunTests">
+                    <Gallio IgnoreFailures="true" Filter="Type=SomeFixture" Files="@(TestFile)">
+                        <!-- This tells MSBuild to store the output value of the task's ExitCode property
+                             into the project's ExitCode property -->
+                        <Output TaskParameter="ExitCode" PropertyName="ExitCode"/>
+                    </Gallio>
+                    <Error Text="Tests execution failed" Condition="'$(ExitCode)' != 0" />
+                </Target>
+            </Project>
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="M:Gallio.MSBuildTasks.Gallio.#ctor">
+            <summary>
+            Default constructor.
+            </summary>
+        </member>
+        <member name="M:Gallio.MSBuildTasks.Gallio.Execute">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.MSBuildTasks.Gallio.RunLauncher(Gallio.Runner.TestLauncher)">
+            <exclude />
+            <summary>
+            Provided so that the unit tests can override test execution behavior.
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.Files">
+            <summary>
+            The list of relative or absolute paths of test files, projects and assemblies to execute.
+            Wildcards may be used.  This is required.
+            </summary>
+            <example>The following example shows how to specify the test files, projects and assemblies
+            (for a more complete example please see the <see cref="T:Gallio.MSBuildTasks.Gallio"/> task documentation):
+            <code>
+            <![CDATA[
+            <!-- Specify the test files, projects and assemblies -->
+            <ItemGroup>
+                <TestFile Include="[Path-to-test-assembly1]/TestAssembly1.dll" />
+                <TestFile Include="[Path-to-test-assembly2]/TestAssembly2.dll" />
+                <TestFile Include="[Path-to-test-script1]/TestScript1_spec.rb" />
+                <TestFile Include="[Path-to-test-script2]/TestScript2.xml" />
+            </ItemGroup>
+            <Target Name="MyTarget">
+                <Gallio Files="@(TestFile)" />
+            </Target>
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.HintDirectories">
+            <summary>
+            The list of directories used for loading referenced assemblies and other dependent resources.
+            </summary>
+            <example>The following example shows how to specify the hint directories:
+            <code>
+            <![CDATA[
+            <ItemGroup>
+                <HintDirectory Include="[Path-to-test-hint-directory-1]/" />
+                <HintDirectory Include="[Path-to-test-hint-directory-2]/" />
+            </ItemGroup>
+            <Target Name="MyTarget">
+                <Gallio HintDirectories="@(HintDirectory)" />
+            </Target>
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.PluginDirectories">
+            <summary>
+            Additional Gallio plugin directories to search recursively.
+            </summary>
+            <example>The following example shows how to specify the plugins directories:
+            <code>
+            <![CDATA[
+            <ItemGroup>
+                <PluginDirectory Include="[Path-to-test-plugin-directory-1]/" />
+                <PluginDirectory Include="[Path-to-test-plugin-directory-2]/" />
+            </ItemGroup>
+            <Target Name="MyTarget">
+                <Gallio PluginDirectories="@(PluginDirectory)" />
+            </Target>
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.ApplicationBaseDirectory">
+            <summary>
+            <para>
+            Gets or sets the relative or absolute path of the application base directory,
+            or null to use a default value selected by the consumer.
+            </para>
+            <para>
+            If relative, the path is based on the current working directory,
+            so a value of "" causes the current working directory to be used.
+            </para>
+            <para>
+            The default is null.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.WorkingDirectory">
+            <summary>
+            <para>
+            Gets or sets the relative or absolute path of the working directory
+            or null to use a default value selected by the consumer.
+            </para>
+            <para>
+            If relative, the path is based on the current working directory,
+            so a value of "" causes the current working directory to be used.
+            </para>
+            <para>
+            The default is null.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.ShadowCopy">
+            <summary>
+            <para>
+            Enables shadow copying when set to true.
+            </para>
+            <para>
+            Shadow copying allows the original assemblies to be modified while the tests are running.
+            However, shadow copying may occasionally cause some tests to fail if they depend on their original location.
+            </para>
+            <para>
+            The default is false.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.Debug">
+            <summary>
+            <para>
+            Attaches the debugger to the test process when set to true.
+            </para>
+            <para>
+            The default is false.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.RuntimeVersion">
+            <summary>
+            <para>
+            Gets or sets the version of the .Net runtime to use for running tests.
+            </para>
+            <para>
+            For the CLR, this must be the name of one of the framework directories in %SystemRoot%\Microsoft.Net\Framework.  eg. 'v2.0.50727'.
+            </para>
+            <para>
+            The default is null which uses the most recent installed and supported framework.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.ReportTypes">
+            <summary>
+            A list of the types of reports to generate, separated by semicolons. 
+            </summary>
+            <remarks>
+            <list type="bullet">
+            <item>The types supported "out of the box" are: Html, Html-Condensed, Text, Text-Condendes, XHtml,
+            XHtml-Condensed, MHtml, MHtml-CondensedXml, and Xml-Inline, but more types could be available as plugins.</item>
+            <item>The report types are not case sensitive.</item>
+            </list>
+            </remarks>
+            <example>
+            In the following example reports will be generated in both HTML and XML format:
+            <code>
+            <![CDATA[
+            <Target Name="MyTarget">
+                <Gallio ReportTypes="html;xml" />
+            </Target>
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.ReportArchive">
+            <summary>
+            Sets the report archive mode.
+            </summary>
+            <remarks>
+            <para>
+            The supported modes are:
+            <list type="bullet">
+            <item>Normal (default)</item>
+            <item>Zip</item>
+            </list>
+            </para>
+            </remarks>
+            <example>
+            In the following example, reports will be enclosed in a zip file:
+            <code>
+            <![CDATA[
+            <Target Name="MyTarget">
+                <Gallio ReportArchive="zip" />
+            </Target>
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.ReportNameFormat">
+            <summary>
+            Sets the format string to use to generate the reports filenames.
+            </summary>
+            <remarks>
+            Any occurence of {0} will be replaced by the date, and any occurrence of {1} by the time.
+            The default format string is test-report-{0}-{1}.
+            </remarks>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.ReportDirectory">
+            <summary>
+            Sets the name of the directory where the reports will be put.
+            </summary>
+            <remarks>
+            The directory will be created if it doesn't exist.  Existing files will be overwritten.
+            The default report directory is "Reports".
+            </remarks>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.RunnerType">
+            <summary>
+            Sets the type of test runner to use.
+            </summary>
+            <remarks>
+            <list type="bullet">
+            <item>The types supported "out of the box" are: Local, IsolatedAppDomain
+            and IsolatedProcess (default), but more types could be available as plugins.</item>
+            <item>The runner types are not case sensitive.</item>
+            </list>
+            </remarks>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.RunnerExtensions">
+            <summary>
+            <para>
+            Specifies the type, assembly, and parameters of custom test runner
+            extensions to use during the test run in the form:
+            '[Namespace.]Type,Assembly[;Parameters]'.
+            </para>
+            <para>
+            eg. 'FancyLogger,MyCustomExtensions.dll;SomeParameters'
+            </para>
+            </summary>
+            <remarks>
+            Since semicolons are used to delimit multiple property values in MSBuild,
+            it may be necessary to escape semicolons that appear as part of test
+            runner extension specifications to ensure MSBuild does not misinterpret them.
+            An escaped semicolon may be written as "%3B" in the build file.
+            </remarks>
+            <example>
+            The following example runs tests using a custom logger extension:
+            <code>
+            <![CDATA[
+            <Target Name="MyTarget">
+                <Gallio Files="MyTestAssembly.dll" RunnerExtensions="FancyLogger,MyExtensions.dll%3BColorOutput,FancyIndenting" />
+            </Target>
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.RunnerProperties">
+            <summary>
+            Specifies option property key/value pairs for the test runner.
+            </summary>
+            <example>
+            The following example specifies some extra NCover arguments.
+            <code>
+            <![CDATA[
+            <gallio>
+            <Target Name="MyTarget">
+                <Gallio Files="MyTestAssembly.dll" RunnerExtensions="NCoverArguments='//eas Gallio'" />
+            </Target>
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.ReportFormatterProperties">
+            <summary>
+            Specifies option property key/value pairs for the report formatter.
+            </summary>
+            <example>
+            The following example changes the default attachment content disposition for the reports.
+            <code>
+            <![CDATA[
+            <Target Name="MyTarget">
+                <Gallio Files="MyTestAssembly.dll" RunnerExtensions="AttachmentContentDisposition=Absent" />
+            </Target>
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.Filter">
+            <summary>
+            <para>
+      Sets the filter set to apply, which consists of a sequence of one or more inclusion
+      or exclusion filter rules prefixed using 'include' (optional) or 'exclude'.
+    </para>
+            </summary>
+            <remarks>
+            <para>
+      A filter rule consists of zero or more filter expressions
+      that may be combined using 'and', 'or', and 'not' and grouped with
+      parentheses.  A filter expression consists of a filter key followed by one or
+      more comma-delimited matching values in the form 'key: value, "quoted value",
+      /regular expression/'.
+    </para><para>
+      The filter grammar is defined as follows:
+    </para><para>
+      <code><![CDATA[
+     INCLUDE          ::= "include"              # Not case-sensitive
+     EXCLUDE          ::= "exclude"              # Not case-sensitive
+	
+     OR               ::= "or"                   # Not case-sensitive
+     AND              ::= "and"                  # Not case-sensitive
+     NOT              ::= "not"                  # Not case-sensitive
+
+     <unquotedWord>   ::= [^:,*()/\"']+
+    
+     <quotedWord>     ::= '"' .* '"'             # String delimited by double quotation marks
+                      | "'" .* "'"               # String delimited by single quotation marks
+               
+     <word>           ::= <unquotedWord>
+                      | <quotedWord>
+                      
+     <regexWord>      ::= "/" .* "/"             # Regular expression
+                      | "/" .* "/i"              # Case-insensitive regular expression
+                      
+     <key>            ::= <word>
+    
+     <value>          ::= <word>                 # Value specified by exact string
+                      | <regexWord>              # Value specified by regular expression
+    
+     <matchSequence>  ::= <value> (',' <value>)* # One or more comma-separated values
+    
+     <filterExpr>     ::= "*"                    # "Any"
+                      | <key> ":" matchSeq>
+                      | <filterExpr> OR filterExpr>   # Combine filter expressions with OR
+                      | <filterExpr> AND filterExpr>  # Combine filter expressions with AND
+                      | NOT <filterExpr>         # Negate filter expression
+                      | "(" <filterExpr> ")"     # Grouping filter expression
+		      
+     <filterRule>     ::= <filterExpr>           # Inclusion rule (default case)
+                      | INCLUDE <filterExpr>     # Inclusion rule
+                      | EXCLUDE <filterExpr>     # Exclusion rule
+
+     <filterSet>      ::= <filterRule>           # Filter set consists of at least one filter rule.
+                      | <filterRule> <filterSet> # But may be a sequence of rules.
+     ]]></code>
+    </para><list type="bullet">
+      <item>By default this property takes the value "*", which means the "Any" filter will be applied.</item>
+      <item>
+        The operator precedence is, from highest to lowest: NOT, AND, and OR. All these operators are
+        left-associative.
+      </item>
+      <item>
+        The commas used to separate the values are interpreted as OR operators, so "Type:Fixture1,Fixture2"
+        is equivalent to "Type:Fixture1 or Type:Fixture2".
+      </item>
+      <item>
+        White-space is ignored outside quoted strings, so "Type:Fixture1|Type:Fixture2" is equivalent
+        to "Type : Fixture1 | Type : Fixture2".
+      </item>
+      <item>
+        Commas, colons, slashes, backslashes and quotation marks can be escaped with a backslash. For
+        example, \' will be interpreted as '. Using a single backslash in front of any other character
+        is invalid.
+      </item>
+      <item>
+        Currently the following filter keys are recognized:
+        <list type="bullet">
+          <item>Id: Filter by id.</item>
+          <item>Name: Filter by name.</item>
+          <item>Assembly: Filter by assembly name.</item>
+          <item>Namespace: Filter by namespace name.</item>
+          <item>Type: Filter by type name, including inherited types.</item>
+          <item>ExactType: Filter by type name, excluding inherited types.</item>
+          <item>Member: Filter by member name.</item>
+          <item>
+            *: All other names are assumed to correspond to metadata keys. See <see cref="T:Gallio.Model.MetadataKeys"/> for standard metadata keys.  Common keys are: AuthorName, Category, Description, Importance, TestsOn.  <seealso cref="T:Gallio.Model.MetadataKeys"/>
+          </item>
+        </list>
+      </item>      
+    </list>
+            </remarks>
+            <example>
+            <para>
+      Assuming the following fixtures have been defined:
+    </para><code><![CDATA[
+      [TestFixture]
+      [Category("UnitTest")]
+      [Author("AlbertEinstein")]
+      public class Fixture1
+      {
+        [Test]
+        public void Test1()
+        {
+        }
+        [Test]
+        public void Test2()
+        {
+        }
+      }
+
+      [TestFixture]
+      [Category("IntegrationTest")]
+      public class Fixture2
+      {
+        [Test]
+        public void Test1()
+        {
+        }
+        [Test]
+        public void Test2()
+        {
+        }
+      }
+    ]]></code><para>The following filters could be applied:</para><list type="bullet">
+      <item>
+        <term>Type: Fixture1</term>
+        <description>All the tests within Fixture1 will be run.</description>
+      </item>
+
+      <item>
+        <term>Member: Test1</term>
+        <description>Only Fixture1.Test1 and Fixture2.Test1 will be run.</description>
+      </item>
+
+      <item>
+        <term>Type: Fixture1, Fixture2</term>
+        <description>All the tests within Fixture1 or Fixture2 will be run.</description>
+      </item>
+
+      <item>
+        <term>Type:Fixture1 or Type:Fixture2</term>
+        <description>All the tests within Fixture1 or Fixture2 will be run.</description>
+      </item>
+
+      <item>
+        <term>Type:Fixture1, Fixture2 and Member:Test2</term>
+        <description>Only Fixture1.Test2 and Fixture2.Test2 will be run.</description>
+      </item>
+
+      <item>
+        <term>Type:/Fixture*/ and Member:Test2</term>
+        <description>Only Fixture1.Test2 and Fixture2.Test2 will be run.</description>
+      </item>
+
+      <item>
+        <term>AuthorName:AlbertEinstein</term>
+        <description>All the tests within Fixture1 will be run because its author attribute is set to "AlbertEinstein".</description>
+      </item>
+
+      <item>
+        <term>Category: IntegrationTest</term>
+        <description>All the tests within Fixture2 will be run because its category attribute is set to "IntegrationTest".</description>
+      </item>
+
+      <item>
+        <term>("Type": 'Fixture1' and "Member":/Test*/) or (Type : Fixture2 and Member: /Test*/)</term>
+        <description>All the tests will be run. This example also shows that you can enclose key and
+        values with quotation marks, and group expressions with parentheses.</description>
+      </item>
+
+      <item>
+        <term>exclude AuthorName: AlbertEinstein</term>
+        <description>All the tests within Fixture2 will be run because its author attribute is not set to "AlbertEinstein".</description>
+      </item>
+      
+      <item>
+        <term>exclude Type: Fixture2 include Member: Test2</term>
+        <description>Only Fixture1.Test2 will be run because Fixture2 was excluded from consideration before the inclusion rule was applied.</description>
+      </item>
+    </list>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.IgnoreFailures">
+            <summary>
+            Sets whether test failures will be ignored and allow the build to proceed.
+            When set to <c>false</c>, test failures will cause the build to fail.
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.ShowReports">
+            <summary>
+            Sets whether to show generated reports in a window using the default system application
+            registered to the report file type.
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.DoNotRun">
+            <summary>
+            Sets whether to load the tests but not run them.  This option may be used to produce a
+            report that contains test metadata for consumption by other tools.
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.IgnoreAnnotations">
+            <summary>
+            <para>
+            Sets whether to ignore annotations when determining the result code.
+            If false (default), then error annotations, usually indicative of broken tests, will cause
+            a failure result to be generated.
+            </para>
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.EchoResults">
+            <summary>
+            Sets whether to echo results to the screen as tests finish.  If this option is set
+            to true, the default, test results are echoed to the console
+            in varying detail depending on the current verbosity level.  Otherwise
+            only final summary statistics are displayed.
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.RunTimeLimit">
+            <summary>
+            Sets the maximum amount of time (in seconds) the tests can run
+            before they are canceled. The default is an infinite time to run.
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.Verbosity">
+            <summary>
+            The verbosity to use when logging.  The default is "Normal".
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.ExitCode">
+            <summary>
+            Gets the exit code of the tests execution.
+            </summary>
+            <remarks>
+            This property is only meaningful when the IgnoreFailures property is set to true.
+            </remarks>
+            <example>
+            To use this property, you need to include an Output tag within the
+            Gallio tag to specify a name to reference it:
+            <code>
+            <![CDATA[
+            <Gallio>
+                 <!-- This tells MSBuild that the task's ExitCode output property will
+                      be made available as a property called ExitCode in the project
+                      after the tests have been run: -->
+                <Output TaskParameter="ExitCode" PropertyName="ExitCode"/>
+            </Gallio>
+            <!-- After the exit code be retrieved and used like this: -->
+            <Error Text="The tests execution failed" Condition="'$(ExitCode)' != 0" />
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.TestCount">
+            <summary>
+            Gets the total number of test cases run.
+            </summary>
+            <example>
+            To use this property, you need to include an Output tag within the
+            Gallio tag to specify a name to reference it:
+            <code>
+            <![CDATA[
+            <Gallio>
+                 <!-- This tells MSBuild that the task's TestCount output property will
+                      be made available as a property called TestCount in the project
+                      after the tests have been run: -->
+                <Output TaskParameter="TestCount" PropertyName="TestCount" />
+            </Gallio>
+            <!-- After execution the number of test cases run can be retrieved like this: -->
+            <Message Text="$(TestCount) test cases were run." />
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.StepCount">
+            <summary>
+            Gets the total number of test steps run.
+            </summary>
+            <example>
+            To use this property, you need to include an Output tag within the
+            Gallio tag to specify a name to reference it:
+            <code>
+            <![CDATA[
+            <Gallio>
+                 <!-- This tells MSBuild that the task's StepCount output property will
+                      be made available as a property called StepCount in the project
+                      after the tests have been run: -->
+                <Output TaskParameter="StepCount" PropertyName="StepCount" />
+            </Gallio>
+            <!-- After execution the number of test steps run can be retrieved like this: -->
+            <Message Text="$(StepCount) test steps were run." />
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.PassedCount">
+            <summary>
+            Gets the total number of test cases that were run and passed.
+            </summary>
+            <example>
+            To use this property, you need to include an Output tag within the
+            Gallio tag to specify a name to reference it:
+            <code>
+            <![CDATA[
+            <Gallio>
+                 <!-- This tells MSBuild that the task's PassedCount output property will
+                      be made available as a property called PassedCount in the project
+                      after the tests have been run: -->
+                <Output TaskParameter="PassedCount" PropertyName="PassedCount" />
+            </Gallio>
+            <!-- After execution the number of passed tests can be retrieved like this: -->
+            <Message Text="$(PassedCount) tests passed." />
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.FailedCount">
+            <summary>
+            Gets the total number of test cases that were run and failed.
+            </summary>
+            <example>
+            To use this property, you need to include an Output tag within the
+            Gallio tag to specify a name to reference it:
+            <code>
+            <![CDATA[
+            <Gallio>
+                 <!-- This tells MSBuild that the task's FailedCount output property will
+                      be made available as a property called FailedCount in the project
+                      after the tests have been run: -->
+                <Output TaskParameter="FailedCount" PropertyName="FailedCount" />
+            </Gallio>
+            <!-- After execution the number of failed tests can be retrieved like this: -->
+            <Message Text="$(FailedCount) tests passed." />
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.InconclusiveCount">
+            <summary>
+            Gets the total number of test cases that ran and were inconclusive.
+            </summary>
+            <example>
+            To use this property, you need to include an Output tag within the
+            Gallio tag to specify a name to reference it:
+            <code>
+            <![CDATA[
+            <Gallio>
+                 <!-- This tells MSBuild that the task's InconclusiveCount output property will
+                      be made available as a property called InconclusiveCount in the project
+                      after the tests have been run: -->
+                <Output TaskParameter="InconclusiveCount" PropertyName="InconclusiveCount" />
+            </Gallio>
+            <!-- After execution the number of inconclusive tests can be retrieved like this: -->
+            <Message Text="$(InconclusiveCount) tests were inconclusive." />
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.RunCount">
+            <summary>
+            Gets the total number of test cases that were run.
+            </summary>
+            <example>
+            To use this property, you need to include an Output tag within the
+            Gallio tag to specify a name to reference it:
+            <code>
+            <![CDATA[
+            <Gallio>
+                 <!-- This tells MSBuild that the task's RunCount output property will
+                      be made available as a property called RunCount in the project
+                      after the tests have been run: -->
+                <Output TaskParameter="RunCount" PropertyName="RunCount" />
+            </Gallio>
+            <!-- After execution the number of tests run can be retrieved like this: -->
+            <Message Text="$(RunCount) tests were run." />
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.SkippedCount">
+            <summary>
+            Gets the total number of test cases that did not run because they were skipped.
+            </summary>
+            <example>
+            To use this property, you need to include an Output tag within the
+            Gallio tag to specify a name to reference it:
+            <code>
+            <![CDATA[
+            <Gallio>
+                 <!-- This tells MSBuild that the task's SkippedCount output property will
+                      be made available as a property called SkippedCount in the project
+                      after the tests have been run: -->
+                <Output TaskParameter="SkippedCount" PropertyName="SkippedCount" />
+            </Gallio>
+            <!-- After execution the number of skipped tests can be retrieved like this: -->
+            <Message Text="$(SkippedCount) tests were skipped." />
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.Duration">
+            <summary>
+            Gets the duration of the tests execution in seconds.
+            </summary>
+            <example>
+            To use this property, you need to include an Output tag within the
+            Gallio tag to specify a name to reference it:
+            <code>
+            <![CDATA[
+            <Gallio>
+                 <!-- This tells MSBuild that the task's Duration output property will
+                      be made available as a property called Duration in the project
+                      after the tests have been run: -->
+                <Output TaskParameter="Duration" PropertyName="Duration" />
+            </Gallio>
+            <!-- After execution the duration can be retrieved like this: -->
+            <Message Text="The tests took $(Duration)s to execute." />
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Gallio.AssertCount">
+            <summary>
+            Gets the number of assertions evaluated.
+            </summary>
+            <example>
+            To use this property, you need to include an Output tag within the
+            Gallio tag to specify a name to reference it:
+            <code>
+            <![CDATA[
+            <Gallio>
+                 <!-- This tells MSBuild that the task's AssertionCount output property will
+                      be made available as a property called AssertionCount in the project
+                      after the tests have been run: -->
+                <Output TaskParameter="AssertionCount" PropertyName="AssertionCount" />
+            </Gallio>
+            <!-- After execution the number of assertions can be retrieved like this: -->
+            <Message Text="$(AssertionCount) assertions were evaluated." />
+            ]]>
+            </code>
+            </example>
+        </member>
+        <member name="T:Gallio.MSBuildTasks.NamespaceDoc">
+            <summary>
+            The Gallio.MSBuildTasks namespace contains MSBuild tasks for Gallio.
+            </summary>
+        </member>
+        <member name="T:Gallio.MSBuildTasks.TaskLogger">
+            <exclude/>
+            <summary>
+            Logs messages to a <see cref="T:Microsoft.Build.Utilities.TaskLoggingHelper"/> instance.
+            </summary>
+        </member>
+        <member name="T:Gallio.MSBuildTasks.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Properties.Resources.DefaultReportNameFormat">
+            <summary>
+              Looks up a localized string similar to test-report-{0}-{1}.
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Properties.Resources.TaskNameAndVersion">
+            <summary>
+              Looks up a localized string similar to Gallio MSBuild Task - Version {0}.
+            </summary>
+        </member>
+        <member name="P:Gallio.MSBuildTasks.Properties.Resources.UnexpectedErrorDuringExecution">
+            <summary>
+              Looks up a localized string similar to An unexpected error occurred during execution of the Gallio task..
+            </summary>
+        </member>
+        <member name="T:Gallio.MSBuildTasks.TaskLogExtension">
+            <exclude/>
+            <summary>
+            Logs messages to a <see cref="T:Microsoft.Build.Utilities.TaskLoggingHelper"/> instance
+            for test results.
+            </summary>
+        </member>
+    </members>
+</doc>

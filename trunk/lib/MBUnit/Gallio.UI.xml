@@ -1,0 +1,1373 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Gallio.UI</name>
+    </assembly>
+    <members>
+        <member name="T:Gallio.UI.Common.Policies.IUnhandledExceptionPolicy">
+            <summary>
+             Wrapper for static <see cref="T:Gallio.Common.Policies.UnhandledExceptionPolicy">UnhandledExceptionPolicy</see> 
+             class (to improve testability).
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Common.Policies.IUnhandledExceptionPolicy.Report(System.String,System.Exception)">
+            <summary>
+            Reports an unhandled exception.
+            </summary>
+            <param name="message">A message to explain how the exception was intercepted.</param>
+            <param name="unhandledException">The unhandled exception.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="message"/> or 
+            <paramref name="unhandledException"/> is null.</exception>
+        </member>
+        <member name="T:Gallio.UI.Common.Policies.UnhandledExceptionPolicy">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.Common.Policies.UnhandledExceptionPolicy.Report(System.String,System.Exception)">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.Common.Synchronization.SynchronizationContext">
+            <summary>
+             Holder for the current sync context (e.g. the winforms current).
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Common.Synchronization.SynchronizationContext.Send(System.Threading.SendOrPostCallback,System.Object)">
+            <summary>
+            Wrapper for Send on the shared sync context.
+            </summary>
+            <param name="sendOrPostCallback">The SendOrPostCallback delegate to call.</param>
+            <param name="state">The object passed to the delegate.</param>
+        </member>
+        <member name="M:Gallio.UI.Common.Synchronization.SynchronizationContext.Post(System.Threading.SendOrPostCallback,System.Object)">
+            <summary>
+            Wrapper for Post on the shared sync context.
+            </summary>
+            <param name="sendOrPostCallback">The SendOrPostCallback delegate to call.</param>
+            <param name="state">The object passed to the delegate.</param>
+        </member>
+        <member name="P:Gallio.UI.Common.Synchronization.SynchronizationContext.Current">
+            <summary>
+             Returns a shared SynchronizationContext instance.
+            </summary>
+             <remarks>
+             Usually used to stash a reference to the win forms synchronization 
+             context (WindowsFormsSynchronizationContext.Current), used for 
+             cross-thread data binding.
+             </remarks>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.ControlPanelPresenter">
+            <summary>
+            Presents the control panel dialog.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.IControlPanelPresenter">
+            <summary>
+            Presents the control panel dialog.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.IControlPanelPresenter.Show(System.Windows.Forms.IWin32Window)">
+            <summary>
+            Shows the control panel dialog.
+            </summary>
+            <param name="owner">The dialog owner control.</param>
+            <returns>The dialog result, either <see cref="F:System.Windows.Forms.DialogResult.OK"/>
+            or <see cref="F:System.Windows.Forms.DialogResult.Cancel"/> depending on how the dialog
+            was closed.</returns>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.ControlPanelPresenter.#ctor(Gallio.Runtime.Extensibility.ComponentHandle{Gallio.UI.ControlPanel.IControlPanelTabProvider,Gallio.UI.ControlPanel.ControlPanelTabProviderTraits}[],Gallio.Runtime.Security.IElevationManager)">
+            <summary>
+            Creates a control panel presenter.
+            </summary>
+            <param name="controlPanelTabProviderHandles">The preference page provider handles, not null.</param>
+            <param name="elevationManager">The elevation manager, not null.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.ControlPanelPresenter.Show(System.Windows.Forms.IWin32Window)">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.ControlPanelTab">
+            <summary>
+            Base class for components that present control panel tabs.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.SettingsEditor">
+            <summary>
+            Base class for user controls for editing settings with deferred application.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.SettingsEditor.ApplyPendingSettingsChanges(Gallio.Runtime.Security.IElevationContext,Gallio.Runtime.ProgressMonitoring.IProgressMonitor)">
+            <summary>
+            Applies pending settings changes.
+            </summary>
+            <param name="elevationContext">An elevation context when <see cref="P:Gallio.UI.ControlPanel.SettingsEditor.RequiresElevation"/>
+            is true, otherwise null.</param>
+            <param name="progressMonitor">The progress monitor, not null.</param>
+            <remarks>
+            The default implementation simply sets <see cref="P:Gallio.UI.ControlPanel.SettingsEditor.PendingSettingsChanges"/> to false.
+            </remarks>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.SettingsEditor.OnPendingSettingsChangesChanged(System.EventArgs)">
+            <summary>
+            Raises the <see cref="P:Gallio.UI.ControlPanel.SettingsEditor.PendingSettingsChanges"/> event.
+            </summary>
+            <param name="e">The event arguments.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.SettingsEditor.OnRequiresElevationChanged(System.EventArgs)">
+            <summary>
+            Raises the <see cref="E:Gallio.UI.ControlPanel.SettingsEditor.RequiresElevationChanged"/> event.
+            </summary>
+            <param name="e">The event arguments.</param>
+        </member>
+        <member name="E:Gallio.UI.ControlPanel.SettingsEditor.PendingSettingsChangesChanged">
+            <summary>
+            Event raised when the value of <see cref="P:Gallio.UI.ControlPanel.SettingsEditor.PendingSettingsChanges"/> changes.
+            </summary>
+        </member>
+        <member name="E:Gallio.UI.ControlPanel.SettingsEditor.RequiresElevationChanged">
+            <summary>
+            Event raised when the value of <see cref="P:Gallio.UI.ControlPanel.SettingsEditor.RequiresElevation"/> changes.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.SettingsEditor.PendingSettingsChanges">
+            <summary>
+            Gets or sets whether there are pending settings changes yet to be applied.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.SettingsEditor.RequiresElevation">
+            <summary>
+            Gets or sets whether elevation will be required to apply pending modifications.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.ControlPanelTab.#ctor">
+            <summary>
+            Creates a control panel tab.
+            </summary>
+        </member>
+        <member name="F:Gallio.UI.ControlPanel.ControlPanelTab.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.ControlPanelTab.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.ControlPanelTab.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.ControlPanelTabProviderTraits">
+            <summary>
+            Describes the traits of a <see cref="T:Gallio.UI.ControlPanel.IControlPanelTabProvider"/>.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.ControlPanelTabProviderTraits.#ctor(System.String)">
+            <summary>
+            Creates a traits object for a control panel tab provider.
+            </summary>
+            <param name="name">The control panel tab name.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="name"/> is null.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="name"/> is empty.</exception>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.ControlPanelTabProviderTraits.Name">
+            <summary>
+            Gets the control panel tab name.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.ControlPanelTabProviderTraits.Order">
+            <summary>
+            Gets or sets an integer index used to sort control panel tabs in ascending order.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.IControlPanelTabProvider">
+            <summary>
+            Provides a preference pane to be incorporated into the Gallio control panel.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.IControlPanelTabProvider.CreateControlPanelTab">
+            <summary>
+            Creates a control panel tab to include in the control panel.
+            </summary>
+            <returns>The control panel tab.</returns>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.ControlPanelDialog">
+            <summary>
+            Presents a dialog with control panel options.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.ControlPanelDialog.#ctor">
+            <summary>
+            Creates a control panel dialog.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.ControlPanelDialog.AddTab(System.String,Gallio.Common.Func{Gallio.UI.ControlPanel.ControlPanelTab})">
+            <summary>
+            Adds a tab.
+            </summary>
+            <param name="name">The tab name.</param>
+            <param name="tabFactory">The tab factory.</param>
+        </member>
+        <member name="F:Gallio.UI.ControlPanel.ControlPanelDialog.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.ControlPanelDialog.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.ControlPanelDialog.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.ControlPanelDialog.ElevationManager">
+            <summary>
+            Gets or sets the elevation manager used to obtain an elevation context.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.ControlPanelDialog.ProgressMonitorProvider">
+            <summary>
+            Gets or sets the progress monitor provider to use.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Plugins.NamespaceDoc">
+            <summary>
+            The Gallio.UI.ControlPanel.Plugins namespace contains types for a standard Control
+            Panel extension that displays installed plugins.
+            </summary>
+        </member>
+        <member name="F:Gallio.UI.ControlPanel.Plugins.PluginControlPanelTab.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Plugins.PluginControlPanelTab.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Plugins.PluginControlPanelTab.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Plugins.PluginControlPanelTabProvider">
+            <summary>
+            A control panel tab for managing installed plugins.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Plugins.PluginControlPanelTabProvider.#ctor(Gallio.Runtime.Extensibility.IRegistry)">
+            <summary>
+            Creates a control panel tab for managing installed plugins.
+            </summary>
+            <param name="registry">The plugin registry, not null.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Plugins.PluginControlPanelTabProvider.CreateControlPanelTab">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Preferences.NamespaceDoc">
+            <summary>
+            The Gallio.UI.ControlPanel namespace contains types for using and extending the
+            Preference Tab of the Gallio Control Panel UI.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Preferences.PreferencePaneContainer">
+            <summary>
+            Contains a preference pane and decorates it with a title.
+            </summary>
+        </member>
+        <member name="F:Gallio.UI.ControlPanel.Preferences.PreferencePaneContainer.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferencePaneContainer.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferencePaneContainer.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.Preferences.PreferencePaneContainer.PreferencePane">
+            <summary>
+            Gets or sets the preference pane, or null if none.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.Preferences.PreferencePaneContainer.Title">
+            <summary>
+            Gets or sets the preference pane title, or null if none.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Preferences.PreferencePaneScope">
+            <summary>
+            Specifies the scope of the changes effected by a preference pane.
+            </summary>
+        </member>
+        <member name="F:Gallio.UI.ControlPanel.Preferences.PreferencePaneScope.User">
+            <summary>
+            Changes affect the current user only.
+            </summary>
+        </member>
+        <member name="F:Gallio.UI.ControlPanel.Preferences.PreferencePaneScope.Machine">
+            <summary>
+            Changes affect all users of the machine.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Preferences.RuntimePreferencePaneCommitterElevatedCommand">
+            <summary>
+            Applies changes made by the <see cref="T:Gallio.UI.ControlPanel.Preferences.RuntimePreferencePane"/>.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.RuntimePreferencePaneCommitterElevatedCommand.Execute(Gallio.Runtime.InstallationConfiguration,Gallio.Runtime.ProgressMonitoring.IProgressMonitor)">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Preferences.PreferencePane">
+            <summary>
+            Base class for components that present preference panels.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferencePane.#ctor">
+            <summary>
+            Creates a preference pane.
+            </summary>
+        </member>
+        <member name="F:Gallio.UI.ControlPanel.Preferences.PreferencePane.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferencePane.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferencePane.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="F:Gallio.UI.ControlPanel.Preferences.PlaceholderPreferencePane.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PlaceholderPreferencePane.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PlaceholderPreferencePane.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Preferences.PlaceholderPreferencePaneProvider">
+            <summary>
+            A preference pane provider that is used as an empty placeholder for a
+            non-leaf node in the preference pane tree.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Preferences.IPreferencePaneProvider">
+            <summary>
+            Provides a preference pane to be incorporated into the Gallio control panel.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.IPreferencePaneProvider.CreatePreferencePane">
+            <summary>
+            Creates a preference pane to include in the control panel.
+            </summary>
+            <returns>The preference pane.</returns>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PlaceholderPreferencePaneProvider.CreatePreferencePane">
+            <inheritdoc />
+        </member>
+        <member name="F:Gallio.UI.ControlPanel.Preferences.RuntimePreferencePane.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.RuntimePreferencePane.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.RuntimePreferencePane.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Preferences.RuntimePreferencePaneProvider">
+            <summary>
+            Provides the preference pane for the Gallio runtime paths.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.RuntimePreferencePaneProvider.CreatePreferencePane">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferenceControlPanelTab.AddPane(System.String,System.Drawing.Icon,Gallio.UI.ControlPanel.Preferences.PreferencePaneScope,Gallio.Common.Func{Gallio.UI.ControlPanel.Preferences.PreferencePane})">
+            <summary>
+            Adds a preference pane.
+            </summary>
+            <param name="path">The preference pane path consisting of slash-delimited name segments
+            specifying tree nodes.</param>
+            <param name="icon">The preference pane icon, or null if none.</param>
+            <param name="scope">The preference pane scope, or null if none.</param>
+            <param name="paneFactory">The preference pane factory.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferenceControlPanelTab.ApplyPendingSettingsChanges(Gallio.Runtime.Security.IElevationContext,Gallio.Runtime.ProgressMonitoring.IProgressMonitor)">
+            <inheritdoc />
+        </member>
+        <member name="F:Gallio.UI.ControlPanel.Preferences.PreferenceControlPanelTab.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferenceControlPanelTab.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferenceControlPanelTab.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Preferences.PreferenceControlPanelTabProvider">
+            <summary>
+            Provides the preferences control panel tab.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferenceControlPanelTabProvider.#ctor(Gallio.Runtime.Extensibility.ComponentHandle{Gallio.UI.ControlPanel.Preferences.IPreferencePaneProvider,Gallio.UI.ControlPanel.Preferences.PreferencePaneProviderTraits}[])">
+            <summary>
+            Creates a control panel tab provider for preference panes.
+            </summary>
+            <param name="preferencePaneProviderHandles">The preference page provider handles, not null.</param>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferenceControlPanelTabProvider.CreateControlPanelTab">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.Preferences.PreferencePaneProviderTraits">
+            <summary>
+            Describes the traits of a <see cref="T:Gallio.UI.ControlPanel.Preferences.IPreferencePaneProvider"/>.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ControlPanel.Preferences.PreferencePaneProviderTraits.#ctor(System.String)">
+            <summary>
+            Creates a traits object for a preference pane provider.
+            </summary>
+            <param name="path">The preference pane path consisting of slash-delimited name segments
+            specifying tree nodes.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="path"/> is null.</exception>
+            <exception cref="T:System.ArgumentException">Thrown if <paramref name="path"/> is empty.</exception>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.Preferences.PreferencePaneProviderTraits.Path">
+            <summary>
+            Gets the preference pane path consisting of slash-delimited name segments
+            specifying tree nodes.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.Preferences.PreferencePaneProviderTraits.Icon">
+            <summary>
+            Gets or sets an icon (16x16) for the preference pane, or null if none.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.Preferences.PreferencePaneProviderTraits.Order">
+            <summary>
+            Gets or sets an integer index used to sort control panel tabs in ascending order.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ControlPanel.Preferences.PreferencePaneProviderTraits.Scope">
+            <summary>
+            Gets or sets a value that describes the scope of the changes effected by a preference pane.
+            </summary>
+            <value>The scope.  <see cref="F:Gallio.UI.ControlPanel.Preferences.PreferencePaneScope.User"/> by default.</value>
+        </member>
+        <member name="T:Gallio.UI.ControlPanel.NamespaceDoc">
+            <summary>
+            The Gallio.UI.ControlPanel namespace contains types for using and extending the
+            Gallio Control Panel UI.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.Controls.CommandToolStripMenuItem">
+            <summary>
+            Extends the win forms ToolStripMenuItem to wrap a MenuCommand.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Controls.CommandToolStripMenuItem.#ctor(Gallio.UI.Menus.MenuCommand)">
+            <summary>
+             Constructor providing a menu command.
+            </summary>
+             <remarks>
+             When clicked, the command will be run synchronously.
+             </remarks>
+            <param name="command">The command to use.</param>
+        </member>
+        <member name="M:Gallio.UI.Controls.CommandToolStripMenuItem.#ctor(Gallio.UI.Menus.MenuCommand,Gallio.UI.ProgressMonitoring.ITaskManager)">
+            <summary>
+            Constructor providing a command and task manager.
+            </summary>
+            <remarks>
+            When clicked, the command will be queued with the 
+            supplied task manager.
+            </remarks>
+            <param name="command">The command to use.</param>
+            <param name="taskManager">The task manager to use.</param>
+        </member>
+        <member name="M:Gallio.UI.Controls.CommandToolStripMenuItem.#ctor(Gallio.UI.Menus.MenuCommand,Gallio.UI.ProgressMonitoring.ITaskManager,Gallio.UI.Controls.IKeysParser)">
+            <summary>
+             Constructor providing a command, task manager and keys parser.
+            </summary>
+            <param name="command">The command to use.</param>
+            <param name="taskManager">The task manager to use.</param>
+            <param name="keysParser">The keys parser to use.</param>
+        </member>
+        <member name="T:Gallio.UI.Controls.TruncatedToolStripMenuItem">
+            <summary>
+            A menu item that truncates the text, using ellipses (...), if necessary.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.Controls.ToolStripMenuItem">
+            <summary>
+            Sub-class of <see cref="T:System.Windows.Forms.ToolStripMenuItem">ToolStripMenuItem</see>, 
+            making databinding easier.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Controls.ToolStripMenuItem.BindingContext">
+            <summary>
+            Gets or sets the collection of currency managers for the IBindableComponent.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Controls.ToolStripMenuItem.DataBindings">
+            <summary>
+            Gets the collection of data-binding objects for this IBindableComponent.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Controls.TruncatedToolStripMenuItem.#ctor(System.String,System.Int32)">
+            <summary>
+             Ctor.
+            </summary>
+            <param name="text">The text for the menu item to display. 
+             The full text will be the tooltip, but the display text
+             will be truncated if longer than specified.</param>
+            <param name="width">The maximum length text to display.</param>
+        </member>
+        <member name="T:Gallio.UI.Controls.IKeysParser">
+            <summary>
+             Parses a string representation of a <see cref="T:System.Windows.Forms.Keys"/> enum.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Controls.IKeysParser.Parse(System.String)">
+            <summary>
+             Parses a string representation of a <see cref="T:System.Windows.Forms.Keys"/> enum.
+            </summary>
+            <param name="shortcut">The shortcut string to parse.</param>
+            <returns>A <see cref="T:System.Windows.Forms.Keys"/> enum.</returns>
+             <example>
+             For example, "Ctrl + S" would parse as Keys.Control | Keys.S
+             </example>
+        </member>
+        <member name="T:Gallio.UI.Controls.KeysParser">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.Controls.KeysParser.Parse(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.Controls.ToolStripButton">
+            <summary>
+            Sub-class of <see cref="T:System.Windows.Forms.ToolStripButton">ToolStripButton</see>, 
+            making databinding easier.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Controls.ToolStripButton.BindingContext">
+            <summary>
+            Gets or sets the collection of currency managers for the IBindableComponent.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Controls.ToolStripButton.DataBindings">
+            <summary>
+            Gets the collection of data-binding objects for this IBindableComponent.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.DataBinding.Observable`1">
+            <summary>
+            Wrapper for a field, that implements INotifyPropertyChanged.
+            </summary>
+            <typeparam name="T">The type to wrap.</typeparam>
+            <remarks>
+            All credit to Ayende:
+            http://ayende.com/Blog/archive/2009/08/08/an-easier-way-to-manage-inotifypropertychanged.aspx
+            </remarks>
+        </member>
+        <member name="M:Gallio.UI.DataBinding.Observable`1.#ctor">
+            <summary>
+            Default constructor.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.DataBinding.Observable`1.#ctor(`0)">
+            <summary>
+            Constructor initializing field.
+            </summary>
+            <param name="value">The initial value to wrap.</param>
+        </member>
+        <member name="M:Gallio.UI.DataBinding.Observable`1.op_Implicit(Gallio.UI.DataBinding.Observable{`0})~`0">
+            <summary>
+            Implicit operator allowing use of value.
+            </summary>
+            <param name="val"></param>
+            <returns></returns>
+        </member>
+        <member name="P:Gallio.UI.DataBinding.Observable`1.Value">
+            <summary>
+            The value being wrapped.
+            </summary>
+        </member>
+        <member name="E:Gallio.UI.DataBinding.Observable`1.PropertyChanged">
+            <summary>
+            Event fired when the value changes.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.DataBinding.ObservableList`1">
+            <summary>
+             List that raises an event when the contents are modified.
+            </summary>
+             <remarks>Wraps a List&lt;T&gt;.</remarks>
+            <typeparam name="T">The type of elements in the list.</typeparam>
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.GetEnumerator">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.System#Collections#IEnumerable#GetEnumerator">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.Add(`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.Clear">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.Contains(`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.CopyTo(`0[],System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.Remove(`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.IndexOf(`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.Insert(System.Int32,`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.RemoveAt(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.ToArray">
+            <summary>
+            Copies the elements of the list to a new array.
+            </summary>
+            <returns>An array containing copies of the elements of the list.</returns>
+        </member>
+        <member name="M:Gallio.UI.DataBinding.ObservableList`1.AddRange(System.Collections.Generic.IEnumerable{`0})">
+            <summary>
+            Adds the elements of the specified collection to the end of the list.
+            </summary>
+            <param name="collection"></param>
+        </member>
+        <member name="P:Gallio.UI.DataBinding.ObservableList`1.Count">
+            <inheritdoc />
+        </member>
+        <member name="P:Gallio.UI.DataBinding.ObservableList`1.IsReadOnly">
+            <inheritdoc />
+        </member>
+        <member name="P:Gallio.UI.DataBinding.ObservableList`1.Item(System.Int32)">
+            <inheritdoc />
+        </member>
+        <member name="E:Gallio.UI.DataBinding.ObservableList`1.PropertyChanged">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.ErrorReporting.ErrorDialog">
+            <summary>
+            Presents an error dialog consisting of a title, a message and a detailed message.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ErrorReporting.ErrorDialog.#ctor">
+            <summary>
+            Creates the dialog.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ErrorReporting.ErrorDialog.Show(System.Windows.Forms.IWin32Window,System.String,System.String,System.String)">
+            <summary>
+            Shows the error dialog.
+            </summary>
+            <param name="owner">The owner window, or null if none.</param>
+            <param name="errorTitle">The error title.</param>
+            <param name="errorMessage">The error message.</param>
+            <param name="errorDetails">The error details.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="errorTitle"/>,
+            <paramref name="errorMessage"/> or <paramref name="errorDetails"/> is null.</exception>
+        </member>
+        <member name="F:Gallio.UI.ErrorReporting.ErrorDialog.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ErrorReporting.ErrorDialog.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Gallio.UI.ErrorReporting.ErrorDialog.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ErrorReporting.ErrorDialog.ErrorTitle">
+            <summary>
+            Gets or sets the error title.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
+        </member>
+        <member name="P:Gallio.UI.ErrorReporting.ErrorDialog.ErrorMessage">
+            <summary>
+            Gets or sets the error message.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
+        </member>
+        <member name="P:Gallio.UI.ErrorReporting.ErrorDialog.ErrorDetails">
+            <summary>
+            Gets or sets the error details.
+            </summary>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="value"/> is null.</exception>
+        </member>
+        <member name="P:Gallio.UI.ErrorReporting.ErrorDialog.ErrorDetailsVisible">
+            <summary>
+            Gets or sets whether the error details panel is visible.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.Controls.NamespaceDoc">
+            <summary>
+            The Gallio.UI.Controls namespace contains types for reusable Windows Forms custom controls.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.Controls.ShieldButton">
+            <summary>
+            An extension of the Button class that displays the "Shield" icon when
+            privilege elevation is required.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Controls.ShieldButton.#ctor">
+            <summary>
+            Creates a shield button.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Controls.ShieldButton.OnShieldChanged(System.EventArgs)">
+            <summary>
+            Raises the <see cref="E:Gallio.UI.Controls.ShieldButton.ShieldChanged"/> event.
+            </summary>
+            <param name="e">The event arguments.</param>
+        </member>
+        <member name="E:Gallio.UI.Controls.ShieldButton.ShieldChanged">
+            <summary>
+            An event raised when the value of <see cref="P:Gallio.UI.Controls.ShieldButton.Shield"/> has changed.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Controls.ShieldButton.Shield">
+            <summary>
+            Gets or sets whether the shield icon should be displayed.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ErrorReporting.ErrorDialogUnhandledExceptionHandler">
+            <summary>
+            Installs an unhandled exception handler that displays an error dialog.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ErrorReporting.ErrorDialogUnhandledExceptionHandler.Install(System.Windows.Forms.Form)">
+            <summary>
+            Installs the handler.
+            </summary>
+            <remarks>
+            <para>
+            The handler is automatically removed when the form is disposed.
+            </para>
+            </remarks>
+            <param name="owner">The owner window.</param>
+            <exception cref="T:System.ArgumentNullException">Thrown if <paramref name="owner"/> is null.</exception>
+            <exception cref="T:System.InvalidOperationException">Thrown if there is already a handler installed for a different owner.</exception>
+        </member>
+        <member name="M:Gallio.UI.ErrorReporting.ErrorDialogUnhandledExceptionHandler.Uninstall">
+            <summary>
+            Uninstalls the handler.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ErrorReporting.ErrorDialogUnhandledExceptionHandler.RunApplicationWithHandler(System.Windows.Forms.Form)">
+            <summary>
+            Runs an application 
+            </summary>
+            <param name="mainForm">The main form.</param>
+        </member>
+        <member name="T:Gallio.UI.Events.Event">
+            <summary>
+            Marker class for Events.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.Events.EventAggregator">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.Events.IEventAggregator">
+            <summary>
+            An event aggregator.
+            http://martinfowler.com/eaaDev/EventAggregator.html
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Events.IEventAggregator.Send``1(System.Object,``0)">
+            <summary>
+             Send an event to all interested parties (synchronous).
+            </summary>
+            <param name="sender">The sender of the message.</param>
+            <param name="message">The message to send.</param>
+            <typeparam name="T">The type of event.</typeparam>
+        </member>
+        <member name="M:Gallio.UI.Events.EventAggregator.#ctor(Gallio.Runtime.Extensibility.IServiceLocator)">
+            <summary>
+             Ctor.
+            </summary>
+            <param name="serviceLocator">A service locator used to find registered handlers.</param>
+        </member>
+        <member name="M:Gallio.UI.Events.EventAggregator.Send``1(System.Object,``0)">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.Events.EventHandlerProxy`1">
+            <summary>
+             Proxy event handler.
+            </summary>
+            <typeparam name="T">The type of event.</typeparam>
+        </member>
+        <member name="T:Gallio.UI.Events.Handles`1">
+            <summary>
+            Marker interface used by the EventAggregator to
+            locate classes interested in an event.
+            </summary>
+            <typeparam name="T">The type of event.</typeparam>
+        </member>
+        <member name="M:Gallio.UI.Events.Handles`1.Handle(`0)">
+            <summary>
+             Handle an <see cref="T:Gallio.UI.Events.Event"/>.
+            </summary>
+            <param name="event">The event to handle.</param>
+        </member>
+        <member name="M:Gallio.UI.Events.EventHandlerProxy`1.#ctor(Gallio.UI.Events.Handles{`0})">
+            <summary>
+             Ctor.
+            </summary>
+            <param name="target">The handler to proxy for.</param>
+        </member>
+        <member name="M:Gallio.UI.Events.EventHandlerProxy`1.Handle(`0)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.Events.EventHandlerProxy`1.Equals(Gallio.UI.Events.EventHandlerProxy{`0})">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.Events.EventHandlerProxy`1.Equals(System.Object)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.Events.EventHandlerProxy`1.GetHashCode">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.Events.EventHandlerProxy`1.op_Equality(Gallio.UI.Events.EventHandlerProxy{`0},Gallio.UI.Events.EventHandlerProxy{`0})">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.Events.EventHandlerProxy`1.op_Inequality(Gallio.UI.Events.EventHandlerProxy{`0},Gallio.UI.Events.EventHandlerProxy{`0})">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.Menus.MenuCommand">
+            <summary>
+            Wraps an <see cref="T:Gallio.UI.ProgressMonitoring.ICommand">ICommand</see> and provides
+            hints for the UI.
+            </summary>
+            <remarks>
+            Inspired by the WPF Command pattern.
+            http://msdn.microsoft.com/en-us/library/system.windows.input.icommand.aspx
+            </remarks>
+        </member>
+        <member name="M:Gallio.UI.Menus.MenuCommand.#ctor">
+            <summary>
+            Default constructor.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Menus.MenuCommand.Command">
+            <summary>
+            The command that will be executed.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Menus.MenuCommand.CanExecute">
+            <summary>
+            Whether the command can currently be executed, or not.
+            </summary>
+            <remarks>
+            Defaults to true.
+            </remarks>
+        </member>
+        <member name="P:Gallio.UI.Menus.MenuCommand.Text">
+            <summary>
+            The text description of the command.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Menus.MenuCommand.Shortcut">
+            <summary>
+             The shortcut to use for the command.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Menus.MenuCommand.Image">
+            <summary>
+             The image to use for the command.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.ITaskQueue">
+            <summary>
+             A task queue, for use by the <see cref="T:Gallio.UI.ProgressMonitoring.TaskManager"/>.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ITaskQueue.AddTask(System.String,Gallio.UI.ProgressMonitoring.ICommand)">
+            <summary>
+            Adds a task to the specified queue.
+            </summary>
+            <param name="queueId">The id of the queue to use.</param>
+            <param name="command">An <see cref="T:Gallio.UI.ProgressMonitoring.ICommand"/> to queue.</param>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ITaskQueue.GetNextTask(System.String)">
+            <summary>
+            Get the next task for the specified queue.
+            </summary>
+            <param name="queueId">The id of the queue to use.</param>
+            <returns>An <see cref="T:Gallio.UI.ProgressMonitoring.ICommand"/>, or null if the queue is empty.</returns>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ITaskQueue.RemoveAllTasks(System.String)">
+            <summary>
+            Removes all tasks from the specified queue.
+            </summary>
+            <param name="queueId">The id of the queue to use.</param>
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.ITaskRunner">
+            <summary>
+             Takes care of running queued tasks.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ITaskRunner.RunTask(System.String)">
+            <summary>
+             Run the next task for a named queue, if there is one.
+            </summary>
+            <param name="queueId">The id of the queue to use.</param>
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.TaskCancelled">
+            <summary>
+             Event fired when a task is cancelled.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskCancelled.#ctor(System.String)">
+            <summary>
+             Ctor.
+            </summary>
+            <param name="queueId">The id of the queue.</param>
+        </member>
+        <member name="P:Gallio.UI.ProgressMonitoring.TaskCancelled.QueueId">
+            <summary>
+             The id of the queue.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.TaskCompleted">
+            <summary>
+             Event fired when a task is completed.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskCompleted.#ctor(System.String)">
+            <summary>
+             Ctor.
+            </summary>
+            <param name="queueId">The id of the queue.</param>
+        </member>
+        <member name="P:Gallio.UI.ProgressMonitoring.TaskCompleted.QueueId">
+            <summary>
+             The id of the queue.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.TaskQueue">
+            <summary>
+            Manages multiple queues of tasks.
+            </summary>
+            <remarks>
+            Queue id is an arbitrary string, used as a key.
+            </remarks>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskQueue.#ctor">
+            <summary>
+             Ctor.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskQueue.AddTask(System.String,Gallio.UI.ProgressMonitoring.ICommand)">
+            <summary>
+            Adds a task to the specified queue.
+            </summary>
+            <param name="queueId">The id of the queue to use.</param>
+            <param name="command">An <see cref="T:Gallio.UI.ProgressMonitoring.ICommand"/> to queue.</param>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskQueue.GetNextTask(System.String)">
+            <summary>
+            Get the next task for the specified queue.
+            </summary>
+            <param name="queueId">The id of the queue to use.</param>
+            <returns>An <see cref="T:Gallio.UI.ProgressMonitoring.ICommand"/>, or null if the queue is empty.</returns>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskQueue.RemoveAllTasks(System.String)">
+            <summary>
+            Removes all tasks from the specified queue.
+            </summary>
+            <param name="queueId">The id of the queue to use.</param>
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.TaskRunner">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskRunner.#ctor(Gallio.UI.ProgressMonitoring.ITaskQueue,Gallio.UI.Events.IEventAggregator,Gallio.UI.Common.Policies.IUnhandledExceptionPolicy)">
+            <summary>
+             Ctor.
+            </summary>
+            <param name="taskQueue">The task queue to use.</param>
+            <param name="eventAggregator">An event aggregator.</param>
+            <param name="unhandledExceptionPolicy">An exception policy.</param>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskRunner.RunTask(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.ICommand">
+            <summary>
+            Command pattern.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ICommand.Execute(Gallio.Runtime.ProgressMonitoring.IProgressMonitor)">
+            <summary>
+            Run a task (with progress information).
+            </summary>
+            <param name="progressMonitor">The progress monitor.</param>
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.ITaskManager">
+            <summary>
+             A task manager for UI applications.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ITaskManager.BackgroundTask(Gallio.Common.Action)">
+            <summary>
+             Run a task as a background action (uses ThreadPool). 
+             No progress information will be displayed.
+            </summary>
+            <param name="action">The action to perform.</param>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ITaskManager.ClearQueue">
+            <summary>
+             Empty the queue of tasks.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ITaskManager.ClearQueue(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ITaskManager.QueueTask(Gallio.UI.ProgressMonitoring.ICommand)">
+            <summary>
+             Add a task to the queue. If nothing is in the queue or 
+             running, then the task will be executed.
+            </summary>
+            <param name="command">The command to queue.</param>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ITaskManager.QueueTask(System.String,Gallio.UI.ProgressMonitoring.ICommand)">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.ProgressMonitorDialog">
+            <summary>
+             Progress dialog.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ProgressMonitorDialog.#ctor(Gallio.Runtime.ProgressMonitoring.ObservableProgressMonitor)">
+            <summary>
+             Default constructor.
+            </summary>
+            <param name="progressMonitor">The progress monitor to display information for.</param>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ProgressMonitorDialog.OnLoad(System.EventArgs)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ProgressMonitorDialog.OnFormClosing(System.Windows.Forms.FormClosingEventArgs)">
+            <inherit />
+        </member>
+        <member name="F:Gallio.UI.ProgressMonitoring.ProgressMonitorDialog.components">
+            <summary>
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ProgressMonitorDialog.Dispose(System.Boolean)">
+            <summary>
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.ProgressMonitorDialog.InitializeComponent">
+            <summary>
+            Required method for Designer support - do not modify
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.TaskManager">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskManager.#ctor(Gallio.UI.ProgressMonitoring.ITaskQueue,Gallio.UI.ProgressMonitoring.ITaskRunner)">
+            <summary>
+             Default constructor.
+            </summary>
+            <param name="taskQueue">A task queue.</param>
+            <param name="taskRunner">A task runner.</param>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskManager.QueueTask(Gallio.UI.ProgressMonitoring.ICommand)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskManager.QueueTask(System.String,Gallio.UI.ProgressMonitoring.ICommand)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskManager.BackgroundTask(Gallio.Common.Action)">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskManager.ClearQueue">
+            <inheritdoc />
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskManager.ClearQueue(System.String)">
+            <inheritdoc />
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.TaskStarted">
+            <summary>
+             Event fired when a task is started.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.ProgressMonitoring.TaskStarted.#ctor(System.String,Gallio.Runtime.ProgressMonitoring.ObservableProgressMonitor)">
+            <summary>
+             Ctor.
+            </summary>
+            <param name="queueId">The queue id.</param>
+            <param name="progressMonitor">A progress monitor.</param>
+        </member>
+        <member name="P:Gallio.UI.ProgressMonitoring.TaskStarted.QueueId">
+            <summary>
+             The id of the queue.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ProgressMonitoring.TaskStarted.ProgressMonitor">
+            <summary>
+             A progress monitor attached to the task.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.ProgressMonitoring.ToolStripProgressBar">
+            <summary>
+             Impl of a tool strip progress bar for Gallio progress monitoring.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ProgressMonitoring.ToolStripProgressBar.TotalWork">
+            <summary>
+             Total work to do.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.ProgressMonitoring.ToolStripProgressBar.CompletedWork">
+            <summary>
+             Total work to do.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.Reports.HtmlTestStepRunFormatter">
+            <summary>
+            <para>
+            An optimized HTML renderer for individual test step runs and their descendants.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Reports.HtmlTestStepRunFormatter.TestStepReportWriter.ShouldUseFlash(System.Collections.Generic.IEnumerable{Gallio.Runner.Reports.Schema.TestStepRun})">
+            <summary>
+            Attempting to load flash content in a 64bit process on Windows is doomed to failure
+            because Adobe does not ship a 64bit version of the Flash plug-in at this time.
+            Unfortunately instead of failing gracefully, what happens is that Windows pops up a
+            warning dialog (when the browser is disposed) complaining about a missing flash.ocx.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.Properties.Resources">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Properties.Resources.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Properties.Resources.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.Reports.NamespaceDoc">
+            <summary>
+            The Gallio.UI.Reports namespace contains types for formatting reports for
+            display in a Windows Forms UI.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.Reports.TestStepRunViewer">
+            <summary>
+            <para>
+            Displays a summary of a set of test step runs.
+            </para>
+            <para>
+            This control is optimized to display individual test run results to the user on
+            demand more quickly than could be done if we had to show the whole report at once.
+            </para>
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Reports.TestStepRunViewer.#ctor">
+            <summary>
+            Creates a test step run viewer.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Reports.TestStepRunViewer.OnLoad(System.EventArgs)">
+            <summary>
+            Raises the <see cref="E:System.Windows.Forms.UserControl.Load"/> event.
+            </summary>
+            <param name="e">An <see cref="T:System.EventArgs"/> that contains the event data.</param>
+        </member>
+        <member name="M:Gallio.UI.Reports.TestStepRunViewer.Clear">
+            <summary>
+            Clears the contents of the report viewer and discards all cached content.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Reports.TestStepRunViewer.Show(System.Collections.Generic.ICollection{Gallio.Runner.Reports.Schema.TestStepRun})">
+            <summary>
+            Displays information about a set of test step run.
+            </summary>
+            <param name="testStepRuns">The test step runs.</param>
+        </member>
+        <member name="M:Gallio.UI.Reports.TestStepRunViewer.Show(System.Collections.Generic.ICollection{Gallio.Runner.Reports.Schema.TestStepRun},Gallio.Model.Schema.TestModelData)">
+            <summary>
+            Displays information about a set of test step runs, using additional
+            information from the test model when available.
+            </summary>
+            <param name="testStepRuns">The test step runs.</param>
+            <param name="testModelData">The test model data, or null if not available.</param>
+        </member>
+        <member name="F:Gallio.UI.Reports.TestStepRunViewer.components">
+            <summary> 
+            Required designer variable.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Reports.TestStepRunViewer.Dispose(System.Boolean)">
+            <summary> 
+            Clean up any resources being used.
+            </summary>
+            <param name="disposing">true if managed resources should be disposed; otherwise, false.</param>
+        </member>
+        <member name="M:Gallio.UI.Reports.TestStepRunViewer.InitializeComponent">
+            <summary> 
+            Required method for Designer support - do not modify 
+            the contents of this method with the code editor.
+            </summary>
+        </member>
+        <member name="T:Gallio.UI.Tree.NodeControls.NodeCheckBox">
+            <summary>
+             Node check box.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Tree.NodeControls.NodeCheckBox.#ctor">
+            <summary>
+             Node check box.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Tree.NodeControls.NodeCheckBox.GetValue(Aga.Controls.Tree.TreeNodeAdv)">
+            <summary>
+             Gets the value from the node.
+            </summary>
+            <param name="node">The node.</param>
+            <returns>The value.</returns>
+        </member>
+        <member name="M:Gallio.UI.Tree.NodeControls.NodeCheckBox.SetCheckState(Aga.Controls.Tree.TreeNodeAdv,System.Windows.Forms.CheckState)">
+            <summary>
+            Sets the check state of the node.
+            </summary>
+            <param name="node">The node.</param>
+            <param name="value">The value.</param>
+        </member>
+        <member name="M:Gallio.UI.Tree.NodeControls.NodeCheckBox.GetNewState(System.Windows.Forms.CheckState)">
+            <summary>
+            Gets the new check state.
+            </summary>
+            <param name="state">The state.</param>
+            <returns>The new check state.</returns>
+        </member>
+        <member name="T:Gallio.UI.Tree.Nodes.ThreeStateNode">
+            <summary>
+             A three-state node.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Tree.Nodes.ThreeStateNode.#ctor(System.String)">
+            <summary>
+             Ctor.
+            </summary>
+            <param name="text">The text to display.</param>
+        </member>
+        <member name="M:Gallio.UI.Tree.Nodes.ThreeStateNode.GetSiblingsState">
+            <summary>
+            Returns the 'combined' state for all siblings of a node.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Tree.Nodes.ThreeStateNode.UpdateStateOfRelatedNodes">
+            <summary>
+            Manages updating related child and parent nodes of this instance.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Tree.Nodes.ThreeStateNode.UpdateChildNodeState">
+            <summary>
+            Recursively update child node's state based on the state of this node.
+            </summary>
+        </member>
+        <member name="M:Gallio.UI.Tree.Nodes.ThreeStateNode.ChildShouldBeChecked(Gallio.UI.Tree.Nodes.ThreeStateNode,System.Windows.Forms.CheckState)">
+            <summary>
+            Allows inheriting classes to block cascading check state.
+            </summary>
+            <param name="child">The child to evaluate.</param>
+            <param name="checkState">The proposed check state.</param>
+            <returns>True if the check state can be cascaded, otherwise false.</returns>
+        </member>
+        <member name="M:Gallio.UI.Tree.Nodes.ThreeStateNode.UpdateParentNodeState">
+            <summary>
+            Recursively update parent node state based on the current state of this node.
+            </summary>
+        </member>
+        <member name="P:Gallio.UI.Tree.Nodes.ThreeStateNode.CheckState">
+            <summary>
+             The check state of the node
+            </summary>
+        </member>
+    </members>
+</doc>

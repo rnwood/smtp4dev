@@ -1,0 +1,21 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.PowerShellCommands"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio PowerShell Commands</name>
+    <version>3.2.0.0</version>
+    <description>Provides PowerShell cmdlets for running tests with Gallio.</description>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.PowerShellCommands.plugin" />
+    <file path="Gallio.PowerShellCommands.dll" />
+    <file path="Gallio.PowerShellCommands.dll-Help.xml" />
+    <file path="Gallio.PowerShellCommands.xml" />
+  </files>
+</plugin>
