@@ -13,7 +13,7 @@
 
         public AuthMechanismProcessorStatus ProcessResponse(string data)
         {
-            Credentials = new AnonymousAuthenticationRequest();
+            Credentials = new AnonymousAuthenticationCredentials();
 
             AuthenticationResult result =
                 Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials);
@@ -29,7 +29,7 @@
             }
         }
 
-        public IAuthenticationRequest Credentials
+        public IAuthenticationCredentials Credentials
         {
             get;
             private set;

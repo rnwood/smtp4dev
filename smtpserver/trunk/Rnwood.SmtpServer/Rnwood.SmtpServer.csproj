@@ -59,15 +59,17 @@
     <Compile Include="CurrentDateTimeProvider.cs" />
     <Compile Include="DataAccessMode.cs" />
     <Compile Include="DefaultServer.cs" />
-    <Compile Include="Extensions\Auth\AnonymousAuthenticationRequest.cs" />
+    <Compile Include="Extensions\Auth\AnonymousAuthenticationCredentials.cs" />
     <Compile Include="Extensions\Auth\AnonymousMechanismProcessor.cs" />
-    <Compile Include="Extensions\Auth\IAuthenticationRequest.cs" />
+    <Compile Include="Extensions\Auth\IAuthenticationCredentials.cs" />
     <Compile Include="Extensions\Auth\AuthenticationResult.cs" />
     <Compile Include="DefaultServerBehaviour.cs" />
     <Compile Include="Extensions\Auth\AuthExtensionProcessor.cs" />
     <Compile Include="Extensions\Auth\AuthVerb.cs" />
     <Compile Include="Extensions\Auth\CramMd5MechanismProcessor.cs" />
+    <Compile Include="Extensions\Auth\LoginAuthenticationCredentials.cs" />
     <Compile Include="Extensions\Auth\LoginMechanismProcessor.cs" />
+    <Compile Include="Extensions\Auth\PlainAuthenticationCredentials.cs" />
     <Compile Include="Extensions\Auth\PlainMechanismProcessor.cs" />
     <Compile Include="Extensions\EightBitMimeDataVerb.cs" />
     <Compile Include="Extensions\IExtension.cs" />
@@ -77,11 +79,11 @@
     <Compile Include="Extensions\Auth\AuthMechanismMap.cs" />
     <Compile Include="Extensions\Auth\IAuthMechanismProcessor.cs" />
     <Compile Include="Extensions\Auth\AuthMechanismProcessorStatus.cs" />
-    <Compile Include="Extensions\Auth\CramMd5AuthenticationRequest.cs" />
+    <Compile Include="Extensions\Auth\CramMd5AuthenticationCredentials.cs" />
     <Compile Include="Extensions\Auth\CramMd5Mechanism.cs" />
     <Compile Include="Extensions\Auth\LoginMechanism.cs" />
     <Compile Include="Extensions\Auth\PlainMechanism.cs" />
-    <Compile Include="Extensions\Auth\UsernameAndPasswordAuthenticationRequest.cs" />
+    <Compile Include="Extensions\Auth\UsernameAndPasswordAuthenticationCredentials.cs" />
     <Compile Include="Extensions\ExtensionProcessor.cs" />
     <Compile Include="Extensions\IExtensionProcessor.cs" />
     <Compile Include="Extensions\SizeExtension.cs" />
@@ -132,6 +134,7 @@
     <Compile Include="SmtpCommand.cs" />
     <Compile Include="Verbs\VerbMap.cs" />
     <Compile Include="Verbs\RsetVerb.cs" />
+    <Compile Include="Verbs\VerbWithSubCommands.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

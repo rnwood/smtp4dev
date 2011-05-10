@@ -4,9 +4,9 @@ using System.Text;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class CramMd5AuthenticationRequest : IAuthenticationRequest
+    public class CramMd5AuthenticationCredentials : IAuthenticationCredentials
     {
-        public CramMd5AuthenticationRequest(string username, string challenge, string challengeResponse)
+        public CramMd5AuthenticationCredentials(string username, string challenge, string challengeResponse)
         {
             Username = username;
             ChallengeResponse = challengeResponse;

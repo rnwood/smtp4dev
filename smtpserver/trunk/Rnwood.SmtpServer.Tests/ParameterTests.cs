@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using MbUnit.Framework;
+using MbUnit.Framework.ContractVerifiers;
 
 namespace Rnwood.SmtpServer.Tests
 {
@@ -24,5 +25,23 @@ namespace Rnwood.SmtpServer.Tests
 
             Assert.AreEqual("value", p.Value);
         }
+
+        [VerifyContract]
+        public readonly EqualityContract<Parameter> Equality = new EqualityContract<Parameter>()
+        {
+            ImplementsOperatorOverloads =
+                false,
+            EquivalenceClasses =
+                                                                                               {
+                                                                                                   {
+                                                                                                       new Parameter("KEYA", "VALUEA"),
+                                                                                                       new Parameter("KEYa", "VALUEA")
+                                                                                                    }, 
+                                                                                                    {
+                                                                                                       new Parameter("KEYB", "VALUEb"),
+                                                                                                       new Parameter("KEYB", "VALUEb")
+                                                                                                    }
+                                                                                               }
+        };
     }
 }
