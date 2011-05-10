@@ -192,7 +192,7 @@ namespace Rnwood.Smtp4dev
         }
 
         public AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
-                                                                  IAuthenticationRequest authenticationRequest)
+                                                                  IAuthenticationCredentials authenticationCredentials)
         {
             if (Settings.Default.FailAuthentication)
             {

@@ -13,13 +13,12 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         protected IConnection Connection { get; private set; }
 
         private States State { get; set; }
+        private string _username;
 
         #region IAuthMechanismProcessor Members
 
         public AuthMechanismProcessorStatus ProcessResponse(string data)
         {
-            string username = null;
-
             switch (State)
             {
                 case States.Initial:
@@ -31,7 +30,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
                 case States.WaitingForUsername:
 
-                    username = DecodeBase64(data);
+                    _username = DecodeBase64(data);
 
                     Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
                                                               Convert.ToBase64String(
@@ -43,7 +42,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                     string password = DecodeBase64(data);
                     State = States.Completed;
 
-                    Credentials = new UsernameAndPasswordAuthenticationRequest(username, password);
+                    Credentials = new LoginAuthenticationCredentials(_username, password);
 
                     AuthenticationResult result =
                         Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection,
@@ -64,7 +63,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             }
         }
 
-        public IAuthenticationRequest Credentials { get; set; }
+        public IAuthenticationCredentials Credentials { get; set; }
 
         #endregion
 

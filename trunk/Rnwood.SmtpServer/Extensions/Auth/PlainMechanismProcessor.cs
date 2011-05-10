@@ -53,7 +53,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             string username = decodedDataParts[1];
             string password = decodedDataParts[2];
 
-            Credentials = new UsernameAndPasswordAuthenticationRequest(username, password);
+            Credentials = new PlainAuthenticationCredentials(username, password);
 
             AuthenticationResult result =
                 Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials);
@@ -68,7 +68,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             }
         }
 
-        public IAuthenticationRequest Credentials { get; private set; }
+        public IAuthenticationCredentials Credentials { get; private set; }
 
         #endregion
 

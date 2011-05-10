@@ -52,7 +52,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 string username = responseparts[0];
                 string hash = responseparts[1];
 
-                Credentials = new CramMd5AuthenticationRequest(username, _challenge, hash);
+                Credentials = new CramMd5AuthenticationCredentials(username, _challenge, hash);
 
                 AuthenticationResult result =
                     Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials);
@@ -69,7 +69,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             }
         }
 
-        public IAuthenticationRequest Credentials { get; private set; }
+        public IAuthenticationCredentials Credentials { get; private set; }
 
         #endregion
 

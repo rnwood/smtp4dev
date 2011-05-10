@@ -4,7 +4,7 @@
     {
         AuthMechanismProcessorStatus ProcessResponse(string data);
 
-        IAuthenticationRequest Credentials
+        IAuthenticationCredentials Credentials
         {
             get;
         }

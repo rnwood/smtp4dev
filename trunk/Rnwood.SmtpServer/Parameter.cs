@@ -1,6 +1,8 @@
-﻿namespace Rnwood.SmtpServer
+﻿using System;
+
+namespace Rnwood.SmtpServer
 {
-    public class Parameter
+    public class Parameter : IEquatable<Parameter>
     {
         public Parameter(string name, string value)
         {
@@ -15,22 +17,22 @@
         {
             if (ReferenceEquals(null, other)) return false;
             if (ReferenceEquals(this, other)) return true;
-            return Equals(other.Name, Name) && Equals(other.Value, Value);
+            return string.Equals(other.Name, Name, StringComparison.CurrentCultureIgnoreCase) && Equals(other.Value, Value);
         }
 
         public override bool Equals(object obj)
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof (Parameter)) return false;
-            return Equals((Parameter) obj);
+            if (obj.GetType() != typeof(Parameter)) return false;
+            return Equals((Parameter)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return ((Name != null ? Name.GetHashCode() : 0)*397) ^ (Value != null ? Value.GetHashCode() : 0);
+                return ((Name != null ? Name.ToLower().GetHashCode() : 0) * 397) ^ (Value != null ? Value.GetHashCode() : 0);
             }
         }
     }

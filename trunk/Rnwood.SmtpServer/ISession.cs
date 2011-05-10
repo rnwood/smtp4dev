@@ -63,7 +63,7 @@ namespace Rnwood.SmtpServer
         /// <value><c>true</c> if authenticated; otherwise, <c>false</c>.</value>
         bool Authenticated { get; }
 
-        IAuthenticationRequest AuthenticationCredentials { get; }
+        IAuthenticationCredentials AuthenticationCredentials { get; }
 
         /// <summary>
         /// Gets the error that caused the session to terminate if it didn't complete normally.
