@@ -34,7 +34,7 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             Mocks mocks = new Mocks();
             mocks.ServerBehaviour.Setup(
                 b =>
-                b.ValidateAuthenticationCredentials(mocks.Connection.Object, It.IsAny<AnonymousAuthenticationRequest>()))
+                b.ValidateAuthenticationCredentials(mocks.Connection.Object, It.IsAny<AnonymousAuthenticationCredentials>()))
                 .Returns(authenticationResult);
 
             AnonymousMechanismProcessor anonymousMechanismProcessor = new AnonymousMechanismProcessor(mocks.Connection.Object);
@@ -44,7 +44,7 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
 
             if (authenticationResult == AuthenticationResult.Success)
             {
-                Assert.IsInstanceOfType(typeof(AnonymousAuthenticationRequest), anonymousMechanismProcessor.Credentials);
+                Assert.IsInstanceOfType(typeof(AnonymousAuthenticationCredentials), anonymousMechanismProcessor.Credentials);
             }
         }
     }

@@ -13,15 +13,15 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
         [Test]
         public void ValidateResponse_Valid()
         {
-            CramMd5AuthenticationRequest authenticationRequest = new CramMd5AuthenticationRequest("username", "challenge", "b26eafe32c337296f7870c68edd5e8a5");
-            Assert.IsTrue(authenticationRequest.ValidateResponse("password"));
+            CramMd5AuthenticationCredentials authenticationCredentials = new CramMd5AuthenticationCredentials("username", "challenge", "b26eafe32c337296f7870c68edd5e8a5");
+            Assert.IsTrue(authenticationCredentials.ValidateResponse("password"));
         }
 
         [Test]
         public void ValidateResponse_Invalid()
         {
-            CramMd5AuthenticationRequest authenticationRequest = new CramMd5AuthenticationRequest("username", "challenge", "b26eafe32c337296f7870c68edd5e8a5");
-            Assert.IsFalse(authenticationRequest.ValidateResponse("password2"));
+            CramMd5AuthenticationCredentials authenticationCredentials = new CramMd5AuthenticationCredentials("username", "challenge", "b26eafe32c337296f7870c68edd5e8a5");
+            Assert.IsFalse(authenticationCredentials.ValidateResponse("password2"));
         }
     }
 }

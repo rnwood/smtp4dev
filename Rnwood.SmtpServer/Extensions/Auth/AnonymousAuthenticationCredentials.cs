@@ -5,7 +5,7 @@ using System.Text;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class AnonymousAuthenticationRequest : IAuthenticationRequest
+    public class AnonymousAuthenticationCredentials : IAuthenticationCredentials
     {
     }
 }
