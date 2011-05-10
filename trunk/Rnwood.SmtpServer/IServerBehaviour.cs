@@ -96,10 +96,10 @@ namespace Rnwood.SmtpServer
         /// are correct.
         /// </summary>
         /// <param name="connection">The connection.</param>
-        /// <param name="authenticationRequest">The authentication request.</param>
+        /// <param name="authenticationCredentials">The authentication request.</param>
         /// <returns></returns>
         AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
-                                                           IAuthenticationRequest authenticationRequest);
+                                                           IAuthenticationCredentials authenticationCredentials);
 
         /// <summary>
         /// Called when a new message is started in the specified session.

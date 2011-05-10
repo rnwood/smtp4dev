@@ -136,11 +136,11 @@ namespace Rnwood.SmtpServer
         }
 
         public virtual AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
-                                                                          IAuthenticationRequest request)
+                                                                          IAuthenticationCredentials credentials)
         {
             if (AuthenticationCredentialsValidationRequired != null)
             {
-                AuthenticationCredentialsValidationRequired(this, new AuthenticationCredentialsValidationEventArgs(request));
+                AuthenticationCredentialsValidationRequired(this, new AuthenticationCredentialsValidationEventArgs(credentials));
             }
 
             return AuthenticationResult.Failure;

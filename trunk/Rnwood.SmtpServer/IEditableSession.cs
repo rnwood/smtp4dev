@@ -23,7 +23,7 @@ namespace Rnwood.SmtpServer
 
         bool Authenticated { get; set; }
 
-        IAuthenticationRequest AuthenticationCredentials { get; set; }
+        IAuthenticationCredentials AuthenticationCredentials { get; set; }
 
         string SessionError { get; set; }
 
