@@ -100,7 +100,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         {
             try
             {
-                return Encoding.ASCII.GetString(Convert.FromBase64String(data));
+                return Encoding.ASCII.GetString(Convert.FromBase64String(data ?? ""));
             }
             catch (FormatException)
             {
