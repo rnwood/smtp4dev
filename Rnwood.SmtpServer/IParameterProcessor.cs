@@ -2,6 +2,6 @@
 {
     public interface IParameterProcessor
     {
-        void SetParameter(IConnection connection, string key, string value);
+        void SetParameter(string key, string value);
     }
 }

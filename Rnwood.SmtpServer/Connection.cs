@@ -3,10 +3,10 @@
 using System;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Net.Security;
-using System.Runtime.InteropServices;
+using System.Net.Sockets;
 using System.Text;
-using System.Threading;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Verbs;
 
@@ -17,26 +17,36 @@ namespace Rnwood.SmtpServer
     public class Connection : IConnection
     {
 
-        public IConnectionChannel Channel { get; private set; }
 
-
-        public Connection(IServer server, Func<Connection, IConnectionChannel> channelCreator) : this(server, channelCreator, new VerbMap())
+        public Encoding ReaderEncoding
         {
+            get; private set;
         }
 
-        public Connection(IServer server, Func<Connection, IConnectionChannel> channelCreator, IVerbMap verbMap)
+        private readonly TcpClient _tcpClient;
+        private StreamReader _reader;
+
+        private Stream _stream;
+        private StreamWriter _writer;
+
+        public Connection(Server server, TcpClient tcpClient)
         {
-            VerbMap = verbMap;
+            VerbMap = new VerbMap();
+            Session = new Session()
+                          {
+                              ClientAddress = ((IPEndPoint) tcpClient.Client.RemoteEndPoint).Address,
+                              StartDate = DateTime.Now
+                          };
+
             Server = server;
-            Channel = channelCreator(this);
-            Session = server.Behaviour.OnCreateNewSession(this, Channel.ClientIPAddress, DateTime.Now);
+            _tcpClient = tcpClient;
+            _tcpClient.ReceiveTimeout = Server.Behaviour.GetReceiveTimeout(this);
 
-            
+            ReaderEncoding =
+                new ASCIISevenBitTruncatingEncoding();
+            _stream = tcpClient.GetStream();
 
-            Channel.ReceiveTimeout = Server.Behaviour.GetReceiveTimeout(this);
-
-            SetReaderEncodingToDefault();
-
+            SetupReaderAndWriter();
             SetupVerbs();
         }
 
@@ -44,24 +54,42 @@ namespace Rnwood.SmtpServer
 
         public IServer Server { get; private set; }
 
+        public void SetReaderEncoding(Encoding encoding)
+        {
+            SetupReaderAndWriter();
+        }
 
+        public void SetReaderEncodingToDefault()
+        {
+            SetReaderEncoding(new ASCIISevenBitTruncatingEncoding());
+        }
 
         public IExtensionProcessor[] ExtensionProcessors { get; private set; }
 
+        public void CloseConnection()
+        {
+            _writer.Flush();
+            _tcpClient.Close();
+        }
 
-        public IVerbMap VerbMap { get; private set; }
+        public VerbMap VerbMap { get; private set; }
 
+        public void ApplyStreamFilter(Func<Stream, Stream> filter)
+        {
+            _stream = filter(_stream);
+            SetupReaderAndWriter();
+        }
 
         public MailVerb MailVerb
         {
-            get { return (MailVerb)VerbMap.GetVerbProcessor("MAIL"); }
+            get { return (MailVerb) VerbMap.GetVerbProcessor("MAIL"); }
         }
 
         public void WriteLine(string text, params object[] arg)
         {
             string formattedText = string.Format(text, arg);
             Session.AppendToLog(formattedText);
-            Channel.WriteLine(formattedText);
+            _writer.WriteLine(formattedText);
         }
 
         public void WriteResponse(SmtpResponse response)
@@ -71,25 +99,25 @@ namespace Rnwood.SmtpServer
 
         public string ReadLine()
         {
-            string text = Channel.ReadLine();
+            string text = _reader.ReadLine();
             Session.AppendToLog(text);
             return text;
         }
 
-        public IEditableSession Session { get; private set; }
+        public ISession Session { get; private set; }
 
-        public IEditableMessage CurrentMessage { get; private set; }
+        public Message CurrentMessage { get; private set; }
 
-        public IEditableMessage NewMessage()
+        public Message NewMessage()
         {
-            CurrentMessage = Server.Behaviour.OnCreateNewMessage(this);
+            CurrentMessage = new Message(Session);
             return CurrentMessage;
         }
 
         public void CommitMessage()
         {
-            IMessage message = CurrentMessage;
-            Session.AddMessage(message);
+            Message message = CurrentMessage;
+            Session.Messages.Add(message);
             CurrentMessage = null;
 
             Server.Behaviour.OnMessageReceived(this, message);
@@ -102,6 +130,11 @@ namespace Rnwood.SmtpServer
 
         #endregion
 
+        private void SetupReaderAndWriter()
+        {
+            _writer = new StreamWriter(_stream, ReaderEncoding) {AutoFlush = true, NewLine = "\r\n"};
+            _reader = new StreamReader(_stream, ReaderEncoding);
+        }
 
         private void SetupVerbs()
         {
@@ -118,34 +151,25 @@ namespace Rnwood.SmtpServer
                 Server.Behaviour.GetExtensions(this).Select(e => e.CreateExtensionProcessor(this)).ToArray();
         }
 
-        private Thread _processThread;
-
-        public void AbortProcessing()
-        {
-            lock (this)
-            {
-                if (_processThread != null)
-                {
-                    _processThread.Interrupt();
-                }
-            }
-        }
-
-        public void Process()
+        public void Start()
         {
             try
             {
-                _processThread = Thread.CurrentThread;
-
                 Server.Behaviour.OnSessionStarted(this, Session);
 
+                if (Server.Behaviour.IsSSLEnabled(this))
+                {
+                    SslStream sslStream = new SslStream(_stream);
+                    sslStream.AuthenticateAsServer(Server.Behaviour.GetSSLCertificate(this));
+                    Session.SecureConnection = true;
+                    _stream = sslStream;
+                    SetupReaderAndWriter();
+                }
 
                 WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady,
                                                Server.Behaviour.DomainName + " smtp4dev ready"));
 
-                int numberOfInvalidCommands = 0;
-
-                while (Channel.IsConnected)
+                while (_tcpClient.Client.Connected)
                 {
                     SmtpCommand command = new SmtpCommand(ReadLine());
                     Server.Behaviour.OnCommandReceived(this, command);
@@ -156,8 +180,6 @@ namespace Rnwood.SmtpServer
 
                         if (verbProcessor != null)
                         {
-                            numberOfInvalidCommands = 0;
-
                             try
                             {
                                 verbProcessor.Process(this, command);
@@ -169,19 +191,8 @@ namespace Rnwood.SmtpServer
                         }
                         else
                         {
-                            numberOfInvalidCommands++;
-
-                            if (numberOfInvalidCommands >= Server.Behaviour.MaximumNumberOfSequentialBadCommands)
-                            {
-                                WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel,
-                                                               "Command unrecognised - closing connection because of too many bad commands in a row"));
-                                CloseConnection();
-                            }
-                            else
-                            {
-                                WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
-                                                               "Command unrecognised ({0} tries left)", Server.Behaviour.MaximumNumberOfSequentialBadCommands-numberOfInvalidCommands));
-                            }
+                            WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
+                                                           "Command unrecognised"));
                         }
                     }
                     else if (command.IsEmpty)
@@ -199,35 +210,10 @@ namespace Rnwood.SmtpServer
                 Session.SessionError = ioException.Message;
             }
 
-            Channel.Close();
+            CloseConnection();
 
             Session.EndDate = DateTime.Now;
             Server.Behaviour.OnSessionCompleted(this, Session);
-
-            lock (this)
-            {
-                _processThread = null;
-            }
-        }
-
-        public void CloseConnection()
-        {
-            Channel.Close();
-        }
-
-        public void Kill()
-        {
-            Channel.Close();
-        }
-
-        public void SetReaderEncoding(Encoding encoding)
-        {
-            Channel.SetReaderEncoding(encoding);
-        }
-
-        public void SetReaderEncodingToDefault()
-        {
-            SetReaderEncoding(Server.Behaviour.GetDefaultEncoding(this));
         }
     }
 }

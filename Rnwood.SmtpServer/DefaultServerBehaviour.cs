@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Extensions.Auth;
 using System.Linq;
@@ -36,27 +35,11 @@ namespace Rnwood.SmtpServer
         {
             PortNumber = portNumber;
             _sslCertificate = sslCertificate;
-            ReceiveTimeout = new TimeSpan(0, 1, 0);
         }
 
         #region IServerBehaviour Members
 
-        public IEditableSession OnCreateNewSession(IConnection connection, IPAddress clientAddress, DateTime startDate)
-        {
-            return new MemorySession(clientAddress, startDate);
-        }
-
-        public int MaximumNumberOfSequentialBadCommands
-        {
-            get { return 10; }
-        }
-
-        public virtual Encoding GetDefaultEncoding(IConnection connection)
-        {
-            return new ASCIISevenBitTruncatingEncoding();
-        }
-
-        public virtual void OnMessageReceived(IConnection connection, IMessage message)
+        public virtual void OnMessageReceived(IConnection connection, Message message)
         {
             if (MessageReceived != null)
             {
@@ -96,7 +79,7 @@ namespace Rnwood.SmtpServer
             return _sslCertificate;
         }
 
-        public virtual void OnMessageRecipientAdding(IConnection connection, IMessage message, string recipient)
+        public void OnMessageRecipientAdding(IConnection connection, Message message, string recipient)
         {
         }
 
@@ -120,7 +103,7 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        public virtual void OnSessionStarted(IConnection connection, ISession session)
+        public void OnSessionStarted(IConnection connection, ISession session)
         {
             if (SessionStarted != null)
             {
@@ -128,19 +111,17 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        public TimeSpan ReceiveTimeout { get; set; }
-
         public virtual int GetReceiveTimeout(IConnection connection)
         {
-            return (int)ReceiveTimeout.TotalMilliseconds;
+            return (int)new TimeSpan(0, 5, 0).TotalMilliseconds;
         }
 
         public virtual AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
-                                                                          IAuthenticationCredentials credentials)
+                                                                          IAuthenticationRequest request)
         {
             if (AuthenticationCredentialsValidationRequired != null)
             {
-                AuthenticationCredentialsValidationRequired(this, new AuthenticationCredentialsValidationEventArgs(credentials));
+                AuthenticationCredentialsValidationRequired(this, new AuthenticationCredentialsValidationEventArgs(request));
             }
 
             return AuthenticationResult.Failure;
@@ -156,17 +137,13 @@ namespace Rnwood.SmtpServer
             return false;
         }
 
-        public virtual void OnCommandReceived(IConnection connection, SmtpCommand command)
+        public void OnCommandReceived(IConnection connection, SmtpCommand command)
         {
-            if (CommandReceived != null)
-            {
-                CommandReceived(this, new CommandEventArgs(command));
-            }
         }
 
-        public virtual IEditableMessage OnCreateNewMessage(IConnection connection)
+        public IMessage CreateMessage(IConnection connection)
         {
-            return new MemoryMessage(connection.Session);
+            return new Message(connection.Session);
         }
 
         public virtual void OnMessageCompleted(IConnection connection)
@@ -179,11 +156,42 @@ namespace Rnwood.SmtpServer
 
         #endregion
 
-        public event EventHandler<CommandEventArgs> CommandReceived;
         public event EventHandler<MessageEventArgs> MessageCompleted;
         public event EventHandler<MessageEventArgs> MessageReceived;
         public event EventHandler<SessionEventArgs> SessionCompleted;
         public event EventHandler<SessionEventArgs> SessionStarted;
         public event EventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequired;
+    }
+
+    public class AuthenticationCredentialsValidationEventArgs : EventArgs
+    {
+        public AuthenticationCredentialsValidationEventArgs(IAuthenticationRequest credentials)
+        {
+            Credentials = credentials;
+        }
+
+        public IAuthenticationRequest Credentials { get; private set; }
+
+        public AuthenticationResult AuthenticationResult { get; set; }
+    }
+
+    public class MessageEventArgs : EventArgs
+    {
+        public MessageEventArgs(Message message)
+        {
+            Message = message;
+        }
+
+        public Message Message { get; private set; }
+    }
+
+    public class SessionEventArgs : EventArgs
+    {
+        public SessionEventArgs(ISession session)
+        {
+            Session = session;
+        }
+
+        public ISession Session { get; private set; }
     }
 }

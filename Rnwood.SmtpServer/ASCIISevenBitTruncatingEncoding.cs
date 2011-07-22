@@ -1,6 +1,5 @@
 using System;
 using System.Text;
-using System.Linq;
 
 namespace Rnwood.SmtpServer
 {
@@ -136,7 +135,8 @@ namespace Rnwood.SmtpServer
 
                 public override bool Fallback(byte[] bytesUnknown, int index)
                 {
-                    _fallbackString = Encoding.ASCII.GetString(bytesUnknown.Select(b => (byte)( b & 127)).ToArray());
+                    byte unknownChar = bytesUnknown[index];
+                    _fallbackString = Encoding.ASCII.GetString(new[] { (byte)(unknownChar & 127) });
                     _fallbackIndex = 0;
 
                     return true;

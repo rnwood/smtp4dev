@@ -1,10 +1,11 @@
 ﻿#region
 
 using System.Linq;
+using Rnwood.SmtpServer.Verbs;
 
 #endregion
 
-namespace Rnwood.SmtpServer.Verbs
+namespace Rnwood.SmtpServer
 {
     public class MailFromVerb : IVerb
     {
@@ -46,7 +47,7 @@ namespace Rnwood.SmtpServer.Verbs
 
             try
             {
-                ParameterProcessorMap.Process(connection, command.Arguments.Skip(1).ToArray(), true);
+                ParameterProcessorMap.Process(command.Arguments.Skip(1).ToArray(), true);
                 connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Okey dokey"));
             }
             catch

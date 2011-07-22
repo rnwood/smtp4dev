@@ -4,7 +4,6 @@ using System;
 using System.IO;
 using Rnwood.SmtpServer;
 using anmar.SharpMimeTools;
-using System.Linq;
 
 #endregion
 
@@ -12,12 +11,12 @@ namespace Rnwood.Smtp4dev
 {
     public class MessageViewModel
     {
-        public MessageViewModel(IMessage message)
+        public MessageViewModel(Message message)
         {
             Message = message;
         }
 
-        public IMessage Message { get; private set; }
+        public Message Message { get; private set; }
 
         public string From
         {
@@ -62,7 +61,7 @@ namespace Rnwood.Smtp4dev
             byte[] data = new byte[64 * 1024];
             int bytesRead;
 
-            using (Stream dataStream = Message.GetData())
+            using (Stream dataStream = Message.GetData(false))
             {
                 using (FileStream fileStream = file.OpenWrite())
                 {
@@ -77,12 +76,6 @@ namespace Rnwood.Smtp4dev
         public void MarkAsViewed()
         {
             HasBeenViewed = true;
-        }
-
-        public bool MatchesFilter(string text)
-        {
-            string[] searchText = new string[] { Subject, To, From };
-            return searchText.Any(st => st.IndexOf(text, StringComparison.CurrentCultureIgnoreCase) > -1);
         }
     }
 }

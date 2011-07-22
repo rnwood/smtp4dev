@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Text;
@@ -10,7 +9,7 @@ using System.Collections.Generic;
 
 namespace Rnwood.SmtpServer
 {
-    public class SmtpCommand : IEquatable<SmtpCommand>
+    public class SmtpCommand
     {
         public static Regex COMMANDREGEX = new Regex("(?'verb'[^ :]+)[ :]*(?'arguments'.*)");
 
@@ -18,13 +17,8 @@ namespace Rnwood.SmtpServer
         {
             Text = text;
 
-            IsValid = false;
-            IsEmpty = true;
-
             if (!string.IsNullOrEmpty(text))
             {
-                IsEmpty = false;
-
                 Match match = COMMANDREGEX.Match(text);
 
                 if (match.Success)
@@ -33,10 +27,12 @@ namespace Rnwood.SmtpServer
                     ArgumentsText = match.Groups["arguments"].Value ?? "";
                     Arguments = ParseArguments(ArgumentsText);
                     IsValid = true;
+                    return;
                 }
             }
 
-
+            IsValid = false;
+            IsEmpty = true;
         }
 
         private string[] ParseArguments(string argumentsText)
@@ -88,25 +84,5 @@ namespace Rnwood.SmtpServer
 
         public bool IsValid { get; private set; }
         public bool IsEmpty { get; private set; }
-
-        public bool Equals(SmtpCommand other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Equals(other.Text, Text);
-        }
-
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof (SmtpCommand)) return false;
-            return Equals((SmtpCommand) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            return (Text != null ? Text.GetHashCode() : 0);
-        }
     }
 }

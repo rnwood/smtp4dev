@@ -14,6 +14,7 @@ using Microsoft.Win32;
 using Rnwood.Smtp4dev.MessageInspector;
 using Rnwood.Smtp4dev.Properties;
 using Rnwood.SmtpServer;
+using Message = Rnwood.SmtpServer.Message;
 
 #endregion
 
@@ -22,23 +23,20 @@ namespace Rnwood.Smtp4dev
     public partial class MainForm : Form
     {
         private readonly BindingList<MessageViewModel> _messages = new BindingList<MessageViewModel>();
-        private readonly BindingList<MessageViewModel> _filteredMessages = new BindingList<MessageViewModel>();
         private readonly BindingList<SessionViewModel> _sessions = new BindingList<SessionViewModel>();
         private Server _server;
+        private bool _quitting;
 
         public MainForm()
         {
             InitializeComponent();
 
-            messageBindingSource.DataSource = _filteredMessages;
+            messageBindingSource.DataSource = _messages;
             sessionBindingSource.DataSource = _sessions;
             _messages.ListChanged += _messages_ListChanged;
 
             Icon = Resources.ListeningIcon;
             trayIcon.Icon = Resources.NotListeningIcon;
-
-            versionLabel.Text
-                = versionLabel.Text + " v" + typeof (Program).Assembly.GetName().Version.ToString();
         }
 
         private bool _firstShown = true;
@@ -120,42 +118,17 @@ namespace Rnwood.Smtp4dev
             notRunningPicture.Visible = startListeningButton.Visible = false;
         }
 
-
-
         private void _messages_ListChanged(object sender, ListChangedEventArgs e)
         {
             deleteAllMenuItem.Enabled = deleteAllButton.Enabled = viewLastMessageMenuItem.Enabled = _messages.Count > 0;
             trayIcon.Text = string.Format("smtp4dev (listening on :{0})\n{1} messages", Settings.Default.PortNumber, _messages.Count);
 
-            if (e.ListChangedType == ListChangedType.ItemAdded)
-            {
-                MessageViewModel message = _messages[e.NewIndex];
-                if (message.MatchesFilter(filterTextbox.Text))
-                {
-                    _filteredMessages.Add(message);
-                }
-            }
-            else if (e.ListChangedType == ListChangedType.ItemDeleted)
-            {
-                UpdateFilteredMessages();
-            }
-
-
             if (e.ListChangedType == ListChangedType.ItemAdded && Settings.Default.ScrollMessages &&
-                _filteredMessages.Contains(_messages[e.NewIndex]))
+                messageGrid.RowCount > 0)
             {
                 messageGrid.ClearSelection();
                 messageGrid.Rows[messageGrid.RowCount - 1].Selected = true;
                 messageGrid.FirstDisplayedScrollingRowIndex = messageGrid.RowCount - 1;
-            }
-        }
-
-        private void UpdateFilteredMessages()
-        {
-            _filteredMessages.Clear();
-            foreach (var message in _messages.Where(m => m.MatchesFilter(filterTextbox.Text)))
-            {
-                _filteredMessages.Add(message);
             }
         }
 
@@ -196,7 +169,7 @@ namespace Rnwood.Smtp4dev
         {
             MessageViewModel message = new MessageViewModel(e.Message);
 
-            BeginInvoke((MethodInvoker)(() =>
+            Invoke((MethodInvoker)(() =>
                                         {
                                             _messages.Add(message);
 
@@ -250,7 +223,6 @@ namespace Rnwood.Smtp4dev
 
         private void trayIcon_DoubleClick(object sender, EventArgs e)
         {
-            Thread.Sleep(200);
             Visible = true;
         }
 
@@ -300,10 +272,8 @@ namespace Rnwood.Smtp4dev
 
         private void DeleteAllMessages()
         {
-            foreach (SessionViewModel session in _sessions.ToArray())
-            {
-                DeleteSession(session);
-            }
+            _messages.Clear();
+            _sessions.Clear();
         }
 
         private void messageGrid_DoubleClick(object sender, EventArgs e)
@@ -339,6 +309,7 @@ namespace Rnwood.Smtp4dev
                 StopServer();
             }
             trayIcon.Visible = false;
+            _quitting = true;
             Application.Exit();
         }
 
@@ -424,35 +395,15 @@ namespace Rnwood.Smtp4dev
 
         private void deleteButton_Click(object sender, EventArgs e)
         {
-            foreach (MessageViewModel message in SelectedMessages.ToArray())
+            foreach (MessageViewModel message in SelectedMessages)
             {
-                DeleteMessage(message);
+                _messages.Remove(message);
             }
 
-            foreach (SessionViewModel session in _sessions.Where(s => !_messages.Any(mvm => s.Session.GetMessages().Contains(mvm.Message))).ToArray())
+            foreach (SessionViewModel session in _sessions.Where(s => !_messages.Any(mvm => s.Session.Messages.Contains(mvm.Message))).ToArray())
             {
-                DeleteSession(session);
+                _sessions.Remove(session);
             }
-        }
-
-        private void DeleteSession(SessionViewModel session)
-        {
-            _sessions.Remove(session);
-
-            foreach (MessageViewModel message in _messages.Where(mvm => session.Session.GetMessages().Any(m => mvm.Message == m)).ToArray())
-            {
-                DeleteMessage(message);
-            }
-
-            foreach (IMessage m in session.Session.GetMessages())
-            {
-                m.Dispose();
-            }
-        }
-
-        private void DeleteMessage(MessageViewModel message)
-        {
-            _messages.Remove(message);
         }
 
         private void stopListeningButton_Click(object sender, EventArgs e)
@@ -519,15 +470,11 @@ namespace Rnwood.Smtp4dev
 
             InspectorWindow form = new InspectorWindow(message.Parts);
             form.Show();
+
             messageGrid.Refresh();
         }
 
         private void button1_Click_1(object sender, EventArgs e)
-        {
-            ViewSelectedSessions();
-        }
-
-        private void ViewSelectedSessions()
         {
             foreach (SessionViewModel session in SelectedSessions)
             {
@@ -542,15 +489,20 @@ namespace Rnwood.Smtp4dev
 
         private void deleteSessionButton_Click(object sender, EventArgs e)
         {
-            foreach (SessionViewModel session in SelectedSessions.ToArray())
+            foreach (SessionViewModel session in SelectedSessions)
             {
-                DeleteSession(session);
+                _sessions.Remove(session);
+
+                foreach (MessageViewModel message in _messages.Where(mvm => session.Session.Messages.Any(m => mvm.Message == m)).ToArray())
+                {
+                    _messages.Remove(message);
+                }
             }
         }
 
         private void MainForm_FormClosing(object sender, FormClosingEventArgs e)
         {
-            if (e.CloseReason == CloseReason.UserClosing)
+            if (!_quitting)
             {
                 if (Settings.Default.MinimizeToSysTray)
                 {
@@ -558,16 +510,6 @@ namespace Rnwood.Smtp4dev
                     e.Cancel = true;
                 }
             }
-        }
-
-        private void sessionsGrid_DoubleClick(object sender, EventArgs e)
-        {
-            ViewSelectedSessions();
-        }
-
-        private void filterTextbox_TextChanged(object sender, EventArgs e)
-        {
-            UpdateFilteredMessages();
         }
     }
 }

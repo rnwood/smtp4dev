@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{A9B2D06F-970D-4197-843E-B658CDBF7D88}</ProjectGuid>
     <ProjectTypeGuids>{3AC096D0-A1C2-E12C-1390-A8335801FDAB};{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}</ProjectTypeGuids>
@@ -32,14 +32,8 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
-    <Reference Include="Gallio, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\MBUnit\Gallio.dll</HintPath>
-    </Reference>
-    <Reference Include="MbUnit, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\lib\MBUnit\MbUnit.dll</HintPath>
-    </Reference>
+    <Reference Include="Gallio, Version=3.1.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL" />
+    <Reference Include="MbUnit, Version=3.1.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL" />
     <Reference Include="Moq, Version=3.1.416.3, Culture=neutral, PublicKeyToken=69f491c39445e920, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\lib\Moq\Moq.dll</HintPath>
@@ -62,40 +56,15 @@
     <Compile Include="..\SolutionInfo.cs">
       <Link>SolutionInfo.cs</Link>
     </Compile>
-    <Compile Include="AbstractMessageTests.cs" />
-    <Compile Include="AbstractSessionTests.cs" />
-    <Compile Include="ASCIISevenBitTruncatingEncodingTests.cs" />
     <Compile Include="ClientTests.cs" />
-    <Compile Include="CommandEventArgsTests.cs" />
-    <Compile Include="Extensions\Auth\AnonymousMechanismProcessorTests.cs" />
-    <Compile Include="Extensions\Auth\CramMd5AuthenticationRequestTests.cs" />
-    <Compile Include="Extensions\Auth\CramMd5MechanismProcessorTests.cs" />
-    <Compile Include="FileMessageTests.cs" />
-    <Compile Include="MemoryMessageTests.cs" />
-    <Compile Include="MemorySessionTests.cs" />
-    <Compile Include="MessageEventArgsTests.cs" />
     <Compile Include="Mocks.cs" />
-    <Compile Include="ParameterParserTests.cs" />
-    <Compile Include="ParameterProcessorMapTests.cs" />
-    <Compile Include="ParameterTests.cs" />
-    <Compile Include="RandomIntegerGeneratorTests.cs" />
     <Compile Include="ServerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SessionEventArgsTests.cs" />
     <Compile Include="SmtpCommandTests.cs" />
-    <Compile Include="ConnectionTests.cs" />
-    <Compile Include="SmtpResponseTests.cs" />
-    <Compile Include="SmtpServerExceptionTests.cs" />
-    <Compile Include="Verbs\MailFromVerbTests.cs" />
-    <Compile Include="Verbs\RsetVerbTests.cs" />
     <Compile Include="Verbs\DataVerbTests.cs" />
-    <Compile Include="Verbs\EhloVerbTests.cs" />
     <Compile Include="Verbs\HeloVerbTests.cs" />
     <Compile Include="Verbs\NoopVerbTests.cs" />
-    <Compile Include="Verbs\QuitVerbTests.cs" />
     <Compile Include="Verbs\RcptToVerbTests.cs" />
-    <Compile Include="Verbs\VerbMapTests.cs" />
-    <Compile Include="Verbs\VerbWithSubCommandsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rnwood.SmtpServer\Rnwood.SmtpServer.csproj">

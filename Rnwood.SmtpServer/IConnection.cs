@@ -14,18 +14,20 @@ namespace Rnwood.SmtpServer
     {
         IServer Server { get; }
         IExtensionProcessor[] ExtensionProcessors { get; }
-        IVerbMap VerbMap { get; }
+        VerbMap VerbMap { get; }
         MailVerb MailVerb { get; }
-        IEditableSession Session { get; }
-        IEditableMessage CurrentMessage { get; }
-        IConnectionChannel Channel { get; }
-        void CloseConnection();
-        void WriteResponse(SmtpResponse response);
-        IEditableMessage NewMessage();
-        void CommitMessage();
-        void AbortMessage();
-        string ReadLine();
+        ISession Session { get; }
+        Message CurrentMessage { get; }
+        Encoding ReaderEncoding { get; }
         void SetReaderEncoding(Encoding encoding);
         void SetReaderEncodingToDefault();
+        void CloseConnection();
+        void ApplyStreamFilter(Func<Stream, Stream> filter);
+        void WriteLine(string text, params object[] arg);
+        void WriteResponse(SmtpResponse response);
+        string ReadLine();
+        Message NewMessage();
+        void CommitMessage();
+        void AbortMessage();
     }
 }

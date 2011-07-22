@@ -1,6 +1,5 @@
 ﻿#region
 
-using System;
 using System.Net.Sockets;
 using System.Threading;
 using MbUnit.Framework;
@@ -22,21 +21,6 @@ namespace Rnwood.SmtpServer.Tests
         private Server NewServer()
         {
             return new DefaultServer(Ports.AssignAutomatically);
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void Run_AlreadyRunning_Throws()
-        {
-            Server server = StartServer();
-            try
-            {
-                server.Run();
-            }
-            finally
-            {
-                server.Stop();
-            }
         }
 
         [Test]
@@ -72,22 +56,7 @@ namespace Rnwood.SmtpServer.Tests
         }
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void Start_AlreadyRunning_Throws()
-        {
-            Server server = StartServer();
-            try
-            {
-                server.Start();
-            }
-            finally
-            {
-                server.Stop();
-            }
-        }
-
-        [Test]
-        [ExpectedException(typeof(SocketException))]
+        [ExpectedException(typeof (SocketException))]
         public void StartOnInusePort_StartupExceptionThrown()
         {
             Server server1 = new DefaultServer(Ports.AssignAutomatically);
@@ -100,20 +69,12 @@ namespace Rnwood.SmtpServer.Tests
         }
 
         [Test]
-        public void Stop_NotIsRunning()
+        public void Stop_NotRunning()
         {
             Server server = StartServer();
             server.Stop();
             Assert.IsFalse(server.IsRunning);
         }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void Stop_NotRunning_Throws()
-        {
-            Server server = NewServer();
-            server.Stop();
-        }     
 
         [Test]
         public void Start_CanConnect()

@@ -28,16 +28,15 @@ namespace Rnwood.SmtpServer.Extensions
 
             #region IParameterProcessor Members
 
-            public void SetParameter(IConnection connection, string key, string value)
+            public void SetParameter(string key, string value)
             {
                 if (key.Equals("SIZE", StringComparison.InvariantCultureIgnoreCase))
                 {
-                    long messageSize;
+                    int messageSize;
 
-                    if (long.TryParse(value, out messageSize) && messageSize > 0)
+                    if (int.TryParse(value, out messageSize) && messageSize > 0)
                     {
                         long? maxMessageSize = Connection.Server.Behaviour.GetMaximumMessageSize(Connection);
-                        connection.CurrentMessage.DeclaredMessageSize = messageSize;
 
                         if (maxMessageSize.HasValue && messageSize > maxMessageSize)
                         {

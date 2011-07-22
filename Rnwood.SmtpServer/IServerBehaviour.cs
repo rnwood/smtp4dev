@@ -1,10 +1,8 @@
 #region
 
-using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
-using System.Text;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Extensions.Auth;
 
@@ -24,18 +22,11 @@ namespace Rnwood.SmtpServer
         /// </summary>
         /// <value>The IP address.</value>
         IPAddress IpAddress { get; }
-
         /// <summary>
         /// Gets the TCP port number on which to listen for connections.
         /// </summary>
         /// <value>The TCP port number.</value>
         int PortNumber { get; }
-
-
-        /// <summary>
-        /// Gets the maximum number of sequential bad commands that can be accepted before the server disconnects the client
-        /// </summary>
-        int MaximumNumberOfSequentialBadCommands { get; }
 
         /// <summary>
         /// Gets a value indicating whether to run in SSL mode.
@@ -43,9 +34,9 @@ namespace Rnwood.SmtpServer
         /// <value><c>true</c> if the server should run in SSL mode otherwise, <c>false</c>.</value>
         bool IsSSLEnabled(IConnection connection);
 
-        void OnMessageReceived(IConnection connection, IMessage message);
+        void OnMessageReceived(IConnection connection, Message message);
 
-        void OnMessageRecipientAdding(IConnection connection, IMessage message, string recipient);
+        void OnMessageRecipientAdding(IConnection connection, Message message, string recipient);
 
         /// <summary>
         /// Gets the maximum allowed size of the message for the specified connection.
@@ -96,10 +87,10 @@ namespace Rnwood.SmtpServer
         /// are correct.
         /// </summary>
         /// <param name="connection">The connection.</param>
-        /// <param name="authenticationCredentials">The authentication request.</param>
+        /// <param name="authenticationRequest">The authentication request.</param>
         /// <returns></returns>
         AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
-                                                           IAuthenticationCredentials authenticationCredentials);
+                                                           IAuthenticationRequest authenticationRequest);
 
         /// <summary>
         /// Called when a new message is started in the specified session.
@@ -108,7 +99,7 @@ namespace Rnwood.SmtpServer
         /// <param name="from">From.</param>
         void OnMessageStart(IConnection connection, string from);
 
-        IEditableMessage OnCreateNewMessage(IConnection connection);
+        IMessage CreateMessage(IConnection connection);
 
         /// <summary>
         /// Determines whether the speficied auth mechanism should be enabled for the specified connecton.
@@ -128,7 +119,5 @@ namespace Rnwood.SmtpServer
         void OnCommandReceived(IConnection connection, SmtpCommand command);
 
         void OnMessageCompleted(IConnection connection);
-        Encoding GetDefaultEncoding(IConnection connection);
-        IEditableSession OnCreateNewSession(IConnection connection, IPAddress clientAddress, DateTime startDate);
     }
 }

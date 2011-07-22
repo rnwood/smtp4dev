@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
     <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
-    <ProductVersion>9.0.30729</ProductVersion>
+    <ProductVersion>9.0.21022</ProductVersion>
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>{C5BBE7C2-0EA0-4E50-95FF-BF07EA1B93FF}</ProjectGuid>
     <OutputType>Library</OutputType>
@@ -52,77 +52,43 @@
       <Link>SolutionInfo.cs</Link>
     </Compile>
     <Compile Include="ASCIISevenBitTruncatingEncoding.cs" />
-    <Compile Include="AuthenticationCredentialsValidationEventArgs.cs" />
-    <Compile Include="CommandEventArgs.cs" />
     <Compile Include="Connection.cs" />
-    <Compile Include="ConnectionUnexpectedlyClosedException.cs" />
-    <Compile Include="CurrentDateTimeProvider.cs" />
-    <Compile Include="DataAccessMode.cs" />
     <Compile Include="DefaultServer.cs" />
-    <Compile Include="Extensions\Auth\AnonymousAuthenticationCredentials.cs" />
-    <Compile Include="Extensions\Auth\AnonymousMechanismProcessor.cs" />
-    <Compile Include="Extensions\Auth\IAuthenticationCredentials.cs" />
+    <Compile Include="Extensions\Auth\AnonymousAuthenticationRequest.cs" />
+    <Compile Include="Extensions\Auth\AuthenticationRequest.cs" />
     <Compile Include="Extensions\Auth\AuthenticationResult.cs" />
     <Compile Include="DefaultServerBehaviour.cs" />
-    <Compile Include="Extensions\Auth\AuthExtensionProcessor.cs" />
-    <Compile Include="Extensions\Auth\AuthVerb.cs" />
-    <Compile Include="Extensions\Auth\CramMd5MechanismProcessor.cs" />
-    <Compile Include="Extensions\Auth\LoginAuthenticationCredentials.cs" />
-    <Compile Include="Extensions\Auth\LoginMechanismProcessor.cs" />
-    <Compile Include="Extensions\Auth\PlainAuthenticationCredentials.cs" />
-    <Compile Include="Extensions\Auth\PlainMechanismProcessor.cs" />
-    <Compile Include="Extensions\EightBitMimeDataVerb.cs" />
-    <Compile Include="Extensions\IExtension.cs" />
+    <Compile Include="Extensions\Extension.cs" />
     <Compile Include="Extensions\Auth\AnonymousMechanism.cs" />
     <Compile Include="Extensions\Auth\AuthExtension.cs" />
     <Compile Include="Extensions\Auth\IAuthMechanism.cs" />
     <Compile Include="Extensions\Auth\AuthMechanismMap.cs" />
     <Compile Include="Extensions\Auth\IAuthMechanismProcessor.cs" />
     <Compile Include="Extensions\Auth\AuthMechanismProcessorStatus.cs" />
-    <Compile Include="Extensions\Auth\CramMd5AuthenticationCredentials.cs" />
+    <Compile Include="Extensions\Auth\CramMd5AuthenticationRequest.cs" />
     <Compile Include="Extensions\Auth\CramMd5Mechanism.cs" />
     <Compile Include="Extensions\Auth\LoginMechanism.cs" />
     <Compile Include="Extensions\Auth\PlainMechanism.cs" />
-    <Compile Include="Extensions\Auth\UsernameAndPasswordAuthenticationCredentials.cs" />
-    <Compile Include="Extensions\ExtensionProcessor.cs" />
-    <Compile Include="Extensions\IExtensionProcessor.cs" />
+    <Compile Include="Extensions\Auth\UsernameAndPasswordAuthenticationRequest.cs" />
     <Compile Include="Extensions\SizeExtension.cs" />
     <Compile Include="Extensions\StartTlsExtension.cs" />
     <Compile Include="Extensions\EightBitMimeExtension.cs" />
-    <Compile Include="Extensions\StartTlsVerb.cs" />
     <Compile Include="IConnection.cs" />
-    <Compile Include="IConnectionChannel.cs" />
-    <Compile Include="ICurrentDateTimeProvider.cs" />
-    <Compile Include="IEditableMessage.cs" />
     <Compile Include="IMessage.cs" />
-    <Compile Include="IRandomIntegerGenerator.cs" />
     <Compile Include="IServer.cs" />
     <Compile Include="IServerBehaviour.cs" />
-    <Compile Include="IEditableSession.cs" />
-    <Compile Include="ISession.cs" />
-    <Compile Include="MemoryMessage.cs" />
-    <Compile Include="MemorySession.cs" />
-    <Compile Include="AbstractMessage.cs" />
+    <Compile Include="ICompletedSession.cs" />
+    <Compile Include="Message.cs" />
     <Compile Include="IParameterProcessor.cs" />
-    <Compile Include="MessageEventArgs.cs" />
-    <Compile Include="Parameter.cs" />
     <Compile Include="ParameterParser.cs" />
     <Compile Include="ParameterProcessorMap.cs" />
-    <Compile Include="AbstractSession.cs" />
-    <Compile Include="Ports.cs" />
-    <Compile Include="RandomIntegerGenerator.cs" />
-    <Compile Include="ServerStopBehaviour.cs" />
-    <Compile Include="SessionEventArgs.cs" />
+    <Compile Include="Session.cs" />
     <Compile Include="SmtpResponse.cs" />
     <Compile Include="SmtpServerException.cs" />
-    <Compile Include="FileMessage.cs" />
-    <Compile Include="StandardSmtpResponseCode.cs" />
-    <Compile Include="TcpClientConnectionChannel.cs" />
     <Compile Include="Verbs\DataVerb.cs" />
     <Compile Include="Verbs\EhloVerb.cs" />
     <Compile Include="Verbs\HeloVerb.cs" />
     <Compile Include="Verbs\IVerb.cs" />
-    <Compile Include="Verbs\IVerbMap.cs" />
     <Compile Include="Verbs\MailFromVerb.cs" />
     <Compile Include="Verbs\MailVerb.cs" />
     <Compile Include="Verbs\NoopVerb.cs" />
@@ -134,7 +100,6 @@
     <Compile Include="SmtpCommand.cs" />
     <Compile Include="Verbs\VerbMap.cs" />
     <Compile Include="Verbs\RsetVerb.cs" />
-    <Compile Include="Verbs\VerbWithSubCommands.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="Resources\" />

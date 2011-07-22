@@ -1,10 +1,11 @@
 ﻿#region
 
 using System.Linq;
+using Rnwood.SmtpServer.Verbs;
 
 #endregion
 
-namespace Rnwood.SmtpServer.Verbs
+namespace Rnwood.SmtpServer
 {
     public class RcptToVerb : IVerb
     {
@@ -28,7 +29,7 @@ namespace Rnwood.SmtpServer.Verbs
 
             string address = command.ArgumentsText.Remove(0, 1).Remove(command.ArgumentsText.Length - 2);
             connection.Server.Behaviour.OnMessageRecipientAdding(connection, connection.CurrentMessage, address);
-            connection.CurrentMessage.AddTo(address);
+            connection.CurrentMessage.ToList.Add(address);
             connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Recipient accepted"));
         }
     }

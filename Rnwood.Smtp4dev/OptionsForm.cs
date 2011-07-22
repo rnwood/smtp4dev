@@ -19,7 +19,7 @@ namespace Rnwood.Smtp4dev
             InitializeComponent();
 
             Icon = Resources.ListeningIcon;
-            checkBox3.Checked = Settings.Default.StartOnLogin;
+            checkBox3.Checked = RegistrySettings.StartOnLogin;
 
             UpdateControlStatus();
 
@@ -34,7 +34,7 @@ namespace Rnwood.Smtp4dev
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Settings.Default.StartOnLogin = checkBox3.Checked;
+            RegistrySettings.StartOnLogin = checkBox3.Checked;
             Settings.Default.IPAddress = (ipAddressCombo.SelectedItem).ToString();
             Settings.Default.Save();
             DialogResult = DialogResult.OK;

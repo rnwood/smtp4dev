@@ -1,13 +1,12 @@
 ﻿#region
 
-using System;
 using System.Text;
 
 #endregion
 
 namespace Rnwood.SmtpServer
 {
-    public class SmtpResponse : IEquatable<SmtpResponse>
+    public class SmtpResponse
     {
         public SmtpResponse(int code, string message, params object[] args)
         {
@@ -58,28 +57,28 @@ namespace Rnwood.SmtpServer
 
             return result.ToString();
         }
+    }
 
-        public bool Equals(SmtpResponse other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return other.Code == Code && Equals(other.Message, Message);
-        }
+    public enum StandardSmtpResponseCode
+    {
+        //Errors
+        SyntaxErrorCommandUnrecognised = 500,
+        SyntaxErrorInCommandArguments = 501,
+        CommandNotImplemented = 502,
+        BadSequenceOfCommands = 503,
+        CommandParameterNotImplemented = 504,
+        ExceededStorageAllocation = 552,
+        AuthenticationFailure = 535,
+        AuthenticationRequired = 530,
 
-        public override bool Equals(object obj)
-        {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof (SmtpResponse)) return false;
-            return Equals((SmtpResponse) obj);
-        }
-
-        public override int GetHashCode()
-        {
-            unchecked
-            {
-                return (Code*397) ^ (Message != null ? Message.GetHashCode() : 0);
-            }
-        }
+        SystemStatusOrHelpReply = 211,
+        HelpMessage = 214,
+        ServiceReady = 220,
+        ClosingTransmissionChannel = 221,
+        OK = 250,
+        UserNotLocalWillForwardTo = 251,
+        StartMailInputEndWithDot = 354,
+        AuthenticationContinue = 334,
+        AuthenitcationOK = 235
     }
 }

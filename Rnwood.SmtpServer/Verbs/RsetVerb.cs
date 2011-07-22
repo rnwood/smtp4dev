@@ -5,7 +5,6 @@
         public void Process(IConnection connection, SmtpCommand command)
         {
             connection.AbortMessage();
-            connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Rset completed"));
         }
     }
 }

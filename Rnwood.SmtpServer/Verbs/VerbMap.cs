@@ -7,9 +7,9 @@ using System.Collections.Generic;
 
 namespace Rnwood.SmtpServer.Verbs
 {
-    public class VerbMap : IVerbMap
+    public class VerbMap
     {
-        private readonly Dictionary<string, IVerb> _processorVerbs = new Dictionary<string, IVerb>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, IVerb> _processorVerbs = new Dictionary<string, IVerb>();
 
         public void SetVerbProcessor(string verb, IVerb verbProcessor)
         {
@@ -18,9 +18,15 @@ namespace Rnwood.SmtpServer.Verbs
 
         public IVerb GetVerbProcessor(string verb)
         {
-            IVerb result = null;
-            _processorVerbs.TryGetValue(verb, out result);
-            return result;
+            foreach (KeyValuePair<string, IVerb> processorEntry in _processorVerbs)
+            {
+                if (string.Equals(processorEntry.Key, verb, StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return processorEntry.Value;
+                }
+            }
+
+            return null;
         }
     }
 }

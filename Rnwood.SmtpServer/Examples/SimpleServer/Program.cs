@@ -1,7 +1,6 @@
 ﻿#region
 
 using System;
-using System.Collections.Generic;
 using System.Text;
 using System.IO;
 
@@ -18,23 +17,23 @@ namespace Rnwood.SmtpServer.Example
     {
         private static void Main(string[] args)
         {
-            List<IMessage> messages = new List<IMessage>();
+            DefaultServerBehaviour serverBehaviour = new DefaultServerBehaviour();
+            serverBehaviour.SessionStarted += SessionStarted;
+            serverBehaviour.SessionCompleted += SessionCompleted;
+            serverBehaviour.MessageReceived += MessageReceived;
 
-            DefaultServer server = new DefaultServer(Ports.AssignAutomatically);
-            server.MessageReceived += (s, ea) => messages.Add(ea.Message);
+            Server server = new Server(serverBehaviour);
             server.Start();
 
-            int portnumber = server.PortNumber;
-            //do something to send mail
-            
-            
+            Console.WriteLine("Server running. Press ENTER to stop and exit");
+            Console.ReadLine();
             server.Stop();
         }
 
         private static void SessionCompleted(object sender, SessionEventArgs e)
         {
             Console.WriteLine(string.Format("SESSION END - Address:{0} NoOfMessages:{1} Error:{2}",
-                                            e.Session.ClientAddress, e.Session.GetMessages().Length, e.Session.SessionError));
+                                            e.Session.ClientAddress, e.Session.Messages.Count, e.Session.SessionError));
         }
 
         private static void SessionStarted(object sender, SessionEventArgs e)
