@@ -1,5 +1,6 @@
 ﻿#region
 
+using System;
 using System.Collections.Generic;
 
 #endregion
@@ -9,7 +10,7 @@ namespace Rnwood.SmtpServer
     public class ParameterProcessorMap
     {
         private readonly Dictionary<string, IParameterProcessor> _processors =
-            new Dictionary<string, IParameterProcessor>();
+            new Dictionary<string, IParameterProcessor>(StringComparer.InvariantCultureIgnoreCase);
 
         public void SetProcessor(string key, IParameterProcessor connection)
         {
