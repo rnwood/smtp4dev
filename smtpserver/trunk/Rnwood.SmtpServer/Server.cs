@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Linq;
 
 #endregion
 
@@ -36,28 +37,22 @@ namespace Rnwood.SmtpServer
             if (IsRunning)
                 throw new InvalidOperationException("Already running");
 
-            StartListener();
+            _listener = new TcpListener(Behaviour.IpAddress, Behaviour.PortNumber);
+            _listener.Start();
 
             IsRunning = true;
 
             Core();
         }
 
-        private void StartListener()
-        {
-            _listener = new TcpListener(Behaviour.IpAddress, Behaviour.PortNumber);
-            _listener.Start();
-
-            PortNumber = ((IPEndPoint)_listener.LocalEndpoint).Port;
-        }
-
         public int PortNumber
         {
-            get;
-            private set;
+            get
+            {
+                return ((IPEndPoint)_listener.LocalEndpoint).Port;
+            }
         }
 
-        private readonly System.Threading.AutoResetEvent _connectionCompletedEvent = new AutoResetEvent(false);
 
         private void Core()
         {
@@ -72,13 +67,11 @@ namespace Rnwood.SmtpServer
                     if (IsRunning)
                     {
                         Thread thread = new Thread(ConnectionThreadWork);
-                        thread.Start(tcpClient);
+                        Connection connection = new Connection(this, (TcpClient)tcpClient);
+                        _activeConnections.Add(connection);
+                        thread.Start(connection);
                     }
                 }
-            }
-            catch (ThreadInterruptedException e)
-            {
-                //normal - caused by Stop()
             }
             catch (SocketException e)
             {
@@ -97,28 +90,39 @@ namespace Rnwood.SmtpServer
         /// Runs the server asynchronously. This method returns once the server has been started.
         /// To stop the server call the <see cref="Stop()"/> method.
         /// </summary>
-        /// <returns>The port number the server is listening on</returns>
         /// <exception cref="System.InvalidOperationException">if the server is already running.</exception>
-        public int Start()
+        public void Start()
         {
             if (IsRunning)
                 throw new InvalidOperationException("Already running");
 
-            StartListener();
+            _listener = new TcpListener(Behaviour.IpAddress, Behaviour.PortNumber);
+            _listener.Start();
 
             IsRunning = true;
 
             new Thread(Core).Start();
+        }
 
-            return PortNumber;
+
+        /// <summary>
+        /// Stops the running server. Any existing connections are terminated.
+        /// </summary>
+        /// <exception cref="System.InvalidOperationException">if the server is not running.</exception>
+        public void Stop()
+        {
+            Stop(true);
         }
 
         /// <summary>
         /// Stops the running server.
+        /// This method blocks until all connections have terminated, either by normal completion or timeout,
+        /// or if <paramref name="killConnections"/> has been specified then once all of the threads
+        /// have been killed.
         /// </summary>
-        /// <param name="stopBehaviour">Specifies what to do with any currently active connections</param>
+        /// <param name="killConnections">True if existing connections should be terminated.</param>
         /// <exception cref="System.InvalidOperationException">if the server is not running.</exception>
-        public void Stop(ServerStopBehaviour stopBehaviour)
+        public void Stop(bool killConnections)
         {
             if (!IsRunning)
             {
@@ -127,84 +131,25 @@ namespace Rnwood.SmtpServer
 
             IsRunning = false;
             _listener.Stop();
-
-            _coreThread.Interrupt();
             _coreThread.Join();
 
-            switch (stopBehaviour)
+            if (killConnections)
             {
-                case ServerStopBehaviour.KillExistingConnections:
-                    KillActiveConnections();
-                    break;
-
-                case ServerStopBehaviour.WaitForExistingConnections:
-                    WaitForActiveConnectionsToComplete();
-                    break;
-            }
-        }
-
-        private void WaitForActiveConnectionsToComplete()
-        {
-            while (GetFirstActiveConnection() != null)
-            {
-                _connectionCompletedEvent.WaitOne();
-            }
-        }
-
-        private Connection GetFirstActiveConnection()
-        {
-            lock (_activeConnections)
-            {
-                if (_activeConnections.Count > 0)
+                foreach (Connection connection in _activeConnections.Cast<Connection>().ToArray())
                 {
-                    return _activeConnections[0];
+                    connection.CloseConnection();
+                    connection.Thread.Join();
                 }
             }
-
-            return null;
         }
 
-        private void KillActiveConnections()
+        private readonly IList _activeConnections = ArrayList.Synchronized(new List<Connection>());
+
+        private void ConnectionThreadWork(object connectionObj)
         {
-            Connection firstActiveConnection = null;
-
-            while ((firstActiveConnection = GetFirstActiveConnection()) != null)
-            {
-                firstActiveConnection.Kill();
-            }
-        }
-
-        private readonly List<Connection> _activeConnections = new List<Connection>();
-
-        private void ConnectionThreadWork(object tcpClient)
-        {
-            Connection connection = new Connection(this, c => new TcpClientConnectionChannel(c, (TcpClient)tcpClient, Behaviour.GetDefaultEncoding(c)));
-            lock (_activeConnections)
-            {
-                _activeConnections.Add(connection);
-            }
-
-            try
-            {
-                connection.Process();
-            }
-            finally
-            {
-                lock (_activeConnections)
-                {
-                    _activeConnections.Remove(connection);
-                }
-
-                _connectionCompletedEvent.Set();
-            }
-        }
-
-        /// <summary>
-        /// Stops the running server and waits for any existing connections to complete.
-        /// </summary>
-        public void Stop()
-        {
-            Stop(ServerStopBehaviour.WaitForExistingConnections);
+            Connection connection = (Connection) connectionObj;
+            connection.Start();
+            _activeConnections.Remove(connection);
         }
     }
 }

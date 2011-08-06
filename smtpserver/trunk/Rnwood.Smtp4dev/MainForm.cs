@@ -189,7 +189,7 @@ namespace Rnwood.Smtp4dev
 
         private void OnSessionCompleted(object sender, SessionEventArgs e)
         {
-            Invoke((MethodInvoker)(() => { _sessions.Add(new SessionViewModel(e.Session)); }));
+            BeginInvoke((MethodInvoker)(() => { _sessions.Add(new SessionViewModel(e.Session)); }));
         }
 
         private void OnMessageReceived(object sender, MessageEventArgs e)

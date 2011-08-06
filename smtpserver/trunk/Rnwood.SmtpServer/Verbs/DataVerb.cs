@@ -2,10 +2,12 @@
 
 using System;
 using System.IO;
+using System.Text;
+using Rnwood.SmtpServer.Verbs;
 
 #endregion
 
-namespace Rnwood.SmtpServer.Verbs
+namespace Rnwood.SmtpServer
 {
     public class DataVerb : IVerb
     {
@@ -22,7 +24,7 @@ namespace Rnwood.SmtpServer.Verbs
             connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.StartMailInputEndWithDot,
                                                                "End message with period"));
 
-            using (StreamWriter writer = new StreamWriter(connection.CurrentMessage.GetData(DataAccessMode.ForWriting), connection.Channel.ReaderEncoding))
+            using (StreamWriter writer = new StreamWriter(connection.CurrentMessage.GetData(true), connection.ReaderEncoding))
             {
                 bool firstLine = true;
 

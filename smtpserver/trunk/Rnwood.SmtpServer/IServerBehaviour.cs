@@ -24,18 +24,11 @@ namespace Rnwood.SmtpServer
         /// </summary>
         /// <value>The IP address.</value>
         IPAddress IpAddress { get; }
-
         /// <summary>
         /// Gets the TCP port number on which to listen for connections.
         /// </summary>
         /// <value>The TCP port number.</value>
         int PortNumber { get; }
-
-
-        /// <summary>
-        /// Gets the maximum number of sequential bad commands that can be accepted before the server disconnects the client
-        /// </summary>
-        int MaximumNumberOfSequentialBadCommands { get; }
 
         /// <summary>
         /// Gets a value indicating whether to run in SSL mode.
@@ -96,10 +89,10 @@ namespace Rnwood.SmtpServer
         /// are correct.
         /// </summary>
         /// <param name="connection">The connection.</param>
-        /// <param name="authenticationCredentials">The authentication request.</param>
+        /// <param name="authenticationRequest">The authentication request.</param>
         /// <returns></returns>
         AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
-                                                           IAuthenticationCredentials authenticationCredentials);
+                                                           IAuthenticationRequest authenticationRequest);
 
         /// <summary>
         /// Called when a new message is started in the specified session.
@@ -129,6 +122,6 @@ namespace Rnwood.SmtpServer
 
         void OnMessageCompleted(IConnection connection);
         Encoding GetDefaultEncoding(IConnection connection);
-        IEditableSession OnCreateNewSession(IConnection connection, IPAddress clientAddress, DateTime startDate);
+        IEditableSession OnCreateNewSession(Connection connection, IPAddress clientAddress, DateTime startDate);
     }
 }

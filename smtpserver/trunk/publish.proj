@@ -31,7 +31,7 @@
 			<ServerSourceFiles Include="Publish\Source\Rnwood.SmtpServer\**\*.*" Exclude="Publish\*"/>
 		</ItemGroup>
 		
-		<Copy SourceFiles="LICENSE.txt" DestinationFiles="Publish\Source\Rnwood.SmtpServer\LICENSE.txt"/>
+		<Copy SourceFiles="LICENSE" DestinationFiles="Publish\Source\Rnwood.SmtpServer\LICENSE"/>
 		
 		<Zip Files="@(ServerSourceFiles)" ZipFileName="Publish\Rnwood.SmtpServer-$(Version)-source.zip" WorkingDirectory="Publish\Source\Rnwood.SmtpServer" ZipLevel="9" />
 		

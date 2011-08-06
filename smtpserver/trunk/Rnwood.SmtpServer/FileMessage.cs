@@ -1,4 +1,3 @@
-using System;
 using System.CodeDom.Compiler;
 using System.IO;
 
@@ -16,16 +15,12 @@ namespace Rnwood.SmtpServer
         private FileInfo _file;
         private bool _keepOnDispose;
 
-        public override Stream GetData(DataAccessMode dataAccessMode)
+        public override Stream GetData(bool forWriting)
         {
-            if (dataAccessMode == DataAccessMode.ForWriting)
+            if (forWriting)
             {
                 return _file.OpenWrite();
-            }else if (_file.Length == 0)
-            {
-                throw new InvalidOperationException("Cannot read message data before it has been written");
             }
-
             return new FileStream(_file.FullName, FileMode.Open, FileAccess.Read, FileShare.Delete|FileShare.Read);
         }
 
