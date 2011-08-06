@@ -1,4 +1,4 @@
-namespace Rnwood.SmtpServer.Extensions.Auth
+namespace Rnwood.SmtpServer
 {
     public enum AuthenticationResult
     {

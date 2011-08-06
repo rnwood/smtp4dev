@@ -36,19 +36,13 @@ namespace Rnwood.SmtpServer
         {
             PortNumber = portNumber;
             _sslCertificate = sslCertificate;
-            ReceiveTimeout = new TimeSpan(0, 1, 0);
         }
 
         #region IServerBehaviour Members
 
-        public IEditableSession OnCreateNewSession(IConnection connection, IPAddress clientAddress, DateTime startDate)
+        public IEditableSession OnCreateNewSession(Connection connection, IPAddress clientAddress, DateTime startDate)
         {
             return new MemorySession(clientAddress, startDate);
-        }
-
-        public int MaximumNumberOfSequentialBadCommands
-        {
-            get { return 10; }
         }
 
         public virtual Encoding GetDefaultEncoding(IConnection connection)
@@ -128,19 +122,17 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        public TimeSpan ReceiveTimeout { get; set; }
-
         public virtual int GetReceiveTimeout(IConnection connection)
         {
-            return (int)ReceiveTimeout.TotalMilliseconds;
+            return (int)new TimeSpan(0, 5, 0).TotalMilliseconds;
         }
 
         public virtual AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
-                                                                          IAuthenticationCredentials credentials)
+                                                                          IAuthenticationRequest request)
         {
             if (AuthenticationCredentialsValidationRequired != null)
             {
-                AuthenticationCredentialsValidationRequired(this, new AuthenticationCredentialsValidationEventArgs(credentials));
+                AuthenticationCredentialsValidationRequired(this, new AuthenticationCredentialsValidationEventArgs(request));
             }
 
             return AuthenticationResult.Failure;

@@ -24,7 +24,7 @@ namespace Rnwood.Smtp4dev
 
         #region IServerBehaviour Members
 
-        public IEditableSession OnCreateNewSession(IConnection connection, IPAddress clientAddress, DateTime startDate)
+        public IEditableSession OnCreateNewSession(Connection connection, IPAddress clientAddress, DateTime startDate)
         {
             return new MemorySession(clientAddress, startDate);
         }
@@ -77,11 +77,6 @@ namespace Rnwood.Smtp4dev
         public string DomainName
         {
             get { return Settings.Default.DomainName; }
-        }
-
-        public int MaximumNumberOfSequentialBadCommands
-        {
-            get { return 10; }
         }
 
         public IPAddress IpAddress
@@ -192,7 +187,7 @@ namespace Rnwood.Smtp4dev
         }
 
         public AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
-                                                                  IAuthenticationCredentials authenticationCredentials)
+                                                                  IAuthenticationRequest authenticationRequest)
         {
             if (Settings.Default.FailAuthentication)
             {
