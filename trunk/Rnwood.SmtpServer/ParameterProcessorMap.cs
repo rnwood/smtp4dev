@@ -9,7 +9,8 @@ namespace Rnwood.SmtpServer
 {
     public class ParameterProcessorMap
     {
-        private readonly Dictionary<string, IParameterProcessor> _processors = new Dictionary<string, IParameterProcessor>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, IParameterProcessor> _processors =
+            new Dictionary<string, IParameterProcessor>(StringComparer.InvariantCultureIgnoreCase);
 
         public void SetProcessor(string key, IParameterProcessor processor)
         {

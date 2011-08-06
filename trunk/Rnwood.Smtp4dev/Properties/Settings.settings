@@ -57,7 +57,7 @@
       <Value Profile="(Default)">0</Value>
     </Setting>
     <Setting Name="IPAddress" Type="System.String" Scope="User">
-      <Value Profile="(Default)">0.0.0.0</Value>
+      <Value Profile="(Default)">127.0.0.1</Value>
     </Setting>
     <Setting Name="ReceiveTimeout" Type="System.Int32" Scope="User">
       <Value Profile="(Default)">30000</Value>

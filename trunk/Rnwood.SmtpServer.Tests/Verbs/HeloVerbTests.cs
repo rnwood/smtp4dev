@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using MbUnit.Framework;
 using Moq;
-using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
@@ -12,7 +11,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
     public class HeloVerbTests
     {
         [Test]
-        public void Process()
+        public void SayHelo()
         {
             Mocks mocks = new Mocks();
 
@@ -20,41 +19,20 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             verb.Process(mocks.Connection.Object, new SmtpCommand("HELO foo.blah"));
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+            mocks.Session.VerifySet(s => s.ClientName, "foo.bar");
         }
 
         [Test]
-        public void Process_NoArguments_Accepted()
+        public void SayHeloTwice_ReturnsError()
         {
             Mocks mocks = new Mocks();
-
-            HeloVerb verb = new HeloVerb();
-            verb.Process(mocks.Connection.Object, new SmtpCommand("HELO"));
-
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
-        }
-
-
-        [Test]
-        public void Process_RecordsClientName()
-        {
-            Mocks mocks = new Mocks();
+            mocks.Session.SetupGet(s => s.ClientName).Returns("already.said.helo");
+            mocks.Session.SetupSet(s => s.ClientName).Never();
 
             HeloVerb verb = new HeloVerb();
             verb.Process(mocks.Connection.Object, new SmtpCommand("HELO foo.blah"));
 
-            mocks.Session.VerifySet(s => s.ClientName = "foo.blah");
-        }
-
-        [Test]
-        public void Process_SaidHeloAlready_Allowed()
-        {
-            Mocks mocks = new Mocks();
-            
-            HeloVerb verb = new HeloVerb();
-            verb.Process(mocks.Connection.Object, new SmtpCommand("HELO foo.blah"));
-            verb.Process(mocks.Connection.Object, new SmtpCommand("HELO foo.blah"));
-
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
         }
     }
 }
