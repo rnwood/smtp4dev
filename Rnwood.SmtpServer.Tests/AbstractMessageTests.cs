@@ -22,34 +22,6 @@ namespace Rnwood.SmtpServer.Tests
         protected abstract IEditableMessage GetMessage();
 
         [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void GetData_ForReadingBeforeWrite_ExceptionThrown()
-        {
-            IEditableMessage message = GetMessage();
-            message.GetData();
-        }
-
-        [Test]
-        [ExpectedException(typeof(InvalidOperationException))]
-        public void GetData_ForReadingDuringWrite_ExceptionThrown()
-        {
-            IEditableMessage message = GetMessage();
-
-            using(message.GetData(DataAccessMode.ForWriting))
-            {
-                //attempt read during write
-                message.GetData();
-            }
-        }
-
-        [Test]
-        public void Dispose()
-        {
-            IEditableMessage editableMessage = GetMessage();
-            editableMessage.Dispose();
-        }
-
-        [Test]
         public void GetData_ForWriting_Accepted()
         {
             IEditableMessage message = GetMessage();
@@ -57,7 +29,7 @@ namespace Rnwood.SmtpServer.Tests
             byte[] writtenBytes = new byte[64 * 1024];
             new Random().NextBytes(writtenBytes);
 
-            using (Stream stream = message.GetData(DataAccessMode.ForWriting))
+            using (Stream stream = message.GetData(true))
             {
                 stream.Write(writtenBytes, 0, writtenBytes.Length);
             }

@@ -1,10 +1,10 @@
 ﻿#region
 
-
+using Rnwood.SmtpServer.Verbs;
 
 #endregion
 
-namespace Rnwood.SmtpServer.Verbs
+namespace Rnwood.SmtpServer
 {
     public class QuitVerb : IVerb
     {

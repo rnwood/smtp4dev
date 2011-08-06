@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text;
 using MbUnit.Framework;
 using Moq;
-using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
@@ -67,18 +66,6 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
             Assert.AreEqual(0, message.To.Length);
-        }
-
-        [Test]
-        public void Process_NoCurrentMessage_Error()
-        {
-            Mocks mocks = new Mocks();
-            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
-            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns((IEditableMessage)null);
-
-            RcptToVerb verb = new RcptToVerb();
-            verb.Process(mocks.Connection.Object, new SmtpCommand("TO foobar"));
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
         }
     }
 }

@@ -5,27 +5,12 @@ using System.Linq;
 using System.Text;
 using MbUnit.Framework;
 using Moq;
-using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
     [TestFixture]
     public class DataVerbTests
     {
-        [Test]
-        [ExpectedException(typeof(ConnectionUnexpectedlyClosedException))]
-        public void Data_Disconnected_ThrowsException()
-        {
-            Mocks mocks = new Mocks();
-            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
-            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
-
-            mocks.Connection.Setup(c => c.ReadLine()).Throws(new ConnectionUnexpectedlyClosedException()).AtMostOnce();
-
-            DataVerb verb = new DataVerb();
-            verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
-        }
-
         [Test]
         public void Data_DoubleDots_Unescaped()
         {
@@ -59,7 +44,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
             if (eightBitClean)
             {
-                mocks.ConnectionChannel.SetupGet(c => c.ReaderEncoding).Returns(Encoding.UTF8);
+                mocks.Connection.SetupGet(c => c.ReaderEncoding).Returns(Encoding.UTF8);
             }
 
             MemoryMessage message = new MemoryMessage(mocks.Session.Object);
