@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-  <Product Id="*" Name="smtp4dev 2.0.7" Language="1033" Version="2.0.8" Manufacturer="Robert Wood" UpgradeCode="542EEA02-7932-465A-B51C-79B20B6E26AF">
+  <Product Id="*" Name="smtp4dev 2.0.8" Language="1033" Version="2.0.9" Manufacturer="Robert Wood" UpgradeCode="542EEA02-7932-465A-B51C-79B20B6E26AF">
 
     <Package InstallerVersion="200" Compressed="yes" />
 
     <Media Id="1" Cabinet="media1.cab" EmbedCab="yes" />
 
     <Upgrade Id="542EEA02-7932-465A-B51C-79B20B6E26AF">
-      <UpgradeVersion Minimum="1.0.0" Maximum="2.0.7" IncludeMaximum="yes" Property="THEUPGRADEVERSION"/>
+      <UpgradeVersion Minimum="1.0.0" Maximum="2.0.8" IncludeMaximum="yes" Property="THEUPGRADEVERSION"/>
     </Upgrade>
 
     <WixVariable Id="WixUILicenseRtf" Value="$(var.SolutionDir)license.rtf" />

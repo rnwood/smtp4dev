@@ -100,6 +100,12 @@ namespace Rnwood.SmtpServer
         public string ReadLine()
         {
             string text = _reader.ReadLine();
+
+            if (text == null)
+            {
+                throw new IOException("Client disconnected");
+            }
+
             Session.AppendToLog(text);
             return text;
         }
