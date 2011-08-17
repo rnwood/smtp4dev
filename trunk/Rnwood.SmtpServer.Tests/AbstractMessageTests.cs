@@ -29,7 +29,7 @@ namespace Rnwood.SmtpServer.Tests
             byte[] writtenBytes = new byte[64 * 1024];
             new Random().NextBytes(writtenBytes);
 
-            using (Stream stream = message.GetData(true))
+            using (Stream stream = message.GetData(DataAccessMode.ForWriting))
             {
                 stream.Write(writtenBytes, 0, writtenBytes.Length);
             }

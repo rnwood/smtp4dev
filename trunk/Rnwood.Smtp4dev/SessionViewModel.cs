@@ -11,7 +11,7 @@ using Rnwood.SmtpServer;
 
 namespace Rnwood.Smtp4dev
 {
-    public class SessionViewModel
+    public class SessionViewModel : IDisposable
     {
         public SessionViewModel(ISession session)
         {
@@ -48,18 +48,31 @@ namespace Rnwood.Smtp4dev
             TempFileCollection tempFiles = new TempFileCollection();
             FileInfo msgFile = new FileInfo(tempFiles.AddExtension("txt"));
 
-            using (TextReader inStream = Session.GetLog())
             using (StreamWriter outStream = msgFile.CreateText())
             {
-                string line;
-
-                while ((line = inStream.ReadLine()) != null)
+                using (TextReader inStream = Session.GetLog())
                 {
-                    outStream.WriteLine(line);
+                    string line;
+
+                    while ((line = inStream.ReadLine()) != null)
+                    {
+                        outStream.WriteLine(line);
+                    }
+                }
+
+                if (Session.SessionErrorType == SessionErrorType.UnexpectedException)
+                {
+                    outStream.WriteLine("Session ended abnormally.");
+                    outStream.WriteLine(Session.SessionError.ToString());
                 }
             }
 
             Process.Start(msgFile.FullName);
+        }
+
+        public void Dispose()
+        {
+            Session.Dispose();
         }
     }
 }

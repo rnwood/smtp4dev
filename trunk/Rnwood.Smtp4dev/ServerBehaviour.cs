@@ -24,9 +24,22 @@ namespace Rnwood.Smtp4dev
 
         #region IServerBehaviour Members
 
-        public IEditableSession OnCreateNewSession(Connection connection, IPAddress clientAddress, DateTime startDate)
+        public IEditableSession OnCreateNewSession(IConnection connection, IPAddress clientAddress, DateTime startDate)
         {
-            return new MemorySession(clientAddress, startDate);
+            if (!Settings.Default.MessageFolder.Exists)
+            {
+                Settings.Default.MessageFolder.Create();
+            }
+
+            FileInfo filename = null;
+
+            while (filename == null || filename.Exists)
+            {
+                filename = new FileInfo(Path.Combine(Settings.Default.MessageFolder.FullName, "Session" +
+                             DateTime.Now.ToString("yyyy-MM-dd_HHmmss-ffff") + ".txt"));
+            }
+
+            return new FileSession(clientAddress, startDate, filename, false);
         }
 
         public Encoding GetDefaultEncoding(IConnection connection)
@@ -72,6 +85,10 @@ namespace Rnwood.Smtp4dev
 
         public void OnCommandReceived(IConnection connection, SmtpCommand command)
         {
+            if (Settings.Default.CauseTimeout)
+            {
+                connection.ReadLine();
+            }
         }
 
         public string DomainName
@@ -92,6 +109,12 @@ namespace Rnwood.Smtp4dev
         public bool IsSSLEnabled(IConnection connection)
         {
             return Settings.Default.EnableSSL;
+        }
+
+
+        public int MaximumNumberOfSequentialBadCommands
+        {
+            get { return 10; }
         }
 
         public bool IsSessionLoggingEnabled(IConnection connection)
@@ -187,7 +210,7 @@ namespace Rnwood.Smtp4dev
         }
 
         public AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
-                                                                  IAuthenticationRequest authenticationRequest)
+                                                                      IAuthenticationCredentials authenticationRequest)
         {
             if (Settings.Default.FailAuthentication)
             {
@@ -221,7 +244,7 @@ namespace Rnwood.Smtp4dev
 
             return true;
         }
-        
+
         public IEditableMessage OnCreateNewMessage(IConnection connection)
         {
             if (!Settings.Default.MessageFolder.Exists)
@@ -229,9 +252,15 @@ namespace Rnwood.Smtp4dev
                 Settings.Default.MessageFolder.Create();
             }
 
-            string filename = DateTime.Now.ToString("yyyy-MM-dd_HHmmss-ffff") + ".eml";
-            
-            return new FileMessage(connection.Session, new FileInfo(Path.Combine(Settings.Default.MessageFolder.FullName, filename)), false);
+            FileInfo filename = null;
+
+            while (filename == null || filename.Exists)
+            {
+                filename = new FileInfo(Path.Combine(Settings.Default.MessageFolder.FullName,
+                             DateTime.Now.ToString("yyyy-MM-dd_HHmmss-ffff") + ".eml"));
+            }
+
+            return new FileMessage(connection.Session, filename, false);
         }
 
         #endregion

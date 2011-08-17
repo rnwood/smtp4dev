@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Net.Mail;
 using System.Text.RegularExpressions;
 using MbUnit.Framework;
@@ -18,7 +19,7 @@ namespace Rnwood.SmtpServer.Tests
             mocks.ConnectionChannel.Setup(c => c.WriteLine(It.IsAny<string>())).Callback(
                 mocks.ConnectionChannel.Object.Close);
 
-            Connection connection = new Connection(mocks.Server.Object, c => mocks.ConnectionChannel.Object);
+            Connection connection = new Connection(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
             connection.Process();
 
             mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.IsRegex("220 .*", RegexOptions.IgnoreCase)));
@@ -34,7 +35,7 @@ namespace Rnwood.SmtpServer.Tests
 
             mocks.ConnectionChannel.Setup(c => c.ReadLine()).Returns("GOODCOMMAND").Callback(mocks.ConnectionChannel.Object.Close);
 
-            Connection connection = new Connection(mocks.Server.Object, c => mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
+            Connection connection = new Connection(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
             connection.Process();
 
             mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.IsRegex("500 error", RegexOptions.IgnoreCase)));
@@ -47,7 +48,7 @@ namespace Rnwood.SmtpServer.Tests
 
             mocks.ConnectionChannel.Setup(c => c.ReadLine()).Returns("").Callback(mocks.ConnectionChannel.Object.Close);
 
-            Connection connection = new Connection(mocks.Server.Object, c => mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
+            Connection connection = new Connection(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
             connection.Process();
 
             //Should only print service ready message
@@ -63,7 +64,7 @@ namespace Rnwood.SmtpServer.Tests
 
             mocks.ConnectionChannel.Setup(c => c.ReadLine()).Returns("GOODCOMMAND").Callback(mocks.ConnectionChannel.Object.Close);
 
-            Connection connection = new Connection(mocks.Server.Object, c => mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
+            Connection connection = new Connection(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
             connection.Process();
 
             mockVerb.Verify(v => v.Process(It.IsAny<IConnection>(), It.IsAny<SmtpCommand>()));
@@ -75,7 +76,7 @@ namespace Rnwood.SmtpServer.Tests
             Mocks mocks = new Mocks();
             mocks.ConnectionChannel.Setup(c => c.ReadLine()).Returns("BADCOMMAND").Callback(mocks.ConnectionChannel.Object.Close);
 
-            Connection connection = new Connection(mocks.Server.Object, c => mocks.ConnectionChannel.Object);
+            Connection connection = new Connection(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
             connection.Process();
 
             mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.IsRegex("500 .*", RegexOptions.IgnoreCase)));
@@ -87,10 +88,10 @@ namespace Rnwood.SmtpServer.Tests
             Mocks mocks = new Mocks();
             mocks.ServerBehaviour.SetupGet(b => b.MaximumNumberOfSequentialBadCommands).Returns(2);
 
-            mocks.ConnectionChannel.Setup(c => c.ReadLine()).Returns("a");
-            mocks.ConnectionChannel.Setup(c => c.ReadLine()).Returns("b");
 
-            Connection connection = new Connection(mocks.Server.Object, c => mocks.ConnectionChannel.Object);
+            mocks.ConnectionChannel.Setup(c => c.ReadLine()).Returns("BADCOMMAND");
+
+            Connection connection = new Connection(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
             connection.Process();
 
             mocks.ConnectionChannel.Verify(c => c.ReadLine(), Times.Exactly(2));
@@ -102,7 +103,7 @@ namespace Rnwood.SmtpServer.Tests
         {
             Mocks mocks = new Mocks();
 
-            Connection connection = new Connection(mocks.Server.Object, c => mocks.ConnectionChannel.Object);
+            Connection connection = new Connection(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
             connection.NewMessage();
 
             connection.AbortMessage();
@@ -114,7 +115,7 @@ namespace Rnwood.SmtpServer.Tests
         {
             Mocks mocks = new Mocks();
 
-            Connection connection = new Connection(mocks.Server.Object, c => mocks.ConnectionChannel.Object);
+            Connection connection = new Connection(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
             IEditableMessage message = connection.NewMessage();
 
             connection.CommitMessage();

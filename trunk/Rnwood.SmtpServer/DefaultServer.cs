@@ -98,11 +98,4 @@ namespace Rnwood.SmtpServer
             remove { Behaviour.MessageCompleted -= value; }
         }
     }
-
-    public enum Ports
-    {
-        AssignAutomatically = 0,
-        SMTP = 25,
-        SMTPOverSSL=465
-    }
 }

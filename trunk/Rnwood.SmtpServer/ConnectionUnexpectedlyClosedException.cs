@@ -1,10 +1,11 @@
 ﻿using System;
+using System.IO;
 using System.Runtime.Serialization;
 
 namespace Rnwood.SmtpServer
 {
     [Serializable]
-    public class ConnectionUnexpectedlyClosedException : Exception
+    public class ConnectionUnexpectedlyClosedException : IOException
     {
         public ConnectionUnexpectedlyClosedException()
         {

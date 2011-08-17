@@ -5,7 +5,7 @@ using Rnwood.SmtpServer.Extensions.Auth;
 
 namespace Rnwood.SmtpServer
 {
-    public interface ISession
+    public interface ISession : IDisposable
     {
         /// <summary>
         /// Gets the date the session started.
@@ -70,6 +70,8 @@ namespace Rnwood.SmtpServer
         /// </summary>
         /// <seealso cref="CompletedNormally"/>
         /// <value>The session error.</value>
-        string SessionError { get; }
+        Exception SessionError { get; }
+
+        SessionErrorType SessionErrorType { get; }
     }
 }
