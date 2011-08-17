@@ -20,6 +20,8 @@ namespace Rnwood.SmtpServer
                 return;
             }
 
+            connection.Session.ClientName = command.ArgumentsText ?? "";
+
             StringBuilder text = new StringBuilder();
             text.AppendLine("Nice to meet you.");
 

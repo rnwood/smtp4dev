@@ -7,10 +7,8 @@ namespace Rnwood.SmtpServer
 {
     public class MemorySession : AbstractSession
     {
-        public MemorySession(IPAddress clientAddress, DateTime startDate )
+        public MemorySession(IPAddress clientAddress, DateTime startDate) : base(clientAddress, startDate)
         {
-            ClientAddress = clientAddress;
-            StartDate = startDate;
         }
 
         private readonly StringBuilder _log = new StringBuilder();
@@ -22,6 +20,11 @@ namespace Rnwood.SmtpServer
         public override void AppendToLog(string text)
         {
             _log.AppendLine(text);
+        }
+
+        public override void Dispose()
+        {
+
         }
     }
 }

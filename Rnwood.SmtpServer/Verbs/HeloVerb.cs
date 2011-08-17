@@ -1,6 +1,7 @@
 ﻿#region
 
 using Rnwood.SmtpServer.Verbs;
+using System.Linq;
 
 #endregion
 
@@ -17,7 +18,7 @@ namespace Rnwood.SmtpServer
                 return;
             }
 
-            connection.Session.ClientName = command.Arguments[0];
+            connection.Session.ClientName = command.ArgumentsText ?? "";
             connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Nice to meet you"));
         }
     }

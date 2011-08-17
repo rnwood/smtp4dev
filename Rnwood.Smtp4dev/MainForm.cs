@@ -37,8 +37,7 @@ namespace Rnwood.Smtp4dev
             Icon = Resources.ListeningIcon;
             trayIcon.Icon = Resources.NotListeningIcon;
 
-            versionLabel.Text
-                = versionLabel.Text + " v" + typeof (Program).Assembly.GetName().Version.ToString();
+            label2.Text = " v" + typeof(Program).Assembly.GetName().Version.ToString();
         }
 
         private bool _firstShown = true;
@@ -152,6 +151,7 @@ namespace Rnwood.Smtp4dev
 
         private void UpdateFilteredMessages()
         {
+            clearSearchButton.Enabled = !string.IsNullOrEmpty(filterTextbox.Text);
             _filteredMessages.Clear();
             foreach (var message in _messages.Where(m => m.MatchesFilter(filterTextbox.Text)))
             {
@@ -174,7 +174,7 @@ namespace Rnwood.Smtp4dev
             }
             catch (Exception exception)
             {
-                Invoke((MethodInvoker)(() =>
+                BeginInvoke((MethodInvoker)(() =>
                                             {
 
                                                 StopServer();
@@ -189,7 +189,15 @@ namespace Rnwood.Smtp4dev
 
         private void OnSessionCompleted(object sender, SessionEventArgs e)
         {
-            BeginInvoke((MethodInvoker)(() => { _sessions.Add(new SessionViewModel(e.Session)); }));
+            BeginInvoke((MethodInvoker)(() =>
+                                            {
+                                                _sessions.Add(new SessionViewModel(e.Session));
+
+                                                if (e.Session.SessionErrorType == SessionErrorType.UnexpectedException)
+                                                {
+                                                    trayIcon.ShowBalloonTip(3000, "Unexpected Error", "The server experienced an unexpected error. View the session log for details.", ToolTipIcon.Error);
+                                                }
+                                            }));
         }
 
         private void OnMessageReceived(object sender, MessageEventArgs e)
@@ -204,7 +212,9 @@ namespace Rnwood.Smtp4dev
                                             {
                                                 while (_messages.Count > Settings.Default.MaxMessages)
                                                 {
+                                                    MessageViewModel removedMessage = _messages[0];
                                                     _messages.RemoveAt(0);
+                                                    removedMessage.Dispose();
                                                 }
                                             }
 
@@ -269,27 +279,37 @@ namespace Rnwood.Smtp4dev
 
         private void ViewMessage(MessageViewModel message)
         {
-            TempFileCollection tempFiles = new TempFileCollection();
-            FileInfo msgFile = new FileInfo(tempFiles.AddExtension("eml"));
-            message.SaveToFile(msgFile);
-
-            if (Registry.ClassesRoot.OpenSubKey(".eml", false) == null || string.IsNullOrEmpty((string)Registry.ClassesRoot.OpenSubKey(".eml", false).GetValue(null)))
+            try
             {
-                switch (MessageBox.Show(this,
-                                        "You don't appear to have a viewer application associated with .eml files!\nWould you like to download Windows Live Mail (free from live.com website)?",
-                                        "View Message", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question))
+                TempFileCollection tempFiles = new TempFileCollection();
+                FileInfo msgFile = new FileInfo(tempFiles.AddExtension("eml"));
+                message.SaveToFile(msgFile);
+
+                if (Registry.ClassesRoot.OpenSubKey(".eml", false) == null || string.IsNullOrEmpty((string)Registry.ClassesRoot.OpenSubKey(".eml", false).GetValue(null)))
                 {
-                    case DialogResult.Yes:
-                        Process.Start("http://download.live.com/wlmail");
-                        return;
-                        break;
-                    case DialogResult.Cancel:
-                        return;
-                        break;
+                    switch (MessageBox.Show(this,
+                                            "You don't appear to have a viewer application associated with .eml files!\nWould you like to visit the live.com website now to download Windows Live Mail?",
+                                            "View Message", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Question))
+                    {
+                        case DialogResult.Yes:
+                            Process.Start("http://download.live.com/wlmail");
+                            return;
+                            break;
+                        case DialogResult.Cancel:
+                            return;
+                            break;
+                    }
                 }
+
+
+                Process.Start(msgFile.FullName);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, "Failed to view message:\n" + ex.Message, Application.ProductName, MessageBoxButtons.OK,
+                                MessageBoxIcon.Error);
             }
 
-            Process.Start(msgFile.FullName);
             messageGrid.Refresh();
         }
 
@@ -300,9 +320,9 @@ namespace Rnwood.Smtp4dev
 
         private void DeleteAllMessages()
         {
-            foreach (SessionViewModel session in _sessions.ToArray())
+            foreach (MessageViewModel message in _messages.ToArray())
             {
-                DeleteSession(session);
+                DeleteMessage(message);
             }
         }
 
@@ -338,6 +358,9 @@ namespace Rnwood.Smtp4dev
             {
                 StopServer();
             }
+
+            DeleteAllMessages();
+
             trayIcon.Visible = false;
             Application.Exit();
         }
@@ -437,22 +460,19 @@ namespace Rnwood.Smtp4dev
 
         private void DeleteSession(SessionViewModel session)
         {
-            _sessions.Remove(session);
-
             foreach (MessageViewModel message in _messages.Where(mvm => session.Session.GetMessages().Any(m => mvm.Message == m)).ToArray())
             {
                 DeleteMessage(message);
             }
 
-            foreach (IMessage m in session.Session.GetMessages())
-            {
-                m.Dispose();
-            }
+            _sessions.Remove(session);
+            session.Dispose();
         }
 
         private void DeleteMessage(MessageViewModel message)
         {
             _messages.Remove(message);
+            message.Dispose();
         }
 
         private void stopListeningButton_Click(object sender, EventArgs e)
@@ -568,6 +588,11 @@ namespace Rnwood.Smtp4dev
         private void filterTextbox_TextChanged(object sender, EventArgs e)
         {
             UpdateFilteredMessages();
+        }
+
+        private void clearSearchButton_Click(object sender, EventArgs e)
+        {
+            filterTextbox.Text = "";
         }
     }
 }

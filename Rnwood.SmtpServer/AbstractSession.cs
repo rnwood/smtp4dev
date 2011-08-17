@@ -12,11 +12,14 @@ namespace Rnwood.SmtpServer
 {
     public abstract class AbstractSession : IEditableSession
     {
-        public AbstractSession()
+        public AbstractSession(IPAddress clientAddress, DateTime startDate)
         {
-            _messages = new List<IMessage>();
-        }
+               _messages = new List<IMessage>();
+            ClientAddress = clientAddress;
+            StartDate = startDate;
 
+        }
+        
         public DateTime StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }
@@ -28,6 +31,8 @@ namespace Rnwood.SmtpServer
         public bool SecureConnection { get; set; }
 
         public abstract TextReader GetLog();
+
+        public abstract void Dispose();
         
         public IMessage[] GetMessages()
         {
@@ -45,9 +50,11 @@ namespace Rnwood.SmtpServer
 
         public bool Authenticated { get; set; }
 
-        public IAuthenticationRequest AuthenticationCredentials { get; set; }
+        public IAuthenticationCredentials AuthenticationCredentials { get; set; }
 
-        public string SessionError { get; set; }
+        public Exception SessionError { get; set; }
+
+        public SessionErrorType SessionErrorType { get; set; }
 
         public abstract void AppendToLog(string text);
 

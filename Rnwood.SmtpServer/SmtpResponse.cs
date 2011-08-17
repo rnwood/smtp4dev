@@ -1,12 +1,13 @@
 ﻿#region
 
+using System;
 using System.Text;
 
 #endregion
 
 namespace Rnwood.SmtpServer
 {
-    public class SmtpResponse
+    public class SmtpResponse : IEquatable<SmtpResponse>
     {
         public SmtpResponse(int code, string message, params object[] args)
         {
@@ -56,6 +57,29 @@ namespace Rnwood.SmtpServer
             }
 
             return result.ToString();
+        }
+
+        public bool Equals(SmtpResponse other)
+        {
+            if (ReferenceEquals(null, other)) return false;
+            if (ReferenceEquals(this, other)) return true;
+            return other.Code == Code && Equals(other.Message, Message);
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (ReferenceEquals(null, obj)) return false;
+            if (ReferenceEquals(this, obj)) return true;
+            if (obj.GetType() != typeof (SmtpResponse)) return false;
+            return Equals((SmtpResponse) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                return (Code*397) ^ (Message != null ? Message.GetHashCode() : 0);
+            }
         }
     }
 }
