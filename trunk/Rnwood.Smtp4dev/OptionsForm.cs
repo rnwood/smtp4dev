@@ -104,5 +104,14 @@ namespace Rnwood.Smtp4dev
                 MessageBox.Show("Error checking for update.\n" + ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+
+        private void button4_Click(object sender, EventArgs e)
+        {
+            folderBrowserDialog1.SelectedPath = Settings.Default.CustomMessageFolder;
+            if (folderBrowserDialog1.ShowDialog() == System.Windows.Forms.DialogResult.OK)
+            {
+                Settings.Default.CustomMessageFolder = folderBrowserDialog1.SelectedPath;
+            }
+        }
     }
 }

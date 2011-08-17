@@ -25,7 +25,8 @@ namespace Rnwood.SmtpServer
 
         IAuthenticationCredentials AuthenticationCredentials { get; set; }
 
-        string SessionError { get; set; }
+        Exception SessionError { get; set; }
+        SessionErrorType SessionErrorType { get; set; }
 
         void AppendToLog(string text);
     }

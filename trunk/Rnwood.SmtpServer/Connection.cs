@@ -18,32 +18,21 @@ namespace Rnwood.SmtpServer
     public class Connection : IConnection
     {
 
+        public IConnectionChannel ConnectionChannel { get; private set; }
 
-        public Encoding ReaderEncoding
+        public Connection(IServer server, IConnectionChannel connectionChannel, IVerbMap verbMap)
         {
-            get; private set;
-        }
-
-        private readonly TcpClient _tcpClient;
-        private StreamReader _reader;
-
-        private Stream _stream;
-        private StreamWriter _writer;
-
-        public Connection(Server server, TcpClient tcpClient)
-        {
-            VerbMap = new VerbMap();
-            Session = server.Behaviour.OnCreateNewSession(this, ((IPEndPoint) tcpClient.Client.RemoteEndPoint).Address,
-                                                          DateTime.Now);
+            ConnectionChannel = connectionChannel;
+            VerbMap = verbMap;
+            Session = server.Behaviour.OnCreateNewSession(this, ConnectionChannel.ClientIPAddress, DateTime.Now);
 
             Server = server;
-            _tcpClient = tcpClient;
-            _tcpClient.ReceiveTimeout = Server.Behaviour.GetReceiveTimeout(this);
 
-            _stream = tcpClient.GetStream();
+            ConnectionChannel.ReceiveTimeout = Server.Behaviour.GetReceiveTimeout(this);
             SetReaderEncodingToDefault();
 
-            SetupVerbs();
+
+            ExtensionProcessors = Server.Behaviour.GetExtensions(this).Select(e => e.CreateExtensionProcessor(this)).ToArray();
         }
 
         #region IConnectionProcessor Members
@@ -52,8 +41,12 @@ namespace Rnwood.SmtpServer
 
         public void SetReaderEncoding(Encoding encoding)
         {
-            ReaderEncoding = encoding;
-            SetupReaderAndWriter();
+            ConnectionChannel.SetReaderEncoding(encoding);
+        }
+
+        public Encoding ReaderEncoding
+        {
+            get { return ConnectionChannel.ReaderEncoding; }
         }
 
         public void SetReaderEncodingToDefault()
@@ -65,28 +58,26 @@ namespace Rnwood.SmtpServer
 
         public void CloseConnection()
         {
-            _writer.Flush();
-            _tcpClient.Close();
+            ConnectionChannel.Close();
         }
 
-        public VerbMap VerbMap { get; private set; }
+        public IVerbMap VerbMap { get; private set; }
 
         public void ApplyStreamFilter(Func<Stream, Stream> filter)
         {
-            _stream = filter(_stream);
-            SetupReaderAndWriter();
+            ConnectionChannel.ApplyStreamFilter(filter);
         }
 
         public MailVerb MailVerb
         {
-            get { return (MailVerb) VerbMap.GetVerbProcessor("MAIL"); }
+            get { return (MailVerb)VerbMap.GetVerbProcessor("MAIL"); }
         }
 
         public void WriteLine(string text, params object[] arg)
         {
             string formattedText = string.Format(text, arg);
             Session.AppendToLog(formattedText);
-            _writer.WriteLine(formattedText);
+            ConnectionChannel.WriteLine(formattedText);
         }
 
         public void WriteResponse(SmtpResponse response)
@@ -96,12 +87,7 @@ namespace Rnwood.SmtpServer
 
         public string ReadLine()
         {
-            string text = _reader.ReadLine();
-
-            if (text == null)
-            {
-                throw new IOException("Client disconnected");
-            }
+            string text = ConnectionChannel.ReadLine();
             Session.AppendToLog(text);
             return text;
         }
@@ -132,51 +118,36 @@ namespace Rnwood.SmtpServer
 
         #endregion
 
-        private void SetupReaderAndWriter()
-        {
-            _writer = new StreamWriter(_stream, ReaderEncoding) {AutoFlush = true, NewLine = "\r\n"};
-            _reader = new StreamReader(_stream, ReaderEncoding);
-        }
-
-        private void SetupVerbs()
-        {
-            VerbMap.SetVerbProcessor("HELO", new HeloVerb());
-            VerbMap.SetVerbProcessor("EHLO", new EhloVerb());
-            VerbMap.SetVerbProcessor("QUIT", new QuitVerb());
-            VerbMap.SetVerbProcessor("MAIL", new MailVerb());
-            VerbMap.SetVerbProcessor("RCPT", new RcptVerb());
-            VerbMap.SetVerbProcessor("DATA", new DataVerb());
-            VerbMap.SetVerbProcessor("RSET", new RsetVerb());
-            VerbMap.SetVerbProcessor("NOOP", new NoopVerb());
-
-            ExtensionProcessors =
-                Server.Behaviour.GetExtensions(this).Select(e => e.CreateExtensionProcessor(this)).ToArray();
-        }
-
         public Thread Thread { get; private set; }
 
-        public void Start()
+        public void Process()
         {
             Thread = System.Threading.Thread.CurrentThread;
 
             try
             {
                 Server.Behaviour.OnSessionStarted(this, Session);
+                SetReaderEncoding(Server.Behaviour.GetDefaultEncoding(this));
 
                 if (Server.Behaviour.IsSSLEnabled(this))
                 {
-                    SslStream sslStream = new SslStream(_stream);
-                    sslStream.AuthenticateAsServer(Server.Behaviour.GetSSLCertificate(this));
+                    ConnectionChannel.ApplyStreamFilter(s =>
+                    {
+                        SslStream sslStream = new SslStream(s);
+                        sslStream.AuthenticateAsServer(Server.Behaviour.GetSSLCertificate(this));
+                        return sslStream;
+                    });
+
                     Session.SecureConnection = true;
-                    _stream = sslStream;
-                    SetupReaderAndWriter();
                 }
 
                 WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady,
                                                Server.Behaviour.DomainName + " smtp4dev ready"));
 
-                while (_tcpClient.Client.Connected)
+                int numberOfInvalidCommands = 0;
+                while (ConnectionChannel.IsConnected)
                 {
+                    bool badCommand = false;
                     SmtpCommand command = new SmtpCommand(ReadLine());
                     Server.Behaviour.OnCommandReceived(this, command);
 
@@ -197,8 +168,7 @@ namespace Rnwood.SmtpServer
                         }
                         else
                         {
-                            WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
-                                                           "Command unrecognised"));
+                            badCommand = true;
                         }
                     }
                     else if (command.IsEmpty)
@@ -206,17 +176,40 @@ namespace Rnwood.SmtpServer
                     }
                     else
                     {
-                        WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
-                                                       "Command unrecognised"));
+                        badCommand = true;
+                    }
+
+                    if (badCommand)
+                    {
+                        numberOfInvalidCommands++;
+
+                        if (Server.Behaviour.MaximumNumberOfSequentialBadCommands > 0 &&
+                        numberOfInvalidCommands >= Server.Behaviour.MaximumNumberOfSequentialBadCommands)
+                        {
+                            WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel, "Too many bad commands. Bye!"));
+                            CloseConnection();
+                        }
+                        else
+                        {
+                            WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
+                                                           "Command unrecognised"));
+                        }
                     }
                 }
             }
             catch (IOException ioException)
             {
-                Session.SessionError = ioException.Message;
-            } catch (ThreadInterruptedException exception)
+                Session.SessionError = ioException;
+                Session.SessionErrorType = SessionErrorType.NetworkError;
+            }
+            catch (ThreadInterruptedException exception)
             {
-                Session.SessionError = exception.Message;
+                Session.SessionError = exception;
+                Session.SessionErrorType = SessionErrorType.ServerShutdown;
+            } catch (Exception exception)
+            {
+                Session.SessionError = exception;
+                Session.SessionErrorType = SessionErrorType.UnexpectedException;
             }
 
             CloseConnection();

@@ -10,7 +10,7 @@ namespace Rnwood.SmtpServer.Extensions
         {
             connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady,
                                                       "Ready to start TLS"));
-            connection.Channel.ApplyStreamFilter(stream =>
+            connection.ApplyStreamFilter(stream =>
                                                      {
                                                          SslStream sslStream = new SslStream(stream);
                                                          sslStream.AuthenticateAsServer(

@@ -5,12 +5,12 @@ namespace Rnwood.SmtpServer
 {
     public class AuthenticationCredentialsValidationEventArgs : EventArgs
     {
-        public AuthenticationCredentialsValidationEventArgs(IAuthenticationRequest credentials)
+        public AuthenticationCredentialsValidationEventArgs(IAuthenticationCredentials credentials)
         {
             Credentials = credentials;
         }
 
-        public IAuthenticationRequest Credentials { get; private set; }
+        public IAuthenticationCredentials Credentials { get; private set; }
 
         public AuthenticationResult AuthenticationResult { get; set; }
     }

@@ -34,5 +34,17 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
         }
+
+        [Test]
+        public void SayHelo_NoName()
+        {
+            Mocks mocks = new Mocks();
+
+            HeloVerb verb = new HeloVerb();
+            verb.Process(mocks.Connection.Object, new SmtpCommand("HELO"));
+
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+            mocks.Session.VerifySet(s => s.ClientName, "");
+        }
     }
 }

@@ -12,9 +12,9 @@ namespace Rnwood.SmtpServer
 
         private byte[] _data;
 
-        public override Stream GetData(bool forWriting)
+        public override Stream GetData(DataAccessMode dataAccessMode)
         {
-            if (forWriting)
+            if (dataAccessMode == DataAccessMode.ForWriting)
             {
                 CloseNotifyingMemoryStream stream = new CloseNotifyingMemoryStream();
                 stream.Closing += (s, ea) =>

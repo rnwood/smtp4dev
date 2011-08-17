@@ -10,7 +10,7 @@ using System.Linq;
 
 namespace Rnwood.Smtp4dev
 {
-    public class MessageViewModel
+    public class MessageViewModel : IDisposable
     {
         public MessageViewModel(IMessage message)
         {
@@ -39,19 +39,34 @@ namespace Rnwood.Smtp4dev
             get { return SharpMimeTools.rfc2047decode(Parts.Header.Subject); }
         }
 
+        public void Dispose()
+        {
+            if (_contents != null)
+            {
+                _contents.Close();
+                _partsStream.Close();
+            }
+            Message.Dispose();
+        }
+
         private SharpMimeMessage _contents;
+        private Stream _partsStream;
+
         public SharpMimeMessage Parts
         {
             get
             {
                 if (_contents == null)
                 {
-                    _contents = new SharpMimeMessage(Message.GetData());
+                    _partsStream = Message.GetData();
+                    _contents = new SharpMimeMessage(_partsStream);
                 }
 
                 return _contents;
             }
         }
+
+
 
         public bool HasBeenViewed { get; private set; }
 
