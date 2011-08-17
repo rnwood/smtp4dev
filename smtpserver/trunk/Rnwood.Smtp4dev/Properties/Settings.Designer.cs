@@ -448,5 +448,17 @@ namespace Rnwood.Smtp4dev.Properties {
                 this["CustomMessageFolder"] = value;
             }
         }
+        
+        [global::System.Configuration.UserScopedSettingAttribute()]
+        [global::System.Diagnostics.DebuggerNonUserCodeAttribute()]
+        [global::System.Configuration.DefaultSettingValueAttribute("False")]
+        public bool CauseTimeout {
+            get {
+                return ((bool)(this["CauseTimeout"]));
+            }
+            set {
+                this["CauseTimeout"] = value;
+            }
+        }
     }
 }

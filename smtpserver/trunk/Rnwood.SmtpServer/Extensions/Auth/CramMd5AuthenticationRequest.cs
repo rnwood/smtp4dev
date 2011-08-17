@@ -1,6 +1,6 @@
 ﻿namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class CramMd5AuthenticationRequest : IAuthenticationRequest
+    public class CramMd5AuthenticationRequest : IAuthenticationCredentials
     {
         public CramMd5AuthenticationRequest(string username, string challenge, string challengeResponse)
         {

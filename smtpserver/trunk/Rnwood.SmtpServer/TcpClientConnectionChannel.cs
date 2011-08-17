@@ -9,24 +9,13 @@ namespace Rnwood.SmtpServer
 {
     internal class TcpClientConnectionChannel : IConnectionChannel
     {
-        public TcpClientConnectionChannel(IConnection connection, TcpClient tcpClient, Encoding encoding)
+        public TcpClientConnectionChannel(TcpClient tcpClient)
         {
-            _connection = connection;
             _tcpClient = tcpClient;
             _stream = tcpClient.GetStream();
-
-            if (connection.Server.Behaviour.IsSSLEnabled(connection))
-            {
-                SslStream sslStream = new SslStream(_stream);
-                sslStream.AuthenticateAsServer(connection.Server.Behaviour.GetSSLCertificate(connection));
-                _connection.Session.SecureConnection = true;
-                _stream = sslStream;
-            }
-
-            SetReaderEncoding(encoding);
+            SetReaderEncoding(Encoding.Default);
         }
 
-        private readonly IConnection _connection;
         private readonly TcpClient _tcpClient;
         private StreamReader _reader;
         private Stream _stream;

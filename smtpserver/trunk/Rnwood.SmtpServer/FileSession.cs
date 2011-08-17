@@ -1,12 +1,12 @@
-using System.CodeDom.Compiler;
+using System;
 using System.IO;
+using System.Net;
 
 namespace Rnwood.SmtpServer
 {
-    public class FileMessage : AbstractMessage
+    public class FileSession : AbstractSession
     {
-        public FileMessage(ISession session, FileInfo file, bool keepOnDispose)
-            : base(session)
+        public FileSession(IPAddress clientAddress, DateTime startDate, FileInfo file, bool keepOnDispose) : base(clientAddress, startDate)
         {
             _file = file;
             _keepOnDispose = keepOnDispose;
@@ -15,13 +15,17 @@ namespace Rnwood.SmtpServer
         private readonly FileInfo _file;
         private readonly bool _keepOnDispose;
 
-        public override Stream GetData(DataAccessMode dataAccessMode)
+        public override TextReader GetLog()
         {
-            if (dataAccessMode == DataAccessMode.ForWriting)
+            return _file.OpenText();
+        }
+
+        public override void AppendToLog(string text)
+        {
+            using (StreamWriter writer = _file.AppendText())
             {
-                return _file.OpenWrite();
+                writer.WriteLine(text);
             }
-            return new FileStream(_file.FullName, FileMode.Open, FileAccess.Read, FileShare.Delete|FileShare.Read);
         }
 
         public override void Dispose()

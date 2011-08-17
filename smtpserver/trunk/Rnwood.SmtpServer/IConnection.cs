@@ -14,7 +14,7 @@ namespace Rnwood.SmtpServer
     {
         IServer Server { get; }
         IExtensionProcessor[] ExtensionProcessors { get; }
-        VerbMap VerbMap { get; }
+        IVerbMap VerbMap { get; }
         MailVerb MailVerb { get; }
         IEditableSession Session { get; }
         IEditableMessage CurrentMessage { get; }

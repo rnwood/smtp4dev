@@ -7,6 +7,7 @@ using System.Net;
 using System.Net.Sockets;
 using System.Threading;
 using System.Linq;
+using Rnwood.SmtpServer.Verbs;
 
 #endregion
 
@@ -53,6 +54,20 @@ namespace Rnwood.SmtpServer
             }
         }
 
+        private IVerbMap GetVerbMap()
+        {
+            VerbMap verbMap = new VerbMap();
+            verbMap.SetVerbProcessor("HELO", new HeloVerb());
+            verbMap.SetVerbProcessor("EHLO", new EhloVerb());
+            verbMap.SetVerbProcessor("QUIT", new QuitVerb());
+            verbMap.SetVerbProcessor("MAIL", new MailVerb());
+            verbMap.SetVerbProcessor("RCPT", new RcptVerb());
+            verbMap.SetVerbProcessor("DATA", new DataVerb());
+            verbMap.SetVerbProcessor("RSET", new RsetVerb());
+            verbMap.SetVerbProcessor("NOOP", new NoopVerb());
+
+            return verbMap;
+        }
 
         private void Core()
         {
@@ -67,7 +82,7 @@ namespace Rnwood.SmtpServer
                     if (IsRunning)
                     {
                         Thread thread = new Thread(ConnectionThreadWork);
-                        Connection connection = new Connection(this, (TcpClient)tcpClient);
+                        Connection connection = new Connection(this, new TcpClientConnectionChannel(tcpClient), GetVerbMap());
                         _activeConnections.Add(connection);
                         thread.Start(connection);
                     }
@@ -148,7 +163,7 @@ namespace Rnwood.SmtpServer
         private void ConnectionThreadWork(object connectionObj)
         {
             Connection connection = (Connection) connectionObj;
-            connection.Start();
+            connection.Process();
             _activeConnections.Remove(connection);
         }
     }

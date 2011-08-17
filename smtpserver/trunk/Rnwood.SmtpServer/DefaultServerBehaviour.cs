@@ -40,7 +40,7 @@ namespace Rnwood.SmtpServer
 
         #region IServerBehaviour Members
 
-        public IEditableSession OnCreateNewSession(Connection connection, IPAddress clientAddress, DateTime startDate)
+        public IEditableSession OnCreateNewSession(IConnection connection, IPAddress clientAddress, DateTime startDate)
         {
             return new MemorySession(clientAddress, startDate);
         }
@@ -127,8 +127,13 @@ namespace Rnwood.SmtpServer
             return (int)new TimeSpan(0, 5, 0).TotalMilliseconds;
         }
 
+        public int MaximumNumberOfSequentialBadCommands
+        {
+            get { return 10; }
+        }
+
         public virtual AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
-                                                                          IAuthenticationRequest request)
+                                                                          IAuthenticationCredentials request)
         {
             if (AuthenticationCredentialsValidationRequired != null)
             {

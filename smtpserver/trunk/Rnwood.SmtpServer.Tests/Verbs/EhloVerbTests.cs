@@ -42,6 +42,8 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             EhloVerb ehloVerb = new EhloVerb();
             ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO"));
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+
+            mocks.Session.VerifySet(s => s.ClientName = "");
         }
 
 

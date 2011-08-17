@@ -57,17 +57,39 @@
       <Link>SolutionInfo.cs</Link>
     </Compile>
     <Compile Include="AbstractMessageTests.cs" />
+    <Compile Include="AbstractSessionTests.cs" />
+    <Compile Include="ASCIISevenBitTruncatingEncodingTests.cs" />
     <Compile Include="ClientTests.cs" />
+    <Compile Include="CommandEventArgsTests.cs" />
+    <Compile Include="ConnectionTests.cs" />
+    <Compile Include="Extensions\Auth\AnonymousMechanismProcessorTests.cs" />
+    <Compile Include="Extensions\Auth\CramMd5AuthenticationRequestTests.cs" />
+    <Compile Include="Extensions\Auth\CramMd5MechanismProcessorTests.cs" />
     <Compile Include="FileMessageTests.cs" />
     <Compile Include="MemoryMessageTests.cs" />
+    <Compile Include="MemorySessionTests.cs" />
+    <Compile Include="MessageEventArgsTests.cs" />
     <Compile Include="Mocks.cs" />
+    <Compile Include="ParameterParserTests.cs" />
+    <Compile Include="ParameterProcessorMapTests.cs" />
+    <Compile Include="ParameterTests.cs" />
+    <Compile Include="RandomIntegerGeneratorTests.cs" />
     <Compile Include="ServerTests.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SessionEventArgsTests.cs" />
     <Compile Include="SmtpCommandTests.cs" />
+    <Compile Include="SmtpResponseTests.cs" />
+    <Compile Include="SmtpServerExceptionTests.cs" />
     <Compile Include="Verbs\DataVerbTests.cs" />
+    <Compile Include="Verbs\EhloVerbTests.cs" />
     <Compile Include="Verbs\HeloVerbTests.cs" />
+    <Compile Include="Verbs\MailFromVerbTests.cs" />
     <Compile Include="Verbs\NoopVerbTests.cs" />
+    <Compile Include="Verbs\QuitVerbTests.cs" />
     <Compile Include="Verbs\RcptToVerbTests.cs" />
+    <Compile Include="Verbs\RsetVerbTests.cs" />
+    <Compile Include="Verbs\VerbMapTests.cs" />
+    <Compile Include="Verbs\VerbWithSubCommandsTests.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\Rnwood.SmtpServer\Rnwood.SmtpServer.csproj">
