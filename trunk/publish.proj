@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
 	<PropertyGroup>
-		<Version>2.0</Version>
+		<Version>2.1alpha1</Version>
 		<MSBuildCommunityTasksPath>.</MSBuildCommunityTasksPath>
 	</PropertyGroup>
 
@@ -31,7 +31,7 @@
 			<ServerSourceFiles Include="Publish\Source\Rnwood.SmtpServer\**\*.*" Exclude="Publish\*"/>
 		</ItemGroup>
 		
-		<Copy SourceFiles="LICENSE" DestinationFiles="Publish\Source\Rnwood.SmtpServer\LICENSE"/>
+		<Copy SourceFiles="LICENSE.txt" DestinationFiles="Publish\Source\Rnwood.SmtpServer\LICENSE.txt"/>
 		
 		<Zip Files="@(ServerSourceFiles)" ZipFileName="Publish\Rnwood.SmtpServer-$(Version)-source.zip" WorkingDirectory="Publish\Source\Rnwood.SmtpServer" ZipLevel="9" />
 		
