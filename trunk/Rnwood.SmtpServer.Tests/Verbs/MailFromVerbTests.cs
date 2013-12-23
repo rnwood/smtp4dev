@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestFixture]
+    [TestClass]
     public class MailFromVerbTests
     {
-        [Test]
+        [TestMethod]
         public void Process_AlreadyGivenFrom_ErrorResponse()
         {
             Mocks mocks = new Mocks();
@@ -23,7 +23,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
         }
 
-        [Test]
+        [TestMethod]
         public void Process_MissingAddress_ErrorResponse()
         {
             Mocks mocks = new Mocks();
@@ -33,12 +33,27 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
         }
+        
+        [TestMethod]
+        public void Process_Address_Plain()
+        {
+            Process_Address("rob@rnwood.co.uk", "rob@rnwood.co.uk", StandardSmtpResponseCode.OK);
+        }
 
-        [Row("rob@rnwood.co.uk", "rob@rnwood.co.uk", StandardSmtpResponseCode.OK)]
-        [Row("<rob@rnwood.co.uk>", "rob@rnwood.co.uk", StandardSmtpResponseCode.OK)]
-        [Row("<Robert Wood <rob@rnwood.co.uk>>", "Robert Wood <rob@rnwood.co.uk>", StandardSmtpResponseCode.OK)]
-        [Test]
-        public void Process_Address(string address, string expectedParsedAddress, StandardSmtpResponseCode expectedResponse)
+        [TestMethod]
+        public void Process_Address_Bracketed()
+        {
+            Process_Address("<rob@rnwood.co.uk>", "rob@rnwood.co.uk", StandardSmtpResponseCode.OK);
+        }
+
+        [TestMethod]
+        public void Process_Address_BracketedWithName()
+        {
+            Process_Address("<Robert Wood <rob@rnwood.co.uk>>", "Robert Wood <rob@rnwood.co.uk>", StandardSmtpResponseCode.OK);
+        }
+
+
+        private void Process_Address(string address, string expectedParsedAddress, StandardSmtpResponseCode expectedResponse)
         {
             Mocks mocks = new Mocks();
             Mock<IEditableMessage> message = new Mock<IEditableMessage>();

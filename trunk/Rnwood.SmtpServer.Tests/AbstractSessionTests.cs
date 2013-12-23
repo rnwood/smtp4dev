@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace Rnwood.SmtpServer.Tests
@@ -11,25 +11,25 @@ namespace Rnwood.SmtpServer.Tests
     {
         protected abstract IEditableSession GetSession();
 
-        [Test]
+        [TestMethod]
         public void AppendToLog()
         {
             IEditableSession session = GetSession();
             session.AppendToLog("Blah1");
             session.AppendToLog("Blah2");
 
-            Assert.AreElementsEqual(new[] { "Blah1", "Blah2", "" },
+            CollectionAssert.AreEqual(new[] { "Blah1", "Blah2", "" },
                                     session.GetLog().ReadToEnd().Split(new string[] { "\r\n" }, StringSplitOptions.None));
         }
 
-        [Test]
+        [TestMethod]
         public void GetMessages_InitiallyEmpty()
         {
             IEditableSession session = GetSession();
             Assert.AreEqual(0, session.GetMessages().Length);
         }
 
-        [Test]
+        [TestMethod]
         public void AddMessage()
         {
             IEditableSession session = GetSession();

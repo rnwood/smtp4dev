@@ -6,6 +6,8 @@ using System.Reflection;
 using System.Windows.Forms;
 using Rnwood.AutoUpdate;
 using Rnwood.Smtp4dev.Properties;
+using Rnwood.SmtpServer;
+using Rnwood.Smtp4dev.Service;
 
 #endregion
 
@@ -29,11 +31,44 @@ namespace Rnwood.Smtp4dev
                 Settings.Default.Save();
             }
 
-            CheckForUpdate();
+            if (args.Length == 1 && args[0].Equals("/SERVICE", StringComparison.OrdinalIgnoreCase))
+            {
+                Smtp4devService.Start();
+            } else if (args.Length == 1 && args[0].Equals("/INSTALLSERVICE", StringComparison.OrdinalIgnoreCase))
+            {
+                Smtp4devService.Install();
+                Console.WriteLine("Service Installed OK");
+            }
+            else if (args.Length == 1 && args[0].Equals("/REMOVESERVICE", StringComparison.OrdinalIgnoreCase))
+            {
+                Smtp4devService.Remove();
+                Console.WriteLine("Service Removed OK");
+            }
+            else
+            {
+                SingleInstanceManager<FirstInstanceServer> sim = new SingleInstanceManager<FirstInstanceServer>("{064CA48F-C04D-498C-A8E9-D0BAC8AF0FE8}", () => new FirstInstanceServer());
 
-            MainForm form = new MainForm();
-            Application.Run(form);
+                if (!Settings.Default.AllowMultipleInstances)
+                {
+                    if (!sim.IsFirstInstance)
+                    {
+                        sim.GetFirstInstance().ProcessLaunchInfo(new LaunchInfo(Environment.CurrentDirectory, args));
+                        return;
+                    }
+                }
+
+                CheckForUpdate();
+                MainForm form = new MainForm();
+
+                if (sim.IsFirstInstance)
+                {
+                    sim.GetFirstInstance().LaunchInfoReceived += (s, ea) => form.Activate();
+                }
+
+                Application.Run(form);
+            }
         }
+
 
         private static void CheckForUpdate()
         {

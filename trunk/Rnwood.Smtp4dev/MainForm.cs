@@ -165,7 +165,7 @@ namespace Rnwood.Smtp4dev
             {
                 Application.DoEvents();
 
-                ServerBehaviour b = new ServerBehaviour();
+                ServerBehaviour b = new ServerBehaviour(Settings.Default);
                 b.MessageReceived += OnMessageReceived;
                 b.SessionCompleted += OnSessionCompleted;
 

@@ -2,28 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Rnwood.SmtpServer.Extensions.Auth;
 
 namespace Rnwood.SmtpServer.Tests.Extensions.Auth
 {
-    [TestFixture]
+    [TestClass]
     public class AnomymousMechanismProcessorTests
     {
-        [Test]
+        [TestMethod]
         public void ProcessResponse_Success()
         {
             ProcessResponse(AuthenticationResult.Success, AuthMechanismProcessorStatus.Success);
         }
 
-        [Test]
+        [TestMethod]
         public void ProcessResponse_Failure()
         {
             ProcessResponse(AuthenticationResult.Failure, AuthMechanismProcessorStatus.Failed);
         }
 
-        [Test]
+        [TestMethod]
         public void ProcessResponse_TemporarilyFailure()
         {
             ProcessResponse(AuthenticationResult.TemporaryFailure, AuthMechanismProcessorStatus.Failed);
@@ -38,13 +38,13 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
                 .Returns(authenticationResult);
 
             AnonymousMechanismProcessor anonymousMechanismProcessor = new AnonymousMechanismProcessor(mocks.Connection.Object);
-            AuthMechanismProcessorStatus result = anonymousMechanismProcessor.ProcessResponse("");
+            AuthMechanismProcessorStatus result = anonymousMechanismProcessor.ProcessResponse(null);
 
             Assert.AreEqual(authMechanismProcessorStatus, result);
 
             if (authenticationResult == AuthenticationResult.Success)
             {
-                Assert.IsInstanceOfType(typeof(AnonymousAuthenticationCredentials), anonymousMechanismProcessor.Credentials);
+                Assert.IsInstanceOfType(anonymousMechanismProcessor.Credentials, typeof(AnonymousAuthenticationCredentials));
             }
         }
     }

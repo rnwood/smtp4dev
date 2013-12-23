@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestFixture]
+    [TestClass]
     public class HeloVerbTests
     {
-        [Test]
+        [TestMethod]
         public void SayHelo()
         {
             Mocks mocks = new Mocks();
@@ -22,7 +22,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.Session.VerifySet(s => s.ClientName, "foo.bar");
         }
 
-        [Test]
+        [TestMethod]
         public void SayHeloTwice_ReturnsError()
         {
             Mocks mocks = new Mocks();
@@ -35,7 +35,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
         }
 
-        [Test]
+        [TestMethod]
         public void SayHelo_NoName()
         {
             Mocks mocks = new Mocks();

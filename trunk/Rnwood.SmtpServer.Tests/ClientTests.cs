@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Mail;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestFixture]
+    [TestClass]
     public class ClientTests
     {
 
-        [Test]
+        [TestMethod]
         public void SmtpClient_NonSSL()
         {
             DefaultServer server = new DefaultServer(Ports.AssignAutomatically);
