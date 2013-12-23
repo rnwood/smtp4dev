@@ -17,7 +17,13 @@ namespace WindowsService
             InitializeComponent();
 
             _behaviour = new DefaultServerBehaviour();
+            _behaviour.MessageReceived += OnMessageReceived;
             _server = new Server(_behaviour);
+        }
+
+        void OnMessageReceived(object sender, MessageEventArgs e)
+        {
+            
         }
 
         private DefaultServerBehaviour _behaviour;

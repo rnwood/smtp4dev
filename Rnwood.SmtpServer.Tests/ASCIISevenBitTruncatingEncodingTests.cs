@@ -1,30 +1,31 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestFixture]
+    [TestClass]
     public class ASCIISevenBitTruncatingEncodingTests
     {
-        [Test]
+        [TestMethod]
         public void GetChars()
         {
             ASCIISevenBitTruncatingEncoding encoding = new ASCIISevenBitTruncatingEncoding();
             char[] chars = encoding.GetChars(new[] { (byte)'a', (byte)'b', (byte)'c' }, 0, 3);
 
-            Assert.AreElementsEqual(new[] { 'a', 'b', 'c' }, chars);
+            CollectionAssert.AreEqual(new[] { 'a', 'b', 'c' }, chars);
         }
 
-        [Test]
+        [TestMethod]
         public void GetBytes()
         {
             ASCIISevenBitTruncatingEncoding encoding = new ASCIISevenBitTruncatingEncoding();
             byte[] bytes = encoding.GetBytes(new[] { 'a', 'b', 'c' }, 0, 3);
 
-            Assert.AreElementsEqual(new[] { (byte)'a', (byte)'b', (byte)'c' }, bytes);
+            CollectionAssert.AreEqual(new[] { (byte)'a', (byte)'b', (byte)'c' }, bytes);
         }
     }
 }

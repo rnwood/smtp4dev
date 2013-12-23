@@ -2,13 +2,13 @@
 
 using System.Net.Sockets;
 using System.Threading;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 #endregion
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestFixture]
+    [TestClass]
     public class ServerTests
     {
         private Server StartServer()
@@ -23,7 +23,7 @@ namespace Rnwood.SmtpServer.Tests
             return new DefaultServer(Ports.AssignAutomatically);
         }
 
-        [Test]
+        [TestMethod]
         public void Run_Blocks()
         {
             Server server = NewServer();
@@ -47,7 +47,7 @@ namespace Rnwood.SmtpServer.Tests
             runThread.Join();
         }
 
-        [Test]
+        [TestMethod]
         public void Start_IsRunning()
         {
             Server server = StartServer();
@@ -55,7 +55,7 @@ namespace Rnwood.SmtpServer.Tests
             server.Stop();
         }
 
-        [Test]
+        [TestMethod]
         [ExpectedException(typeof (SocketException))]
         public void StartOnInusePort_StartupExceptionThrown()
         {
@@ -68,7 +68,7 @@ namespace Rnwood.SmtpServer.Tests
             server1.Stop();
         }
 
-        [Test]
+        [TestMethod]
         public void Stop_NotRunning()
         {
             Server server = StartServer();
@@ -76,7 +76,7 @@ namespace Rnwood.SmtpServer.Tests
             Assert.IsFalse(server.IsRunning);
         }
 
-        [Test]
+        [TestMethod]
         public void Start_CanConnect()
         {
             Server server = StartServer();

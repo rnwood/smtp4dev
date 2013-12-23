@@ -39,7 +39,7 @@
       <Value Profile="(Default)">True</Value>
     </Setting>
     <Setting Name="EnableSTARTTLS" Type="System.Boolean" Scope="User">
-      <Value Profile="(Default)">True</Value>
+      <Value Profile="(Default)">False</Value>
     </Setting>
     <Setting Name="SSLCertificatePath" Type="System.String" Scope="User">
       <Value Profile="(Default)" />
@@ -111,6 +111,9 @@
       <Value Profile="(Default)" />
     </Setting>
     <Setting Name="CauseTimeout" Type="System.Boolean" Scope="User">
+      <Value Profile="(Default)">False</Value>
+    </Setting>
+    <Setting Name="AllowMultipleInstances" Type="System.Boolean" Scope="User">
       <Value Profile="(Default)">False</Value>
     </Setting>
   </Settings>

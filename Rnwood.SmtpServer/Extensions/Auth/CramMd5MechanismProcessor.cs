@@ -40,7 +40,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             }
             else
             {
-                string response = DecodeBase64(data);
+                string response = ServerUtility.DecodeBase64(data);
                 string[] responseparts = response.Split(' ');
 
                 if (responseparts.Length != 2)
@@ -72,19 +72,6 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         public IAuthenticationCredentials Credentials { get; private set; }
 
         #endregion
-
-        private static string DecodeBase64(string data)
-        {
-            try
-            {
-                return Encoding.ASCII.GetString(Convert.FromBase64String(data));
-            }
-            catch (FormatException)
-            {
-                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationFailure,
-                                                               "Bad Base64 data"));
-            }
-        }
 
         #region Nested type: States
 
