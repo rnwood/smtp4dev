@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestFixture]
+    [TestClass]
     public class SessionEventArgsTests
     {
-        [Test]
+        [TestMethod]
         public void Session()
         {
             Mocks mocks = new Mocks();

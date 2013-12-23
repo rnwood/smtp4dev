@@ -10,32 +10,41 @@ using Rnwood.Smtp4dev.Properties;
 using Rnwood.SmtpServer;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Extensions.Auth;
+using Settings = System.Object;
 
 #endregion
 
 namespace Rnwood.Smtp4dev
 {
-    public class ServerBehaviour : IServerBehaviour
+    class ServerBehaviour : IServerBehaviour
     {
         private readonly AuthExtension _authExtension = new AuthExtension();
         private readonly EightBitMimeExtension _eightBitMimeExtension = new EightBitMimeExtension();
         private readonly SizeExtension _sizeExtension = new SizeExtension();
         private readonly StartTlsExtension _startTLSExtension = new StartTlsExtension();
+        private readonly IServerSettings _settings;
+
+        public ServerBehaviour(IServerSettings settings)
+        {
+            _settings = settings;
+        }
 
         #region IServerBehaviour Members
 
         public IEditableSession OnCreateNewSession(IConnection connection, IPAddress clientAddress, DateTime startDate)
         {
-            if (!Settings.Default.MessageFolder.Exists)
+            DirectoryInfo messageFolder = new DirectoryInfo(_settings.CustomMessageFolder);
+
+            if (!messageFolder.Exists)
             {
-                Settings.Default.MessageFolder.Create();
+                messageFolder.Create();
             }
 
             FileInfo filename = null;
 
             while (filename == null || filename.Exists)
             {
-                filename = new FileInfo(Path.Combine(Settings.Default.MessageFolder.FullName, "Session" +
+                filename = new FileInfo(Path.Combine(_settings.CustomMessageFolder, "Session" +
                              DateTime.Now.ToString("yyyy-MM-dd_HHmmss-ffff") + ".txt"));
             }
 
@@ -44,7 +53,7 @@ namespace Rnwood.Smtp4dev
 
         public Encoding GetDefaultEncoding(IConnection connection)
         {
-            if (Settings.Default.DefaultTo8Bit)
+            if (_settings.DefaultTo8Bit)
             {
                 return Encoding.Default;
             }
@@ -54,7 +63,7 @@ namespace Rnwood.Smtp4dev
 
         public void OnMessageCompleted(IConnection connection)
         {
-            if (Settings.Default.RejectMessages)
+            if (_settings.RejectMessages)
             {
                 throw new SmtpServerException(
                     new SmtpResponse(StandardSmtpResponseCode.TransactionFailed,
@@ -72,7 +81,7 @@ namespace Rnwood.Smtp4dev
 
         public void OnMessageRecipientAdding(IConnection connection, IMessage message, string recipient)
         {
-            if (Settings.Default.RejectRecipients)
+            if (_settings.RejectRecipients)
             {
                 throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.RecipientRejected,
                                                                "Recipient rejected - mailbox unavailable"));
@@ -81,11 +90,15 @@ namespace Rnwood.Smtp4dev
 
         public void OnSessionStarted(IConnection connection, ISession session)
         {
+            if (SessionStarted != null)
+            {
+                SessionStarted(this, new SessionEventArgs(session));
+            }
         }
 
         public void OnCommandReceived(IConnection connection, SmtpCommand command)
         {
-            if (Settings.Default.CauseTimeout)
+            if (_settings.CauseTimeout)
             {
                 connection.ReadLine();
             }
@@ -93,22 +106,22 @@ namespace Rnwood.Smtp4dev
 
         public string DomainName
         {
-            get { return Settings.Default.DomainName; }
+            get { return _settings.DomainName; }
         }
 
         public IPAddress IpAddress
         {
-            get { return IPAddress.Parse(Settings.Default.IPAddress); }
+            get { return IPAddress.Parse(_settings.IPAddress); }
         }
 
         public int PortNumber
         {
-            get { return Settings.Default.PortNumber; }
+            get { return _settings.PortNumber; }
         }
 
         public bool IsSSLEnabled(IConnection connection)
         {
-            return Settings.Default.EnableSSL;
+            return _settings.EnableSSL;
         }
 
 
@@ -124,65 +137,39 @@ namespace Rnwood.Smtp4dev
 
         public X509Certificate GetSSLCertificate(IConnection connection)
         {
-            if (string.IsNullOrEmpty(Settings.Default.SSLCertificatePath))
+            if (string.IsNullOrEmpty(_settings.SSLCertificatePath))
             {
-                //RegistryKey key = Registry.LocalMachine.OpenSubKey("SOFTWARE\\Microsoft\\Microsoft SDKs\\Windows", false);
-                //string sdkPath = (string)key.GetValue("CurrentInstallFolder", null);
-
-                //if (sdkPath != null)
-                //{
-                //    string makeCertPath = sdkPath + "\\bin\\makecert.exe";
-                //    string makeCertArgs =
-                //        "-r -pe -n CN=\"{0}\" -e {1} -eku 1.3.6.1.5.5.7.3.1 -sky exchange -ss my -sp \"Microsoft RSA SChannel Cryptographic Provider\" -sy 12";
-
-                //    if (Directory.Exists(sdkPath))
-                //    {
-                //        ProcessStartInfo psi = new ProcessStartInfo(makeCertPath, string.Format(makeCertArgs, DomainName, DateTime.Today.AddYears(1).ToString("MM/dd/yyyy"))) { CreateNoWindow = true, UseShellExecute = false };
-                //        Process process = Process.Start(psi);
-                //        process.Start();
-                //        process.WaitForExit();
-
-                //        if (process.ExitCode == 0)
-                //        {
-                //            X509Store store = new X509Store(StoreName.My, StoreLocation.CurrentUser);
-                //            store.Open(OpenFlags.ReadOnly);
-
-                //            return store.Certificates.Find(X509FindType.FindBySubjectName, DomainName, false)[0];
-                //        }
-                //    }
-                //}
-
                 return null;
             }
 
-            if (string.IsNullOrEmpty(Settings.Default.SSLCertificatePassword))
+            if (string.IsNullOrEmpty(_settings.SSLCertificatePassword))
             {
-                return new X509Certificate(Settings.Default.SSLCertificatePath);
+                return new X509Certificate(_settings.SSLCertificatePath);
             }
 
-            return new X509Certificate(Settings.Default.SSLCertificatePath, Settings.Default.SSLCertificatePassword);
+            return new X509Certificate(_settings.SSLCertificatePath, _settings.SSLCertificatePassword);
         }
 
         public IEnumerable<IExtension> GetExtensions(IConnection connection)
         {
             List<IExtension> extensions = new List<IExtension>();
 
-            if (Settings.Default.Enable8BITMIME)
+            if (_settings.Enable8BITMIME)
             {
                 extensions.Add(_eightBitMimeExtension);
             }
 
-            if (Settings.Default.EnableSTARTTLS)
+            if (_settings.EnableSTARTTLS)
             {
                 extensions.Add(_startTLSExtension);
             }
 
-            if (Settings.Default.EnableAUTH)
+            if (_settings.EnableAUTH)
             {
                 extensions.Add(_authExtension);
             }
 
-            if (Settings.Default.EnableSIZE)
+            if (_settings.EnableSIZE)
             {
                 extensions.Add(_sizeExtension);
             }
@@ -192,7 +179,7 @@ namespace Rnwood.Smtp4dev
 
         public long? GetMaximumMessageSize(IConnection connection)
         {
-            long value = Settings.Default.MaximumMessageSize;
+            long value = _settings.MaximumMessageSize;
             return value != 0 ? value : (long?)null;
         }
 
@@ -206,13 +193,13 @@ namespace Rnwood.Smtp4dev
 
         public int GetReceiveTimeout(IConnection connection)
         {
-            return Settings.Default.ReceiveTimeout;
+            return _settings.ReceiveTimeout;
         }
 
         public AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
                                                                       IAuthenticationCredentials authenticationRequest)
         {
-            if (Settings.Default.FailAuthentication)
+            if (_settings.FailAuthentication)
             {
                 return AuthenticationResult.Failure;
             }
@@ -222,13 +209,13 @@ namespace Rnwood.Smtp4dev
 
         public void OnMessageStart(IConnection connection, string from)
         {
-            if (Settings.Default.RequireAuthentication && !connection.Session.Authenticated)
+            if (_settings.RequireAuthentication && !connection.Session.Authenticated)
             {
                 throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationRequired,
                                                                "Must authenticate before sending mail"));
             }
 
-            if (Settings.Default.RequireSecureConnection && !connection.Session.SecureConnection)
+            if (_settings.RequireSecureConnection && !connection.Session.SecureConnection)
             {
                 throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
                                                                "Mail must be sent over secure connection"));
@@ -237,7 +224,7 @@ namespace Rnwood.Smtp4dev
 
         public bool IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism)
         {
-            if (Settings.Default.OnlyAllowClearTextAuthOverSecureConnection)
+            if (_settings.OnlyAllowClearTextAuthOverSecureConnection)
             {
                 return (!authMechanism.IsPlainText) || connection.Session.SecureConnection;
             }
@@ -247,16 +234,18 @@ namespace Rnwood.Smtp4dev
 
         public IEditableMessage OnCreateNewMessage(IConnection connection)
         {
-            if (!Settings.Default.MessageFolder.Exists)
+            DirectoryInfo messageFolder = new DirectoryInfo(_settings.CustomMessageFolder);
+
+            if (!messageFolder.Exists)
             {
-                Settings.Default.MessageFolder.Create();
+                messageFolder.Create();
             }
 
             FileInfo filename = null;
 
             while (filename == null || filename.Exists)
             {
-                filename = new FileInfo(Path.Combine(Settings.Default.MessageFolder.FullName,
+                filename = new FileInfo(Path.Combine(messageFolder.FullName,
                              DateTime.Now.ToString("yyyy-MM-dd_HHmmss-ffff") + ".eml"));
             }
 
@@ -268,5 +257,7 @@ namespace Rnwood.Smtp4dev
         public event EventHandler<MessageEventArgs> MessageReceived;
 
         public event EventHandler<SessionEventArgs> SessionCompleted;
+
+        public event EventHandler<SessionEventArgs> SessionStarted;
     }
 }

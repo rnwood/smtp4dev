@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestFixture]
+    [TestClass]
     public class SmtpServerExceptionTests
     {
-        [Test]
+        [TestMethod]
         public void InnerException()
         {
             Exception innerException = new Exception();
@@ -19,7 +19,7 @@ namespace Rnwood.SmtpServer.Tests
             Assert.AreSame(innerException, e.InnerException);
         }
 
-        [Test]
+        [TestMethod]
         public void SmtpResponse()
         {
             SmtpResponse smtpResponse = new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Blah");

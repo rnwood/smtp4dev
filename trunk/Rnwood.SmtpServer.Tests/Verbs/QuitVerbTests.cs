@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestFixture]
+    [TestClass]
     public class QuitVerbTests
     {
-        [Test]
+        [TestMethod]
         public void Quit_RespondsWithClosingChannel()
         {
             Mocks mocks = new Mocks();

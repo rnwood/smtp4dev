@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestFixture]
+    [TestClass]
     public class VerbWithSubCommandsTests
     {
-        [Test]
+        [TestMethod]
         public void Process_RegisteredSubCommand_Processed()
         {
             Mocks mocks = new Mocks();
@@ -25,7 +25,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             verb.Verify(v => v.Process(mocks.Connection.Object, new SmtpCommand("SUBCOMMAND1")));
         }
 
-        [Test]
+        [TestMethod]
         public void Process_UnregisteredSubCommand_ErrorResponse()
         {
             Mocks mocks = new Mocks();

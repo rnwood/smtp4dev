@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestFixture]
+    [TestClass]
     public class ParameterParserTests
     {
-        [Test]
+        [TestMethod]
         public void NoParameters()
         {
             ParameterParser parameterParser = new ParameterParser("");
@@ -17,7 +17,7 @@ namespace Rnwood.SmtpServer.Tests
             Assert.AreEqual(0, parameterParser.Parameters.Length);
         }
 
-        [Test]
+        [TestMethod]
         public void SingleParameter()
         {
             ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA");
@@ -26,7 +26,7 @@ namespace Rnwood.SmtpServer.Tests
             Assert.AreEqual(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters[0]);
         }
 
-        [Test]
+        [TestMethod]
         public void MultipleParameters()
         {
             ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA KEYB=VALUEB");

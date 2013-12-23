@@ -3,15 +3,15 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestFixture]
+    [TestClass]
     public class DataVerbTests
     {
-        [Test]
+        [TestMethod]
         public void Data_DoubleDots_Unescaped()
         {
             //Check escaping of end of message character ".." is decoded to "."
@@ -19,19 +19,19 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             TestGoodData(new string[] { "A", "..", "B..", "." }, "A\r\n.\r\nB..", true);
         }
 
-        [Test]
+        [TestMethod]
         public void Data_EmptyMessage_Accepted()
         {
             TestGoodData(new string[] { "." }, "", true);
         }
 
-        [Test]
+        [TestMethod]
         public void Data_8BitData_TruncatedTo7Bit()
         {
             TestGoodData(new string[] { ((char)(0x41 + 128)).ToString(), "." }, "\u0041", false);
         }
 
-        [Test]
+        [TestMethod]
         public void Data_8BitData_PassedThrough()
         {
             string data = ((char)(0x41 + 128)).ToString();
@@ -66,7 +66,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             }
         }
 
-        [Test]
+        [TestMethod]
         public void Data_AboveSizeLimit_Rejected()
         {
             Mocks mocks = new Mocks();
@@ -86,7 +86,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.ExceededStorageAllocation);
         }
 
-        [Test]
+        [TestMethod]
         public void Data_ExactlySizeLimit_Accepted()
         {
             Mocks mocks = new Mocks();
@@ -106,7 +106,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         }
 
-        [Test]
+        [TestMethod]
         public void Data_WithinSizeLimit_Accepted()
         {
             Mocks mocks = new Mocks();
@@ -126,7 +126,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         }
 
-        [Test]
+        [TestMethod]
         public void Data_NoCurrentMessage_ReturnsError()
         {
             Mocks mocks = new Mocks();

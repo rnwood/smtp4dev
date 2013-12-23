@@ -9,11 +9,18 @@ using Microsoft.Win32;
 
 namespace Rnwood.Smtp4dev.Properties
 {
-    partial class Settings
+    partial class Settings : Rnwood.Smtp4dev.IServerSettings
     {
         protected override void OnSettingsLoaded(object sender, SettingsLoadedEventArgs e)
         {
             StartOnLogin = StartOnLoginInternal;
+
+            if (string.IsNullOrEmpty(CustomMessageFolder))
+            {
+                CustomMessageFolder =
+                Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
+                                     "smtp4dev\\Messages");
+            }
         }
 
         public override void Save()
@@ -21,22 +28,6 @@ namespace Rnwood.Smtp4dev.Properties
             base.Save();
 
             StartOnLoginInternal = StartOnLogin;
-        }
-
-        public DirectoryInfo MessageFolder
-        {
-            get
-            {
-                if (!string.IsNullOrEmpty(CustomMessageFolder))
-                {
-                    return new DirectoryInfo(CustomMessageFolder);
-                }
-
-                return
-                    new DirectoryInfo(
-                        Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData),
-                                     "smtp4dev\\Messages"));
-            }
         }
 
         public bool StartOnLogin

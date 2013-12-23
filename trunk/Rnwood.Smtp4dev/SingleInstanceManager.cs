@@ -10,66 +10,65 @@ using System.Threading;
 
 namespace Rnwood.Smtp4dev
 {
-    public class SingleInstanceManager : MarshalByRefObject, IFirstInstanceServer
+    public class SingleInstanceManager<TInstance> where TInstance : MarshalByRefObject
     {
         private Mutex _mutex;
 
-        public SingleInstanceManager(string applicationId)
+        public SingleInstanceManager(string applicationId, Func<TInstance> firstInstanceCreator)
         {
             ApplicationId = applicationId;
 
-            bool firstInstance;
-            _mutex = new Mutex(true, ApplicationId, out firstInstance);
-            IsFirstInstance = firstInstance;
+            bool isFirstInstance;
+            _mutex = new Mutex(true, ApplicationId, out isFirstInstance);
+            IsFirstInstance = isFirstInstance;
+
+            if (IsFirstInstance)
+            {
+                firstInstance =  firstInstanceCreator();
+
+                IpcServerChannel channel = new IpcServerChannel(ApplicationId);
+                ChannelServices.RegisterChannel(channel);
+                RemotingServices.Marshal(firstInstance, ApplicationId, typeof(TInstance));
+            }
         }
+
+        private TInstance firstInstance;
 
         public bool IsFirstInstance { get; private set; }
 
         public string ApplicationId { get; private set; }
 
-        #region IFirstInstanceServer Members
-
-        void IFirstInstanceServer.ProcessLaunchInfo(LaunchInfo launchInfo)
-        {
-            OnLaunchInfoReceived(launchInfo);
-        }
-
-        #endregion
-
-        public void SendLaunchInfoToFirstInstance(LaunchInfo launchInfo)
+        public TInstance GetFirstInstance()
         {
             if (IsFirstInstance)
             {
-                throw new InvalidOperationException();
+                return firstInstance;
             }
 
             IpcClientChannel channel = new IpcClientChannel(ApplicationId, null);
             ChannelServices.RegisterChannel(channel);
 
-            IFirstInstanceServer server =
-                (IFirstInstanceServer)
-                Activator.GetObject(typeof (IFirstInstanceServer), string.Format("ipc://{0}/{0}", ApplicationId));
-            server.ProcessLaunchInfo(launchInfo);
+            TInstance server =
+                (TInstance)
+                Activator.GetObject(typeof(TInstance), string.Format("ipc://{0}/{0}", ApplicationId));
+            return server;
         }
+
+    }
+
+
+    class FirstInstanceServer : MarshalByRefObject
+    {
 
         public override object InitializeLifetimeService()
         {
             return null;
         }
 
-        public event EventHandler<LaunchInfoReceivedEventArgs> LaunchInfoReceived;
-
-        public void ListenForLaunches()
+        public void ProcessLaunchInfo(LaunchInfo launchInfo)
         {
-            if (!IsFirstInstance)
-            {
-                throw new InvalidOperationException();
-            }
+            OnLaunchInfoReceived(launchInfo);
 
-            IpcServerChannel channel = new IpcServerChannel(ApplicationId);
-            ChannelServices.RegisterChannel(channel);
-
-            RemotingServices.Marshal(this, ApplicationId, typeof (IFirstInstanceServer));
         }
 
         protected virtual void OnLaunchInfoReceived(LaunchInfo launchInfo)
@@ -79,12 +78,10 @@ namespace Rnwood.Smtp4dev
                 LaunchInfoReceived(this, new LaunchInfoReceivedEventArgs(launchInfo));
             }
         }
+
+        public event EventHandler<LaunchInfoReceivedEventArgs> LaunchInfoReceived;
     }
 
-    public interface IFirstInstanceServer
-    {
-        void ProcessLaunchInfo(LaunchInfo launchInfo);
-    }
 
     public class LaunchInfoReceivedEventArgs : EventArgs
     {

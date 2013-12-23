@@ -41,7 +41,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 return AuthMechanismProcessorStatus.Continue;
             }
 
-            string decodedData = DecodeBase64(data);
+            string decodedData = ServerUtility.DecodeBase64(data);
             string[] decodedDataParts = decodedData.Split('\0');
 
             if (decodedDataParts.Length != 3)
@@ -71,18 +71,5 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         public IAuthenticationCredentials Credentials { get; private set; }
 
         #endregion
-
-        private static string DecodeBase64(string data)
-        {
-            try
-            {
-                return Encoding.ASCII.GetString(Convert.FromBase64String(data));
-            }
-            catch (FormatException)
-            {
-                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationFailure,
-                                                               "Bad Base64 data"));
-            }
-        }
     }
 }

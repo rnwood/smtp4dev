@@ -2,21 +2,21 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestFixture]
+    [TestClass]
     public class RcptToVerbTests
     {
-        [Test]
+        [TestMethod]
         public void EmailAddressOnly()
         {
             TestGoodAddress("<rob@rnwood.co.uk>", "rob@rnwood.co.uk");
         }
 
-        [Test]
+        [TestMethod]
         public void EmailAddressWithDisplayName()
         {
             //Should this format be accepted????
@@ -36,20 +36,20 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             Assert.AreEqual(expectedAddress, message.To[0]);
         }
 
-        [Test]
+        [TestMethod]
         public void UnbraketedAddress_ReturnsError()
         {
             TestBadAddress("rob@rnwood.co.uk");
         }
 
-        [Test]
+        [TestMethod]
         public void MismatchedBraket_ReturnsError()
         {
             TestBadAddress("<rob@rnwood.co.uk");
             TestBadAddress("<Robert Wood<rob@rnwood.co.uk>");
         }
 
-        [Test]
+        [TestMethod]
         public void EmptyAddress_ReturnsError()
         {
             TestBadAddress("<>");

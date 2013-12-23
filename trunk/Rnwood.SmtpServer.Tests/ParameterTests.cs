@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
-using MbUnit.Framework.ContractVerifiers;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestFixture]
+    [TestClass]
     public class ParameterTests
     {
-        [Test]
+        [TestMethod]
         public void Name()
         {
             Parameter p = new Parameter("name", "value");
@@ -18,7 +17,7 @@ namespace Rnwood.SmtpServer.Tests
             Assert.AreEqual("name", p.Name);
         }
 
-        [Test]
+        [TestMethod]
         public void Value()
         {
             Parameter p = new Parameter("name", "value");
@@ -26,22 +25,16 @@ namespace Rnwood.SmtpServer.Tests
             Assert.AreEqual("value", p.Value);
         }
 
-        [VerifyContract]
-        public readonly EqualityContract<Parameter> Equality = new EqualityContract<Parameter>()
+        [TestMethod]
+        public void Equality_Equal()
         {
-            ImplementsOperatorOverloads =
-                false,
-            EquivalenceClasses =
-                                                                                               {
-                                                                                                   {
-                                                                                                       new Parameter("KEYA", "VALUEA"),
-                                                                                                       new Parameter("KEYa", "VALUEA")
-                                                                                                    }, 
-                                                                                                    {
-                                                                                                       new Parameter("KEYB", "VALUEb"),
-                                                                                                       new Parameter("KEYB", "VALUEb")
-                                                                                                    }
-                                                                                               }
-        };
+            Assert.IsTrue(new Parameter("KEYA", "VALUEA").Equals( new Parameter("KEYa", "VALUEA")));
+        }
+
+        [TestMethod]
+        public void Equality_NotEqual()
+        {
+            Assert.IsFalse(new Parameter("KEYb", "VALUEb").Equals(new Parameter("KEYa", "VALUEA")));
+        }
     }
 }
