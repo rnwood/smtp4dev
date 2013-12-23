@@ -8,6 +8,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         public LoginMechanismProcessor(IConnection connection)
         {
             Connection = connection;
+            State = States.Initial;
         }
 
         protected IConnection Connection { get; private set; }
@@ -19,6 +20,11 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
         public AuthMechanismProcessorStatus ProcessResponse(string data)
         {
+            if (data != null)
+            {
+                State = States.WaitingForUsername;
+            }
+
             switch (State)
             {
                 case States.Initial:
@@ -30,7 +36,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
                 case States.WaitingForUsername:
 
-                    _username = DecodeBase64(data);
+                    _username = ServerUtility.DecodeBase64(data);
 
                     Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
                                                               Convert.ToBase64String(
@@ -39,7 +45,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                     return AuthMechanismProcessorStatus.Continue;
 
                 case States.WaitingForPassword:
-                    string password = DecodeBase64(data);
+                    string password = ServerUtility.DecodeBase64(data);
                     State = States.Completed;
 
                     Credentials = new LoginAuthenticationCredentials(_username, password);
@@ -66,19 +72,6 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         public IAuthenticationCredentials Credentials { get; set; }
 
         #endregion
-
-        private static string DecodeBase64(string data)
-        {
-            try
-            {
-                return Encoding.ASCII.GetString(Convert.FromBase64String(data));
-            }
-            catch (FormatException)
-            {
-                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationFailure,
-                                                               "Bad Base64 data"));
-            }
-        }
 
         #region Nested type: States
 

@@ -2,16 +2,16 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestFixture]
+    [TestClass]
     public class VerbMapTests
     {
-        [Test]
+        [TestMethod]
         public void GetVerbProcessor_RegisteredVerb_ReturnsVerb()
         {
             VerbMap verbMap = new VerbMap();
@@ -22,7 +22,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             Assert.AreSame(verbMock.Object, verbMap.GetVerbProcessor("verb"));
         }
 
-        [Test]
+        [TestMethod]
         public void GetVerbProcessor_RegisteredVerbWithDifferentCase_ReturnsVerb()
         {
             VerbMap verbMap = new VerbMap();
@@ -33,7 +33,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             Assert.AreSame(verbMock.Object, verbMap.GetVerbProcessor("VERB"));
         }
 
-        [Test]
+        [TestMethod]
         public void GetVerbProcessor_NoRegisteredVerb_ReturnsNull()
         {
             VerbMap verbMap = new VerbMap();
@@ -41,7 +41,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             Assert.IsNull(verbMap.GetVerbProcessor("VERB"));
         }
 
-        [Test]
+        [TestMethod]
         public void SetVerbProcessor_RegisteredVerbAgainWithNull_ClearsRegistration()
         {
             VerbMap verbMap = new VerbMap();
@@ -53,7 +53,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             Assert.IsNull(verbMap.GetVerbProcessor("verb"));
         }
 
-        [Test]
+        [TestMethod]
         public void SetVerbProcessor_RegisteredVerbAgainDifferentCaseWithNull_ClearsRegistration()
         {
             VerbMap verbMap = new VerbMap();
@@ -66,7 +66,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         }
 
 
-        [Test]
+        [TestMethod]
         public void SetVerbProcessor_RegisteredVerbAgain_UpdatesRegistration()
         {
             VerbMap verbMap = new VerbMap();

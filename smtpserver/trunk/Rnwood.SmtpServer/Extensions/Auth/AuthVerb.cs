@@ -43,8 +43,14 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 IAuthMechanismProcessor authMechanismProcessor =
                     mechanism.CreateAuthMechanismProcessor(connection);
 
+                string initialData = null;
+                if (command.Arguments.Length > 1)
+                {
+                    initialData = string.Join(" ", command.Arguments.Skip(1).ToArray());
+                }
+
                 AuthMechanismProcessorStatus status =
-                    authMechanismProcessor.ProcessResponse(string.Join(" ", command.Arguments.Skip(1).ToArray()));
+                    authMechanismProcessor.ProcessResponse(initialData);
                 while (status == AuthMechanismProcessorStatus.Continue)
                 {
                     string response = connection.ReadLine();

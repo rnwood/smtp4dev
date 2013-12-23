@@ -1,12 +1,12 @@
 using System;
 using System.IO;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
     public abstract class AbstractMessageTests
     {
-        [Test]
+        [TestMethod]
         public void AddTo()
         {
             IEditableMessage message = GetMessage();
@@ -21,7 +21,7 @@ namespace Rnwood.SmtpServer.Tests
 
         protected abstract IEditableMessage GetMessage();
 
-        [Test]
+        [TestMethod]
         public void GetData_ForWriting_Accepted()
         {
             IEditableMessage message = GetMessage();
@@ -42,7 +42,7 @@ namespace Rnwood.SmtpServer.Tests
                 stream.Read(readBytes, 0, readBytes.Length);
             }
 
-            Assert.AreElementsEqual(writtenBytes, readBytes);
+            CollectionAssert.AreEqual(writtenBytes, readBytes);
         }
     }
 }

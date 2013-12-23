@@ -2,35 +2,35 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Rnwood.SmtpServer.Extensions.Auth;
 
 namespace Rnwood.SmtpServer.Tests.Extensions.Auth
 {
-    [TestFixture]
+    [TestClass]
     public class CramMd5MechanismProcessorTests
     {
-        [Test]
+        [TestMethod]
         public void ProcessRepsonse_GetChallenge()
         {
             Mocks mocks = new Mocks();
 
             CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks);
-            AuthMechanismProcessorStatus result = cramMd5MechanismProcessor.ProcessResponse("");
+            AuthMechanismProcessorStatus result = cramMd5MechanismProcessor.ProcessResponse(null);
 
             Assert.AreEqual(AuthMechanismProcessorStatus.Continue, result);
             mocks.Connection.Verify(c => c.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, "MTIzNC4xMDAwMEBtb2NrZG9tYWlu")));
         }
 
-        [Test]
+        [TestMethod]
         [ExpectedException(typeof(SmtpServerException))]
         public void ProcessResponse_Response_BadBase64()
         {
             Mocks mocks = new Mocks();
 
             CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks);
-            cramMd5MechanismProcessor.ProcessResponse("");
+            cramMd5MechanismProcessor.ProcessResponse(null);
             cramMd5MechanismProcessor.ProcessResponse("rob blah");
         }
 

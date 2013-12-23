@@ -3,18 +3,20 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestFixture]
+    [TestClass]
     public class RandomIntegerGeneratorTests
     {
-        [Test]
+        [TestMethod]
         public void GenerateRandomInteger()
         {
             RandomIntegerGenerator randomNumberGenerator = new RandomIntegerGenerator();
-            Assert.Between(randomNumberGenerator.GenerateRandomInteger(-100, 100), -100, 100);
+            int randomNumber = randomNumberGenerator.GenerateRandomInteger(-100, 100);
+            Assert.IsTrue(randomNumber >= -100);
+            Assert.IsTrue(randomNumber <= 100);
         }
     }
 }

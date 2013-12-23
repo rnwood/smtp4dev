@@ -3,17 +3,17 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestFixture]
+    [TestClass]
     public class EhloVerbTests
     {
-        [Test]
+        [TestMethod]
         public void Process_RespondsWith250()
         {
             Mocks mocks = new Mocks();
@@ -35,7 +35,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
         }
 
-        [Test]
+        [TestMethod]
         public void Process_NoArguments_Accepted()
         {
             Mocks mocks = new Mocks();
@@ -47,7 +47,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         }
 
 
-        [Test]
+        [TestMethod]
         public void Process_RecordsClientName()
         {
             Mocks mocks = new Mocks();
@@ -57,7 +57,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.Session.VerifySet(s => s.ClientName = "foobar");
         }
 
-        [Test]
+        [TestMethod]
         public void Process_RespondsWithExtensionKeywords()
         {
             Mocks mocks = new Mocks();
@@ -84,7 +84,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
         }
 
-        [Test]
+        [TestMethod]
         public void Process_SaidHeloAlready_Allowed()
         {
             Mocks mocks = new Mocks();

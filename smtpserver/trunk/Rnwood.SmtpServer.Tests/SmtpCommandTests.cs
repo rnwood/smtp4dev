@@ -2,14 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using MbUnit.Framework;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestFixture]
+    [TestClass]
     public class SmtpCommandTests
     {
-        [Test]
+        [TestMethod]
         public void Parsing_SingleToken()
         {
             SmtpCommand command = new SmtpCommand("DATA");
@@ -19,7 +19,7 @@ namespace Rnwood.SmtpServer.Tests
             Assert.AreEqual(0, command.Arguments.Length);
         }
 
-        [Test]
+        [TestMethod]
         public void Parsing_MailFrom_WithDisplayName()
         {
             SmtpCommand command = new SmtpCommand("MAIL FROM:<Robert Wood<rob@rnwood.co.uk>> ARG1 ARG2");
@@ -32,7 +32,7 @@ namespace Rnwood.SmtpServer.Tests
             Assert.AreEqual("ARG2", command.Arguments[3]);
         }
 
-        [Test]
+        [TestMethod]
         public void Parsing_MailFrom_EmailOnly()
         {
             SmtpCommand command = new SmtpCommand("MAIL FROM:<rob@rnwood.co.uk> ARG1 ARG2");
