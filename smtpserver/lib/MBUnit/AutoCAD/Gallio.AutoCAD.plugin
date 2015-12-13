@@ -1,0 +1,75 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.AutoCAD"
+        recommendedInstallationPath="AutoCAD"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>AutoCAD Integration Plugin</name>
+    <version>3.2.0.0</version>
+    <description>Provides support for testing ObjectARX extensions within AutoCAD.</description>
+    <icon>plugin://Gallio.AutoCAD/Resources/Gallio.AutoCAD.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.AutoCAD.plugin" />
+    <file path="Gallio.AutoCAD.dll" />
+    <file path="Gallio.AutoCAD.Plugin.dll" />
+    <file path="Resources\Gallio.AutoCAD.ico" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio.AutoCAD, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e"
+              codeBase="Gallio.AutoCAD.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+
+  <services>
+    <service serviceId="Gallio.AutoCAD.AcadLocator"
+             serviceType="Gallio.AutoCAD.IAcadLocator, Gallio.AutoCAD" />
+
+    <service serviceId="Gallio.AutoCAD.Preferences.AcadPreferenceManager"
+             serviceType="Gallio.AutoCAD.Preferences.IAcadPreferenceManager, Gallio.AutoCAD" />
+
+    <service serviceId="Gallio.AutoCAD.ProcessManagement.AcadProcessFactory"
+             serviceType="Gallio.AutoCAD.ProcessManagement.IAcadProcessFactory, Gallio.AutoCAD" />
+  </services>
+
+  <components>
+    <component componentId="Gallio.AutoCAD.AcadLocator"
+               serviceId="Gallio.AutoCAD.AcadLocator"
+               componentType="Gallio.AutoCAD.AcadLocator, Gallio.AutoCAD" />
+
+    <component componentId="Gallio.AutoCAD.Preferences.AcadPreferenceManager"
+               serviceId="Gallio.AutoCAD.Preferences.AcadPreferenceManager"
+               componentType="Gallio.AutoCAD.Preferences.AcadPreferenceManager, Gallio.AutoCAD" />
+
+    <component componentId="Gallio.AutoCAD.ProcessManagement.AcadProcessFactory"
+               serviceId="Gallio.AutoCAD.ProcessManagement.AcadProcessFactory"
+               componentType="Gallio.AutoCAD.ProcessManagement.AcadProcessFactory, Gallio.AutoCAD" />
+
+    <component componentId="AutoCAD.AcadTestRunnerFactory"
+               serviceId="Gallio.TestRunnerFactory"
+               componentType="Gallio.Runner.DefaultTestRunnerFactory, Gallio">
+      <parameters>
+        <testIsolationProvider>${AutoCAD.AcadTestIsolationProvider}</testIsolationProvider>
+      </parameters>
+      <traits>
+        <name>AutoCAD</name>
+        <description>
+          Runs tests within an AutoCAD process.
+
+          Supported test runner properties:
+          - AcadAttachToExisting: If "true" attaches to an existing AutoCAD process, otherwise starts a new one.
+          - AcadExePath: Specifies the full path of the "acad.exe" program.
+        </description>
+      </traits>
+    </component>
+
+    <component componentId="AutoCAD.AcadTestIsolationProvider"
+               serviceId="Gallio.TestIsolationProvider"
+               componentType="Gallio.AutoCAD.Isolation.AcadTestIsolationProvider, Gallio.AutoCAD" />
+  </components>
+</plugin>

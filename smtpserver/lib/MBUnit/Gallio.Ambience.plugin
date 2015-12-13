@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.Ambience"
+        recommendedInstallationPath=""
+        enableCondition="${minFramework:NET35}"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio Ambience Library</name>
+    <version>3.2.0.0</version>
+    <description>Provides a lightweight object database based on db4o for storing test data across test runs.</description>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.Ambience.plugin" />
+    <file path="Gallio.Ambience.dll" />
+    <file path="Gallio.Ambience.pdb" />
+    <file path="Gallio.Ambience.xml" />
+    <file path="Gallio.Ambience.Server.exe" />
+    <file path="Gallio.Ambience.Server.exe.config" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio.Ambience, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e"
+              codeBase="Gallio.Ambience.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+</plugin>

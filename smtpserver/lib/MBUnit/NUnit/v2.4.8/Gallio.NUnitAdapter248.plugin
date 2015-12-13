@@ -1,0 +1,92 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.NUnitAdapter248"
+        recommendedInstallationPath="NUnit\v2.4.8"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>NUnit v2.4.8 Adapter Plugin</name>
+    <version>3.2.0.0</version>
+    <description>Provides support for running NUnit v2.4.8 tests.</description>
+    <icon>plugin://Gallio.NUnitAdapter248/Resources/NUnit.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.NUnitAdapter248.plugin" />
+    <file path="Gallio.NUnitAdapter248.dll" />
+    <file path="license.txt" />
+    <file path="Readme.txt" />
+    <file path="nunit.core.dll" />
+    <file path="nunit.core.interfaces.dll" />
+    <file path="nunit.core.extensions.dll" />
+    <file path="nunit.framework.dll" />
+    <file path="nunit.framework.dll.tdnet" />
+    <file path="nunit.framework.extensions.dll" />
+    <file path="nunit.util.dll" />
+    <file path="addins\NUnit Addins Readme.txt" />
+    <file path="Resources\NUnit.ico" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio.NUnitAdapter248, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null"
+              codeBase="Gallio.NUnitAdapter248.dll"
+              qualifyPartialName="true" />
+
+    <assembly fullName="nunit.core, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77"
+              codeBase="nunit.core.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.4.8.0-2.4.8.65535" />
+      </bindingRedirects>
+    </assembly>
+
+    <assembly fullName="nunit.core.extensions, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77"
+              codeBase="nunit.core.extensions.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.4.8.0-2.4.8.65535" />
+      </bindingRedirects>
+    </assembly>
+
+    <assembly fullName="nunit.core.interfaces, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77"
+              codeBase="nunit.core.interfaces.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.4.8.0-2.4.8.65535" />
+      </bindingRedirects>
+    </assembly>
+
+    <assembly fullName="nunit.util, Version=2.4.8.0, Culture=neutral, PublicKeyToken=96d09a1eb7f44a77"
+              codeBase="nunit.util.dll">
+      <bindingRedirects>
+        <bindingRedirect oldVersion="2.4.8.0-2.4.8.65535" />
+      </bindingRedirects>
+    </assembly>
+  </assemblies>
+
+  <probingPaths>
+    <probingPath>v2.4.8</probingPath>
+  </probingPaths>
+
+  <components>
+    <component componentId="NUnitAdapter248.TestFramework"
+               serviceId="Gallio.TestFramework"
+               componentType="Gallio.NUnitAdapter.Model.NUnitTestFramework, Gallio.NUnitAdapter248">
+      <traits>
+        <name>NUnit v2.4.8</name>
+        <frameworkAssemblies>nunit.framework, Version=2.4.8.0-2.4.8.65535</frameworkAssemblies>
+        <version>2.4.8.0</version>
+        <fileTypes>Assembly</fileTypes>
+        <icon>plugin://Gallio.NUnitAdapter248/Resources/NUnit.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="NUnitAdapter248.TestKinds.NUnitTestAssembly"
+               serviceId="Gallio.TestKind">
+      <traits>
+        <name>NUnit v2.4.8 Assembly</name>
+        <description>NUnit v2.4.8 Test Assembly</description>
+        <icon>plugin://Gallio.NUnitAdapter248/Resources/NUnit.ico</icon>
+      </traits>
+    </component>
+  </components>
+</plugin>

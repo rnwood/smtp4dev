@@ -1,0 +1,18 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.Echo"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Gallio Echo</name>
+    <version>3.2.0.0</version>
+    <description>A command-line test runner.</description>
+    <icon>plugin://Gallio.Echo/Resources/Gallio.Echo.ico</icon>
+  </traits>
+
+  <files>
+    <file path="Gallio.Echo.plugin" />
+    <file path="Gallio.Echo.exe" />
+    <file path="Gallio.Echo.exe.config" />
+    <file path="Resources\Gallio.Echo.ico" />
+  </files>
+</plugin>

@@ -1,0 +1,6 @@
+<TestRunner>
+	<FriendlyName>csUnit v{0}.{1}.{2}</FriendlyName>
+	<AssemblyPath>..\TDNet\Gallio.TDNetRunner.dll</AssemblyPath>
+	<TypeName>Gallio.TDNetRunner.GallioResidentTestRunner</TypeName>
+	<TestRunnerType>Resident</TestRunnerType>
+</TestRunner>

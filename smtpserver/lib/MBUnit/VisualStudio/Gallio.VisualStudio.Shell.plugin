@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.VisualStudio.Shell"
+        recommendedInstallationPath="VisualStudio"
+        enableCondition="${process:DEVENV.EXE} or ${process:VSTESTHOST.EXE} or ${process:QTAGENT.EXE} or ${process:QTAGENT32.EXE} or ${process:QTDCAGENT.EXE} or ${process:QTDCAGENT32.EXE} or ${process:MSTEST.EXE} or ${minFramework:NET35}"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Visual Studio Integration Shell</name>
+    <version>3.2.0.0</version>
+    <description>Provides a framework for hosting Gallio plugins within Visual Studio.</description>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.VisualStudio.Shell.plugin" />
+    <file path="Gallio.VisualStudio.Shell.dll" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio.VisualStudio.Shell, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e"
+              codeBase="Gallio.VisualStudio.Shell.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+
+  <services>
+    <service serviceId="Shell.Shell"
+             serviceType="Gallio.VisualStudio.Shell.Core.IShell, Gallio.VisualStudio.Shell" />
+
+    <service serviceId="Shell.ShellExtension"
+             serviceType="Gallio.VisualStudio.Shell.Core.IShellExtension, Gallio.VisualStudio.Shell" />
+
+    <service serviceId="Shell.CommandManager"
+             serviceType="Gallio.VisualStudio.Shell.UI.Commands.ICommandManager, Gallio.VisualStudio.Shell" />
+
+    <service serviceId="Shell.Command"
+             serviceType="Gallio.VisualStudio.Shell.UI.Commands.ICommand, Gallio.VisualStudio.Shell" />
+
+    <service serviceId="Shell.ToolWindowManager"
+             serviceType="Gallio.VisualStudio.Shell.UI.ToolWindows.IToolWindowManager, Gallio.VisualStudio.Shell" />
+  </services>
+</plugin>
