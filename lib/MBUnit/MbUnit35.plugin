@@ -1,0 +1,30 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="MbUnit35"
+        recommendedInstallationPath=""
+        enableCondition="${minFramework:NET35}"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>MbUnit v3 Extensions for .Net 3.5</name>
+    <version>3.2.0.0</version>
+    <description>Provides additional MbUnit v3 features for use with .Net 3.5.</description>
+    <icon>plugin://MbUnit/Resources/MbUnit.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio35" />
+    <dependency pluginId="MbUnit" />
+  </dependencies>
+
+  <files>
+    <file path="MbUnit35.plugin" />
+    <file path="MbUnit35.dll" />
+    <file path="MbUnit35.pdb" />
+    <file path="MbUnit35.xml" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="MbUnit35, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e"
+              codeBase="MbUnit35.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+</plugin>

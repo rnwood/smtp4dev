@@ -1,0 +1,43 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<xs:schema id="LatestVersion"
+    targetNamespace="http://www.rnwood.co.uk/AutoUpdate/Releases"
+    elementFormDefault="qualified"
+    xmlns="http://www.rnwood.co.uk/AutoUpdate/Releases"
+    xmlns:xs="http://www.w3.org/2001/XMLSchema"
+>
+
+  <xs:element name="Releases">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="Release" minOccurs="0" maxOccurs="unbounded"/>
+      </xs:sequence>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:element name="Release">
+    <xs:complexType>
+      <xs:sequence>
+        <xs:element name="URL" type="xs:anyURI"/>
+        <xs:element name="DetailsURL" type="xs:anyURI"/>
+      </xs:sequence>
+      <xs:attribute name="name" type="xs:string" use="required"/>
+      <xs:attribute name="version" type="versionNumber" use="required"/>
+      <xs:attribute name="status" type="releaseStatus" use="optional" default="release"/>
+    </xs:complexType>
+  </xs:element>
+
+  <xs:simpleType name="versionNumber">
+    <xs:restriction base="xs:string">
+      <xs:pattern value="\d+(\.\d+){1,3}"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+  <xs:simpleType name="releaseStatus">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="release"/>
+      <xs:enumeration value="prerelease"/>
+    </xs:restriction>
+  </xs:simpleType>
+
+</xs:schema>
+

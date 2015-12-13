@@ -1,0 +1,51 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.VisualStudio.Tip90"
+        recommendedInstallationPath="VisualStudio\v9.0"
+        enableCondition="${process:DEVENV.EXE_V9.0} or ${process:VSTESTHOST.EXE_V9.0} or ${process:MSTEST.EXE_V9.0} or ${framework:NET35}"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>Visual Studio 2008 Test Runner</name>
+    <version>3.2.0.0</version>
+    <description>Enables Visual Studio 2008 to run Gallio tests via the Test View.</description>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio.VisualStudio.Shell90" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.VisualStudio.Tip90.plugin" />
+    <file path="Gallio.VisualStudio.Tip90.dll" />
+    
+    <!-- Installed in the GAC only.
+    <file path="Gallio.VisualStudio.Tip90.Proxy.dll" />
+    -->
+  </files>
+
+  <probingPaths>
+    <probingPath>v9.0</probingPath>
+  </probingPaths>
+  
+  <assemblies>
+    <assembly fullName="Gallio.VisualStudio.Tip90, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e"
+              codeBase="Gallio.VisualStudio.Tip90.dll"
+              qualifyPartialName="true" />
+
+    <assembly fullName="Gallio.VisualStudio.Tip90.Proxy, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e" />
+  </assemblies>
+
+  <services>
+    <service serviceId="Tip90.ProxyHandler"
+             serviceType="Gallio.VisualStudio.Tip.IProxyHandler, Gallio.VisualStudio.Tip90.Proxy, Version=3.2.0.0, Culture=neutral, PublicKeyToken=eb9cfa67ee6ab36e, processorArchitecture=MSIL" />
+  </services>
+
+  <components>
+    <component componentId="Tip90.ShellExtension"
+               serviceId="Shell.ShellExtension"
+               componentType="Gallio.VisualStudio.Tip.TipShellExtension, Gallio.VisualStudio.Tip90" />
+
+    <component componentId="Tip90.ProxyHandler"
+               serviceId="Tip90.ProxyHandler"
+               componentType="Gallio.VisualStudio.Tip.DefaultProxyHandler, Gallio.VisualStudio.Tip90" />
+  </components>
+</plugin>

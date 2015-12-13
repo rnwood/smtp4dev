@@ -1,0 +1,278 @@
+<?xml version="1.0" encoding="utf-8"?>
+<doc>
+  <assembly>
+    <name>MbUnit.Framework.2.0</name>
+  </assembly>
+  <members>
+    <member name="T:MbUnit.Framework.GenericAssert">
+      <summary>Assertion class This class cannot be inherited.</summary>
+    </member>
+    <member name="M:MbUnit.Framework.GenericAssert.IsEmpty``1(System.Collections.Generic.ICollection{``0},System.String,System.Object[])">
+      <summary>Assert that an array, list or other collection is empty</summary>
+      <param name="collection">An array, list or other collection implementing ICollection</param>
+      <param name="message">The message to be displayed on failure</param>
+      <param name="args">Arguments to be used in formatting the message</param>
+    </member>
+    <member name="M:MbUnit.Framework.GenericAssert.IsEmpty``1(System.Collections.Generic.ICollection{``0},System.String)">
+      <summary>Assert that an array, list or other collection is empty</summary>
+      <param name="collection">An array, list or other collection implementing ICollection</param>
+      <param name="message">The message to be displayed on failure</param>
+    </member>
+    <member name="M:MbUnit.Framework.GenericAssert.IsEmpty``1(System.Collections.Generic.ICollection{``0})">
+      <summary>Assert that an array,list or other collection is empty</summary>
+      <param name="collection">An array, list or other collection implementing ICollection</param>
+    </member>
+    <member name="M:MbUnit.Framework.GenericAssert.IsNotEmpty``1(System.Collections.Generic.ICollection{``0},System.String,System.Object[])">
+      <summary>Assert that an array, list or other collection is empty</summary>
+      <param name="collection">An array, list or other collection implementing ICollection</param>
+      <param name="message">The message to be displayed on failure</param>
+      <param name="args">Arguments to be used in formatting the message</param>
+    </member>
+    <member name="M:MbUnit.Framework.GenericAssert.IsNotEmpty``1(System.Collections.Generic.ICollection{``0},System.String)">
+      <summary>Assert that an array, list or other collection is empty</summary>
+      <param name="collection">An array, list or other collection implementing ICollection</param>
+      <param name="message">The message to be displayed on failure</param>
+    </member>
+    <member name="M:MbUnit.Framework.GenericAssert.IsNotEmpty``1(System.Collections.Generic.ICollection{``0})">
+      <summary>Assert that an array,list or other collection is empty</summary>
+      <param name="collection">An array, list or other collection implementing ICollection</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.CreateInstance(System.String,System.String)">
+      <summary>Create Instance</summary>
+      <param name="assemblyName">Full assembly path.</param>
+      <param name="className">Type Name such as (System.String)</param>
+      <returns>Newly created object.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.CreateInstance(System.String,System.String,System.Object[])">
+      <summary>Create Instance</summary>
+      <param name="assemblyName">Full assembly path.</param>
+      <param name="className">Type Name such as (System.String)</param>
+      <param name="args">Constructor parameters.</param>
+      <returns>Newly created object.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetField(System.Object,System.String)">
+      <summary>Get public, non-public, or static field value.</summary>
+      <param name="obj">Object where field is defined.</param>
+      <param name="fieldName">Field name.</param>
+      <returns>Field value</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetField(MbUnit.Framework.Reflection.AccessModifier,System.Object,System.String)">
+      <summary>Get field value.</summary>
+      <param name="access">Specify field access modifier.</param>
+      <param name="obj">Object where field is defined.</param>
+      <param name="fieldName">Field name.</param>
+      <returns>Field value</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetField(MbUnit.Framework.Reflection.AccessModifier,System.Object,System.String,System.Boolean)">
+      <summary>Get field value.</summary>
+      <param name="access">Specify field access modifier.</param>
+      <param name="obj">Object where field is defined.</param>
+      <param name="fieldName">Field name.</param>
+      <param name="lookInBase">Specify if need to look in Base classes.</param>
+      <returns>Field value</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetField(System.String)">
+      <summary>Get public, non-public, or static field value.</summary>
+      <param name="fieldName">Field name.</param>
+      <returns>Field value</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetField(System.String,MbUnit.Framework.Reflection.AccessModifier)">
+      <summary>Get field value.</summary>
+      <param name="fieldName">Field name.</param>
+      <param name="access">Specify field access modifier.</param>
+      <returns>Field value</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetField(System.String,MbUnit.Framework.Reflection.AccessModifier,System.Boolean)">
+      <summary>Get field value.</summary>
+      <param name="fieldName">Field name.</param>
+      <param name="access">Specify field access modifier.</param>
+      <param name="lookInBase">Specify if need to look in Base classes.</param>
+      <returns>Field value</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetNonPublicField(System.String)">
+      <summary>Gets value of NonPublic field.</summary>
+      <param name="fieldName">NonPublic field name</param>
+      <returns>Field value</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetNonPublicProperty(System.String)">
+      <summary>Gets value of NonPublic property</summary>
+      <param name="propName">Property name</param>
+      <returns>Property value</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetNonPublicVariable(System.Object,System.String)">
+      <summary>Get the value from a NonPublic variable or field.</summary>
+      <param name="obj">Object which contains field</param>
+      <param name="variableName">Field Name</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetPrivateVariable(System.String)">
+      <summary>Get the value from a NonPublic variable or field.</summary>
+      <param name="obj">Object which contains field</param>
+      <param name="variableName">Field Name</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetProperty(System.Object,System.String)">
+      <summary>Get Property Value</summary>
+      <param name="obj">Object where property is defined.</param>
+      <param name="propertyName">Property Name.</param>
+      <returns>Property Value.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetProperty(MbUnit.Framework.Reflection.AccessModifier,System.Object,System.String)">
+      <summary>Get Property Value</summary>
+      <param name="access">Specify property access modifier.</param>
+      <param name="propertyName">Property Name.</param>
+      <returns>Property Value.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetProperty(MbUnit.Framework.Reflection.AccessModifier,System.Object,System.String,System.Boolean)">
+      <summary>Get Property Value</summary>
+      <param name="access">Specify property access modifier.</param>
+      <param name="propertyName">Property Name.</param>
+      <param name="lookInBase">Set to true if need look for the property in base classes.</param>
+      <returns>Property Value.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetProperty(System.String)">
+      <summary>Get Property Value</summary>
+      <param name="propertyName">Property Name.</param>
+      <returns>Property Value.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetProperty(MbUnit.Framework.Reflection.AccessModifier,System.String)">
+      <summary>Get Property Value</summary>
+      <param name="access">Specify property access modifier.</param>
+      <param name="propertyName">Property Name.</param>
+      <returns>Property Value.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.GetProperty(MbUnit.Framework.Reflection.AccessModifier,System.String,System.Boolean)">
+      <summary>Get Property Value</summary>
+      <param name="access">Specify property access modifier.</param>
+      <param name="propertyName">Property Name.</param>
+      <param name="lookInBase">Specify if need to look in Base classes.</param>
+      <returns>Property Value.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.InvokeMethod(System.Object,System.String)">
+      <summary>Execute a NonPublic method with arguments on a object</summary>
+      <param name="obj">Object where method is defined.</param>
+      <param name="methodName">Method to call</param>
+      <returns>The object the method should return.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.InvokeMethod(System.Object,System.String,System.Object[])">
+      <summary>Execute a NonPublic method with arguments on a object</summary>
+      <param name="obj">Object where method is defined.</param>
+      <param name="methodName">Method to call</param>
+      <param name="methodParams">Method's parameters.</param>
+      <returns>The object the method should return.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.InvokeMethod(MbUnit.Framework.Reflection.AccessModifier,System.Object,System.String,System.Object[])">
+      <summary>Execute a NonPublic method with arguments on a object</summary>
+      <param name="access">Specify method access modifier.</param>
+      <param name="obj">Object where method is defined.</param>
+      <param name="methodName">Method to call</param>
+      <param name="methodParams">Method's parameters.</param>
+      <returns>The object the method should return.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.InvokeMethod(MbUnit.Framework.Reflection.AccessModifier,System.Object,System.String,System.Boolean,System.Object[])">
+      <summary>Execute a NonPublic method with arguments on a object</summary>
+      <param name="access">Specify method access modifier.</param>
+      <param name="obj">Object where method is defined.</param>
+      <param name="methodName">Method to call</param>
+      <param name="methodParams">Method's parameters.</param>
+      <returns>The object the method should return.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.InvokeMethod(System.String)">
+      <summary>Execute a NonPublic method with arguments on a object</summary>
+      <param name="methodName">Method to call</param>
+      <returns>The object the method should return.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.InvokeMethod(System.String,System.Object[])">
+      <summary>Execute a NonPublic method with arguments on a object</summary>
+      <param name="methodName">Method to call</param>
+      <param name="methodParams">Method's parameters.</param>
+      <returns>The object the method should return.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.InvokeMethod(MbUnit.Framework.Reflection.AccessModifier,System.String,System.Object[])">
+      <summary>Execute a NonPublic method with arguments on a object</summary>
+      <param name="methodName">Method to call</param>
+      <param name="access">Specify method access modifier.</param>
+      <param name="methodParams">Method's parameters.</param>
+      <returns>The object the method should return.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.RunNonPublicMethod(System.Object,System.String)">
+      <summary>Execute a NonPublic method on a object</summary>
+      <param name="obj">Object to call method on</param>
+      <param name="methodName">Method to call</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.RunPrivateMethod(System.String)">
+      <summary>Execute a NonPublic method without arguments on a object</summary>
+      <param name="obj">Object to call method on</param>
+      <param name="methodName">Method to call</param>
+      <returns>The object the method should return.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.RunPrivateMethod(System.String,System.Object[])">
+      <summary>Execute a NonPublic method with arguments on a object</summary>
+      <param name="obj">Object to call method on</param>
+      <param name="methodName">Method to call</param>
+      <returns>The object the method should return.</returns>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.SetField(System.Object,System.String,System.Object)">
+      <summary>Set field value.</summary>
+      <param name="obj">Object where field is defined.</param>
+      <param name="fieldName">Field Name.</param>
+      <param name="fieldValue">Field Value.</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.SetField(MbUnit.Framework.Reflection.AccessModifier,System.Object,System.String,System.Object)">
+      <summary>Set field value.</summary>
+      <param name="access">Specify field access modifier.</param>
+      <param name="obj">Object where field is defined.</param>
+      <param name="fieldName">Field Name.</param>
+      <param name="fieldValue">Field Value.</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.SetField(MbUnit.Framework.Reflection.AccessModifier,System.Object,System.String,System.Object,System.Boolean)">
+      <summary>Set field value.</summary>
+      <param name="access">Specify field access modifier.</param>
+      <param name="obj">Object where field is defined.</param>
+      <param name="fieldName">Field Name.</param>
+      <param name="fieldValue">Field Value.</param>
+      <param name="lookInBase">Specify if need to look in Base classes.</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.SetField(System.String,System.Object)">
+      <summary>Set field value.</summary>
+      <param name="fieldName">Field Name.</param>
+      <param name="fieldValue">Field Value.</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.SetField(MbUnit.Framework.Reflection.AccessModifier,System.String,System.Object)">
+      <summary>Set field value.</summary>
+      <param name="fieldName">Field Name.</param>
+      <param name="fieldValue">Field Value.</param>
+      <param name="access">Specify field access modifier.</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.SetProperty(System.Object,System.String,System.Object)">
+      <summary>Set Property value.</summary>
+      <param name="obj">Object where property is defined.</param>
+      <param name="fieldName">Property Name.</param>
+      <param name="fieldValue">Property Value.</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.SetProperty(MbUnit.Framework.Reflection.AccessModifier,System.Object,System.String,System.Object)">
+      <summary>Set Property value.</summary>
+      <param name="access">Specify property access modifier.</param>
+      <param name="obj">Object where property is defined.</param>
+      <param name="fieldName">Property Name.</param>
+      <param name="fieldValue">Property Value.</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.SetProperty(MbUnit.Framework.Reflection.AccessModifier,System.Object,System.String,System.Object,System.Boolean)">
+      <summary>Set Property value.</summary>
+      <param name="access">Specify property access modifier.</param>
+      <param name="obj">Object where property is defined.</param>
+      <param name="fieldName">Property Name.</param>
+      <param name="fieldValue">Property Value.</param>
+      <param name="lookInBase">Set to true if need look for the property in base classes.</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.SetProperty(System.String,System.Object)">
+      <summary>Set Property value.</summary>
+      <param name="fieldName">Property Name.</param>
+      <param name="fieldValue">Property Value.</param>
+    </member>
+    <member name="M:MbUnit.Framework.Reflection.Reflector.SetProperty(MbUnit.Framework.Reflection.AccessModifier,System.String,System.Object)">
+      <summary>Set Property value.</summary>
+      <param name="access">Specify property access modifier.</param>
+      <param name="fieldName">Property Name.</param>
+      <param name="fieldValue">Property Value.</param>
+    </member>
+  </members>
+</doc>

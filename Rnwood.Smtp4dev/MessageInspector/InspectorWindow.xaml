@@ -1,0 +1,82 @@
+﻿<Window x:Class="Rnwood.Smtp4dev.MessageInspector.InspectorWindow"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="clr-namespace:Rnwood.Smtp4dev.MessageInspector"
+    Height="430" Width="926" Background="{x:Static SystemColors.ControlBrush}" Title="{Binding Path=Subject,StringFormat='Message: {0}', Mode=OneWay}" WindowStartupLocation="CenterScreen" WindowState="Maximized" xmlns:my="clr-namespace:Microsoft.Windows.Controls;assembly=WPFToolkit">
+
+    <Window.Resources>
+    </Window.Resources>
+    <TabControl  Grid.Row="1" Margin="3">
+
+        <TabItem Header="MIME Parts">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="3*"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*"/>
+                </Grid.RowDefinitions>
+
+                <TreeView Margin="4,3,2,3" ItemsSource="{Binding .}" Name="treeView" SelectedItemChanged="treeView_SelectedItemChanged">
+
+                    <TreeView.ItemContainerStyle>
+                        <Style TargetType="{x:Type TreeViewItem}">
+                            <Setter Property="IsSelected" Value="{Binding IsSelected, Mode=TwoWay}" />
+                        </Style>
+                    </TreeView.ItemContainerStyle>
+
+                    <TreeView.ItemTemplate>
+                        <HierarchicalDataTemplate DataType="{x:Type local:MessageViewModel}" ItemsSource="{Binding Children}">
+                            <StackPanel Orientation="Horizontal" Margin="1">
+                                <!--<Image Source="{Binding Icon}" Width="16" Height="16"/>-->
+                                <TextBlock Text="{Binding Name, Mode=OneWay}"/>
+                            </StackPanel>
+                        </HierarchicalDataTemplate>
+                    </TreeView.ItemTemplate>
+
+                </TreeView>
+                <Grid Grid.Column="1" Margin="3" DataContext="{Binding ElementName=treeView, Path=SelectedItem}" Name="partDetailsGrid" IsEnabled="False">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="auto"/>
+                        <RowDefinition Height="*"/>
+                    </Grid.RowDefinitions>
+
+                    <Label>Selected Part:</Label>
+                    <TabControl Grid.Row="1" Margin="3">
+                        <TabItem Header="Source">
+                            <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+                        </TabItem>
+                        <TabItem Header="Headers">
+                            <my:DataGrid Margin="3" Name="dataGrid1" ItemsSource="{Binding Headers}" IsReadOnly="True" AutoGenerateColumns="False" HorizontalGridLinesBrush="LightGray" VerticalGridLinesBrush="LightGray" BorderThickness="1" BorderBrush="Black" HeadersVisibility="Column">
+                                <my:DataGrid.CellStyle>
+                                    <Style TargetType="{x:Type my:DataGridCell}">
+                                        <Setter Property="Padding" Value="50"/>
+                                    </Style>
+                                </my:DataGrid.CellStyle>
+                                <my:DataGrid.Columns>
+                                    <my:DataGridTextColumn Binding="{Binding Key, Mode=OneWay}" Width="*" Header="Name">
+
+                                    </my:DataGridTextColumn>
+                                    <my:DataGridTextColumn Binding="{Binding Value, Mode=OneWay}"  Width="2*" Header="Value"/>
+                                </my:DataGrid.Columns>
+                            </my:DataGrid>
+                        </TabItem>
+                        <TabItem Header="Body">
+                            <DockPanel>
+                                <StackPanel Margin="3" DockPanel.Dock="Bottom" HorizontalAlignment="Left" Orientation="Horizontal">
+                                    <Button Margin="3" Padding="3"  Click="Button_Click">Open</Button>
+                                    <Button Margin="3" Padding="3"  Click="Button_Click_1">Save As...</Button>
+                                </StackPanel>
+                                <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Body, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+                            </DockPanel>
+                        </TabItem>
+                    </TabControl>
+                </Grid>
+            </Grid>
+        </TabItem>
+        <TabItem Header="Message Source">
+            <TextBox IsReadOnly="True" Margin="3" FontFamily="Courier New" Text="{Binding Path=Data, Mode=OneWay}" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"/>
+        </TabItem>
+    </TabControl>
+</Window>

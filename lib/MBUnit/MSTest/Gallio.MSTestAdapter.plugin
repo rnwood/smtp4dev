@@ -1,0 +1,38 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.MSTestAdapter"
+        recommendedInstallationPath="MSTest"
+        xmlns="http://www.gallio.org/">
+  <traits>
+    <name>MSTest Adapter Plugin</name>
+    <version>3.2.0.0</version>
+    <description>Provides support for running MSTest tests.  Requires MSTest to be installed separately.</description>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.MSTestAdapter.plugin" />
+    <file path="Gallio.MSTestAdapter.dll" />
+    <file path="Readme.txt" />
+  </files>
+
+  <assemblies>
+    <assembly fullName="Gallio.MSTestAdapter, Version=3.2.0.0, Culture=neutral, PublicKeyToken=null"
+              codeBase="Gallio.MSTestAdapter.dll"
+              qualifyPartialName="true" />
+  </assemblies>
+
+  <components>
+    <component componentId="MSTestAdapter.TestFramework"
+               serviceId="Gallio.TestFramework"
+               componentType="Gallio.MSTestAdapter.Model.MSTestFramework, Gallio.MSTestAdapter">
+      <traits>
+        <name>MSTest</name>
+        <frameworkAssemblies>Microsoft.VisualStudio.QualityTools.UnitTestFramework</frameworkAssemblies>
+        <fileTypes>Assembly</fileTypes>
+      </traits>
+    </component>
+  </components>
+</plugin>

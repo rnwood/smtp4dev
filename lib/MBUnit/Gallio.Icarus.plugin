@@ -1,0 +1,177 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<plugin pluginId="Gallio.Icarus"
+        recommendedInstallationPath=""
+        xmlns="http://www.gallio.org/">
+  
+  <traits>
+    <name>Gallio Icarus Test Runner</name>
+    <version>3.2.0.0</version>
+    <description>A GUI based test runner.</description>
+    <icon>plugin://Gallio.Icarus/Resources/Gallio.Icarus.ico</icon>
+  </traits>
+
+  <dependencies>
+    <dependency pluginId="Gallio.UI" />
+  </dependencies>
+
+  <files>
+    <file path="Gallio.Icarus.plugin" />
+    <file path="Gallio.Icarus.exe" />
+    <file path="Gallio.Icarus.exe.config" />
+    <file path="Gallio.Icarus.XmlSerializers.dll" />
+    <file path="ICSharpCode.TextEditor.dll" />
+    <file path="Resources\Gallio.Icarus.ico" />
+  </files>
+
+  <services>
+    
+    <service serviceId="Gallio.Icarus.OptionsController" 
+             serviceType="Gallio.Icarus.Controllers.Interfaces.IOptionsController, Gallio.Icarus" />
+
+    <service serviceId="Gallio.Icarus.Package" 
+             serviceType="Gallio.Icarus.IPackage, Gallio.Icarus" />
+			 
+    <service serviceId="Gallio.Icarus.WindowManager.WindowManager" 
+             serviceType="Gallio.Icarus.WindowManager.IWindowManager, Gallio.Icarus" />
+
+    <service serviceId="Gallio.Icarus.WindowManager.MenuManager"
+             serviceType="Gallio.Icarus.WindowManager.IMenuManager, Gallio.Icarus" />
+
+    <service serviceId="Gallio.Icarus.Runtime.PluginScanner" 
+             serviceType="Gallio.Icarus.Runtime.IPluginScanner, Gallio.Icarus" />
+
+    <service serviceId="Gallio.Icarus.TreeBuilders.TreeBuilder"
+             serviceType="Gallio.Icarus.TreeBuilders.ITreeBuilder, Gallio.Icarus" />
+    
+  </services>
+
+  <components>
+  
+    <component componentId="Gallio.Icarus.Controllers.OptionsController" 
+               serviceId="Gallio.Icarus.OptionsController"
+               componentType="Gallio.Icarus.Controllers.OptionsController, Gallio.Icarus" />
+  
+    <component componentId="Gallio.Icarus.WindowManager.WindowManager" 
+               serviceId="Gallio.Icarus.WindowManager.WindowManager"
+               componentType="Gallio.Icarus.WindowManager.WindowManager, Gallio.Icarus" />
+
+    <component componentId="Gallio.Icarus.WindowManager.MenuManager"
+               serviceId="Gallio.Icarus.WindowManager.MenuManager"
+               componentType="Gallio.Icarus.WindowManager.MenuManager, Gallio.Icarus" />
+    
+    <component componentId="Gallio.Icarus.Runtime.DefaultConventionScanner" 
+               serviceId="Gallio.Icarus.Runtime.PluginScanner"
+               componentType="Gallio.Icarus.Runtime.DefaultConventionScanner, Gallio.Icarus" />
+    
+    <!-- Tree builders -->
+
+    <component componentId="Gallio.Icarus.TreeBuilders.NamespaceTreeBuilder"
+               serviceId="Gallio.Icarus.TreeBuilders.TreeBuilder"
+               componentType="Gallio.Icarus.TreeBuilders.NamespaceTreeBuilder, Gallio.Icarus">
+      <traits>
+        <priority>1</priority>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.Icarus.TreeBuilders.MetadataTreeBuilder"
+               serviceId="Gallio.Icarus.TreeBuilders.TreeBuilder"
+               componentType="Gallio.Icarus.TreeBuilders.MetadataTreeBuilder, Gallio.Icarus">
+      <traits>
+        <priority>1</priority>
+      </traits>
+    </component>
+    
+    <!-- Control panel -->
+
+    <component componentId="Gallio.Icarus.ControlPanel.RootPaneProvider"
+               serviceId="Gallio.UI.PreferencePaneProvider">
+      <traits>
+        <path>Icarus</path>
+        <order>-75</order>
+        <icon>plugin://Gallio.Icarus/Resources/Gallio.Icarus.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.Icarus.ControlPanel.TestStatusPaneProvider"
+           serviceId="Gallio.UI.PreferencePaneProvider"
+           componentType="Gallio.Icarus.ControlPanel.TestStatusPaneProvider, Gallio.Icarus">
+      <traits>
+        <path>Icarus/Appearance/Test Status</path>
+        <order>100</order>
+        <icon>plugin://Gallio.Icarus/Resources/Gallio.Icarus.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.Icarus.ControlPanel.StartupPaneProvider"
+           serviceId="Gallio.UI.PreferencePaneProvider"
+           componentType="Gallio.Icarus.ControlPanel.StartupPaneProvider, Gallio.Icarus">
+      <traits>
+        <path>Icarus/Startup</path>
+        <order>200</order>
+        <icon>plugin://Gallio.Icarus/Resources/Gallio.Icarus.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.Icarus.ControlPanel.TestExplorerPaneProvider" 
+               serviceId="Gallio.UI.PreferencePaneProvider" 
+               componentType="Gallio.Icarus.ControlPanel.TestExplorerPaneProvider, Gallio.Icarus">
+      <traits>
+        <path>Icarus/Test Explorer</path>
+        <order>300</order>
+        <icon>plugin://Gallio.Icarus/Resources/Gallio.Icarus.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.Icarus.ControlPanel.TreeViewCategoryPaneProvider" 
+               serviceId="Gallio.UI.PreferencePaneProvider" 
+               componentType="Gallio.Icarus.ControlPanel.TreeViewCategoryPaneProvider, Gallio.Icarus">
+      <traits>
+        <path>Icarus/Test Explorer/Tree View Categories</path>
+        <order>1</order>
+        <icon>plugin://Gallio.Icarus/Resources/Gallio.Icarus.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.Icarus.ControlPanel.ReportsPaneProvider" 
+               serviceId="Gallio.UI.PreferencePaneProvider" 
+               componentType="Gallio.Icarus.ControlPanel.ReportsPaneProvider, Gallio.Icarus">
+      <traits>
+        <path>Icarus/Reports</path>
+        <order>1</order>
+        <icon>plugin://Gallio.Icarus/Resources/Gallio.Icarus.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.Icarus.ControlPanel.ProgressMonitoringPaneProvider" 
+               serviceId="Gallio.UI.PreferencePaneProvider" 
+               componentType="Gallio.Icarus.ControlPanel.ProgressMonitoringPaneProvider, Gallio.Icarus">
+      <traits>
+        <path>Icarus/Appearance/Progress Monitoring</path>
+        <order>1</order>
+        <icon>plugin://Gallio.Icarus/Resources/Gallio.Icarus.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.Icarus.ControlPanel.TestRunnerExtensionsPaneProvider" 
+               serviceId="Gallio.UI.PreferencePaneProvider" 
+               componentType="Gallio.Icarus.ControlPanel.TestRunnerExtensionsPaneProvider, Gallio.Icarus">
+      <traits>
+        <path>Icarus/Runner/Test Runner Extensions</path>
+        <order>1</order>
+        <icon>plugin://Gallio.Icarus/Resources/Gallio.Icarus.ico</icon>
+      </traits>
+    </component>
+
+    <component componentId="Gallio.Icarus.ControlPanel.TestRunnerFactoryPaneProvider" 
+               serviceId="Gallio.UI.PreferencePaneProvider" 
+               componentType="Gallio.Icarus.ControlPanel.TestRunnerFactoryPaneProvider, Gallio.Icarus">
+      <traits>
+        <path>Icarus/Runner/Test Runner Factory</path>
+        <order>1</order>
+        <icon>plugin://Gallio.Icarus/Resources/Gallio.Icarus.ico</icon>
+      </traits>
+    </component>
+
+  </components>
+
+</plugin>
