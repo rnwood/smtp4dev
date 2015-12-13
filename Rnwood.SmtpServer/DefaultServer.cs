@@ -37,7 +37,7 @@ namespace Rnwood.SmtpServer
 
         /// <summary>
         /// Initializes a new SMTP over SSL server on the specified port number
-        /// using the supplied SSL ceritificate.
+        /// using the supplied SSL certificate.
         /// </summary>
         /// <param name="portNumber">The port number.</param>
         /// <param name="sslCertificate">The SSL certificate.</param>
@@ -49,8 +49,7 @@ namespace Rnwood.SmtpServer
         /// <summary>
         /// Initializes a new SMTP over SSL server on the specified standard port number
         /// </summary>
-        /// <param name="portNumber">The port number.</param>
-        /// <param name="sslCertificate">The SSL certificate.</param>
+        /// <param name="port">The standard port (or auto) to use.</param>
         public DefaultServer(Ports port)
             : this(new DefaultServerBehaviour((int)port))
         {

@@ -30,7 +30,7 @@ namespace Rnwood.SmtpServer.Tests
         {
             Mocks mocks = new Mocks();
             Mock<IVerb> mockVerb = new Mock<IVerb>();
-            mocks.VerbMap.Expect(v => v.GetVerbProcessor(It.IsAny<string>())).Returns(mockVerb.Object);
+            mocks.VerbMap.Setup(v => v.GetVerbProcessor(It.IsAny<string>())).Returns(mockVerb.Object);
             mockVerb.Setup(v => v.Process(It.IsAny<IConnection>(), It.IsAny<SmtpCommand>())).Throws(new SmtpServerException(new SmtpResponse(500, "error")));
 
             mocks.ConnectionChannel.Setup(c => c.ReadLine()).Returns("GOODCOMMAND").Callback(mocks.ConnectionChannel.Object.Close);
@@ -60,7 +60,7 @@ namespace Rnwood.SmtpServer.Tests
         {
             Mocks mocks = new Mocks();
             Mock<IVerb> mockVerb = new Mock<IVerb>();
-            mocks.VerbMap.Expect(v => v.GetVerbProcessor(It.IsAny<string>())).Returns(mockVerb.Object);
+            mocks.VerbMap.Setup(v => v.GetVerbProcessor(It.IsAny<string>())).Returns(mockVerb.Object);
 
             mocks.ConnectionChannel.Setup(c => c.ReadLine()).Returns("GOODCOMMAND").Callback(mocks.ConnectionChannel.Object.Close);
 
