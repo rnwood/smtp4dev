@@ -7,12 +7,12 @@ namespace Rnwood.SmtpServer
     {
         Stream GetData(DataAccessMode dataAccessMode);
 
-        DateTime ReceivedDate { get; set; }
-        string From { get; set; }
+        new DateTime ReceivedDate { get; set; }
+        new string From { get; set; }
         void AddTo(string to);
 
-        bool SecureConnection { get; set; }
-        bool EightBitTransport { get; set; }
-        long? DeclaredMessageSize { get; set; }
+        new bool SecureConnection { get; set; }
+        new bool EightBitTransport { get; set; }
+        new long? DeclaredMessageSize { get; set; }
     }
 }

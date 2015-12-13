@@ -19,7 +19,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             verb.Process(mocks.Connection.Object, new SmtpCommand("HELO foo.blah"));
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
-            mocks.Session.VerifySet(s => s.ClientName, "foo.bar");
+            mocks.Session.VerifySet(s => s.ClientName = "foo.blah");
         }
 
         [TestMethod]
@@ -43,7 +43,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             verb.Process(mocks.Connection.Object, new SmtpCommand("HELO"));
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
-            mocks.Session.VerifySet(s => s.ClientName, "");
+            mocks.Session.VerifySet(s => s.ClientName = "");
         }
     }
 }

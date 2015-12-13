@@ -20,7 +20,14 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             AuthMechanismProcessorStatus result = processor.ProcessResponse(null);
 
             Assert.AreEqual(AuthMechanismProcessorStatus.Continue, result);
-            mocks.Connection.Verify(c => c.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, It.Is<string>(data => ServerUtility.DecodeBase64(data).Equals( "Username:", StringComparison.OrdinalIgnoreCase)))));
+            mocks.Connection.Verify(c =>
+                c.WriteResponse(
+                        It.Is<SmtpResponse>(r =>
+                           r.Code == (int) StandardSmtpResponseCode.AuthenticationContinue &&
+                           VerifyBase64Response(r.Message, "Username:")
+                        )
+                )
+            );
         }
 
         [TestMethod]
@@ -32,7 +39,20 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             AuthMechanismProcessorStatus result = processor.ProcessResponse(ServerUtility.EncodeBase64("rob"));
 
             Assert.AreEqual(AuthMechanismProcessorStatus.Continue, result);
-            mocks.Connection.Verify(c => c.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, It.Is<string>(data => ServerUtility.DecodeBase64(data).Equals("Password:", StringComparison.OrdinalIgnoreCase)))));
+
+            mocks.Connection.Verify(c => 
+                c.WriteResponse(
+                    It.Is<SmtpResponse>(r => 
+                        VerifyBase64Response(r.Message, "Password:") 
+                        && r.Code == (int)StandardSmtpResponseCode.AuthenticationContinue
+                    )
+                )
+            );
+        }
+
+        bool VerifyBase64Response(string base64, string expectedString)
+        {
+            return ServerUtility.DecodeBase64(base64).Equals( expectedString);
         }
 
         [TestMethod]

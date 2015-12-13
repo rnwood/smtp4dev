@@ -7,26 +7,26 @@ namespace Rnwood.SmtpServer
 {
     public interface IEditableSession : ISession
     {
-        DateTime StartDate { get; set; }
-        
-        DateTime? EndDate { get; set; }
+        new DateTime StartDate { get; set; }
 
-        IPAddress ClientAddress { get; set; }
+        new DateTime? EndDate { get; set; }
 
-        string ClientName { get; set; }
+        new IPAddress ClientAddress { get; set; }
 
-        bool SecureConnection { get; set; }
+        new string ClientName { get; set; }
+
+        new bool SecureConnection { get; set; }
 
         void AddMessage(IMessage message);
-        
-        bool CompletedNormally { get; set; }
 
-        bool Authenticated { get; set; }
+        new bool CompletedNormally { get; set; }
 
-        IAuthenticationCredentials AuthenticationCredentials { get; set; }
+        new bool Authenticated { get; set; }
 
-        Exception SessionError { get; set; }
-        SessionErrorType SessionErrorType { get; set; }
+        new IAuthenticationCredentials AuthenticationCredentials { get; set; }
+
+        new Exception SessionError { get; set; }
+        new SessionErrorType SessionErrorType { get; set; }
 
         void AppendToLog(string text);
     }

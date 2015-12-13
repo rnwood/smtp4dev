@@ -61,10 +61,8 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             {
                 case AuthenticationResult.Success:
                     return AuthMechanismProcessorStatus.Success;
-                    break;
                 default:
                     return AuthMechanismProcessorStatus.Failed;
-                    break;
             }
         }
 
