@@ -27,7 +27,6 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         {
             Mocks mocks = new Mocks();
             mocks.Session.SetupGet(s => s.ClientName).Returns("already.said.helo");
-            mocks.Session.SetupSet(s => s.ClientName).Never();
 
             HeloVerb verb = new HeloVerb();
             verb.Process(mocks.Connection.Object, new SmtpCommand("HELO foo.blah"));
