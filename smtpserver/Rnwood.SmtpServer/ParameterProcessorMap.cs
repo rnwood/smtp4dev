@@ -24,14 +24,9 @@ namespace Rnwood.SmtpServer
             return result;
         }
 
-        public void Process(IConnection connection, string[] tokens, bool throwOnUnknownParameter)
+        public void Process(IConnection connection, string[] arguments, bool throwOnUnknownParameter)
         {
-            Process(connection, new ParameterParser(tokens), throwOnUnknownParameter);
-        }
-
-        public void Process(IConnection connection, string parametersString, bool throwOnUnknownParameter)
-        {
-            Process(connection, new ParameterParser(parametersString), throwOnUnknownParameter);
+            Process(connection, new ParameterParser(arguments), throwOnUnknownParameter);
         }
 
         public void Process(IConnection connection, ParameterParser parameters, bool throwOnUnknownParameter)

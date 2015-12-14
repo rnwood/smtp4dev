@@ -8,7 +8,7 @@ namespace Rnwood.SmtpServer.Tests
         [TestMethod]
         public void NoParameters()
         {
-            ParameterParser parameterParser = new ParameterParser("");
+            ParameterParser parameterParser = new ParameterParser(new string[0]);
 
             Assert.AreEqual(0, parameterParser.Parameters.Length);
         }
@@ -25,7 +25,7 @@ namespace Rnwood.SmtpServer.Tests
         [TestMethod]
         public void MultipleParameters()
         {
-            ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA KEYB=VALUEB");
+            ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA", "KEYB=VALUEB");
 
             Assert.AreEqual(2, parameterParser.Parameters.Length);
             Assert.AreEqual(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters[0]);

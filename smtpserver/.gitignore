@@ -4,3 +4,4 @@ bin
 *.ncrunch*
 packages
 _ncrunch_*
+*.user

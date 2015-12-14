@@ -84,6 +84,7 @@
     </Compile>
     <Compile Include="AbstractMessageTests.cs" />
     <Compile Include="AbstractSessionTests.cs" />
+    <Compile Include="ArgumentsParserTests.cs" />
     <Compile Include="ASCIISevenBitTruncatingEncodingTests.cs" />
     <Compile Include="ClientTests.cs" />
     <Compile Include="CommandEventArgsTests.cs" />
