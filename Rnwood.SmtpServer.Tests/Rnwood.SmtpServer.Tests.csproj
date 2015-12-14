@@ -94,6 +94,7 @@
     <Compile Include="Extensions\Auth\LoginMechanismProcessorTests.cs" />
     <Compile Include="Extensions\Auth\CramMd5AuthenticationRequestTests.cs" />
     <Compile Include="Extensions\Auth\CramMd5MechanismProcessorTests.cs" />
+    <Compile Include="Verbs\StartTlsVerbTests.cs" />
     <Compile Include="FileMessageTests.cs" />
     <Compile Include="MemoryMessageTests.cs" />
     <Compile Include="MemorySessionTests.cs" />
