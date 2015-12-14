@@ -58,9 +58,11 @@ namespace Rnwood.SmtpServer.Tests
         public void ToString_MultiLineMessage()
         {
             SmtpResponse r = new SmtpResponse(200, "Multi line message line 1\r\n" +
-            "Multi line message line 2");
+            "Multi line message line 2\r\n" +
+            "Multi line message line 3");
             Assert.AreEqual("200-Multi line message line 1\r\n" +
-            "200 Multi line message line 2\r\n", r.ToString());
+            "200-Multi line message line 2\r\n" +
+            "200 Multi line message line 3\r\n", r.ToString());
         }
 
         [TestMethod]
