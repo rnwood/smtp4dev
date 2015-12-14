@@ -7,3 +7,5 @@ For downloads of the stable smtp4dev v2 please see [https://smtp4dev.codeplex.co
 *If you find smtp4dev useful, please consider supporting further development by making a donation:*
 
 <a href='https://www.paypal.me/rnwood'><img alt='Donate' src='https://www.paypalobjects.com/webstatic/en_US/btn/btn_donate_pp_142x27.png'/></a>
+
+[![Build status](https://ci.appveyor.com/api/projects/status/tay9sajnfh4vy2x0/branch/master?svg=true)](https://ci.appveyor.com/project/rnwood/smtp4dev/branch/master)
