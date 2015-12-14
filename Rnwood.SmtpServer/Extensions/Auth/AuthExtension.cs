@@ -1,9 +1,5 @@
 ﻿#region
 
-using System.Collections.Generic;
-using System.Linq;
-using Rnwood.SmtpServer.Verbs;
-
 #endregion
 
 namespace Rnwood.SmtpServer.Extensions.Auth

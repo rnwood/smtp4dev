@@ -1,6 +1,5 @@
-using System;
-using System.Text;
 using System.Linq;
+using System.Text;
 
 namespace Rnwood.SmtpServer
 {
@@ -44,7 +43,7 @@ namespace Rnwood.SmtpServer
             return _asciiEncoding.GetMaxCharCount(byteCount);
         }
 
-        class EncodingFallback : EncoderFallback
+        private class EncodingFallback : EncoderFallback
         {
             public override int MaxCharCount
             {
@@ -56,7 +55,7 @@ namespace Rnwood.SmtpServer
                 return new Buffer();
             }
 
-            class Buffer : EncoderFallbackBuffer
+            private class Buffer : EncoderFallbackBuffer
             {
                 public override bool Fallback(char charUnknown, int index)
                 {
@@ -74,7 +73,7 @@ namespace Rnwood.SmtpServer
 
                 private char FallbackChar(char charUnknown)
                 {
-                   return (char)(charUnknown & 127);
+                    return (char)(charUnknown & 127);
                 }
 
                 public override char GetNextChar()
@@ -107,10 +106,9 @@ namespace Rnwood.SmtpServer
                     get { return !_charRead ? 1 : 0; }
                 }
             }
-
         }
 
-        class DecodingFallback : DecoderFallback
+        private class DecodingFallback : DecoderFallback
         {
             public override int MaxCharCount
             {
@@ -136,7 +134,7 @@ namespace Rnwood.SmtpServer
 
                 public override bool Fallback(byte[] bytesUnknown, int index)
                 {
-                    _fallbackString = Encoding.ASCII.GetString(bytesUnknown.Select(b => (byte)( b & 127)).ToArray());
+                    _fallbackString = Encoding.ASCII.GetString(bytesUnknown.Select(b => (byte)(b & 127)).ToArray());
                     _fallbackIndex = 0;
 
                     return true;
@@ -166,7 +164,7 @@ namespace Rnwood.SmtpServer
                 }
             }
 
-            #endregion
+            #endregion Nested type: Buffer
         }
     }
 }

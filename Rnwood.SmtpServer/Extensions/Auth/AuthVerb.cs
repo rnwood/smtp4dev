@@ -1,5 +1,5 @@
-﻿using System.Linq;
-using Rnwood.SmtpServer.Verbs;
+﻿using Rnwood.SmtpServer.Verbs;
+using System.Linq;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
@@ -11,7 +11,6 @@ namespace Rnwood.SmtpServer.Extensions.Auth
         }
 
         public AuthExtensionProcessor AuthExtensionProcessor { get; private set; }
-
 
         public void Process(IConnection connection, SmtpCommand command)
         {

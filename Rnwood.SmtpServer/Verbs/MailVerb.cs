@@ -18,9 +18,8 @@ namespace Rnwood.SmtpServer
 
         public MailFromVerb FromSubVerb
         {
-            get { return (MailFromVerb) SubVerbMap.GetVerbProcessor("FROM"); }
+            get { return (MailFromVerb)SubVerbMap.GetVerbProcessor("FROM"); }
         }
-
 
         public void Process(IConnection connection, SmtpCommand command)
         {

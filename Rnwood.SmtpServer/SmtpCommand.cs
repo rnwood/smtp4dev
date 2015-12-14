@@ -1,10 +1,9 @@
 ﻿#region
 
 using System;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Text;
 using System.Collections.Generic;
+using System.Text;
+using System.Text.RegularExpressions;
 
 #endregion
 
@@ -33,8 +32,6 @@ namespace Rnwood.SmtpServer
                     IsValid = true;
                 }
             }
-
-
         }
 
         private string[] ParseArguments(string argumentsText)
@@ -64,6 +61,7 @@ namespace Rnwood.SmtpServer
                             goto default;
                         }
                         break;
+
                     default:
                         currentArgument.Append(character);
                         break;
@@ -76,6 +74,7 @@ namespace Rnwood.SmtpServer
             }
             return arguments.ToArray();
         }
+
         public string Text { get; private set; }
 
         public string ArgumentsText { get; private set; }
@@ -98,8 +97,8 @@ namespace Rnwood.SmtpServer
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof (SmtpCommand)) return false;
-            return Equals((SmtpCommand) obj);
+            if (obj.GetType() != typeof(SmtpCommand)) return false;
+            return Equals((SmtpCommand)obj);
         }
 
         public override int GetHashCode()

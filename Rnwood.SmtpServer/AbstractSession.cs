@@ -1,10 +1,10 @@
 #region
 
+using Rnwood.SmtpServer.Extensions.Auth;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Net;
-using Rnwood.SmtpServer.Extensions.Auth;
 
 #endregion
 
@@ -14,12 +14,11 @@ namespace Rnwood.SmtpServer
     {
         public AbstractSession(IPAddress clientAddress, DateTime startDate)
         {
-               _messages = new List<IMessage>();
+            _messages = new List<IMessage>();
             ClientAddress = clientAddress;
             StartDate = startDate;
-
         }
-        
+
         public DateTime StartDate { get; set; }
 
         public DateTime? EndDate { get; set; }
@@ -33,7 +32,7 @@ namespace Rnwood.SmtpServer
         public abstract TextReader GetLog();
 
         public abstract void Dispose();
-        
+
         public IMessage[] GetMessages()
         {
             return _messages.ToArray();
@@ -57,7 +56,5 @@ namespace Rnwood.SmtpServer
         public SessionErrorType SessionErrorType { get; set; }
 
         public abstract void AppendToLog(string text);
-
-        
     }
 }

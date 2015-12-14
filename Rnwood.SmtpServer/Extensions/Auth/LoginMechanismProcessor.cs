@@ -3,22 +3,19 @@ using System.Text;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class LoginMechanismProcessor : IAuthMechanismProcessor
+    public class LoginMechanismProcessor : AuthMechanismProcessor
     {
-        public LoginMechanismProcessor(IConnection connection)
+        public LoginMechanismProcessor(IConnection connection) : base(connection)
         {
-            Connection = connection;
             State = States.Initial;
         }
-
-        protected IConnection Connection { get; private set; }
 
         private States State { get; set; }
         private string _username;
 
         #region IAuthMechanismProcessor Members
 
-        public AuthMechanismProcessorStatus ProcessResponse(string data)
+        public override AuthMechanismProcessorStatus ProcessResponse(string data)
         {
             if (data != null)
             {
@@ -36,7 +33,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
                 case States.WaitingForUsername:
 
-                    _username = ServerUtility.DecodeBase64(data);
+                    _username = DecodeBase64(data);
 
                     Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
                                                               Convert.ToBase64String(
@@ -45,7 +42,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                     return AuthMechanismProcessorStatus.Continue;
 
                 case States.WaitingForPassword:
-                    string password = ServerUtility.DecodeBase64(data);
+                    string password = DecodeBase64(data);
                     State = States.Completed;
 
                     Credentials = new LoginAuthenticationCredentials(_username, password);
@@ -58,6 +55,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                     {
                         case AuthenticationResult.Success:
                             return AuthMechanismProcessorStatus.Success;
+
                         default:
                             return AuthMechanismProcessorStatus.Failed;
                     }
@@ -67,9 +65,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             }
         }
 
-        public IAuthenticationCredentials Credentials { get; set; }
-
-        #endregion
+        #endregion IAuthMechanismProcessor Members
 
         #region Nested type: States
 
@@ -81,6 +77,6 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             Completed
         }
 
-        #endregion
+        #endregion Nested type: States
     }
 }

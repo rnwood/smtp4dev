@@ -12,6 +12,7 @@ namespace Rnwood.SmtpServer
         }
 
         private readonly StringBuilder _log = new StringBuilder();
+
         public override TextReader GetLog()
         {
             return new StringReader(_log.ToString());
@@ -24,7 +25,6 @@ namespace Rnwood.SmtpServer
 
         public override void Dispose()
         {
-
         }
     }
 }

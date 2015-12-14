@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
@@ -44,7 +40,6 @@ namespace Rnwood.SmtpServer.Tests
             Assert.AreEqual("Blah", r.Message);
         }
 
-
         [TestMethod]
         public void Code()
         {
@@ -79,7 +74,5 @@ namespace Rnwood.SmtpServer.Tests
         {
             Assert.IsFalse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised, "Eror").Equals(new SmtpResponse(StandardSmtpResponseCode.OK, "OK")));
         }
-
-
     }
 }

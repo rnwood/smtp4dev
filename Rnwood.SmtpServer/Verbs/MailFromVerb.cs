@@ -1,7 +1,7 @@
 ﻿#region
 
-using System.Linq;
 using Rnwood.SmtpServer.Verbs;
+using System.Linq;
 
 #endregion
 
@@ -43,7 +43,6 @@ namespace Rnwood.SmtpServer
             connection.Server.Behaviour.OnMessageStart(connection, from);
             connection.NewMessage();
             connection.CurrentMessage.From = from;
-
 
             try
             {

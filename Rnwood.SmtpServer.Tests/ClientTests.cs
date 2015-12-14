@@ -1,16 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net.Mail;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
     [TestClass]
     public class ClientTests
     {
-
         [TestMethod]
         public void SmtpClient_NonSSL()
         {
@@ -21,8 +16,6 @@ namespace Rnwood.SmtpServer.Tests
             client.Send("from@from.com", "to@to.com", "subject", "body");
 
             server.Stop();
-
-            
         }
     }
 }

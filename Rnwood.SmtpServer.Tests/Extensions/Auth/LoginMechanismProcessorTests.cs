@@ -1,15 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Rnwood.SmtpServer.Extensions.Auth;
 
 namespace Rnwood.SmtpServer.Tests.Extensions.Auth
 {
     [TestClass]
-    public class LoginMechanismProcessorTests
+    public class LoginMechanismProcessorTests : AuthMechanismTest
     {
         [TestMethod]
         public void ProcessRepsonse_NoUsername_GetUsernameChallenge()
@@ -23,7 +19,7 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             mocks.Connection.Verify(c =>
                 c.WriteResponse(
                         It.Is<SmtpResponse>(r =>
-                           r.Code == (int) StandardSmtpResponseCode.AuthenticationContinue &&
+                           r.Code == (int)StandardSmtpResponseCode.AuthenticationContinue &&
                            VerifyBase64Response(r.Message, "Username:")
                         )
                 )
@@ -36,27 +32,22 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             Mocks mocks = new Mocks();
 
             LoginMechanismProcessor processor = Setup(mocks);
-            AuthMechanismProcessorStatus result = processor.ProcessResponse(ServerUtility.EncodeBase64("rob"));
+            AuthMechanismProcessorStatus result = processor.ProcessResponse(EncodeBase64("rob"));
 
             Assert.AreEqual(AuthMechanismProcessorStatus.Continue, result);
 
-            mocks.Connection.Verify(c => 
+            mocks.Connection.Verify(c =>
                 c.WriteResponse(
-                    It.Is<SmtpResponse>(r => 
-                        VerifyBase64Response(r.Message, "Password:") 
+                    It.Is<SmtpResponse>(r =>
+                        VerifyBase64Response(r.Message, "Password:")
                         && r.Code == (int)StandardSmtpResponseCode.AuthenticationContinue
                     )
                 )
             );
         }
 
-        bool VerifyBase64Response(string base64, string expectedString)
-        {
-            return ServerUtility.DecodeBase64(base64).Equals( expectedString);
-        }
-
         [TestMethod]
-        [ExpectedException(typeof(SmtpServerException))]
+        [ExpectedException(typeof(BadBase64Exception))]
         public void ProcessResponse_Response_BadBase64()
         {
             Mocks mocks = new Mocks();

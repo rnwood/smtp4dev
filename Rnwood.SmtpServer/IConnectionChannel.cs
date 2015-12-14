@@ -12,14 +12,17 @@ namespace Rnwood.SmtpServer
         bool IsConnected { get; }
         int ReceiveTimeout { get; set; }
         IPAddress ClientIPAddress { get; }
+
         void Close();
 
         Encoding ReaderEncoding { get; }
+
         void SetReaderEncoding(Encoding encoding);
 
         void ApplyStreamFilter(Func<Stream, Stream> filter);
-        void WriteLine(string text);
-        string ReadLine();
 
+        void WriteLine(string text);
+
+        string ReadLine();
     }
 }

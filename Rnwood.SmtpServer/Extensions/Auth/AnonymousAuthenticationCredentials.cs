@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
-namespace Rnwood.SmtpServer.Extensions.Auth
+﻿namespace Rnwood.SmtpServer.Extensions.Auth
 {
     public class AnonymousAuthenticationCredentials : IAuthenticationCredentials
     {

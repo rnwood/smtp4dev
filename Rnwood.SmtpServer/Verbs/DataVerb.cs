@@ -1,9 +1,8 @@
 ﻿#region
 
+using Rnwood.SmtpServer.Verbs;
 using System;
 using System.IO;
-using System.Text;
-using Rnwood.SmtpServer.Verbs;
 
 #endregion
 
@@ -47,7 +46,6 @@ namespace Rnwood.SmtpServer
                     }
 
                     firstLine = false;
-
                 } while (true);
 
                 writer.Flush();
@@ -67,7 +65,6 @@ namespace Rnwood.SmtpServer
                     connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted"));
                     connection.CommitMessage();
                 }
-
             }
         }
 

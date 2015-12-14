@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Rnwood.SmtpServer.Verbs;
 
@@ -31,7 +27,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             Mocks mocks = new Mocks();
 
             Mock<VerbWithSubCommands> verbWithSubCommands = new Mock<VerbWithSubCommands>() { CallBase = true };
-            
+
             verbWithSubCommands.Object.Process(mocks.Connection.Object, new SmtpCommand("VERB SUBCOMMAND1"));
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.CommandParameterNotImplemented);

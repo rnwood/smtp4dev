@@ -1,8 +1,8 @@
 ﻿#region
 
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net.Sockets;
 using System.Threading;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 #endregion
 
@@ -56,7 +56,7 @@ namespace Rnwood.SmtpServer.Tests
         }
 
         [TestMethod]
-        [ExpectedException(typeof (SocketException))]
+        [ExpectedException(typeof(SocketException))]
         public void StartOnInusePort_StartupExceptionThrown()
         {
             Server server1 = new DefaultServer(Ports.AssignAutomatically);

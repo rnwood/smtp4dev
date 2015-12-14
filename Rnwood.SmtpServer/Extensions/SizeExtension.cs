@@ -63,11 +63,11 @@ namespace Rnwood.SmtpServer.Extensions
 
                     if (maxMessageSize.HasValue)
                     {
-                        return new[] {string.Format("SIZE={0}", maxMessageSize.Value)};
+                        return new[] { string.Format("SIZE={0}", maxMessageSize.Value) };
                     }
                     else
                     {
-                        return new[] {"SIZE"};
+                        return new[] { "SIZE" };
                     }
                 }
             }

@@ -1,6 +1,6 @@
-﻿using System.Net.Security;
+﻿using Rnwood.SmtpServer.Verbs;
+using System.Net.Security;
 using System.Security.Authentication;
-using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Extensions
 {

@@ -1,8 +1,5 @@
 ﻿#region
 
-using System;
-using System.Text;
-
 #endregion
 
 namespace Rnwood.SmtpServer.Extensions
@@ -41,5 +38,4 @@ namespace Rnwood.SmtpServer.Extensions
 
         #endregion
     }
-
 }

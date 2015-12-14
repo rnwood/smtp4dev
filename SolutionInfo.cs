@@ -1,5 +1,4 @@
-﻿using System;
-using System.Reflection;
+﻿using System.Reflection;
 
 [assembly: AssemblyCompany("Robert N Wood <rob@rnwood.co.uk>")]
 [assembly: AssemblyProduct("smtp4dev")]

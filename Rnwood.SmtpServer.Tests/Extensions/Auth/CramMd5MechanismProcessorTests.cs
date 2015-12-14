@@ -1,15 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Rnwood.SmtpServer.Extensions.Auth;
+using System;
 
 namespace Rnwood.SmtpServer.Tests.Extensions.Auth
 {
     [TestClass]
-    public class CramMd5MechanismProcessorTests
+    public class CramMd5MechanismProcessorTests : AuthMechanismTest
     {
         [TestMethod]
         public void ProcessRepsonse_GetChallenge()
@@ -19,12 +16,33 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks);
             AuthMechanismProcessorStatus result = cramMd5MechanismProcessor.ProcessResponse(null);
 
+            string expectedResponse = string.Format("{0}.{1}@{2}", FAKERANDOM, FAKEDATETIME, FAKEDOMAIN);
+
             Assert.AreEqual(AuthMechanismProcessorStatus.Continue, result);
-            mocks.Connection.Verify(c => c.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, "MTIzNC4xMDAwMEBtb2NrZG9tYWlu")));
+            mocks.Connection.Verify(
+                    c => c.WriteResponse(
+                        It.Is<SmtpResponse>(r =>
+                            r.Code == (int)StandardSmtpResponseCode.AuthenticationContinue &&
+                            VerifyBase64Response(r.Message, expectedResponse)
+                        )
+                    )
+                );
         }
 
         [TestMethod]
         [ExpectedException(typeof(SmtpServerException))]
+        public void ProcessRepsonse_ChallengeReponse_BadFormat()
+        {
+            Mocks mocks = new Mocks();
+
+            string challenge = string.Format("{0}.{1}@{2}", FAKERANDOM, FAKEDATETIME, FAKEDOMAIN);
+
+            CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks, challenge);
+            AuthMechanismProcessorStatus result = cramMd5MechanismProcessor.ProcessResponse("BLAH");
+        }
+
+        [TestMethod]
+        [ExpectedException(typeof(BadBase64Exception))]
         public void ProcessResponse_Response_BadBase64()
         {
             Mocks mocks = new Mocks();
@@ -34,20 +52,21 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             cramMd5MechanismProcessor.ProcessResponse("rob blah");
         }
 
-        private CramMd5MechanismProcessor Setup(Mocks mocks)
+        private const int FAKEDATETIME = 10000;
+        private const int FAKERANDOM = 1234;
+        private const string FAKEDOMAIN = "mockdomain";
+
+        private CramMd5MechanismProcessor Setup(Mocks mocks, string challenge = null)
         {
             Mock<IRandomIntegerGenerator> randomMock = new Mock<IRandomIntegerGenerator>();
-            randomMock.Setup(r => r.GenerateRandomInteger(It.IsAny<int>(), It.IsAny<int>())).Returns(1234);
+            randomMock.Setup(r => r.GenerateRandomInteger(It.IsAny<int>(), It.IsAny<int>())).Returns(FAKERANDOM);
 
             Mock<ICurrentDateTimeProvider> dateMock = new Mock<ICurrentDateTimeProvider>();
-            dateMock.Setup(d => d.GetCurrentDateTime()).Returns(new DateTime(10000));
+            dateMock.Setup(d => d.GetCurrentDateTime()).Returns(new DateTime(FAKEDATETIME));
 
-            mocks.ServerBehaviour.SetupGet(b => b.DomainName).Returns("mockdomain");
+            mocks.ServerBehaviour.SetupGet(b => b.DomainName).Returns(FAKEDOMAIN);
 
-            string challenge = "1234.10000@mockdomain";
-            string challengeB64 = "MTIzNC4xMDAwMEBtb2NrZG9tYWlu";
-
-            return new CramMd5MechanismProcessor(mocks.Connection.Object, randomMock.Object, dateMock.Object);
+            return new CramMd5MechanismProcessor(mocks.Connection.Object, randomMock.Object, dateMock.Object, challenge);
         }
     }
 }

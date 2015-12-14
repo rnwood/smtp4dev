@@ -1,7 +1,7 @@
-﻿using System;
+﻿using Rnwood.SmtpServer.Extensions.Auth;
+using System;
 using System.IO;
 using System.Net;
-using Rnwood.SmtpServer.Extensions.Auth;
 
 namespace Rnwood.SmtpServer
 {
@@ -17,26 +17,26 @@ namespace Rnwood.SmtpServer
         /// Gets the date the session ended.
         /// </summary>
         /// <value>The end date.</value>
-        DateTime? EndDate { get;}
+        DateTime? EndDate { get; }
 
         /// <summary>
         /// Gets the IP address of the client that established this session.
         /// </summary>
         /// <value>The client address.</value>
-        IPAddress ClientAddress { get;}
+        IPAddress ClientAddress { get; }
 
         /// <summary>
         /// Gets or sets the name of the client as reported in its HELO/EHLO command
         /// or null.
         /// </summary>
         /// <value>The name of the client.</value>
-        string ClientName { get;}
+        string ClientName { get; }
 
         /// <summary>
         /// Gets or sets a value indicating whether the session is over a secure connection.
         /// </summary>
         /// <value><c>true</c> if [secure connection]; otherwise, <c>false</c>.</value>
-        bool SecureConnection { get;}
+        bool SecureConnection { get; }
 
         /// <summary>
         /// Gets the session log (all communication between the client and server)

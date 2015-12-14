@@ -1,17 +1,13 @@
-﻿using System;
-using System.IO;
-using System.Net.Mail;
-using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Rnwood.SmtpServer.Verbs;
+using System.Text.RegularExpressions;
 
 namespace Rnwood.SmtpServer.Tests
 {
     [TestClass]
     public class ConnectionTests
     {
-
         [TestMethod]
         public void Process_GreetingWritten()
         {
@@ -87,7 +83,6 @@ namespace Rnwood.SmtpServer.Tests
         {
             Mocks mocks = new Mocks();
             mocks.ServerBehaviour.SetupGet(b => b.MaximumNumberOfSequentialBadCommands).Returns(2);
-
 
             mocks.ConnectionChannel.Setup(c => c.ReadLine()).Returns("BADCOMMAND");
 

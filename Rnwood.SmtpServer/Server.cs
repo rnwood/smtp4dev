@@ -1,13 +1,13 @@
 ﻿#region
 
+using Rnwood.SmtpServer.Verbs;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
-using System.Linq;
-using Rnwood.SmtpServer.Verbs;
 
 #endregion
 
@@ -119,7 +119,6 @@ namespace Rnwood.SmtpServer
             new Thread(Core).Start();
         }
 
-
         /// <summary>
         /// Stops the running server. Any existing connections are terminated.
         /// </summary>
@@ -162,7 +161,7 @@ namespace Rnwood.SmtpServer
 
         private void ConnectionThreadWork(object connectionObj)
         {
-            Connection connection = (Connection) connectionObj;
+            Connection connection = (Connection)connectionObj;
             connection.Process();
             _activeConnections.Remove(connection);
         }

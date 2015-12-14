@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text;
-using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Extensions
 {
@@ -33,7 +32,7 @@ namespace Rnwood.SmtpServer.Extensions
             }
         }
 
-        #endregion
+        #endregion IParameterProcessor Members
 
         public override void Process(IConnection connection, SmtpCommand command)
         {

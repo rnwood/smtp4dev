@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net;
-using System.Text;
-using Moq;
+﻿using Moq;
 using Rnwood.SmtpServer.Verbs;
+using System;
+using System.Net;
 
 namespace Rnwood.SmtpServer.Tests
 {
@@ -29,7 +26,7 @@ namespace Rnwood.SmtpServer.Tests
             Server.SetupGet(s => s.Behaviour).Returns(ServerBehaviour.Object);
 
             bool isConnected = true;
-            ConnectionChannel.Setup(s => s.IsConnected).Returns(() =>isConnected);
+            ConnectionChannel.Setup(s => s.IsConnected).Returns(() => isConnected);
             ConnectionChannel.Setup(s => s.Close()).Callback(() => isConnected = false);
         }
 
