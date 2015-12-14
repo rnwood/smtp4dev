@@ -2,8 +2,6 @@
 
 using System;
 using System.Collections.Generic;
-using System.Text;
-using System.IO;
 
 #endregion
 
@@ -26,8 +24,7 @@ namespace Rnwood.SmtpServer.Example
 
             int portnumber = server.PortNumber;
             //do something to send mail
-            
-            
+
             server.Stop();
         }
 

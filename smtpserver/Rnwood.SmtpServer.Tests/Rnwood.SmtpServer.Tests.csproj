@@ -89,6 +89,7 @@
     <Compile Include="CommandEventArgsTests.cs" />
     <Compile Include="ConnectionTests.cs" />
     <Compile Include="Extensions\Auth\AnonymousMechanismProcessorTests.cs" />
+    <Compile Include="Extensions\Auth\AuthMechanismTest.cs" />
     <Compile Include="Extensions\Auth\LoginMechanismProcessorTests.cs" />
     <Compile Include="Extensions\Auth\CramMd5AuthenticationRequestTests.cs" />
     <Compile Include="Extensions\Auth\CramMd5MechanismProcessorTests.cs" />

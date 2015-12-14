@@ -1,5 +1,4 @@
-﻿using System;
-namespace Rnwood.SmtpServer.Verbs
+﻿namespace Rnwood.SmtpServer.Verbs
 {
     public interface IVerb
     {

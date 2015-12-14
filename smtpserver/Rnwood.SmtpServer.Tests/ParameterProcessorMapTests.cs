@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 
 namespace Rnwood.SmtpServer.Tests
@@ -28,7 +24,6 @@ namespace Rnwood.SmtpServer.Tests
             Assert.AreSame(processor.Object, map.GetProcessor("BLAH"));
         }
 
-
         [TestMethod]
         public void GetProcessor_RegisteredDifferentCase_Returned()
         {
@@ -47,7 +42,7 @@ namespace Rnwood.SmtpServer.Tests
             Mocks mocks = new Mocks();
 
             ParameterProcessorMap map = new ParameterProcessorMap();
-            map.Process(mocks.Connection.Object, new string[] {"KEYA=VALUEA"}, true);
+            map.Process(mocks.Connection.Object, new string[] { "KEYA=VALUEA" }, true);
         }
 
         [TestMethod]
@@ -58,7 +53,6 @@ namespace Rnwood.SmtpServer.Tests
             ParameterProcessorMap map = new ParameterProcessorMap();
             map.Process(mocks.Connection.Object, new string[] { }, true);
         }
-
 
         [TestMethod]
         public void Process_KnownParameters_Processed()

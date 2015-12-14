@@ -9,6 +9,7 @@ namespace Rnwood.SmtpServer
 
         new DateTime ReceivedDate { get; set; }
         new string From { get; set; }
+
         void AddTo(string to);
 
         new bool SecureConnection { get; set; }

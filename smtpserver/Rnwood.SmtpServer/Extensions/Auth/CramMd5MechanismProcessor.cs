@@ -3,25 +3,28 @@ using System.Text;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class CramMd5MechanismProcessor : IAuthMechanismProcessor
+    public class CramMd5MechanismProcessor : AuthMechanismProcessor
     {
         private readonly IRandomIntegerGenerator _random;
         private readonly ICurrentDateTimeProvider _dateTimeProvider;
 
         private string _challenge;
 
-        public CramMd5MechanismProcessor(IConnection connection, IRandomIntegerGenerator random, ICurrentDateTimeProvider dateTimeProvider)
+        public CramMd5MechanismProcessor(IConnection connection, IRandomIntegerGenerator random, ICurrentDateTimeProvider dateTimeProvider) : base(connection)
         {
-            Connection = connection;
             _random = random;
             _dateTimeProvider = dateTimeProvider;
         }
 
-        protected IConnection Connection { get; set; }
+        public CramMd5MechanismProcessor(IConnection connection, IRandomIntegerGenerator random, ICurrentDateTimeProvider dateTimeProvider, string challenge)
+            : this(connection, random, dateTimeProvider)
+        {
+            _challenge = challenge;
+        }
 
         #region IAuthMechanismProcessor Members
 
-        public AuthMechanismProcessorStatus ProcessResponse(string data)
+        public override AuthMechanismProcessorStatus ProcessResponse(string data)
         {
             if (_challenge == null)
             {
@@ -40,7 +43,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             }
             else
             {
-                string response = ServerUtility.DecodeBase64(data);
+                string response = DecodeBase64(data);
                 string[] responseparts = response.Split(' ');
 
                 if (responseparts.Length != 2)
@@ -61,15 +64,14 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 {
                     case AuthenticationResult.Success:
                         return AuthMechanismProcessorStatus.Success;
+
                     default:
                         return AuthMechanismProcessorStatus.Failed;
                 }
             }
         }
 
-        public IAuthenticationCredentials Credentials { get; private set; }
-
-        #endregion
+        #endregion IAuthMechanismProcessor Members
 
         #region Nested type: States
 
@@ -79,6 +81,6 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             AwaitingResponse
         }
 
-        #endregion
+        #endregion Nested type: States
     }
 }

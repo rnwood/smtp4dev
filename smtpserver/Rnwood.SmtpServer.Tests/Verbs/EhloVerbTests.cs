@@ -1,12 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.RegularExpressions;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
 using Rnwood.SmtpServer.Extensions;
-using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
@@ -32,7 +26,6 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar"));
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
-
         }
 
         [TestMethod]
@@ -45,7 +38,6 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
             mocks.Session.VerifySet(s => s.ClientName = "");
         }
-
 
         [TestMethod]
         public void Process_RecordsClientName()
@@ -81,7 +73,6 @@ namespace Rnwood.SmtpServer.Tests.Verbs
                 r.Message.Contains("EXTN2A") &&
                     r.Message.Contains("EXTN2B")
                 )));
-
         }
 
         [TestMethod]

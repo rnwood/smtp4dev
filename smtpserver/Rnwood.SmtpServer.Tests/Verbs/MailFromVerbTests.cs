@@ -1,10 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Moq;
-using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
@@ -33,7 +28,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
         }
-        
+
         [TestMethod]
         public void Process_Address_Plain()
         {
@@ -51,7 +46,6 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         {
             Process_Address("<Robert Wood <rob@rnwood.co.uk>>", "Robert Wood <rob@rnwood.co.uk>", StandardSmtpResponseCode.OK);
         }
-
 
         private void Process_Address(string address, string expectedParsedAddress, StandardSmtpResponseCode expectedResponse)
         {

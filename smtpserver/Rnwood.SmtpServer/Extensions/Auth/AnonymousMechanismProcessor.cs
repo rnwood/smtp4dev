@@ -22,6 +22,7 @@
             {
                 case AuthenticationResult.Success:
                     return AuthMechanismProcessorStatus.Success;
+
                 default:
                     return AuthMechanismProcessorStatus.Failed;
             }
@@ -33,6 +34,6 @@
             private set;
         }
 
-        #endregion
+        #endregion IAuthMechanismProcessor Members
     }
 }

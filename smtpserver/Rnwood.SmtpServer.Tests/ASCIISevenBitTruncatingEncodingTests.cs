@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
@@ -34,16 +29,16 @@ namespace Rnwood.SmtpServer.Tests
             ASCIISevenBitTruncatingEncoding encoding = new ASCIISevenBitTruncatingEncoding();
             char[] chars = encoding.GetChars(new[] { (byte)250 }, 0, 1);
 
-            CollectionAssert.AreEqual(new[] { 'z'}, chars);
+            CollectionAssert.AreEqual(new[] { 'z' }, chars);
         }
 
         [TestMethod]
         public void GetBytes_ExtendedChar_ReturnsTruncated()
         {
             ASCIISevenBitTruncatingEncoding encoding = new ASCIISevenBitTruncatingEncoding();
-            byte[] bytes = encoding.GetBytes(new[] { (char) 250 }, 0, 1);
+            byte[] bytes = encoding.GetBytes(new[] { (char)250 }, 0, 1);
 
-            CollectionAssert.AreEqual(new[] { (byte)'z'}, bytes);
+            CollectionAssert.AreEqual(new[] { (byte)'z' }, bytes);
         }
     }
 }

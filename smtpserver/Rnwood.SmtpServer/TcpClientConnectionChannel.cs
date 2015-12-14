@@ -1,7 +1,6 @@
 ﻿using System;
 using System.IO;
 using System.Net;
-using System.Net.Security;
 using System.Net.Sockets;
 using System.Text;
 
@@ -32,7 +31,6 @@ namespace Rnwood.SmtpServer
             ReaderEncoding = encoding;
             SetupReaderAndWriter();
         }
-
 
         public bool IsConnected
         {
@@ -84,7 +82,5 @@ namespace Rnwood.SmtpServer
         {
             _writer.WriteLine(text);
         }
-
-
     }
 }

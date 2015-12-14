@@ -1,4 +1,3 @@
-using System.CodeDom.Compiler;
 using System.IO;
 
 namespace Rnwood.SmtpServer
@@ -21,7 +20,7 @@ namespace Rnwood.SmtpServer
             {
                 return _file.OpenWrite();
             }
-            return new FileStream(_file.FullName, FileMode.Open, FileAccess.Read, FileShare.Delete|FileShare.Read);
+            return new FileStream(_file.FullName, FileMode.Open, FileAccess.Read, FileShare.Delete | FileShare.Read);
         }
 
         public override void Dispose()

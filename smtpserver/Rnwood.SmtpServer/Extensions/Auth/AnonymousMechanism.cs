@@ -19,6 +19,6 @@
             get { return false; }
         }
 
-        #endregion
+        #endregion IAuthMechanism Members
     }
 }

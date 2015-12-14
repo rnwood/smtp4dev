@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
@@ -28,7 +24,7 @@ namespace Rnwood.SmtpServer.Tests
         [TestMethod]
         public void Equality_Equal()
         {
-            Assert.IsTrue(new Parameter("KEYA", "VALUEA").Equals( new Parameter("KEYa", "VALUEA")));
+            Assert.IsTrue(new Parameter("KEYA", "VALUEA").Equals(new Parameter("KEYa", "VALUEA")));
         }
 
         [TestMethod]

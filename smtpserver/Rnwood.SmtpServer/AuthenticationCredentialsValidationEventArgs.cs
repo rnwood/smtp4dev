@@ -1,5 +1,5 @@
-using System;
 using Rnwood.SmtpServer.Extensions.Auth;
+using System;
 
 namespace Rnwood.SmtpServer
 {

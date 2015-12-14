@@ -1,9 +1,5 @@
 ﻿#region
 
-using System.Net.Security;
-using System.Security.Authentication;
-using Rnwood.SmtpServer.Verbs;
-
 #endregion
 
 namespace Rnwood.SmtpServer.Extensions
@@ -33,10 +29,10 @@ namespace Rnwood.SmtpServer.Extensions
                 {
                     if (!Connection.Session.SecureConnection)
                     {
-                        return new[] {"STARTTLS"};
+                        return new[] { "STARTTLS" };
                     }
 
-                    return new string[] {};
+                    return new string[] { };
                 }
             }
         }

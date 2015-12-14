@@ -1,9 +1,6 @@
-﻿using System;
-using System.Text;
-
-namespace Rnwood.SmtpServer.Extensions.Auth
+﻿namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    public class PlainMechanismProcessor : IAuthMechanismProcessor
+    public class PlainMechanismProcessor : AuthMechanismProcessor, IAuthMechanismProcessor
     {
         #region States enum
 
@@ -13,20 +10,17 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             AwaitingResponse
         }
 
-        #endregion
+        #endregion States enum
 
-        public PlainMechanismProcessor(IConnection connection)
+        public PlainMechanismProcessor(IConnection connection) : base(connection)
         {
-            Connection = connection;
         }
-
-        protected IConnection Connection { get; private set; }
 
         private States State { get; set; }
 
         #region IAuthMechanismProcessor Members
 
-        public AuthMechanismProcessorStatus ProcessResponse(string data)
+        public override AuthMechanismProcessorStatus ProcessResponse(string data)
         {
             if (string.IsNullOrEmpty(data))
             {
@@ -41,7 +35,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 return AuthMechanismProcessorStatus.Continue;
             }
 
-            string decodedData = ServerUtility.DecodeBase64(data);
+            string decodedData = DecodeBase64(data);
             string[] decodedDataParts = decodedData.Split('\0');
 
             if (decodedDataParts.Length != 3)
@@ -61,13 +55,12 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             {
                 case AuthenticationResult.Success:
                     return AuthMechanismProcessorStatus.Success;
+
                 default:
                     return AuthMechanismProcessorStatus.Failed;
             }
         }
 
-        public IAuthenticationCredentials Credentials { get; private set; }
-
-        #endregion
+        #endregion IAuthMechanismProcessor Members
     }
 }

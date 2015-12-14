@@ -1,15 +1,13 @@
 ﻿#region
 
+using Rnwood.SmtpServer.Extensions;
+using Rnwood.SmtpServer.Verbs;
 using System;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Net.Security;
-using System.Net.Sockets;
 using System.Text;
 using System.Threading;
-using Rnwood.SmtpServer.Extensions;
-using Rnwood.SmtpServer.Verbs;
 
 #endregion
 
@@ -17,7 +15,6 @@ namespace Rnwood.SmtpServer
 {
     public class Connection : IConnection
     {
-
         public IConnectionChannel ConnectionChannel { get; private set; }
 
         public Connection(IServer server, IConnectionChannel connectionChannel, IVerbMap verbMap)
@@ -30,7 +27,6 @@ namespace Rnwood.SmtpServer
 
             ConnectionChannel.ReceiveTimeout = Server.Behaviour.GetReceiveTimeout(this);
             SetReaderEncodingToDefault();
-
 
             ExtensionProcessors = Server.Behaviour.GetExtensions(this).Select(e => e.CreateExtensionProcessor(this)).ToArray();
         }
@@ -206,7 +202,8 @@ namespace Rnwood.SmtpServer
             {
                 Session.SessionError = exception;
                 Session.SessionErrorType = SessionErrorType.ServerShutdown;
-            } catch (Exception exception)
+            }
+            catch (Exception exception)
             {
                 Session.SessionError = exception;
                 Session.SessionErrorType = SessionErrorType.UnexpectedException;

@@ -1,7 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Security.Cryptography.X509Certificates;
 
 namespace Rnwood.SmtpServer
@@ -63,7 +60,7 @@ namespace Rnwood.SmtpServer
         {
             get
             {
-                return (DefaultServerBehaviour) base.Behaviour;
+                return (DefaultServerBehaviour)base.Behaviour;
             }
         }
 

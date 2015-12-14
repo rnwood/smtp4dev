@@ -1,6 +1,6 @@
+using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 
 namespace Rnwood.SmtpServer.Tests
 {
@@ -33,7 +33,6 @@ namespace Rnwood.SmtpServer.Tests
             {
                 stream.Write(writtenBytes, 0, writtenBytes.Length);
             }
-
 
             byte[] readBytes;
             using (Stream stream = message.GetData())

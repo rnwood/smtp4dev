@@ -54,6 +54,7 @@ namespace Rnwood.SmtpServer
         }
 
         public abstract Stream GetData(DataAccessMode dataAccessMode);
+
         public abstract void Dispose();
     }
 }

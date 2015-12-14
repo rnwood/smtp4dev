@@ -1,9 +1,8 @@
 ﻿#region
 
-using System.Collections.Generic;
+using Rnwood.SmtpServer.Verbs;
 using System.Linq;
 using System.Text;
-using Rnwood.SmtpServer.Verbs;
 
 #endregion
 

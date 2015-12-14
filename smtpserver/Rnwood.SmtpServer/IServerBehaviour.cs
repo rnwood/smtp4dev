@@ -1,12 +1,12 @@
 #region
 
+using Rnwood.SmtpServer.Extensions;
+using Rnwood.SmtpServer.Extensions.Auth;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Rnwood.SmtpServer.Extensions;
-using Rnwood.SmtpServer.Extensions.Auth;
 
 #endregion
 
@@ -19,11 +19,13 @@ namespace Rnwood.SmtpServer
         /// </summary>
         /// <value>The domain name report by the server to clients.</value>
         string DomainName { get; }
+
         /// <summary>
         /// Gets the IP address on which to listen for connections.
         /// </summary>
         /// <value>The IP address.</value>
         IPAddress IpAddress { get; }
+
         /// <summary>
         /// Gets the TCP port number on which to listen for connections.
         /// </summary>
@@ -111,7 +113,7 @@ namespace Rnwood.SmtpServer
         /// <param name="connection">The connection.</param>
         /// <param name="authMechanism">The auth mechanism.</param>
         /// <returns>
-        /// 	<c>true if the specified auth mechanism should be enabled otherwise, <c>false</c>.
+        /// 	<c>true</c> if the specified auth mechanism should be enabled otherwise, <c>false</c>.
         /// </returns>
         bool IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism);
 
@@ -123,7 +125,9 @@ namespace Rnwood.SmtpServer
         void OnCommandReceived(IConnection connection, SmtpCommand command);
 
         void OnMessageCompleted(IConnection connection);
+
         Encoding GetDefaultEncoding(IConnection connection);
+
         IEditableSession OnCreateNewSession(IConnection connection, IPAddress clientAddress, DateTime startDate);
     }
 }

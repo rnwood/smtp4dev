@@ -1,7 +1,6 @@
-using System;
-using System.Collections.Generic;
-using System.Net;
 using Rnwood.SmtpServer.Extensions.Auth;
+using System;
+using System.Net;
 
 namespace Rnwood.SmtpServer
 {

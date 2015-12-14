@@ -12,9 +12,8 @@ namespace Rnwood.SmtpServer
 
         bool SecureConnection { get; }
         bool EightBitTransport { get; }
-        long? DeclaredMessageSize { get;  }
+        long? DeclaredMessageSize { get; }
 
         Stream GetData();
-        
     }
 }

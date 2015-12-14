@@ -1,13 +1,12 @@
 ﻿#region
 
+using Rnwood.SmtpServer.Extensions;
+using Rnwood.SmtpServer.Extensions.Auth;
 using System;
 using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
-using Rnwood.SmtpServer.Extensions;
-using Rnwood.SmtpServer.Extensions.Auth;
-using System.Linq;
 
 #endregion
 
@@ -147,7 +146,6 @@ namespace Rnwood.SmtpServer
         {
         }
 
-
         public virtual bool IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism)
         {
             return false;
@@ -177,10 +175,15 @@ namespace Rnwood.SmtpServer
         #endregion
 
         public event EventHandler<CommandEventArgs> CommandReceived;
+
         public event EventHandler<MessageEventArgs> MessageCompleted;
+
         public event EventHandler<MessageEventArgs> MessageReceived;
+
         public event EventHandler<SessionEventArgs> SessionCompleted;
+
         public event EventHandler<SessionEventArgs> SessionStarted;
+
         public event EventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequired;
     }
 }

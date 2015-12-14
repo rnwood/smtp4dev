@@ -36,7 +36,6 @@ namespace Rnwood.SmtpServer
         {
         }
 
-
         public class CloseNotifyingMemoryStream : MemoryStream
         {
             public event EventHandler Closing;
@@ -45,13 +44,11 @@ namespace Rnwood.SmtpServer
             {
                 if (Closing != null)
                 {
-
                     Closing(this, EventArgs.Empty);
                 }
 
                 base.Close();
             }
         }
-
     }
 }

@@ -1,7 +1,7 @@
 ﻿#region
 
-using System.Linq;
 using Rnwood.SmtpServer.Verbs;
+using System.Linq;
 
 #endregion
 

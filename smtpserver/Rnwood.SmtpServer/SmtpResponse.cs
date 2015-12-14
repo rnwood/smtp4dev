@@ -16,7 +16,7 @@ namespace Rnwood.SmtpServer
         }
 
         public SmtpResponse(StandardSmtpResponseCode code, string message, params object[] args)
-            : this((int) code, message, args)
+            : this((int)code, message, args)
         {
         }
 
@@ -40,7 +40,7 @@ namespace Rnwood.SmtpServer
         public override string ToString()
         {
             StringBuilder result = new StringBuilder();
-            string[] lines = Message.Split(new string[]{"\r\n"}, System.StringSplitOptions.None);
+            string[] lines = Message.Split(new string[] { "\r\n" }, System.StringSplitOptions.None);
 
             for (int l = 0; l < lines.Length; l++)
             {
@@ -70,15 +70,15 @@ namespace Rnwood.SmtpServer
         {
             if (ReferenceEquals(null, obj)) return false;
             if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof (SmtpResponse)) return false;
-            return Equals((SmtpResponse) obj);
+            if (obj.GetType() != typeof(SmtpResponse)) return false;
+            return Equals((SmtpResponse)obj);
         }
 
         public override int GetHashCode()
         {
             unchecked
             {
-                return (Code*397) ^ (Message != null ? Message.GetHashCode() : 0);
+                return (Code * 397) ^ (Message != null ? Message.GetHashCode() : 0);
             }
         }
     }
