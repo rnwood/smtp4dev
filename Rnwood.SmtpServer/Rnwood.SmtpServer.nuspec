@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package>
+  <metadata>
+    <id>$id$</id>
+    <version>$version$</version>
+    <title>Rnwood.SmtpServer</title>
+    <authors>Robert N Wood</authors>
+    <owners>Robert N Wood</owners>
+    <licenseUrl>https://raw.githubusercontent.com/rnwood/smtp4dev/master/LICENSE.txt</licenseUrl>
+    <projectUrl>https://github.com/rnwood/smtp4dev</projectUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
+    <description>A SMTP server component that can be used to embed a mail server in application. As used by the popular SMTP4DEV tool.</description>
+    <releaseNotes></releaseNotes>
+    <copyright>Copyright 2015</copyright>
+  </metadata>
+</package>
