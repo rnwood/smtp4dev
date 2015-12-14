@@ -1,8 +1,8 @@
 ﻿using System.Reflection;
 
-[assembly: AssemblyCompany("Robert N Wood <rob@rnwood.co.uk>")]
+[assembly: AssemblyCompany("Robert N Wood")]
 [assembly: AssemblyProduct("smtp4dev")]
-[assembly: AssemblyCopyright("Copyright © Robert N Wood 2009-2011")]
+[assembly: AssemblyCopyright("Copyright © Robert N Wood 2009-2015")]
 [assembly: AssemblyTrademark("")]
-[assembly: AssemblyVersion("2.1.1")]
-[assembly: AssemblyFileVersion("2.1.1")]
+[assembly: AssemblyVersion("3.0.0")]
+[assembly: AssemblyFileVersion("3.0.0")]
