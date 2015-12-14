@@ -1,0 +1,73 @@
+﻿using System;
+using System.Text;
+
+namespace Rnwood.SmtpServer.Extensions.Auth
+{
+    public class PlainMechanismProcessor : IAuthMechanismProcessor
+    {
+        #region States enum
+
+        public enum States
+        {
+            Initial,
+            AwaitingResponse
+        }
+
+        #endregion
+
+        public PlainMechanismProcessor(IConnection connection)
+        {
+            Connection = connection;
+        }
+
+        protected IConnection Connection { get; private set; }
+
+        private States State { get; set; }
+
+        #region IAuthMechanismProcessor Members
+
+        public AuthMechanismProcessorStatus ProcessResponse(string data)
+        {
+            if (string.IsNullOrEmpty(data))
+            {
+                if (State == States.AwaitingResponse)
+                {
+                    throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationFailure,
+                                                                   "Missing auth data"));
+                }
+
+                Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, ""));
+                State = States.AwaitingResponse;
+                return AuthMechanismProcessorStatus.Continue;
+            }
+
+            string decodedData = ServerUtility.DecodeBase64(data);
+            string[] decodedDataParts = decodedData.Split('\0');
+
+            if (decodedDataParts.Length != 3)
+            {
+                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationFailure,
+                                                               "Auth data in incorrect format"));
+            }
+
+            string username = decodedDataParts[1];
+            string password = decodedDataParts[2];
+
+            Credentials = new PlainAuthenticationCredentials(username, password);
+
+            AuthenticationResult result =
+                Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials);
+            switch (result)
+            {
+                case AuthenticationResult.Success:
+                    return AuthMechanismProcessorStatus.Success;
+                default:
+                    return AuthMechanismProcessorStatus.Failed;
+            }
+        }
+
+        public IAuthenticationCredentials Credentials { get; private set; }
+
+        #endregion
+    }
+}
