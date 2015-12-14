@@ -1,0 +1,6 @@
+.vs
+obj
+bin
+*.ncrunch*
+packages
+_ncrunch_*

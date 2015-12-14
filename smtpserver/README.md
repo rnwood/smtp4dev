@@ -1,12 +1,9 @@
 # smtp4dev
 smtp4dev - the mail server for development
 
-A dummy SMTP server for Windows. Sits in the system tray and does not deliver the received messages. The received messages can be quickly viewed, saved and the source/structure inspected. Useful for testing/debugging software that generates email.
+A dummy SMTP server for Windows. This repository hosts the development of v3 which will have a re-written web UI so that it can be shared amongst members of a team (the most requested feature in v2).
+For downloads of the stable smtp4dev v2 please see [https://smtp4dev.codeplex.com/]
 
 *If you find smtp4dev useful, please consider supporting further development by making a donation:*
 
 <a href='https://www.paypal.me/rnwood'><img alt='Donate' src='https://www.paypalobjects.com/webstatic/en_US/btn/btn_donate_pp_142x27.png'/></a>
-
-## Configuring software to send to smtp4dev
-smtp4dev should work with most software that sends messages using the SMTP protocol.
-Configure your software to send mail to localhost. If the software requires an SSL connection then this must be enabled in the options dialog and you need to supply a cerficate.
