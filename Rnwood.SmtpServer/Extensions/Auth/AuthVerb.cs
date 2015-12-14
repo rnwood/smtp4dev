@@ -14,7 +14,9 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
         public void Process(IConnection connection, SmtpCommand command)
         {
-            if (command.Arguments.Length > 0)
+            ArgumentsParser argumentsParser = new ArgumentsParser(command.ArgumentsText);
+
+            if (argumentsParser.Arguments.Length > 0)
             {
                 if (connection.Session.Authenticated)
                 {
@@ -22,7 +24,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                                                                    "Already authenticated"));
                 }
 
-                string mechanismId = command.Arguments[0];
+                string mechanismId = argumentsParser.Arguments[0];
                 IAuthMechanism mechanism = AuthExtensionProcessor.MechanismMap.Get(mechanismId);
 
                 if (mechanism == null)
@@ -43,9 +45,9 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                     mechanism.CreateAuthMechanismProcessor(connection);
 
                 string initialData = null;
-                if (command.Arguments.Length > 1)
+                if (argumentsParser.Arguments.Length > 1)
                 {
-                    initialData = string.Join(" ", command.Arguments.Skip(1).ToArray());
+                    initialData = string.Join(" ", argumentsParser.Arguments.Skip(1).ToArray());
                 }
 
                 AuthMechanismProcessorStatus status =

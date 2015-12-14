@@ -76,6 +76,7 @@
       <Link>SolutionInfo.cs</Link>
     </Compile>
     <Compile Include="AbstractMessage.cs" />
+    <Compile Include="ArgumentsParser.cs" />
     <Compile Include="ASCIISevenBitTruncatingEncoding.cs" />
     <Compile Include="AuthenticationCredentialsValidationEventArgs.cs" />
     <Compile Include="CommandEventArgs.cs" />

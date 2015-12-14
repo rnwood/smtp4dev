@@ -28,58 +28,20 @@ namespace Rnwood.SmtpServer
                 {
                     Verb = match.Groups["verb"].Value;
                     ArgumentsText = match.Groups["arguments"].Value ?? "";
-                    Arguments = ParseArguments(ArgumentsText);
                     IsValid = true;
                 }
             }
         }
 
-        private string[] ParseArguments(string argumentsText)
-        {
-            int ltCount = 0;
-            List<string> arguments = new List<string>();
-            StringBuilder currentArgument = new StringBuilder();
-            foreach (char character in argumentsText)
-            {
-                switch (character)
-                {
-                    case '<':
-                        ltCount++;
-                        goto default;
-                    case '>':
-                        ltCount--;
-                        goto default;
-                    case ' ':
-                    case ':':
-                        if (ltCount == 0)
-                        {
-                            arguments.Add(currentArgument.ToString());
-                            currentArgument = new StringBuilder();
-                        }
-                        else
-                        {
-                            goto default;
-                        }
-                        break;
-
-                    default:
-                        currentArgument.Append(character);
-                        break;
-                }
-            }
-
-            if (currentArgument.Length != 0)
-            {
-                arguments.Add(currentArgument.ToString());
-            }
-            return arguments.ToArray();
-        }
-
+        /// <summary>
+        /// Gets the text.
+        /// </summary>
+        /// <value>
+        /// The text.
+        /// </value>
         public string Text { get; private set; }
 
         public string ArgumentsText { get; private set; }
-
-        public string[] Arguments { get; private set; }
 
         public string Verb { get; private set; }
 

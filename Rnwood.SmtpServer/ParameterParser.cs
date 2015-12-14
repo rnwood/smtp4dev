@@ -11,24 +11,15 @@ namespace Rnwood.SmtpServer
     {
         private readonly List<Parameter> _parameters = new List<Parameter>();
 
-        public ParameterParser(string[] tokens)
+        public ParameterParser(params string[] arguments)
         {
-            ParameterText = string.Join(" ", tokens);
-            Parse(tokens);
-        }
-
-        public ParameterParser(string parameterText)
-        {
-            ParameterText = parameterText;
-            Parse(ParameterText.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries));
+            Parse(arguments);
         }
 
         public Parameter[] Parameters
         {
             get { return _parameters.ToArray(); }
         }
-
-        public string ParameterText { get; private set; }
 
         private void Parse(string[] tokens)
         {

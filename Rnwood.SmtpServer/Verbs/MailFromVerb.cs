@@ -33,7 +33,10 @@ namespace Rnwood.SmtpServer
                 return;
             }
 
-            string from = command.Arguments.First();
+            ArgumentsParser argumentsParser = new ArgumentsParser(command.ArgumentsText);
+            string[] arguments = argumentsParser.Arguments;
+
+            string from = arguments.First();
             if (from.StartsWith("<"))
                 from = from.Remove(0, 1);
 
@@ -46,7 +49,7 @@ namespace Rnwood.SmtpServer
 
             try
             {
-                ParameterProcessorMap.Process(connection, command.Arguments.Skip(1).ToArray(), true);
+                ParameterProcessorMap.Process(connection, arguments.Skip(1).ToArray(), true);
                 connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Okey dokey"));
             }
             catch

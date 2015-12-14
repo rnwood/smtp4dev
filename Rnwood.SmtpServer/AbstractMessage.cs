@@ -8,8 +8,13 @@ using System.IO;
 
 namespace Rnwood.SmtpServer
 {
-    public abstract class AbstractMessage : IEditableMessage
+    public abstract class AbstractMessage : IEditableMessage, IMessage
     {
+        /// <summary>
+        /// Creates a message associated with the specified session.
+        /// </summary>
+        /// <param name="session">The session on which the message is being received.</param>
+        /// <returns></returns>
         public AbstractMessage(ISession session)
         {
             Session = session;
