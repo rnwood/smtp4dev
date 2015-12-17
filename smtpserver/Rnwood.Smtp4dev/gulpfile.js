@@ -1,4 +1,4 @@
-﻿/// <binding Clean='clean' />
+﻿/// <binding AfterBuild='after-build' Clean='clean' />
 "use strict";
 
 var gulp = require("gulp"),
@@ -8,7 +8,8 @@ var gulp = require("gulp"),
     uglify = require("gulp-uglify");
 
 var paths = {
-    webroot: "./wwwroot/"
+    webroot: "./wwwroot/",
+    root: ".",
 };
 
 paths.js = paths.webroot + "js/**/*.js";
@@ -27,6 +28,7 @@ gulp.task("clean:css", function (cb) {
 });
 
 gulp.task("clean", ["clean:js", "clean:css"]);
+gulp.task("after-build", []);
 
 gulp.task("min:js", function () {
     return gulp.src([paths.js, "!" + paths.minJs], { base: "." })

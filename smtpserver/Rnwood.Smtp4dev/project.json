@@ -26,13 +26,21 @@
   },
 
   "commands": {
-    "web": "Microsoft.AspNet.Server.Kestrel --server.urls=http://localhost:5000"
+    "run": "Rnwood.Smtp4dev",
+    "web": "Microsoft.AspNet.Server.Kestrel --server.urls=http://localhost:5000",
+    "install": "Rnwood.Smtp4dev install",
+    "uninstall": "Rnwood.Smtp4dev uninstall"
   },
 
   "frameworks": {
     "dnx451": {
       "dependencies": {
         "Rnwood.SmtpServer": "1.0.0-*"
+      },
+      "frameworkAssemblies": {
+        "System.ServiceProcess": "4.0.0.0",
+        "System.Configuration.Install": "4.0.0.0",
+        "System.Windows.Forms": "4.0.0.0"
       }
     }
   },
@@ -41,9 +49,11 @@
     "wwwroot",
     "node_modules"
   ],
+
   "publishExclude": [
     "**.user",
-    "**.vspscc"
+    "**.vspscc",
+    "**.ncrunch*"
   ],
   "scripts": {
     "prepublish": [ "npm install", "bower install", "gulp clean", "gulp min" ]
