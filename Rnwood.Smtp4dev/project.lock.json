@@ -7766,7 +7766,10 @@
       "Swashbuckle.SwaggerUi >= 6.0.0-rc1-final"
     ],
     "DNX,Version=v4.5.1": [
-      "Rnwood.SmtpServer >= 1.0.0-*"
+      "Rnwood.SmtpServer >= 1.0.0-*",
+      "fx/System.ServiceProcess >= 4.0.0",
+      "fx/System.Configuration.Install >= 4.0.0",
+      "fx/System.Windows.Forms >= 4.0.0"
     ]
   }
 }
