@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Messages";
+}
+
+<div class="messagelist">
+    <table>
+        <thead><tr><td>From</td></tr></thead>
+        <tbody>
+            <tr data-bind="foreach: Messages">
+                <td data-bind="text: From"></td>
+            </tr>
+        </tbody>
+    </table>
+</div>

@@ -1,35 +1,49 @@
 ﻿using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
+using Microsoft.AspNet.Mvc.Razor;
+using Microsoft.AspNet.Server.Kestrel;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.PlatformAbstractions;
+using Rnwood.Smtp4dev.Model;
+using Rnwood.Smtp4dev.UI;
+using Rnwood.Smtp4dev.WindowsService;
 using Swashbuckle.Application;
 using Swashbuckle.SwaggerGen;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reflection;
+using System.Security.Principal;
+using System.ServiceProcess;
 using System.Threading.Tasks;
+using System.Windows.Forms;
 
 namespace Rnwood.Smtp4dev
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        private IHostingEnvironment _hostingEnvironment;
+
+        public Startup(IHostingEnvironment hostingEnvironment)
         {
+            _hostingEnvironment = hostingEnvironment;
+
             // Set up configuration sources.
             var builder = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
                 .AddEnvironmentVariables();
 
-            if (env.IsDevelopment())
+            if (_hostingEnvironment.IsDevelopment())
             {
                 // This will push telemetry data through Application Insights pipeline faster, allowing you to view results immediately.
                 builder.AddApplicationInsightsSettings(developerMode: true);
             }
             Configuration = builder.Build();
-
-            Rnwood.SmtpServer.Server s = new Rnwood.SmtpServer.DefaultServer();
-            s.Start();
         }
 
         public IConfigurationRoot Configuration { get; set; }
@@ -42,7 +56,7 @@ namespace Rnwood.Smtp4dev
 
             services.AddMvc();
 
-            string pathToXml = @"..\..\artifacts\bin\Rnwood.Smtp4dev\Rnwood.SmtpServer.xml";
+            services.Configure<RazorViewEngineOptions>(razor => razor.ViewLocationExpanders.Add(new ViewLocationExpander()));
 
             services.AddSwaggerGen();
             services.ConfigureSwaggerDocument(options =>
@@ -54,14 +68,9 @@ namespace Rnwood.Smtp4dev
                     Description = "SMTP server for development",
                     TermsOfService = "None"
                 });
-                options.OperationFilter(new Swashbuckle.SwaggerGen.XmlComments.ApplyXmlActionComments(pathToXml));
             });
 
-            services.ConfigureSwaggerSchema(options =>
-            {
-                options.DescribeAllEnumsAsStrings = true;
-                options.ModelFilter(new Swashbuckle.SwaggerGen.XmlComments.ApplyXmlTypeComments(pathToXml));
-            });
+            services.UseSmtp4dev();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -95,11 +104,8 @@ namespace Rnwood.Smtp4dev
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                    template: "{controller=Messages}/{action=Index}/{id?}");
             });
         }
-
-        // Entry point for the application.
-        public static void Main(string[] args) => WebApplication.Run<Startup>(args);
     }
 }

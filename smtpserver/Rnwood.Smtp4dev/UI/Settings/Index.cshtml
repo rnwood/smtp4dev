@@ -1,0 +1,27 @@
+﻿@model Rnwood.Smtp4dev.UI.Settings.SettingsViewModel
+@{
+}
+
+<div class="row">
+
+    <div class="col-xs-10">
+
+        @Html.ValidationSummary(false, "", new { @class = "alert alert-danger" })
+
+        @if (Model.Message != null)
+        {
+            <div class="alert alert-success">@Model.Message</div>
+        }
+
+        @using (Html.BeginForm(ViewContext.ActionDescriptor.Name, (string)ViewContext.RouteData.Values["Controller"], FormMethod.Post, new { @class = "" }))
+        {
+            <fieldset class="form-group">
+                @Html.LabelFor(vm => vm.Port, null, new { @class = "control-label" })
+                @Html.EditorFor(vm => vm.Port, new { @class = "form-control" })
+                @Html.ValidationMessageFor(vm => vm.Port, null, new { @class = "help-inline" })
+            </fieldset>
+
+            <button type="submit" class="btn btn-primary">Save</button>
+        }
+    </div>
+</div>
