@@ -31,6 +31,6 @@ artifacts:
 - path: Rnwood.SmtpServer\bin\Debug\*
   name: Rnwood.SmtpServer-{version}
   type: zip
-- path: 'Rnwood.Smtp4dev/output/**/*'
+- path: 'Rnwood.Smtp4dev/bin/output/**/*'
   name: Rnwood.Smtp4dev-{version}
   type: zip
