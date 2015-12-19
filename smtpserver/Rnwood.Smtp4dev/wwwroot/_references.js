@@ -6,4 +6,5 @@
 /// <reference path="lib/jquery-validation/dist/jquery.validate.js" />
 /// <reference path="lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js" />
 /// <reference path="lib/knockout.js/knockout.js" />
+/// <reference path="lib/moment/moment.js" />
 /// <reference path="lib/signalr/jquery.signalR.js" />

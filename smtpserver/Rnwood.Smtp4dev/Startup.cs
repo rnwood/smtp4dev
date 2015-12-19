@@ -1,27 +1,12 @@
 ﻿using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Mvc.Razor;
-using Microsoft.AspNet.Server.Kestrel;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.PlatformAbstractions;
 using Rnwood.Smtp4dev.Model;
 using Rnwood.Smtp4dev.UI;
-using Rnwood.Smtp4dev.WindowsService;
-using Swashbuckle.Application;
 using Swashbuckle.SwaggerGen;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Security.Principal;
-using System.ServiceProcess;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace Rnwood.Smtp4dev
 {
@@ -49,7 +34,7 @@ namespace Rnwood.Smtp4dev
         public IConfigurationRoot Configuration { get; set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(IServiceCollection services)
+        public void ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection services)
         {
             // Add framework services.
             services.AddApplicationInsightsTelemetry(Configuration);
@@ -69,6 +54,8 @@ namespace Rnwood.Smtp4dev
                     TermsOfService = "None"
                 });
             });
+
+            services.AddSignalR();
 
             services.UseSmtp4dev();
         }
@@ -99,6 +86,8 @@ namespace Rnwood.Smtp4dev
 
             app.UseSwaggerGen();
             app.UseSwaggerUi();
+
+            app.UseSignalR();
 
             app.UseMvc(routes =>
             {

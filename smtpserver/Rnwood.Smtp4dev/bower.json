@@ -8,6 +8,7 @@
     "jquery-validation-unobtrusive": "3.2.4",
     "font-awesome": "4.4.0",
     "signalr": "~2.2.0",
-    "knockout.js": "~3.1.0"
+    "knockout.js": "~3.1.0",
+    "moment": "2.10.6"
   }
 }

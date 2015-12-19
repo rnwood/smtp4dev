@@ -7,12 +7,12 @@
     <title>@ViewData["Title"] smtp4dev</title>
 
     <environment names="Development">
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/css/bootstrap-theme.min.css" />
         <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/css/site.css" />
     </environment>
     <environment names="Staging,Production">
-        <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="~/css/bootstrap-theme.min.css" />
         <link rel="stylesheet" href="~/lib/font-awesome/css/font-awesome.min.css" asp-append-version="true" />
         <link rel="stylesheet" href="~/css/site.min.css" asp-append-version="true" />
     </environment>
@@ -37,7 +37,8 @@
                     <li class="@Html.IsActive("Settings", "Index")"><a asp-controller="Settings" asp-action="Index"><i class="fa fa-cog fa-lg"></i> Settings</a></li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
-                    <li><a href='https://www.paypal.me/rnwood'><i class="fa fa-money"></i>Donate to support development</a></li>
+                    <li><a href="/swagger/ui">API</a></li>
+                    <li><a href='https://www.paypal.me/rnwood'></i>Donate to support development</a></li>
                 </ul>
             </div>
         </div>
@@ -52,6 +53,10 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.min.js"></script>
     <script src="~/lib/signalr/jquery.signalR.min.js"></script>
     <script src="~/lib/knockout.js/knockout.js"></script>
+    <script src="~/lib/moment/min/moment-with-locales.min.js"></script>
+
+    <script src="~/lib/signalr/jquery.signalR.min.js"></script>
+    <script src="~/signalr/hubs"></script>
 
     <environment names="Development">
         <script src="~/js/site.js" asp-append-version="true"></script>
