@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNet.Mvc;
-using Rnwood.Smtp4dev.Controllers.API.Model;
+using Rnwood.Smtp4dev.Controllers.API.DTO;
 using Rnwood.Smtp4dev.Model;
 using System;
 using System.Collections.Generic;

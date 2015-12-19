@@ -2,12 +2,22 @@
     ViewData["Title"] = "Messages";
 }
 
-<div class="messagelist">
-    <table>
-        <thead><tr><td>From</td></tr></thead>
-        <tbody>
-            <tr data-bind="foreach: Messages">
+<div class="messagelist table-responsive">
+    <table class="table">
+        <thead>
+            <tr>
+                <td>Received</td>
+                <td>From</td>
+                <td>To</td>
+                <td>Subject</td>
+            </tr>
+        </thead>
+        <tbody data-bind="foreach: Messages">
+            <tr>
+                <td data-bind="text: moment(ReceivedDate).format('L LT')"></td>
                 <td data-bind="text: From"></td>
+                <td data-bind="foreach: To"><span data-bind="text:$data"></span></td>
+                <td data-bind="text: Subject"></td>
             </tr>
         </tbody>
     </table>
