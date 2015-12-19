@@ -21,7 +21,7 @@ before_build:
 
     npm install -g gulp bower
 after_build:
- - ps: dnu publish Rnwood.Smtp4dev
+ - ps: dnu publish Rnwood.Smtp4dev --quiet --runtime active --configuration Release
 build:
   publish_nuget: true
   publish_nuget_symbols: true
