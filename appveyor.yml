@@ -23,7 +23,7 @@ before_build:
     npm install -g gulp bower
 after_build:
  - cmd: dnu publish Rnwood.Smtp4dev --quiet --runtime active --configuration Release 2>nul
- - cmd: 7z a Rnwood.Smtp4dev.zip '.\Rnwood.Smtp4dev\bin\output\*'
+ - cmd: 7z a Rnwood.Smtp4dev.zip '%APPVEYOR_BUILD_FOLDER%\Rnwood.Smtp4dev\bin\output\*'
 build:
   publish_nuget: true
   publish_nuget_symbols: true
