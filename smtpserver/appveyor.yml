@@ -19,7 +19,7 @@ before_build:
 
     dnu restore
 after_build:
- - ps: dnu publish
+ - ps: dnu publish Rnwood.Smtp4dev
 build:
   publish_nuget: true
   publish_nuget_symbols: true
@@ -29,6 +29,6 @@ artifacts:
 - path: Rnwood.SmtpServer\bin\Debug\*
   name: Rnwood.SmtpServer-{version}
   type: zip
-- path: 'output/**/*'
+- path: 'Rnwood.Smtp4dev/output/**/*'
   name: Rnwood.Smtp4dev-{version}
   type: zip
