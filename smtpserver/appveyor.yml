@@ -18,6 +18,8 @@ before_build:
     dnvm upgrade
 
     dnu restore
+
+    npm install -g gulp bower
 after_build:
  - ps: dnu publish Rnwood.Smtp4dev
 build:
