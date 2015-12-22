@@ -11,7 +11,5 @@ namespace Rnwood.Smtp4dev.Model
         event EventHandler<Smtp4devMessageEventArgs> MessageAdded;
 
         void AddMessage(ISmtp4devMessage message);
-
-        ISmtp4devMessage CreateMessage(IConnection connection);
     }
 }

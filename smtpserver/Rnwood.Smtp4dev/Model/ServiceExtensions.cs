@@ -14,9 +14,11 @@ namespace Rnwood.Smtp4dev.Model
             SettingsStore settingsStore = new SettingsStore();
             services.AddInstance<ISettingsStore>(settingsStore);
 
-            string messagesPath = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Smtp4dev", "Messages");
+            string dbDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Smtp4dev");
+            Directory.CreateDirectory(dbDirectory);
+            FileInfo dbFile = new FileInfo(Path.Combine(dbDirectory, "Smtp4dev.db"));
 
-            MessageStore messageStore = new MessageStore(new DirectoryInfo(messagesPath));
+            MessageStore messageStore = new MessageStore(dbFile);
             services.AddInstance<IMessageStore>(messageStore);
 
             Smtp4devEngine server = new Smtp4devEngine(settingsStore, messageStore);

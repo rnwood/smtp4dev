@@ -60,7 +60,16 @@ namespace Rnwood.SmtpServer
 
         public class Builder : IMessageBuilder
         {
-            private MemoryMessage _message = new MemoryMessage();
+            public Builder() : this(new MemoryMessage())
+            {
+            }
+
+            protected Builder(MemoryMessage message)
+            {
+                _message = message;
+            }
+
+            private MemoryMessage _message;
 
             public Stream WriteData()
             {
