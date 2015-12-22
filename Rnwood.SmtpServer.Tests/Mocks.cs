@@ -14,12 +14,14 @@ namespace Rnwood.SmtpServer.Tests
             Session = new Mock<IEditableSession>();
             Server = new Mock<IServer>();
             ServerBehaviour = new Mock<IServerBehaviour>();
-            Message = new Mock<IMessage>();
+            MessageBuilder = new Mock<IMessageBuilder>();
             VerbMap = new Mock<IVerbMap>();
 
             ServerBehaviour.Setup(
                 sb => sb.OnCreateNewSession(It.IsAny<IConnection>(), It.IsAny<IPAddress>(), It.IsAny<DateTime>())).
                 Returns(Session.Object);
+            ServerBehaviour.Setup(sb => sb.OnCreateNewMessage(It.IsAny<IConnection>())).Returns(MessageBuilder.Object);
+
             Connection.SetupGet(c => c.Session).Returns(Session.Object);
             Connection.SetupGet(c => c.Server).Returns(Server.Object);
             Connection.SetupGet(c => c.ReaderEncoding).Returns(new ASCIISevenBitTruncatingEncoding());
@@ -35,7 +37,7 @@ namespace Rnwood.SmtpServer.Tests
         public Mock<IEditableSession> Session { get; private set; }
         public Mock<IServer> Server { get; private set; }
         public Mock<IServerBehaviour> ServerBehaviour { get; private set; }
-        public Mock<IMessage> Message { get; private set; }
+        public Mock<IMessageBuilder> MessageBuilder { get; private set; }
 
         public Mock<IVerbMap> VerbMap { get; private set; }
 

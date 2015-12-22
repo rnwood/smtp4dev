@@ -1,41 +1,42 @@
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System;
 using System.IO;
+using System.Linq;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    public abstract class AbstractMessageTests
+    public abstract class MessageBuilderTests
     {
         [TestMethod]
         public void AddTo()
         {
-            IEditableMessage message = GetMessage();
+            IMessageBuilder builder = GetInstance();
 
-            message.AddTo("foo@bar.com");
-            message.AddTo("bar@foo.com");
+            builder.To.Add("foo@bar.com");
+            builder.To.Add("bar@foo.com");
 
-            Assert.AreEqual(2, message.To.Length);
-            Assert.AreEqual(message.To[0], "foo@bar.com");
-            Assert.AreEqual(message.To[1], "bar@foo.com");
+            Assert.AreEqual(2, builder.To.Count);
+            Assert.AreEqual(builder.To.ElementAt(0), "foo@bar.com");
+            Assert.AreEqual(builder.To.ElementAt(1), "bar@foo.com");
         }
 
-        protected abstract IEditableMessage GetMessage();
+        protected abstract IMessageBuilder GetInstance();
 
         [TestMethod]
-        public void GetData_ForWriting_Accepted()
+        public void WriteData_Accepted()
         {
-            IEditableMessage message = GetMessage();
+            IMessageBuilder builder = GetInstance();
 
             byte[] writtenBytes = new byte[64 * 1024];
             new Random().NextBytes(writtenBytes);
 
-            using (Stream stream = message.GetData(DataAccessMode.ForWriting))
+            using (Stream stream = builder.WriteData())
             {
                 stream.Write(writtenBytes, 0, writtenBytes.Length);
             }
 
             byte[] readBytes;
-            using (Stream stream = message.GetData())
+            using (Stream stream = builder.GetData())
             {
                 readBytes = new byte[stream.Length];
                 stream.Read(readBytes, 0, readBytes.Length);

@@ -7,33 +7,18 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Model
 {
-    public class Smtp4devServer : ISmtp4devServer
+    public class Smtp4devEngine : ISmtp4devEngine
     {
-        private DefaultServer _server;
-        private ObservableCollection<IMessage> _messages = new ObservableCollection<IMessage>();
+        private Server _server;
         private ISettingsStore _settingsStore;
+        private IMessageStore _messageStore;
 
-        public Smtp4devServer(ISettingsStore settingsStore)
+        public Smtp4devEngine(ISettingsStore settingsStore, IMessageStore messageStore)
         {
             _settingsStore = settingsStore;
-
-            _messages.CollectionChanged += (s, ea) =>
-            {
-                MessagesChanged?.Invoke(this, new EventArgs());
-            };
-
+            _messageStore = messageStore;
             TryStart();
         }
-
-        public IEnumerable<IMessage> Messages
-        {
-            get
-            {
-                return _messages.ToList();
-            }
-        }
-
-        public event EventHandler<EventArgs> MessagesChanged;
 
         public Exception ServerError { get; set; }
 
@@ -62,8 +47,7 @@ namespace Rnwood.Smtp4dev.Model
 
             try
             {
-                _server = new DefaultServer(settings.Port);
-                _server.MessageReceived += MessageReceived;
+                _server = new Server(new Smtp4devServerBehaviour(settings, OnMessageReceived, connection => (IMessageBuilder)_messageStore.CreateMessage(connection)));
                 _server.Start();
             }
             catch (Exception e)
@@ -77,9 +61,9 @@ namespace Rnwood.Smtp4dev.Model
             _server.Stop(true);
         }
 
-        private void MessageReceived(object sender, MessageEventArgs e)
+        private void OnMessageReceived(ISmtp4devMessage message)
         {
-            _messages.Add(e.Message);
+            _messageStore.AddMessage(message);
         }
     }
 }

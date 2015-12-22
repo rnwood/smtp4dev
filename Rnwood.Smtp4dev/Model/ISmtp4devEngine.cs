@@ -6,12 +6,8 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Model
 {
-    public interface ISmtp4devServer
+    public interface ISmtp4devEngine
     {
-        event EventHandler<EventArgs> MessagesChanged;
-
-        IEnumerable<IMessage> Messages { get; }
-
         void ApplySettings(Settings settings);
 
         bool IsRunning { get; }

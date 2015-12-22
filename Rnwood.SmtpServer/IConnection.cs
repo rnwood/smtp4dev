@@ -17,7 +17,7 @@ namespace Rnwood.SmtpServer
         IVerbMap VerbMap { get; }
         MailVerb MailVerb { get; }
         IEditableSession Session { get; }
-        IEditableMessage CurrentMessage { get; }
+        IMessageBuilder CurrentMessage { get; }
         Encoding ReaderEncoding { get; }
 
         void SetReaderEncoding(Encoding encoding);
@@ -34,7 +34,7 @@ namespace Rnwood.SmtpServer
 
         string ReadLine();
 
-        IEditableMessage NewMessage();
+        IMessageBuilder NewMessage();
 
         void CommitMessage();
 

@@ -111,7 +111,8 @@ namespace Rnwood.SmtpServer.Tests
             Mocks mocks = new Mocks();
 
             Connection connection = new Connection(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object);
-            IEditableMessage message = connection.NewMessage();
+            IMessageBuilder messageBuilder = connection.NewMessage();
+            IMessage message = messageBuilder.ToMessage();
 
             connection.CommitMessage();
             mocks.Session.Verify(s => s.AddMessage(message));

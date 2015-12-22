@@ -23,7 +23,7 @@ namespace Rnwood.SmtpServer
             connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.StartMailInputEndWithDot,
                                                                "End message with period"));
 
-            using (StreamWriter writer = new StreamWriter(connection.CurrentMessage.GetData(DataAccessMode.ForWriting), connection.ReaderEncoding))
+            using (StreamWriter writer = new StreamWriter(connection.CurrentMessage.WriteData(), connection.ReaderEncoding))
             {
                 bool firstLine = true;
 

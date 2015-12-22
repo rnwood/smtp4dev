@@ -6,7 +6,7 @@ namespace Rnwood.SmtpServer
     public interface IMessage : IDisposable
     {
         /// <summary>
-        /// Date the messge was received by the server.
+        /// Date the message was received by the server.
         /// </summary>
         DateTime ReceivedDate { get; }
 
@@ -21,7 +21,7 @@ namespace Rnwood.SmtpServer
         string From { get; }
 
         /// <summary>
-        /// Receipient of the message as specified by the client when sending RCPT TO command.
+        /// Recipient of the message as specified by the client when sending RCPT TO command.
         /// </summary>
         string[] To { get; }
 

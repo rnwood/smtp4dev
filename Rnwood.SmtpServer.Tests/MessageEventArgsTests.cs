@@ -8,11 +8,10 @@ namespace Rnwood.SmtpServer.Tests
         [TestMethod]
         public void Message()
         {
-            Mocks mocks = new Mocks();
+            IMessage message = new MemoryMessage();
+            MessageEventArgs messageEventArgs = new MessageEventArgs(message);
 
-            MessageEventArgs messageEventArgs = new MessageEventArgs(mocks.Message.Object);
-
-            Assert.AreSame(mocks.Message.Object, messageEventArgs.Message);
+            Assert.AreSame(message, messageEventArgs.Message);
         }
     }
 }

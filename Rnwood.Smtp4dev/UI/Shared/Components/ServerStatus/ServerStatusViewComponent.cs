@@ -10,12 +10,12 @@ namespace Rnwood.Smtp4dev.UI.Shared.Components.ServerStatus
     [ViewComponent(Name = "ServerStatus")]
     public class ServerStatusViewComponent : ViewComponent
     {
-        public ServerStatusViewComponent(ISmtp4devServer server)
+        public ServerStatusViewComponent(ISmtp4devEngine server)
         {
             _server = server;
         }
 
-        private ISmtp4devServer _server;
+        private ISmtp4devEngine _server;
 
         public IViewComponentResult Invoke()
         {

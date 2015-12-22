@@ -13,11 +13,11 @@ namespace Rnwood.Smtp4dev.Controllers.API
     [Route("api/message")]
     public class MessagesController : Controller
     {
-        private ISmtp4devServer _messageStore;
+        private IMessageStore _messageStore;
 
-        public MessagesController(ISmtp4devServer messgeStore)
+        public MessagesController(IMessageStore messageStore)
         {
-            _messageStore = messgeStore;
+            _messageStore = messageStore;
         }
 
         // GET: api/values
@@ -25,12 +25,6 @@ namespace Rnwood.Smtp4dev.Controllers.API
         public IEnumerable<Message> Get()
         {
             return _messageStore.Messages.Select(m => new Message(m));
-        }
-
-        // DELETE api/values/5
-        [HttpDelete("{id}")]
-        public void Delete(Guid id)
-        {
         }
     }
 }

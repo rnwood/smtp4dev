@@ -10,7 +10,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         public void Process_AlreadyGivenFrom_ErrorResponse()
         {
             Mocks mocks = new Mocks();
-            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(new Mock<IEditableMessage>().Object);
+            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(new Mock<IMessageBuilder>().Object);
 
             MailFromVerb mailFromVerb = new MailFromVerb();
             mailFromVerb.Process(mocks.Connection.Object, new SmtpCommand("FROM <foo@bar.com>"));
@@ -50,8 +50,8 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         private void Process_Address(string address, string expectedParsedAddress, StandardSmtpResponseCode expectedResponse)
         {
             Mocks mocks = new Mocks();
-            Mock<IEditableMessage> message = new Mock<IEditableMessage>();
-            IEditableMessage currentMessage = null;
+            Mock<IMessageBuilder> message = new Mock<IMessageBuilder>();
+            IMessageBuilder currentMessage = null;
             mocks.Connection.Setup(c => c.NewMessage()).Returns(() =>
                                                                                                         {
                                                                                                             currentMessage

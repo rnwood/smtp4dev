@@ -1,0 +1,20 @@
+﻿@model Rnwood.Smtp4dev.UI.Messages.ViewMessageViewModel
+@{
+    ViewData["Title"] = "Message: " + Model.Subject;
+}
+
+<h2>Headers:</h2>
+<div class="table-responsive">
+    <table class="table">
+        <thead>
+            <tr><td>Name</td><td>Value</td></tr>
+        </thead>
+        @foreach (KeyValuePair<string, string> header in Model.Headers)
+        {
+            <tr>
+                <td>@header.Key</td>
+                <td>@header.Value</td>
+            </tr>
+        }
+    </table>
+</div>

@@ -88,7 +88,7 @@ namespace Rnwood.SmtpServer
             remove { Behaviour.AuthenticationCredentialsValidationRequired -= value; }
         }
 
-        public event EventHandler<MessageEventArgs> MessageCompleted
+        public event EventHandler<ConnectionEventArgs> MessageCompleted
         {
             add { Behaviour.MessageCompleted += value; }
             remove { Behaviour.MessageCompleted -= value; }
