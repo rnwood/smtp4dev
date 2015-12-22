@@ -19,21 +19,41 @@ namespace Rnwood.Smtp4dev.Model
         }
 
         private IOdb _database;
+        private object _syncRoot = new object();
 
         public IEnumerable<ISmtp4devMessage> Messages
         {
             get
             {
-                return _database.QueryAndExecute<ISmtp4devMessage>();
+                lock (_syncRoot)
+                {
+                    return _database.QueryAndExecute<ISmtp4devMessage>();
+                }
             }
         }
 
         public event EventHandler<Smtp4devMessageEventArgs> MessageAdded;
 
+        public event EventHandler<Smtp4devMessageEventArgs> MessageDeleted;
+
+        public void DeleteMessage(ISmtp4devMessage message)
+        {
+            lock (_syncRoot)
+            {
+                _database.Delete(message);
+                _database.Commit();
+            }
+
+            MessageDeleted?.Invoke(this, new Smtp4devMessageEventArgs(message));
+        }
+
         public void AddMessage(ISmtp4devMessage message)
         {
-            _database.Store(message);
-            _database.Commit();
+            lock (_syncRoot)
+            {
+                _database.Store(message);
+                _database.Commit();
+            }
 
             MessageAdded?.Invoke(this, new Smtp4devMessageEventArgs(message));
         }

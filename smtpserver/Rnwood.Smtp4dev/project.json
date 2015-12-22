@@ -30,9 +30,7 @@
 
   "commands": {
     "run": "Rnwood.Smtp4dev",
-    "web": "Microsoft.AspNet.Server.Kestrel --server.urls=http://localhost:5000",
-    "install": "Rnwood.Smtp4dev install",
-    "uninstall": "Rnwood.Smtp4dev uninstall"
+    "web": "Microsoft.AspNet.Server.Kestrel --server.urls=http://localhost:5000"
   },
 
   "frameworks": {

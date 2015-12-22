@@ -10,6 +10,10 @@ namespace Rnwood.Smtp4dev.Model
 
         event EventHandler<Smtp4devMessageEventArgs> MessageAdded;
 
+        event EventHandler<Smtp4devMessageEventArgs> MessageDeleted;
+
         void AddMessage(ISmtp4devMessage message);
+
+        void DeleteMessage(ISmtp4devMessage message);
     }
 }
