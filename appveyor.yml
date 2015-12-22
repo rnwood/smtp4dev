@@ -1,0 +1,34 @@
+version: 3.0.{build}
+os: Visual Studio 2015
+configuration: Release
+assembly_info:
+  patch: true
+  file: '**\SolutionInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+environment:
+  DNX_FEED: https://www.nuget.org/api/v2
+nuget:
+  account_feed: true
+  project_feed: true
+before_build:
+- cmd: >-
+    nuget restore
+
+    dnvm upgrade
+
+    dnu restore
+
+    npm install -g gulp bower
+after_build:
+ - cmd: dnu publish Rnwood.Smtp4dev --quiet --runtime active --configuration Release 2>nul
+ - cmd: '7z a Rnwood.Smtp4dev.zip %APPVEYOR_BUILD_FOLDER%\Rnwood.Smtp4dev\bin\output\*'
+build:
+  publish_nuget: true
+  publish_nuget_symbols: true
+  parallel: true
+  verbosity: minimal
+artifacts:
+- path: Rnwood.Smtp4dev.zip
+  type: zip
