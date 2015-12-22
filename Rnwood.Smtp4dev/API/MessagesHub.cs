@@ -11,12 +11,19 @@ namespace Rnwood.Smtp4dev.API
     {
         public MessagesHub(IMessageStore messageStore)
         {
-            messageStore.MessageAdded += (s, ea) => { MessageAdded(ea.Message); };
+            messageStore.MessageAdded += (s, ea) => { OnMessageAdded(ea.Message); };
+
+            messageStore.MessageDeleted += (s, ea) => { OnMessageDeleted(ea.Message); };
         }
 
-        public void MessageAdded(ISmtp4devMessage message)
+        private void OnMessageAdded(ISmtp4devMessage message)
         {
             Clients.All.messageAdded(message.Id);
+        }
+
+        private void OnMessageDeleted(ISmtp4devMessage message)
+        {
+            Clients.All.messageDeleted(message.Id);
         }
     }
 }

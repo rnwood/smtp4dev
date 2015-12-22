@@ -24,3 +24,12 @@
 .validation-summary-valid.alert-danger {
     display: none;
 }
+
+.table-hover .actions a {
+    visibility: hidden;
+}
+
+.table-hover tr:hover .actions a {
+    visibility: visible;
+}
+

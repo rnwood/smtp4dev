@@ -1,35 +1,22 @@
-﻿$(function () {
-    function MessageViewModel(data) {
-        var self = this;
-        $.extend(this, data);
+﻿requirejs.config({
+    baseUrl: 'lib',
+    packages: [
+        { name: 'text', location: 'text', main: 'text' },
+        { name: 'when', location: 'when', main: 'when' },
+        { name: 'rest', location: 'rest', main: 'browser' },
+        { name: 'knockout', location: 'knockoutjs/dist', main: 'knockout' },
+        { name: 'moment', location: 'moment/min', main: 'moment-with-locales' },
+        { name: 'component/messagelist', location: '/components/messagelist', main: 'messagelist' }
+    ]
+});
 
-        this.view = function () {
-            location.href = "/Messages/View/" + self.Id;
-        };
-    }
-
-    function MessageListViewModel() {
-        var self = this;
-        this.Messages = ko.observableArray([]);
-
-        function refresh() {
-            $.getJSON("/api/message", null, function (data) {
-                self.Messages.removeAll();
-                data.forEach(function (element) {
-                    self.Messages.push(new MessageViewModel(element));
-                });
-            });
-        }
-
-        refresh();
-
-        var hub = $.connection.messagesHub;
-        hub.client.messageAdded = refresh;
-    }
-
-    $(".messagelist").each(function (index, element) {
-        ko.applyBindings(new MessageListViewModel(), element);
+require(["knockout"], function (ko) {
+    ko.components.register('messagelist', {
+        viewModel: { require: 'component/messagelist' },
+        template: { require: 'text!/components/messagelist/messagelist.html' }
     });
 
     $.connection.hub.start();
+
+    ko.applyBindings({});
 });

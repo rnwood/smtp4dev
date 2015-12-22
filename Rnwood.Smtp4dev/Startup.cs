@@ -1,12 +1,16 @@
 ﻿using Microsoft.AspNet.Builder;
 using Microsoft.AspNet.Hosting;
+using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.AspNet.Mvc.Razor;
+using Microsoft.AspNet.Routing;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Rnwood.Smtp4dev.Model;
 using Rnwood.Smtp4dev.UI;
 using Swashbuckle.SwaggerGen;
+using System;
+using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev
 {

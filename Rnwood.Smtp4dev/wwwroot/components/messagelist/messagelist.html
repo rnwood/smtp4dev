@@ -1,0 +1,32 @@
+﻿<div class="messagelist">
+
+    <div class="btn-toolbar" role="toolbar" data-bind="if: options.showActions">
+        <div class="btn-group" role="group">
+            <button type="button" class="btn btn-default"><i class="fa fa-trash"></i> Delete all</button>
+        </div>
+    </div>
+
+    <div class="table-responsive">
+        <table class="table table-hover table-striped">
+            <thead>
+                <tr>
+                    <td>Received</td>
+                    <td>From</td>
+                    <td>To</td>
+                    <td>Subject</td>
+                    <td data-bind="if: options.showActions"></td>
+                </tr>
+            </thead>
+            <tbody data-bind="foreach: messages">
+                <tr data-bind="click: view" style="cursor: pointer">
+                    <td data-bind="text: ReceivedDateString"></td>
+                    <td data-bind="text: From"></td>
+                    <td data-bind="foreach: To"><span data-bind="text:$data"></span></td>
+                    <td data-bind="text: Subject"></td>
+                    <td data-bind="if: $parent.options.showActions" class="actions"><a class="fa fa-trash"></a></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+</div>

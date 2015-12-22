@@ -26,5 +26,16 @@ namespace Rnwood.Smtp4dev.Controllers.API
         {
             return _messageStore.Messages.Select(m => new Message(m));
         }
+
+        [HttpDelete]
+        public void Delete(Guid id)
+        {
+            ISmtp4devMessage message = _messageStore.Messages.FirstOrDefault(m => m.Id == id);
+
+            if (message != null)
+            {
+                _messageStore.DeleteMessage(message);
+            }
+        }
     }
 }
