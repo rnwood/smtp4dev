@@ -90,17 +90,18 @@ namespace Rnwood.SmtpServer
 
         public IEditableSession Session { get; private set; }
 
-        public IEditableMessage CurrentMessage { get; private set; }
+        public IMessageBuilder CurrentMessage { get; private set; }
 
-        public IEditableMessage NewMessage()
+        public IMessageBuilder NewMessage()
         {
             CurrentMessage = Server.Behaviour.OnCreateNewMessage(this);
+            CurrentMessage.Session = Session;
             return CurrentMessage;
         }
 
         public void CommitMessage()
         {
-            IMessage message = CurrentMessage;
+            IMessage message = CurrentMessage.ToMessage();
             Session.AddMessage(message);
             CurrentMessage = null;
 

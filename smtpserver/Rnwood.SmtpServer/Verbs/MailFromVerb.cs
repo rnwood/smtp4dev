@@ -9,9 +9,16 @@ namespace Rnwood.SmtpServer
 {
     public class MailFromVerb : IVerb
     {
-        public MailFromVerb()
+        private ICurrentDateTimeProvider _currentDateTimeProvider;
+
+        public MailFromVerb(ICurrentDateTimeProvider currentDateTimeProvider)
         {
             ParameterProcessorMap = new ParameterProcessorMap();
+            _currentDateTimeProvider = currentDateTimeProvider;
+        }
+
+        public MailFromVerb() : this(new CurrentDateTimeProvider())
+        {
         }
 
         public ParameterProcessorMap ParameterProcessorMap { get; private set; }
@@ -45,12 +52,13 @@ namespace Rnwood.SmtpServer
 
             connection.Server.Behaviour.OnMessageStart(connection, from);
             connection.NewMessage();
+            connection.CurrentMessage.ReceivedDate = _currentDateTimeProvider.GetCurrentDateTime();
             connection.CurrentMessage.From = from;
 
             try
             {
                 ParameterProcessorMap.Process(connection, arguments.Skip(1).ToArray(), true);
-                connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Okey dokey"));
+                connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "New message started"));
             }
             catch
             {

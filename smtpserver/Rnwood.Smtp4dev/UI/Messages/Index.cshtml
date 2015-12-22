@@ -13,7 +13,7 @@
             </tr>
         </thead>
         <tbody data-bind="foreach: Messages">
-            <tr>
+            <tr data-bind="click: view" style="cursor: pointer">
                 <td data-bind="text: moment(ReceivedDate).format('L LT')"></td>
                 <td data-bind="text: From"></td>
                 <td data-bind="foreach: To"><span data-bind="text:$data"></span></td>

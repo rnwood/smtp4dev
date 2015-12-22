@@ -42,7 +42,7 @@ namespace Rnwood.SmtpServer
 
         void OnMessageReceived(IConnection connection, IMessage message);
 
-        void OnMessageRecipientAdding(IConnection connection, IMessage message, string recipient);
+        void OnMessageRecipientAdding(IConnection connection, IMessageBuilder message, string recipient);
 
         /// <summary>
         /// Gets the maximum allowed size of the message for the specified connection.
@@ -105,7 +105,7 @@ namespace Rnwood.SmtpServer
         /// <param name="from">From.</param>
         void OnMessageStart(IConnection connection, string from);
 
-        IEditableMessage OnCreateNewMessage(IConnection connection);
+        IMessageBuilder OnCreateNewMessage(IConnection connection);
 
         /// <summary>
         /// Determines whether the speficied auth mechanism should be enabled for the specified connecton.

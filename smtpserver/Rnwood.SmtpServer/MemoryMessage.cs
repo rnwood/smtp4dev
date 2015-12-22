@@ -1,53 +1,187 @@
 using System;
+using System.Collections.Generic;
 using System.IO;
 
 namespace Rnwood.SmtpServer
 {
-    public class MemoryMessage : AbstractMessage
+    public class MemoryMessage : IMessage
     {
-        public MemoryMessage(ISession session)
-            : base(session)
+        public MemoryMessage()
         {
         }
 
-        private byte[] _data;
+        internal byte[] Data { get; set; }
 
-        public override Stream GetData(DataAccessMode dataAccessMode)
+        public DateTime ReceivedDate
         {
-            if (dataAccessMode == DataAccessMode.ForWriting)
+            get; private set;
+        }
+
+        public ISession Session
+        {
+            get; private set;
+        }
+
+        public string From
+        {
+            get; private set;
+        }
+
+        private List<string> _to = new List<string>();
+
+        public string[] To
+        {
+            get { return _to.ToArray(); }
+        }
+
+        public bool SecureConnection
+        {
+            get; private set;
+        }
+
+        public bool EightBitTransport
+        {
+            get; private set;
+        }
+
+        public long? DeclaredMessageSize
+        {
+            get; private set;
+        }
+
+        public virtual void Dispose()
+        {
+        }
+
+        public Stream GetData()
+        {
+            return new MemoryStream(Data, false);
+        }
+
+        public class Builder : IMessageBuilder
+        {
+            private MemoryMessage _message = new MemoryMessage();
+
+            public Stream WriteData()
             {
                 CloseNotifyingMemoryStream stream = new CloseNotifyingMemoryStream();
                 stream.Closing += (s, ea) =>
-                                      {
-                                          _data = new byte[stream.Length];
-                                          stream.Position = 0;
-                                          stream.Read(_data, 0, _data.Length);
-                                      };
+                {
+                    _message.Data = stream.ToArray();
+                };
 
                 return stream;
             }
-            else
+
+            internal class CloseNotifyingMemoryStream : MemoryStream
             {
-                return new MemoryStream(_data, false);
-            }
-        }
+                public event EventHandler Closing;
 
-        public override void Dispose()
-        {
-        }
-
-        public class CloseNotifyingMemoryStream : MemoryStream
-        {
-            public event EventHandler Closing;
-
-            public override void Close()
-            {
-                if (Closing != null)
+                public override void Close()
                 {
-                    Closing(this, EventArgs.Empty);
+                    if (Closing != null)
+                    {
+                        Closing(this, EventArgs.Empty);
+                    }
+
+                    base.Close();
+                }
+            }
+
+            public ISession Session
+            {
+                get
+                {
+                    return _message.Session;
                 }
 
-                base.Close();
+                set
+                {
+                    _message.Session = value;
+                }
+            }
+
+            public DateTime ReceivedDate
+            {
+                get
+                {
+                    return _message.ReceivedDate;
+                }
+
+                set
+                {
+                    _message.ReceivedDate = value;
+                }
+            }
+
+            public string From
+            {
+                get
+                {
+                    return _message.From;
+                }
+
+                set
+                {
+                    _message.From = value;
+                }
+            }
+
+            public bool SecureConnection
+            {
+                get
+                {
+                    return _message.SecureConnection;
+                }
+
+                set
+                {
+                    _message.SecureConnection = value;
+                }
+            }
+
+            public bool EightBitTransport
+            {
+                get
+                {
+                    return _message.EightBitTransport;
+                }
+
+                set
+                {
+                    EightBitTransport = value;
+                }
+            }
+
+            public long? DeclaredMessageSize
+            {
+                get
+                {
+                    return _message.DeclaredMessageSize;
+                }
+
+                set
+                {
+                    _message.DeclaredMessageSize = value;
+                }
+            }
+
+            public ICollection<string> To
+            {
+                get
+                {
+                    return _message._to;
+                }
+            }
+
+            public IMessage ToMessage()
+            {
+                return _message;
+            }
+
+            public Stream GetData()
+            {
+                return _message.GetData();
             }
         }
     }

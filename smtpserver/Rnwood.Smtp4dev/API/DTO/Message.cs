@@ -1,4 +1,5 @@
 ﻿using MimeKit;
+using Rnwood.Smtp4dev.Model;
 using Rnwood.SmtpServer;
 using System;
 using System.Collections.Generic;
@@ -10,9 +11,9 @@ namespace Rnwood.Smtp4dev.Controllers.API.DTO
 {
     public class Message
     {
-        private IMessage _message;
+        private ISmtp4devMessage _message;
 
-        public Message(IMessage message)
+        internal Message(ISmtp4devMessage message)
         {
             _message = message;
 
@@ -37,5 +38,7 @@ namespace Rnwood.Smtp4dev.Controllers.API.DTO
         public string[] To { get { return _message.To; } }
 
         public string Subject { get; private set; }
+
+        public Guid Id { get { return _message.Id; } }
     }
 }

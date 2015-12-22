@@ -44,8 +44,8 @@ namespace Rnwood.SmtpServer.Tests.Verbs
                 mocks.Connection.SetupGet(c => c.ReaderEncoding).Returns(Encoding.UTF8);
             }
 
-            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
-            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
+            MemoryMessage.Builder messageBuilder = new MemoryMessage.Builder();
+            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
             mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).Returns((long?)null);
 
             int messageLine = 0;
@@ -57,7 +57,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
 
-            using (StreamReader dataReader = new StreamReader(message.GetData(), eightBitClean ? Encoding.UTF8 : Encoding.Default))
+            using (StreamReader dataReader = new StreamReader(messageBuilder.GetData(), eightBitClean ? Encoding.UTF8 : Encoding.Default))
             {
                 Assert.AreEqual(expectedData, dataReader.ReadToEnd());
             }
@@ -68,8 +68,8 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         {
             Mocks mocks = new Mocks();
 
-            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
-            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
+            MemoryMessage.Builder messageBuilder = new MemoryMessage.Builder();
+            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
             mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).Returns(10);
 
             string[] messageData = new string[] { new string('x', 11), "." };
@@ -88,8 +88,8 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         {
             Mocks mocks = new Mocks();
 
-            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
-            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
+            MemoryMessage.Builder messageBuilder = new MemoryMessage.Builder();
+            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
             mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).Returns(10);
 
             string[] messageData = new string[] { new string('x', 10), "." };
@@ -108,8 +108,8 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         {
             Mocks mocks = new Mocks();
 
-            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
-            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
+            MemoryMessage.Builder messageBuilder = new MemoryMessage.Builder();
+            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
             mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).Returns(10);
 
             string[] messageData = new string[] { new string('x', 9), "." };

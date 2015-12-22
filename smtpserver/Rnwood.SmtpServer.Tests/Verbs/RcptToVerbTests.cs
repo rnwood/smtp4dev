@@ -1,4 +1,5 @@
 ﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Linq;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
@@ -21,14 +22,14 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         private void TestGoodAddress(string address, string expectedAddress)
         {
             Mocks mocks = new Mocks();
-            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
-            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
+            MemoryMessage.Builder messageBuilder = new MemoryMessage.Builder();
+            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
 
             RcptToVerb verb = new RcptToVerb();
             verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address));
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
-            Assert.AreEqual(expectedAddress, message.To[0]);
+            Assert.AreEqual(expectedAddress, messageBuilder.To.First());
         }
 
         [TestMethod]
@@ -53,14 +54,14 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         private void TestBadAddress(string address)
         {
             Mocks mocks = new Mocks();
-            MemoryMessage message = new MemoryMessage(mocks.Session.Object);
-            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message);
+            MemoryMessage.Builder messageBuilder = new MemoryMessage.Builder();
+            mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
 
             RcptToVerb verb = new RcptToVerb();
             verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address));
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
-            Assert.AreEqual(0, message.To.Length);
+            Assert.AreEqual(0, messageBuilder.To.Count);
         }
     }
 }

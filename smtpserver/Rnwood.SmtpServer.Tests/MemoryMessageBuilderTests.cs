@@ -3,12 +3,12 @@
 namespace Rnwood.SmtpServer.Tests
 {
     [TestClass]
-    public class MemoryMessageTests : AbstractMessageTests
+    public class MemoryMessageBuilderTests : MessageBuilderTests
     {
-        protected override IEditableMessage GetMessage()
+        protected override IMessageBuilder GetInstance()
         {
             Mocks mocks = new Mocks();
-            return new MemoryMessage(mocks.Session.Object);
+            return new MemoryMessage.Builder();
         }
     }
 }

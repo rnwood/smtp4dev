@@ -82,7 +82,7 @@
     <Compile Include="..\SolutionInfo.cs">
       <Link>SolutionInfo.cs</Link>
     </Compile>
-    <Compile Include="AbstractMessageTests.cs" />
+    <Compile Include="MessageBuilderTests.cs" />
     <Compile Include="AbstractSessionTests.cs" />
     <Compile Include="ArgumentsParserTests.cs" />
     <Compile Include="ASCIISevenBitTruncatingEncodingTests.cs" />
@@ -95,8 +95,8 @@
     <Compile Include="Extensions\Auth\CramMd5AuthenticationRequestTests.cs" />
     <Compile Include="Extensions\Auth\CramMd5MechanismProcessorTests.cs" />
     <Compile Include="Verbs\StartTlsVerbTests.cs" />
-    <Compile Include="FileMessageTests.cs" />
-    <Compile Include="MemoryMessageTests.cs" />
+    <Compile Include="FileMessageBuilderTests.cs" />
+    <Compile Include="MemoryMessageBuilderTests.cs" />
     <Compile Include="MemorySessionTests.cs" />
     <Compile Include="MessageEventArgsTests.cs" />
     <Compile Include="Mocks.cs" />

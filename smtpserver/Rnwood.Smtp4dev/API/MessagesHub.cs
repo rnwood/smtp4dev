@@ -9,14 +9,14 @@ namespace Rnwood.Smtp4dev.API
 {
     public class MessagesHub : Hub
     {
-        public MessagesHub(ISmtp4devServer server)
+        public MessagesHub(IMessageStore messageStore)
         {
-            server.MessagesChanged += (s, ea) => { Refresh(); };
+            messageStore.MessageAdded += (s, ea) => { MessageAdded(ea.Message); };
         }
 
-        public void Refresh()
+        public void MessageAdded(ISmtp4devMessage message)
         {
-            Clients.All.refresh();
+            Clients.All.messageAdded(message.Id);
         }
     }
 }

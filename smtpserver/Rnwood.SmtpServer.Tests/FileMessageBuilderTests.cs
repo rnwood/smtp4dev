@@ -4,14 +4,14 @@ using System.IO;
 namespace Rnwood.SmtpServer.Tests
 {
     [TestClass]
-    public class FileMessageTests : AbstractMessageTests
+    public class FileMessageBuilderTests : MessageBuilderTests
     {
-        protected override IEditableMessage GetMessage()
+        protected override IMessageBuilder GetInstance()
         {
             FileInfo tempFile = new FileInfo(Path.GetTempFileName());
 
             Mocks mocks = new Mocks();
-            return new FileMessage(mocks.Session.Object, tempFile, false);
+            return new FileMessage.Builder(tempFile, false);
         }
     }
 }

@@ -89,7 +89,7 @@ namespace Rnwood.SmtpServer
             return _sslCertificate;
         }
 
-        public virtual void OnMessageRecipientAdding(IConnection connection, IMessage message, string recipient)
+        public virtual void OnMessageRecipientAdding(IConnection connection, IMessageBuilder message, string recipient)
         {
         }
 
@@ -159,16 +159,16 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        public virtual IEditableMessage OnCreateNewMessage(IConnection connection)
+        public virtual IMessageBuilder OnCreateNewMessage(IConnection connection)
         {
-            return new MemoryMessage(connection.Session);
+            return new MemoryMessage.Builder();
         }
 
         public virtual void OnMessageCompleted(IConnection connection)
         {
             if (MessageCompleted != null)
             {
-                MessageCompleted(this, new MessageEventArgs(connection.CurrentMessage));
+                MessageCompleted(this, new ConnectionEventArgs(connection));
             }
         }
 
@@ -176,7 +176,7 @@ namespace Rnwood.SmtpServer
 
         public event EventHandler<CommandEventArgs> CommandReceived;
 
-        public event EventHandler<MessageEventArgs> MessageCompleted;
+        public event EventHandler<ConnectionEventArgs> MessageCompleted;
 
         public event EventHandler<MessageEventArgs> MessageReceived;
 

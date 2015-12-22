@@ -78,12 +78,12 @@
     <Compile Include="..\SolutionInfo.cs">
       <Link>SolutionInfo.cs</Link>
     </Compile>
-    <Compile Include="AbstractMessage.cs" />
     <Compile Include="ArgumentsParser.cs" />
     <Compile Include="ASCIISevenBitTruncatingEncoding.cs" />
     <Compile Include="AuthenticationCredentialsValidationEventArgs.cs" />
     <Compile Include="CommandEventArgs.cs" />
     <Compile Include="Connection.cs" />
+    <Compile Include="ConnectionEventArgs.cs" />
     <Compile Include="ConnectionUnexpectedlyClosedException.cs" />
     <Compile Include="CurrentDateTimeProvider.cs" />
     <Compile Include="DataAccessMode.cs" />
@@ -127,7 +127,7 @@
     <Compile Include="IConnection.cs" />
     <Compile Include="IConnectionChannel.cs" />
     <Compile Include="ICurrentDateTimeProvider.cs" />
-    <Compile Include="IEditableMessage.cs" />
+    <Compile Include="IMessageBuilder.cs" />
     <Compile Include="IEditableSession.cs" />
     <Compile Include="IMessage.cs" />
     <Compile Include="IRandomIntegerGenerator.cs" />
