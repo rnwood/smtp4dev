@@ -47,7 +47,7 @@ namespace Rnwood.Smtp4dev.Model
 
             try
             {
-                _server = new Server(new Smtp4devServerBehaviour(settings, OnMessageReceived, connection => (IMessageBuilder)_messageStore.CreateMessage(connection)));
+                _server = new Server(new Smtp4devServerBehaviour(settings, OnMessageReceived));
                 _server.Start();
             }
             catch (Exception e)

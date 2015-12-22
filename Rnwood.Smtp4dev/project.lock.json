@@ -1573,6 +1573,15 @@
           "lib/net45/MimeKit.dll": {}
         }
       },
+      "NDatabase/3.8.0": {
+        "type": "package",
+        "compile": {
+          "lib/net45/NDatabase3.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NDatabase3.dll": {}
+        }
+      },
       "Newtonsoft.Json/6.0.6": {
         "type": "package",
         "compile": {
@@ -3408,6 +3417,15 @@
         "runtime": {
           "lib/net45/BouncyCastle.dll": {},
           "lib/net45/MimeKit.dll": {}
+        }
+      },
+      "NDatabase/3.8.0": {
+        "type": "package",
+        "compile": {
+          "lib/net45/NDatabase3.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NDatabase3.dll": {}
         }
       },
       "Newtonsoft.Json/6.0.6": {
@@ -5247,6 +5265,15 @@
           "lib/net45/MimeKit.dll": {}
         }
       },
+      "NDatabase/3.8.0": {
+        "type": "package",
+        "compile": {
+          "lib/net45/NDatabase3.dll": {}
+        },
+        "runtime": {
+          "lib/net45/NDatabase3.dll": {}
+        }
+      },
       "Newtonsoft.Json/6.0.6": {
         "type": "package",
         "compile": {
@@ -6755,6 +6782,27 @@
         "MimeKit.nuspec"
       ]
     },
+    "NDatabase/3.8.0": {
+      "type": "package",
+      "sha512": "kcgjxd0rLUbWNuteSaPfB6BaDIK+4ranxeHmxglBumCBHzA91vudbKa5ZxKxQaptQdbgkA8kxrLLfm6/0iXBbg==",
+      "files": [
+        "lib/mono/NDatabase3.dll",
+        "lib/mono/NDatabase3.dll.mdb",
+        "lib/mono/NDatabase3.xml",
+        "lib/net35/NDatabase3.dll",
+        "lib/net35/NDatabase3.pdb",
+        "lib/net35/NDatabase3.xml",
+        "lib/net40/NDatabase3.dll",
+        "lib/net40/NDatabase3.pdb",
+        "lib/net40/NDatabase3.xml",
+        "lib/net45/NDatabase3.dll",
+        "lib/net45/NDatabase3.pdb",
+        "lib/net45/NDatabase3.xml",
+        "NDatabase.3.8.0.nupkg",
+        "NDatabase.3.8.0.nupkg.sha512",
+        "NDatabase.nuspec"
+      ]
+    },
     "Newtonsoft.Json/6.0.6": {
       "type": "package",
       "sha512": "w26uZNyCG5VeoKiEOJ4+9/o8koSofLKwHl7WLreIcp0U6r57L7WiRXmjp8MTKFw6dYNZ9AE0lw69WYbIhUsU9Q==",
@@ -7601,7 +7649,8 @@
       "Swashbuckle.SwaggerUi >= 6.0.0-rc1-final",
       "Rnwood.SmtpServer >= 1.0.0-*",
       "Microsoft.AspNet.SignalR.Server >= 3.0.0-rc1-final",
-      "MimeKit >= 1.3.0-beta3"
+      "MimeKit >= 1.3.0-beta3",
+      "NDatabase >= 3.8.0"
     ],
     "DNX,Version=v4.5.1": [
       "fx/System.ServiceProcess >= 4.0.0",

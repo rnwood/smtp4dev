@@ -1,4 +1,6 @@
-﻿using Rnwood.SmtpServer;
+﻿using NDatabase;
+using NDatabase.Api;
+using Rnwood.SmtpServer;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -11,25 +13,18 @@ namespace Rnwood.Smtp4dev.Model
 {
     public class MessageStore : IMessageStore
     {
-        public MessageStore(DirectoryInfo directory)
+        public MessageStore(FileInfo file)
         {
-            _directory = directory;
-
-            if (!_directory.Exists)
-            {
-                _directory.Create();
-            }
+            _database = OdbFactory.Open(file.FullName);
         }
 
-        private DirectoryInfo _directory;
-
-        private ConcurrentQueue<ISmtp4devMessage> _messages = new ConcurrentQueue<ISmtp4devMessage>();
+        private IOdb _database;
 
         public IEnumerable<ISmtp4devMessage> Messages
         {
             get
             {
-                return _messages.ToList();
+                return _database.QueryAndExecute<ISmtp4devMessage>();
             }
         }
 
@@ -37,17 +32,10 @@ namespace Rnwood.Smtp4dev.Model
 
         public void AddMessage(ISmtp4devMessage message)
         {
-            _messages.Enqueue(message);
+            _database.Store(message);
+            _database.Commit();
+
             MessageAdded?.Invoke(this, new Smtp4devMessageEventArgs(message));
-        }
-
-        public ISmtp4devMessage CreateMessage(IConnection connection)
-        {
-            Guid id = Guid.NewGuid();
-
-            string fileName = Path.Combine(_directory.FullName, id.ToString() + ".msg");
-
-            return new Smtp4devMessage(connection.Session, id, new FileInfo(fileName));
         }
     }
 }

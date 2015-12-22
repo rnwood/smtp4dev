@@ -7,13 +7,20 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Model
 {
-    internal class Smtp4devMessage : FileMessage, ISmtp4devMessage
+    internal class Smtp4devMessage : MemoryMessage, ISmtp4devMessage
     {
-        internal Smtp4devMessage(ISession session, Guid id, FileInfo file) : base(file, true)
+        private Smtp4devMessage(Guid id)
         {
             Id = id;
         }
 
         public Guid Id { get; private set; }
+
+        public new class Builder : MemoryMessage.Builder
+        {
+            public Builder() : base(new Smtp4devMessage(Guid.NewGuid()))
+            {
+            }
+        }
     }
 }

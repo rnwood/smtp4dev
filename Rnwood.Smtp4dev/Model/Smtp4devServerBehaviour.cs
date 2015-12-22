@@ -13,15 +13,13 @@ namespace Rnwood.Smtp4dev.Model
 {
     internal class Smtp4devServerBehaviour : IServerBehaviour
     {
-        internal Smtp4devServerBehaviour(Settings settings, Action<ISmtp4devMessage> messageRecievedHandler, Func<IConnection, IMessageBuilder> createMessageHandler)
+        internal Smtp4devServerBehaviour(Settings settings, Action<ISmtp4devMessage> messageRecievedHandler)
         {
             _settings = settings;
             _messageReceivedHandler = messageRecievedHandler;
-            _createMessageHandler = createMessageHandler;
         }
 
         private Action<ISmtp4devMessage> _messageReceivedHandler;
-        private Func<IConnection, IMessageBuilder> _createMessageHandler;
         private Settings _settings;
 
         public string DomainName
@@ -102,7 +100,7 @@ namespace Rnwood.Smtp4dev.Model
 
         public IMessageBuilder OnCreateNewMessage(IConnection connection)
         {
-            return _createMessageHandler(connection);
+            return new Smtp4devMessage.Builder();
         }
 
         public IEditableSession OnCreateNewSession(IConnection connection, IPAddress clientAddress, DateTime startDate)
