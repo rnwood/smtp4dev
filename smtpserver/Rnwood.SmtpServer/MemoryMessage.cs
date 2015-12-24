@@ -55,7 +55,7 @@ namespace Rnwood.SmtpServer
 
         public Stream GetData()
         {
-            return new MemoryStream(Data, false);
+            return new MemoryStream(Data ?? new byte[0], false);
         }
 
         public class Builder : IMessageBuilder
@@ -183,7 +183,7 @@ namespace Rnwood.SmtpServer
                 }
             }
 
-            public IMessage ToMessage()
+            public virtual IMessage ToMessage()
             {
                 return _message;
             }

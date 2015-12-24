@@ -9,5 +9,7 @@ namespace Rnwood.Smtp4dev.Model
     public interface ISmtp4devMessage : IMessage
     {
         Guid Id { get; }
+
+        string Subject { get; }
     }
 }

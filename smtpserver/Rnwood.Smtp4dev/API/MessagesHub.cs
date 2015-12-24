@@ -1,4 +1,6 @@
 ﻿using Microsoft.AspNet.SignalR;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.PlatformAbstractions;
 using Rnwood.Smtp4dev.Model;
 using System;
 using System.Collections.Generic;
@@ -9,21 +11,8 @@ namespace Rnwood.Smtp4dev.API
 {
     public class MessagesHub : Hub
     {
-        public MessagesHub(IMessageStore messageStore)
+        public MessagesHub()
         {
-            messageStore.MessageAdded += (s, ea) => { OnMessageAdded(ea.Message); };
-
-            messageStore.MessageDeleted += (s, ea) => { OnMessageDeleted(ea.Message); };
-        }
-
-        private void OnMessageAdded(ISmtp4devMessage message)
-        {
-            Clients.All.messageAdded(message.Id);
-        }
-
-        private void OnMessageDeleted(ISmtp4devMessage message)
-        {
-            Clients.All.messageDeleted(message.Id);
         }
     }
 }

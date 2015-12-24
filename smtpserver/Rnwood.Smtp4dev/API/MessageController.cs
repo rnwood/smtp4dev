@@ -22,12 +22,18 @@ namespace Rnwood.Smtp4dev.Controllers.API
 
         // GET: api/values
         [HttpGet]
-        public IEnumerable<Message> Get()
+        public IEnumerable<Message> Get(string searchTerm)
         {
-            return _messageStore.Messages.Select(m => new Message(m));
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                return _messageStore.SearchMessages(searchTerm).Select(m => new Message(m));
+            }
+            else {
+                return _messageStore.Messages.Select(m => new Message(m));
+            }
         }
 
-        [HttpDelete]
+        [HttpDelete("{id}")]
         public void Delete(Guid id)
         {
             ISmtp4devMessage message = _messageStore.Messages.FirstOrDefault(m => m.Id == id);
@@ -36,6 +42,12 @@ namespace Rnwood.Smtp4dev.Controllers.API
             {
                 _messageStore.DeleteMessage(message);
             }
+        }
+
+        [HttpDelete("all")]
+        public void DeleteAll()
+        {
+            _messageStore.DeleteAllMessages();
         }
     }
 }

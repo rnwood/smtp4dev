@@ -15,5 +15,9 @@ namespace Rnwood.Smtp4dev.Model
         void AddMessage(ISmtp4devMessage message);
 
         void DeleteMessage(ISmtp4devMessage message);
+
+        IEnumerable<ISmtp4devMessage> SearchMessages(string searchTerm);
+
+        void DeleteAllMessages();
     }
 }

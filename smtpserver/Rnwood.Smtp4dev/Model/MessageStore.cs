@@ -1,5 +1,6 @@
 ﻿using NDatabase;
 using NDatabase.Api;
+using NDatabase.Exceptions;
 using Rnwood.SmtpServer;
 using System;
 using System.Collections.Concurrent;
@@ -27,7 +28,7 @@ namespace Rnwood.Smtp4dev.Model
             {
                 lock (_syncRoot)
                 {
-                    return _database.QueryAndExecute<ISmtp4devMessage>();
+                    return _database.AsQueryable<ISmtp4devMessage>().OrderByDescending(m => m.ReceivedDate);
                 }
             }
         }
@@ -56,6 +57,31 @@ namespace Rnwood.Smtp4dev.Model
             }
 
             MessageAdded?.Invoke(this, new Smtp4devMessageEventArgs(message));
+        }
+
+        public IEnumerable<ISmtp4devMessage> SearchMessages(string searchTerm)
+        {
+            lock (_syncRoot)
+            {
+                return _database.AsQueryable<ISmtp4devMessage>()
+                    .Where(m =>
+                        (m.Subject != null && m.Subject.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) > -1)
+                        || m.To.Any(to => to.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) > -1)
+                        || m.From.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) > -1
+                    )
+                    .OrderByDescending(m => m.ReceivedDate);
+            }
+        }
+
+        public void DeleteAllMessages()
+        {
+            lock (_syncRoot)
+            {
+                foreach (ISmtp4devMessage message in Messages)
+                {
+                    DeleteMessage(message);
+                }
+            }
         }
     }
 }
