@@ -1,42 +1,68 @@
-﻿define(["rest", "knockout", "moment", "rest/interceptor/mime", "rest/interceptor/entity"], function (rest, ko, moment, mime, entity) {
-    client = rest
-    .chain(mime, { mime: 'application/json' })
-    .chain(entity);
+﻿define(["text!/components/messagelist/messagelist.html", "api", "knockout", "moment", "/signalr/hubs", "toastr"],
+    function (template, api, ko, moment, jQuery, toastr) {
 
-    return function (options) {
-        var self = this;
-        self.options = options;
 
-        function MessageViewModel(data) {
+        function MessageListViewModel(options) {
             var self = this;
-            $.extend(self, data);
-
-            self.ReceivedDateString = moment(data.ReceivedDate).format('L LT');
-
-            self.view = function () {
-                location.href = "/Messages/View/" + self.Id;
-            };
-
-            self.delete = function () {
-                $.ajax()
-            };
-        }
-
-        self.messages = ko.observableArray([]);
-
-        function refresh() {
-            client('/api/message').done(function (data) {
-                self.messages.removeAll();
-                data.forEach(function (element) {
-                    self.messages.push(new MessageViewModel(element));
-                });
+            self.showActions = options.showActions || false;
+            self.searchTerm = ko.observable("");
+            self.searchTerm.extend({ rateLimit: 500, method: "notifyWhenChangesStop" });
+            self.searchTerm.subscribe(function () {
+                self.loadMessages();
             });
-        }
 
-        refresh();
+            self.messages = ko.observableArray();
 
-        var hub = $.connection.messagesHub;
-        hub.client.messageAdded = refresh;
-        hub.client.messageDeleted = refresh;
+            function MessageViewModel(data) {
+                var self = this;
+                $.extend(self, data);
+
+                self.ReceivedDateString = moment(data.ReceivedDate).format('L LT');
+
+                self.view = function () {
+                    location.href = "/Messages/View/" + self.Id;
+                };
+
+                self.deleteMessage = function () {
+                    api({ path: "/api/message/{id}", method: "DELETE", params: { id: self.Id } })
+                        .then(
+                            function () { },
+                            function (response) {
+                                toastr.error("Failed to delete message.");
+                            }
+                        );
+                };
+            }
+
+            self.loadMessages = function() {
+                api({ path: '/api/message', params: { searchTerm: self.searchTerm() } }).then(function (data) {
+                    self.messages.removeAll();
+                    data.forEach(function (element) {
+                        self.messages.push(new MessageViewModel(element));
+                    });
+                });
+            }
+
+            self.deleteAll = function () {
+                api({ path: "/api/message/all", method: "DELETE" }).then(function () {
+                },function (response) {
+                    toastr.error("Failed to delete all messages.");
+                });
+            }
+
+            var hub = jQuery.connection.messagesHub;
+            hub.client.messageAdded = self.loadMessages;
+            hub.client.messageDeleted = self.loadMessages;
+
+            jQuery.connection.hub.start();
+
+            self.loadMessages();
+        };
+
+
+        return {
+            viewModel: { viewModel: MessageListViewModel },
+            template: template
+        };
     }
-});
+);

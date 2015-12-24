@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.AspNet.SignalR.Hubs;
+using Microsoft.Extensions.DependencyInjection;
+using Rnwood.Smtp4dev.API;
 using System;
 using System.Collections.Generic;
 using System.IO;

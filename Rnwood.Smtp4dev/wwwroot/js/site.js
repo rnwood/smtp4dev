@@ -1,22 +1,51 @@
 ﻿requirejs.config({
-    baseUrl: 'lib',
+    baseUrl: '/lib',
+    paths: {
+        'bootstrap': 'bootstrap/dist/js/bootstrap.min',
+        'jquery': 'jquery/dist/jquery.min',   
+        'text': 'text/text' ,
+        'knockout': 'knockoutjs/dist/knockout' ,
+        'moment': 'moment/min/moment-with-locales' ,
+        'toastr': 'toastr/toastr' ,
+        'jquery/signalr': 'signalr/jquery.signalR.min' ,
+        'component/messagelist': '/components/messagelist/messagelist',
+        'api': "/js/api"
+
+    },
     packages: [
-        { name: 'text', location: 'text', main: 'text' },
         { name: 'when', location: 'when', main: 'when' },
         { name: 'rest', location: 'rest', main: 'browser' },
-        { name: 'knockout', location: 'knockoutjs/dist', main: 'knockout' },
-        { name: 'moment', location: 'moment/min', main: 'moment-with-locales' },
-        { name: 'component/messagelist', location: '/components/messagelist', main: 'messagelist' }
-    ]
+],
+    
+shim: {
+    '/signalr/hubs': {
+        deps: ['jquery/signalr'],
+        exports: 'jQuery'
+    },
+    'jquery': {
+            exports: 'jQuery'
+    },
+    'jquery/signalr': {
+            deps: ['jquery'],            
+            exports: 'jQuery'
+    },
+    'bootstrap':{
+            deps: ['jquery']
+    }
+}
+
+
 });
+
+require(["bootstrap"]);
 
 require(["knockout"], function (ko) {
     ko.components.register('messagelist', {
-        viewModel: { require: 'component/messagelist' },
-        template: { require: 'text!/components/messagelist/messagelist.html' }
+        require: "component/messagelist"
     });
 
-    $.connection.hub.start();
 
     ko.applyBindings({});
 });
+
+

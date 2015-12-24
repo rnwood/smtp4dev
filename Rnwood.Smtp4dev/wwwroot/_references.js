@@ -1,15 +1,4 @@
-﻿/// <autosync enabled="true" />
+﻿/// <autosync enabled="false" />
 /// <reference path="../gulpfile.js" />
-/// <reference path="components/messagelist/messagelist.js" />
+/// <reference path="lib/requirejs/require.js" data-main="js/site.js" start-page="/Index.html" />
 /// <reference path="js/site.js" />
-/// <reference path="lib/bootstrap/dist/js/bootstrap.js" />
-/// <reference path="lib/jquery/dist/jquery.js" />
-/// <reference path="lib/jquery-validation/dist/jquery.validate.js" />
-/// <reference path="lib/jquery-validation-unobtrusive/jquery.validate.unobtrusive.js" />
-/// <reference path="lib/knockoutjs/dist/knockout.js" />
-/// <reference path="lib/moment/moment.js" />
-/// <reference path="lib/requirejs/require.js" />
-/// <reference path="lib/rest/browser.js" />
-/// <reference path="lib/signalr/jquery.signalR.js" />
-/// <reference path="lib/text/text.js" />
-/// <reference path="lib/when/when.js" />
