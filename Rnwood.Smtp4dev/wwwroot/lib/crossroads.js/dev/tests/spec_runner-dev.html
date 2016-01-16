@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <title>DEV | Crossroads.js | Jasmine Test Runner</title>
+        <link rel="stylesheet" href="lib/jasmine/jasmine.css">
+        <script src="lib/jasmine/jasmine.js"></script>
+        <script src="lib/jasmine/jasmine-html.js"></script>
+
+        <script src="../../dev/lib/signals.js"></script>
+        <script src="../../dev/src/intro.js"></script>
+        <script src="../../dev/src/crossroads.js"></script>
+        <script src="../../dev/src/route.js"></script>
+        <script src="../../dev/src/pattern_lexer.js"></script>
+
+        <script src="spec/lexer.spec.js"></script>
+        <script src="spec/add.spec.js"></script>
+        <script src="spec/remove.spec.js"></script>
+        <script src="spec/match.spec.js"></script>
+        <script src="spec/parse.spec.js"></script>
+        <script src="spec/create.spec.js"></script>
+        <script src="spec/signals.spec.js"></script>
+        <script src="spec/toString.spec.js"></script>
+        <script src="spec/interpolate.spec.js"></script>
+        <script src="spec/pipe.spec.js"></script>
+        <script src="spec/dispose.spec.js"></script>
+    </head>
+    <body>
+        <script>
+            //run specs and add reporter
+            var reporter = new jasmine.HtmlReporter,
+                env = jasmine.getEnv();
+            env.specFilter = function(spec){
+                return reporter.specFilter(spec)
+            };
+            env.addReporter(reporter);
+            env.execute();
+        </script>
+    </body>
+</html>

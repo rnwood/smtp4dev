@@ -1,10 +1,12 @@
-﻿define(['rest', "rest/interceptor/mime", "rest/interceptor/entity", "rest/interceptor/errorCode"], function (rest, mime, entity, errorCode) {
+﻿define(['js-data', 'js-data-http'], function (jsdata, DSHttpAdapter) {
+    var store = jsdata.createStore();
 
-    var api = rest
-    .chain(errorCode)
-    .chain(mime, { mime: 'application/json' })
-    .chain(entity);
+    var adapter = new DSHttpAdapter({ basePath: '/api' });
+    store.registerAdapter('http', adapter, { default: true });
 
-    return api;
+    var Server = store.defineResource({ name: 'server' });
 
+    var Message = store.defineResource({ name: 'message' });
+
+    return { Server: Server, Message: Message };
 });

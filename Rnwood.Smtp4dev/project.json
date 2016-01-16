@@ -1,4 +1,4 @@
-﻿{
+{
   "version": "1.0.0-*",
   "compilationOptions": {
     "emitEntryPoint": true
@@ -23,9 +23,9 @@
     "Swashbuckle.SwaggerGen": "6.0.0-rc1-final",
     "Swashbuckle.SwaggerUi": "6.0.0-rc1-final",
     "Rnwood.SmtpServer": "1.0.0-*",
-    "Microsoft.AspNet.SignalR.Server": "3.0.0-rc1-final",
     "MimeKit": "1.3.0-beta3",
-    "NDatabase": "3.8.0"
+    "NDatabase": "3.8.0",
+    "Microsoft.AspNet.Mvc.WebApiCompatShim": "6.0.0-rc1-final"
   },
 
   "commands": {

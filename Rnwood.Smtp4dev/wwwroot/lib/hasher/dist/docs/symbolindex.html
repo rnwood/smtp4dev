@@ -1,0 +1,278 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+        "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+		
+		<title>JsDoc Reference - Index</title>
+		<meta name="generator" content="JsDoc Toolkit" />
+		
+        <link rel="stylesheet" href="static/default.css" type="text/css" media="screen" charset="utf-8" />
+
+        <style>
+            #symbolFilter {
+                margin-top: 2em;
+                margin-bottom: 1em;
+            }
+
+            .hidden {
+                visibility: hidden;
+                display: none;
+            }
+        </style>
+
+        <script>
+            var overview, filterField;
+
+            function filterOverview() {
+                var i, name,
+                    lst = overview.getElementsByTagName('tr'),
+                    regex = filterField.value ? ('^(' + filterField.value + ')') : '.*';
+
+                regex = new RegExp(regex, 'i');
+                for (i = 0; i < lst.length; i++) {
+                    name = lst[i].getElementsByTagName('td')[0].innerHTML;
+                    if (regex.test(name)) {
+                        lst[i].className = 'symbolEntry';
+                    } else {
+                        lst[i].className = 'symbolEntry hidden';
+                    }
+                }
+            }
+
+            var init = function() {
+                overview = window.document.getElementById('symbolOverview');
+                filterField = window.document.getElementById('symbolFilter');
+
+                filterField.addEventListener('change', filterOverview, false);
+                filterOverview();
+
+                delete init;
+            }
+        </script>
+	</head>
+	
+	<body onload="init()">
+		<div id="header">
+</div>
+
+		<div id="index">
+            <div id="docs">
+                
+            </div>
+			
+<h2>Index</h2>
+<ul class="classList">
+  <li><a href="files.html">File Index</a></li>
+  <li><a href="index.html">Class Index</a></li>
+  <li><a href="symbolindex.html">Symbol Index</a></li>
+</ul>
+<h2>Classes</h2>
+<ul class="classList">
+	
+	<li><i><a href="symbols/_global_.html">_global_</a></i></li>
+	
+	<li><a href="symbols/hasher.html">hasher</a></li>
+	
+</ul>
+
+		</div>
+		
+		<div id="content">
+            <h1 id="classTitle">Symbol Index</h1>
+            <div>
+                <input id="symbolFilter" type="text" /><br />
+                <table id="symbolOverview">
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">appendHash</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.appendHash">hasher.appendHash</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">changed</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.changed">hasher.changed</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">dispose</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.dispose">hasher.dispose</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">getBaseURL</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.getBaseURL">hasher.getBaseURL</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">getHash</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.getHash">hasher.getHash</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">getHashAsArray</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.getHashAsArray">hasher.getHashAsArray</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">getURL</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.getURL">hasher.getURL</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">hasher</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html">hasher</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">init</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.init">hasher.init</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">initialized</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.initialized">hasher.initialized</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">isActive</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.isActive">hasher.isActive</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">prependHash</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.prependHash">hasher.prependHash</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">raw</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.raw">hasher.raw</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">replaceHash</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.replaceHash">hasher.replaceHash</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">separator</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.separator">hasher.separator</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">setHash</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.setHash">hasher.setHash</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">stop</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.stop">hasher.stop</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">stopped</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.stopped">hasher.stopped</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">toString</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.toString">hasher.toString</a>
+                        
+                      </td>
+                    </tr>
+                  
+                    <tr class="symbolEntry">
+                      <td class="symbolName">VERSION</td>
+                      <td>
+                        
+                          <a href="symbols/hasher.html#.VERSION">hasher.VERSION</a>
+                        
+                      </td>
+                    </tr>
+                  
+                </table>
+            </div>
+            <hr />
+		</div>
+		<div class="fineprint" style="clear:both;text-align:center">
+			
+			Documentation generated by <a href="http://code.google.com/p/jsdoc-toolkit/" target="_blankt">JsDoc Toolkit</a> 2.4.0 on Mon Nov 11 2013 15:19:04 GMT-0200 (BRST)
+			 | template based on Steffen Siering <a href="http://github.com/urso/jsdoc-simple">jsdoc-simple</a>.
+		</div>
+	</body>
+</html>
+

@@ -11,8 +11,10 @@ namespace Rnwood.Smtp4dev.Model
         public Settings()
         {
             Port = 25;
+            IsEnabled = true;
         }
 
+        public bool IsEnabled { get; set; }
         public int Port { get; set; }
     }
 }

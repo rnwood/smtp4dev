@@ -17,6 +17,10 @@ namespace Rnwood.Smtp4dev.Model
         public void Save(Settings settings)
         {
             _settings = settings;
+
+            Saved?.Invoke(this, EventArgs.Empty);
         }
+
+        public event EventHandler Saved;
     }
 }

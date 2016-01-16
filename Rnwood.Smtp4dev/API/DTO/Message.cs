@@ -13,7 +13,7 @@ namespace Rnwood.Smtp4dev.Controllers.API.DTO
     {
         private ISmtp4devMessage _message;
 
-        internal Message(ISmtp4devMessage message)
+        public Message(ISmtp4devMessage message)
         {
             _message = message;
 
@@ -22,23 +22,23 @@ namespace Rnwood.Smtp4dev.Controllers.API.DTO
                 try
                 {
                     MimeMessage mimeMessage = MimeMessage.Load(messageData);
-                    Subject = mimeMessage.Subject;
+                    subject = mimeMessage.Subject;
                 }
                 catch (FormatException e)
                 {
-                    Subject = "";
+                    subject = "";
                 }
             }
         }
 
-        public DateTime ReceivedDate { get { return _message.ReceivedDate; } }
+        public DateTime receivedDate { get { return _message.ReceivedDate; } }
 
-        public string From { get { return _message.From; } }
+        public string from { get { return _message.From; } }
 
-        public string[] To { get { return _message.To; } }
+        public string[] to { get { return _message.To; } }
 
-        public string Subject { get; private set; }
+        public string subject { get; private set; }
 
-        public Guid Id { get { return _message.Id; } }
+        public Guid id { get { return _message.Id; } }
     }
 }

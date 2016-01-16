@@ -25,10 +25,25 @@ namespace Rnwood.SmtpServer
 
         public IServerBehaviour Behaviour { get; private set; }
 
+        private bool _isRunning;
+
         /// <summary>
         /// Gets or sets a value indicating whether the server is currently running.
         /// </summary>
-        public bool IsRunning { get; private set; }
+        public bool IsRunning
+        {
+            get
+            {
+                return _isRunning;
+            }
+            private set
+            {
+                _isRunning = value;
+                IsRunningChanged?.Invoke(this, EventArgs.Empty);
+            }
+        }
+
+        public event EventHandler IsRunningChanged;
 
         /// <summary>
         /// Runs the server synchronously. This method blocks until the server is stopped.
