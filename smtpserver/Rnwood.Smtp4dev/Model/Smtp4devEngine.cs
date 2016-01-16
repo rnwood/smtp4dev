@@ -1,4 +1,5 @@
-﻿using Rnwood.SmtpServer;
+﻿using Rnwood.Smtp4dev.API;
+using Rnwood.SmtpServer;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
@@ -13,11 +14,20 @@ namespace Rnwood.Smtp4dev.Model
         private ISettingsStore _settingsStore;
         private IMessageStore _messageStore;
 
+        public event EventHandler StateChanged;
+
         public Smtp4devEngine(ISettingsStore settingsStore, IMessageStore messageStore)
         {
             _settingsStore = settingsStore;
+            _settingsStore.Saved += OnSettingsChanged;
             _messageStore = messageStore;
+
             TryStart();
+        }
+
+        private void OnSettingsChanged(object sender, EventArgs e)
+        {
+            ApplySettings();
         }
 
         public Exception ServerError { get; set; }
@@ -26,15 +36,25 @@ namespace Rnwood.Smtp4dev.Model
         {
             get
             {
-                return _server.IsRunning;
+                return _server != null && _server.IsRunning;
             }
         }
 
-        public void ApplySettings(Settings settings)
+        private void ApplySettings()
         {
-            if (_server.IsRunning)
+            if (_server != null)
             {
-                Stop();
+                if (_server.IsRunning)
+                {
+                    Stop();
+                }
+
+                if (_server != null)
+                {
+                    _server.IsRunningChanged -= OnServerStateChanged;
+                }
+
+                _server = null;
             }
 
             TryStart();
@@ -45,20 +65,32 @@ namespace Rnwood.Smtp4dev.Model
             ServerError = null;
             Settings settings = _settingsStore.Load();
 
-            try
+            if (settings.IsEnabled)
             {
-                _server = new Server(new Smtp4devServerBehaviour(settings, OnMessageReceived));
-                _server.Start();
-            }
-            catch (Exception e)
-            {
-                ServerError = e;
+                try
+                {
+                    _server = new Server(new Smtp4devServerBehaviour(settings, OnMessageReceived));
+                    _server.IsRunningChanged += OnServerStateChanged;
+                    _server.Start();
+                }
+                catch (Exception e)
+                {
+                    ServerError = e;
+                }
             }
         }
 
         private void Stop()
         {
-            _server.Stop(true);
+            if (_server != null)
+            {
+                _server.Stop(true);
+            }
+        }
+
+        private void OnServerStateChanged(object sender, EventArgs eventArgs)
+        {
+            StateChanged?.Invoke(this, EventArgs.Empty);
         }
 
         private void OnMessageReceived(ISmtp4devMessage message)

@@ -3,7 +3,6 @@ using Microsoft.AspNet.Hosting;
 using Microsoft.AspNet.Mvc.Infrastructure;
 using Microsoft.AspNet.Mvc.Razor;
 using Microsoft.AspNet.Routing;
-using Microsoft.AspNet.SignalR.Infrastructure;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
@@ -61,8 +60,6 @@ namespace Rnwood.Smtp4dev
                 });
             });
 
-            services.AddSignalR();
-
             services.UseSmtp4dev();
         }
 
@@ -93,20 +90,12 @@ namespace Rnwood.Smtp4dev
             app.UseSwaggerGen();
             app.UseSwaggerUi();
 
-            app.UseSignalR();
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
-                    template: "{controller=Messages}/{action=Index}/{id?}");
+                    template: "{controller=App}/{action=Index}/{id?}");
             });
-
-            IMessageStore messageStore = app.ApplicationServices.GetRequiredService<IMessageStore>();
-            dynamic clients = app.ApplicationServices.GetRequiredService<IConnectionManager>().GetHubContext<MessagesHub>().Clients.All;
-
-            messageStore.MessageAdded += (s, ea) => { clients.messageAdded(ea.Message.Id); };
-            messageStore.MessageDeleted += (s, ea) => { clients.messageDeleted(ea.Message.Id); };
         }
     }
 }

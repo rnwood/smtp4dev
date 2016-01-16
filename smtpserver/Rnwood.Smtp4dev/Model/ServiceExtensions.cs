@@ -1,5 +1,4 @@
-﻿using Microsoft.AspNet.SignalR.Hubs;
-using Microsoft.Extensions.DependencyInjection;
+﻿using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.API;
 using System;
 using System.Collections.Generic;
@@ -23,8 +22,7 @@ namespace Rnwood.Smtp4dev.Model
             MessageStore messageStore = new MessageStore(dbFile);
             services.AddInstance<IMessageStore>(messageStore);
 
-            Smtp4devEngine server = new Smtp4devEngine(settingsStore, messageStore);
-            services.AddInstance<ISmtp4devEngine>(server);
+            services.AddSingleton<ISmtp4devEngine, Smtp4devEngine>();
         }
     }
 }

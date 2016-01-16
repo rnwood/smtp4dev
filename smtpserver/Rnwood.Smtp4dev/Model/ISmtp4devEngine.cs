@@ -8,10 +8,10 @@ namespace Rnwood.Smtp4dev.Model
 {
     public interface ISmtp4devEngine
     {
-        void ApplySettings(Settings settings);
-
         bool IsRunning { get; }
 
         Exception ServerError { get; }
+
+        event EventHandler StateChanged;
     }
 }
