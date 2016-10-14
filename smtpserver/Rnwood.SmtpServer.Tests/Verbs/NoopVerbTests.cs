@@ -1,12 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestClass]
+    
     public class NoopVerbTests
     {
-        [TestMethod]
+        [Fact]
         public void Noop()
         {
             Mocks mocks = new Mocks();

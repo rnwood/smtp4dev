@@ -86,14 +86,17 @@ namespace Rnwood.SmtpServer
             {
                 public event EventHandler Closing;
 
-                public override void Close()
+                protected override void Dispose(bool disposing)
                 {
-                    if (Closing != null)
+                    if (disposing)
                     {
-                        Closing(this, EventArgs.Empty);
+                        if (Closing != null)
+                        {
+                            Closing(this, EventArgs.Empty);
+                        }
                     }
 
-                    base.Close();
+                    base.Dispose(disposing);
                 }
             }
 

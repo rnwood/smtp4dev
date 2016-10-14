@@ -1,14 +1,13 @@
 ﻿#region
 
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using System.Net.Sockets;
 using System.Threading;
+using Xunit;
 
 #endregion
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
     public class ServerTests
     {
         private Server StartServer()
@@ -23,67 +22,50 @@ namespace Rnwood.SmtpServer.Tests
             return new DefaultServer(Ports.AssignAutomatically);
         }
 
-        [TestMethod]
-        public void Run_Blocks()
-        {
-            Server server = NewServer();
-            bool shouldBeRunning = true;
-            Thread runThread = new Thread(() =>
-                                              {
-                                                  server.Run();
-
-                                                  //If we get here before Stop) is called then fail
-                                                  Assert.IsFalse(shouldBeRunning);
-                                              });
-            runThread.Start();
-
-            while (!server.IsRunning)
-            {
-                //spin!
-            }
-            Assert.IsTrue(runThread.IsAlive);
-            shouldBeRunning = false;
-            server.Stop();
-            runThread.Join();
-        }
-
-        [TestMethod]
+        [Fact]
         public void Start_IsRunning()
         {
             Server server = StartServer();
-            Assert.IsTrue(server.IsRunning);
+            Assert.True(server.IsRunning);
             server.Stop();
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(SocketException))]
+        [Fact]
         public void StartOnInusePort_StartupExceptionThrown()
         {
-            Server server1 = new DefaultServer(Ports.AssignAutomatically);
-            server1.Start();
+            Assert.Throws<SocketException>(() =>
+            {
+                Server server1 = new DefaultServer(Ports.AssignAutomatically);
+                server1.Start();
 
-            Server server2 = new DefaultServer(server1.PortNumber);
-            server2.Start();
-
-            server1.Stop();
+                try
+                {
+                    Server server2 = new DefaultServer(server1.PortNumber);
+                    server2.Start();
+                }
+                finally
+                {
+                    server1.Stop();
+                }
+            });
         }
 
-        [TestMethod]
+        [Fact]
         public void Stop_NotRunning()
         {
             Server server = StartServer();
             server.Stop();
-            Assert.IsFalse(server.IsRunning);
+            Assert.False(server.IsRunning);
         }
 
-        [TestMethod]
-        public void Start_CanConnect()
+        [Fact]
+        public async void Start_CanConnect()
         {
             Server server = StartServer();
 
             TcpClient client = new TcpClient();
-            client.Connect("localhost", server.PortNumber);
-            client.Close();
+            await client.ConnectAsync("localhost", server.PortNumber);
+            client.Dispose();
 
             server.Stop();
         }

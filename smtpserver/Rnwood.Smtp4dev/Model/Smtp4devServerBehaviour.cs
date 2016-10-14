@@ -56,7 +56,7 @@ namespace Rnwood.Smtp4dev.Model
 
         public Encoding GetDefaultEncoding(IConnection connection)
         {
-            return Encoding.Default;
+            return new ASCIISevenBitTruncatingEncoding();
         }
 
         public IEnumerable<IExtension> GetExtensions(IConnection connection)

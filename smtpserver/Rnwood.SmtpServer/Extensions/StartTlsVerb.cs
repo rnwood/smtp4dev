@@ -22,10 +22,10 @@ namespace Rnwood.SmtpServer.Extensions
             connection.ApplyStreamFilter(stream =>
                                                      {
                                                          SslStream sslStream = new SslStream(stream);
-                                                         sslStream.AuthenticateAsServer(certificate
+                                                         sslStream.AuthenticateAsServerAsync(certificate
                                                              , false,
                                                              SslProtocols.Ssl2 | SslProtocols.Ssl3 | SslProtocols.Tls,
-                                                             false);
+                                                             false).Wait();
                                                          return sslStream;
                                                      });
 

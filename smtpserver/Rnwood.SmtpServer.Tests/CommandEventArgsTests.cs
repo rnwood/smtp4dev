@@ -1,17 +1,17 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
+    
     public class CommandEventArgsTests
     {
-        [TestMethod]
+        [Fact]
         public void Command()
         {
             SmtpCommand command = new SmtpCommand("BLAH");
             CommandEventArgs args = new CommandEventArgs(command);
 
-            Assert.AreSame(command, args.Command);
+            Assert.Same(command, args.Command);
         }
     }
 }

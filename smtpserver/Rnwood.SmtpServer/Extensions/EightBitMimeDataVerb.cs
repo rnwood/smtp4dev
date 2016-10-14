@@ -13,13 +13,13 @@ namespace Rnwood.SmtpServer.Extensions
 
         public void SetParameter(IConnection connection, string key, string value)
         {
-            if (key.Equals("BODY", StringComparison.InvariantCultureIgnoreCase))
+            if (key.Equals("BODY", StringComparison.OrdinalIgnoreCase))
             {
-                if (value.Equals("8BITMIME", StringComparison.InvariantCultureIgnoreCase))
+                if (value.Equals("8BITMIME", StringComparison.CurrentCultureIgnoreCase))
                 {
                     connection.CurrentMessage.EightBitTransport = true;
                 }
-                else if (value.Equals("7BIT", StringComparison.InvariantCultureIgnoreCase))
+                else if (value.Equals("7BIT", StringComparison.OrdinalIgnoreCase))
                 {
                     connection.CurrentMessage.EightBitTransport = false;
                 }
@@ -38,7 +38,7 @@ namespace Rnwood.SmtpServer.Extensions
         {
             if (connection.CurrentMessage != null && connection.CurrentMessage.EightBitTransport)
             {
-                connection.SetReaderEncoding(Encoding.Default);
+                connection.SetReaderEncoding(Encoding.UTF8);
             }
 
             try

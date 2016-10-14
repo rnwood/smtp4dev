@@ -1,8 +1,8 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
+    
     public class MemoryMessageBuilderTests : MessageBuilderTests
     {
         protected override IMessageBuilder GetInstance()

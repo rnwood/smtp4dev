@@ -1,4 +1,4 @@
-using Microsoft.VisualStudio.TestTools.UnitTesting;
+using Xunit;
 using System;
 using System.IO;
 using System.Linq;
@@ -7,7 +7,7 @@ namespace Rnwood.SmtpServer.Tests
 {
     public abstract class MessageBuilderTests
     {
-        [TestMethod]
+        [Fact]
         public void AddTo()
         {
             IMessageBuilder builder = GetInstance();
@@ -15,14 +15,14 @@ namespace Rnwood.SmtpServer.Tests
             builder.To.Add("foo@bar.com");
             builder.To.Add("bar@foo.com");
 
-            Assert.AreEqual(2, builder.To.Count);
-            Assert.AreEqual(builder.To.ElementAt(0), "foo@bar.com");
-            Assert.AreEqual(builder.To.ElementAt(1), "bar@foo.com");
+            Assert.Equal(2, builder.To.Count);
+            Assert.Equal(builder.To.ElementAt(0), "foo@bar.com");
+            Assert.Equal(builder.To.ElementAt(1), "bar@foo.com");
         }
 
         protected abstract IMessageBuilder GetInstance();
 
-        [TestMethod]
+        [Fact]
         public void WriteData_Accepted()
         {
             IMessageBuilder builder = GetInstance();
@@ -42,7 +42,7 @@ namespace Rnwood.SmtpServer.Tests
                 stream.Read(readBytes, 0, readBytes.Length);
             }
 
-            CollectionAssert.AreEqual(writtenBytes, readBytes);
+            Assert.Equal(writtenBytes, readBytes);
         }
     }
 }

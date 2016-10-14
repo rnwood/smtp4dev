@@ -1,44 +1,43 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
     public class ASCIISevenBitTruncatingEncodingTests
     {
-        [TestMethod]
+        [Fact]
         public void GetChars_ASCIIChar_ReturnsOriginal()
         {
             ASCIISevenBitTruncatingEncoding encoding = new ASCIISevenBitTruncatingEncoding();
             char[] chars = encoding.GetChars(new[] { (byte)'a', (byte)'b', (byte)'c' }, 0, 3);
 
-            CollectionAssert.AreEqual(new[] { 'a', 'b', 'c' }, chars);
+            Assert.Equal(new[] { 'a', 'b', 'c' }, chars);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetBytes_ASCIIChar_ReturnsOriginal()
         {
             ASCIISevenBitTruncatingEncoding encoding = new ASCIISevenBitTruncatingEncoding();
             byte[] bytes = encoding.GetBytes(new[] { 'a', 'b', 'c' }, 0, 3);
 
-            CollectionAssert.AreEqual(new[] { (byte)'a', (byte)'b', (byte)'c' }, bytes);
+            Assert.Equal(new[] { (byte)'a', (byte)'b', (byte)'c' }, bytes);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetChars_ExtendedChar_ReturnsTruncated()
         {
             ASCIISevenBitTruncatingEncoding encoding = new ASCIISevenBitTruncatingEncoding();
             char[] chars = encoding.GetChars(new[] { (byte)250 }, 0, 1);
 
-            CollectionAssert.AreEqual(new[] { 'z' }, chars);
+            Assert.Equal(new[] { 'z' }, chars);
         }
 
-        [TestMethod]
+        [Fact]
         public void GetBytes_ExtendedChar_ReturnsTruncated()
         {
             ASCIISevenBitTruncatingEncoding encoding = new ASCIISevenBitTruncatingEncoding();
             byte[] bytes = encoding.GetBytes(new[] { (char)250 }, 0, 1);
 
-            CollectionAssert.AreEqual(new[] { (byte)'z' }, bytes);
+            Assert.Equal(new[] { (byte)'z' }, bytes);
         }
     }
 }

@@ -1,14 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+﻿using Moq;
 using Rnwood.SmtpServer.Extensions.Auth;
 using System;
+using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Extensions.Auth
 {
-    [TestClass]
     public class CramMd5MechanismProcessorTests : AuthMechanismTest
     {
-        [TestMethod]
+        [Fact]
         public void ProcessRepsonse_GetChallenge()
         {
             Mocks mocks = new Mocks();
@@ -18,7 +17,7 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
 
             string expectedResponse = string.Format("{0}.{1}@{2}", FAKERANDOM, FAKEDATETIME, FAKEDOMAIN);
 
-            Assert.AreEqual(AuthMechanismProcessorStatus.Continue, result);
+            Assert.Equal(AuthMechanismProcessorStatus.Continue, result);
             mocks.Connection.Verify(
                     c => c.WriteResponse(
                         It.Is<SmtpResponse>(r =>
@@ -29,27 +28,31 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
                 );
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(SmtpServerException))]
+        [Fact]
         public void ProcessRepsonse_ChallengeReponse_BadFormat()
         {
-            Mocks mocks = new Mocks();
+            Assert.Throws<SmtpServerException>(() =>
+            {
+                Mocks mocks = new Mocks();
 
-            string challenge = string.Format("{0}.{1}@{2}", FAKERANDOM, FAKEDATETIME, FAKEDOMAIN);
+                string challenge = string.Format("{0}.{1}@{2}", FAKERANDOM, FAKEDATETIME, FAKEDOMAIN);
 
-            CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks, challenge);
-            AuthMechanismProcessorStatus result = cramMd5MechanismProcessor.ProcessResponse("BLAH");
+                CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks, challenge);
+                AuthMechanismProcessorStatus result = cramMd5MechanismProcessor.ProcessResponse("BLAH");
+            });
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(BadBase64Exception))]
+        [Fact]
         public void ProcessResponse_Response_BadBase64()
         {
-            Mocks mocks = new Mocks();
+            Assert.Throws<BadBase64Exception>(() =>
+            {
+                Mocks mocks = new Mocks();
 
-            CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks);
-            cramMd5MechanismProcessor.ProcessResponse(null);
-            cramMd5MechanismProcessor.ProcessResponse("rob blah");
+                CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks);
+                cramMd5MechanismProcessor.ProcessResponse(null);
+                cramMd5MechanismProcessor.ProcessResponse("rob blah");
+            });
         }
 
         private const int FAKEDATETIME = 10000;

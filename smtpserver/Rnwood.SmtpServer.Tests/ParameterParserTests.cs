@@ -1,35 +1,35 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
+    
     public class ParameterParserTests
     {
-        [TestMethod]
+        [Fact]
         public void NoParameters()
         {
             ParameterParser parameterParser = new ParameterParser(new string[0]);
 
-            Assert.AreEqual(0, parameterParser.Parameters.Length);
+            Assert.Equal(0, parameterParser.Parameters.Length);
         }
 
-        [TestMethod]
+        [Fact]
         public void SingleParameter()
         {
             ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA");
 
-            Assert.AreEqual(1, parameterParser.Parameters.Length);
-            Assert.AreEqual(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters[0]);
+            Assert.Equal(1, parameterParser.Parameters.Length);
+            Assert.Equal(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters[0]);
         }
 
-        [TestMethod]
+        [Fact]
         public void MultipleParameters()
         {
             ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA", "KEYB=VALUEB");
 
-            Assert.AreEqual(2, parameterParser.Parameters.Length);
-            Assert.AreEqual(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters[0]);
-            Assert.AreEqual(new Parameter("KEYB", "VALUEB"), parameterParser.Parameters[1]);
+            Assert.Equal(2, parameterParser.Parameters.Length);
+            Assert.Equal(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters[0]);
+            Assert.Equal(new Parameter("KEYB", "VALUEB"), parameterParser.Parameters[1]);
         }
     }
 }

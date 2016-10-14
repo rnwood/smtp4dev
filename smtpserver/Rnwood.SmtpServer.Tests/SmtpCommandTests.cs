@@ -1,35 +1,35 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
+    
     public class SmtpCommandTests
     {
-        [TestMethod]
+        [Fact]
         public void Parsing_SingleToken()
         {
             SmtpCommand command = new SmtpCommand("DATA");
-            Assert.IsTrue(command.IsValid);
-            Assert.AreEqual("DATA", command.Verb);
-            Assert.AreEqual("", command.ArgumentsText);
+            Assert.True(command.IsValid);
+            Assert.Equal("DATA", command.Verb);
+            Assert.Equal("", command.ArgumentsText);
         }
 
-        [TestMethod]
+        [Fact]
         public void Parsing_ArgsSeparatedBySpace()
         {
             SmtpCommand command = new SmtpCommand("DATA ARGS");
-            Assert.IsTrue(command.IsValid);
-            Assert.AreEqual("DATA", command.Verb);
-            Assert.AreEqual("ARGS", command.ArgumentsText);
+            Assert.True(command.IsValid);
+            Assert.Equal("DATA", command.Verb);
+            Assert.Equal("ARGS", command.ArgumentsText);
         }
 
-        [TestMethod]
+        [Fact]
         public void Parsing_ArgsSeparatedByColon()
         {
             SmtpCommand command = new SmtpCommand("DATA:ARGS");
-            Assert.IsTrue(command.IsValid);
-            Assert.AreEqual("DATA", command.Verb);
-            Assert.AreEqual("ARGS", command.ArgumentsText);
+            Assert.True(command.IsValid);
+            Assert.Equal("DATA", command.Verb);
+            Assert.Equal("ARGS", command.ArgumentsText);
         }
     }
 }

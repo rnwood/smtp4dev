@@ -1,14 +1,14 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using Moq;
 using Rnwood.SmtpServer.Verbs;
 using System.Text.RegularExpressions;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
+    
     public class ConnectionTests
     {
-        [TestMethod]
+        [Fact]
         public void Process_GreetingWritten()
         {
             Mocks mocks = new Mocks();
@@ -21,7 +21,7 @@ namespace Rnwood.SmtpServer.Tests
             mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.IsRegex("220 .*", RegexOptions.IgnoreCase)));
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_SmtpServerExceptionThrow_ResponseWritten()
         {
             Mocks mocks = new Mocks();
@@ -37,7 +37,7 @@ namespace Rnwood.SmtpServer.Tests
             mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.IsRegex("500 error", RegexOptions.IgnoreCase)));
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_EmptyCommand_NoResponse()
         {
             Mocks mocks = new Mocks();
@@ -51,7 +51,7 @@ namespace Rnwood.SmtpServer.Tests
             mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.Is<string>(s => !s.StartsWith("220 "))), Times.Never());
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_GoodCommand_Processed()
         {
             Mocks mocks = new Mocks();
@@ -66,7 +66,7 @@ namespace Rnwood.SmtpServer.Tests
             mockVerb.Verify(v => v.Process(It.IsAny<IConnection>(), It.IsAny<SmtpCommand>()));
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_BadCommand_500Response()
         {
             Mocks mocks = new Mocks();
@@ -78,7 +78,7 @@ namespace Rnwood.SmtpServer.Tests
             mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.IsRegex("500 .*", RegexOptions.IgnoreCase)));
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_TooManyBadCommands_Disconnected()
         {
             Mocks mocks = new Mocks();
@@ -93,7 +93,7 @@ namespace Rnwood.SmtpServer.Tests
             mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.IsRegex("221 .*", RegexOptions.IgnoreCase)));
         }
 
-        [TestMethod]
+        [Fact]
         public void AbortMessage()
         {
             Mocks mocks = new Mocks();
@@ -102,10 +102,10 @@ namespace Rnwood.SmtpServer.Tests
             connection.NewMessage();
 
             connection.AbortMessage();
-            Assert.IsNull(connection.CurrentMessage);
+            Assert.Null(connection.CurrentMessage);
         }
 
-        [TestMethod]
+        [Fact]
         public void CommitMessage()
         {
             Mocks mocks = new Mocks();
@@ -117,7 +117,7 @@ namespace Rnwood.SmtpServer.Tests
             connection.CommitMessage();
             mocks.Session.Verify(s => s.AddMessage(message));
             mocks.ServerBehaviour.Verify(b => b.OnMessageReceived(connection, message));
-            Assert.IsNull(connection.CurrentMessage);
+            Assert.Null(connection.CurrentMessage);
         }
     }
 }

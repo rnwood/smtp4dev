@@ -46,7 +46,8 @@
 
                 <tbody data-bind="if: messages().length == 0 && !loading() && !error()">
                     <tr>
-                        <td data-bind="attr: {colspan: showActions ? 5 : 4}" class="text-muted text-center">No messages received yet.</td>
+                        <td data-bind="if: !searchTerm;attr: {colspan: showActions ? 5 : 4}" class="text-muted text-center">No messages received yet.</td>
+                        <td data-bind="if: searchTerm;attr: {colspan: showActions ? 5 : 4}" class="text-muted text-center">No messages matching search.</td>
                     </tr>
                 </tbody>
             </table>

@@ -9,7 +9,7 @@ namespace Rnwood.SmtpServer.Verbs
 {
     public class VerbMap : IVerbMap
     {
-        private readonly Dictionary<string, IVerb> _processorVerbs = new Dictionary<string, IVerb>(StringComparer.InvariantCultureIgnoreCase);
+        private readonly Dictionary<string, IVerb> _processorVerbs = new Dictionary<string, IVerb>(StringComparer.CurrentCultureIgnoreCase);
 
         public void SetVerbProcessor(string verb, IVerb verbProcessor)
         {

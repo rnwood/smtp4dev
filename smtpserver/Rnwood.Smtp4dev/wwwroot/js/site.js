@@ -65,6 +65,10 @@ require(["knockout"], function (ko) {
     ko.components.register('busy', {
         require: "/components/busy.js"
     });
+
+    ko.components.register('viewmessageview', {
+        require: "/views/viewmessageview.js"
+    });
 });
 
 /// <reference path=”/Scripts/crossroads/crossroads.js” />
@@ -93,7 +97,8 @@ require(["knockout", "crossroads", "hasher"], function (ko, crossroads, hasher) 
             { url: "", params: { page: "messagesview" } },
             { url: "/messages", params: { page: "messagesview" } },
             { url: "/sessions", params: { page: "sessionsview" } },
-            { url: "/settings", params: { page: "settingsview" } }
+            { url: "/settings", params: { page: "settingsview" } },
+            { url: "/message/{id}", params: { page: "viewmessageview" } }
         ]
     });
 

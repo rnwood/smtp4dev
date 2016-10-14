@@ -1,28 +1,28 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using System;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
+    
     public class SmtpServerExceptionTests
     {
-        [TestMethod]
+        [Fact]
         public void InnerException()
         {
             Exception innerException = new Exception();
 
             SmtpServerException e = new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Blah"), innerException);
 
-            Assert.AreSame(innerException, e.InnerException);
+            Assert.Same(innerException, e.InnerException);
         }
 
-        [TestMethod]
+        [Fact]
         public void SmtpResponse()
         {
             SmtpResponse smtpResponse = new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Blah");
             SmtpServerException e = new SmtpServerException(smtpResponse);
 
-            Assert.AreSame(smtpResponse, e.SmtpResponse);
+            Assert.Same(smtpResponse, e.SmtpResponse);
         }
     }
 }

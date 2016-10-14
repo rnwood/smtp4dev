@@ -1,11 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestClass]
+    
     public class HeloVerbTests
     {
-        [TestMethod]
+        [Fact]
         public void SayHelo()
         {
             Mocks mocks = new Mocks();
@@ -17,7 +17,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.Session.VerifySet(s => s.ClientName = "foo.blah");
         }
 
-        [TestMethod]
+        [Fact]
         public void SayHeloTwice_ReturnsError()
         {
             Mocks mocks = new Mocks();
@@ -29,7 +29,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
         }
 
-        [TestMethod]
+        [Fact]
         public void SayHelo_NoName()
         {
             Mocks mocks = new Mocks();

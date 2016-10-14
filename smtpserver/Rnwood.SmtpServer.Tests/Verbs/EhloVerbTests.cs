@@ -1,13 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using Moq;
 using Rnwood.SmtpServer.Extensions;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestClass]
+    
     public class EhloVerbTests
     {
-        [TestMethod]
+        [Fact]
         public void Process_RespondsWith250()
         {
             Mocks mocks = new Mocks();
@@ -28,7 +28,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_NoArguments_Accepted()
         {
             Mocks mocks = new Mocks();
@@ -39,7 +39,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.Session.VerifySet(s => s.ClientName = "");
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_RecordsClientName()
         {
             Mocks mocks = new Mocks();
@@ -49,7 +49,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.Session.VerifySet(s => s.ClientName = "foobar");
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_RespondsWithExtensionKeywords()
         {
             Mocks mocks = new Mocks();
@@ -75,7 +75,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
                 )));
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_SaidHeloAlready_Allowed()
         {
             Mocks mocks = new Mocks();

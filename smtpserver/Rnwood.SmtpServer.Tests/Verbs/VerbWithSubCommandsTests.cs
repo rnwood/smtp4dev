@@ -1,13 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using Moq;
 using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestClass]
+    
     public class VerbWithSubCommandsTests
     {
-        [TestMethod]
+        [Fact]
         public void Process_RegisteredSubCommand_Processed()
         {
             Mocks mocks = new Mocks();
@@ -21,7 +21,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             verb.Verify(v => v.Process(mocks.Connection.Object, new SmtpCommand("SUBCOMMAND1")));
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_UnregisteredSubCommand_ErrorResponse()
         {
             Mocks mocks = new Mocks();

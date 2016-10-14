@@ -1,4 +1,4 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using Moq;
 using Rnwood.SmtpServer.Extensions;
 using System;
@@ -9,10 +9,10 @@ using System.Text;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestClass]
+    
     public class StartTlsVerbTests
     {
-        [TestMethod]
+        [Fact]
         public void NoCertificateAvailable_ReturnsErrorResponse()
         {
             Mocks mocks = new Mocks();

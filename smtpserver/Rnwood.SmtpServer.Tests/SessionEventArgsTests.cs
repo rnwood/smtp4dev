@@ -1,18 +1,18 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
+    
     public class SessionEventArgsTests
     {
-        [TestMethod]
+        [Fact]
         public void Session()
         {
             Mocks mocks = new Mocks();
 
             SessionEventArgs s = new SessionEventArgs(mocks.Session.Object);
 
-            Assert.AreEqual(s.Session, mocks.Session.Object);
+            Assert.Equal(s.Session, mocks.Session.Object);
         }
     }
 }

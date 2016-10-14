@@ -13,16 +13,12 @@ namespace Rnwood.Smtp4dev.Model
         public static void UseSmtp4dev(this IServiceCollection services)
         {
             SettingsStore settingsStore = new SettingsStore();
-            services.AddInstance<ISettingsStore>(settingsStore);
+            services.AddSingleton<ISettingsStore>(settingsStore);
 
-            string dbDirectory = Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "Smtp4dev");
-            Directory.CreateDirectory(dbDirectory);
-            FileInfo dbFile = new FileInfo(Path.Combine(dbDirectory, "Smtp4dev.db"));
+            MessageStore messageStore = new MessageStore();
+            services.AddSingleton<IMessageStore>(messageStore);
 
-            MessageStore messageStore = new MessageStore(dbFile);
-            services.AddInstance<IMessageStore>(messageStore);
-
-            services.AddSingleton<ISmtp4devEngine, Smtp4devEngine>();
+            services.AddTransient<ISmtp4devEngine, Smtp4devEngine>();
         }
     }
 }

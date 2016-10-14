@@ -1,6 +1,6 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+﻿using Moq;
 using System;
+using Xunit;
 
 namespace Rnwood.SmtpServer.Tests
 {
@@ -8,25 +8,25 @@ namespace Rnwood.SmtpServer.Tests
     {
         protected abstract IEditableSession GetSession();
 
-        [TestMethod]
+        [Fact]
         public void AppendToLog()
         {
             IEditableSession session = GetSession();
             session.AppendToLog("Blah1");
             session.AppendToLog("Blah2");
 
-            CollectionAssert.AreEqual(new[] { "Blah1", "Blah2", "" },
+            Assert.Equal(new[] { "Blah1", "Blah2", "" },
                                     session.GetLog().ReadToEnd().Split(new string[] { "\r\n" }, StringSplitOptions.None));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetMessages_InitiallyEmpty()
         {
             IEditableSession session = GetSession();
-            Assert.AreEqual(0, session.GetMessages().Length);
+            Assert.Equal(0, session.GetMessages().Length);
         }
 
-        [TestMethod]
+        [Fact]
         public void AddMessage()
         {
             IEditableSession session = GetSession();
@@ -34,8 +34,8 @@ namespace Rnwood.SmtpServer.Tests
 
             session.AddMessage(message.Object);
 
-            Assert.AreEqual(1, session.GetMessages().Length);
-            Assert.AreSame(message.Object, session.GetMessages()[0]);
+            Assert.Equal(1, session.GetMessages().Length);
+            Assert.Same(message.Object, session.GetMessages()[0]);
         }
     }
 }
