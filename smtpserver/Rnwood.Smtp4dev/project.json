@@ -4,14 +4,10 @@
   },
 
   "dependencies": {
-    "Microsoft.NETCore.App": {
-      "version": "1.0.1",
-      "type": "platform"
-    },
+    "NETStandard.Library": "1.6.0",
     "Rnwood.SmtpServer": "4.0.0-*",
     "MimeKit": "1.8.0",
     "Swashbuckle": "6.0.0-beta902",
-    "Microsoft.ApplicationInsights.AspNetCore": "1.0.0",
     "Microsoft.AspNetCore.Diagnostics": "1.0.0",
     "Microsoft.AspNetCore.Mvc": "1.0.1",
     "Microsoft.AspNetCore.Razor.Tools": {
@@ -27,8 +23,10 @@
     "Microsoft.Extensions.Logging": "1.0.0",
     "Microsoft.Extensions.Logging.Console": "1.0.0",
     "Microsoft.Extensions.Logging.Debug": "1.0.0",
-    "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0",
-    "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0"
+    "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0",
+    "Microsoft.NETCore.App": {
+      "version": "1.0.1"
+    }
   },
 
   "tools": {
@@ -39,16 +37,19 @@
 
   "frameworks": {
     "netcoreapp1.0": {
-      "imports": [
-        "dotnet5.6",
-        "portable-net45+win8"
-      ]
     }
+  },
+
+  "runtimes": {
+    "win7-x64": {},
+    "win7-x86": {},
+    "ubuntu.16.04-x64": {},
+    "osx.10.10-x64": {}
   },
 
   "buildOptions": {
     "emitEntryPoint": true,
-    "preserveCompilationContext": true
+    "preserveCompilationContext": false
   },
 
   "runtimeOptions": {
