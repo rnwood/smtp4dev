@@ -28,7 +28,7 @@ build:
   verbosity: minimal
 artifacts:
 - path: Rnwood.Smtp4dev\bin\release\netcoreapp1.0\win7-x64\publish
-  name: Smtp4dev-$(version)-win7-x64
+  name: Smtp4dev-${version}-win7-x64
   type: zip
 test_script:
 - cmd: dotnet test Rnwood.SmtpServer.Tests
