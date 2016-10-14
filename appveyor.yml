@@ -21,14 +21,14 @@ before_build:
     npm install -g gulp bower
 after_build:
  - cmd: dotnet publish Rnwood.Smtp4dev -c Release -r win7-x64
- - cmd: '7z a Smtp4dev-win7-x64.zip %APPVEYOR_BUILD_FOLDER%\Rnwood.Smtp4dev\bin\release\netcoreapp1.0\win7-x64\publish\*'
 build:
   publish_nuget: false
   publish_nuget_symbols: false
   parallel: true
   verbosity: minimal
 artifacts:
-- path: Smtp4dev-win7-x64.zip
+- path: Rnwood.Smtp4dev\bin\release\netcoreapp1.0\win7-x64\publish
+  name: Smtp4dev-$(version)-win7-x64
   type: zip
 test_script:
 - cmd: dotnet test Rnwood.SmtpServer.Tests
