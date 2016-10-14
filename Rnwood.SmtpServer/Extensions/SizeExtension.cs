@@ -1,7 +1,6 @@
 ﻿#region
 
 using System;
-using System.Net.Mail;
 
 #endregion
 
@@ -30,7 +29,7 @@ namespace Rnwood.SmtpServer.Extensions
 
             public void SetParameter(IConnection connection, string key, string value)
             {
-                if (key.Equals("SIZE", StringComparison.InvariantCultureIgnoreCase))
+                if (key.Equals("SIZE", StringComparison.OrdinalIgnoreCase))
                 {
                     long messageSize;
 
@@ -48,7 +47,7 @@ namespace Rnwood.SmtpServer.Extensions
                     }
                     else
                     {
-                        throw new SmtpException(SmtpStatusCode.SyntaxError, "Bad message size specified");
+                        throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments, "Bad message size specified"));
                     }
                 }
             }

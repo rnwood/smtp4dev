@@ -60,7 +60,7 @@ namespace Rnwood.SmtpServer
                 }
                 else
                 {
-                    writer.Close();
+                    writer.Dispose();
                     connection.Server.Behaviour.OnMessageCompleted(connection);
                     connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted"));
                     connection.CommitMessage();

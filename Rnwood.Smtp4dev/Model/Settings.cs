@@ -5,7 +5,6 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Model
 {
-    [Serializable]
     public class Settings
     {
         public Settings()

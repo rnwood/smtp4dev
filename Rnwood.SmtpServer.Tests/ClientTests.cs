@@ -1,21 +1,42 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using System.Net.Mail;
+﻿using MailKit.Net.Smtp;
+using MimeKit;
+using Xunit;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
     public class ClientTests
     {
-        [TestMethod]
+        [Fact]
         public void SmtpClient_NonSSL()
         {
-            DefaultServer server = new DefaultServer(Ports.AssignAutomatically);
-            server.Start();
+            using (DefaultServer server = new DefaultServer(Ports.AssignAutomatically))
+            {
+                IMessage receivedMessage = null;
+                server.MessageReceived += (o, ea) =>
+                {
+                    receivedMessage = ea.Message;
+                };
+                server.Start();
 
-            SmtpClient client = new SmtpClient("localhost", server.PortNumber);
-            client.Send("from@from.com", "to@to.com", "subject", "body");
+                MimeMessage message = new MimeMessage();
+                message.From.Add(new MailboxAddress("", "from@from.com"));
+                message.To.Add(new MailboxAddress("", "to@to.com"));
+                message.Subject = "subject";
+                message.Body = new TextPart("plain")
+                {
+                    Text = "body"
+                };
 
-            server.Stop();
+                using (SmtpClient client = new SmtpClient())
+                {
+                    client.Connect("localhost", server.PortNumber);
+
+                    client.Send(message);
+                }
+
+                Assert.NotNull(receivedMessage);
+                Assert.Equal("from@from.com", receivedMessage.From);
+            }
         }
     }
 }

@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net.Security;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -34,6 +35,9 @@ namespace Rnwood.SmtpServer
         #region IConnectionProcessor Members
 
         public IServer Server { get; private set; }
+
+        private Task _task;
+        private CancellationTokenSource _taskCancellationTokenSource = new CancellationTokenSource();
 
         public void SetReaderEncoding(Encoding encoding)
         {
@@ -115,12 +119,14 @@ namespace Rnwood.SmtpServer
 
         #endregion
 
-        public Thread Thread { get; private set; }
+        public Task StartProcessing()
+        {
+            _task = Task.Run(() => Process());
+            return _task;
+        }
 
         public void Process()
         {
-            Thread = System.Threading.Thread.CurrentThread;
-
             try
             {
                 Server.Behaviour.OnSessionStarted(this, Session);
@@ -131,7 +137,7 @@ namespace Rnwood.SmtpServer
                     ConnectionChannel.ApplyStreamFilter(s =>
                     {
                         SslStream sslStream = new SslStream(s);
-                        sslStream.AuthenticateAsServer(Server.Behaviour.GetSSLCertificate(this));
+                        sslStream.AuthenticateAsServerAsync(Server.Behaviour.GetSSLCertificate(this)).Wait();
                         return sslStream;
                     });
 
@@ -142,7 +148,7 @@ namespace Rnwood.SmtpServer
                                                Server.Behaviour.DomainName + " smtp4dev ready"));
 
                 int numberOfInvalidCommands = 0;
-                while (ConnectionChannel.IsConnected)
+                while (ConnectionChannel.IsConnected && !_taskCancellationTokenSource.IsCancellationRequested)
                 {
                     bool badCommand = false;
                     SmtpCommand command = new SmtpCommand(ReadLine());
@@ -199,21 +205,27 @@ namespace Rnwood.SmtpServer
                 Session.SessionError = ioException;
                 Session.SessionErrorType = SessionErrorType.NetworkError;
             }
-            catch (ThreadInterruptedException exception)
-            {
-                Session.SessionError = exception;
-                Session.SessionErrorType = SessionErrorType.ServerShutdown;
-            }
             catch (Exception exception)
             {
                 Session.SessionError = exception;
                 Session.SessionErrorType = SessionErrorType.UnexpectedException;
             }
 
+            if (_taskCancellationTokenSource.IsCancellationRequested)
+            {
+                Session.SessionErrorType = SessionErrorType.ServerShutdown;
+            }
+
             CloseConnection();
 
             Session.EndDate = DateTime.Now;
             Server.Behaviour.OnSessionCompleted(this, Session);
+        }
+
+        public void Terminate()
+        {
+            _taskCancellationTokenSource.Cancel();
+            _task.Wait();
         }
     }
 }

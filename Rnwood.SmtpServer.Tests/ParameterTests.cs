@@ -1,36 +1,35 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
     public class ParameterTests
     {
-        [TestMethod]
+        [Fact]
         public void Name()
         {
             Parameter p = new Parameter("name", "value");
 
-            Assert.AreEqual("name", p.Name);
+            Assert.Equal("name", p.Name);
         }
 
-        [TestMethod]
+        [Fact]
         public void Value()
         {
             Parameter p = new Parameter("name", "value");
 
-            Assert.AreEqual("value", p.Value);
+            Assert.Equal("value", p.Value);
         }
 
-        [TestMethod]
+        [Fact]
         public void Equality_Equal()
         {
-            Assert.IsTrue(new Parameter("KEYA", "VALUEA").Equals(new Parameter("KEYa", "VALUEA")));
+            Assert.True(new Parameter("KEYA", "VALUEA").Equals(new Parameter("KEYa", "VALUEA")));
         }
 
-        [TestMethod]
+        [Fact]
         public void Equality_NotEqual()
         {
-            Assert.IsFalse(new Parameter("KEYb", "VALUEb").Equals(new Parameter("KEYa", "VALUEA")));
+            Assert.False(new Parameter("KEYb", "VALUEb").Equals(new Parameter("KEYa", "VALUEA")));
         }
     }
 }

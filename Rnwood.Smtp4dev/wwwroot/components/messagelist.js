@@ -23,6 +23,7 @@
                 self.receivedDateString = moment(data.ReceivedDate).format('L LT');
 
                 self.view = function () {
+                    window.location.hash = "/message/" + self.id;
                 };
 
                 self.deleteMessage = function () {

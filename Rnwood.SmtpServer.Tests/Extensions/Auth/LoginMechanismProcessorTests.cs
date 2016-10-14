@@ -1,13 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+﻿using Moq;
 using Rnwood.SmtpServer.Extensions.Auth;
+using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Extensions.Auth
 {
-    [TestClass]
     public class LoginMechanismProcessorTests : AuthMechanismTest
     {
-        [TestMethod]
+        [Fact]
         public void ProcessRepsonse_NoUsername_GetUsernameChallenge()
         {
             Mocks mocks = new Mocks();
@@ -15,7 +14,7 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             LoginMechanismProcessor processor = Setup(mocks);
             AuthMechanismProcessorStatus result = processor.ProcessResponse(null);
 
-            Assert.AreEqual(AuthMechanismProcessorStatus.Continue, result);
+            Assert.Equal(AuthMechanismProcessorStatus.Continue, result);
             mocks.Connection.Verify(c =>
                 c.WriteResponse(
                         It.Is<SmtpResponse>(r =>
@@ -26,7 +25,7 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             );
         }
 
-        [TestMethod]
+        [Fact]
         public void ProcessRepsonse_Username_GetPasswordChallenge()
         {
             Mocks mocks = new Mocks();
@@ -34,7 +33,7 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             LoginMechanismProcessor processor = Setup(mocks);
             AuthMechanismProcessorStatus result = processor.ProcessResponse(EncodeBase64("rob"));
 
-            Assert.AreEqual(AuthMechanismProcessorStatus.Continue, result);
+            Assert.Equal(AuthMechanismProcessorStatus.Continue, result);
 
             mocks.Connection.Verify(c =>
                 c.WriteResponse(
@@ -46,15 +45,17 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             );
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(BadBase64Exception))]
+        [Fact]
         public void ProcessResponse_Response_BadBase64()
         {
-            Mocks mocks = new Mocks();
+            Assert.Throws<BadBase64Exception>(() =>
+            {
+                Mocks mocks = new Mocks();
 
-            LoginMechanismProcessor processor = Setup(mocks);
-            processor.ProcessResponse(null);
-            processor.ProcessResponse("rob blah");
+                LoginMechanismProcessor processor = Setup(mocks);
+                processor.ProcessResponse(null);
+                processor.ProcessResponse("rob blah");
+            });
         }
 
         private LoginMechanismProcessor Setup(Mocks mocks)

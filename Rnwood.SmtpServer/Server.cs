@@ -8,6 +8,7 @@ using System.Linq;
 using System.Net;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -15,7 +16,6 @@ namespace Rnwood.SmtpServer
 {
     public class Server : IServer
     {
-        private Thread _coreThread;
         private TcpListener _listener;
 
         public Server(IServerBehaviour behaviour)
@@ -45,22 +45,6 @@ namespace Rnwood.SmtpServer
 
         public event EventHandler IsRunningChanged;
 
-        /// <summary>
-        /// Runs the server synchronously. This method blocks until the server is stopped.
-        /// </summary>
-        public void Run()
-        {
-            if (IsRunning)
-                throw new InvalidOperationException("Already running");
-
-            _listener = new TcpListener(Behaviour.IpAddress, Behaviour.PortNumber);
-            _listener.Start();
-
-            IsRunning = true;
-
-            Core();
-        }
-
         public int PortNumber
         {
             get
@@ -86,26 +70,31 @@ namespace Rnwood.SmtpServer
 
         private void Core()
         {
-            _coreThread = Thread.CurrentThread;
-
             try
             {
                 while (IsRunning)
                 {
-                    TcpClient tcpClient = _listener.AcceptTcpClient();
+                    Task<TcpClient> acceptTask = _listener.AcceptTcpClientAsync();
+                    acceptTask.Wait();
+
+                    TcpClient tcpClient = acceptTask.Result;
 
                     if (IsRunning)
                     {
-                        Thread thread = new Thread(ConnectionThreadWork);
                         Connection connection = new Connection(this, new TcpClientConnectionChannel(tcpClient), GetVerbMap());
                         _activeConnections.Add(connection);
-                        thread.Start(connection);
+
+                        connection.StartProcessing().ContinueWith((connectionTask) =>
+                            {
+                                _activeConnections.Remove(connection);
+                            }
+                        );
                     }
                 }
             }
-            catch (SocketException e)
+            catch (AggregateException e)
             {
-                if (e.SocketErrorCode == SocketError.Interrupted)
+                if (e.InnerException is ObjectDisposedException)
                 {
                     //normal - caused by _listener.Stop();
                 }
@@ -131,7 +120,8 @@ namespace Rnwood.SmtpServer
 
             IsRunning = true;
 
-            new Thread(Core).Start();
+            _coreTaskCancellationToken = new CancellationTokenSource();
+            _coreTask = Task.Run(() => Core());
         }
 
         /// <summary>
@@ -160,25 +150,53 @@ namespace Rnwood.SmtpServer
 
             IsRunning = false;
             _listener.Stop();
-            _coreThread.Join();
+            _coreTaskCancellationToken.Cancel();
+            _coreTask.Wait();
 
             if (killConnections)
             {
                 foreach (Connection connection in _activeConnections.Cast<Connection>().ToArray())
                 {
                     connection.CloseConnection();
-                    connection.Thread.Join();
+                    connection.Terminate();
                 }
             }
         }
 
         private readonly IList _activeConnections = ArrayList.Synchronized(new List<Connection>());
+        private Task _coreTask;
+        private CancellationTokenSource _coreTaskCancellationToken;
 
-        private void ConnectionThreadWork(object connectionObj)
+        #region IDisposable Support
+        private bool disposedValue = false; // To detect redundant calls
+
+        protected virtual void Dispose(bool disposing)
         {
-            Connection connection = (Connection)connectionObj;
-            connection.Process();
-            _activeConnections.Remove(connection);
+            if (!disposedValue)
+            {
+                if (disposing)
+                {
+                    Stop();
+                }
+
+                disposedValue = true;
+            }
         }
+
+        // ~Server() {
+        //   // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+        //   Dispose(false);
+        // }
+
+        // This code added to correctly implement the disposable pattern.
+        public void Dispose()
+        {
+            // Do not change this code. Put cleanup code in Dispose(bool disposing) above.
+            Dispose(true);
+            // TODO: uncomment the following line if the finalizer is overridden above.
+            // GC.SuppressFinalize(this);
+        }
+
+        #endregion
     }
 }

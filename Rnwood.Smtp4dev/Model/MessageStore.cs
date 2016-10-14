@@ -1,7 +1,4 @@
-﻿using NDatabase;
-using NDatabase.Api;
-using NDatabase.Exceptions;
-using Rnwood.SmtpServer;
+﻿using Rnwood.SmtpServer;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -14,22 +11,18 @@ namespace Rnwood.Smtp4dev.Model
 {
     public class MessageStore : IMessageStore
     {
-        public MessageStore(FileInfo file)
+        public MessageStore()
         {
-            _database = OdbFactory.Open(file.FullName);
         }
 
-        private IOdb _database;
-        private object _syncRoot = new object();
+        private ConcurrentDictionary<Guid, ISmtp4devMessage> _messages = new ConcurrentDictionary<Guid, ISmtp4devMessage>();
 
         public IEnumerable<ISmtp4devMessage> Messages
         {
             get
             {
-                lock (_syncRoot)
-                {
-                    return _database.AsQueryable<ISmtp4devMessage>().OrderByDescending(m => m.ReceivedDate);
-                }
+                //Return copy
+                return _messages.Values.ToArray();
             }
         }
 
@@ -39,48 +32,37 @@ namespace Rnwood.Smtp4dev.Model
 
         public void DeleteMessage(ISmtp4devMessage message)
         {
-            lock (_syncRoot)
+            ISmtp4devMessage deletedMessage;
+            if (_messages.TryRemove(message.Id, out deletedMessage))
             {
-                _database.Delete(message);
-                _database.Commit();
+                MessageDeleted?.Invoke(this, new Smtp4devMessageEventArgs(deletedMessage));
             }
-
-            MessageDeleted?.Invoke(this, new Smtp4devMessageEventArgs(message));
         }
 
         public void AddMessage(ISmtp4devMessage message)
         {
-            lock (_syncRoot)
+            if (_messages.TryAdd(message.Id, message))
             {
-                _database.Store(message);
-                _database.Commit();
+                MessageAdded?.Invoke(this, new Smtp4devMessageEventArgs(message));
             }
-
-            MessageAdded?.Invoke(this, new Smtp4devMessageEventArgs(message));
         }
 
         public IEnumerable<ISmtp4devMessage> SearchMessages(string searchTerm)
         {
-            lock (_syncRoot)
-            {
-                return _database.AsQueryable<ISmtp4devMessage>()
-                    .Where(m =>
-                        (m.Subject != null && m.Subject.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) > -1)
-                        || m.To.Any(to => to.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) > -1)
-                        || m.From.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) > -1
-                    )
-                    .OrderByDescending(m => m.ReceivedDate);
-            }
+            return Messages
+                .Where(m =>
+                    (m.Subject != null && m.Subject.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) > -1)
+                    || m.To.Any(to => to.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) > -1)
+                    || m.From.IndexOf(searchTerm, StringComparison.OrdinalIgnoreCase) > -1
+                )
+                .OrderByDescending(m => m.ReceivedDate);
         }
 
         public void DeleteAllMessages()
         {
-            lock (_syncRoot)
+            foreach (ISmtp4devMessage message in Messages)
             {
-                foreach (ISmtp4devMessage message in Messages)
-                {
-                    DeleteMessage(message);
-                }
+                DeleteMessage(message);
             }
         }
     }

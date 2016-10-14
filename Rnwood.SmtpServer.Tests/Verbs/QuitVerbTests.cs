@@ -1,11 +1,11 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestClass]
+    
     public class QuitVerbTests
     {
-        [TestMethod]
+        [Fact]
         public void Quit_RespondsWithClosingChannel()
         {
             Mocks mocks = new Mocks();

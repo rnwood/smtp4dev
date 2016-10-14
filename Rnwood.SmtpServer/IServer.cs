@@ -1,6 +1,8 @@
+using System;
+
 namespace Rnwood.SmtpServer
 {
-    public interface IServer
+    public interface IServer : IDisposable
     {
         IServerBehaviour Behaviour { get; }
     }

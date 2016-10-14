@@ -1,19 +1,18 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+﻿using Moq;
+using Xunit;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
     public class ParameterProcessorMapTests
     {
-        [TestMethod]
+        [Fact]
         public void GetProcessor_NotRegistered_Null()
         {
             ParameterProcessorMap map = new ParameterProcessorMap();
-            Assert.IsNull(map.GetProcessor("BLAH"));
+            Assert.Null(map.GetProcessor("BLAH"));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetProcessor_Registered_Returned()
         {
             Mock<IParameterProcessor> processor = new Mock<IParameterProcessor>();
@@ -21,10 +20,10 @@ namespace Rnwood.SmtpServer.Tests
             ParameterProcessorMap map = new ParameterProcessorMap();
             map.SetProcessor("BLAH", processor.Object);
 
-            Assert.AreSame(processor.Object, map.GetProcessor("BLAH"));
+            Assert.Same(processor.Object, map.GetProcessor("BLAH"));
         }
 
-        [TestMethod]
+        [Fact]
         public void GetProcessor_RegisteredDifferentCase_Returned()
         {
             Mock<IParameterProcessor> processor = new Mock<IParameterProcessor>();
@@ -32,20 +31,24 @@ namespace Rnwood.SmtpServer.Tests
             ParameterProcessorMap map = new ParameterProcessorMap();
             map.SetProcessor("blah", processor.Object);
 
-            Assert.AreSame(processor.Object, map.GetProcessor("BLAH"));
+            Assert.Same(processor.Object, map.GetProcessor("BLAH"));
         }
 
-        [TestMethod]
-        [ExpectedException(typeof(SmtpServerException), "Parameter KEYA is not recognised")]
+        [Fact]
         public void Process_UnknownParameter_Throws()
         {
-            Mocks mocks = new Mocks();
+            SmtpServerException e = Assert.Throws<SmtpServerException>(() =>
+            {
+                Mocks mocks = new Mocks();
 
-            ParameterProcessorMap map = new ParameterProcessorMap();
-            map.Process(mocks.Connection.Object, new string[] { "KEYA=VALUEA" }, true);
+                ParameterProcessorMap map = new ParameterProcessorMap();
+                map.Process(mocks.Connection.Object, new string[] { "KEYA=VALUEA" }, true);
+            });
+
+            Assert.Equal("Parameter KEYA is not recognised", e.Message);
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_NoParameters_Accepted()
         {
             Mocks mocks = new Mocks();
@@ -54,7 +57,7 @@ namespace Rnwood.SmtpServer.Tests
             map.Process(mocks.Connection.Object, new string[] { }, true);
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_KnownParameters_Processed()
         {
             Mocks mocks = new Mocks();

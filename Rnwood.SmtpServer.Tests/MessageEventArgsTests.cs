@@ -1,17 +1,17 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 
 namespace Rnwood.SmtpServer.Tests
 {
-    [TestClass]
+    
     public class MessageEventArgsTests
     {
-        [TestMethod]
+        [Fact]
         public void Message()
         {
             IMessage message = new MemoryMessage();
             MessageEventArgs messageEventArgs = new MessageEventArgs(message);
 
-            Assert.AreSame(message, messageEventArgs.Message);
+            Assert.Same(message, messageEventArgs.Message);
         }
     }
 }

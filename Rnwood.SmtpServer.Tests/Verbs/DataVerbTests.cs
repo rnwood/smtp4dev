@@ -1,14 +1,13 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
-using Moq;
+﻿using Moq;
 using System.IO;
 using System.Text;
+using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestClass]
     public class DataVerbTests
     {
-        [TestMethod]
+        [Fact]
         public void Data_DoubleDots_Unescaped()
         {
             //Check escaping of end of message character ".." is decoded to "."
@@ -16,19 +15,19 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             TestGoodData(new string[] { "A", "..", "B..", "." }, "A\r\n.\r\nB..", true);
         }
 
-        [TestMethod]
+        [Fact]
         public void Data_EmptyMessage_Accepted()
         {
             TestGoodData(new string[] { "." }, "", true);
         }
 
-        [TestMethod]
+        [Fact]
         public void Data_8BitData_TruncatedTo7Bit()
         {
             TestGoodData(new string[] { ((char)(0x41 + 128)).ToString(), "." }, "\u0041", false);
         }
 
-        [TestMethod]
+        [Fact]
         public void Data_8BitData_PassedThrough()
         {
             string data = ((char)(0x41 + 128)).ToString();
@@ -57,13 +56,13 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
 
-            using (StreamReader dataReader = new StreamReader(messageBuilder.GetData(), eightBitClean ? Encoding.UTF8 : Encoding.Default))
+            using (StreamReader dataReader = new StreamReader(messageBuilder.GetData(), eightBitClean ? Encoding.UTF8 : new ASCIISevenBitTruncatingEncoding()))
             {
-                Assert.AreEqual(expectedData, dataReader.ReadToEnd());
+                Assert.Equal(expectedData, dataReader.ReadToEnd());
             }
         }
 
-        [TestMethod]
+        [Fact]
         public void Data_AboveSizeLimit_Rejected()
         {
             Mocks mocks = new Mocks();
@@ -83,7 +82,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.ExceededStorageAllocation);
         }
 
-        [TestMethod]
+        [Fact]
         public void Data_ExactlySizeLimit_Accepted()
         {
             Mocks mocks = new Mocks();
@@ -103,7 +102,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         }
 
-        [TestMethod]
+        [Fact]
         public void Data_WithinSizeLimit_Accepted()
         {
             Mocks mocks = new Mocks();
@@ -123,7 +122,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         }
 
-        [TestMethod]
+        [Fact]
         public void Data_NoCurrentMessage_ReturnsError()
         {
             Mocks mocks = new Mocks();

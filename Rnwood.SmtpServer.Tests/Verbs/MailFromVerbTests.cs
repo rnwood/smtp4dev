@@ -1,12 +1,12 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using Moq;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestClass]
+    
     public class MailFromVerbTests
     {
-        [TestMethod]
+        [Fact]
         public void Process_AlreadyGivenFrom_ErrorResponse()
         {
             Mocks mocks = new Mocks();
@@ -18,7 +18,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_MissingAddress_ErrorResponse()
         {
             Mocks mocks = new Mocks();
@@ -29,19 +29,19 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_Address_Plain()
         {
             Process_Address("rob@rnwood.co.uk", "rob@rnwood.co.uk", StandardSmtpResponseCode.OK);
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_Address_Bracketed()
         {
             Process_Address("<rob@rnwood.co.uk>", "rob@rnwood.co.uk", StandardSmtpResponseCode.OK);
         }
 
-        [TestMethod]
+        [Fact]
         public void Process_Address_BracketedWithName()
         {
             Process_Address("<Robert Wood <rob@rnwood.co.uk>>", "Robert Wood <rob@rnwood.co.uk>", StandardSmtpResponseCode.OK);

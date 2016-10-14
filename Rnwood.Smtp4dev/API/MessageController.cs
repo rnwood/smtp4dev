@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNet.Http;
-using Microsoft.AspNet.Mvc;
+﻿using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
 using MimeKit;
 using Rnwood.Smtp4dev.API;
 using Rnwood.Smtp4dev.API.DTO;
@@ -11,7 +11,6 @@ using System.ComponentModel;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Web.Http;
 
 // For more information on enabling Web API for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -34,7 +33,8 @@ namespace Rnwood.Smtp4dev.API
             {
                 return _messageStore.SearchMessages(searchTerm).Select(m => new Message(m));
             }
-            else {
+            else
+            {
                 return _messageStore.Messages.Select(m => new Message(m));
             }
         }

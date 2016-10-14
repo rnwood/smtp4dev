@@ -1,18 +1,18 @@
-﻿using Microsoft.VisualStudio.TestTools.UnitTesting;
+﻿using Xunit;
 using System.Linq;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    [TestClass]
+    
     public class RcptToVerbTests
     {
-        [TestMethod]
+        [Fact]
         public void EmailAddressOnly()
         {
             TestGoodAddress("<rob@rnwood.co.uk>", "rob@rnwood.co.uk");
         }
 
-        [TestMethod]
+        [Fact]
         public void EmailAddressWithDisplayName()
         {
             //Should this format be accepted????
@@ -29,23 +29,23 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address));
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
-            Assert.AreEqual(expectedAddress, messageBuilder.To.First());
+            Assert.Equal(expectedAddress, messageBuilder.To.First());
         }
 
-        [TestMethod]
+        [Fact]
         public void UnbraketedAddress_ReturnsError()
         {
             TestBadAddress("rob@rnwood.co.uk");
         }
 
-        [TestMethod]
+        [Fact]
         public void MismatchedBraket_ReturnsError()
         {
             TestBadAddress("<rob@rnwood.co.uk");
             TestBadAddress("<Robert Wood<rob@rnwood.co.uk>");
         }
 
-        [TestMethod]
+        [Fact]
         public void EmptyAddress_ReturnsError()
         {
             TestBadAddress("<>");
@@ -61,7 +61,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address));
 
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
-            Assert.AreEqual(0, messageBuilder.To.Count);
+            Assert.Equal(0, messageBuilder.To.Count);
         }
     }
 }

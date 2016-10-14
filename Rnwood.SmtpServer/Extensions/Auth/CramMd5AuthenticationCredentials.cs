@@ -24,7 +24,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             HMACMD5 hmacmd5 = new HMACMD5(ASCIIEncoding.ASCII.GetBytes(password));
             string expectedResponse = BitConverter.ToString(hmacmd5.ComputeHash(ASCIIEncoding.ASCII.GetBytes(Challenge))).Replace("-", "");
 
-            return string.Equals(expectedResponse, ChallengeResponse, StringComparison.InvariantCultureIgnoreCase);
+            return string.Equals(expectedResponse, ChallengeResponse, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

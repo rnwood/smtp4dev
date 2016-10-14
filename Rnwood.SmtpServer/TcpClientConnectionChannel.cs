@@ -12,7 +12,7 @@ namespace Rnwood.SmtpServer
         {
             _tcpClient = tcpClient;
             _stream = tcpClient.GetStream();
-            SetReaderEncoding(Encoding.Default);
+            SetReaderEncoding(Encoding.ASCII);
         }
 
         private readonly TcpClient _tcpClient;
@@ -40,7 +40,7 @@ namespace Rnwood.SmtpServer
         public void Close()
         {
             _writer.Flush();
-            _tcpClient.Close();
+            _tcpClient.Dispose();
         }
 
         public int ReceiveTimeout
