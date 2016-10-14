@@ -30,3 +30,6 @@ build:
 artifacts:
 - path: Smtp4dev-win7-x64.zip
   type: zip
+test_script:
+- cmd: dotnet test Rnwood.SmtpServer.Tests
+
