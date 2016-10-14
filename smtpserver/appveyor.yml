@@ -7,8 +7,6 @@ assembly_info:
   assembly_version: '{version}'
   assembly_file_version: '{version}'
   assembly_informational_version: '{version}'
-environment:
-  DNX_FEED: https://www.nuget.org/api/v2
 nuget:
   account_feed: true
   project_feed: true
@@ -23,7 +21,7 @@ after_build:
  - cmd: dotnet publish Rnwood.Smtp4dev -c Release -r ubuntu.16.04-x64
  - cmd: dotnet publish Rnwood.Smtp4dev -c Release -r osx.10.10-x64
  - ps: |
-    dotnet pack Rnwood.Smtp4dev.Tests -c Release --version-suffix $("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
+    dotnet pack Rnwood.SmtpServer.Tests -c Release --version-suffix $("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
     appveyor PushArtifact Rnwood.SmtpServer\bin\Release\*.nupkg	
 build:
   publish_nuget: false
