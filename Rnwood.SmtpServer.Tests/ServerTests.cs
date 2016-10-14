@@ -33,21 +33,18 @@ namespace Rnwood.SmtpServer.Tests
         [Fact]
         public void StartOnInusePort_StartupExceptionThrown()
         {
-            Assert.Throws<SocketException>(() =>
+            using (Server server1 = new DefaultServer(Ports.AssignAutomatically))
             {
-                Server server1 = new DefaultServer(Ports.AssignAutomatically);
                 server1.Start();
 
-                try
+                using (Server server2 = new DefaultServer(server1.PortNumber))
                 {
-                    Server server2 = new DefaultServer(server1.PortNumber);
-                    server2.Start();
+                    Assert.Throws<SocketException>(() =>
+                    {
+                        server2.Start();
+                    });
                 }
-                finally
-                {
-                    server1.Stop();
-                }
-            });
+            }
         }
 
         [Fact]
