@@ -14,11 +14,9 @@ nuget:
   project_feed: true
 before_build:
 - cmd: >-
-    nuget restore
+    dotnet restore
 
     dnvm upgrade
-
-    dnu restore
 
     npm install -g gulp bower
 after_build:
