@@ -92,11 +92,15 @@ namespace Rnwood.SmtpServer
                     }
                 }
             }
+            catch (ObjectDisposedException)
+            {
+                //normal - caused by _listener.Stop();
+            }
             catch (AggregateException e)
             {
                 if (e.InnerException is ObjectDisposedException)
                 {
-                    //normal - caused by _listener.Stop();
+                    //normal - caused by _listener.Stop() returned by Wait()
                 }
                 else
                 {
@@ -145,10 +149,9 @@ namespace Rnwood.SmtpServer
         {
             if (!IsRunning)
             {
-                throw new InvalidOperationException("Not running");
+                return;
             }
 
-            IsRunning = false;
             _listener.Stop();
             _coreTaskCancellationToken.Cancel();
             _coreTask.Wait();
@@ -161,6 +164,8 @@ namespace Rnwood.SmtpServer
                     connection.Terminate();
                 }
             }
+
+            IsRunning = false;
         }
 
         private readonly IList _activeConnections = ArrayList.Synchronized(new List<Connection>());
