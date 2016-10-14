@@ -2826,7 +2826,7 @@
           "lib/netstandard1.1/xunit.runner.utility.dotnet.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0": {
+      "Rnwood.SmtpServer/4.0.0-beta": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
@@ -8328,7 +8328,7 @@
         "xunit.runner.utility.nuspec"
       ]
     },
-    "Rnwood.SmtpServer/4.0.0": {
+    "Rnwood.SmtpServer/4.0.0-beta": {
       "type": "project",
       "path": "../Rnwood.SmtpServer/project.json",
       "msbuildProject": "../Rnwood.SmtpServer/Rnwood.SmtpServer.xproj"
