@@ -1,66 +1,66 @@
-﻿using Xunit;
-using System.Linq;
+﻿using System.Linq;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    
     public class RcptToVerbTests
     {
         [Fact]
-        public void EmailAddressOnly()
+        public async Task EmailAddressOnly()
         {
-            TestGoodAddress("<rob@rnwood.co.uk>", "rob@rnwood.co.uk");
+            await TestGoodAddressAsync("<rob@rnwood.co.uk>", "rob@rnwood.co.uk");
         }
 
         [Fact]
-        public void EmailAddressWithDisplayName()
+        public async Task EmailAddressWithDisplayName()
         {
             //Should this format be accepted????
-            TestGoodAddress("<Robert Wood<rob@rnwood.co.uk>>", "Robert Wood<rob@rnwood.co.uk>");
+            await TestGoodAddressAsync("<Robert Wood<rob@rnwood.co.uk>>", "Robert Wood<rob@rnwood.co.uk>");
         }
 
-        private void TestGoodAddress(string address, string expectedAddress)
+        private async Task TestGoodAddressAsync(string address, string expectedAddress)
         {
             Mocks mocks = new Mocks();
             MemoryMessage.Builder messageBuilder = new MemoryMessage.Builder();
             mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
 
             RcptToVerb verb = new RcptToVerb();
-            verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address));
+            await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("TO " + address));
 
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
             Assert.Equal(expectedAddress, messageBuilder.To.First());
         }
 
         [Fact]
-        public void UnbraketedAddress_ReturnsError()
+        public async Task UnbraketedAddress_ReturnsError()
         {
-            TestBadAddress("rob@rnwood.co.uk");
+            await TestBadAddressAsync("rob@rnwood.co.uk");
         }
 
         [Fact]
-        public void MismatchedBraket_ReturnsError()
+        public async Task MismatchedBraket_ReturnsError()
         {
-            TestBadAddress("<rob@rnwood.co.uk");
-            TestBadAddress("<Robert Wood<rob@rnwood.co.uk>");
+            await TestBadAddressAsync("<rob@rnwood.co.uk");
+            await TestBadAddressAsync("<Robert Wood<rob@rnwood.co.uk>");
         }
 
         [Fact]
-        public void EmptyAddress_ReturnsError()
+        public async Task EmptyAddress_ReturnsError()
         {
-            TestBadAddress("<>");
+            await TestBadAddressAsync("<>");
         }
 
-        private void TestBadAddress(string address)
+        private async Task TestBadAddressAsync(string address)
         {
             Mocks mocks = new Mocks();
             MemoryMessage.Builder messageBuilder = new MemoryMessage.Builder();
             mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
 
             RcptToVerb verb = new RcptToVerb();
-            verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address));
+            await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("TO " + address));
 
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
+            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
             Assert.Equal(0, messageBuilder.To.Count);
         }
     }

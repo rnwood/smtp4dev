@@ -1,4 +1,6 @@
-﻿namespace Rnwood.SmtpServer.Extensions.Auth
+﻿using System.Threading.Tasks;
+
+namespace Rnwood.SmtpServer.Extensions.Auth
 {
     public class PlainMechanismProcessor : AuthMechanismProcessor, IAuthMechanismProcessor
     {
@@ -20,7 +22,7 @@
 
         #region IAuthMechanismProcessor Members
 
-        public override AuthMechanismProcessorStatus ProcessResponse(string data)
+        public async override Task<AuthMechanismProcessorStatus> ProcessResponseAsync(string data)
         {
             if (string.IsNullOrEmpty(data))
             {
@@ -30,7 +32,7 @@
                                                                    "Missing auth data"));
                 }
 
-                Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, ""));
+                await Connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue, ""));
                 State = States.AwaitingResponse;
                 return AuthMechanismProcessorStatus.Continue;
             }

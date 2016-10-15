@@ -2,6 +2,7 @@
 using Rnwood.SmtpServer.Verbs;
 using System;
 using System.Net;
+using System.Threading.Tasks;
 
 namespace Rnwood.SmtpServer.Tests
 {
@@ -41,9 +42,9 @@ namespace Rnwood.SmtpServer.Tests
 
         public Mock<IVerbMap> VerbMap { get; private set; }
 
-        public void VerifyWriteResponse(StandardSmtpResponseCode responseCode)
+        public async Task VerifyWriteResponseAsync(StandardSmtpResponseCode responseCode)
         {
-            Connection.Verify(c => c.WriteResponse(It.Is<SmtpResponse>(r => r.Code == (int)responseCode)));
+            Connection.Verify(c => c.WriteResponseAsync(It.Is<SmtpResponse>(r => r.Code == (int)responseCode)));
         }
     }
 }

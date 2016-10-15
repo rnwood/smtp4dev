@@ -1,20 +1,20 @@
-﻿using Xunit;
-using Rnwood.SmtpServer.Verbs;
+﻿using Rnwood.SmtpServer.Verbs;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    
     public class RsetVerbTests
     {
         [Fact]
-        public void Process()
+        public async Task ProcessAsync()
         {
             Mocks mocks = new Mocks();
 
             RsetVerb verb = new RsetVerb();
-            verb.Process(mocks.Connection.Object, new SmtpCommand("RSET"));
+            await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("RSET"));
 
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
             mocks.Connection.Verify(c => c.AbortMessage());
         }
     }

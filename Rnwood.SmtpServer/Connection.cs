@@ -36,9 +36,6 @@ namespace Rnwood.SmtpServer
 
         public IServer Server { get; private set; }
 
-        private Task _task;
-        private CancellationTokenSource _taskCancellationTokenSource = new CancellationTokenSource();
-
         public void SetReaderEncoding(Encoding encoding)
         {
             ConnectionChannel.SetReaderEncoding(encoding);
@@ -63,9 +60,9 @@ namespace Rnwood.SmtpServer
 
         public IVerbMap VerbMap { get; private set; }
 
-        public void ApplyStreamFilter(Func<Stream, Stream> filter)
+        public async Task ApplyStreamFilterAsync(Func<Stream, Task<Stream>> filter)
         {
-            ConnectionChannel.ApplyStreamFilter(filter);
+            await ConnectionChannel.ApplyStreamFilterAsync(filter);
         }
 
         public MailVerb MailVerb
@@ -73,21 +70,21 @@ namespace Rnwood.SmtpServer
             get { return (MailVerb)VerbMap.GetVerbProcessor("MAIL"); }
         }
 
-        public void WriteLine(string text, params object[] arg)
+        public async Task WriteLineAsync(string text, params object[] arg)
         {
             string formattedText = string.Format(text, arg);
             Session.AppendToLog(formattedText);
-            ConnectionChannel.WriteLine(formattedText);
+            await ConnectionChannel.WriteLineAsync(formattedText);
         }
 
-        public void WriteResponse(SmtpResponse response)
+        public async Task WriteResponseAsync(SmtpResponse response)
         {
-            WriteLine(response.ToString().TrimEnd());
+            await WriteLineAsync(response.ToString().TrimEnd());
         }
 
-        public string ReadLine()
+        public async Task<string> ReadLineAsync()
         {
-            string text = ConnectionChannel.ReadLine();
+            string text = await ConnectionChannel.ReadLineAsync();
             Session.AppendToLog(text);
             return text;
         }
@@ -119,13 +116,7 @@ namespace Rnwood.SmtpServer
 
         #endregion
 
-        public Task StartProcessing()
-        {
-            _task = Task.Run(() => Process());
-            return _task;
-        }
-
-        public void Process()
+        public async Task ProcessAsync()
         {
             try
             {
@@ -134,24 +125,24 @@ namespace Rnwood.SmtpServer
 
                 if (Server.Behaviour.IsSSLEnabled(this))
                 {
-                    ConnectionChannel.ApplyStreamFilter(s =>
+                    await ConnectionChannel.ApplyStreamFilterAsync(async s =>
                     {
                         SslStream sslStream = new SslStream(s);
-                        sslStream.AuthenticateAsServerAsync(Server.Behaviour.GetSSLCertificate(this)).Wait();
+                        await sslStream.AuthenticateAsServerAsync(Server.Behaviour.GetSSLCertificate(this));
                         return sslStream;
                     });
 
                     Session.SecureConnection = true;
                 }
 
-                WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ServiceReady,
+                await WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.ServiceReady,
                                                Server.Behaviour.DomainName + " smtp4dev ready"));
 
                 int numberOfInvalidCommands = 0;
-                while (ConnectionChannel.IsConnected && !_taskCancellationTokenSource.IsCancellationRequested)
+                while (ConnectionChannel.IsConnected)
                 {
                     bool badCommand = false;
-                    SmtpCommand command = new SmtpCommand(ReadLine());
+                    SmtpCommand command = new SmtpCommand(await ReadLineAsync());
                     Server.Behaviour.OnCommandReceived(this, command);
 
                     if (command.IsValid)
@@ -162,11 +153,11 @@ namespace Rnwood.SmtpServer
                         {
                             try
                             {
-                                verbProcessor.Process(this, command);
+                                await verbProcessor.ProcessAsync(this, command);
                             }
                             catch (SmtpServerException exception)
                             {
-                                WriteResponse(exception.SmtpResponse);
+                                await WriteResponseAsync(exception.SmtpResponse);
                             }
                         }
                         else
@@ -189,12 +180,12 @@ namespace Rnwood.SmtpServer
                         if (Server.Behaviour.MaximumNumberOfSequentialBadCommands > 0 &&
                         numberOfInvalidCommands >= Server.Behaviour.MaximumNumberOfSequentialBadCommands)
                         {
-                            WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel, "Too many bad commands. Bye!"));
+                            await WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel, "Too many bad commands. Bye!"));
                             CloseConnection();
                         }
                         else
                         {
-                            WriteResponse(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
+                            await WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
                                                            "Command unrecognised"));
                         }
                     }
@@ -211,11 +202,6 @@ namespace Rnwood.SmtpServer
                 Session.SessionErrorType = SessionErrorType.UnexpectedException;
             }
 
-            if (_taskCancellationTokenSource.IsCancellationRequested)
-            {
-                Session.SessionErrorType = SessionErrorType.ServerShutdown;
-            }
-
             CloseConnection();
 
             Session.EndDate = DateTime.Now;
@@ -224,8 +210,7 @@ namespace Rnwood.SmtpServer
 
         public void Terminate()
         {
-            _taskCancellationTokenSource.Cancel();
-            _task.Wait();
+            CloseConnection();
         }
     }
 }

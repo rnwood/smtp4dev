@@ -5,6 +5,7 @@ using Rnwood.SmtpServer.Verbs;
 using System;
 using System.IO;
 using System.Text;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -26,13 +27,13 @@ namespace Rnwood.SmtpServer
 
         void CloseConnection();
 
-        void ApplyStreamFilter(Func<Stream, Stream> filter);
+        Task ApplyStreamFilterAsync(Func<Stream, Task<Stream>> filter);
 
-        void WriteLine(string text, params object[] arg);
+        Task WriteLineAsync(string text, params object[] arg);
 
-        void WriteResponse(SmtpResponse response);
+        Task WriteResponseAsync(SmtpResponse response);
 
-        string ReadLine();
+        Task<string> ReadLineAsync();
 
         IMessageBuilder NewMessage();
 

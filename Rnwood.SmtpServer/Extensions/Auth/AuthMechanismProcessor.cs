@@ -1,5 +1,6 @@
 using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
@@ -31,6 +32,6 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             }
         }
 
-        public abstract AuthMechanismProcessorStatus ProcessResponse(string data);
+        public abstract Task<AuthMechanismProcessorStatus> ProcessResponseAsync(string data);
     }
 }

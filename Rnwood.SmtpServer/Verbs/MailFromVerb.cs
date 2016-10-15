@@ -2,6 +2,7 @@
 
 using Rnwood.SmtpServer.Verbs;
 using System.Linq;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -23,18 +24,18 @@ namespace Rnwood.SmtpServer
 
         public ParameterProcessorMap ParameterProcessorMap { get; private set; }
 
-        public void Process(IConnection connection, SmtpCommand command)
+        public async Task ProcessAsync(IConnection connection, SmtpCommand command)
         {
             if (connection.CurrentMessage != null)
             {
-                connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                await connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
                                                                    "You already told me who the message was from"));
                 return;
             }
 
             if (command.ArgumentsText.Length == 0)
             {
-                connection.WriteResponse(
+                await connection.WriteResponseAsync(
                     new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments,
                                      "Must specify from address or <>"));
                 return;
@@ -57,8 +58,8 @@ namespace Rnwood.SmtpServer
 
             try
             {
-                ParameterProcessorMap.Process(connection, arguments.Skip(1).ToArray(), true);
-                connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "New message started"));
+                await ParameterProcessorMap.ProcessAsync(connection, arguments.Skip(1).ToArray(), true);
+                await connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.OK, "New message started"));
             }
             catch
             {

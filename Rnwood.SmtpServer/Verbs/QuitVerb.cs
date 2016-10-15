@@ -1,6 +1,7 @@
 ﻿#region
 
 using Rnwood.SmtpServer.Verbs;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -8,9 +9,9 @@ namespace Rnwood.SmtpServer
 {
     public class QuitVerb : IVerb
     {
-        public void Process(IConnection connection, SmtpCommand command)
+        public async Task ProcessAsync(IConnection connection, SmtpCommand command)
         {
-            connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel,
+            await connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel,
                                                                "See you later aligator"));
             connection.CloseConnection();
             connection.Session.CompletedNormally = true;

@@ -1,20 +1,20 @@
-﻿using Xunit;
-using Rnwood.SmtpServer.Verbs;
+﻿using Rnwood.SmtpServer.Verbs;
+using System.Threading.Tasks;
+using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
-    
     public class NoopVerbTests
     {
         [Fact]
-        public void Noop()
+        public async Task Noop()
         {
             Mocks mocks = new Mocks();
 
             NoopVerb verb = new NoopVerb();
-            verb.Process(mocks.Connection.Object, new SmtpCommand("NOOP"));
+            await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("NOOP"));
 
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
         }
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
@@ -15,7 +16,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
         #region IAuthMechanismProcessor Members
 
-        public override AuthMechanismProcessorStatus ProcessResponse(string data)
+        public async override Task<AuthMechanismProcessorStatus> ProcessResponseAsync(string data)
         {
             if (data != null)
             {
@@ -25,7 +26,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             switch (State)
             {
                 case States.Initial:
-                    Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
+                    await Connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
                                                               Convert.ToBase64String(
                                                                   Encoding.ASCII.GetBytes("Username:"))));
                     State = States.WaitingForUsername;
@@ -35,7 +36,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
                     _username = DecodeBase64(data);
 
-                    Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
+                    await Connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
                                                               Convert.ToBase64String(
                                                                   Encoding.ASCII.GetBytes("Password:"))));
                     State = States.WaitingForPassword;

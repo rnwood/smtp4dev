@@ -3,6 +3,7 @@ using System.IO;
 using System.Net;
 using System.Net.Sockets;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Rnwood.SmtpServer
 {
@@ -54,9 +55,9 @@ namespace Rnwood.SmtpServer
             get { return ((IPEndPoint)_tcpClient.Client.RemoteEndPoint).Address; }
         }
 
-        public void ApplyStreamFilter(Func<Stream, Stream> filter)
+        public async Task ApplyStreamFilterAsync(Func<Stream, Task<Stream>> filter)
         {
-            _stream = filter(_stream);
+            _stream = await filter(_stream);
             SetupReaderAndWriter();
         }
 
@@ -66,9 +67,9 @@ namespace Rnwood.SmtpServer
             _reader = new StreamReader(_stream, ReaderEncoding);
         }
 
-        public string ReadLine()
+        public async Task<string> ReadLineAsync()
         {
-            string text = _reader.ReadLine();
+            string text = await _reader.ReadLineAsync();
 
             if (text == null)
             {
@@ -78,9 +79,9 @@ namespace Rnwood.SmtpServer
             return text;
         }
 
-        public void WriteLine(string text)
+        public async Task WriteLineAsync(string text)
         {
-            _writer.WriteLine(text);
+            await _writer.WriteLineAsync(text);
         }
     }
 }
