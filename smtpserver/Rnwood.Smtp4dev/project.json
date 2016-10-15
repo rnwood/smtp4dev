@@ -24,9 +24,6 @@
     "Microsoft.Extensions.Logging.Console": "1.0.0",
     "Microsoft.Extensions.Logging.Debug": "1.0.0",
     "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0",
-    "Microsoft.NETCore.App": {
-      "version": "1.0.1"
-    }
   },
 
   "tools": {
@@ -37,6 +34,15 @@
 
   "frameworks": {
     "netcoreapp1.0": {
+      "Microsoft.NETCore.App": {
+        "version": "1.0.1"
+      }
+    },
+
+    "net461": {
+      "dependencies": {
+        "Microsoft.AspNetCore.Hosting.WindowsServices": "1.0.0"
+      }
     }
   },
 
