@@ -1,11 +1,13 @@
-﻿namespace Rnwood.SmtpServer.Verbs
+﻿using System.Threading.Tasks;
+
+namespace Rnwood.SmtpServer.Verbs
 {
     public class RsetVerb : IVerb
     {
-        public void Process(IConnection connection, SmtpCommand command)
+        public async Task ProcessAsync(IConnection connection, SmtpCommand command)
         {
             connection.AbortMessage();
-            connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Rset completed"));
+            await connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.OK, "Rset completed"));
         }
     }
 }

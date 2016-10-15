@@ -68,27 +68,20 @@ namespace Rnwood.SmtpServer
             return verbMap;
         }
 
-        private void Core()
+        private async void Core()
         {
             try
             {
                 while (IsRunning)
                 {
-                    Task<TcpClient> acceptTask = _listener.AcceptTcpClientAsync();
-                    acceptTask.Wait();
-
-                    TcpClient tcpClient = acceptTask.Result;
+                    TcpClient tcpClient = await _listener.AcceptTcpClientAsync();
 
                     if (IsRunning)
                     {
                         Connection connection = new Connection(this, new TcpClientConnectionChannel(tcpClient), GetVerbMap());
                         _activeConnections.Add(connection);
-
-                        connection.StartProcessing().ContinueWith((connectionTask) =>
-                            {
-                                _activeConnections.Remove(connection);
-                            }
-                        );
+                        await connection.ProcessAsync();
+                        _activeConnections.Remove(connection);
                     }
                 }
             }
@@ -152,8 +145,8 @@ namespace Rnwood.SmtpServer
                 return;
             }
 
-            _listener.Stop();
             _coreTaskCancellationToken.Cancel();
+            _listener.Stop();
             _coreTask.Wait();
 
             if (killConnections)

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
@@ -24,7 +25,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
         #region IAuthMechanismProcessor Members
 
-        public override AuthMechanismProcessorStatus ProcessResponse(string data)
+        public async override Task<AuthMechanismProcessorStatus> ProcessResponseAsync(string data)
         {
             if (_challenge == null)
             {
@@ -37,7 +38,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 _challenge = challenge.ToString();
 
                 string base64Challenge = Convert.ToBase64String(Encoding.ASCII.GetBytes(challenge.ToString()));
-                Connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
+                await Connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.AuthenticationContinue,
                                                           base64Challenge));
                 return AuthMechanismProcessorStatus.Continue;
             }

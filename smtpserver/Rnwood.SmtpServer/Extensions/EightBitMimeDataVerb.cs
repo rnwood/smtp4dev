@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Rnwood.SmtpServer.Extensions
 {
@@ -34,7 +35,7 @@ namespace Rnwood.SmtpServer.Extensions
 
         #endregion IParameterProcessor Members
 
-        public override void Process(IConnection connection, SmtpCommand command)
+        public async override Task ProcessAsync(IConnection connection, SmtpCommand command)
         {
             if (connection.CurrentMessage != null && connection.CurrentMessage.EightBitTransport)
             {
@@ -43,7 +44,7 @@ namespace Rnwood.SmtpServer.Extensions
 
             try
             {
-                base.Process(connection, command);
+                await base.ProcessAsync(connection, command);
             }
             finally
             {

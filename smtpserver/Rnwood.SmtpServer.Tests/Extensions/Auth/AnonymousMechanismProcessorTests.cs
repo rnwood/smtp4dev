@@ -1,5 +1,6 @@
 ﻿using Moq;
 using Rnwood.SmtpServer.Extensions.Auth;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Extensions.Auth
@@ -24,7 +25,7 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
             ProcessResponse(AuthenticationResult.TemporaryFailure, AuthMechanismProcessorStatus.Failed);
         }
 
-        private void ProcessResponse(AuthenticationResult authenticationResult, AuthMechanismProcessorStatus authMechanismProcessorStatus)
+        private async Task ProcessResponse(AuthenticationResult authenticationResult, AuthMechanismProcessorStatus authMechanismProcessorStatus)
         {
             Mocks mocks = new Mocks();
             mocks.ServerBehaviour.Setup(
@@ -33,7 +34,7 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
                 .Returns(authenticationResult);
 
             AnonymousMechanismProcessor anonymousMechanismProcessor = new AnonymousMechanismProcessor(mocks.Connection.Object);
-            AuthMechanismProcessorStatus result = anonymousMechanismProcessor.ProcessResponse(null);
+            AuthMechanismProcessorStatus result = await anonymousMechanismProcessor.ProcessResponseAsync(null);
 
             Assert.Equal(authMechanismProcessorStatus, result);
 

@@ -1,4 +1,6 @@
-﻿namespace Rnwood.SmtpServer.Extensions.Auth
+﻿using System.Threading.Tasks;
+
+namespace Rnwood.SmtpServer.Extensions.Auth
 {
     public class AnonymousMechanismProcessor : IAuthMechanismProcessor
     {
@@ -11,7 +13,7 @@
 
         #region IAuthMechanismProcessor Members
 
-        public AuthMechanismProcessorStatus ProcessResponse(string data)
+        public async Task<AuthMechanismProcessorStatus> ProcessResponseAsync(string data)
         {
             Credentials = new AnonymousAuthenticationCredentials();
 

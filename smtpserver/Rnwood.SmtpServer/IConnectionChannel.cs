@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace Rnwood.SmtpServer
 {
@@ -19,10 +20,10 @@ namespace Rnwood.SmtpServer
 
         void SetReaderEncoding(Encoding encoding);
 
-        void ApplyStreamFilter(Func<Stream, Stream> filter);
+        Task ApplyStreamFilterAsync(Func<Stream, Task<Stream>> filter);
 
-        void WriteLine(string text);
+        Task WriteLineAsync(string text);
 
-        string ReadLine();
+        Task<string> ReadLineAsync();
     }
 }

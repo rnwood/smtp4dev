@@ -1,6 +1,7 @@
 ﻿#region
 
 using Rnwood.SmtpServer.Verbs;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -21,18 +22,18 @@ namespace Rnwood.SmtpServer
             get { return (MailFromVerb)SubVerbMap.GetVerbProcessor("FROM"); }
         }
 
-        public void Process(IConnection connection, SmtpCommand command)
+        public async Task ProcessAsync(IConnection connection, SmtpCommand command)
         {
             SmtpCommand subrequest = new SmtpCommand(command.ArgumentsText);
             IVerb verbProcessor = SubVerbMap.GetVerbProcessor(subrequest.Verb);
 
             if (verbProcessor != null)
             {
-                verbProcessor.Process(connection, subrequest);
+                await verbProcessor.ProcessAsync(connection, subrequest);
             }
             else
             {
-                connection.WriteResponse(
+                await connection.WriteResponseAsync(
                     new SmtpResponse(StandardSmtpResponseCode.CommandParameterNotImplemented,
                                      "Subcommand {0} not implemented", subrequest.Verb));
             }

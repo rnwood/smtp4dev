@@ -1,5 +1,6 @@
 ﻿using Moq;
 using Rnwood.SmtpServer.Extensions.Auth;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Extensions.Auth
@@ -7,16 +8,16 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
     public class LoginMechanismProcessorTests : AuthMechanismTest
     {
         [Fact]
-        public void ProcessRepsonse_NoUsername_GetUsernameChallenge()
+        public async Task ProcessRepsonse_NoUsername_GetUsernameChallenge()
         {
             Mocks mocks = new Mocks();
 
             LoginMechanismProcessor processor = Setup(mocks);
-            AuthMechanismProcessorStatus result = processor.ProcessResponse(null);
+            AuthMechanismProcessorStatus result = await processor.ProcessResponseAsync(null);
 
             Assert.Equal(AuthMechanismProcessorStatus.Continue, result);
             mocks.Connection.Verify(c =>
-                c.WriteResponse(
+                c.WriteResponseAsync(
                         It.Is<SmtpResponse>(r =>
                            r.Code == (int)StandardSmtpResponseCode.AuthenticationContinue &&
                            VerifyBase64Response(r.Message, "Username:")
@@ -26,17 +27,17 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
         }
 
         [Fact]
-        public void ProcessRepsonse_Username_GetPasswordChallenge()
+        public async Task ProcessRepsonse_Username_GetPasswordChallenge()
         {
             Mocks mocks = new Mocks();
 
             LoginMechanismProcessor processor = Setup(mocks);
-            AuthMechanismProcessorStatus result = processor.ProcessResponse(EncodeBase64("rob"));
+            AuthMechanismProcessorStatus result = await processor.ProcessResponseAsync(EncodeBase64("rob"));
 
             Assert.Equal(AuthMechanismProcessorStatus.Continue, result);
 
             mocks.Connection.Verify(c =>
-                c.WriteResponse(
+                c.WriteResponseAsync(
                     It.Is<SmtpResponse>(r =>
                         VerifyBase64Response(r.Message, "Password:")
                         && r.Code == (int)StandardSmtpResponseCode.AuthenticationContinue
@@ -46,15 +47,15 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
         }
 
         [Fact]
-        public void ProcessResponse_Response_BadBase64()
+        public async Task ProcessResponse_Response_BadBase64()
         {
-            Assert.Throws<BadBase64Exception>(() =>
+            await Assert.ThrowsAsync<BadBase64Exception>(async () =>
             {
                 Mocks mocks = new Mocks();
 
                 LoginMechanismProcessor processor = Setup(mocks);
-                processor.ProcessResponse(null);
-                processor.ProcessResponse("rob blah");
+                await processor.ProcessResponseAsync(null);
+                await processor.ProcessResponseAsync("rob blah");
             });
         }
 

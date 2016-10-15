@@ -3,6 +3,7 @@
 using Rnwood.SmtpServer.Verbs;
 using System;
 using System.IO;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -10,17 +11,17 @@ namespace Rnwood.SmtpServer
 {
     public class DataVerb : IVerb
     {
-        public virtual void Process(IConnection connection, SmtpCommand command)
+        public async virtual Task ProcessAsync(IConnection connection, SmtpCommand command)
         {
             if (connection.CurrentMessage == null)
             {
-                connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
+                await connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.BadSequenceOfCommands,
                                                                    "Bad sequence of commands"));
                 return;
             }
 
             connection.CurrentMessage.SecureConnection = connection.Session.SecureConnection;
-            connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.StartMailInputEndWithDot,
+            await connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.StartMailInputEndWithDot,
                                                                "End message with period"));
 
             using (StreamWriter writer = new StreamWriter(connection.CurrentMessage.WriteData(), connection.ReaderEncoding))
@@ -29,7 +30,7 @@ namespace Rnwood.SmtpServer
 
                 do
                 {
-                    string line = connection.ReadLine();
+                    string line = await connection.ReadLineAsync();
 
                     if (line != ".")
                     {
@@ -54,7 +55,7 @@ namespace Rnwood.SmtpServer
 
                 if (maxMessageSize.HasValue && writer.BaseStream.Length > maxMessageSize.Value)
                 {
-                    connection.WriteResponse(
+                    await connection.WriteResponseAsync(
                         new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation,
                                          "Message exceeds fixed size limit"));
                 }
@@ -62,7 +63,7 @@ namespace Rnwood.SmtpServer
                 {
                     writer.Dispose();
                     connection.Server.Behaviour.OnMessageCompleted(connection);
-                    connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted"));
+                    await connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted"));
                     connection.CommitMessage();
                 }
             }

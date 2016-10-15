@@ -1,6 +1,7 @@
 ﻿using Moq;
 using Rnwood.SmtpServer.Extensions.Auth;
 using System;
+using System.Threading.Tasks;
 using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Extensions.Auth
@@ -8,18 +9,18 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
     public class CramMd5MechanismProcessorTests : AuthMechanismTest
     {
         [Fact]
-        public void ProcessRepsonse_GetChallenge()
+        public async Task ProcessRepsonse_GetChallenge()
         {
             Mocks mocks = new Mocks();
 
             CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks);
-            AuthMechanismProcessorStatus result = cramMd5MechanismProcessor.ProcessResponse(null);
+            AuthMechanismProcessorStatus result = await cramMd5MechanismProcessor.ProcessResponseAsync(null);
 
             string expectedResponse = string.Format("{0}.{1}@{2}", FAKERANDOM, FAKEDATETIME, FAKEDOMAIN);
 
             Assert.Equal(AuthMechanismProcessorStatus.Continue, result);
             mocks.Connection.Verify(
-                    c => c.WriteResponse(
+                    c => c.WriteResponseAsync(
                         It.Is<SmtpResponse>(r =>
                             r.Code == (int)StandardSmtpResponseCode.AuthenticationContinue &&
                             VerifyBase64Response(r.Message, expectedResponse)
@@ -29,29 +30,29 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
         }
 
         [Fact]
-        public void ProcessRepsonse_ChallengeReponse_BadFormat()
+        public async Task ProcessRepsonse_ChallengeReponse_BadFormat()
         {
-            Assert.Throws<SmtpServerException>(() =>
+            await Assert.ThrowsAsync<SmtpServerException>(async () =>
             {
                 Mocks mocks = new Mocks();
 
                 string challenge = string.Format("{0}.{1}@{2}", FAKERANDOM, FAKEDATETIME, FAKEDOMAIN);
 
                 CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks, challenge);
-                AuthMechanismProcessorStatus result = cramMd5MechanismProcessor.ProcessResponse("BLAH");
+                AuthMechanismProcessorStatus result = await cramMd5MechanismProcessor.ProcessResponseAsync("BLAH");
             });
         }
 
         [Fact]
-        public void ProcessResponse_Response_BadBase64()
+        public async Task ProcessResponse_Response_BadBase64()
         {
-            Assert.Throws<BadBase64Exception>(() =>
+            await Assert.ThrowsAsync<BadBase64Exception>(async () =>
             {
                 Mocks mocks = new Mocks();
 
                 CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks);
-                cramMd5MechanismProcessor.ProcessResponse(null);
-                cramMd5MechanismProcessor.ProcessResponse("rob blah");
+                await cramMd5MechanismProcessor.ProcessResponseAsync(null);
+                await cramMd5MechanismProcessor.ProcessResponseAsync("rob blah");
             });
         }
 

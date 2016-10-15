@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -24,12 +25,12 @@ namespace Rnwood.SmtpServer
             return result;
         }
 
-        public void Process(IConnection connection, string[] arguments, bool throwOnUnknownParameter)
+        public async Task ProcessAsync(IConnection connection, string[] arguments, bool throwOnUnknownParameter)
         {
-            Process(connection, new ParameterParser(arguments), throwOnUnknownParameter);
+            await ProcessAsync(connection, new ParameterParser(arguments), throwOnUnknownParameter);
         }
 
-        public void Process(IConnection connection, ParameterParser parameters, bool throwOnUnknownParameter)
+        public async Task ProcessAsync(IConnection connection, ParameterParser parameters, bool throwOnUnknownParameter)
         {
             foreach (Parameter parameter in parameters.Parameters)
             {
