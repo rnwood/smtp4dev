@@ -90,8 +90,8 @@ namespace Rnwood.SmtpServer
                 {
                     Connection connection = new Connection(this, new TcpClientConnectionChannel(tcpClient), GetVerbMap());
                     _activeConnections.Add(connection);
-                    await connection.ProcessAsync();
-                    _activeConnections.Remove(connection);
+                    connection.Terminated += (s, ea) => _activeConnections.Remove(connection);
+                    connection.ProcessAsync();
                 }
             }
         }

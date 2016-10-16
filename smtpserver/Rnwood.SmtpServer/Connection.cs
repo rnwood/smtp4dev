@@ -36,6 +36,8 @@ namespace Rnwood.SmtpServer
 
         public IServer Server { get; private set; }
 
+        public event EventHandler Terminated;
+
         public void SetReaderEncoding(Encoding encoding)
         {
             ConnectionChannel.SetReaderEncoding(encoding);
@@ -211,6 +213,7 @@ namespace Rnwood.SmtpServer
         public void Terminate()
         {
             ConnectionChannel.Terminate();
+            Terminated?.Invoke(this, EventArgs.Empty);
         }
     }
 }
