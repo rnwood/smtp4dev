@@ -42,4 +42,15 @@ artifacts:
   type: zip
 test_script:
 - cmd: dotnet test Rnwood.SmtpServer.Tests
-
+deploy:
+  release: Rnwood.SmtpServer-v$(appveyor_build_version)
+  description: 'Rnwood.SmtpServer'
+  provider: GitHub
+  auth_token:
+    secure: W1n6bqq6IQIyPCo6VLaAGwpF9PQhQbLcclrV8MryEf5kQ9halXdIqM7w8hL6JJj8
+  artifact: /.*\.nupkg/            # upload all NuGet packages to release assets
+  draft: false
+  prerelease: true
+  on:
+    branch: master                 # release from master branch only
+    appveyor_repo_tag: true  
