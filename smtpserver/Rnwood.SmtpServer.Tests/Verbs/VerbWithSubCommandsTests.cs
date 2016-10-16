@@ -30,7 +30,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
             await verbWithSubCommands.Object.ProcessAsync(mocks.Connection.Object, new SmtpCommand("VERB SUBCOMMAND1"));
 
-            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.CommandParameterNotImplemented);
+            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.CommandParameterNotImplemented);
         }
     }
 }

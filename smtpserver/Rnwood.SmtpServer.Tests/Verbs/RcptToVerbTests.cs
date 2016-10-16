@@ -28,7 +28,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             RcptToVerb verb = new RcptToVerb();
             await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("TO " + address));
 
-            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
+            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
             Assert.Equal(expectedAddress, messageBuilder.To.First());
         }
 
@@ -60,7 +60,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             RcptToVerb verb = new RcptToVerb();
             await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("TO " + address));
 
-            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
+            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
             Assert.Equal(0, messageBuilder.To.Count);
         }
     }

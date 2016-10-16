@@ -18,7 +18,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             Credentials = new AnonymousAuthenticationCredentials();
 
             AuthenticationResult result =
-                Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials);
+                await Connection.Server.Behaviour.ValidateAuthenticationCredentialsAsync(Connection, Credentials);
 
             switch (result)
             {

@@ -10,14 +10,14 @@ namespace Rnwood.SmtpServer
 
         ISession Session { get; set; }
 
-        new DateTime ReceivedDate { get; set; }
-        new string From { get; set; }
+        DateTime ReceivedDate { get; set; }
+        string From { get; set; }
 
         ICollection<string> To { get; }
 
-        new bool SecureConnection { get; set; }
-        new bool EightBitTransport { get; set; }
-        new long? DeclaredMessageSize { get; set; }
+        bool SecureConnection { get; set; }
+        bool EightBitTransport { get; set; }
+        long? DeclaredMessageSize { get; set; }
 
         IMessage ToMessage();
 

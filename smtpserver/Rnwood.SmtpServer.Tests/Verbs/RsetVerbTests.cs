@@ -14,7 +14,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             RsetVerb verb = new RsetVerb();
             await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("RSET"));
 
-            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
+            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
             mocks.Connection.Verify(c => c.AbortMessage());
         }
     }

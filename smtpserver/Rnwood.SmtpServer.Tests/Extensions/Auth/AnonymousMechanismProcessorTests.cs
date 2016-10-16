@@ -8,30 +8,30 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
     public class AnomymousMechanismProcessorTests
     {
         [Fact]
-        public void ProcessResponse_Success()
+        public async Task ProcessResponse_Success()
         {
-            ProcessResponse(AuthenticationResult.Success, AuthMechanismProcessorStatus.Success);
+            await ProcessResponseAsync(AuthenticationResult.Success, AuthMechanismProcessorStatus.Success);
         }
 
         [Fact]
-        public void ProcessResponse_Failure()
+        public async Task ProcessResponse_Failure()
         {
-            ProcessResponse(AuthenticationResult.Failure, AuthMechanismProcessorStatus.Failed);
+            await ProcessResponseAsync(AuthenticationResult.Failure, AuthMechanismProcessorStatus.Failed);
         }
 
         [Fact]
-        public void ProcessResponse_TemporarilyFailure()
+        public async Task ProcessResponse_TemporarilyFailure()
         {
-            ProcessResponse(AuthenticationResult.TemporaryFailure, AuthMechanismProcessorStatus.Failed);
+            await ProcessResponseAsync(AuthenticationResult.TemporaryFailure, AuthMechanismProcessorStatus.Failed);
         }
 
-        private async Task ProcessResponse(AuthenticationResult authenticationResult, AuthMechanismProcessorStatus authMechanismProcessorStatus)
+        private async Task ProcessResponseAsync(AuthenticationResult authenticationResult, AuthMechanismProcessorStatus authMechanismProcessorStatus)
         {
             Mocks mocks = new Mocks();
             mocks.ServerBehaviour.Setup(
                 b =>
-                b.ValidateAuthenticationCredentials(mocks.Connection.Object, It.IsAny<AnonymousAuthenticationCredentials>()))
-                .Returns(authenticationResult);
+                b.ValidateAuthenticationCredentialsAsync(mocks.Connection.Object, It.IsAny<AnonymousAuthenticationCredentials>()))
+                .ReturnsAsync(authenticationResult);
 
             AnonymousMechanismProcessor anonymousMechanismProcessor = new AnonymousMechanismProcessor(mocks.Connection.Object);
             AuthMechanismProcessorStatus result = await anonymousMechanismProcessor.ProcessResponseAsync(null);

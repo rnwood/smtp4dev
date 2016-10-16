@@ -24,7 +24,7 @@ namespace Rnwood.Smtp4dev.Controllers.API.DTO
                     MimeMessage mimeMessage = MimeMessage.Load(messageData);
                     subject = mimeMessage.Subject;
                 }
-                catch (FormatException e)
+                catch (FormatException)
                 {
                     subject = "";
                 }

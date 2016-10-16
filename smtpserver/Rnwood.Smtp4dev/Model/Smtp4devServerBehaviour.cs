@@ -133,7 +133,7 @@ namespace Rnwood.Smtp4dev.Model
         {
         }
 
-        public AuthenticationResult ValidateAuthenticationCredentials(IConnection connection, IAuthenticationCredentials authenticationRequest)
+        public async Task<AuthenticationResult> ValidateAuthenticationCredentialsAsync(IConnection connection, IAuthenticationCredentials authenticationRequest)
         {
             return AuthenticationResult.Success;
         }

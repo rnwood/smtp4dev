@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -95,7 +96,7 @@ namespace Rnwood.SmtpServer
         /// <param name="connection">The connection.</param>
         /// <param name="authenticationRequest">The authentication request.</param>
         /// <returns></returns>
-        AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
+        Task<AuthenticationResult> ValidateAuthenticationCredentialsAsync(IConnection connection,
                                                            IAuthenticationCredentials authenticationRequest);
 
         /// <summary>

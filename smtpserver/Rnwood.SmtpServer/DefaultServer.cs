@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
 
 namespace Rnwood.SmtpServer
 {
@@ -82,10 +83,10 @@ namespace Rnwood.SmtpServer
             remove { Behaviour.SessionStarted -= value; }
         }
 
-        public event EventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequired
+        public event Func<object, AuthenticationCredentialsValidationEventArgs, Task> AuthenticationCredentialsValidationRequiredAsync
         {
-            add { Behaviour.AuthenticationCredentialsValidationRequired += value; }
-            remove { Behaviour.AuthenticationCredentialsValidationRequired -= value; }
+            add { Behaviour.AuthenticationCredentialsValidationRequiredAsync += value; }
+            remove { Behaviour.AuthenticationCredentialsValidationRequiredAsync -= value; }
         }
 
         public event EventHandler<ConnectionEventArgs> MessageCompleted

@@ -4,9 +4,11 @@ using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Extensions.Auth;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
+using System.Threading.Tasks;
 
 #endregion
 
@@ -131,12 +133,28 @@ namespace Rnwood.SmtpServer
             get { return 10; }
         }
 
-        public virtual AuthenticationResult ValidateAuthenticationCredentials(IConnection connection,
+        public async virtual Task<AuthenticationResult> ValidateAuthenticationCredentialsAsync(IConnection connection,
                                                                           IAuthenticationCredentials request)
         {
-            if (AuthenticationCredentialsValidationRequired != null)
+            var handlers = AuthenticationCredentialsValidationRequiredAsync;
+
+            if (handlers != null)
             {
-                AuthenticationCredentialsValidationRequired(this, new AuthenticationCredentialsValidationEventArgs(request));
+                var tasks = handlers.GetInvocationList()
+                    .Cast<Func<object, AuthenticationCredentialsValidationEventArgs, Task>>()
+                    .Select(h =>
+                    {
+                        AuthenticationCredentialsValidationEventArgs args = new AuthenticationCredentialsValidationEventArgs(request);
+                        return new { Args = args, Task = h(this, args) };
+                    });
+
+                await Task.WhenAll(tasks.Select(t => t.Task).ToArray());
+
+                AuthenticationResult? failureResult = tasks.Select(t => t.Args.AuthenticationResult)
+                    .Where(r => r != AuthenticationResult.Success)
+                    .FirstOrDefault() ;
+
+                return failureResult ?? AuthenticationResult.Success;
             }
 
             return AuthenticationResult.Failure;
@@ -184,6 +202,6 @@ namespace Rnwood.SmtpServer
 
         public event EventHandler<SessionEventArgs> SessionStarted;
 
-        public event EventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequired;
+        public event Func<object, AuthenticationCredentialsValidationEventArgs, Task> AuthenticationCredentialsValidationRequiredAsync;
     }
 }

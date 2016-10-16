@@ -42,7 +42,7 @@ namespace Rnwood.SmtpServer.Tests
 
         public Mock<IVerbMap> VerbMap { get; private set; }
 
-        public async Task VerifyWriteResponseAsync(StandardSmtpResponseCode responseCode)
+        public void VerifyWriteResponseAsync(StandardSmtpResponseCode responseCode)
         {
             Connection.Verify(c => c.WriteResponseAsync(It.Is<SmtpResponse>(r => r.Code == (int)responseCode)));
         }

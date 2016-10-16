@@ -52,7 +52,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
             Credentials = new PlainAuthenticationCredentials(username, password);
 
             AuthenticationResult result =
-                Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials);
+                await Connection.Server.Behaviour.ValidateAuthenticationCredentialsAsync(Connection, Credentials);
             switch (result)
             {
                 case AuthenticationResult.Success:
