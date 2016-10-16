@@ -41,6 +41,11 @@ namespace Rnwood.SmtpServer
         public void Close()
         {
             _writer.Flush();
+            Terminate();
+        }
+
+        public void Terminate()
+        {
             _tcpClient.Dispose();
         }
 
