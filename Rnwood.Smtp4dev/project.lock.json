@@ -3901,7 +3901,7 @@
           "lib/netstandard1.3/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0-beta": {
+      "Rnwood.SmtpServer/3.0.0-alpha": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
@@ -8061,7 +8061,7 @@
           "lib/netstandard1.3/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0-beta": {
+      "Rnwood.SmtpServer/3.0.0-alpha": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
@@ -12223,7 +12223,7 @@
           "lib/netstandard1.3/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0-beta": {
+      "Rnwood.SmtpServer/3.0.0-alpha": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
@@ -16472,7 +16472,7 @@
           "lib/netstandard1.3/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0-beta": {
+      "Rnwood.SmtpServer/3.0.0-alpha": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
@@ -20721,7 +20721,7 @@
           "lib/netstandard1.3/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0-beta": {
+      "Rnwood.SmtpServer/3.0.0-alpha": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
@@ -23177,7 +23177,7 @@
           "lib/net46/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0-beta": {
+      "Rnwood.SmtpServer/3.0.0-alpha": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1",
         "dependencies": {
@@ -25517,7 +25517,7 @@
           "lib/net46/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0-beta": {
+      "Rnwood.SmtpServer/3.0.0-alpha": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1",
         "dependencies": {
@@ -27857,7 +27857,7 @@
           "lib/net46/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0-beta": {
+      "Rnwood.SmtpServer/3.0.0-alpha": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1",
         "dependencies": {
@@ -30197,7 +30197,7 @@
           "lib/net46/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0-beta": {
+      "Rnwood.SmtpServer/3.0.0-alpha": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1",
         "dependencies": {
@@ -32537,7 +32537,7 @@
           "lib/net46/System.Xml.XPath.XDocument.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0-beta": {
+      "Rnwood.SmtpServer/3.0.0-alpha": {
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1",
         "dependencies": {
@@ -40224,7 +40224,7 @@
         "ref/xamarinwatchos10/_._"
       ]
     },
-    "Rnwood.SmtpServer/4.0.0-beta": {
+    "Rnwood.SmtpServer/3.0.0-alpha": {
       "type": "project",
       "path": "../Rnwood.SmtpServer/project.json",
       "msbuildProject": "../Rnwood.SmtpServer/Rnwood.SmtpServer.xproj"
