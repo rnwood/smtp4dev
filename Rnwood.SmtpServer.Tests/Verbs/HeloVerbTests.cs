@@ -13,7 +13,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             HeloVerb verb = new HeloVerb();
             await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("HELO foo.blah"));
 
-            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
+            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
             mocks.Session.VerifySet(s => s.ClientName = "foo.blah");
         }
 
@@ -26,7 +26,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             HeloVerb verb = new HeloVerb();
             await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("HELO foo.blah"));
 
-            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.BadSequenceOfCommands);
+            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.BadSequenceOfCommands);
         }
 
         [Fact]
@@ -37,7 +37,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             HeloVerb verb = new HeloVerb();
             await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("HELO"));
 
-            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
+            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
             mocks.Session.VerifySet(s => s.ClientName = "");
         }
     }

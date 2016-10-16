@@ -49,7 +49,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                     Credentials = new LoginAuthenticationCredentials(_username, password);
 
                     AuthenticationResult result =
-                        Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection,
+                        await Connection.Server.Behaviour.ValidateAuthenticationCredentialsAsync(Connection,
                                                                                       Credentials);
 
                     switch (result)

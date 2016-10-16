@@ -59,7 +59,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
                 Credentials = new CramMd5AuthenticationCredentials(username, _challenge, hash);
 
                 AuthenticationResult result =
-                    Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials);
+                    await Connection.Server.Behaviour.ValidateAuthenticationCredentialsAsync(Connection, Credentials);
 
                 switch (result)
                 {

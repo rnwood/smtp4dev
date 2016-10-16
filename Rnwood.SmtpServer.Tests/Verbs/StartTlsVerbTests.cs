@@ -21,7 +21,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             StartTlsVerb verb = new StartTlsVerb();
             await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("STARTTLS"));
 
-            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.CommandNotImplemented);
+            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.CommandNotImplemented);
         }
     }
 }

@@ -10,6 +10,10 @@ using System.Linq;
 using System.Reflection;
 using System.Threading.Tasks;
 
+#if NET461
+using Microsoft.AspNetCore.Hosting.WindowsServices;
+#endif
+
 namespace Rnwood.Smtp4dev
 {
     public class Program
@@ -22,7 +26,19 @@ namespace Rnwood.Smtp4dev
                 .UseStartup<Startup>()
                 .Build();
 
-            host.Run();
+            if (args.Contains("--service", StringComparer.OrdinalIgnoreCase))
+            {
+#if NET461
+                host.RunAsService();
+#else
+                Console.Error.WriteLine("ERROR --service not supported on this platform");
+                Environment.Exit(1);
+#endif
+            }
+            else
+            {
+                host.Run();
+            }
         }
     }
 }

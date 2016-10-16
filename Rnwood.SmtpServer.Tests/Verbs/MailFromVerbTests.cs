@@ -15,7 +15,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             MailFromVerb mailFromVerb = new MailFromVerb();
             await mailFromVerb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("FROM <foo@bar.com>"));
 
-            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.BadSequenceOfCommands);
+            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.BadSequenceOfCommands);
         }
 
         [Fact]
@@ -26,7 +26,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             MailFromVerb mailFromVerb = new MailFromVerb();
             await mailFromVerb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("FROM"));
 
-            await mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
+            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
         }
 
         [Fact]
@@ -66,7 +66,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             MailFromVerb mailFromVerb = new MailFromVerb();
             await mailFromVerb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("FROM " + address));
 
-            await mocks.VerifyWriteResponseAsync(expectedResponse);
+            mocks.VerifyWriteResponseAsync(expectedResponse);
             message.VerifySet(m => m.From = expectedParsedAddress);
         }
     }

@@ -867,7 +867,7 @@
           "lib/netstandard1.6/Microsoft.DotNet.Cli.Utils.dll": {}
         }
       },
-      "Microsoft.DotNet.InternalAbstractions/1.0.0": {
+      "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
           "System.AppContext": "4.1.0",
@@ -886,11 +886,11 @@
           "lib/netstandard1.3/Microsoft.DotNet.InternalAbstractions.dll": {}
         }
       },
-      "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121": {
+      "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206": {
         "type": "package",
         "dependencies": {
           "Microsoft.CSharp": "4.0.1",
-          "Microsoft.Extensions.DependencyModel": "1.0.0",
+          "Microsoft.Extensions.DependencyModel": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "NuGet.Packaging": "3.5.0-beta2-1484",
           "NuGet.RuntimeModel": "3.5.0-beta2-1484",
@@ -1079,10 +1079,10 @@
           "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/1.0.0": {
+      "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+          "Microsoft.DotNet.InternalAbstractions": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "System.Diagnostics.Debug": "4.0.11",
           "System.Dynamic.Runtime": "4.0.11",
@@ -4751,7 +4751,7 @@
           "lib/netstandard1.6/Microsoft.DotNet.Cli.Utils.dll": {}
         }
       },
-      "Microsoft.DotNet.InternalAbstractions/1.0.0": {
+      "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
           "System.AppContext": "4.1.0",
@@ -4770,11 +4770,11 @@
           "lib/netstandard1.3/Microsoft.DotNet.InternalAbstractions.dll": {}
         }
       },
-      "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121": {
+      "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206": {
         "type": "package",
         "dependencies": {
           "Microsoft.CSharp": "4.0.1",
-          "Microsoft.Extensions.DependencyModel": "1.0.0",
+          "Microsoft.Extensions.DependencyModel": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "NuGet.Packaging": "3.5.0-beta2-1484",
           "NuGet.RuntimeModel": "3.5.0-beta2-1484",
@@ -4963,10 +4963,10 @@
           "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/1.0.0": {
+      "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+          "Microsoft.DotNet.InternalAbstractions": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "System.Diagnostics.Debug": "4.0.11",
           "System.Dynamic.Runtime": "4.0.11",
@@ -8911,7 +8911,7 @@
           "lib/netstandard1.6/Microsoft.DotNet.Cli.Utils.dll": {}
         }
       },
-      "Microsoft.DotNet.InternalAbstractions/1.0.0": {
+      "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
           "System.AppContext": "4.1.0",
@@ -8930,11 +8930,11 @@
           "lib/netstandard1.3/Microsoft.DotNet.InternalAbstractions.dll": {}
         }
       },
-      "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121": {
+      "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206": {
         "type": "package",
         "dependencies": {
           "Microsoft.CSharp": "4.0.1",
-          "Microsoft.Extensions.DependencyModel": "1.0.0",
+          "Microsoft.Extensions.DependencyModel": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "NuGet.Packaging": "3.5.0-beta2-1484",
           "NuGet.RuntimeModel": "3.5.0-beta2-1484",
@@ -9123,10 +9123,10 @@
           "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/1.0.0": {
+      "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+          "Microsoft.DotNet.InternalAbstractions": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "System.Diagnostics.Debug": "4.0.11",
           "System.Dynamic.Runtime": "4.0.11",
@@ -13073,7 +13073,7 @@
           "lib/netstandard1.6/Microsoft.DotNet.Cli.Utils.dll": {}
         }
       },
-      "Microsoft.DotNet.InternalAbstractions/1.0.0": {
+      "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
           "System.AppContext": "4.1.0",
@@ -13092,11 +13092,11 @@
           "lib/netstandard1.3/Microsoft.DotNet.InternalAbstractions.dll": {}
         }
       },
-      "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121": {
+      "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206": {
         "type": "package",
         "dependencies": {
           "Microsoft.CSharp": "4.0.1",
-          "Microsoft.Extensions.DependencyModel": "1.0.0",
+          "Microsoft.Extensions.DependencyModel": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "NuGet.Packaging": "3.5.0-beta2-1484",
           "NuGet.RuntimeModel": "3.5.0-beta2-1484",
@@ -13285,10 +13285,10 @@
           "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/1.0.0": {
+      "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+          "Microsoft.DotNet.InternalAbstractions": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "System.Diagnostics.Debug": "4.0.11",
           "System.Dynamic.Runtime": "4.0.11",
@@ -17322,7 +17322,7 @@
           "lib/netstandard1.6/Microsoft.DotNet.Cli.Utils.dll": {}
         }
       },
-      "Microsoft.DotNet.InternalAbstractions/1.0.0": {
+      "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
           "System.AppContext": "4.1.0",
@@ -17341,11 +17341,11 @@
           "lib/netstandard1.3/Microsoft.DotNet.InternalAbstractions.dll": {}
         }
       },
-      "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121": {
+      "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206": {
         "type": "package",
         "dependencies": {
           "Microsoft.CSharp": "4.0.1",
-          "Microsoft.Extensions.DependencyModel": "1.0.0",
+          "Microsoft.Extensions.DependencyModel": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "NuGet.Packaging": "3.5.0-beta2-1484",
           "NuGet.RuntimeModel": "3.5.0-beta2-1484",
@@ -17534,10 +17534,10 @@
           "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/1.0.0": {
+      "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+          "Microsoft.DotNet.InternalAbstractions": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "System.Diagnostics.Debug": "4.0.11",
           "System.Dynamic.Runtime": "4.0.11",
@@ -21525,7 +21525,7 @@
           "lib/net451/Microsoft.DotNet.Cli.Utils.dll": {}
         }
       },
-      "Microsoft.DotNet.InternalAbstractions/1.0.0": {
+      "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206": {
         "type": "package",
         "compile": {
           "lib/net451/Microsoft.DotNet.InternalAbstractions.dll": {}
@@ -21534,10 +21534,10 @@
           "lib/net451/Microsoft.DotNet.InternalAbstractions.dll": {}
         }
       },
-      "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121": {
+      "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.DependencyModel": "1.0.0",
+          "Microsoft.Extensions.DependencyModel": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "NuGet.Packaging": "3.5.0-beta2-1484",
           "NuGet.RuntimeModel": "3.5.0-beta2-1484",
@@ -21694,10 +21694,10 @@
           "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/1.0.0": {
+      "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+          "Microsoft.DotNet.InternalAbstractions": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1"
         },
         "compile": {
@@ -23939,7 +23939,7 @@
           "lib/net451/Microsoft.DotNet.Cli.Utils.dll": {}
         }
       },
-      "Microsoft.DotNet.InternalAbstractions/1.0.0": {
+      "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206": {
         "type": "package",
         "compile": {
           "lib/net451/Microsoft.DotNet.InternalAbstractions.dll": {}
@@ -23948,10 +23948,10 @@
           "lib/net451/Microsoft.DotNet.InternalAbstractions.dll": {}
         }
       },
-      "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121": {
+      "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.DependencyModel": "1.0.0",
+          "Microsoft.Extensions.DependencyModel": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "NuGet.Packaging": "3.5.0-beta2-1484",
           "NuGet.RuntimeModel": "3.5.0-beta2-1484",
@@ -24108,10 +24108,10 @@
           "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/1.0.0": {
+      "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+          "Microsoft.DotNet.InternalAbstractions": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1"
         },
         "compile": {
@@ -26279,7 +26279,7 @@
           "lib/net451/Microsoft.DotNet.Cli.Utils.dll": {}
         }
       },
-      "Microsoft.DotNet.InternalAbstractions/1.0.0": {
+      "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206": {
         "type": "package",
         "compile": {
           "lib/net451/Microsoft.DotNet.InternalAbstractions.dll": {}
@@ -26288,10 +26288,10 @@
           "lib/net451/Microsoft.DotNet.InternalAbstractions.dll": {}
         }
       },
-      "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121": {
+      "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.DependencyModel": "1.0.0",
+          "Microsoft.Extensions.DependencyModel": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "NuGet.Packaging": "3.5.0-beta2-1484",
           "NuGet.RuntimeModel": "3.5.0-beta2-1484",
@@ -26448,10 +26448,10 @@
           "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/1.0.0": {
+      "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+          "Microsoft.DotNet.InternalAbstractions": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1"
         },
         "compile": {
@@ -28619,7 +28619,7 @@
           "lib/net451/Microsoft.DotNet.Cli.Utils.dll": {}
         }
       },
-      "Microsoft.DotNet.InternalAbstractions/1.0.0": {
+      "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206": {
         "type": "package",
         "compile": {
           "lib/net451/Microsoft.DotNet.InternalAbstractions.dll": {}
@@ -28628,10 +28628,10 @@
           "lib/net451/Microsoft.DotNet.InternalAbstractions.dll": {}
         }
       },
-      "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121": {
+      "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.DependencyModel": "1.0.0",
+          "Microsoft.Extensions.DependencyModel": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "NuGet.Packaging": "3.5.0-beta2-1484",
           "NuGet.RuntimeModel": "3.5.0-beta2-1484",
@@ -28788,10 +28788,10 @@
           "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/1.0.0": {
+      "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+          "Microsoft.DotNet.InternalAbstractions": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1"
         },
         "compile": {
@@ -30959,7 +30959,7 @@
           "lib/net451/Microsoft.DotNet.Cli.Utils.dll": {}
         }
       },
-      "Microsoft.DotNet.InternalAbstractions/1.0.0": {
+      "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206": {
         "type": "package",
         "compile": {
           "lib/net451/Microsoft.DotNet.InternalAbstractions.dll": {}
@@ -30968,10 +30968,10 @@
           "lib/net451/Microsoft.DotNet.InternalAbstractions.dll": {}
         }
       },
-      "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121": {
+      "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.Extensions.DependencyModel": "1.0.0",
+          "Microsoft.Extensions.DependencyModel": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1",
           "NuGet.Packaging": "3.5.0-beta2-1484",
           "NuGet.RuntimeModel": "3.5.0-beta2-1484",
@@ -31128,10 +31128,10 @@
           "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
         }
       },
-      "Microsoft.Extensions.DependencyModel/1.0.0": {
+      "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206": {
         "type": "package",
         "dependencies": {
-          "Microsoft.DotNet.InternalAbstractions": "1.0.0",
+          "Microsoft.DotNet.InternalAbstractions": "1.0.1-beta-003206",
           "Newtonsoft.Json": "9.0.1"
         },
         "compile": {
@@ -33243,23 +33243,23 @@
         "lib/netstandard1.6/Microsoft.DotNet.Cli.Utils.dll"
       ]
     },
-    "Microsoft.DotNet.InternalAbstractions/1.0.0": {
-      "sha512": "AAguUq7YyKk3yDWPoWA8DrLZvURxB/LrDdTn1h5lmPeznkFUpfC3p459w5mQYQE0qpquf/CkSQZ0etiV5vRHFA==",
+    "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206": {
+      "sha512": "FznBxQy6fucPtW8c8R8Y4vYYc1f9t5pROz7fFV02cDwpx93TEXBiM7rn29TtZTe51TPJsHfX37CzBx8mGNFWhg==",
       "type": "package",
-      "path": "Microsoft.DotNet.InternalAbstractions/1.0.0",
+      "path": "Microsoft.DotNet.InternalAbstractions/1.0.1-beta-003206",
       "files": [
-        "Microsoft.DotNet.InternalAbstractions.1.0.0.nupkg.sha512",
+        "Microsoft.DotNet.InternalAbstractions.1.0.1-beta-003206.nupkg.sha512",
         "Microsoft.DotNet.InternalAbstractions.nuspec",
         "lib/net451/Microsoft.DotNet.InternalAbstractions.dll",
         "lib/netstandard1.3/Microsoft.DotNet.InternalAbstractions.dll"
       ]
     },
-    "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121": {
-      "sha512": "wnWw5KsKinG2wWxdoQIJXZlMFvPNhL7WmIyW9q6xrZFUi/uld5PC3ksq2QDZepF148FUjCIyTP+TnRwU3RJqUg==",
+    "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206": {
+      "sha512": "VawLdMCNmxjeEIUoX7l8hAZf8OCLJW69ZYF2OeLe3lez+Z7J/sT9TzvMUVwkBmHMqr6FmOK/9bvQN1Sp/n4hIQ==",
       "type": "package",
-      "path": "Microsoft.DotNet.ProjectModel/1.0.0-rc3-003121",
+      "path": "Microsoft.DotNet.ProjectModel/1.0.0-rc4-003206",
       "files": [
-        "Microsoft.DotNet.ProjectModel.1.0.0-rc3-003121.nupkg.sha512",
+        "Microsoft.DotNet.ProjectModel.1.0.0-rc4-003206.nupkg.sha512",
         "Microsoft.DotNet.ProjectModel.nuspec",
         "lib/net451/Microsoft.DotNet.ProjectModel.dll",
         "lib/netstandard1.6/Microsoft.DotNet.ProjectModel.dll"
@@ -33395,12 +33395,12 @@
         "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml"
       ]
     },
-    "Microsoft.Extensions.DependencyModel/1.0.0": {
-      "sha512": "n55Y2T4qMgCNMrJaqAN+nlG2EH4XL+e9uxIg4vdFsQeF+L8UKxRdD3C35Bt+xk3vO3Zwp3g+6KFq2VPH2COSmg==",
+    "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206": {
+      "sha512": "3NksdRkng/dzYmaW4GDJx8ZIrVvugZu/vAcg7US+lAd3K4+xYo7QOnLxkQxi3UGLuTZW8f5c3TP1qKgsElKrIQ==",
       "type": "package",
-      "path": "Microsoft.Extensions.DependencyModel/1.0.0",
+      "path": "Microsoft.Extensions.DependencyModel/1.0.1-beta-003206",
       "files": [
-        "Microsoft.Extensions.DependencyModel.1.0.0.nupkg.sha512",
+        "Microsoft.Extensions.DependencyModel.1.0.1-beta-003206.nupkg.sha512",
         "Microsoft.Extensions.DependencyModel.nuspec",
         "lib/net451/Microsoft.Extensions.DependencyModel.dll",
         "lib/netstandard1.6/Microsoft.Extensions.DependencyModel.dll"
@@ -40239,11 +40239,13 @@
       "Microsoft.AspNetCore.Server.IISIntegration >= 1.0.0",
       "Microsoft.AspNetCore.Server.Kestrel >= 1.0.1",
       "Microsoft.AspNetCore.StaticFiles >= 1.0.0",
+      "Microsoft.DotNet.ProjectModel >= 1.0.0-rc4-003206",
       "Microsoft.Extensions.Configuration.EnvironmentVariables >= 1.0.0",
       "Microsoft.Extensions.Configuration.Json >= 1.0.0",
       "Microsoft.Extensions.Logging >= 1.0.0",
       "Microsoft.Extensions.Logging.Console >= 1.0.0",
       "Microsoft.Extensions.Logging.Debug >= 1.0.0",
+      "Microsoft.Extensions.PlatformAbstractions >= 1.0.0",
       "Microsoft.VisualStudio.Web.BrowserLink.Loader >= 14.0.0",
       "MimeKit >= 1.8.0",
       "NETStandard.Library >= 1.6.0",
