@@ -210,7 +210,7 @@ namespace Rnwood.SmtpServer
 
         public void Terminate()
         {
-            CloseConnection();
+            ConnectionChannel.Terminate();
         }
     }
 }

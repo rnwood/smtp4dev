@@ -22,7 +22,7 @@ after_build:
  - cmd: dotnet publish Rnwood.Smtp4dev -c Release -r osx.10.10-x64 -f netcoreapp1.0
  - ps: |
     dotnet pack Rnwood.SmtpServer -c Release --version-suffix $("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
-    get-item Rnwood.SmtpServer\bin\Release\*.nupkg | %{ appveyor PushArtifact %_.FullName } 
+    get-item Rnwood.SmtpServer\bin\Release\*.nupkg | foreach-object { appveyor PushArtifact $_.FullName } 
 build:
   publish_nuget: false
   publish_nuget_symbols: false

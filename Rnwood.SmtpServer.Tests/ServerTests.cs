@@ -1,7 +1,10 @@
 ﻿#region
 
+using System;
+using System.Linq;
 using System.Net.Sockets;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 
 #endregion
@@ -56,13 +59,42 @@ namespace Rnwood.SmtpServer.Tests
         }
 
         [Fact]
+        public async Task Stop_CannotConnect()
+        {
+            Server server = StartServer();
+            int portNumber = server.PortNumber;
+            server.Stop();
+
+            TcpClient client = new TcpClient();
+            await Assert.ThrowsAnyAsync<SocketException>(async () =>
+                await client.ConnectAsync("localhost", portNumber)
+            );
+        }
+
+        [Fact]
+        public async Task Stop_KillConnectionTrue_ConnectionsKilled()
+        {
+            Server server = StartServer();
+
+            using (TcpClient client = new TcpClient())
+            {
+                await client.ConnectAsync("localhost", server.PortNumber);
+            }
+
+            server.Stop(true);
+
+            Assert.Equal(0, server.ActiveConnections.Count());
+        }
+
+        [Fact]
         public async void Start_CanConnect()
         {
             Server server = StartServer();
 
-            TcpClient client = new TcpClient();
-            await client.ConnectAsync("localhost", server.PortNumber);
-            client.Dispose();
+            using (TcpClient client = new TcpClient())
+            {
+                await client.ConnectAsync("localhost", server.PortNumber);
+            }
 
             server.Stop();
         }

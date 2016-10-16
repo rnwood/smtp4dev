@@ -25,5 +25,7 @@ namespace Rnwood.SmtpServer
         Task WriteLineAsync(string text);
 
         Task<string> ReadLineAsync();
+
+        void Terminate();
     }
 }

@@ -70,34 +70,28 @@ namespace Rnwood.SmtpServer
 
         private async void Core()
         {
-            try
+            while (IsRunning)
             {
-                while (IsRunning)
+                TcpClient tcpClient = null;
+                try
                 {
-                    TcpClient tcpClient = await _listener.AcceptTcpClientAsync();
-
+                    tcpClient = await _listener.AcceptTcpClientAsync();
+                }
+                catch (InvalidOperationException)
+                {
                     if (IsRunning)
                     {
-                        Connection connection = new Connection(this, new TcpClientConnectionChannel(tcpClient), GetVerbMap());
-                        _activeConnections.Add(connection);
-                        await connection.ProcessAsync();
-                        _activeConnections.Remove(connection);
+                        throw;
                     }
+                    //normal - caused by _listener.Stop();
                 }
-            }
-            catch (ObjectDisposedException)
-            {
-                //normal - caused by _listener.Stop();
-            }
-            catch (AggregateException e)
-            {
-                if (e.InnerException is ObjectDisposedException)
+
+                if (IsRunning)
                 {
-                    //normal - caused by _listener.Stop() returned by Wait()
-                }
-                else
-                {
-                    throw;
+                    Connection connection = new Connection(this, new TcpClientConnectionChannel(tcpClient), GetVerbMap());
+                    _activeConnections.Add(connection);
+                    await connection.ProcessAsync();
+                    _activeConnections.Remove(connection);
                 }
             }
         }
@@ -117,7 +111,6 @@ namespace Rnwood.SmtpServer
 
             IsRunning = true;
 
-            _coreTaskCancellationToken = new CancellationTokenSource();
             _coreTask = Task.Run(() => Core());
         }
 
@@ -145,7 +138,7 @@ namespace Rnwood.SmtpServer
                 return;
             }
 
-            _coreTaskCancellationToken.Cancel();
+            IsRunning = false;
             _listener.Stop();
             _coreTask.Wait();
 
@@ -153,17 +146,22 @@ namespace Rnwood.SmtpServer
             {
                 foreach (Connection connection in _activeConnections.Cast<Connection>().ToArray())
                 {
-                    connection.CloseConnection();
                     connection.Terminate();
                 }
             }
-
-            IsRunning = false;
         }
 
         private readonly IList _activeConnections = ArrayList.Synchronized(new List<Connection>());
+
+        public IEnumerable<IConnection> ActiveConnections
+        {
+            get
+            {
+                return _activeConnections.Cast<IConnection>();
+            }
+        }
+
         private Task _coreTask;
-        private CancellationTokenSource _coreTaskCancellationToken;
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
