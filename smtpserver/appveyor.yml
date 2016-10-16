@@ -13,7 +13,6 @@ nuget:
 before_build:
 - cmd: |
     dotnet restore
-    dnvm upgrade
     npm install -g gulp bower
 after_build:
  - cmd: dotnet publish Rnwood.Smtp4dev -c Release -r win7-x64 -f net461
