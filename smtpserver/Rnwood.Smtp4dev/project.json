@@ -11,7 +11,7 @@
 
   "dependencies": {
     "NETStandard.Library": "1.6.0",
-    "Rnwood.SmtpServer": "4.0.0-*",
+    "Rnwood.SmtpServer": "3.0.0-*",
     "MimeKit": "1.8.0",
     "Swashbuckle": "6.0.0-beta902",
     "Microsoft.AspNetCore.Diagnostics": "1.0.0",

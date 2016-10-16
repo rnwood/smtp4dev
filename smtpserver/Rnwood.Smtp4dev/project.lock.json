@@ -40249,7 +40249,7 @@
       "Microsoft.VisualStudio.Web.BrowserLink.Loader >= 14.0.0",
       "MimeKit >= 1.8.0",
       "NETStandard.Library >= 1.6.0",
-      "Rnwood.SmtpServer >= 4.0.0-*",
+      "Rnwood.SmtpServer >= 3.0.0-*",
       "Swashbuckle >= 6.0.0-beta902"
     ],
     ".NETCoreApp,Version=v1.0": [],
