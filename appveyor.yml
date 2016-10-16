@@ -52,4 +52,8 @@ deploy:
   draft: false
   prerelease: true
   on:
-    branch: master                 # release from master branch only
+    branch: master                 # release from master branch only	
+cache:
+  - Rnwood.Smtp4dev\node_modules                        # local npm modules
+  - '%APPDATA%\npm-cache'               # npm cache
+  - '%USERPROFILE%\.nuget\packages -> **\project.json'  # project.json cache
