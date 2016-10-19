@@ -8426,7 +8426,7 @@
     "": [
       "MailKit >= 1.8.1",
       "Moq >= 4.6.38-alpha",
-      "Rnwood.SmtpServer >= 4.0.0-*",
+      "Rnwood.SmtpServer",
       "System.Collections.NonGeneric >= 4.0.1",
       "System.Net.Security >= 4.0.0",
       "dotnet-test-xunit >= 2.2.0-preview2-build1029",

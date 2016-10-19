@@ -4,16 +4,10 @@
   "description": "Smtp4dev is a SMTP mail server for use during development and testing.",
   "licenseUrl": "https://github.com/rnwood/smtp4dev/blob/master/LICENSE.md",
   "projectUrl": "http://github.com/rnwood/smtp4dev",
-
-  "commands": {
-    "run": "Rnwood.Smtp4dev"
-  },
-
   "dependencies": {
     "NETStandard.Library": "1.6.0",
     "Rnwood.SmtpServer": "3.0.0-*",
     "MimeKit": "1.8.0",
-    "Swashbuckle": "6.0.0-beta902",
     "Microsoft.AspNetCore.Diagnostics": "1.0.0",
     "Microsoft.AspNetCore.Mvc": "1.0.1",
     "Microsoft.AspNetCore.Razor.Tools": {
@@ -29,9 +23,8 @@
     "Microsoft.Extensions.Logging": "1.0.0",
     "Microsoft.Extensions.Logging.Console": "1.0.0",
     "Microsoft.Extensions.Logging.Debug": "1.0.0",
-    "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0",
-    "Microsoft.Extensions.PlatformAbstractions": "1.0.0",
-    "Microsoft.DotNet.ProjectModel": "1.0.0-rc4-003206"
+    "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.0",
+    "Microsoft.VisualStudio.Web.BrowserLink.Loader": "14.0.0"
   },
 
   "tools": {
@@ -42,8 +35,14 @@
 
   "frameworks": {
     "netcoreapp1.0": {
-      "Microsoft.NETCore.App": {
-        "version": "1.0.1"
+      "imports": [
+        "dotnet5.6",
+        "portable-net45+win8"
+      ],
+      "dependencies": {
+        "Microsoft.NETCore.App": {
+          "version": "1.0.1"
+        }
       }
     },
 
@@ -63,13 +62,16 @@
 
   "buildOptions": {
     "emitEntryPoint": true,
-    "preserveCompilationContext": false
+    "preserveCompilationContext": true
   },
 
   "runtimeOptions": {
     "configProperties": {
       "System.GC.Server": true
     }
+  },
+  "commands": {
+    "run": "Rnwood.Smtp4dev"
   },
 
   "publishOptions": {
