@@ -9,7 +9,6 @@ using Microsoft.Extensions.PlatformAbstractions;
 using Rnwood.Smtp4dev.API;
 using Rnwood.Smtp4dev.Model;
 using Rnwood.Smtp4dev.UI;
-using Swashbuckle.SwaggerGen;
 using System;
 using System.Threading.Tasks;
 
@@ -17,47 +16,41 @@ namespace Rnwood.Smtp4dev
 {
     public class Startup
     {
-        private IHostingEnvironment _hostingEnvironment;
-
-        public Startup(IHostingEnvironment hostingEnvironment)
+        public Startup(IHostingEnvironment env)
         {
-            _hostingEnvironment = hostingEnvironment;
-
-            // Set up configuration sources.
             var builder = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json", true)
+                .SetBasePath(env.ContentRootPath)
+                .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
                 .AddEnvironmentVariables();
 
-            if (_hostingEnvironment.IsDevelopment())
+            if (env.IsDevelopment())
             {
             }
             Configuration = builder.Build();
         }
 
-        public IConfigurationRoot Configuration { get; set; }
+        public IConfigurationRoot Configuration { get; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
-        public void ConfigureServices(Microsoft.Extensions.DependencyInjection.IServiceCollection services)
+        public void ConfigureServices(IServiceCollection services)
         {
             // Add framework services.
 
-            services.AddMvc();
-            services.AddSwaggerGen();
             services.UseSmtp4dev();
+            services.AddMvc();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole();
+            loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
 
             app.UseDeveloperExceptionPage();
+            app.UseBrowserLink();
 
             app.UseStaticFiles();
-
-            app.UseSwagger();
-            app.UseSwaggerUi();
 
             app.UseMvc(routes =>
             {

@@ -23,6 +23,7 @@ namespace Rnwood.Smtp4dev
             var host = new WebHostBuilder()
                 .UseKestrel()
                 .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseIISIntegration()
                 .UseStartup<Startup>()
                 .Build();
 
