@@ -69,9 +69,14 @@ namespace Rnwood.Smtp4dev.Model
             return null;
         }
 
-        public int GetReceiveTimeout(IConnection connection)
+        public TimeSpan GetReceiveTimeout(IConnection connection)
         {
-            return int.MaxValue;
+            return TimeSpan.FromMinutes(5);
+        }
+
+        public TimeSpan GetSendTimeout(IConnection connection)
+        {
+            return TimeSpan.FromMinutes(5);
         }
 
         public X509Certificate GetSSLCertificate(IConnection connection)
