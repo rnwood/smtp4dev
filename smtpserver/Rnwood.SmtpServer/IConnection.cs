@@ -25,11 +25,9 @@ namespace Rnwood.SmtpServer
 
         void SetReaderEncodingToDefault();
 
-        void CloseConnection();
+        Task CloseConnectionAsync();
 
         Task ApplyStreamFilterAsync(Func<Stream, Task<Stream>> filter);
-
-        Task WriteLineAsync(string text, params object[] arg);
 
         Task WriteResponseAsync(SmtpResponse response);
 

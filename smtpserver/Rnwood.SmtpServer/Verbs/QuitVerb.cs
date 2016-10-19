@@ -12,8 +12,8 @@ namespace Rnwood.SmtpServer
         public async Task ProcessAsync(IConnection connection, SmtpCommand command)
         {
             await connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel,
-                                                               "See you later aligator"));
-            connection.CloseConnection();
+                                                               "Goodbye"));
+            await connection.CloseConnectionAsync();
             connection.Session.CompletedNormally = true;
         }
     }

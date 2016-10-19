@@ -123,9 +123,14 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        public virtual int GetReceiveTimeout(IConnection connection)
+        public virtual TimeSpan GetReceiveTimeout(IConnection connection)
         {
-            return (int)new TimeSpan(0, 5, 0).TotalMilliseconds;
+            return new TimeSpan(0, 0, 30);
+        }
+
+        public virtual TimeSpan GetSendTimeout(IConnection connection)
+        {
+            return new TimeSpan(0, 0, 30);
         }
 
         public int MaximumNumberOfSequentialBadCommands
@@ -152,7 +157,7 @@ namespace Rnwood.SmtpServer
 
                 AuthenticationResult? failureResult = tasks.Select(t => t.Args.AuthenticationResult)
                     .Where(r => r != AuthenticationResult.Success)
-                    .FirstOrDefault() ;
+                    .FirstOrDefault();
 
                 return failureResult ?? AuthenticationResult.Success;
             }

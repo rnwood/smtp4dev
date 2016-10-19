@@ -11,10 +11,15 @@ namespace Rnwood.SmtpServer
     public interface IConnectionChannel
     {
         bool IsConnected { get; }
-        int ReceiveTimeout { get; set; }
+        TimeSpan ReceiveTimeout { get; set; }
+
+        TimeSpan SendTimeout { get; set; }
+
         IPAddress ClientIPAddress { get; }
 
-        void Close();
+        Task FlushAsync();
+
+        Task CloseAync();
 
         Encoding ReaderEncoding { get; }
 
@@ -26,6 +31,6 @@ namespace Rnwood.SmtpServer
 
         Task<string> ReadLineAsync();
 
-        void Terminate();
+        event EventHandler Closed;
     }
 }
