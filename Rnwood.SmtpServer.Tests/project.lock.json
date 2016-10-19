@@ -314,6 +314,24 @@
           "lib/netstandard1.6/Microsoft.DotNet.ProjectModel.dll": {}
         }
       },
+      "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.ComponentModel": "4.0.1",
+          "System.Diagnostics.Debug": "4.0.11",
+          "System.Globalization": "4.0.11",
+          "System.Linq": "4.1.0",
+          "System.Linq.Expressions": "4.1.0",
+          "System.Reflection": "4.1.0",
+          "System.Resources.ResourceManager": "4.0.1"
+        },
+        "compile": {
+          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll": {}
+        }
+      },
       "Microsoft.Extensions.DependencyModel/1.0.0": {
         "type": "package",
         "dependencies": {
@@ -328,6 +346,40 @@
         },
         "runtime": {
           "lib/netstandard1.6/Microsoft.Extensions.DependencyModel.dll": {}
+        }
+      },
+      "Microsoft.Extensions.Logging/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "Microsoft.Extensions.DependencyInjection.Abstractions": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
+          "System.Threading": "4.0.11"
+        },
+        "compile": {
+          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.1/Microsoft.Extensions.Logging.dll": {}
+        }
+      },
+      "Microsoft.Extensions.Logging.Abstractions/1.0.0": {
+        "type": "package",
+        "dependencies": {
+          "System.Collections": "4.0.11",
+          "System.Collections.Concurrent": "4.0.12",
+          "System.Diagnostics.Debug": "4.0.11",
+          "System.Globalization": "4.0.11",
+          "System.Linq": "4.1.0",
+          "System.Reflection": "4.1.0",
+          "System.Resources.ResourceManager": "4.0.1",
+          "System.Runtime.Extensions": "4.1.0",
+          "System.Runtime.InteropServices": "4.1.0"
+        },
+        "compile": {
+          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
+        },
+        "runtime": {
+          "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll": {}
         }
       },
       "Microsoft.Extensions.Testing.Abstractions/1.0.0-preview2-003121": {
@@ -2826,13 +2878,16 @@
           "lib/netstandard1.1/xunit.runner.utility.dotnet.dll": {}
         }
       },
-      "Rnwood.SmtpServer/4.0.0-beta": {
+      "Rnwood.SmtpServer/3.0.0-alpha": {
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
+          "Microsoft.Extensions.Logging": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
           "NETStandard.Library": "1.6.0",
           "System.Collections.NonGeneric": "4.0.1",
-          "System.Net.Security": "4.0.0"
+          "System.Net.Security": "4.0.0",
+          "System.Runtime": "4.1.0"
         },
         "compile": {
           "netstandard1.6/Rnwood.SmtpServer.dll": {}
@@ -3098,6 +3153,17 @@
         "lib/netstandard1.6/Microsoft.DotNet.ProjectModel.dll"
       ]
     },
+    "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0": {
+      "sha512": "+XwaNo3o9RhLQhUnnOBCaukeRi1X9yYc0Fzye9RlErSflKZdw0VgHtn6rvKo0FTionsW0x8QVULhKH+nkqVjQA==",
+      "type": "package",
+      "path": "Microsoft.Extensions.DependencyInjection.Abstractions/1.0.0",
+      "files": [
+        "Microsoft.Extensions.DependencyInjection.Abstractions.1.0.0.nupkg.sha512",
+        "Microsoft.Extensions.DependencyInjection.Abstractions.nuspec",
+        "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.dll",
+        "lib/netstandard1.0/Microsoft.Extensions.DependencyInjection.Abstractions.xml"
+      ]
+    },
     "Microsoft.Extensions.DependencyModel/1.0.0": {
       "sha512": "n55Y2T4qMgCNMrJaqAN+nlG2EH4XL+e9uxIg4vdFsQeF+L8UKxRdD3C35Bt+xk3vO3Zwp3g+6KFq2VPH2COSmg==",
       "type": "package",
@@ -3107,6 +3173,28 @@
         "Microsoft.Extensions.DependencyModel.nuspec",
         "lib/net451/Microsoft.Extensions.DependencyModel.dll",
         "lib/netstandard1.6/Microsoft.Extensions.DependencyModel.dll"
+      ]
+    },
+    "Microsoft.Extensions.Logging/1.0.0": {
+      "sha512": "0mDuASVrd/nMeBYIJSK+9lT3TSmWxUXP/ipVB1pF1ApMN5fqGCckPTNwmOfT4Z9wPkXGnhbwFTGrxZvbzTWxOg==",
+      "type": "package",
+      "path": "Microsoft.Extensions.Logging/1.0.0",
+      "files": [
+        "Microsoft.Extensions.Logging.1.0.0.nupkg.sha512",
+        "Microsoft.Extensions.Logging.nuspec",
+        "lib/netstandard1.1/Microsoft.Extensions.Logging.dll",
+        "lib/netstandard1.1/Microsoft.Extensions.Logging.xml"
+      ]
+    },
+    "Microsoft.Extensions.Logging.Abstractions/1.0.0": {
+      "sha512": "wHT6oY50q36mAXBRKtFaB7u07WxKC5u2M8fi3PqHOOnHyUo9gD0u1TlCNR8UObHQxKMYwqlgI8TLcErpt29n8A==",
+      "type": "package",
+      "path": "Microsoft.Extensions.Logging.Abstractions/1.0.0",
+      "files": [
+        "Microsoft.Extensions.Logging.Abstractions.1.0.0.nupkg.sha512",
+        "Microsoft.Extensions.Logging.Abstractions.nuspec",
+        "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.dll",
+        "lib/netstandard1.1/Microsoft.Extensions.Logging.Abstractions.xml"
       ]
     },
     "Microsoft.Extensions.Testing.Abstractions/1.0.0-preview2-003121": {
@@ -8328,7 +8416,7 @@
         "xunit.runner.utility.nuspec"
       ]
     },
-    "Rnwood.SmtpServer/4.0.0-beta": {
+    "Rnwood.SmtpServer/3.0.0-alpha": {
       "type": "project",
       "path": "../Rnwood.SmtpServer/project.json",
       "msbuildProject": "../Rnwood.SmtpServer/Rnwood.SmtpServer.xproj"

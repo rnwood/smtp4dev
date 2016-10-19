@@ -87,7 +87,9 @@ namespace Rnwood.SmtpServer
         /// </summary>
         /// <param name="connection">The connection.</param>
         /// <returns></returns>
-        int GetReceiveTimeout(IConnection connection);
+        TimeSpan GetReceiveTimeout(IConnection connection);
+
+        TimeSpan GetSendTimeout(IConnection connection);
 
         /// <summary>
         /// Validates the authentication request to determine if the supplied details

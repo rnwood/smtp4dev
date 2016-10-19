@@ -14,8 +14,11 @@
   },
 
   "dependencies": {
+    "Microsoft.Extensions.Logging": "1.0.0",
+    "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
     "System.Collections.NonGeneric": "4.0.1",
-    "System.Net.Security": "4.0.0"
+    "System.Net.Security": "4.0.0",
+    "System.Runtime": "4.1.0"
   },
 
   "commands": {

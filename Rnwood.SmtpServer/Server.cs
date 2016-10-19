@@ -1,5 +1,6 @@
 ﻿#region
 
+using Microsoft.Extensions.Logging;
 using Rnwood.SmtpServer.Verbs;
 using System;
 using System.Collections;
@@ -16,6 +17,7 @@ namespace Rnwood.SmtpServer
 {
     public class Server : IServer
     {
+        private ILogger _logger = Logging.Factory.CreateLogger<Server>();
         private TcpListener _listener;
 
         public Server(IServerBehaviour behaviour)
@@ -70,29 +72,59 @@ namespace Rnwood.SmtpServer
 
         private async void Core()
         {
-            while (IsRunning)
-            {
-                TcpClient tcpClient = null;
-                try
-                {
-                    tcpClient = await _listener.AcceptTcpClientAsync();
-                }
-                catch (InvalidOperationException)
-                {
-                    if (IsRunning)
-                    {
-                        throw;
-                    }
-                    //normal - caused by _listener.Stop();
-                }
+            _logger.LogDebug("Core task running");
 
+            try
+            {
+                while (IsRunning)
+                {
+                    _logger.LogDebug("Waiting for new client");
+
+                    await _currentAcceptTask;
+                    _currentAcceptTask = AcceptNextClient();
+                }
+            }
+            finally
+            {
+                _currentAcceptTask = null;
+            }
+        }
+
+        public async Task WaitForNextConnectionAsync()
+        {
+            await _currentAcceptTask;
+        }
+
+        private async Task AcceptNextClient()
+        {
+            TcpClient tcpClient = null;
+            try
+            {
+                tcpClient = await _listener.AcceptTcpClientAsync();
+            }
+            catch (InvalidOperationException)
+            {
                 if (IsRunning)
                 {
-                    Connection connection = new Connection(this, new TcpClientConnectionChannel(tcpClient), GetVerbMap());
-                    _activeConnections.Add(connection);
-                    connection.Terminated += (s, ea) => _activeConnections.Remove(connection);
-                    connection.ProcessAsync();
+                    throw;
                 }
+
+                _logger.LogDebug("Got InvalidOperationException on listener, shutting down");
+                //normal - caused by _listener.Stop();
+            }
+
+            if (IsRunning)
+            {
+                _logger.LogDebug("New connection from {0}", tcpClient.Client.RemoteEndPoint);
+
+                Connection connection = new Connection(this, new TcpClientConnectionChannel(tcpClient), GetVerbMap());
+                _activeConnections.Add(connection);
+                connection.ConnectionClosed += (s, ea) =>
+                {
+                    _logger.LogDebug("Connection {0} handling completed removing from active connections", connection);
+                    _activeConnections.Remove(connection);
+                };
+                connection.ProcessAsync();
             }
         }
 
@@ -106,11 +138,16 @@ namespace Rnwood.SmtpServer
             if (IsRunning)
                 throw new InvalidOperationException("Already running");
 
+            _logger.LogDebug("Starting server on {0}:{1}", Behaviour.IpAddress, Behaviour.PortNumber);
+
             _listener = new TcpListener(Behaviour.IpAddress, Behaviour.PortNumber);
             _listener.Start();
 
             IsRunning = true;
 
+            _logger.LogDebug("Listener active. Starting core task");
+
+            _currentAcceptTask = AcceptNextClient();
             _coreTask = Task.Run(() => Core());
         }
 
@@ -138,17 +175,37 @@ namespace Rnwood.SmtpServer
                 return;
             }
 
+            _logger.LogDebug("Stopping server");
+
             IsRunning = false;
             _listener.Stop();
+
+            _logger.LogDebug("Listener stopped. Waiting for core task to exit");
             _coreTask.Wait();
 
             if (killConnections)
             {
-                foreach (Connection connection in _activeConnections.Cast<Connection>().ToArray())
-                {
-                    connection.Terminate();
-                }
+                KillConnections();
+
+                _logger.LogDebug("Server is stopped");
             }
+            else
+            {
+                _logger.LogDebug("Server is stopped but existing connections may still be active");
+            }
+        }
+
+        public void KillConnections()
+        {
+            _logger.LogDebug("Killing client connections");
+
+            List<Task> killTasks = new List<Task>();
+            foreach (Connection connection in _activeConnections.Cast<Connection>().ToArray())
+            {
+                _logger.LogDebug("Killing connection {0}", connection);
+                killTasks.Add(connection.CloseConnectionAsync());
+            }
+            Task.WaitAll(killTasks.ToArray());
         }
 
         private readonly IList _activeConnections = ArrayList.Synchronized(new List<Connection>());
@@ -165,6 +222,7 @@ namespace Rnwood.SmtpServer
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
+        private Task _currentAcceptTask;
 
         protected virtual void Dispose(bool disposing)
         {

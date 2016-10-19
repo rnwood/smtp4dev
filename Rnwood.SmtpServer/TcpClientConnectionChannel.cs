@@ -7,12 +7,13 @@ using System.Threading.Tasks;
 
 namespace Rnwood.SmtpServer
 {
-    internal class TcpClientConnectionChannel : IConnectionChannel
+    public class TcpClientConnectionChannel : IConnectionChannel
     {
         public TcpClientConnectionChannel(TcpClient tcpClient)
         {
             _tcpClient = tcpClient;
             _stream = tcpClient.GetStream();
+            IsConnected = true;
             SetReaderEncoding(Encoding.ASCII);
         }
 
@@ -35,24 +36,37 @@ namespace Rnwood.SmtpServer
 
         public bool IsConnected
         {
-            get { return _tcpClient.Client.Connected; }
+            get; private set;
         }
 
-        public void Close()
+        public event EventHandler Closed;
+
+        public async Task FlushAsync()
         {
-            _writer.Flush();
-            Terminate();
+            await _writer.FlushAsync();
         }
 
-        public void Terminate()
+        public async Task CloseAync()
         {
-            _tcpClient.Dispose();
+            if (IsConnected)
+            {
+                IsConnected = false;
+                _tcpClient.Dispose();
+
+                Closed?.Invoke(this, EventArgs.Empty);
+            }
         }
 
-        public int ReceiveTimeout
+        public TimeSpan ReceiveTimeout
         {
-            get { return _tcpClient.ReceiveTimeout; }
-            set { _tcpClient.ReceiveTimeout = value; }
+            get { return TimeSpan.FromMilliseconds(_tcpClient.ReceiveTimeout); }
+            set { _tcpClient.ReceiveTimeout = (int)Math.Min(int.MaxValue, value.TotalMilliseconds); }
+        }
+
+        public TimeSpan SendTimeout
+        {
+            get { return TimeSpan.FromMilliseconds(_tcpClient.SendTimeout); }
+            set { _tcpClient.SendTimeout = (int)Math.Min(int.MaxValue, value.TotalMilliseconds); }
         }
 
         public IPAddress ClientIPAddress
@@ -74,19 +88,35 @@ namespace Rnwood.SmtpServer
 
         public async Task<string> ReadLineAsync()
         {
-            string text = await _reader.ReadLineAsync();
-
-            if (text == null)
+            try
             {
-                throw new ConnectionUnexpectedlyClosedException();
-            }
+                string text = await _reader.ReadLineAsync();
 
-            return text;
+                if (text == null)
+                {
+                    throw new IOException("Reader returned null string"); ;
+                }
+
+                return text;
+            }
+            catch (IOException e)
+            {
+                await CloseAync();
+                throw new ConnectionUnexpectedlyClosedException("Read failed", e);
+            }
         }
 
         public async Task WriteLineAsync(string text)
         {
-            await _writer.WriteLineAsync(text);
+            try
+            {
+                await _writer.WriteLineAsync(text);
+            }
+            catch (IOException e)
+            {
+                await CloseAync();
+                throw new ConnectionUnexpectedlyClosedException("Write failed", e);
+            }
         }
     }
 }

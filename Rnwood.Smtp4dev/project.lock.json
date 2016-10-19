@@ -3905,9 +3905,12 @@
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
+          "Microsoft.Extensions.Logging": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
           "NETStandard.Library": "1.6.0",
           "System.Collections.NonGeneric": "4.0.1",
-          "System.Net.Security": "4.0.0"
+          "System.Net.Security": "4.0.0",
+          "System.Runtime": "4.1.0"
         },
         "compile": {
           "netstandard1.6/Rnwood.SmtpServer.dll": {}
@@ -8065,9 +8068,12 @@
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
+          "Microsoft.Extensions.Logging": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
           "NETStandard.Library": "1.6.0",
           "System.Collections.NonGeneric": "4.0.1",
-          "System.Net.Security": "4.0.0"
+          "System.Net.Security": "4.0.0",
+          "System.Runtime": "4.1.0"
         },
         "compile": {
           "netstandard1.6/Rnwood.SmtpServer.dll": {}
@@ -12227,9 +12233,12 @@
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
+          "Microsoft.Extensions.Logging": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
           "NETStandard.Library": "1.6.0",
           "System.Collections.NonGeneric": "4.0.1",
-          "System.Net.Security": "4.0.0"
+          "System.Net.Security": "4.0.0",
+          "System.Runtime": "4.1.0"
         },
         "compile": {
           "netstandard1.6/Rnwood.SmtpServer.dll": {}
@@ -16476,9 +16485,12 @@
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
+          "Microsoft.Extensions.Logging": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
           "NETStandard.Library": "1.6.0",
           "System.Collections.NonGeneric": "4.0.1",
-          "System.Net.Security": "4.0.0"
+          "System.Net.Security": "4.0.0",
+          "System.Runtime": "4.1.0"
         },
         "compile": {
           "netstandard1.6/Rnwood.SmtpServer.dll": {}
@@ -20725,9 +20737,12 @@
         "type": "project",
         "framework": ".NETStandard,Version=v1.6",
         "dependencies": {
+          "Microsoft.Extensions.Logging": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
           "NETStandard.Library": "1.6.0",
           "System.Collections.NonGeneric": "4.0.1",
-          "System.Net.Security": "4.0.0"
+          "System.Net.Security": "4.0.0",
+          "System.Runtime": "4.1.0"
         },
         "compile": {
           "netstandard1.6/Rnwood.SmtpServer.dll": {}
@@ -23181,8 +23196,11 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1",
         "dependencies": {
+          "Microsoft.Extensions.Logging": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
           "System.Collections.NonGeneric": "4.0.1",
-          "System.Net.Security": "4.0.0"
+          "System.Net.Security": "4.0.0",
+          "System.Runtime": "4.1.0"
         },
         "compile": {
           "net461/Rnwood.SmtpServer.dll": {}
@@ -25521,8 +25539,11 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1",
         "dependencies": {
+          "Microsoft.Extensions.Logging": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
           "System.Collections.NonGeneric": "4.0.1",
-          "System.Net.Security": "4.0.0"
+          "System.Net.Security": "4.0.0",
+          "System.Runtime": "4.1.0"
         },
         "compile": {
           "net461/Rnwood.SmtpServer.dll": {}
@@ -27861,8 +27882,11 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1",
         "dependencies": {
+          "Microsoft.Extensions.Logging": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
           "System.Collections.NonGeneric": "4.0.1",
-          "System.Net.Security": "4.0.0"
+          "System.Net.Security": "4.0.0",
+          "System.Runtime": "4.1.0"
         },
         "compile": {
           "net461/Rnwood.SmtpServer.dll": {}
@@ -30201,8 +30225,11 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1",
         "dependencies": {
+          "Microsoft.Extensions.Logging": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
           "System.Collections.NonGeneric": "4.0.1",
-          "System.Net.Security": "4.0.0"
+          "System.Net.Security": "4.0.0",
+          "System.Runtime": "4.1.0"
         },
         "compile": {
           "net461/Rnwood.SmtpServer.dll": {}
@@ -32541,8 +32568,11 @@
         "type": "project",
         "framework": ".NETFramework,Version=v4.6.1",
         "dependencies": {
+          "Microsoft.Extensions.Logging": "1.0.0",
+          "Microsoft.Extensions.Logging.Abstractions": "1.0.0",
           "System.Collections.NonGeneric": "4.0.1",
-          "System.Net.Security": "4.0.0"
+          "System.Net.Security": "4.0.0",
+          "System.Runtime": "4.1.0"
         },
         "compile": {
           "net461/Rnwood.SmtpServer.dll": {}

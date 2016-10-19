@@ -1,6 +1,8 @@
 ﻿using MailKit.Net.Smtp;
 using MimeKit;
+using System;
 using Xunit;
+using Xunit.Abstractions;
 
 namespace Rnwood.SmtpServer.Tests
 {

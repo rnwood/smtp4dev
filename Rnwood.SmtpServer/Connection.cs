@@ -3,6 +3,7 @@
 using Rnwood.SmtpServer.Extensions;
 using Rnwood.SmtpServer.Verbs;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Net.Security;
@@ -17,26 +18,42 @@ namespace Rnwood.SmtpServer
     public class Connection : IConnection
     {
         public IConnectionChannel ConnectionChannel { get; private set; }
+        private string _id;
 
         public Connection(IServer server, IConnectionChannel connectionChannel, IVerbMap verbMap)
         {
+            _id = string.Format("[RemoteIP={0}]", connectionChannel.ClientIPAddress.ToString());
+
             ConnectionChannel = connectionChannel;
+            ConnectionChannel.Closed += OnConnectionChannelClosed;
+
             VerbMap = verbMap;
             Session = server.Behaviour.OnCreateNewSession(this, ConnectionChannel.ClientIPAddress, DateTime.Now);
 
             Server = server;
 
             ConnectionChannel.ReceiveTimeout = Server.Behaviour.GetReceiveTimeout(this);
+            ConnectionChannel.SendTimeout = Server.Behaviour.GetSendTimeout(this);
             SetReaderEncodingToDefault();
 
             ExtensionProcessors = Server.Behaviour.GetExtensions(this).Select(e => e.CreateExtensionProcessor(this)).ToArray();
+        }
+
+        private void OnConnectionChannelClosed(object sender, EventArgs e)
+        {
+            ConnectionClosed?.Invoke(this, EventArgs.Empty);
+        }
+
+        public override string ToString()
+        {
+            return _id;
         }
 
         #region IConnectionProcessor Members
 
         public IServer Server { get; private set; }
 
-        public event EventHandler Terminated;
+        public event EventHandler ConnectionClosed;
 
         public void SetReaderEncoding(Encoding encoding)
         {
@@ -55,9 +72,9 @@ namespace Rnwood.SmtpServer
 
         public IExtensionProcessor[] ExtensionProcessors { get; private set; }
 
-        public void CloseConnection()
+        public async Task CloseConnectionAsync()
         {
-            ConnectionChannel.Close();
+            await ConnectionChannel.CloseAync();
         }
 
         public IVerbMap VerbMap { get; private set; }
@@ -72,16 +89,17 @@ namespace Rnwood.SmtpServer
             get { return (MailVerb)VerbMap.GetVerbProcessor("MAIL"); }
         }
 
-        public async Task WriteLineAsync(string text, params object[] arg)
+        protected async Task WriteLineAndFlushAsync(string text, params object[] arg)
         {
             string formattedText = string.Format(text, arg);
             Session.AppendToLog(formattedText);
             await ConnectionChannel.WriteLineAsync(formattedText);
+            await ConnectionChannel.FlushAsync();
         }
 
         public async Task WriteResponseAsync(SmtpResponse response)
         {
-            await WriteLineAsync(response.ToString().TrimEnd());
+            await WriteLineAndFlushAsync(response.ToString().TrimEnd());
         }
 
         public async Task<string> ReadLineAsync()
@@ -183,7 +201,7 @@ namespace Rnwood.SmtpServer
                         numberOfInvalidCommands >= Server.Behaviour.MaximumNumberOfSequentialBadCommands)
                         {
                             await WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel, "Too many bad commands. Bye!"));
-                            CloseConnection();
+                            await CloseConnectionAsync();
                         }
                         else
                         {
@@ -204,16 +222,10 @@ namespace Rnwood.SmtpServer
                 Session.SessionErrorType = SessionErrorType.UnexpectedException;
             }
 
-            CloseConnection();
+            await CloseConnectionAsync();
 
             Session.EndDate = DateTime.Now;
             Server.Behaviour.OnSessionCompleted(this, Session);
-        }
-
-        public void Terminate()
-        {
-            ConnectionChannel.Terminate();
-            Terminated?.Invoke(this, EventArgs.Empty);
         }
     }
 }

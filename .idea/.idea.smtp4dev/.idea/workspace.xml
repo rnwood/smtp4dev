@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ChangeListManager">
+    <list default="true" id="4e4b3afc-6723-4665-b66c-9c8ddb1e33b4" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.Smtp4dev/project.lock.json" afterPath="$PROJECT_DIR$/../../Rnwood.Smtp4dev/project.lock.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer.Tests/ClientTests.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer.Tests/ClientTests.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer.Tests/ConnectionTests.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer.Tests/ConnectionTests.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer.Tests/Mocks.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer.Tests/Mocks.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer.Tests/ServerTests.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer.Tests/ServerTests.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer.Tests/project.lock.json" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer.Tests/project.lock.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer/BaseBase64Exception.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer/BaseBase64Exception.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer/Connection.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer/Connection.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer/DefaultServerBehaviour.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer/DefaultServerBehaviour.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer/IConnection.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer/IConnection.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer/IConnectionChannel.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer/IConnectionChannel.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer/IServerBehaviour.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer/IServerBehaviour.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer/Server.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer/Server.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer/TcpClientConnectionChannel.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer/TcpClientConnectionChannel.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer/Verbs/QuitVerb.cs" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer/Verbs/QuitVerb.cs" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer/project.json" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer/project.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../Rnwood.SmtpServer/project.lock.json" afterPath="$PROJECT_DIR$/../../Rnwood.SmtpServer/project.lock.json" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../appveyor.yml" afterPath="$PROJECT_DIR$/../../appveyor.yml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/../../smtp4dev.sln" afterPath="$PROJECT_DIR$/../../smtp4dev.sln" />
+    </list>
+    <ignored path="smtp4dev.iws" />
+    <ignored path=".idea/workspace.xml" />
+    <ignored path=".idea/dataSources.local.xml" />
+    <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
+    <option name="TRACKING_ENABLED" value="true" />
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="CreatePatchCommitExecutor">
+    <option name="PATCH_PATH" value="" />
+  </component>
+  <component name="ExecutionTargetManager" SELECTED_TARGET="default_target" />
+  <component name="FavoritesManager">
+    <favorites_list name="smtp4dev" />
+  </component>
+  <component name="FileEditorManager">
+    <leaf>
+      <file leaf-file-name="BaseBase64Exception.cs" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/../../Rnwood.SmtpServer/BaseBase64Exception.cs">
+          <provider selected="true" editor-type-id="text-editor">
+            <state relative-caret-position="112">
+              <caret line="7" column="9" selection-start-line="7" selection-start-column="9" selection-end-line="7" selection-end-column="9" />
+              <folding>
+                <marker date="1476857310682" expanded="true" signature="42:375" ph="{...}" />
+                <marker date="1476857310682" expanded="true" signature="102:373" ph="{...}" />
+                <marker date="1476857310682" expanded="true" signature="190:210" ph="{...}" />
+                <marker date="1476857310682" expanded="true" signature="347:367" ph="{...}" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+    </leaf>
+  </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../.." />
+  </component>
+  <component name="IdeDocumentHistory">
+    <option name="CHANGED_PATHS">
+      <list>
+        <option value="$PROJECT_DIR$/../../Rnwood.SmtpServer/BaseBase64Exception.cs" />
+      </list>
+    </option>
+  </component>
+  <component name="ProjectFrameBounds">
+    <option name="x" value="-8" />
+    <option name="y" value="-8" />
+    <option name="width" value="1936" />
+    <option name="height" value="1066" />
+  </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true">
+    <OptionsSetting value="true" id="Add" />
+    <OptionsSetting value="true" id="Remove" />
+    <OptionsSetting value="true" id="Checkout" />
+    <OptionsSetting value="true" id="Update" />
+    <OptionsSetting value="true" id="Status" />
+    <OptionsSetting value="true" id="Edit" />
+    <ConfirmationsSetting value="0" id="Add" />
+    <ConfirmationsSetting value="0" id="Remove" />
+  </component>
+  <component name="ProjectView">
+    <navigator currentView="SolutionExplorer" proportions="" version="1">
+      <flattenPackages />
+      <showMembers />
+      <showModules />
+      <showLibraryContents />
+      <hideEmptyPackages />
+      <abbreviatePackageNames />
+      <autoscrollToSource />
+      <autoscrollFromSource />
+      <sortByType />
+      <manualOrder />
+      <foldersAlwaysOnTop value="true" />
+    </navigator>
+    <panes>
+      <pane id="SolutionExplorer">
+        <subPane>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" />
+              <option name="myItemType" value="com.jetbrains.resharper.projectView.solutionExplorer.SolutionExplorerViewPane$ProjectViewPaneTreeStructure$createRoot$1" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="smtp4dev (2 projects)" />
+              <option name="myItemType" value="com.jetbrains.resharper.projectView.solutionExplorer.SolutionExplorerNodeRider" />
+            </PATH_ELEMENT>
+          </PATH>
+        </subPane>
+        <option name="show-file-system" value="false" />
+      </pane>
+    </panes>
+  </component>
+  <component name="RunManager" selected=".NET Project.Default">
+    <configuration default="true" type="DotNetProject" factoryName=".NET Project">
+      <option name="PROJECT_PATH" value="" />
+      <option name="PROJECT_KIND" value="None" />
+      <option name="EXE_PATH" value="" />
+      <option name="PROGRAM_PARAMETERS" value="" />
+      <option name="WORKING_DIRECTORY" value="" />
+      <method />
+    </configuration>
+    <configuration default="false" name="Default" type="DotNetProject" factoryName=".NET Project">
+      <option name="PROJECT_PATH" value="$PROJECT_DIR$/../../Rnwood.SmtpServer/Rnwood.SmtpServer.xproj" />
+      <option name="PROJECT_KIND" value="DotNetCore" />
+      <option name="EXE_PATH" value="C:/Program Files/dotnet/dotnet.exe" />
+      <option name="PROGRAM_PARAMETERS" value="run" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/../../Rnwood.SmtpServer" />
+      <method />
+    </configuration>
+    <list size="1">
+      <item index="0" class="java.lang.String" itemvalue=".NET Project.Default" />
+    </list>
+  </component>
+  <component name="ShelveChangesManager" show_recycled="false">
+    <option name="remove_strategy" value="false" />
+  </component>
+  <component name="SvnConfiguration">
+    <configuration />
+  </component>
+  <component name="TaskManager">
+    <task active="true" id="Default" summary="Default task">
+      <changelist id="4e4b3afc-6723-4665-b66c-9c8ddb1e33b4" name="Default" comment="" />
+      <created>1476857151411</created>
+      <option name="number" value="Default" />
+      <option name="presentableId" value="Default" />
+      <updated>1476857151411</updated>
+      <workItem from="1476857153312" duration="157000" />
+    </task>
+    <servers />
+  </component>
+  <component name="TimeTrackingManager">
+    <option name="totallyTimeSpent" value="157000" />
+  </component>
+  <component name="TodoView">
+    <todo-panel id="selected-file">
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+    <todo-panel id="all">
+      <are-packages-shown value="true" />
+      <is-autoscroll-to-source value="true" />
+    </todo-panel>
+  </component>
+  <component name="ToolWindowManager">
+    <frame x="-8" y="-8" width="1936" height="1066" extended-state="6" />
+    <editor active="false" />
+    <layout>
+      <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
+      <window_info id="Errors in solution" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.3294979" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="UnitTesting" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.3294979" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="NuGet" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Change Signature" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="true" content_ui="tabs" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" show_stripe_button="true" weight="0.18020834" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Build" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Database" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="-1" side_tool="false" content_ui="tabs" />
+      <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
+      <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="2" side_tool="false" content_ui="combo" />
+      <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+      <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.4" sideWeight="0.5" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" show_stripe_button="true" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
+    </layout>
+  </component>
+  <component name="VcsContentAnnotationSettings">
+    <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager />
+    <watches-manager />
+  </component>
+  <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/../../Rnwood.SmtpServer/BaseBase64Exception.cs">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="112">
+          <caret line="7" column="9" selection-start-line="7" selection-start-column="9" selection-end-line="7" selection-end-column="9" />
+          <folding>
+            <marker date="1476857310682" expanded="true" signature="42:375" ph="{...}" />
+            <marker date="1476857310682" expanded="true" signature="102:373" ph="{...}" />
+            <marker date="1476857310682" expanded="true" signature="190:210" ph="{...}" />
+            <marker date="1476857310682" expanded="true" signature="347:367" ph="{...}" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+  </component>
+</project>
