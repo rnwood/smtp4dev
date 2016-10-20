@@ -30,26 +30,16 @@ after_build:
  - ps: |
     dotnet pack Rnwood.SmtpServer -c $env:Configuration --version-suffix $("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
     get-item Rnwood.SmtpServer\bin\$($env:Configuration)\*.nupkg | foreach-object { appveyor PushArtifact $_.FullName } 
+	get-item Rnwood.SmtpServer\bin\$($env:Configuration)\*.nupkg | foreach-object { appveyor PushArtifact $_.FullName } 
 build:
   publish_nuget: false
   publish_nuget_symbols: false
   parallel: true
   verbosity: minimal
 artifacts:
-- path: Rnwood.Smtp4dev\bin\Release\$($framework)\$($runtime)\publish
+- path: Rnwood.Smtp4dev\bin\$(configuration)\$(framework)\$(runtime)\publish
   name: Smtp4dev-$($runtime)-v$(appveyor_build_version)
   type: zip
 test_script:
 - cmd: dotnet test Rnwood.SmtpServer.Tests
-deploy:
-  release: Rnwood.SmtpServer-v$(appveyor_build_version)
-  description: 'Rnwood.SmtpServer'
-  provider: GitHub
-  auth_token:
-    secure: W1n6bqq6IQIyPCo6VLaAGwpF9PQhQbLcclrV8MryEf5kQ9halXdIqM7w8hL6JJj8
-  artifact: /.*\.nupkg/            # upload all NuGet packages to release assets
-  draft: false
-  prerelease: true
-  on:
-    branch: master                 # release from master branch only	
 
