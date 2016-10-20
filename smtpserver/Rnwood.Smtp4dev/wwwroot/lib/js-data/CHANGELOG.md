@@ -1,3 +1,30 @@
+##### 2.10.0 - 22 September 2016
+
+###### Backwards compatible changes
+- #324 - Added `applyDefaultsOnInject` option, which defaults to `false`
+- #364 - Added `usePendingFind` and `usePendingFindAll` options, which both default to `true`
+
+###### Bug fixes
+- #316 - Merge/Replace inject does not reevaluate computed properties
+- #324 - Inconsistent defaultValues behavior.
+- #364 - Resource.pendingQueries on server causes unexpected behaviour
+- #373 - DS.clear() extremely slow
+- #407 - DSUtils.copy blacklist applies to nested fields
+
+##### 2.9.0 - 17 February 2016
+
+###### Backwards compatible bug API changes
+- #273 - DS.save, use id from incoming arguments by @zuzusik
+- #284 - (Partial) Support for temporary items
+- #290 - Add save() option to always include specified properties when using changesOnly by @OzzieOrca
+- #305 - Add support for multiple parents by @tfoxy
+
+###### Backwards compatible bug fixes
+- #251 - The 'localKey' of the 'belongsTo' relation ship is not set.
+- #262 - `defaultValues` are shallow copied
+- #272 - lastSaved is broken when API doesn't return saved object in response
+- #304 - Relations ignore useClass on the server
+
 ##### 2.8.2 - 04 November 2015
 
 ###### Backwards compatible bug fixes

@@ -29,7 +29,7 @@
     "tag": "v3.4.0",
     "commit": "b294bf04260a4a2033f09868981e026f254a582a"
   },
-  "_source": "git://github.com/knockout/knockout.git",
-  "_target": "~3.4.0",
+  "_source": "https://github.com/knockout/knockout.git",
+  "_target": "3.4.0",
   "_originalSource": "knockoutjs"
 }

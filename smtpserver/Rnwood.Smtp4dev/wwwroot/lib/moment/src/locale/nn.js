@@ -1,5 +1,5 @@
 //! moment.js locale configuration
-//! locale : norwegian nynorsk (nn)
+//! locale : Nynorsk [nn]
 //! author : https://github.com/mechuwind
 
 import moment from '../moment';
@@ -14,9 +14,9 @@ export default moment.defineLocale('nn', {
         LT : 'HH:mm',
         LTS : 'HH:mm:ss',
         L : 'DD.MM.YYYY',
-        LL : 'D MMMM YYYY',
-        LLL : 'D MMMM YYYY HH:mm',
-        LLLL : 'dddd D MMMM YYYY HH:mm'
+        LL : 'D. MMMM YYYY',
+        LLL : 'D. MMMM YYYY [kl.] H:mm',
+        LLLL : 'dddd D. MMMM YYYY [kl.] HH:mm'
     },
     calendar : {
         sameDay: '[I dag klokka] LT',
@@ -28,7 +28,7 @@ export default moment.defineLocale('nn', {
     },
     relativeTime : {
         future : 'om %s',
-        past : 'for %s sidan',
+        past : '%s sidan',
         s : 'nokre sekund',
         m : 'eit minutt',
         mm : '%d minutt',

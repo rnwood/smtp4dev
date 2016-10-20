@@ -1,6 +1,13 @@
 import isArray from '../utils/is-array';
+import hasOwnProp from '../utils/has-own-prop';
+import isUndefined from '../utils/is-undefined';
 import compareArrays from '../utils/compare-arrays';
+import { deprecateSimple } from '../utils/deprecate';
+import { mergeConfigs } from './set';
 import { Locale } from './constructor';
+import keys from '../utils/keys';
+
+import { baseConfig } from './base-config';
 
 // internal storage for locale config files
 var locales = {};
@@ -40,7 +47,7 @@ function chooseLocale(names) {
 function loadLocale(name) {
     var oldLocale = null;
     // TODO: Find a better way to register and load all the locales in Node
-    if (!locales[name] && typeof module !== 'undefined' &&
+    if (!locales[name] && (typeof module !== 'undefined') &&
             module && module.exports) {
         try {
             oldLocale = globalLocale._abbr;
@@ -59,7 +66,7 @@ function loadLocale(name) {
 export function getSetGlobalLocale (key, values) {
     var data;
     if (key) {
-        if (typeof values === 'undefined') {
+        if (isUndefined(values)) {
             data = getLocale(key);
         }
         else {
@@ -75,11 +82,27 @@ export function getSetGlobalLocale (key, values) {
     return globalLocale._abbr;
 }
 
-export function defineLocale (name, values) {
-    if (values !== null) {
-        values.abbr = name;
-        locales[name] = locales[name] || new Locale();
-        locales[name].set(values);
+export function defineLocale (name, config) {
+    if (config !== null) {
+        var parentConfig = baseConfig;
+        config.abbr = name;
+        if (locales[name] != null) {
+            deprecateSimple('defineLocaleOverride',
+                    'use moment.updateLocale(localeName, config) to change ' +
+                    'an existing locale. moment.defineLocale(localeName, ' +
+                    'config) should only be used for creating a new locale ' +
+                    'See http://momentjs.com/guides/#/warnings/define-locale/ for more info.');
+            parentConfig = locales[name]._config;
+        } else if (config.parentLocale != null) {
+            if (locales[config.parentLocale] != null) {
+                parentConfig = locales[config.parentLocale]._config;
+            } else {
+                // treat as if there is no base config
+                deprecateSimple('parentLocaleUndefined',
+                        'specified parentLocale is not defined yet. See http://momentjs.com/guides/#/warnings/parent-locale/');
+            }
+        }
+        locales[name] = new Locale(mergeConfigs(parentConfig, config));
 
         // backwards compat for now: also set the locale
         getSetGlobalLocale(name);
@@ -90,6 +113,33 @@ export function defineLocale (name, values) {
         delete locales[name];
         return null;
     }
+}
+
+export function updateLocale(name, config) {
+    if (config != null) {
+        var locale, parentConfig = baseConfig;
+        // MERGE
+        if (locales[name] != null) {
+            parentConfig = locales[name]._config;
+        }
+        config = mergeConfigs(parentConfig, config);
+        locale = new Locale(config);
+        locale.parentLocale = locales[name];
+        locales[name] = locale;
+
+        // backwards compat for now: also set the locale
+        getSetGlobalLocale(name);
+    } else {
+        // pass null for config to unupdate, useful for tests
+        if (locales[name] != null) {
+            if (locales[name].parentLocale != null) {
+                locales[name] = locales[name].parentLocale;
+            } else if (locales[name] != null) {
+                delete locales[name];
+            }
+        }
+    }
+    return locales[name];
 }
 
 // returns locale data
@@ -114,4 +164,8 @@ export function getLocale (key) {
     }
 
     return chooseLocale(key);
+}
+
+export function listLocales() {
+    return keys(locales);
 }

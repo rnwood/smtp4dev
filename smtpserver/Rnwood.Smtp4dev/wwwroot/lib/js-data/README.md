@@ -1,6 +1,17 @@
-<img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="64" height="64" />
+<img src="https://raw.githubusercontent.com/js-data/js-data/master/js-data.png" alt="js-data logo" title="js-data" align="right" width="96" height="96" />
 
-## JSData [![Slack Status][sl_b]][slack] [![npm version][npm_b]][npm_l] [![Circle CI][circle_b]][circle_l] [![npm downloads][dn_b]][dn_l] [![Coverage Status][cov_b]][cov_l] [![Codacy][cod_b]][cod_l]
+# js-data
+
+[![Slack Status][sl_b]][slack]
+[![npm version][npm_b]][npm_l]
+[![Circle CI][circle_b]][circle_l]
+[![npm downloads][dn_b]][dn_l]
+[![Coverage Status][cov_b]][cov_l]
+[![Codacy][cod_b]][cod_l]
+
+*JSData 3.x is code complete (waiting on documentation updates to release 3.0.0 stable). Read more in the [3.x docs](http://www.js-data.io/v3.0/docs).*
+
+-----
 
 Inspired by [Ember Data][ember], __JSData__ is the model layer you've been
 craving. It consists of a convenient __framework-agnostic__, __in-memory store__
@@ -32,7 +43,7 @@ Support is handled via the [Slack channel][slack] or the [Mailing List][ml].
 ##### Looking for contributors!
 
 JSData is getting popular and becoming a lot of work for me. I could use help
-with tests, documentation, demos/examples, and adapters. Contact me if you wan
+with tests, documentation, demos/examples, and adapters. Contact me if you want
 to help! jason dot dobry at gmail dot com
 
 [![MtnWestJS Conf 2015 Presentation][mtn_b]][mtn_l]
@@ -181,18 +192,21 @@ See an issue with or have a suggestion for the documentation? You can suggest ed
 ### Changelog
 [CHANGELOG.md](https://github.com/js-data/js-data/blob/master/CHANGELOG.md)
 
+### Support
+
+Support questions are handled via [Stack Overflow][so], [Slack][slack], and the
+[Mailing List][ml]. Ask your questions there.
+
 ### Community
+- [StackOverflow][so]
 - [Slack Channel](http://slack.js-data.io) [![Slack Status][sl_b]][slack] - Better than IRC!
 - [Announcements](http://www.js-data.io/blog)
-- [Mailing List](ml) - Ask your questions!
+- [Mailing List][ml] - Ask your questions!
 - [Issues](https://github.com/js-data/js-data/issues) - Found a bug? Feature request? Submit an issue!
 - [GitHub](https://github.com/js-data/js-data) - View the source code for JSData.
 - [Contributing Guide](https://github.com/js-data/js-data/blob/master/CONTRIBUTING.md)
 
 ### Contributing
-
-First, support is handled via the [Slack Channel][slack] and the
-[Mailing List][ml]. Ask your questions there.
 
 When submitting issues on GitHub, please include as much detail as possible to
 make debugging quick and easy.
@@ -225,7 +239,7 @@ will be committed when a release is cut.
 
 The MIT License (MIT)
 
-Copyright (c) 2014-2015 Jason Dobry
+Copyright (c) 2014-2016 Jason Dobry
 
 Permission is hereby granted, free of charge, to any person obtaining a copy
 of this software and associated documentation files (the "Software"), to deal
@@ -244,7 +258,6 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
-
 
 [sl_b]: http://slack.js-data.io/badge.svg
 [npm_b]: https://img.shields.io/npm/v/js-data.svg?style=flat
@@ -273,7 +286,8 @@ SOFTWARE.
 [mtn_b]: http://img.youtube.com/vi/8wxnnJA9FKw/0.jpg
 [mtn_l]: https://www.youtube.com/watch?v=8wxnnJA9FKw
 
-[inst]: http://www.js-data.io/docs#use-with-webpack
+[inst]: http://www.js-data.io/docs/installation#section-webpack
 
 [slack]: http://slack.js-data.io
 [ml]: https://groups.io/org/groupsio/jsdata
+[so]: http://stackoverflow.com/questions/tagged/jsdata

@@ -1,5 +1,5 @@
-﻿define(["text!./serverstatus.html", "api", "knockout", "ServerEvents"],
-    function (template, api, ko, ServerEvents) {
+﻿define(["text!./serverstatus.html", "api", "knockout"],
+    function (template, api, ko) {
         function ServerStatusViewModel(options) {
             var self = this;
 
@@ -18,8 +18,6 @@
                 });
             }
 
-            var serverEvents = new ServerEvents(self.refresh);
-            self.isAutoRefreshEnabled(true);
             self.refresh();
         };
 

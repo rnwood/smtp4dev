@@ -3,9 +3,8 @@ var pkg = require('../package.json');
 
 var banner = '/*!\n' +
   '* js-data-http\n' +
-  '* @version ' + pkg.version + ' - Homepage <http://www.js-data.io/docs/dshttpadapter>\n' +
-  '* @author Jason Dobry <jason.dobry@gmail.com>\n' +
-  '* @copyright (c) 2014-2015 Jason Dobry\n' +
+  '* @version ' + pkg.version + ' - Homepage <https://github.com/js-data/js-data-http>\n' +
+  '* @copyright (c) 2014-2016 js-data-http project authors\n' +
   '* @license MIT <https://github.com/js-data/js-data-http/blob/master/LICENSE>\n' +
   '*\n' +
   '* @overview HTTP adapter for js-data.\n' +

@@ -157,7 +157,7 @@ function onRequest(request, response) {
           var raw = fs.createReadStream(__dirname + pathname);
           response.writeHead(200, {
             "Content-Type": (pathname.indexOf(".js") !== -1 ? "text/javascript" : (pathname.indexOf(".css") !== -1 ? "text/css" : "text/html")),
-            "Last-Modified": stats.mtime
+            "Last-Modified": stats.mtime.toUTCString()
           });
           raw.pipe(response);
         }

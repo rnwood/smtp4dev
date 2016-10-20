@@ -6,3 +6,7 @@ dependencies:
 test:
   override:
     - npm run ci
+general:
+  artifacts:
+    - "dist"
+    - "coverage"
