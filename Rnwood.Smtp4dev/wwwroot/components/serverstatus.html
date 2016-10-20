@@ -1,7 +1,6 @@
-﻿<div>
+﻿
 
-    <div data-bind="visible: isRunning() === false" class="alert alert-warning">Server is not running!</div>
-    <div data-bind="visible: isRunning()" class="alert alert-info">Server is running.</div>
-    <div data-bind="visible: error()" class="alert alert-danger">Server error: <span data-bind="text: Error"></span></div>
+    <li data-bind="visible: isRunning() === false && !error()" class=""><a href="#/settings">Server not running</a></li>
+    <li data-bind="visible: isRunning()" class="">Server is running.</li>
+    <li data-bind="visible: error()" class=""><a href="#/settings">Server error</a></li>
     <button class="btn btn-sm" data-bind="visible: !isAutoRefreshEnabled(), click: refresh"><i class="fa fa-refresh"></i></button>
-</div>

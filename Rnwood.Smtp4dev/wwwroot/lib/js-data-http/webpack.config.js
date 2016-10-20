@@ -1,4 +1,7 @@
+var path = require('path')
+
 module.exports = {
+  devtool: 'source-map',
   entry: './src/index.js',
   output: {
     filename: './dist/js-data-http.js',
@@ -15,7 +18,13 @@ module.exports = {
   },
   module: {
     loaders: [
-      { test: /(src)(.+)\.js$/, exclude: /node_modules/, loader: 'babel-loader?blacklist=useStrict' }
+      {
+        loader: 'babel-loader',
+        include: [
+          path.resolve(__dirname, 'src')
+        ],
+        test: /\.js$/
+      }
     ]
   }
-};
+}

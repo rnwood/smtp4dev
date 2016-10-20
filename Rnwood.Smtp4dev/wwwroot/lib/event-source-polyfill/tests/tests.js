@@ -21,46 +21,75 @@
 
   // try with native EventSource in Opera 12
   asyncTest("URL with username and password for Basic Authorization", function () {
-    var es = new EventSource(urlWithAuthorization + "?authorization=true&estest=" + encodeURIComponent(commonHeaders + "\n\n" + "\ndata:<authorization>\n\n"));
-    es.onmessage = function (event) {
-      var data = event.data;
-      ok(data === "Basic dXNlcjAxMjpwYXNzMDEy", data); // window.btoa("user012:pass012")
-      es.close();
-      start();
-    };
-    es.onerror = function (event) {
+    var es = undefined;
+    try {
+      es = new EventSource(urlWithAuthorization + "?authorization=true&estest=" + encodeURIComponent(commonHeaders + "\n\n" + "\ndata:<authorization>\n\n"));
+    } catch (error) {
+      if (global.console != undefined) {
+        global.console.log(error);
+      }
+    }
+    if (es != undefined) {
+      es.onmessage = function (event) {
+        var data = event.data;
+        ok(data === "Basic dXNlcjAxMjpwYXNzMDEy", data); // window.btoa("user012:pass012")
+        es.close();
+        start();
+      };
+      es.onerror = function (event) {
+        ok(false, "failed");
+        es.close();
+        start();
+      };
+    } else {
       ok(false, "failed");
-      es.close();
       start();
-    };
+    }
   });
 
   asyncTest("blob: URL", function () {
-    var es = new EventSource(global.URL.createObjectURL(new global.Blob(["retry:1000\ndata:1\n\n"], {
-      type: "text/event-stream;charset=utf-8"
-    })));
-    var message = "";
-    es.onmessage = function (event) {
-      message = event.data;
-    };
-    es.onerror = function (event) {
-      ok(message === "1" && es.readyState === EventSource.CONNECTING, "failed");
-      es.close();
+    if (global.URL != undefined) {
+      var es = new EventSource(global.URL.createObjectURL(new global.Blob(["retry:1000\ndata:1\n\n"], {
+        type: "text/event-stream;charset=utf-8"
+      })));
+      var message = "";
+      es.onmessage = function (event) {
+        message = event.data;
+      };
+      es.onerror = function (event) {
+        ok(message === "1" && es.readyState === EventSource.CONNECTING, "failed");
+        es.close();
+        start();
+      };
+    } else {
+      ok(false, "failed");
       start();
-    };
+    }
   });
 
   asyncTest("data: URL", function () {
-    var es = new EventSource("data:text/event-stream;charset=utf-8," + encodeURIComponent("retry:1000\ndata:1\n\n"));
-    var message = "";
-    es.onmessage = function (event) {
-      message = event.data;
-    };
-    es.onerror = function (event) {
-      ok(message === "1" && es.readyState === EventSource.CONNECTING, "failed");
-      es.close();
+    var es = undefined;
+    try {
+      es = new EventSource("data:text/event-stream;charset=utf-8," + encodeURIComponent("retry:1000\ndata:1\n\n"));
+    } catch (error) {
+      if (global.console != undefined) {
+        global.console.log(error);
+      }
+    }
+    if (es != undefined) {
+      var message = "";
+      es.onmessage = function (event) {
+        message = event.data;
+      };
+      es.onerror = function (event) {
+        ok(message === "1" && es.readyState === EventSource.CONNECTING, "failed");
+        es.close();
+        start();
+      };
+    } else {
+      ok(false, "failed");
       start();
-    };
+    }
   });
 
   asyncTest("Cache-Control: no-cache", function () {

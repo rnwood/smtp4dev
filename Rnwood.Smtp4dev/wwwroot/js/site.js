@@ -8,15 +8,12 @@
         'moment': 'moment/min/moment-with-locales',
         'toastr': 'toastr/toastr',
         'api': "/js/api",
-        'ServerEvents': '/js/ServerEvents',
-        'MessageEvents': '/js/MessageEvents',
         'crossroads': 'crossroads.js/dist/crossroads',
         'hasher': 'hasher/dist/js/hasher',
         'signals': 'js-signals/dist/signals',
         'js-data': 'js-data/dist/js-data',
         'js-data-http': 'js-data-http/dist/js-data-http',
-        'es6promise': 'es6-promise/promise',
-        'event-source-polyfill': 'event-source-polyfill/eventsource'
+        'es6promise': 'es6-promise/es6-promise'
     },
 
     shim: {
@@ -29,7 +26,7 @@
     }
 });
 
-require(["bootstrap", "es6promise", "event-source-polyfill"], function (bootstrap, es6promise) {
+require(["bootstrap", "es6promise"], function (bootstrap, es6promise) {
     es6promise.polyfill()
 });
 

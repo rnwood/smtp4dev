@@ -31,14 +31,14 @@
   "dependencies": {
     "js-data": ">=2.0.0"
   },
-  "version": "2.1.2",
-  "_release": "2.1.2",
+  "version": "2.2.2",
+  "_release": "2.2.2",
   "_resolution": {
     "type": "version",
-    "tag": "2.1.2",
-    "commit": "0e1492b207ebb1d83c980d79675b522135f187f4"
+    "tag": "2.2.2",
+    "commit": "6251c6ea6a37a12fe2811a1979d5aa2998b735c2"
   },
-  "_source": "git://github.com/js-data/js-data-http.git",
-  "_target": "~2.1.2",
+  "_source": "https://github.com/js-data/js-data-http.git",
+  "_target": "2.2.2",
   "_originalSource": "js-data-http"
 }

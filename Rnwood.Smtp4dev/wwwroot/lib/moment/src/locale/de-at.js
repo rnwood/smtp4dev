@@ -1,8 +1,9 @@
 //! moment.js locale configuration
-//! locale : austrian german (de-at)
+//! locale : German (Austria) [de-at]
 //! author : lluchs : https://github.com/lluchs
 //! author: Menelion Elensúle: https://github.com/Oire
 //! author : Martin Groller : https://github.com/MadMG
+//! author : Mikolaj Dadela : https://github.com/mik01aj
 
 import moment from '../moment';
 
@@ -23,9 +24,11 @@ function processRelativeTime(number, withoutSuffix, key, isFuture) {
 export default moment.defineLocale('de-at', {
     months : 'Jänner_Februar_März_April_Mai_Juni_Juli_August_September_Oktober_November_Dezember'.split('_'),
     monthsShort : 'Jän._Febr._Mrz._Apr._Mai_Jun._Jul._Aug._Sept._Okt._Nov._Dez.'.split('_'),
+    monthsParseExact : true,
     weekdays : 'Sonntag_Montag_Dienstag_Mittwoch_Donnerstag_Freitag_Samstag'.split('_'),
     weekdaysShort : 'So._Mo._Di._Mi._Do._Fr._Sa.'.split('_'),
     weekdaysMin : 'So_Mo_Di_Mi_Do_Fr_Sa'.split('_'),
+    weekdaysParseExact : true,
     longDateFormat : {
         LT: 'HH:mm',
         LTS: 'HH:mm:ss',
@@ -35,11 +38,11 @@ export default moment.defineLocale('de-at', {
         LLLL : 'dddd, D. MMMM YYYY HH:mm'
     },
     calendar : {
-        sameDay: '[Heute um] LT [Uhr]',
+        sameDay: '[heute um] LT [Uhr]',
         sameElse: 'L',
-        nextDay: '[Morgen um] LT [Uhr]',
+        nextDay: '[morgen um] LT [Uhr]',
         nextWeek: 'dddd [um] LT [Uhr]',
-        lastDay: '[Gestern um] LT [Uhr]',
+        lastDay: '[gestern um] LT [Uhr]',
         lastWeek: '[letzten] dddd [um] LT [Uhr]'
     },
     relativeTime : {
@@ -64,4 +67,3 @@ export default moment.defineLocale('de-at', {
         doy : 4  // The week that contains Jan 4th is the first week of the year.
     }
 });
-

@@ -1,3 +1,28 @@
+##### 2.2.2 - 18 March 2016
+
+###### Backwards compatible bug fixes
+- #39 - Cannot override default suffix
+- Improved fix for #44
+- Removed rogue console.log statement
+
+##### 2.2.1 - 17 March 2016
+
+###### Backwards compatible bug fixes
+- #44 - Angular/HTTP: Canceling requests with timeout promise does not work
+- #45 - Map file path in js-data-http.min.js is incorrect.
+- #46 - Sending large payloads takes huge amount of time - thanks @ivanvoznyakovsky
+- #47 - perf(http): speed up preparation of http config with large payload - thanks @ivanvoznyakovsky
+
+##### 2.2.0 - 23 February 2016
+
+###### Backwards compatible API changes
+- #40 - Add support for multiple parents by @tfoxy
+
+###### Other
+- Upgraded dependencies, including bundled axios
+- Added AUTHORS and CONTRIBUTORS files
+- Updated Readme
+
 ##### 2.1.2 - 28 October 2015
 
 ###### Other

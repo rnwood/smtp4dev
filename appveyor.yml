@@ -40,4 +40,4 @@ artifacts:
   name: Smtp4dev-$($runtime)-v$(appveyor_build_version)
   type: zip
 test_script:
-- cmd: dotnet test Rnwood.SmtpServer.Tests
+- cmd: dotnet test Rnwood.SmtpServer.Tests -f %FRAMEWORK%

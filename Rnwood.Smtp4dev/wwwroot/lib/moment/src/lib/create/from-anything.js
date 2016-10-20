@@ -1,4 +1,6 @@
 import isArray from '../utils/is-array';
+import isObject from '../utils/is-object';
+import isObjectEmpty from '../utils/is-object-empty';
 import isDate from '../utils/is-date';
 import map from '../utils/map';
 import { createInvalid } from './valid';
@@ -6,6 +8,7 @@ import { Moment, isMoment } from '../moment/constructor';
 import { getLocale } from '../locale/locales';
 import { hooks } from '../utils/hooks';
 import checkOverflow from './check-overflow';
+import { isValid } from './valid';
 
 import { configFromStringAndArray }  from './from-string-and-array';
 import { configFromStringAndFormat } from './from-string-and-format';
@@ -42,12 +45,16 @@ export function prepareConfig (config) {
         return new Moment(checkOverflow(input));
     } else if (isArray(format)) {
         configFromStringAndArray(config);
-    } else if (format) {
-        configFromStringAndFormat(config);
     } else if (isDate(input)) {
         config._d = input;
-    } else {
+    } else if (format) {
+        configFromStringAndFormat(config);
+    }  else {
         configFromInput(config);
+    }
+
+    if (!isValid(config)) {
+        config._d = null;
     }
 
     return config;
@@ -56,9 +63,9 @@ export function prepareConfig (config) {
 function configFromInput(config) {
     var input = config._i;
     if (input === undefined) {
-        config._d = new Date();
+        config._d = new Date(hooks.now());
     } else if (isDate(input)) {
-        config._d = new Date(+input);
+        config._d = new Date(input.valueOf());
     } else if (typeof input === 'string') {
         configFromString(config);
     } else if (isArray(input)) {
@@ -82,6 +89,11 @@ export function createLocalOrUTC (input, format, locale, strict, isUTC) {
     if (typeof(locale) === 'boolean') {
         strict = locale;
         locale = undefined;
+    }
+
+    if ((isObject(input) && isObjectEmpty(input)) ||
+            (isArray(input) && input.length === 0)) {
+        input = undefined;
     }
     // object construction must be done this way.
     // https://github.com/moment/moment/issues/1423

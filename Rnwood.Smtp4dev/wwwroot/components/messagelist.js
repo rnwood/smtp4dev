@@ -1,5 +1,5 @@
-﻿define(["text!./messagelist.html", "api", "knockout", "moment", "toastr", "MessageEvents"],
-    function (template, api, ko, moment, toastr, MessageEvents) {
+﻿define(["text!./messagelist.html", "api", "knockout", "moment", "toastr"],
+    function (template, api, ko, moment, toastr) {
         function MessageListViewModel(params) {
             var self = this;
 
@@ -65,8 +65,6 @@
                 );
             };
 
-            var events = new MessageEvents(self.loadMessages);
-            self.isAutoRefreshEnabled(true);
             self.loadMessages();
         };
 

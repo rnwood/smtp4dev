@@ -3,9 +3,21 @@ import { cloneWithOffset } from '../units/offset';
 import { normalizeUnits } from '../units/aliases';
 
 export function diff (input, units, asFloat) {
-    var that = cloneWithOffset(input, this),
-        zoneDelta = (that.utcOffset() - this.utcOffset()) * 6e4,
+    var that,
+        zoneDelta,
         delta, output;
+
+    if (!this.isValid()) {
+        return NaN;
+    }
+
+    that = cloneWithOffset(input, this);
+
+    if (!that.isValid()) {
+        return NaN;
+    }
+
+    zoneDelta = (that.utcOffset() - this.utcOffset()) * 6e4;
 
     units = normalizeUnits(units);
 
@@ -45,5 +57,6 @@ function monthDiff (a, b) {
         adjust = (b - anchor) / (anchor2 - anchor);
     }
 
-    return -(wholeMonthDiff + adjust);
+    //check for negative zero, return zero if negative zero
+    return -(wholeMonthDiff + adjust) || 0;
 }

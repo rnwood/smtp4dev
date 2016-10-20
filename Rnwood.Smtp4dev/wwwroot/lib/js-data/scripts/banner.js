@@ -5,7 +5,7 @@ var banner = '/*!\n' +
   '* js-data\n' +
   '* @version ' + pkg.version + ' - Homepage <http://www.js-data.io/>\n' +
   '* @author Jason Dobry <jason.dobry@gmail.com>\n' +
-  '* @copyright (c) 2014-2015 Jason Dobry\n' +
+  '* @copyright (c) 2014-2016 Jason Dobry\n' +
   '* @license MIT <https://github.com/js-data/js-data/blob/master/LICENSE>\n' +
   '*\n' +
   '* @overview Robust framework-agnostic data store.\n' +
