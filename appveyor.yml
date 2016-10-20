@@ -28,8 +28,10 @@ build_script:
  - cmd: dotnet build Rnwood.Smtp4dev -c %Configuration% -r %RUNTIME% -f %FRAMEWORK%
 after_build:
  - ps: |
-    dotnet pack Rnwood.SmtpServer -c $env:Configuration --version-suffix $("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
+    $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
+    dotnet pack Rnwood.SmtpServer -c $env:Configuration --version-suffix $versionsuffix
     get-item Rnwood.SmtpServer\bin\$($env:Configuration)\*.nupkg | foreach-object { appveyor PushArtifact $_.FullName } 
+    dotnet publish Rnwood.Smtp4dev -c $env:Configuration -r $env:Runtime  --version-suffix $versionsuffix
 build:
   publish_nuget: false
   publish_nuget_symbols: false
@@ -39,5 +41,6 @@ artifacts:
 - path: Rnwood.Smtp4dev\bin\$(configuration)\$(framework)\$(runtime)\publish
   name: Smtp4dev-$($runtime)-v$(appveyor_build_version)
   type: zip
+- path: Rnwood.SmtpServer\bin\$(configuration)\*.nupkg
 test_script:
 - cmd: dotnet test Rnwood.SmtpServer.Tests -f %FRAMEWORK%
