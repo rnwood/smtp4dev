@@ -36,17 +36,8 @@ build:
   parallel: true
   verbosity: minimal
 artifacts:
-- path: Rnwood.Smtp4dev\bin\Release\net461\win7-x64\publish
-  name: Smtp4dev-win7-x64-v$(appveyor_build_version)
-  type: zip
-- path: Rnwood.Smtp4dev\bin\Release\net461\win7-x86\publish
-  name: Smtp4dev-win7-x86-v$(appveyor_build_version)
-  type: zip
-- path: Rnwood.Smtp4dev\bin\Release\netcoreapp1.0\ubuntu.16.04-x64\publish
-  name: Smtp4dev-ubuntu.16.04-x64-v$(appveyor_build_version)
-  type: zip
-- path: Rnwood.Smtp4dev\bin\Release\netcoreapp1.0\osx.10.10-x64\publish
-  name: Smtp4dev-osx.10.10-x64-v$(appveyor_build_version)
+- path: Rnwood.Smtp4dev\bin\Release\$($framework)\$($runtime)\publish
+  name: Smtp4dev-$($runtime)-v$(appveyor_build_version)
   type: zip
 test_script:
 - cmd: dotnet test Rnwood.SmtpServer.Tests
