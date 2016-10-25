@@ -11,16 +11,16 @@ namespace Rnwood.SmtpServer
         /// supplied SSL certificate.
         /// </summary>
         /// <param name="sslCertificate">The SSL certificate to use for the server.</param>
-        public DefaultServer(X509Certificate sslCertificate)
-            : this(465, sslCertificate)
+        public DefaultServer(bool allowRemoteConnection, X509Certificate sslCertificate)
+            : this(allowRemoteConnection, 465, sslCertificate)
         {
         }
 
         /// <summary>
         /// Initializes a new SMTP server on port 25.
         /// </summary>
-        public DefaultServer()
-            : this(25, null)
+        public DefaultServer(bool allowRemoteConnection)
+            : this(allowRemoteConnection, 25, null)
         {
         }
 
@@ -28,8 +28,8 @@ namespace Rnwood.SmtpServer
         /// Initializes a new SMTP server on the specified port number.
         /// </summary>
         /// <param name="portNumber">The port number.</param>
-        public DefaultServer(int portNumber)
-            : this(portNumber, null)
+        public DefaultServer(bool allowRemoteConnection, int portNumber)
+            : this(allowRemoteConnection, portNumber, null)
         {
         }
 
@@ -39,8 +39,8 @@ namespace Rnwood.SmtpServer
         /// </summary>
         /// <param name="portNumber">The port number.</param>
         /// <param name="sslCertificate">The SSL certificate.</param>
-        public DefaultServer(int portNumber, X509Certificate sslCertificate)
-            : this(new DefaultServerBehaviour(portNumber, sslCertificate))
+        public DefaultServer(bool allowRemoteConnection, int portNumber, X509Certificate sslCertificate)
+            : this(new DefaultServerBehaviour(allowRemoteConnection, portNumber, sslCertificate))
         {
         }
 
@@ -48,8 +48,8 @@ namespace Rnwood.SmtpServer
         /// Initializes a new SMTP over SSL server on the specified standard port number
         /// </summary>
         /// <param name="port">The standard port (or auto) to use.</param>
-        public DefaultServer(Ports port)
-            : this(new DefaultServerBehaviour((int)port))
+        public DefaultServer(bool allowRemoteConnection, Ports port)
+            : this(new DefaultServerBehaviour(allowRemoteConnection, (int)port))
         {
         }
 

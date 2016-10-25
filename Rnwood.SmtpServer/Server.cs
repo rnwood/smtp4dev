@@ -74,25 +74,18 @@ namespace Rnwood.SmtpServer
         {
             _logger.LogDebug("Core task running");
 
-            try
+            while (IsRunning)
             {
-                while (IsRunning)
-                {
-                    _logger.LogDebug("Waiting for new client");
+                _logger.LogDebug("Waiting for new client");
 
-                    await _currentAcceptTask;
-                    _currentAcceptTask = AcceptNextClient();
-                }
-            }
-            finally
-            {
-                _currentAcceptTask = null;
+                await AcceptNextClient();
+                _nextConnectionEvent.Set();
             }
         }
 
-        public async Task WaitForNextConnectionAsync()
+        public void WaitForNextConnection()
         {
-            await _currentAcceptTask;
+            _nextConnectionEvent.WaitOne();
         }
 
         private async Task AcceptNextClient()
@@ -124,7 +117,9 @@ namespace Rnwood.SmtpServer
                     _logger.LogDebug("Connection {0} handling completed removing from active connections", connection);
                     _activeConnections.Remove(connection);
                 };
+#pragma warning disable 4014
                 connection.ProcessAsync();
+#pragma warning restore 4014
             }
         }
 
@@ -147,7 +142,6 @@ namespace Rnwood.SmtpServer
 
             _logger.LogDebug("Listener active. Starting core task");
 
-            _currentAcceptTask = AcceptNextClient();
             _coreTask = Task.Run(() => Core());
         }
 
@@ -222,7 +216,7 @@ namespace Rnwood.SmtpServer
 
         #region IDisposable Support
         private bool disposedValue = false; // To detect redundant calls
-        private Task _currentAcceptTask;
+        private AutoResetEvent _nextConnectionEvent = new AutoResetEvent(false);
 
         protected virtual void Dispose(bool disposing)
         {

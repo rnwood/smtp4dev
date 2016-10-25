@@ -138,9 +138,9 @@ namespace Rnwood.Smtp4dev.Model
         {
         }
 
-        public async Task<AuthenticationResult> ValidateAuthenticationCredentialsAsync(IConnection connection, IAuthenticationCredentials authenticationRequest)
+        public Task<AuthenticationResult> ValidateAuthenticationCredentialsAsync(IConnection connection, IAuthenticationCredentials authenticationRequest)
         {
-            return AuthenticationResult.Success;
+            return Task.FromResult(AuthenticationResult.Success);
         }
     }
 }

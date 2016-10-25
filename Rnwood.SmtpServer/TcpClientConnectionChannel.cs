@@ -46,7 +46,7 @@ namespace Rnwood.SmtpServer
             await _writer.FlushAsync();
         }
 
-        public async Task CloseAync()
+        public Task CloseAync()
         {
             if (IsConnected)
             {
@@ -55,6 +55,8 @@ namespace Rnwood.SmtpServer
 
                 Closed?.Invoke(this, EventArgs.Empty);
             }
+
+            return Task.CompletedTask;
         }
 
         public TimeSpan ReceiveTimeout
