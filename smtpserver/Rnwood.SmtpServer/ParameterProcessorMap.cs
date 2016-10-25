@@ -30,7 +30,7 @@ namespace Rnwood.SmtpServer
             await ProcessAsync(connection, new ParameterParser(arguments), throwOnUnknownParameter);
         }
 
-        public async Task ProcessAsync(IConnection connection, ParameterParser parameters, bool throwOnUnknownParameter)
+        public Task ProcessAsync(IConnection connection, ParameterParser parameters, bool throwOnUnknownParameter)
         {
             foreach (Parameter parameter in parameters.Parameters)
             {
@@ -47,6 +47,8 @@ namespace Rnwood.SmtpServer
                                          "Parameter {0} is not recognised", parameter.Name));
                 }
             }
+
+            return Task.CompletedTask;
         }
     }
 }

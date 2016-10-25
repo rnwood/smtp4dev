@@ -17,26 +17,28 @@ namespace Rnwood.SmtpServer
     public class DefaultServerBehaviour : IServerBehaviour
     {
         private readonly X509Certificate _sslCertificate;
+        private bool _allowRemoteConnections;
 
-        public DefaultServerBehaviour(X509Certificate sslCertificate)
-            : this(587, sslCertificate)
+        public DefaultServerBehaviour(bool allowRemoteConnections, X509Certificate sslCertificate)
+            : this(allowRemoteConnections, 587, sslCertificate)
         {
         }
 
-        public DefaultServerBehaviour()
-            : this(25, null)
+        public DefaultServerBehaviour(bool allowRemoteConnections)
+            : this(allowRemoteConnections, 25, null)
         {
         }
 
-        public DefaultServerBehaviour(int portNumber)
-            : this(portNumber, null)
+        public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber)
+            : this(allowRemoteConnections, portNumber, null)
         {
         }
 
-        public DefaultServerBehaviour(int portNumber, X509Certificate sslCertificate)
+        public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber, X509Certificate sslCertificate)
         {
             PortNumber = portNumber;
             _sslCertificate = sslCertificate;
+            _allowRemoteConnections = allowRemoteConnections;
         }
 
         #region IServerBehaviour Members
@@ -66,7 +68,7 @@ namespace Rnwood.SmtpServer
 
         public virtual IPAddress IpAddress
         {
-            get { return IPAddress.Any; }
+            get { return _allowRemoteConnections ? IPAddress.Any : IPAddress.Loopback; }
         }
 
         public virtual int PortNumber { get; private set; }

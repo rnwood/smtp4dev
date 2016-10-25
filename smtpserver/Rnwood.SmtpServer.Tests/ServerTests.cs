@@ -23,7 +23,7 @@ namespace Rnwood.SmtpServer.Tests
 
         private Server NewServer()
         {
-            return new DefaultServer(Ports.AssignAutomatically);
+            return new DefaultServer(false, Ports.AssignAutomatically);
         }
 
         [Fact]
@@ -38,11 +38,11 @@ namespace Rnwood.SmtpServer.Tests
         [Fact]
         public void StartOnInusePort_StartupExceptionThrown()
         {
-            using (Server server1 = new DefaultServer(Ports.AssignAutomatically))
+            using (Server server1 = new DefaultServer(false, Ports.AssignAutomatically))
             {
                 server1.Start();
 
-                using (Server server2 = new DefaultServer(server1.PortNumber))
+                using (Server server2 = new DefaultServer(false, server1.PortNumber))
                 {
                     Assert.Throws<SocketException>(() =>
                     {
@@ -78,14 +78,14 @@ namespace Rnwood.SmtpServer.Tests
         }
 
         [Fact]
-        public async Task Stop_KillConnectionTrue_ConnectionsKilled()
+        public async Task Stop_KillConnectionsTrue_ConnectionsKilled()
         {
             {
                 Server server = StartServer();
 
                 Task serverTask = Task.Run(async () =>
                 {
-                    await server.WaitForNextConnectionAsync().WithTimeout("waiting for next server connection");
+                    await Task.Run(() => server.WaitForNextConnection()).WithTimeout("waiting for next server connection");
                     Assert.Equal(1, server.ActiveConnections.Count());
                     await Task.Run(() => server.Stop(true)).WithTimeout("stopping server");
                     Assert.Equal(0, server.ActiveConnections.Count());
@@ -100,19 +100,20 @@ namespace Rnwood.SmtpServer.Tests
         }
 
         [Fact]
-        public async Task Stop_KillConnectiosFalse_ConnectionsNotKilled()
+        public async Task Stop_KillConnectionFalse_ConnectionsNotKilled()
         {
             Server server = StartServer();
 
             Task serverTask = Task.Run(async () =>
             {
-                await server.WaitForNextConnectionAsync().WithTimeout("waiting for next server connection");
+                await Task.Run(() => server.WaitForNextConnection()).WithTimeout("waiting for next server connection");
                 Assert.Equal(1, server.ActiveConnections.Count());
 
                 await Task.Run(() => server.Stop(false)).WithTimeout("stopping server");
                 ;
                 Assert.Equal(1, server.ActiveConnections.Count());
                 await Task.Run(() => server.KillConnections()).WithTimeout("killing connections");
+                Assert.Equal(0, server.ActiveConnections.Count());
             });
 
             using (TcpClient client = new TcpClient())
