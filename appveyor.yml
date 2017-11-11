@@ -2,9 +2,9 @@ version: 3.0.0-alpha-{build}
 os: Visual Studio 2017
 configuration: Release
 environment:
+  FRAMEWORK: netcoreapp2.0
   matrix:
-    - FRAMEWORK: net462
-    - FRAMEWORK: netcoreapp2.0	  
+    - RUNTIME: xwin-x86      	
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
@@ -19,22 +19,17 @@ install:
     dotnet restore
     npm install -g gulp bower
 build_script:
- - cmd: dotnet build Rnwood.SmtpServer -c %Configuration%
+ - cmd: dotnet build Rnwood.Smtp4dev.sln -c %Configuration%
 after_build:
  - ps: |
     $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
-    dotnet pack Rnwood.SmtpServer -c $env:Configuration --version-suffix $versionsuffix
-    get-item Rnwood.SmtpServer\bin\$($env:Configuration)\*.nupkg | foreach-object { appveyor PushArtifact $_.FullName } 
-    #dotnet publish Rnwood.Smtp4dev -c $env:Configuration -r $env:Runtime  --version-suffix $versionsuffix
+    dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME  --version-suffix $versionsuffix
 build:
   publish_nuget: false
   publish_nuget_symbols: false
   parallel: true
   verbosity: minimal
 artifacts:
-#- path: Rnwood.Smtp4dev\bin\$(configuration)\$(framework)\$(runtime)\publish
-#  name: Smtp4dev-$($runtime)-v$(appveyor_build_version)
-#  type: zip
-- path: Rnwood.SmtpServer\bin\$(configuration)\*.nupkg
-test_script:
-- cmd: dotnet test Rnwood.SmtpServer.Tests\Rnwood.SmtpServer.Tests.csproj -f %FRAMEWORK%
+- path: Rnwood.Smtp4dev\bin\$(configuration)\$(framework)\$(runtime)\publish
+  name: Smtp4dev-$($runtime)-v$(appveyor_build_version)
+  type: zip
