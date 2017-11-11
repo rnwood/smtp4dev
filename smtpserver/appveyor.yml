@@ -4,9 +4,9 @@ configuration: Release
 environment:
   matrix:
     - RUNTIME: win7-x64
-      FRAMEWORK: net471
+      FRAMEWORK: net462
     - RUNTIME: win7-x86
-      FRAMEWORK: net471
+      FRAMEWORK: net462
     - RUNTIME: ubuntu.16.04-x64
       FRAMEWORK: netcoreapp2.0
     - RUNTIME: osx.10.10-x64
