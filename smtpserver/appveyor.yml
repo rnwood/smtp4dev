@@ -1,10 +1,6 @@
 version: 3.0.0-alpha-{build}
 os: Visual Studio 2017
 configuration: Release
-environment:
-  matrix:
-    - FRAMEWORK: net462
-    - FRAMEWORK: netcoreapp2.0	  
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
@@ -24,7 +20,7 @@ after_build:
  - ps: |
     $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
     dotnet pack Rnwood.SmtpServer -c $env:Configuration --version-suffix $versionsuffix
-    get-item Rnwood.SmtpServer\bin\$($env:Configuration)\*.nupkg | foreach-object { appveyor PushArtifact $_.FullName }
+    #get-item Rnwood.SmtpServer\bin\$($env:Configuration)\*.nupkg | foreach-object { appveyor PushArtifact $_.FullName }
 build:
   publish_nuget: false
   publish_nuget_symbols: false
@@ -33,4 +29,4 @@ build:
 artifacts:
 - path: Rnwood.SmtpServer\bin\$(configuration)\*.nupkg
 test_script:
-- cmd: dotnet test Rnwood.SmtpServer.Tests\Rnwood.SmtpServer.Tests.csproj -f %FRAMEWORK%
+- cmd: dotnet test Rnwood.SmtpServer.Tests\Rnwood.SmtpServer.Tests.csproj
