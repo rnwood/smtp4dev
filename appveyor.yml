@@ -5,6 +5,8 @@ environment:
   FRAMEWORK: netcoreapp2.0
   matrix:
     - RUNTIME: win-x86      	
+    - RUNTIME: linux-x64
+    - RUNTIME: osx-x64
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
