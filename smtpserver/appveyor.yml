@@ -3,14 +3,8 @@ os: Visual Studio 2017
 configuration: Release
 environment:
   matrix:
-    - RUNTIME: win7-x64
-      FRAMEWORK: net462
-    - RUNTIME: win7-x86
-      FRAMEWORK: net462
-    - RUNTIME: ubuntu.16.04-x64
-      FRAMEWORK: netcoreapp2.0
-    - RUNTIME: osx.10.10-x64
-      FRAMEWORK: netcoreapp2.0	  
+    - FRAMEWORK: net462
+    - FRAMEWORK: netcoreapp2.0	  
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
@@ -25,7 +19,7 @@ install:
     dotnet restore
     npm install -g gulp bower
 build_script:
- - cmd: dotnet build Rnwood.Smtp4dev -c %Configuration% -r %RUNTIME% -f %FRAMEWORK%
+ - cmd: dotnet build Rnwood.SmtpServer -c %Configuration%
 after_build:
  - ps: |
     $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
@@ -43,4 +37,4 @@ artifacts:
 #  type: zip
 - path: Rnwood.SmtpServer\bin\$(configuration)\*.nupkg
 test_script:
-- cmd: dotnet test Rnwood.SmtpServer.Tests -f %FRAMEWORK%
+- cmd: dotnet test Rnwood.SmtpServer.Tests\Rnwood.SmtpServer.Tests.csproj -f %FRAMEWORK%
