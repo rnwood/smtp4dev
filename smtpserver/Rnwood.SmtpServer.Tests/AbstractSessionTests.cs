@@ -23,7 +23,7 @@ namespace Rnwood.SmtpServer.Tests
         public void GetMessages_InitiallyEmpty()
         {
             IEditableSession session = GetSession();
-            Assert.Equal(0, session.GetMessages().Length);
+            Assert.Empty( session.GetMessages());
         }
 
         [Fact]
@@ -34,7 +34,7 @@ namespace Rnwood.SmtpServer.Tests
 
             session.AddMessage(message.Object);
 
-            Assert.Equal(1, session.GetMessages().Length);
+            Assert.Single(session.GetMessages());
             Assert.Same(message.Object, session.GetMessages()[0]);
         }
     }

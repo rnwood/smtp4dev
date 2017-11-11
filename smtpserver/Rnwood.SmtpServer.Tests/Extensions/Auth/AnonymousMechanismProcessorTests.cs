@@ -40,7 +40,7 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
 
             if (authenticationResult == AuthenticationResult.Success)
             {
-                Assert.IsType(typeof(AnonymousAuthenticationCredentials), anonymousMechanismProcessor.Credentials);
+                Assert.IsType<AnonymousAuthenticationCredentials>(anonymousMechanismProcessor.Credentials);
             }
         }
     }

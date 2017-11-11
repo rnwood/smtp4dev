@@ -16,8 +16,8 @@ namespace Rnwood.SmtpServer.Tests
             builder.To.Add("bar@foo.com");
 
             Assert.Equal(2, builder.To.Count);
-            Assert.Equal(builder.To.ElementAt(0), "foo@bar.com");
-            Assert.Equal(builder.To.ElementAt(1), "bar@foo.com");
+            Assert.Equal("foo@bar.com", builder.To.ElementAt(0));
+            Assert.Equal("bar@foo.com", builder.To.ElementAt(1));
         }
 
         protected abstract IMessageBuilder GetInstance();

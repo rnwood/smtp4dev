@@ -13,7 +13,7 @@ namespace Rnwood.SmtpServer.Tests
         public void Parsing_FirstArgumentAferVerbWithColon_Split()
         {
             ArgumentsParser args = new ArgumentsParser("ARG1=VALUE:BLAH");
-            Assert.Equal(1, args.Arguments.Length);
+            Assert.Single(args.Arguments);
             Assert.Equal("ARG1=VALUE:BLAH", args.Arguments[0]);
         }
 

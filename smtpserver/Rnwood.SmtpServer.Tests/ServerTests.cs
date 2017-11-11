@@ -86,9 +86,9 @@ namespace Rnwood.SmtpServer.Tests
                 Task serverTask = Task.Run(async () =>
                 {
                     await Task.Run(() => server.WaitForNextConnection()).WithTimeout("waiting for next server connection");
-                    Assert.Equal(1, server.ActiveConnections.Count());
+                    Assert.Single(server.ActiveConnections);
                     await Task.Run(() => server.Stop(true)).WithTimeout("stopping server");
-                    Assert.Equal(0, server.ActiveConnections.Count());
+                    Assert.Empty(server.ActiveConnections);
                 });
 
                 using (TcpClient client = new TcpClient())
@@ -107,13 +107,13 @@ namespace Rnwood.SmtpServer.Tests
             Task serverTask = Task.Run(async () =>
             {
                 await Task.Run(() => server.WaitForNextConnection()).WithTimeout("waiting for next server connection");
-                Assert.Equal(1, server.ActiveConnections.Count());
+                Assert.Single(server.ActiveConnections);
 
                 await Task.Run(() => server.Stop(false)).WithTimeout("stopping server");
                 ;
-                Assert.Equal(1, server.ActiveConnections.Count());
+                Assert.Single(server.ActiveConnections);
                 await Task.Run(() => server.KillConnections()).WithTimeout("killing connections");
-                Assert.Equal(0, server.ActiveConnections.Count());
+                Assert.Empty(server.ActiveConnections);
             });
 
             using (TcpClient client = new TcpClient())

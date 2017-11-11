@@ -10,7 +10,7 @@ namespace Rnwood.SmtpServer.Tests
         {
             ParameterParser parameterParser = new ParameterParser(new string[0]);
 
-            Assert.Equal(0, parameterParser.Parameters.Length);
+            Assert.Empty(parameterParser.Parameters);
         }
 
         [Fact]
@@ -18,7 +18,7 @@ namespace Rnwood.SmtpServer.Tests
         {
             ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA");
 
-            Assert.Equal(1, parameterParser.Parameters.Length);
+            Assert.Single(parameterParser.Parameters);
             Assert.Equal(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters[0]);
         }
 

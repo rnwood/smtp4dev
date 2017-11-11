@@ -28,7 +28,7 @@ namespace Rnwood.SmtpServer.Tests
 
                 await SendMessageAsync(server, "to@to.com").WithTimeout("sending message");
 
-                Assert.Equal(1, messages.Count);
+                Assert.Single(messages);
                 Assert.Equal("from@from.com", messages.First().From);
             }
         }
@@ -81,7 +81,7 @@ namespace Rnwood.SmtpServer.Tests
                 {
                     for (int i = 0; i < numberOfMessagesPerThread; i++)
                     {
-                        Assert.True(messages.Any(m => m.To.Any(t => t == i + "@" + threadId)));
+                        Assert.Contains(messages, m => m.To.Any(t => t == i + "@" + threadId));
                     }
                 }
             }
