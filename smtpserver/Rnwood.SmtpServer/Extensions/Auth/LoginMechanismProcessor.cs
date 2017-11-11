@@ -18,7 +18,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 
         public async override Task<AuthMechanismProcessorStatus> ProcessResponseAsync(string data)
         {
-            if (data != null)
+            if (State == States.Initial && data != null)
             {
                 State = States.WaitingForUsername;
             }
