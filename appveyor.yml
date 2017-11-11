@@ -4,7 +4,7 @@ configuration: Release
 environment:
   FRAMEWORK: netcoreapp2.0
   matrix:
-    - RUNTIME: xwin-x86      	
+    - RUNTIME: win-x86      	
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
