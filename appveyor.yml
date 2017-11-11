@@ -31,5 +31,5 @@ build:
   verbosity: minimal
 artifacts:
 - path: Rnwood.Smtp4dev\bin\$(configuration)\$(framework)\$(runtime)\publish
-  name: Smtp4dev-$($runtime)-v$(appveyor_build_version)
+  name: Smtp4dev-$(runtime)-v$(appveyor_build_version)
   type: zip
