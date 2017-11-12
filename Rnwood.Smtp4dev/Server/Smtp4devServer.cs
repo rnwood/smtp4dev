@@ -2,9 +2,7 @@
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.SmtpServer;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using System.IO;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -22,7 +20,21 @@ namespace Rnwood.Smtp4dev.Server
         {
             Smtp4devDbContext dbContent = _dbContextFactory();
 
-            Message message = new Message(e.Message);
+            Stream dataStream = e.Message.GetData();
+            byte[] data = new byte[dataStream.Length];
+            dataStream.Read(data, 0, data.Length);
+
+            Message message = new Message()
+            {
+                Id = Guid.NewGuid(),
+
+                From = e.Message.From,
+                To = string.Join(", ", e.Message.To),
+                ReceivedDate = e.Message.ReceivedDate,
+
+
+                Data = data
+            };
             dbContent.Messages.Add(message);
             dbContent.SaveChanges();
         }

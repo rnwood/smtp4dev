@@ -1,0 +1,37 @@
+{
+  "name": "smtp4dev",
+  "version": "1.0.0",
+  "description": "smtp4dev - the mail server for development",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rnwood/smtp4dev.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/rnwood/smtp4dev/issues"
+  },
+  "homepage": "https://github.com/rnwood/smtp4dev#readme",
+  "devDependencies": {
+    "@types/axios": "^0.14.0",
+    "@types/vue": "^2.0.0",
+    "axios": "^0.17.1",
+    "element-ui": "^2.0.4",
+    "ts-loader": "^3.1.1",
+    "typescript": "^2.6.1",
+    "vue": "^2.5.3",
+    "vue-class-component": "^6.1.0",
+    "webpack": "^3.8.1"
+  },
+  "-vs-binding": {
+    "BeforeBuild": [
+      "build"
+    ]
+  }
+}

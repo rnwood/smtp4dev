@@ -35,12 +35,12 @@ namespace Rnwood.Smtp4dev
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddDbContext<Smtp4devDbContext>(opt => opt.UseInMemoryDatabase("main"));
+            services.AddDbContext<Smtp4devDbContext>(opt => opt.UseInMemoryDatabase("main"), ServiceLifetime.Transient, ServiceLifetime.Singleton);
 
             services.AddSingleton<Smtp4devServer>();
             services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
 
-           
+
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
         }
 
@@ -53,9 +53,22 @@ namespace Rnwood.Smtp4dev
                 app.UseDeveloperExceptionPage();
             }
 
+            app.UseStaticFiles();
+
             app.UseMvc();
 
             app.ApplicationServices.GetService<Smtp4devServer>().Start();
+
+            if (env.IsDevelopment())
+            {
+                Smtp4devDbContext db = app.ApplicationServices.GetService<Smtp4devDbContext>();
+                db.Messages.Add(new Message()
+                {
+                    Id = Guid.NewGuid(),
+                    From = "foo@bar.com"
+                });
+                db.SaveChanges();
+            }
         }
     }
 }
