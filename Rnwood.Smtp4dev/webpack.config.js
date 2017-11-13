@@ -15,12 +15,28 @@ module.exports = {
                 loader: 'ts-loader',
                 exclude: /node_modules/,
             },
+            {
+                test: /\.vue$/,
+                use: ['vue-loader']
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    { loader: 'style-loader' },
+                    { loader: 'css-loader' },
+                    { loader: 'postcss-loader', options: { postcss: {} } }
+                ]
+            },
+            {
+                test: /\.(ttf|otf|eot|svg|woff(2)?)(\?[a-z0-9]+)?$/,
+                loader: "file-loader?name=fonts/[name].[ext]"
+            },
         ]
     },
     resolve: {
         extensions: [".tsx", ".ts", ".js"],
-		alias: {
-			vue$: 'vue/dist/vue.esm.js'
-		}
+        alias: {
+            vue$: 'vue/dist/vue.esm.js'
+        }
     }
 };

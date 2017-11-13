@@ -19,14 +19,23 @@
   },
   "homepage": "https://github.com/rnwood/smtp4dev#readme",
   "devDependencies": {
+    "@aspnet/signalr-client": "^1.0.0-alpha2-final",
     "@types/axios": "^0.14.0",
     "@types/vue": "^2.0.0",
     "axios": "^0.17.1",
+    "css-loader": "^0.28.7",
+    "element-theme-chalk": "^2.0.4",
+    "element-theme-default": "^1.4.9",
     "element-ui": "^2.0.4",
+    "es6-collections": "^0.5.6",
+    "file-loader": "^1.1.5",
+    "postcss-loader": "^2.0.8",
+    "style-loader": "^0.19.0",
     "ts-loader": "^3.1.1",
     "typescript": "^2.6.1",
     "vue": "^2.5.3",
     "vue-class-component": "^6.1.0",
+    "vue-loader": "^13.5.0",
     "webpack": "^3.8.1"
   },
   "-vs-binding": {

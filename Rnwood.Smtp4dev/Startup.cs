@@ -13,6 +13,13 @@ using Microsoft.EntityFrameworkCore;
 using Rnwood.SmtpServer;
 using Rnwood.Smtp4dev.Server;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.AspNetCore.SignalR;
+using Rnwood.Smtp4dev.Hubs;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Diagnostics;
+using System.Net;
+using System.IO;
+using Newtonsoft.Json;
 
 namespace Rnwood.Smtp4dev
 {
@@ -40,34 +47,85 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<Smtp4devServer>();
             services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
 
-
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
+
+            services.AddSignalR();
+
+            services.AddSingleton<MessagesHub>();
         }
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)
         {
-            if (env.IsDevelopment())
+            app.UseExceptionHandler(new ExceptionHandlerOptions
             {
-                app.UseDeveloperExceptionPage();
-            }
+                ExceptionHandler = new JsonExceptionMiddleware().Invoke
+            });
 
+            app.UseDefaultFiles();
             app.UseStaticFiles();
 
             app.UseMvc();
+
+            app.UseWebSockets();
+            app.UseSignalR(routes =>
+            {
+                routes.MapHub<MessagesHub>("hubs/messages");
+            });
+
+ 
+
 
             app.ApplicationServices.GetService<Smtp4devServer>().Start();
 
             if (env.IsDevelopment())
             {
                 Smtp4devDbContext db = app.ApplicationServices.GetService<Smtp4devDbContext>();
-                db.Messages.Add(new Message()
+
+                Message message = new Message()
                 {
                     Id = Guid.NewGuid(),
-                    From = "foo@bar.com"
-                });
+                    From = "foo@bar.com",
+                    Subject = "subject"
+                };
+
+
+                db.Messages.Add(message);
+
+                MessagePart part = new MessagePart()
+                {
+                    Id = Guid.NewGuid(),
+                    Owner = message,
+                    Content = "bcdef"
+                };
+                db.MessageParts.Add(part);
+
                 db.SaveChanges();
+            }
+        }
+    }
+
+    public class JsonExceptionMiddleware
+    {
+        public async Task Invoke(HttpContext context)
+        {
+            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+
+            var ex = context.Features.Get<IExceptionHandlerFeature>()?.Error;
+            if (ex == null) return;
+
+            var error = new
+            {
+                message = ex.Message
+            };
+
+            context.Response.ContentType = "application/json";
+
+            using (var writer = new StreamWriter(context.Response.Body))
+            {
+                new JsonSerializer().Serialize(writer, error);
+                await writer.FlushAsync().ConfigureAwait(false);
             }
         }
     }

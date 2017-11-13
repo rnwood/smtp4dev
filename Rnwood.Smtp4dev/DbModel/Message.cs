@@ -20,6 +20,8 @@ namespace Rnwood.Smtp4dev.DbModel
         public string To { get; set; }
         public DateTime ReceivedDate { get; set; }
 
-        public byte[] Data { get; set; }
+        public string Subject { get;  set; }
+
+        public List<MessagePart> Parts { get; set; }
     }
 }
