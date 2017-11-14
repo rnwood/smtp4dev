@@ -35,3 +35,9 @@ artifacts:
 - path: Rnwood.Smtp4dev\bin\$(configuration)\$(framework)\$(runtime)\publish
   name: Smtp4dev-$(runtime)-v$(appveyor_build_version)
   type: zip
+deploy:
+  provider: GitHub
+  artifact: /.*\..*/
+  auth_token:
+    secure: 5zLYIRVYHWHyZYOUZ2F46AvAYb3OLIWs35PQUddGkyK3xkV7qCmaMT38PJY6OiY7
+  prerelease: true
