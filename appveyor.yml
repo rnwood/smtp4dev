@@ -4,6 +4,7 @@ configuration: Release
 environment:
   FRAMEWORK: netcoreapp2.0
   matrix:
+    - RUNTIME: noruntime
     - RUNTIME: win-x86      	
     - RUNTIME: linux-x64
     - RUNTIME: osx-x64
@@ -21,11 +22,15 @@ install:
     dotnet restore
     npm install -g gulp bower
 build_script:
- - cmd: dotnet build Rnwood.Smtp4dev.sln -c %Configuration%
+ - cmd: dotnet build Smtp4dev.sln -c %Configuration%
 after_build:
  - ps: |
     $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
-    dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME  --version-suffix $versionsuffix
+    if ($env:RUNTIME -ne "noruntime") {
+       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME 	--version-suffix $versionsuffix
+    } else {
+       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK --version-suffix $versionsuffix	
+    }
 build:
   publish_nuget: false
   publish_nuget_symbols: false
@@ -34,6 +39,9 @@ build:
 artifacts:
 - path: Rnwood.Smtp4dev\bin\$(configuration)\$(framework)\$(runtime)\publish
   name: Smtp4dev-$(runtime)-v$(appveyor_build_version)
+  type: zip
+- path: Rnwood.Smtp4dev\bin\$(configuration)\$(framework)\publish
+  name: Smtp4dev-noruntime-v$(appveyor_build_version)
   type: zip
 deploy:
   provider: GitHub
