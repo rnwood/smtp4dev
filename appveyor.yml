@@ -20,7 +20,7 @@ nuget:
 install:
 - cmd: |
     dotnet restore
-    npm install Rnwood.Smtp4dev
+    npm install .\Rnwood.Smtp4dev
 build_script:
  - cmd: dotnet build Smtp4dev.sln -c %Configuration%
 after_build:
