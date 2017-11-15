@@ -22,6 +22,7 @@ install:
     dotnet restore
     cd Rnwood.Smtp4dev
     npm install
+    cd ..
 build_script:
  - cmd: dotnet build Smtp4dev.sln -c %Configuration%
 after_build:
