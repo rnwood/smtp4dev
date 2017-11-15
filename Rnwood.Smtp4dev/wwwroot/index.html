@@ -5,14 +5,19 @@
     <title>smtp4dev</title>
 </head>
 <body>
-  
+
     <div id="app">
 
         <el-container>
             <el-header>
                 <h1>smtp4dev</h1>
             </el-header>
-            <messagelist />
+
+            <el-row :gutter="10">
+                <el-col :md="12"><messagelist /></el-col>
+                <el-col :md="12"><messageview /></el-col>
+            </el-row>
+
         </el-container>
 
     </div>

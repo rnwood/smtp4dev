@@ -2,13 +2,14 @@
   "compileOnSave": false,
   "compilerOptions": {
     "outDir": "./wwwroot/build/",
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noEmitOnError": true,
     "removeComments": false,
     "sourceMap": true,
     "target": "es5",
     "lib": [ "es5", "es6", "dom" ],
     "module": "commonjs",
+    "strict": true,
     "moduleResolution": "node",
     "experimentalDecorators": true
   },

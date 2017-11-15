@@ -6,3 +6,5 @@ packages
 _ncrunch_*
 *.user
 /Rnwood.Smtp4dev/node_modules
+/Rnwood.Smtp4dev/wwwroot/dist
+/Rnwood.Smtp4dev/wwwroot/build

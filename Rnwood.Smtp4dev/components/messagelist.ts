@@ -1,37 +1,32 @@
-﻿import Vue from 'vue'
-import Component from 'vue-class-component'
+﻿import Component from "vue-class-component";
+import Vue from 'vue'
 import axios from 'axios';
 import { HubConnection } from '@aspnet/signalr-client'
+import Message = Api.Message;
 
 @Component({
-    template: `
-        <div class="messagelist">
-            <button v-on:click="refresh">Refresh</button>
-            <button v-on:click="clear">Clear</button>
-
-            <div v-if="error">{{error.message}}</div>
-            <el-table ref="singleTable" :data="messages" highlight-current-row>
-                <el-table-column type="index" width="50">
-                </el-table-column>
-                <el-table-column property="receivedDate" label="Received" width="120">
-                </el-table-column>
-                <el-table-column property="from" label="From" width="120">
-                </el-table-column>
-                <el-table-column property="to" label="To" width="120">
-                </el-table-column>
-                <el-table-column property="subject" label="Subject">
-                </el-table-column>
-            </el-table>
-        </div>
-`
+    template: require('./messagelist.html'),
+    props: ["selectedmessge"]
 })
 export default class MessageList extends Vue {
-    messages: any[] = []
-    error: Error = null
 
-    private connection = new HubConnection('/hubs/messages');
- 
+
+    constructor() {
+        super();
+    }
+
+    private connection: HubConnection;
+
+    messages: Message[] = [];
+    error?: Error;
+    selectedmessage?: Message;
+
+    handleCurrentChange(message: Message): void {
+        this.selectedmessage = message; 
+    }
+
     clear(): void {
+
         axios.delete("/api/messages/*")
             .then(response => {
                 this.refresh();
@@ -43,11 +38,11 @@ export default class MessageList extends Vue {
 
     refresh(): void {
 
-        this.error = null;
+        this.error;
 
         axios.get("/api/messages")
             .then(response => {
-                this.messages = response.data;
+                this.messages = response.data as Message[];
             })
             .catch(e => {
                 this.error = e;
@@ -56,6 +51,8 @@ export default class MessageList extends Vue {
     }
 
     async created() {
+
+        this.connection = new HubConnection('/hubs/messages');
 
         this.connection.on('messageadded', data => {
             this.refresh();
@@ -68,6 +65,9 @@ export default class MessageList extends Vue {
         await this.connection.start();
 
         this.refresh();
+    }
 
+    async destroyed() {
+        this.connection.stop();
     }
 }

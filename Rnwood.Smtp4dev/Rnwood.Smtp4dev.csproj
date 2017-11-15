@@ -3,15 +3,21 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp2.0</TargetFramework>
     <VersionPrefix>3.0.0-alpha</VersionPrefix>
-    <TypeScriptToolsVersion>2.3</TypeScriptToolsVersion>
+    <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
+    <TypeScriptCompileBlocked>True</TypeScriptCompileBlocked>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.0" />
+    <None Remove="components\messagelist.ts" />
+    <None Remove="npm-debug.log" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.0-alpha2-final" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.0.0-alpha2-final" />
-    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.0" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.0" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.1" />
     <PackageReference Include="MimeKit" Version="1.20.0" />
     <PackageReference Include="Rnwood.SmtpServer" Version="3.0.0-alpha-0203" />
   </ItemGroup>
@@ -21,17 +27,38 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="components\messageview.html" />
     <Content Include="main.ts" />
   </ItemGroup>
 
   <ItemGroup>
-    <Content Include="components\messagelist.ts" />
+    <Content Include="components\messagelist.html" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="components\messageview.ts" />
+    <TypeScriptCompile Include="components\messagelist.ts" />
+    <TypeScriptCompile Include="vue-shims.d.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="components\Message.ts">
+      <CustomToolNamespace>DbModel\Message.cs</CustomToolNamespace>
+    </None>
+    <None Update="components\MessagePart.ts">
+      <CustomToolNamespace>DbModel\MessagePart.cs</CustomToolNamespace>
+    </None>
+    <None Update="components\Smtp4devDbContext.ts">
+      <CustomToolNamespace>DbModel\Smtp4devDbContext.cs</CustomToolNamespace>
+    </None>
   </ItemGroup>
 
 
-  <PropertyGroup>
-	<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    
-  </PropertyGroup>
+  
+
+  <Target Name="RunNpm" BeforeTargets="BeforeBuild">
+    <Message Text="Running npm build..." />
+    <Exec Command="npm run build" WorkingDirectory="$(ProjectDir)" CustomErrorRegularExpression="(ERR.*)" CustomWarningRegularExpression="(WARN.*)" />
+  </Target>
 
 </Project>

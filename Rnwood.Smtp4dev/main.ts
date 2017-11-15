@@ -1,13 +1,14 @@
 ﻿import 'es6-collections';
+import 'element-theme-default/lib/index.css';
+
 import Vue from "vue";
-import Messagelist from './components/messagelist';
+import MessageList from './components/messagelist';
+import MessageView from './components/messageview';
+
 import Element from 'element-ui';
-import 'element-theme-default/lib/index.css'
-
 Vue.use(Element);
-
 
 var app = new Vue({
     el: '#app',
-    components: { Messagelist }
+    components: { messagelist: MessageList, messageview: MessageView }
 });

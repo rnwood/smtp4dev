@@ -22,7 +22,7 @@ The version hosted on this repo is in heavy development. **Grab the [stable(r) v
 
 - Edit ``appsettings.json`` and set the port number you want the SMTP server to listen on.
 
-- Run `Rnwood.Smtpdev` (`.exe` on Windows)
+- Run `Rnwood.Smtpdev` (`.exe` on Windows). (If you downloaded the ``noruntime`` version, you need the .NET Core 2.0 runtime on your machine and you should execute ``dotnet Rnwood.Smtpdev.dll`` to run it.)
 
 - Open your browser at `http://localhost:5000`
 
