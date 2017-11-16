@@ -9,14 +9,9 @@ namespace Rnwood.Smtp4dev.Hubs
 {
     public class MessagesHub : Hub
     {
-        public async Task OnMessageAdded()
+        public async Task OnMessagesChanged()
         {
-            await Clients.All.InvokeAsync("messageadded");
-        }
-
-        public async Task OnMessageRemoved()
-        {
-            await Clients.All.InvokeAsync("messageremoved");
+            await Clients.All.InvokeAsync("messageschanged");
         }
     }
 }

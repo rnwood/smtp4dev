@@ -74,7 +74,7 @@ namespace Rnwood.Smtp4dev
                 routes.MapHub<MessagesHub>("hubs/messages");
             });
 
- 
+
 
 
             app.ApplicationServices.GetService<Smtp4devServer>().Start();
@@ -85,9 +85,13 @@ namespace Rnwood.Smtp4dev
 
                 MessageConverter messageConverter = new MessageConverter();
 
-                Message message =messageConverter.Convert(File.OpenRead("example.eml"));
-                db.Messages.Add(message);
-                db.MessageParts.AddRange(message.Parts);
+
+                using (Stream stream = File.OpenRead("example.eml"))
+                {
+                    Message message = messageConverter.Convert(stream);
+                    db.Messages.Add(message);
+
+                }
 
                 db.SaveChanges();
             }

@@ -1,8 +1,8 @@
 ﻿import Component from "vue-class-component";
 import Vue from 'vue'
-import axios from 'axios';
 import { HubConnection } from '@aspnet/signalr-client'
-import Message = Api.Message;
+import MessagesController from "../ApiClient/MessagesController";
+import MessageHeader from "../ApiClient/MessageHeader";
 
 @Component({
     template: require('./messagelist.html'),
@@ -17,37 +17,39 @@ export default class MessageList extends Vue {
 
     private connection: HubConnection;
 
-    messages: Message[] = [];
+    messages: MessageHeader[] = [];
     error: Error | null = null;
-    selectedmessage: Message | null = null;
+    selectedmessage: MessageHeader | null = null;
+    loading = true;
 
-    handleCurrentChange(message: Message | null): void {
-        this.selectedmessage = message; 
+    handleCurrentChange(message: MessageHeader | null): void {
+        this.selectedmessage = message;
         this.$emit("selected-message-changed", message);
     }
 
-    clear(): void {
+    async clear() {
 
-        axios.delete("/api/messages/*")
-            .then(response => {
-                this.refresh();
-            })
-            .catch(e => {
-                this.error = e
-            })
+        try {
+            await new MessagesController().deleteAll();
+            this.refresh();
+        } catch (e) {
+            this.error = e;
+        }
+
     }
 
-    refresh(): void {
+    async refresh() {
 
         this.error;
 
-        axios.get("/api/messages")
-            .then(response => {
-                this.messages = response.data as Message[];
-            })
-            .catch(e => {
-                this.error = e;
-            })
+        try {
+            this.messages = await new MessagesController().getHeaders();
+        } catch (e) {
+            this.error = e;
+
+        } finally {
+            this.loading = false;
+        }
 
     }
 
@@ -55,11 +57,7 @@ export default class MessageList extends Vue {
 
         this.connection = new HubConnection('/hubs/messages');
 
-        this.connection.on('messageadded', data => {
-            this.refresh();
-        });
-
-        this.connection.on('messageremoved', data => {
+        this.connection.on('messageschanged', data => {
             this.refresh();
         });
 

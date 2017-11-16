@@ -3,19 +3,47 @@
 <head>
     <meta charset="utf-8" />
     <title>smtp4dev</title>
+
+    <style type="text/css">
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            font-family: Calibri, Arial, sans-serif;
+        }
+
+        .header {
+            width: 100%;
+            height: 56px;
+            color: #FFF;
+            background: #607D8B;
+            font-size: 20px;
+        }
+
+        .main {
+           height: 100%;
+        }
+
+        .messagelist, .messageview {
+            height: 100%;
+            overflow-y: scroll;
+        }
+    </style>
 </head>
 <body>
 
     <div id="app">
 
         <el-container>
-            <el-header>
-                <h1>smtp4dev</h1>
+            <el-header class="header">
+                <div class="header__title">smtp4dev</div>
             </el-header>
 
-            <el-row :gutter="10">
+            <el-row :gutter="10" class="main">
                 <el-col :md="12"><messagelist @selected-message-changed="selectedMessageChanged" /></el-col>
-                <el-col :md="12"><messageview v-bind:message="selectedMessage" /></el-col>
+                <el-col :md="12"><messageview v-bind:message-header="selectedMessage" /></el-col>
             </el-row>
 
         </el-container>

@@ -25,14 +25,14 @@ namespace Rnwood.Smtp4dev.Server
         {
             Smtp4devDbContext dbContent = _dbContextFactory();
 
-            Message message = new MessageConverter().Convert(e.Message.GetData());
-
-            dbContent.Messages.Add(message);
-            dbContent.MessageParts.AddRange(message.Parts);
+            using (Stream stream = e.Message.GetData())
+            {
+                Message message = new MessageConverter().Convert(stream);
+                dbContent.Messages.Add(message);
+            }
 
             dbContent.SaveChanges();
-
-            _messagesHub.OnMessageAdded().Wait();
+            _messagesHub.OnMessagesChanged().Wait();
         }
 
         private Func<Smtp4devDbContext> _dbContextFactory;

@@ -12,8 +12,11 @@ namespace Rnwood.Smtp4dev.Server
     {
         public Message Convert(Stream messageData)
         {
+            MimeMessage mime = MimeMessage.Load(messageData, false);
 
-            MimeMessage mime = MimeMessage.Load(messageData);
+            messageData.Seek(0, SeekOrigin.Begin);
+            byte[] data = new byte[messageData.Length];
+            messageData.Read(data, 0, data.Length);
 
             Message message = new Message()
             {
@@ -22,32 +25,11 @@ namespace Rnwood.Smtp4dev.Server
                 From = mime.From.ToString(),
                 To = mime.To.ToString(),
                 ReceivedDate = DateTime.Now,
-                Subject = mime.Subject
+                Subject = mime.Subject,
+                Data = data
+
             };
-
-            message.Parts = new List<DbModel.MessagePart>();
-
-            foreach (MimeEntity mimeEntity in mime.BodyParts)
-            {
-                
-
-                DbModel.MessagePart part = new DbModel.MessagePart()
-                {
-                    Id = Guid.NewGuid(),
-                    Owner = message,
-                    Headers = string.Join(Environment.NewLine, mimeEntity.Headers.Select(h => h.ToString()))
-                };
-
-                using (MemoryStream bodyStream = new MemoryStream())
-                {
-                    mimeEntity.WriteTo(bodyStream, true);
-                    part.Content = bodyStream.ToArray();
-                };
-
-                message.Parts.Add(part);
-            }
-
-
+            
             return message;
         }
     }

@@ -11,7 +11,8 @@
     "module": "commonjs",
     "strict": true,
     "moduleResolution": "node",
-    "experimentalDecorators": true
+    "experimentalDecorators": true,
+    "baseUrl": "."
   },
   "exclude": [
     "node_modules",

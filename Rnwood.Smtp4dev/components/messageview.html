@@ -1,22 +1,18 @@
 ﻿<div class="messageview">
     
-    <div v-if="error">{{error.message}} </div>
+    <el-alert v-if="error" type="error">
+        {{error.message}}
+    </el-alert>
 
-    <div v-if="message">
-        Subject: {{message.subject}}
+    <div v-if="messageHeader" v-loading="loading">
+        Subject: {{messageHeader.subject}}
 
-        <div v-for="part in message.parts">
-            Part: {{part.id}}
-
-            Headers: 
-            <textarea readonly v-model="part.headers"></textarea>
-
-            Content:
-            <textarea readonly v-model="part.content"></textarea>
+        <div v-if="message">
+            Subject: {{message.subject}}
         </div>
     </div>
 
-    <div v-if="!message">
+    <div v-if="!messageHeader">
         No message selected
     </div>
 

@@ -9,8 +9,10 @@ module.exports = {
         filename: 'bundle.js',
         path: path.resolve(__dirname, 'wwwroot/dist/')
     },
+    devtool: "source-map",
+   
     module: {
-        rules: [
+        rules: [ 
             {
                 test: /\.tsx?$/,
                 loader: 'ts-loader',

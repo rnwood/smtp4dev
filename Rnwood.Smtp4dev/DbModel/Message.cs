@@ -22,6 +22,6 @@ namespace Rnwood.Smtp4dev.DbModel
 
         public string Subject { get;  set; }
 
-        public List<MessagePart> Parts { get; set; }
+        public byte[] Data { get; set; }
     }
 }

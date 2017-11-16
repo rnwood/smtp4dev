@@ -14,7 +14,6 @@ namespace Rnwood.Smtp4dev.DbModel
         }
 
         public DbSet<Message> Messages { get; set; }
-        public DbSet<MessagePart> MessageParts { get; set; }
     }
 
 }

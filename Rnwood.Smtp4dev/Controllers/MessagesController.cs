@@ -25,23 +25,27 @@ namespace Rnwood.Smtp4dev.Controllers
         private MessagesHub _messagesHub;
 
         [HttpGet]
-        public IEnumerable<Message> Get()
+        public IEnumerable<ApiModel.MessageHeader> GetHeaders()
         {
-            var result = _dbContext.Messages.Include(m=> m.Parts).ToList();
-            
-            return result;
+            return _dbContext.Messages.Select(m => new ApiModel.MessageHeader(m));
         }
 
-        [HttpDelete("{id}")]
-        public async Task Delete(string id)
+        [HttpGet("{id}")]
+        public ApiModel.Message GetMessage(Guid id)
         {
-            if (id == "*")
-            {
-                _dbContext.Messages.RemoveRange(_dbContext.Messages);
-                _dbContext.SaveChanges();
+            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            return new ApiModel.Message(result);
+        }
 
-                await _messagesHub.OnMessageRemoved();
-            }
+        [HttpDelete("*")]
+        public async Task DeleteAll()
+        {
+
+            _dbContext.Messages.RemoveRange(_dbContext.Messages);
+            _dbContext.SaveChanges();
+
+            await _messagesHub.OnMessagesChanged();
+
         }
 
 

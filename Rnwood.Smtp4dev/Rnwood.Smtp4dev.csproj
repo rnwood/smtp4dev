@@ -36,21 +36,23 @@
   </ItemGroup>
 
   <ItemGroup>
-    <TypeScriptCompile Include="components\app.ts" />
     <TypeScriptCompile Include="components\messageview.ts" />
     <TypeScriptCompile Include="components\messagelist.ts" />
     <TypeScriptCompile Include="vue-shims.d.ts" />
   </ItemGroup>
 
   <ItemGroup>
-    <None Update="components\Message.ts">
-      <CustomToolNamespace>DbModel\Message.cs</CustomToolNamespace>
+    <None Update="ApiClient\Message.ts">
+      <CustomToolNamespace>ApiModel\Message.cs</CustomToolNamespace>
     </None>
-    <None Update="components\MessagePart.ts">
-      <CustomToolNamespace>DbModel\MessagePart.cs</CustomToolNamespace>
+    <None Update="ApiClient\MessageHeader.ts">
+      <CustomToolNamespace>ApiModel\MessageHeader.cs</CustomToolNamespace>
     </None>
-    <None Update="components\Smtp4devDbContext.ts">
-      <CustomToolNamespace>DbModel\Smtp4devDbContext.cs</CustomToolNamespace>
+    <None Update="ApiClient\MessagePart.ts">
+      <CustomToolNamespace>ApiModel\MessagePart.cs</CustomToolNamespace>
+    </None>
+    <None Update="ApiClient\MessagesController.ts">
+      <CustomToolNamespace>Controllers\MessagesController.cs</CustomToolNamespace>
     </None>
   </ItemGroup>
 
@@ -59,7 +61,7 @@
 
   <Target Name="RunNpm" BeforeTargets="BeforeBuild">
     <Message Text="Running npm build..." />
-    <Exec Command="npm run build" WorkingDirectory="$(ProjectDir)" CustomErrorRegularExpression="(ERR.*)" CustomWarningRegularExpression="(WARN.*)" />
+    <Exec Command="npm run build" WorkingDirectory="$(ProjectDir)" CustomErrorRegularExpression="(ERR|TS[0-9]).*" CustomWarningRegularExpression="(WARN.*)" />
   </Target>
 
 </Project>

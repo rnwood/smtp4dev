@@ -5,16 +5,19 @@ import Vue from "vue";
 import MessageList from './components/messagelist';
 import MessageView from './components/messageview';
 import Component from "vue-class-component";
+import MessageHeader from "ApiClient/MessageHeader";
 
 import Element from 'element-ui';
+import axios from 'axios' 
+
 Vue.use(Element);
 
 @Component({})
 export default class Main extends Vue {
 
-    selectedMessage: Api.Message | null = null;
+    selectedMessage: MessageHeader | null = null;
 
-    selectedMessageChanged(selectedMessage: Api.Message | null) {
+    selectedMessageChanged(selectedMessage: MessageHeader | null) {
         this.selectedMessage = selectedMessage;
     };
 
