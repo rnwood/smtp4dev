@@ -29,11 +29,19 @@ namespace Rnwood.Smtp4dev.Server
 
             foreach (MimeEntity mimeEntity in mime.BodyParts)
             {
+                
+
                 DbModel.MessagePart part = new DbModel.MessagePart()
                 {
                     Id = Guid.NewGuid(),
                     Owner = message,
-                    Content = mimeEntity.ToString()
+                    Headers = string.Join(Environment.NewLine, mimeEntity.Headers.Select(h => h.ToString()))
+                };
+
+                using (MemoryStream bodyStream = new MemoryStream())
+                {
+                    mimeEntity.WriteTo(bodyStream, true);
+                    part.Content = bodyStream.ToArray();
                 };
 
                 message.Parts.Add(part);

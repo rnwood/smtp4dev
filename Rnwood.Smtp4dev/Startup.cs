@@ -83,23 +83,11 @@ namespace Rnwood.Smtp4dev
             {
                 Smtp4devDbContext db = app.ApplicationServices.GetService<Smtp4devDbContext>();
 
-                Message message = new Message()
-                {
-                    Id = Guid.NewGuid(),
-                    From = "foo@bar.com",
-                    Subject = "subject"
-                };
+                MessageConverter messageConverter = new MessageConverter();
 
-
+                Message message =messageConverter.Convert(File.OpenRead("example.eml"));
                 db.Messages.Add(message);
-
-                MessagePart part = new MessagePart()
-                {
-                    Id = Guid.NewGuid(),
-                    Owner = message,
-                    Content = "bcdef"
-                };
-                db.MessageParts.Add(part);
+                db.MessageParts.AddRange(message.Parts);
 
                 db.SaveChanges();
             }

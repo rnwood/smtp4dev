@@ -2,6 +2,22 @@
     
     <div v-if="error">{{error.message}} </div>
 
-    Message view
+    <div v-if="message">
+        Subject: {{message.subject}}
+
+        <div v-for="part in message.parts">
+            Part: {{part.id}}
+
+            Headers: 
+            <textarea readonly v-model="part.headers"></textarea>
+
+            Content:
+            <textarea readonly v-model="part.content"></textarea>
+        </div>
+    </div>
+
+    <div v-if="!message">
+        No message selected
+    </div>
 
 </div>

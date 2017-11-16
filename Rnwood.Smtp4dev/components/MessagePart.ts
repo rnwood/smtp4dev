@@ -4,7 +4,8 @@
 		export class MessagePart { 
 			id: string;
 			owner: Message;
-			content: string;
+			content: number[];
+			headers: string;
 		}
 
 }

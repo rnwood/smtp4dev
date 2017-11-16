@@ -18,11 +18,12 @@ export default class MessageList extends Vue {
     private connection: HubConnection;
 
     messages: Message[] = [];
-    error?: Error;
-    selectedmessage?: Message;
+    error: Error | null = null;
+    selectedmessage: Message | null = null;
 
-    handleCurrentChange(message: Message): void {
+    handleCurrentChange(message: Message | null): void {
         this.selectedmessage = message; 
+        this.$emit("selected-message-changed", message);
     }
 
     clear(): void {

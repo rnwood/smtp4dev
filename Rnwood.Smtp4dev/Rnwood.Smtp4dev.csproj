@@ -36,6 +36,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="components\app.ts" />
     <TypeScriptCompile Include="components\messageview.ts" />
     <TypeScriptCompile Include="components\messagelist.ts" />
     <TypeScriptCompile Include="vue-shims.d.ts" />

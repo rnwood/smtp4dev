@@ -12,6 +12,7 @@ namespace Rnwood.Smtp4dev.DbModel
 
         [JsonIgnore]
         public Message Owner { get; set; }
-        public string Content { get; set; }
+        public byte[] Content { get; set; }
+        public string Headers { get; set; }
     }
 }

@@ -14,8 +14,8 @@
             </el-header>
 
             <el-row :gutter="10">
-                <el-col :md="12"><messagelist /></el-col>
-                <el-col :md="12"><messageview /></el-col>
+                <el-col :md="12"><messagelist @selected-message-changed="selectedMessageChanged" /></el-col>
+                <el-col :md="12"><messageview v-bind:message="selectedMessage" /></el-col>
             </el-row>
 
         </el-container>
