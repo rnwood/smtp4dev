@@ -11,42 +11,109 @@
             width: 100%;
             height: 100%;
             background: white;
-            font-family: Calibri, Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        .header {
+        #app {
             width: 100%;
-            height: 56px;
-            color: #FFF;
-            background: #607D8B;
-            font-size: 20px;
+            height: 100%;
         }
 
-        .main {
-           height: 100%;
+        .el-tabs {
+            display: flex;
+            flex-direction: column;
+            height: 100%;
+            width: 100%;
+            align-items: stretch;
+        }
+
+        .el-tab-pane {
+            flex: 1 0 0;
+        }
+
+        .el-tabs__content {
+            flex-grow: 1;
+            display: flex;
         }
 
         .messagelist, .messageview {
-            height: 100%;
-            overflow-y: scroll;
+            display: flex;
+            flex-direction: column;
+        }
+
+            .messagelist .table {
+                overflow-y: scroll;
+                flex: 1;
+            }
+
+
+        .el-icon-caret-right:before {
+            content: "" !important;
+        }
+
+        .fillpanel {
+            display: flex;
+            flex-direction: row;
+            align-content: stretch;
+        }
+
+            .fillpanel.h {
+                flex-direction: column;
+            }
+
+        .fill {
+            flex: 1 0 0;
+            overflow: auto;
+        }
+
+        [v-cloak] {
+            display: none
         }
     </style>
 </head>
 <body>
 
-    <div id="app">
+    <div id="app" v-cloak class="fillpanel">
 
-        <el-container>
-            <el-header class="header">
-                <div class="header__title">smtp4dev</div>
-            </el-header>
+        <el-tabs id="maintabs" class="fill" value="messages">
+            <el-tab-pane label="Messages" name="messages" class="fillpanel">
+                <span slot="label"><i class="el-icon-message"></i> Messages</span>
 
-            <el-row :gutter="10" class="main">
-                <el-col :md="12"><messagelist @selected-message-changed="selectedMessageChanged" /></el-col>
-                <el-col :md="12"><messageview v-bind:message-header="selectedMessage" /></el-col>
-            </el-row>
+                <div class="fill fillpanel">
+                    <messagelist class="fill" @selected-message-changed="selectedMessageChanged" />
+                </div>
+                <div class="fill fillpanel">
+                    <messageview class="fill" v-bind:message-summary="selectedMessage" />
+                </div>
 
-        </el-container>
+            </el-tab-pane>
+
+            <el-tab-pane label="Sessions" name="sessions" class="fillpanel">
+                <span slot="label"><i class="el-icon-document"></i> Sessions</span>
+
+                <div class="fill fillpanel">
+                    <sessionlist class="fill" @selected-session-changed="selectedSessionChanged" />
+                </div>
+
+                <div class="fill fillpanel">
+                    <sessionview class="fill" v-bind:session-summary="selectedSession" />
+                </div>
+            </el-tab-pane>
+
+            <el-tab-pane label="Settings" name="settings fillpanel-h">
+                <span slot="label"><i class="el-icon-setting"></i> Settings</span>
+
+
+                <div class="fill">
+                    <el-alert title="Coming soon!"
+                              type="info"
+                              description="To edit the settings, edit appsettings.json and restart the program"
+                              show-icon>
+                </div>
+            </el-tab-pane>
+        </el-tabs>
+
+
 
     </div>
 

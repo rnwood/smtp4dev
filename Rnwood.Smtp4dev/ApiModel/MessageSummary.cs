@@ -7,9 +7,9 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
-    public class MessageHeader
+    public class MessageSummary
     {
-        public MessageHeader(DbModel.Message dbMessage)
+        public MessageSummary(DbModel.Message dbMessage)
         {
             Id = dbMessage.Id;
             From = dbMessage.From;

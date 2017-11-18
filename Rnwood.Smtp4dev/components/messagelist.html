@@ -1,12 +1,16 @@
 ﻿<div class="messagelist">
-    <button v-on:click="refresh">Refresh</button>
-    <button v-on:click="clear">Clear</button>
+    
+    <el-button-group>
+        <el-button icon="el-icon-delete" v-on:click="clear">Clear</el-button>
+    </el-button-group>
 
 
     <el-alert v-if="error" type="error">
         {{error.message}}
+
+        <el-button v-on:click="refresh">Retry</el-button>
     </el-alert>
-    <el-table ref="singleTable" :data="messages" v-loading="loading" empty-text="No messages" highlight-current-row @current-change="handleCurrentChange">
+    <el-table ref="singleTable" :data="messages" v-loading="loading" empty-text="No messages" highlight-current-row @current-change="handleCurrentChange" class="table">
         <el-table-column type="index" width="50">
         </el-table-column>
         <el-table-column property="receivedDate" label="Received" width="120">

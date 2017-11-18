@@ -5,14 +5,17 @@
     <VersionPrefix>3.0.0-alpha</VersionPrefix>
     <TypeScriptToolsVersion>Latest</TypeScriptToolsVersion>
     <TypeScriptCompileBlocked>True</TypeScriptCompileBlocked>
+    <TypeScriptExperimentalDecorators>True</TypeScriptExperimentalDecorators>
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="ApiClient\FileStreamResult.ts" />
     <None Remove="components\messagelist.ts" />
     <None Remove="npm-debug.log" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="HtmlAgilityPack" Version="1.6.5" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.3" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.0-alpha2-final" />
     <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.0.0-alpha2-final" />
@@ -27,6 +30,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="components\sessionlist.html" />
     <Content Include="components\messageview.html" />
     <Content Include="main.ts" />
   </ItemGroup>
@@ -36,23 +40,39 @@
   </ItemGroup>
 
   <ItemGroup>
+    <TypeScriptCompile Include="ApiClient\FileStreamResult.ts" />
+    <TypeScriptCompile Include="components\headers.ts" />
+    <TypeScriptCompile Include="components\sessionlist.ts" />
+    <TypeScriptCompile Include="components\messageview-html.ts" />
     <TypeScriptCompile Include="components\messageview.ts" />
     <TypeScriptCompile Include="components\messagelist.ts" />
     <TypeScriptCompile Include="vue-shims.d.ts" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="ApiClient\Header.ts">
+      <CustomToolNamespace>ApiModel\Header.cs</CustomToolNamespace>
+    </None>
     <None Update="ApiClient\Message.ts">
       <CustomToolNamespace>ApiModel\Message.cs</CustomToolNamespace>
     </None>
-    <None Update="ApiClient\MessageHeader.ts">
-      <CustomToolNamespace>ApiModel\MessageHeader.cs</CustomToolNamespace>
-    </None>
-    <None Update="ApiClient\MessagePart.ts">
-      <CustomToolNamespace>ApiModel\MessagePart.cs</CustomToolNamespace>
+    <None Update="ApiClient\MessageEntitySummary.ts">
+      <CustomToolNamespace>ApiModel\MessageEntitySummary.cs</CustomToolNamespace>
     </None>
     <None Update="ApiClient\MessagesController.ts">
       <CustomToolNamespace>Controllers\MessagesController.cs</CustomToolNamespace>
+    </None>
+    <None Update="ApiClient\MessageSummary.ts">
+      <CustomToolNamespace>ApiModel\MessageSummary.cs</CustomToolNamespace>
+    </None>
+    <None Update="ApiClient\Session.ts">
+      <CustomToolNamespace>ApiModel\Session.cs</CustomToolNamespace>
+    </None>
+    <None Update="ApiClient\SessionsController.ts">
+      <CustomToolNamespace>Controllers\SessionsController.cs</CustomToolNamespace>
+    </None>
+    <None Update="ApiClient\SessionSummary.ts">
+      <CustomToolNamespace>ApiModel\SessionSummary.cs</CustomToolNamespace>
     </None>
   </ItemGroup>
 

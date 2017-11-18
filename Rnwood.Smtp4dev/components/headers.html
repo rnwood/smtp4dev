@@ -1,0 +1,13 @@
+﻿<div class="headers">
+
+    <template v-if="headers">
+
+        <el-table ref="singleTable" :data="headers" empty-text="No headers" >
+            <el-table-column property="name" label="Name" width="120">
+            </el-table-column>
+            <el-table-column property="value" label="Value">
+            </el-table-column>
+        </el-table>
+    </template>
+
+</div>

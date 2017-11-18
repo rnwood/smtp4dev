@@ -14,6 +14,7 @@ namespace Rnwood.Smtp4dev.DbModel
         }
 
         public DbSet<Message> Messages { get; set; }
+        public DbSet<Session> Sessions { get; set; }
     }
 
 }

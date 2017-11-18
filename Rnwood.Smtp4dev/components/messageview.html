@@ -1,18 +1,71 @@
-﻿<div class="messageview">
-    
+﻿<div class="messageview fill fillpanel">
+
     <el-alert v-if="error" type="error">
         {{error.message}}
+
+        <el-button v-on:click="loadMessage">Retry</el-button>
     </el-alert>
 
-    <div v-if="messageHeader" v-loading="loading">
-        Subject: {{messageHeader.subject}}
-
-        <div v-if="message">
-            Subject: {{message.subject}}
+    <div v-if="messageSummary" v-loading="loading" class="fillpanel h fill">
+        <div>
+            Subject: {{messageSummary.subject}}
         </div>
+
+        <el-tabs value="view" style="height: 100%; width:100%" class="fill">
+
+
+            <el-tab-pane label="View" name="view" class="fillpanel">
+                <messageview-html :message-summary="messageSummary" class="fill" />
+            </el-tab-pane>
+
+            <el-tab-pane label="Headers" name="headers" class="fillpanel">
+                <template v-if="message">
+                    <headers :headers="message.headers" class="fill" />
+                </template>
+            </el-tab-pane>
+
+            <!--
+            <el-tab-pane label="Source" name="source" class="fillpanel">
+                <template v-if="message">
+                    <textarea class="fill" readonly v-model="message.source"></textarea>
+                </template>
+            </el-tab-pane>
+            -->
+
+            <el-tab-pane label="Parts" name="parts">
+
+                <template v-if="message">
+
+
+                    <el-tree :data="message.parts" :props="{label: 'name', children: 'childParts', disabled: false, isLeaf: isLeaf}" @node-click="handleNodeClick" highlight-current default-expand-all></el-tree>
+
+
+                    <div v-if="selectedPart">
+
+                        <el-tabs value="headers">
+                            <el-tab-pane label="Headers" name="headers"><headers :headers="selectedPart.headers" /></el-tab-pane>
+
+                            <!--
+                            <el-tab-pane label="Source" name="source" class="fillpanel">
+                                <template v-if="message">
+                                    <textarea class="fill" readonly v-model="selectedPart.source"></textarea>
+                                </template>
+                            </el-tab-pane>
+                                -->
+
+                        </el-tabs>
+
+                    </div>
+                </template>
+            </el-tab-pane>
+        </el-tabs>
+
+
+
+
     </div>
 
-    <div v-if="!messageHeader">
+    <div v-if="!messageSummary">
         No message selected
     </div>
 

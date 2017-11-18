@@ -8,6 +8,8 @@ using Rnwood.Smtp4dev.Hubs;
 using Microsoft.EntityFrameworkCore;
 using Newtonsoft.Json;
 using System.IO;
+using MimeKit;
+using HtmlAgilityPack;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -25,9 +27,9 @@ namespace Rnwood.Smtp4dev.Controllers
         private MessagesHub _messagesHub;
 
         [HttpGet]
-        public IEnumerable<ApiModel.MessageHeader> GetHeaders()
+        public IEnumerable<ApiModel.MessageSummary> GetSummaries()
         {
-            return _dbContext.Messages.Select(m => new ApiModel.MessageHeader(m));
+            return _dbContext.Messages.Select(m => new ApiModel.MessageSummary(m));
         }
 
         [HttpGet("{id}")]
@@ -35,6 +37,38 @@ namespace Rnwood.Smtp4dev.Controllers
         {
             Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
             return new ApiModel.Message(result);
+        }
+
+        [HttpGet("{id}/part/{cid}/content")]
+        public FileStreamResult GetPartContent(Guid id, string cid)
+        {
+            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+
+            return ApiModel.Message.GetPartContent(result, cid);
+        }
+
+        [HttpGet("{id}/html")]
+        public string GetMessageHtml(Guid id)
+        {
+            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+
+            string html = ApiModel.Message.GetHtml(result);
+
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            HtmlNodeCollection imageElements = doc.DocumentNode.SelectNodes("//img[starts-with(@src, 'cid:')]");
+
+            if (imageElements != null)
+            {
+                foreach (HtmlNode imageElement in imageElements)
+                {
+                    string cid = imageElement.Attributes["src"].Value.Replace("cid:", "", StringComparison.OrdinalIgnoreCase);
+                    imageElement.Attributes["src"].Value = $"/api/Messages/{id.ToString()}/part/{cid}/content";
+                }
+            }
+
+            return doc.DocumentNode.OuterHtml;
         }
 
         [HttpDelete("*")]

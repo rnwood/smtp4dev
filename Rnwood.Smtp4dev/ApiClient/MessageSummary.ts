@@ -1,6 +1,6 @@
-﻿
+﻿ 
 
-export default class MessageHeader {  
+export default class MessageSummary {  
     id: string; 
     from: string; 
     to: string; 

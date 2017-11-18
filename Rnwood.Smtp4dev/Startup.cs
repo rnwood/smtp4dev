@@ -52,6 +52,7 @@ namespace Rnwood.Smtp4dev
             services.AddSignalR();
 
             services.AddSingleton<MessagesHub>();
+            services.AddSingleton<SessionsHub>();
         }
 
 
@@ -72,6 +73,7 @@ namespace Rnwood.Smtp4dev
             app.UseSignalR(routes =>
             {
                 routes.MapHub<MessagesHub>("hubs/messages");
+                routes.MapHub<SessionsHub>("hubs/sessions");
             });
 
 
@@ -87,6 +89,13 @@ namespace Rnwood.Smtp4dev
 
 
                 using (Stream stream = File.OpenRead("example.eml"))
+                {
+                    Message message = messageConverter.Convert(stream);
+                    db.Messages.Add(message);
+
+                }
+
+                using (Stream stream = File.OpenRead("example2.eml"))
                 {
                     Message message = messageConverter.Convert(stream);
                     db.Messages.Add(message);

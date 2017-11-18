@@ -3,6 +3,8 @@
   "compilerOptions": {
     "outDir": "./wwwroot/build/",
     "noImplicitAny": true,
+    "noImplicitThis": false,
+    "noImplicitReturns": true,
     "noEmitOnError": true,
     "removeComments": false,
     "sourceMap": true,

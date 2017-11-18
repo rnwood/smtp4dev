@@ -1,13 +1,13 @@
 ﻿import Component from "vue-class-component";
 import Vue from 'vue'
 import { HubConnection } from '@aspnet/signalr-client'
-import MessagesController from "../ApiClient/MessagesController";
-import MessageSummary from "../ApiClient/MessageSummary";
+import SessionsController from "../ApiClient/SessionsController";
+import SessionSummary from "../ApiClient/SessionSummary";
 
 @Component({
-    template: require('./messagelist.html')
+    template: require('./sessionlist.html')
 })
-export default class MessageList extends Vue {
+export default class SessionList extends Vue {
 
 
     constructor() {
@@ -16,20 +16,20 @@ export default class MessageList extends Vue {
 
     private connection: HubConnection;
 
-    messages: MessageSummary[] = [];
+    sessions: SessionSummary[] = [];
     error: Error | null = null;
-    selectedmessage: MessageSummary | null = null;
+    selectedsession: SessionSummary | null = null;
     loading = true;
 
-    handleCurrentChange(message: MessageSummary | null): void {
-        this.selectedmessage = message;
-        this.$emit("selected-message-changed", message);
+    handleCurrentChange(session: SessionSummary | null): void {
+        this.selectedsession = session;
+        this.$emit("selected-session-changed", session);
     }
 
     async clear() {
 
         try {
-            await new MessagesController().deleteAll();
+            await new SessionsController().deleteAll();
             this.refresh();
         } catch (e) {
             this.error = e;
@@ -42,7 +42,7 @@ export default class MessageList extends Vue {
         this.error = null;
 
         try {
-            this.messages = await new MessagesController().getSummaries();
+            this.sessions = await new SessionsController().getSummaries();
         } catch (e) {
             this.error = e;
 
@@ -54,9 +54,9 @@ export default class MessageList extends Vue {
 
     async created() {
 
-        this.connection = new HubConnection('/hubs/messages');
+        this.connection = new HubConnection('/hubs/sessions');
 
-        this.connection.on('messageschanged', data => {
+        this.connection.on('sessionschanged', data => {
             this.refresh();
         });
 
