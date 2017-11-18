@@ -10,6 +10,11 @@ For downloads of the stable smtp4dev v2 please see [https://smtp4dev.codeplex.co
 
 [![Build status](https://ci.appveyor.com/api/projects/status/tay9sajnfh4vy2x0/branch/master?svg=true)](https://ci.appveyor.com/project/rnwood/smtp4dev/branch/master)
 
+## Screenshots
+
+![Screenshot 1](screenshot1.png)
+![Screenshot 2](screenshot2.png)
+
 ## How to run smtp4dev
 
 The version hosted on this repo is in heavy development. **Grab the [stable(r) v2 version](https://smtp4dev.codeplex.com/) if you want something feature complete which you can just double click on and use.**
