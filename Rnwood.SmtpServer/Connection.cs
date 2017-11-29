@@ -211,7 +211,7 @@ namespace Rnwood.SmtpServer
                     }
                 }
             }
-            catch (IOException ioException)
+            catch (Exception ioException)
             {
                 Session.SessionError = ioException.Message;
             }

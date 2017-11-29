@@ -23,6 +23,18 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         }
 
         [Test]
+        public void SayHelo_NoClientName()
+        {
+            Mocks mocks = new Mocks();
+
+            HeloVerb verb = new HeloVerb();
+            verb.Process(mocks.Connection.Object, new SmtpCommand("HELO"));
+
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+            mocks.Session.VerifySet(s => s.ClientName, (string) null);
+        }
+
+        [Test]
         public void SayHeloTwice_ReturnsError()
         {
             Mocks mocks = new Mocks();
