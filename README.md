@@ -2,7 +2,7 @@
 smtp4dev - the mail server for development
 
 A dummy SMTP server for Windows, Linux, Mac OS-X (and maybe elsewhere where .NET Core is available). This repository hosts the development of v3 which will have a re-written web UI so that it can be shared amongst members of a team (the most requested feature in v2).
-For downloads of the stable smtp4dev v2 please see [https://smtp4dev.codeplex.com/]
+For the stable smtp4dev version 2 (Windows only desktop app) please see [https://github.com/rnwood/smtp4dev/releases/tag/v2.0.10] and the v2.0 branch.
 
 *If you find smtp4dev useful, please consider supporting further development by making a donation:*
 
@@ -17,7 +17,7 @@ For downloads of the stable smtp4dev v2 please see [https://smtp4dev.codeplex.co
 
 ## How to run smtp4dev
 
-The version hosted on this repo is in heavy development. **Grab the [stable(r) v2 version](https://smtp4dev.codeplex.com/) if you want something feature complete which you can just double click on and use.**
+The version hosted on this repo is in heavy development. **Grab the [stable(r) v2 version](https://github.com/rnwood/smtp4dev/releases/tag/v2.0.10) if you want something feature complete which you can just double click on and use.**
 
 *The MacOS release is totally untested. Please contribute instructions on how to use and feedback on any issues*
 
