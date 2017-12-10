@@ -8,7 +8,8 @@ For the stable smtp4dev version 2 (Windows only desktop app) please see [https:/
 
 <a href='https://www.paypal.me/rnwood'><img alt='Donate' src='https://www.paypalobjects.com/webstatic/en_US/btn/btn_donate_pp_142x27.png'/></a>
 
-[![Build status](https://ci.appveyor.com/api/projects/status/tay9sajnfh4vy2x0/branch/master?svg=true)](https://ci.appveyor.com/project/rnwood/smtp4dev/branch/master) [![Github Releases](https://img.shields.io/github/downloads/rnwood/smtp4dev/latest/total.svg)](https://github.com/rnwood/smtp4dev/releases)
+[![Build status](https://ci.appveyor.com/api/projects/status/tay9sajnfh4vy2x0/branch/master?svg=true)](https://ci.appveyor.com/project/rnwood/smtp4dev/branch/master)
+[![Github Releases](https://img.shields.io/github/downloads/rnwood/smtp4dev/latest/total.svg)](https://github.com/rnwood/smtp4dev/releases) (+270k when prev hosted on Codeplex)
 
 ## Screenshots
 
