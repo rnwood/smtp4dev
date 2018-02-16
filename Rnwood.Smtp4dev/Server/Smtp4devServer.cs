@@ -14,8 +14,9 @@ namespace Rnwood.Smtp4dev.Server
         public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptions<ServerOptions> serverOptions, MessagesHub messagesHub, SessionsHub sessionsHub)
         {
             this.dbContextFactory = dbContextFactory;
+            this.serverOptions = serverOptions.Value;
 
-            this.smtpServer = new DefaultServer(serverOptions.Value.AllowRemoteConnections, serverOptions.Value.Port);
+            this.smtpServer = new DefaultServer(this.serverOptions.AllowRemoteConnections, this.serverOptions.Port);
             this.smtpServer.MessageReceived += OnMessageReceived;
             this.smtpServer.SessionCompleted += OnSessionCompleted;
 
@@ -48,6 +49,19 @@ namespace Rnwood.Smtp4dev.Server
             {
                 Message message = new MessageConverter().Convert(stream);
                 dbContent.Messages.Add(message);
+                if (this.serverOptions.SaveMessageOnFileSystem)
+                {
+                    // create a unique file name, even with bulk emails
+                    var filename = $"{this.serverOptions.PathSaveMessageOnFileSystem}{e.Message.ReceivedDate:yyyy-MM-dd-HH-mm-ss-ffff}-{message.To.GetHashCode()}-{message.Subject.GetHashCode()}.eml";
+                    if (!File.Exists(filename))
+                    {
+                        using (var fileStream = File.Create(filename))
+                        {
+                            stream.Seek(0, SeekOrigin.Begin);
+                            stream.CopyTo(fileStream);
+                        }
+                    }
+                }
             }
 
             dbContent.SaveChanges();
@@ -57,7 +71,7 @@ namespace Rnwood.Smtp4dev.Server
         private Func<Smtp4devDbContext> dbContextFactory;
 
         private DefaultServer smtpServer;
-
+        private readonly ServerOptions serverOptions;
         private MessagesHub messagesHub;
         private SessionsHub sessionsHub;
 
