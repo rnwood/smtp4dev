@@ -13,9 +13,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 {
     public class Message
     {
-
-
-        public Message(DbModel.Message dbMessage)
+        public Message(DbModel.Message dbMessage, DbModel.MessageData dbMessageData)
         {
             Id = dbMessage.Id;
             From = dbMessage.From;
@@ -25,7 +23,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
             Parts = new List<ApiModel.MessageEntitySummary>();
 
-            using (MemoryStream stream = new MemoryStream(dbMessage.Data))
+            using (MemoryStream stream = new MemoryStream(dbMessageData.Data))
             {
                 MimeMessage mime = MimeMessage.Load(stream);
 
@@ -76,7 +74,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         }
 
-        internal static FileStreamResult GetPartContent(DbModel.Message result, string cid)
+        internal static FileStreamResult GetPartContent(DbModel.MessageData result, string cid)
         {
             using (MemoryStream stream = new MemoryStream(result.Data))
             {
@@ -112,9 +110,9 @@ namespace Rnwood.Smtp4dev.ApiModel
             }
         }
 
-        public static string GetHtml(DbModel.Message dbMessage)
+        public static string GetHtml(DbModel.MessageData dbMessageData)
         {
-            using (MemoryStream stream = new MemoryStream(dbMessage.Data))
+            using (MemoryStream stream = new MemoryStream(dbMessageData.Data))
             {
                 MimeMessage mime = MimeMessage.Load(stream);
 

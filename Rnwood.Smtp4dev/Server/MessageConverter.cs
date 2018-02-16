@@ -1,36 +1,39 @@
 ﻿using MimeKit;
 using Rnwood.Smtp4dev.DbModel;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Server
 {
     public class MessageConverter
     {
-        public Message Convert(Stream messageData)
+        public Tuple<Message, MessageData>  Convert(Stream messageStream)
         {
-            MimeMessage mime = MimeMessage.Load(messageData, false);
+            MimeMessage mime = MimeMessage.Load(messageStream, false);
 
-            messageData.Seek(0, SeekOrigin.Begin);
-            byte[] data = new byte[messageData.Length];
-            messageData.Read(data, 0, data.Length);
+            messageStream.Seek(0, SeekOrigin.Begin);
+            byte[] data = new byte[messageStream.Length];
+            messageStream.Read(data, 0, data.Length);
 
-            Message message = new Message()
+            Message message = new Message
             {
                 Id = Guid.NewGuid(),
 
                 From = mime.From.ToString(),
                 To = mime.To.ToString(),
                 ReceivedDate = DateTime.Now,
-                Subject = mime.Subject,
-                Data = data
-
+                Subject = mime.Subject
             };
-            
-            return message;
+
+            MessageData messageData = new MessageData
+            {
+                Id = Guid.NewGuid(),
+                MessageId = message.Id,
+                Data = data
+            };
+
+
+            return new Tuple<Message, MessageData>(message, messageData);
         }
     }
 }

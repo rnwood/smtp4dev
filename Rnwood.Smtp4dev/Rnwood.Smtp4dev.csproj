@@ -43,7 +43,6 @@
     <TypeScriptCompile Include="ApiClient\FileStreamResult.ts" />
     <TypeScriptCompile Include="components\headers.ts" />
     <TypeScriptCompile Include="components\sessionlist.ts" />
-    <TypeScriptCompile Include="components\messageview-html.ts" />
     <TypeScriptCompile Include="components\messageview.ts" />
     <TypeScriptCompile Include="components\messagelist.ts" />
     <TypeScriptCompile Include="vue-shims.d.ts" />

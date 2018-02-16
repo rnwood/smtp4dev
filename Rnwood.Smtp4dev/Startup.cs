@@ -90,16 +90,16 @@ namespace Rnwood.Smtp4dev
 
                 using (Stream stream = File.OpenRead("example.eml"))
                 {
-                    Message message = messageConverter.Convert(stream);
-                    db.Messages.Add(message);
-
+                    var convert = new MessageConverter().Convert(stream);
+                    db.Messages.Add(convert.Item1);
+                    db.MessageDatas.Add(convert.Item2);
                 }
 
                 using (Stream stream = File.OpenRead("example2.eml"))
                 {
-                    Message message = messageConverter.Convert(stream);
-                    db.Messages.Add(message);
-
+                    var convert = new MessageConverter().Convert(stream);
+                    db.Messages.Add(convert.Item1);
+                    db.MessageDatas.Add(convert.Item2);
                 }
 
                 db.SaveChanges();
