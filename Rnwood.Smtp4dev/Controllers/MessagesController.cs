@@ -13,6 +13,10 @@ using HtmlAgilityPack;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
+    using System.Net;
+    using System.Net.Http;
+    using System.Net.Http.Headers;
+
     [Route("api/[controller]")]
     public class MessagesController : Controller
     {
@@ -37,6 +41,20 @@ namespace Rnwood.Smtp4dev.Controllers
         {
             Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
             return new ApiModel.Message(result);
+        }
+
+        [HttpGet("download/{id}")]
+        public async Task<IActionResult> GetPartContent(Guid id)
+        {
+            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            if (result != null && System.IO.File.Exists(result.Filename))
+            {
+                var info = new FileInfo(result.Filename);
+                var response = File(new FileStream(result.Filename, FileMode.Open), "application/octet-stream"); // FileStreamResult
+                response.FileDownloadName = info.Name;
+                return response;
+            }
+            return new EmptyResult();
         }
 
         [HttpGet("{id}/part/{cid}/content")]

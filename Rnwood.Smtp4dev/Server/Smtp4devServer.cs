@@ -47,8 +47,7 @@ namespace Rnwood.Smtp4dev.Server
 
             using (Stream stream = e.Message.GetData())
             {
-                Message message = new MessageConverter().Convert(stream);
-                dbContent.Messages.Add(message);
+                Message message = new MessageConverter().Convert(stream);                
                 if (this.serverOptions.SaveMessageOnFileSystem)
                 {
                     // create a unique file name, even with bulk emails
@@ -60,8 +59,10 @@ namespace Rnwood.Smtp4dev.Server
                             stream.Seek(0, SeekOrigin.Begin);
                             stream.CopyTo(fileStream);
                         }
+                        message.Filename = filename;
                     }
                 }
+                dbContent.Messages.Add(message);
             }
 
             dbContent.SaveChanges();
