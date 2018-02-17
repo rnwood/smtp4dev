@@ -2,15 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc;
+using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using HtmlAgilityPack;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
-    using System.Text.RegularExpressions;
-    using DbModel;
-
     [Route("api/[controller]")]
     public class MessagesController : Controller
     {
