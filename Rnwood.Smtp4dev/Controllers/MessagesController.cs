@@ -5,18 +5,11 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using System.IO;
-using MimeKit;
 using HtmlAgilityPack;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
-    using System.Net;
-    using System.Net.Http;
-    using System.Net.Http.Headers;
-
     [Route("api/[controller]")]
     public class MessagesController : Controller
     {

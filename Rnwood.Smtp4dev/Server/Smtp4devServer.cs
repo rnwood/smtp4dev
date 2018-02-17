@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Options;
-using MimeKit;
+﻿using Microsoft.Extensions.Options;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.SmtpServer;
