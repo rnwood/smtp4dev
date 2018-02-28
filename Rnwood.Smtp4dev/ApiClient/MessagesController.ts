@@ -1,18 +1,16 @@
-﻿ 
-
-import MessageSummary from './MessageSummary';
+﻿import MessageSummary from './MessageSummary';
 import Message from './Message';
+import BaseUrlProvider from '../BaseUrlProvider';
 import FileStreamResult from './FileStreamResult';
 import axios from "axios";
 
 export default class MessagesController {
-    public _baseUrl: string;                
+    public _baseUrl: string;
  
-    constructor(baseUrl: string = "/"){
-        this._baseUrl = baseUrl;
+    constructor() {        
+        this._baseUrl = new BaseUrlProvider().getBaseUrl();
     }
-        
-    
+            
     // get: api/Messages       
     public async getSummaries(): Promise<MessageSummary[]> {
         let route = () => `${this._baseUrl}api/Messages`;
