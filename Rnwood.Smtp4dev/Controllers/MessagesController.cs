@@ -64,7 +64,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 foreach (HtmlNode imageElement in imageElements)
                 {
                     string cid = imageElement.Attributes["src"].Value.Replace("cid:", "", StringComparison.OrdinalIgnoreCase);
-                    imageElement.Attributes["src"].Value = $"/api/Messages/{id.ToString()}/part/{cid}/content";
+                    imageElement.Attributes["src"].Value = $"api/Messages/{id.ToString()}/part/{cid}/content";
                 }
             }
 
