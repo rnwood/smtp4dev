@@ -3,6 +3,7 @@ import Vue from 'vue'
 import { HubConnection } from '@aspnet/signalr-client'
 import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
+import BaseUrlProvider from '../BaseUrlProvider';
 
 @Component({
     template: require('./sessionlist.html')
@@ -53,8 +54,8 @@ export default class SessionList extends Vue {
     }
 
     async created() {
-
-        this.connection = new HubConnection('/hubs/sessions');
+        let baseUrl = new BaseUrlProvider().getBaseUrl();
+        this.connection = new HubConnection(baseUrl + '/hubs/sessions');
 
         this.connection.on('sessionschanged', data => {
             this.refresh();

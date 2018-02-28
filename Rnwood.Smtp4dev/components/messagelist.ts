@@ -3,6 +3,7 @@ import Vue from 'vue'
 import { HubConnection } from '@aspnet/signalr-client'
 import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
+import BaseUrlProvider from '../BaseUrlProvider';
 
 @Component({
     template: require('./messagelist.html')
@@ -54,7 +55,8 @@ export default class MessageList extends Vue {
 
     async created() {
 
-        this.connection = new HubConnection('/hubs/messages');
+        let baseUrl = new BaseUrlProvider().getBaseUrl();
+        this.connection = new HubConnection(baseUrl + 'hubs/messages');
 
         this.connection.on('messageschanged', data => {
             this.refresh();
