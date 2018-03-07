@@ -1,6 +1,6 @@
 ﻿import Component from "vue-class-component";
 import Vue from 'vue'
-import { HubConnection } from '@aspnet/signalr-client'
+import { HubConnection } from '@aspnet/signalr'
 import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
 
@@ -12,9 +12,16 @@ export default class MessageList extends Vue {
 
     constructor() {
         super();
+
+        this.connection = new HubConnection('/hubs/messages');
+
+        this.connection.on('messageschanged', data => {
+            this.refresh();
+        });
     }
 
     private connection: HubConnection;
+    private connectionStarted = false;
 
     messages: MessageSummary[] = [];
     error: Error | null = null;
@@ -42,6 +49,10 @@ export default class MessageList extends Vue {
         this.error = null;
 
         try {
+            if (!this.connectionStarted) {
+                await this.connection.start();
+                this.connectionStarted = true;
+            }
             this.messages = await new MessagesController().getSummaries();
         } catch (e) {
             this.error = e;
@@ -54,18 +65,11 @@ export default class MessageList extends Vue {
 
     async created() {
 
-        this.connection = new HubConnection('/hubs/messages');
-
-        this.connection.on('messageschanged', data => {
-            this.refresh();
-        });
-
-        await this.connection.start();
-
         this.refresh();
     }
 
     async destroyed() {
         this.connection.stop();
+        this.connectionStarted = false;
     }
 }

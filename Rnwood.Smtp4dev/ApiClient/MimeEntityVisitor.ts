@@ -1,4 +1,10 @@
 ﻿ 
 
-export default class MimeEntityVisitor { 
+export default class MimeEntityVisitor {
+
+    constructor() {
+        
+    }
+
+    
 }

@@ -1,6 +1,6 @@
 ﻿import Component from "vue-class-component";
 import Vue from 'vue'
-import { HubConnection } from '@aspnet/signalr-client'
+import { HubConnection } from '@aspnet/signalr'
 import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
 
@@ -12,9 +12,14 @@ export default class SessionList extends Vue {
 
     constructor() {
         super();
+
+        this.connection.on('sessionschanged', data => {
+            this.refresh();
+        });
     }
 
-    private connection: HubConnection;
+    private connection = new HubConnection('/hubs/sessions');
+    private connectionStarted = false;
 
     sessions: SessionSummary[] = [];
     error: Error | null = null;
@@ -42,6 +47,12 @@ export default class SessionList extends Vue {
         this.error = null;
 
         try {
+
+            if (!this.connectionStarted) {
+                await this.connection.start();
+                this.connectionStarted = true;
+            }
+
             this.sessions = await new SessionsController().getSummaries();
         } catch (e) {
             this.error = e;
@@ -54,18 +65,11 @@ export default class SessionList extends Vue {
 
     async created() {
 
-        this.connection = new HubConnection('/hubs/sessions');
-
-        this.connection.on('sessionschanged', data => {
-            this.refresh();
-        });
-
-        await this.connection.start();
-
         this.refresh();
     }
 
     async destroyed() {
         this.connection.stop();
+        this.connectionStarted = false;
     }
 }

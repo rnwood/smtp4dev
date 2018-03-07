@@ -72,8 +72,8 @@ namespace Rnwood.Smtp4dev
             app.UseWebSockets();
             app.UseSignalR(routes =>
             {
-                routes.MapHub<MessagesHub>("hubs/messages");
-                routes.MapHub<SessionsHub>("hubs/sessions");
+                routes.MapHub<MessagesHub>("/hubs/messages");
+                routes.MapHub<SessionsHub>("/hubs/sessions");
             });
 
 

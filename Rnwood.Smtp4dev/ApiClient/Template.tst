@@ -22,7 +22,14 @@
     } 
 } 
 $Classes(c => c.Namespace == "Rnwood.Smtp4dev.ApiModel")[$Imports
-export default class $Name$TypeParameters { $Properties(p => !p.Attributes.Any(a => a.Name.Contains("JsonIgnoreAttribute")))[ 
+export default class $Name$TypeParameters {
+
+    constructor($Properties(p => !p.Attributes.Any(a => a.Name.Contains("JsonIgnoreAttribute")))[$name: $Type, ]) {
+        $Properties(p => !p.Attributes.Any(a => a.Name.Contains("JsonIgnoreAttribute")))[ 
+        this.$name = $name;]
+    }
+
+    $Properties(p => !p.Attributes.Any(a => a.Name.Contains("JsonIgnoreAttribute")))[ 
     $name: $Type;]
 }]
 $Classes(*Controller)[$ControllerImports

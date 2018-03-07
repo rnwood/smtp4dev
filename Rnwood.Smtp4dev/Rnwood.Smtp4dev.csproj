@@ -15,13 +15,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="HtmlAgilityPack" Version="1.6.17" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.7.1" />
     <PackageReference Include="Microsoft.AspNetCore.All" Version="2.0.5" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.0-alpha2-final" />
-    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.0.0-alpha2-final" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.0-preview1-final" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.0.0-preview1-final" />
     <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.0.1" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.0.1" />
-    <PackageReference Include="MimeKit" Version="1.22.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.1.0-preview1-final" />
+    <PackageReference Include="MimeKit" Version="2.0.1" />
     <PackageReference Include="Rnwood.SmtpServer" Version="3.0.0-alpha-0203" />
   </ItemGroup>
 

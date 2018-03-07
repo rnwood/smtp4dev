@@ -11,7 +11,7 @@ namespace Rnwood.Smtp4dev.Hubs
     {
         public async Task OnSessionsChanged()
         {
-            await Clients.All.InvokeAsync("sessionschanged");
+            await Clients.All.SendAsync("sessionschanged");
         }
     }
 }

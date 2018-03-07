@@ -11,7 +11,7 @@ export default class Headers extends Vue {
     }
 
     @Prop({ default: null })
-    headers: Header[] | null;
+    headers: Header[] | null = null;
     
 
     async created() {
