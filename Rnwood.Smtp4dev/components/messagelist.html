@@ -5,7 +5,7 @@
     </el-button-group>
 
 
-    <el-alert v-if="error" type="error">
+    <el-alert v-if="error" type="error" title="Error" show-icon>
         {{error.message}}
 
         <el-button v-on:click="refresh">Retry</el-button>

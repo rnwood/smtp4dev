@@ -1,7 +1,7 @@
 ﻿<div class="fillpanel">
 
     <template v-if="attachments">
-        <div v-for="attachment in attachments"><em class="el-icon-file"/> {{attachment.fileName}}</div>
+        <el-button-group v-for="attachment in attachments"><el-button icon="el-icon-document" size="small" v-on:click="openAttachment(attachment)">{{attachment.fileName}}</el-button></el-button-group>
     </template>
 
 </div>

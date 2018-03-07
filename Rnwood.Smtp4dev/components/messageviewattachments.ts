@@ -38,6 +38,10 @@ export default class MessageViewAttachments extends Vue {
         }
     }
 
+    openAttachment(attachment: AttachmentSummary) {
+        window.open(attachment.url);
+    }
+
     async created() {
 
      

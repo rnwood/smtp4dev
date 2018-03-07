@@ -41,10 +41,12 @@ namespace Rnwood.Smtp4dev.ApiModel
 
             return MimeEntityVisitor.Visit< MessageEntitySummary>(entity, null, (e, p) =>
             {
+                string cid = e.ContentId ?? index.ToString();
+
                 MessageEntitySummary result = new MessageEntitySummary()
                 {
                     MessageId = Id,
-                    ContentId = e.ContentId ?? index.ToString(),
+                    ContentId = cid,
                     Name = e.ContentId + " - " + e.ContentType.MimeType,
                     Headers = e.Headers.Select(h => new Header { Name = h.Field, Value = h.Value }).ToList(),
                     ChildParts = new List<MessageEntitySummary>(),
@@ -57,7 +59,11 @@ namespace Rnwood.Smtp4dev.ApiModel
 
                     if (e.IsAttachment)
                     {
-                        p.Attachments.Add(new AttachmentSummary() { ContentId = result.ContentId, FileName = e.ContentDisposition?.FileName });
+                        p.Attachments.Add(new AttachmentSummary() {
+                            ContentId = result.ContentId,
+                            FileName = e.ContentDisposition?.FileName,
+                            Url = $"/api/messages/{Id}/part/{result.ContentId}/content"
+                        });
                     }
                 }
 
