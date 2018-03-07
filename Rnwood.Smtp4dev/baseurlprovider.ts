@@ -12,7 +12,7 @@ Vue.use(Element);
 export default class BaseUrlProvider extends Vue {
     public getBaseUrl(): string {
         let baseUrl = window.location.protocol + "//" + window.location.host;
-        const pathname = window.location.pathname.replace('index.html', '');
+        const pathname = window.location.pathname.replace('/index.html', '');
         return baseUrl + "/" + pathname;
     }
 }
