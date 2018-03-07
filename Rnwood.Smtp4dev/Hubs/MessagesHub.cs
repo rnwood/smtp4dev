@@ -11,7 +11,10 @@ namespace Rnwood.Smtp4dev.Hubs
     {
         public async Task OnMessagesChanged()
         {
-            await Clients.All.InvokeAsync("messageschanged");
+            if (Clients != null)
+            {
+                await Clients.All.InvokeAsync("messageschanged");
+            }
         }
     }
 }
