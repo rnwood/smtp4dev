@@ -11,6 +11,9 @@
     "type": "git",
     "url": "git+https://github.com/rnwood/smtp4dev.git"
   },
+  "engines": {
+    "node": ">= 6.0.0"
+  },
   "keywords": [],
   "author": "",
   "license": "ISC",

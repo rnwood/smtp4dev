@@ -18,6 +18,7 @@ nuget:
   account_feed: false
   project_feed: false
 install:
+- ps: Install-Product node ''
 - cmd: |
     dotnet restore
     cd Rnwood.Smtp4dev
