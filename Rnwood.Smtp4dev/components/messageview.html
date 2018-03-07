@@ -15,6 +15,7 @@
 
 
             <el-tab-pane label="View" name="view" class="fillpanel">
+                <messageviewattachments :message="message" />
                 <messageview-html :message-summary="messageSummary" class="fill" />
             </el-tab-pane>
 
@@ -45,13 +46,11 @@
                         <el-tabs value="headers">
                             <el-tab-pane label="Headers" name="headers"><headers :headers="selectedPart.headers" /></el-tab-pane>
 
-                            <!--
+
                             <el-tab-pane label="Source" name="source" class="fillpanel">
-                                <template v-if="message">
-                                    <textarea class="fill" readonly v-model="selectedPart.source"></textarea>
-                                </template>
+
+                                <messagepartsource class="fill" :messageEntitySummary="selectedPart"></messagepartsource>
                             </el-tab-pane>
-                                -->
 
                         </el-tabs>
 

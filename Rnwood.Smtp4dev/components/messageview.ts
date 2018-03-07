@@ -6,10 +6,17 @@ import Message from "../ApiClient/Message";
 import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
 import Headers from './headers';
 import MessageViewHtml from "./messageviewhtml";
+import MessageViewAttachments from "./messageviewattachments";
+import MessagePartSource from "./messagepartsource";
 
 @Component({ 
     template: require('./messageview.html'),
-    components: {headers: Headers, "messageview-html": MessageViewHtml}
+    components: {
+        headers: Headers,
+        "messageview-html": MessageViewHtml,
+        "messageviewattachments" : MessageViewAttachments,
+        "messagepartsource" : MessagePartSource
+    }
 })
 export default class MessageView extends Vue {
     constructor() {

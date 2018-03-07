@@ -43,13 +43,15 @@
     <TypeScriptCompile Include="ApiClient\FileStreamResult.ts" />
     <TypeScriptCompile Include="components\headers.ts" />
     <TypeScriptCompile Include="components\sessionlist.ts" />
-    <TypeScriptCompile Include="components\messageview-html.ts" />
     <TypeScriptCompile Include="components\messageview.ts" />
     <TypeScriptCompile Include="components\messagelist.ts" />
     <TypeScriptCompile Include="vue-shims.d.ts" />
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="ApiClient\AttachmentSummary.ts">
+      <CustomToolNamespace>ApiModel\AttachmentSummary.cs</CustomToolNamespace>
+    </None>
     <None Update="ApiClient\Header.ts">
       <CustomToolNamespace>ApiModel\Header.cs</CustomToolNamespace>
     </None>
@@ -65,6 +67,9 @@
     <None Update="ApiClient\MessageSummary.ts">
       <CustomToolNamespace>ApiModel\MessageSummary.cs</CustomToolNamespace>
     </None>
+    <None Update="ApiClient\MimeEntityVisitor.ts">
+      <CustomToolNamespace>ApiModel\MimeEntityVisitor.cs</CustomToolNamespace>
+    </None>
     <None Update="ApiClient\Session.ts">
       <CustomToolNamespace>ApiModel\Session.cs</CustomToolNamespace>
     </None>
@@ -73,6 +78,12 @@
     </None>
     <None Update="ApiClient\SessionSummary.ts">
       <CustomToolNamespace>ApiModel\SessionSummary.cs</CustomToolNamespace>
+    </None>
+    <None Update="example.eml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Update="example2.eml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
   </ItemGroup>
 
