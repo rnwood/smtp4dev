@@ -5,10 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using System.IO;
-using MimeKit;
 using HtmlAgilityPack;
 
 namespace Rnwood.Smtp4dev.Controllers
@@ -37,6 +34,20 @@ namespace Rnwood.Smtp4dev.Controllers
         {
             Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
             return new ApiModel.Message(result);
+        }
+
+        [HttpGet("download/{id}")]
+        public async Task<IActionResult> GetPartContent(Guid id)
+        {
+            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            if (result != null && System.IO.File.Exists(result.Filename))
+            {
+                var info = new FileInfo(result.Filename);
+                var response = File(new FileStream(result.Filename, FileMode.Open), "application/octet-stream"); // FileStreamResult
+                response.FileDownloadName = info.Name;
+                return response;
+            }
+            return new EmptyResult();
         }
 
         [HttpGet("{id}/part/{cid}/content")]

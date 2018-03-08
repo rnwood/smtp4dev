@@ -23,5 +23,7 @@ namespace Rnwood.Smtp4dev.DbModel
         public string Subject { get;  set; }
 
         public byte[] Data { get; set; }
+
+        public string Filename { get; set; }
     }
 }
