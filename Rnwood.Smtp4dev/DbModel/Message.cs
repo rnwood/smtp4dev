@@ -21,7 +21,5 @@ namespace Rnwood.Smtp4dev.DbModel
         public DateTime ReceivedDate { get; set; }
 
         public string Subject { get;  set; }
-
-        public byte[] Data { get; set; }
     }
 }

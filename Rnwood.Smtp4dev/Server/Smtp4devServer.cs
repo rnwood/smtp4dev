@@ -46,8 +46,9 @@ namespace Rnwood.Smtp4dev.Server
 
             using (Stream stream = e.Message.GetData())
             {
-                Message message = new MessageConverter().Convert(stream);
-                dbContent.Messages.Add(message);
+                var convert = new MessageConverter().Convert(stream);
+                dbContent.Messages.Add(convert.Item1);
+                dbContent.MessageDatas.Add(convert.Item2);
             }
 
             dbContent.SaveChanges();

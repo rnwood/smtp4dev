@@ -3,19 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Rnwood.Smtp4dev.DbModel;
-using System.Net.Http.Headers;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
     public class Message
     {
-
-
-        public Message(DbModel.Message dbMessage)
+        public Message(DbModel.Message dbMessage, DbModel.MessageData dbMessageData)
         {
             Id = dbMessage.Id;
             From = dbMessage.From;
@@ -25,7 +19,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
             Parts = new List<ApiModel.MessageEntitySummary>();
 
-            using (MemoryStream stream = new MemoryStream(dbMessage.Data))
+            using (MemoryStream stream = new MemoryStream(dbMessageData.Data))
             {
                 MimeMessage mime = MimeMessage.Load(stream);
 
@@ -73,19 +67,19 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         }
 
-        internal static FileStreamResult GetPartContent(DbModel.Message result, string cid)
+        internal static FileStreamResult GetPartContent(DbModel.MessageData result, string cid)
         {
             MimePart contentEntity = (MimePart) GetPart(result, cid);
             return new FileStreamResult(contentEntity.ContentObject.Open(), contentEntity.ContentType.MimeType);
         }
 
-        internal static string GetPartSource(DbModel.Message result, string cid)
+        internal static string GetPartSource(DbModel.MessageData result, string cid)
         {
             MimeEntity contentEntity = GetPart(result, cid);
             return contentEntity.ToString();
         }
 
-        private static MimeEntity GetPart(DbModel.Message message, string cid)
+        private static MimeEntity GetPart(DbModel.MessageData message, string cid)
         {
             MimeEntity result = null;
 
@@ -108,9 +102,9 @@ namespace Rnwood.Smtp4dev.ApiModel
             return result;
         }
 
-        public static string GetHtml(DbModel.Message dbMessage)
+        public static string GetHtml(DbModel.MessageData dbMessageData)
         {
-            using (MemoryStream stream = new MemoryStream(dbMessage.Data))
+            using (MemoryStream stream = new MemoryStream(dbMessageData.Data))
             {
                 MimeMessage mime = MimeMessage.Load(stream);
 
