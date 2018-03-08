@@ -31,6 +31,12 @@ export default class MessagesController {
 
         return (await axios.get(route(id, cid), null || undefined)).data as FileStreamResult;
     }
+    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/source       
+    public async getPartSource(id: string, cid: string): Promise<string> {
+        let route = (id: string, cid: string) => `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/source`;
+
+        return (await axios.get(route(id, cid), null || undefined)).data as string;
+    }
     // get: api/Messages/${encodeURIComponent(id)}/html       
     public async getMessageHtml(id: string): Promise<string> {
         let route = (id: string) => `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/html`;

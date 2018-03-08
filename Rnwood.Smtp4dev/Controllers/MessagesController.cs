@@ -87,6 +87,14 @@ namespace Rnwood.Smtp4dev.Controllers
             return string.Empty;
         }
 
+        [HttpGet("{id}/part/{cid}/source")]
+        public string GetPartSource(Guid id, string cid)
+        {
+            MessageData result = _dbContext.MessageDatas.FirstOrDefault(m => m.MessageId == id);
+
+            return ApiModel.Message.GetPartSource(result, cid);
+        }
+
         [HttpGet("{id}/html")]
         public string GetMessageHtml(Guid id)
         {
