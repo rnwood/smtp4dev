@@ -55,7 +55,7 @@ export default class SessionList extends Vue {
 
     async created() {
         let baseUrl = new BaseUrlProvider().getBaseUrl();
-        this.connection = new HubConnection(baseUrl + '/hubs/sessions');
+        this.connection = new HubConnection(baseUrl + 'hubs/sessions');
 
         this.connection.on('sessionschanged', data => {
             this.refresh();
