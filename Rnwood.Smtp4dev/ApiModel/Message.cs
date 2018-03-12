@@ -25,12 +25,21 @@ namespace Rnwood.Smtp4dev.ApiModel
 
             Parts = new List<ApiModel.MessageEntitySummary>();
 
-            using (MemoryStream stream = new MemoryStream(dbMessage.Data))
+            if (dbMessage.MimeParseError != null)
             {
-                MimeMessage mime = MimeMessage.Load(stream);
+                MimeParseError = dbMessage.MimeParseError;
+                Headers = new List<Header>();
+                Parts = new List<MessageEntitySummary>();
+            }
+            else
+            {
+                using (MemoryStream stream = new MemoryStream(dbMessage.Data))
+                {
+                    MimeMessage mime = MimeMessage.Load(stream);
 
-                Headers = mime.Headers.Select(h => new Header { Name = h.Field, Value = h.Value }).ToList();
-                Parts.Add(HandleMimeEntity(mime.Body));
+                    Headers = mime.Headers.Select(h => new Header { Name = h.Field, Value = h.Value }).ToList();
+                    Parts.Add(HandleMimeEntity(mime.Body));
+                }
             }
         }
 
@@ -39,43 +48,44 @@ namespace Rnwood.Smtp4dev.ApiModel
         {
             int index = 0;
 
-            return MimeEntityVisitor.Visit< MessageEntitySummary>(entity, null, (e, p) =>
-            {
-                string cid = e.ContentId ?? index.ToString();
+            return MimeEntityVisitor.Visit<MessageEntitySummary>(entity, null, (e, p) =>
+           {
+               string cid = e.ContentId ?? index.ToString();
 
-                MessageEntitySummary result = new MessageEntitySummary()
-                {
-                    MessageId = Id,
-                    ContentId = cid,
-                    Name = e.ContentId + " - " + e.ContentType.MimeType,
-                    Headers = e.Headers.Select(h => new Header { Name = h.Field, Value = h.Value }).ToList(),
-                    ChildParts = new List<MessageEntitySummary>(),
-                    Attachments = new List<AttachmentSummary>()
-                };
+               MessageEntitySummary result = new MessageEntitySummary()
+               {
+                   MessageId = Id,
+                   ContentId = cid,
+                   Name = e.ContentId + " - " + e.ContentType.MimeType,
+                   Headers = e.Headers.Select(h => new Header { Name = h.Field, Value = h.Value }).ToList(),
+                   ChildParts = new List<MessageEntitySummary>(),
+                   Attachments = new List<AttachmentSummary>()
+               };
 
-                if (p != null)
-                {
-                    p.ChildParts.Add(result);
+               if (p != null)
+               {
+                   p.ChildParts.Add(result);
 
-                    if (e.IsAttachment)
-                    {
-                        p.Attachments.Add(new AttachmentSummary() {
-                            ContentId = result.ContentId,
-                            FileName = e.ContentDisposition?.FileName,
-                            Url = $"/api/messages/{Id}/part/{result.ContentId}/content"
-                        });
-                    }
-                }
+                   if (e.IsAttachment)
+                   {
+                       p.Attachments.Add(new AttachmentSummary()
+                       {
+                           ContentId = result.ContentId,
+                           FileName = e.ContentDisposition?.FileName,
+                           Url = $"/api/messages/{Id}/part/{result.ContentId}/content"
+                       });
+                   }
+               }
 
-                index++;
-                return result;
-            });
+               index++;
+               return result;
+           });
 
         }
 
         internal static FileStreamResult GetPartContent(DbModel.Message result, string cid)
         {
-            MimePart contentEntity = (MimePart) GetPart(result, cid);
+            MimePart contentEntity = (MimePart)GetPart(result, cid);
             return new FileStreamResult(contentEntity.ContentObject.Open(), contentEntity.ContentType.MimeType);
         }
 
@@ -114,9 +124,17 @@ namespace Rnwood.Smtp4dev.ApiModel
             {
                 MimeMessage mime = MimeMessage.Load(stream);
 
-                
-
                 return mime.HtmlBody;
+            }
+        }
+
+        public static string GetText(DbModel.Message dbMessage)
+        {
+            using (MemoryStream stream = new MemoryStream(dbMessage.Data))
+            {
+                MimeMessage mime = MimeMessage.Load(stream);
+
+                return mime.TextBody;
             }
         }
 
@@ -131,5 +149,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         public List<MessageEntitySummary> Parts { get; set; }
 
         public List<Header> Headers { get; set; }
+
+        public string MimeParseError { get; set; }
     }
 }

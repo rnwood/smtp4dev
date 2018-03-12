@@ -40,13 +40,13 @@ namespace Rnwood.Smtp4dev.Server
             sessionsHub.OnSessionsChanged().Wait();
         }
 
-        private void OnMessageReceived(object sender, MessageEventArgs e)
+        private async void OnMessageReceived(object sender, MessageEventArgs e)
         {
             Smtp4devDbContext dbContent = dbContextFactory();
 
             using (Stream stream = e.Message.GetData())
             {
-                Message message = new MessageConverter().Convert(stream);
+                Message message = await new MessageConverter().ConvertAsync(stream, e.Message.From, string.Join(", ", e.Message.To));
                 dbContent.Messages.Add(message);
             }
 

@@ -6,6 +6,10 @@
         <el-button v-on:click="loadMessage">Retry</el-button>
     </el-alert>
 
+    <template v-if="message && message.mimeParseError">
+        <el-alert type="error">Message parse error: {{message.mimeParseError}}</el-alert>
+    </template>
+
     <template v-if="html">
         <iframe class="fill" :srcdoc="html"></iframe>
     </template>

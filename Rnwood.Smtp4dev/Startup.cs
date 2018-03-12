@@ -76,34 +76,33 @@ namespace Rnwood.Smtp4dev
                 routes.MapHub<SessionsHub>("/hubs/sessions");
             });
 
-
-
-
             app.ApplicationServices.GetService<Smtp4devServer>().Start();
 
             if (env.IsDevelopment())
             {
-                Smtp4devDbContext db = app.ApplicationServices.GetService<Smtp4devDbContext>();
-
-                MessageConverter messageConverter = new MessageConverter();
-
-
-                using (Stream stream = File.OpenRead("example.eml"))
-                {
-                    Message message = messageConverter.Convert(stream);
-                    db.Messages.Add(message);
-
-                }
-
-                using (Stream stream = File.OpenRead("example2.eml"))
-                {
-                    Message message = messageConverter.Convert(stream);
-                    db.Messages.Add(message);
-
-                }
-
-                db.SaveChanges();
+                LoadExampleMessagesAsync(app.ApplicationServices.GetService<Smtp4devDbContext>()).ContinueWith((t) => { }) ;
             }
+        }
+
+        private static async Task LoadExampleMessagesAsync(Smtp4devDbContext db)
+        {;
+
+            MessageConverter messageConverter = new MessageConverter();
+
+
+            using (Stream stream = File.OpenRead("example.eml"))
+            {
+                Message message = await messageConverter.ConvertAsync(stream, "from@from.com", "to@to.com");
+                db.Messages.Add(message);
+            }
+
+            using (Stream stream = File.OpenRead("example2.eml"))
+            {
+                Message message = await messageConverter.ConvertAsync(stream, "from2@from.com", "to2@to.com");
+                db.Messages.Add(message);
+            }
+
+            db.SaveChanges();
         }
     }
 

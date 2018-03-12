@@ -27,10 +27,5 @@ namespace Rnwood.Smtp4dev.ApiModel
 
             return result;
         }
-
-        internal static T Visit<T>(MimeEntity entity, object p1, Func<MimeEntity, T, T> p2)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

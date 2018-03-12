@@ -1,7 +1,7 @@
 ﻿import { Component, Prop,Watch } from 'vue-property-decorator'
 import Vue from 'vue'
 import MessagesController from "../ApiClient/MessagesController";
-import MessageSummary from "../ApiClient/MessageSummary";
+import Message from "../ApiClient/Message";
 
 @Component({
     template: require('./messageviewhtml.html')
@@ -12,15 +12,15 @@ export default class MessageViewHtml extends Vue {
     }
 
     @Prop({ default: null })
-    messageSummary: MessageSummary | null = null;
+    message: Message | null = null;
     html: string | null = null;
 
 
     error: Error | null = null;
     loading = false;
 
-    @Watch("messageSummary")
-    async onMessageChanged(value: MessageSummary, oldValue: MessageSummary) {
+    @Watch("message")
+    async onMessageChanged(value: Message, oldValue: Message) {
         
         await this.loadMessage();
         
@@ -33,8 +33,8 @@ export default class MessageViewHtml extends Vue {
         this.html = null;
 
         try {
-            if (this.messageSummary != null) {
-                this.html = await new MessagesController().getMessageHtml(this.messageSummary.id);
+            if (this.message != null) {
+                this.html = await new MessagesController().getMessageHtml(this.message.id);
             }
         } catch (e) {
             this.error = e;

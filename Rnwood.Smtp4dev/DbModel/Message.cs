@@ -8,7 +8,6 @@ namespace Rnwood.Smtp4dev.DbModel
     public class Message
     {
 
-
         public Message()
         {
 
@@ -23,5 +22,7 @@ namespace Rnwood.Smtp4dev.DbModel
         public string Subject { get;  set; }
 
         public byte[] Data { get; set; }
+
+        public string MimeParseError { get; set; }
     }
 }

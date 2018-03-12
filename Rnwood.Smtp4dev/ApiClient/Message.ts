@@ -5,7 +5,7 @@ import MessageEntitySummary from './MessageEntitySummary';
 import Header from './Header';
 export default class Message {
 
-    constructor(id: string, from: string, to: string, receivedDate: Date, subject: string, parts: MessageEntitySummary[], headers: Header[], ) {
+    constructor(id: string, from: string, to: string, receivedDate: Date, subject: string, parts: MessageEntitySummary[], headers: Header[], mimeParseError: string, ) {
          
         this.id = id; 
         this.from = from; 
@@ -13,7 +13,8 @@ export default class Message {
         this.receivedDate = receivedDate; 
         this.subject = subject; 
         this.parts = parts; 
-        this.headers = headers;
+        this.headers = headers; 
+        this.mimeParseError = mimeParseError;
     }
 
      
@@ -23,5 +24,6 @@ export default class Message {
     receivedDate: Date; 
     subject: string; 
     parts: MessageEntitySummary[]; 
-    headers: Header[];
+    headers: Header[]; 
+    mimeParseError: string;
 }

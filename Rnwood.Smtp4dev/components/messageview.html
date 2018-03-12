@@ -16,7 +16,7 @@
 
             <el-tab-pane label="View" name="view" class="fillpanel h">
                 <messageviewattachments :message="message" />
-                <messageview-html :message-summary="messageSummary" class="fill" />
+                <messageview-html :message="message" class="fill" />
             </el-tab-pane>
 
             <el-tab-pane label="Headers" name="headers" class="fillpanel h">
@@ -30,7 +30,7 @@
                 <template v-if="message">
 
 
-                    <el-tree :data="message.parts" :props="{label: 'name', children: 'childParts', disabled: false, isLeaf: isLeaf}" @node-click="handleNodeClick" highlight-current default-expand-all></el-tree>
+                    <el-tree :data="message.parts" :props="{label: 'name', children: 'childParts', disabled: false, isLeaf: isLeaf}" @node-click="handleNodeClick" highlight-current default-expand-all empty-message="No parts"></el-tree>
 
 
                     <div v-if="selectedPart" class="fill fillpanel">

@@ -62,6 +62,11 @@ namespace Rnwood.Smtp4dev.Controllers
 
             string html = ApiModel.Message.GetHtml(result);
 
+            if (html == null)
+            {
+                html = "<pre>" + HtmlAgilityPack.HtmlDocument.HtmlEncode(ApiModel.Message.GetText(result)) + "</pre>";
+            }
+
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(html);
 
