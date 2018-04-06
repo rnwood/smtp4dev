@@ -43,6 +43,12 @@ export default class MessagesController {
 
         return (await axios.get(route(id), null || undefined)).data as string;
     }
+    // delete: api/Messages/${encodeURIComponent(id)}       
+    public async delete(id: string): Promise<void> {
+        let route = (id: string) => `${this._baseUrl}api/Messages/${encodeURIComponent(id)}`;
+
+        return (await axios.delete(route(id), null || undefined)).data as void;
+    }
     // delete: api/Messages/*       
     public async deleteAll(): Promise<void> {
         let route = () => `${this._baseUrl}api/Messages/*`;

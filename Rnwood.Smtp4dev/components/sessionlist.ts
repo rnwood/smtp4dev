@@ -31,6 +31,21 @@ export default class SessionList extends Vue {
         this.$emit("selected-session-changed", session);
     }
 
+    async deleteSelected() {
+
+        if (this.selectedsession == null) {
+            return;
+        }
+
+        try {
+            await new SessionsController().delete(this.selectedsession.id);
+            this.refresh();
+        } catch (e) {
+            this.error = e;
+        }
+
+    }
+
     async clear() {
 
         try {

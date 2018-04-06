@@ -84,6 +84,17 @@ namespace Rnwood.Smtp4dev.Controllers
             return doc.DocumentNode.OuterHtml;
         }
 
+        [HttpDelete("{id}")]
+        public async Task Delete(Guid id)
+        {
+
+            _dbContext.Messages.RemoveRange(_dbContext.Messages.Where(m => m.Id == id));
+            _dbContext.SaveChanges();
+
+            await _messagesHub.OnMessagesChanged();
+
+        }
+
         [HttpDelete("*")]
         public async Task DeleteAll()
         {

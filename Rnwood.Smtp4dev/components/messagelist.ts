@@ -33,6 +33,21 @@ export default class MessageList extends Vue {
         this.$emit("selected-message-changed", message);
     }
 
+    async deleteSelected() {
+
+        if (this.selectedmessage == null) {
+            return;
+        }
+
+        try {
+            await new MessagesController().delete(this.selectedmessage.id);
+            this.refresh();
+        } catch (e) {
+            this.error = e;
+        }
+
+    }
+
     async clear() {
 
         try {

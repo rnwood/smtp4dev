@@ -39,7 +39,17 @@ namespace Rnwood.Smtp4dev.Controllers
             return new ApiModel.Session(result);
         }
 
-    
+
+        [HttpDelete("{id}")]
+        public async Task Delete(Guid id)
+        {
+
+            _dbContext.Sessions.RemoveRange(_dbContext.Sessions.Where(s => s.Id == id));
+            _dbContext.SaveChanges();
+
+            await sessionsHub.OnSessionsChanged();
+
+        }
 
         [HttpDelete("*")]
         public async Task DeleteAll()
