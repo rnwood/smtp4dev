@@ -43,10 +43,14 @@ export default class $ServiceName {
     }
         
     $Methods[
-    // $HttpMethod: $Url       
-    public async $name($Parameters[$name: $Type][, ]): Promise<$ReturnType> {
-        let route = ($Parameters(p => p.Type.IsPrimitive)[$name: $Type][, ]) => `${this._baseUrl}$Url`;
+    
+    // $HttpMethod: $Url  
+    public $name_url($Parameters(p => p.Type.IsPrimitive)[$name: $Type][, ]): string {
+        return `${this._baseUrl}$Url`;
+    }
 
-        return (await axios.$HttpMethod(route($Parameters(p => p.Type.IsPrimitive)[$name][, ]), $RequestData || undefined)).data as $ReturnType;
+    public async $name($Parameters[$name: $Type][, ]): Promise<$ReturnType> {
+
+        return (await axios.$HttpMethod(this.$name_url($Parameters(p => p.Type.IsPrimitive)[$name][, ]), $RequestData || undefined)).data as $ReturnType;
     }]
 }]

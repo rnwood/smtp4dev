@@ -13,46 +13,84 @@ export default class MessagesController {
     }
         
     
-    // get: api/Messages       
+    
+    // get: api/Messages  
+    public getSummaries_url(): string {
+        return `${this._baseUrl}api/Messages`;
+    }
+
     public async getSummaries(): Promise<MessageSummary[]> {
-        let route = () => `${this._baseUrl}api/Messages`;
 
-        return (await axios.get(route(), null || undefined)).data as MessageSummary[];
+        return (await axios.get(this.getSummaries_url(), null || undefined)).data as MessageSummary[];
     }
-    // get: api/Messages/${encodeURIComponent(id)}       
+    
+    // get: api/Messages/${encodeURIComponent(id)}  
+    public getMessage_url(id: string): string {
+        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}`;
+    }
+
     public async getMessage(id: string): Promise<Message> {
-        let route = (id: string) => `${this._baseUrl}api/Messages/${encodeURIComponent(id)}`;
 
-        return (await axios.get(route(id), null || undefined)).data as Message;
+        return (await axios.get(this.getMessage_url(id), null || undefined)).data as Message;
     }
-    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/content       
+    
+    // get: api/Messages/${encodeURIComponent(id)}/source  
+    public downloadMessage_url(id: string): string {
+        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/source`;
+    }
+
+    public async downloadMessage(id: string): Promise<FileStreamResult> {
+
+        return (await axios.get(this.downloadMessage_url(id), null || undefined)).data as FileStreamResult;
+    }
+    
+    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/content  
+    public getPartContent_url(id: string, cid: string): string {
+        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/content`;
+    }
+
     public async getPartContent(id: string, cid: string): Promise<FileStreamResult> {
-        let route = (id: string, cid: string) => `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/content`;
 
-        return (await axios.get(route(id, cid), null || undefined)).data as FileStreamResult;
+        return (await axios.get(this.getPartContent_url(id, cid), null || undefined)).data as FileStreamResult;
     }
-    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/source       
+    
+    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/source  
+    public getPartSource_url(id: string, cid: string): string {
+        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/source`;
+    }
+
     public async getPartSource(id: string, cid: string): Promise<string> {
-        let route = (id: string, cid: string) => `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/source`;
 
-        return (await axios.get(route(id, cid), null || undefined)).data as string;
+        return (await axios.get(this.getPartSource_url(id, cid), null || undefined)).data as string;
     }
-    // get: api/Messages/${encodeURIComponent(id)}/html       
+    
+    // get: api/Messages/${encodeURIComponent(id)}/html  
+    public getMessageHtml_url(id: string): string {
+        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/html`;
+    }
+
     public async getMessageHtml(id: string): Promise<string> {
-        let route = (id: string) => `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/html`;
 
-        return (await axios.get(route(id), null || undefined)).data as string;
+        return (await axios.get(this.getMessageHtml_url(id), null || undefined)).data as string;
     }
-    // delete: api/Messages/${encodeURIComponent(id)}       
+    
+    // delete: api/Messages/${encodeURIComponent(id)}  
+    public delete_url(id: string): string {
+        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}`;
+    }
+
     public async delete(id: string): Promise<void> {
-        let route = (id: string) => `${this._baseUrl}api/Messages/${encodeURIComponent(id)}`;
 
-        return (await axios.delete(route(id), null || undefined)).data as void;
+        return (await axios.delete(this.delete_url(id), null || undefined)).data as void;
     }
-    // delete: api/Messages/*       
-    public async deleteAll(): Promise<void> {
-        let route = () => `${this._baseUrl}api/Messages/*`;
+    
+    // delete: api/Messages/*  
+    public deleteAll_url(): string {
+        return `${this._baseUrl}api/Messages/*`;
+    }
 
-        return (await axios.delete(route(), null || undefined)).data as void;
+    public async deleteAll(): Promise<void> {
+
+        return (await axios.delete(this.deleteAll_url(), null || undefined)).data as void;
     }
 }

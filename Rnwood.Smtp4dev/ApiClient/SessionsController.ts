@@ -12,28 +12,44 @@ export default class SessionsController {
     }
         
     
-    // get: api/Sessions       
+    
+    // get: api/Sessions  
+    public getSummaries_url(): string {
+        return `${this._baseUrl}api/Sessions`;
+    }
+
     public async getSummaries(): Promise<SessionSummary[]> {
-        let route = () => `${this._baseUrl}api/Sessions`;
 
-        return (await axios.get(route(), null || undefined)).data as SessionSummary[];
+        return (await axios.get(this.getSummaries_url(), null || undefined)).data as SessionSummary[];
     }
-    // get: api/Sessions/${encodeURIComponent(id)}       
+    
+    // get: api/Sessions/${encodeURIComponent(id)}  
+    public getSession_url(id: string): string {
+        return `${this._baseUrl}api/Sessions/${encodeURIComponent(id)}`;
+    }
+
     public async getSession(id: string): Promise<Session> {
-        let route = (id: string) => `${this._baseUrl}api/Sessions/${encodeURIComponent(id)}`;
 
-        return (await axios.get(route(id), null || undefined)).data as Session;
+        return (await axios.get(this.getSession_url(id), null || undefined)).data as Session;
     }
-    // delete: api/Sessions/${encodeURIComponent(id)}       
+    
+    // delete: api/Sessions/${encodeURIComponent(id)}  
+    public delete_url(id: string): string {
+        return `${this._baseUrl}api/Sessions/${encodeURIComponent(id)}`;
+    }
+
     public async delete(id: string): Promise<void> {
-        let route = (id: string) => `${this._baseUrl}api/Sessions/${encodeURIComponent(id)}`;
 
-        return (await axios.delete(route(id), null || undefined)).data as void;
+        return (await axios.delete(this.delete_url(id), null || undefined)).data as void;
     }
-    // delete: api/Sessions/*       
-    public async deleteAll(): Promise<void> {
-        let route = () => `${this._baseUrl}api/Sessions/*`;
+    
+    // delete: api/Sessions/*  
+    public deleteAll_url(): string {
+        return `${this._baseUrl}api/Sessions/*`;
+    }
 
-        return (await axios.delete(route(), null || undefined)).data as void;
+    public async deleteAll(): Promise<void> {
+
+        return (await axios.delete(this.deleteAll_url(), null || undefined)).data as void;
     }
 }

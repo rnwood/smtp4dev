@@ -39,6 +39,13 @@ namespace Rnwood.Smtp4dev.Controllers
             return new ApiModel.Message(result);
         }
 
+        [HttpGet("{id}/source")]
+        public FileStreamResult DownloadMessage(Guid id)
+        {
+            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            return new FileStreamResult(new MemoryStream(result.Data), "message/rfc822") { FileDownloadName = $"{id}.eml" };
+        }
+
         [HttpGet("{id}/part/{cid}/content")]
         public FileStreamResult GetPartContent(Guid id, string cid)
         {

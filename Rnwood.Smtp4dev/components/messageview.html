@@ -7,6 +7,12 @@
     </el-alert>
 
     <div v-if="messageSummary" v-loading="loading" class="fillpanel h fill">
+
+        <el-button-group>
+
+            <el-button icon="el-icon-download" v-on:click="download">Download</el-button>
+        </el-button-group>
+
         <div>
             Subject: {{messageSummary.subject}}
         </div>

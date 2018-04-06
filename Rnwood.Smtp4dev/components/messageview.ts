@@ -64,6 +64,13 @@ export default class MessageView extends Vue {
         this.selectedPart = value;
     }
 
+    async download() {
+        if (this.messageSummary == null) {
+            return;
+        }
+        window.open(new MessagesController().downloadMessage_url(this.messageSummary.id))
+    }
+
 
     async created() {
 
