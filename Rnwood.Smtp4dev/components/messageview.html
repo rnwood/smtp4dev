@@ -13,8 +13,30 @@
             <el-button icon="el-icon-download" v-on:click="download">Download</el-button>
         </el-button-group>
 
-        <div>
-            Subject: {{messageSummary.subject}}
+        <div v-if="message" class="pad">
+            <table>
+                <tr>
+                    <td>From:</td>
+                    <td>{{message.from}}</td>
+                </tr>
+
+                <tr>
+                    <td>To:</td>
+                    <td>{{message.to}}</td>
+                </tr>
+                <tr v-if="message.cc">
+                    <td>Cc:</td>
+                    <td>{{message.cc}}</td>
+                </tr v-if="message.cc">
+                <tr v-if="message.bcc">
+                    <td>Bcc:</td>
+                    <td>{{message.bcc}}</td>
+                </tr>
+                <tr>
+                    <td>Subject:</td>
+                    <td>{{message.subject}}</td>
+                </tr>
+            </table> 
         </div>
 
         <el-tabs value="view" style="height: 100%; width:100%" class="fill">

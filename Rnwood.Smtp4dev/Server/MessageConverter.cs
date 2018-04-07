@@ -11,7 +11,7 @@ namespace Rnwood.Smtp4dev.Server
 {
     public class MessageConverter
     {
-        public async Task<Message> ConvertAsync(Stream messageData, string from, string to)
+        public async Task<Message> ConvertAsync(Stream messageData, string envelopeFrom, string envelopeTo)
         {
             string subject = "";
             string mimeParseError = null;
@@ -65,8 +65,8 @@ namespace Rnwood.Smtp4dev.Server
             {
                 Id = Guid.NewGuid(),
 
-                From = from,
-                To = to,
+                From = envelopeFrom,
+                To = envelopeTo,
                 ReceivedDate = DateTime.Now,
                 Subject = subject,
                 Data = data,

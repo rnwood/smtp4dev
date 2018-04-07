@@ -48,5 +48,5 @@ deploy:
     secure: 5zLYIRVYHWHyZYOUZ2F46AvAYb3OLIWs35PQUddGkyK3xkV7qCmaMT38PJY6OiY7
   prerelease: true
     on:
-    branch: master                 # release from master branch only
-    appveyor_repo_tag: false
+      branch: master                 # release from master branch only
+      appveyor_repo_tag: false

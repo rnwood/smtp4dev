@@ -20,6 +20,8 @@ namespace Rnwood.Smtp4dev.ApiModel
             Id = dbMessage.Id;
             From = dbMessage.From;
             To = dbMessage.To;
+            Cc = "";
+            Bcc = "";
             ReceivedDate = dbMessage.ReceivedDate;
             Subject = dbMessage.Subject;
 
@@ -36,6 +38,35 @@ namespace Rnwood.Smtp4dev.ApiModel
                 using (MemoryStream stream = new MemoryStream(dbMessage.Data))
                 {
                     MimeMessage mime = MimeMessage.Load(stream);
+
+                    if (mime.From != null) {
+                        From = mime.From.ToString();
+                    }
+
+                    List<string> recipients = new List<string>(dbMessage.To.Split(",")
+                        .Select(r => r.Trim())
+                        .Where(r => !string.IsNullOrEmpty(r)));
+
+                    if (mime.To != null) {
+                        To = string.Join(", ", mime.To.Select(t => t.ToString()));
+
+                        foreach(MailboxAddress to in mime.To.Where(t => t is MailboxAddress))
+                        {
+                            recipients.Remove(to.Address);
+                        }
+                    }
+
+                    if (mime.Cc != null)
+                    {
+                        Cc = string.Join(", ", mime.Cc.Select(t => t.ToString()));
+
+                        foreach (MailboxAddress cc in mime.Cc.Where(t => t is MailboxAddress))
+                        {
+                            recipients.Remove(cc.Address);
+                        }
+                    }
+
+                    Bcc = string.Join(", ", recipients);
 
                     Headers = mime.Headers.Select(h => new Header { Name = h.Field, Value = h.Value }).ToList();
                     Parts.Add(HandleMimeEntity(mime.Body));
@@ -142,6 +173,8 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public string From { get; set; }
         public string To { get; set; }
+        public string Cc { get; set; }
+        public string Bcc { get; set; }
         public DateTime ReceivedDate { get; set; }
 
         public string Subject { get; set; }
