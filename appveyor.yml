@@ -1,6 +1,7 @@
 version: 3.0.0-alpha-{build}
 os: Visual Studio 2017
 configuration: Release
+skip_tags: true
 environment:
   FRAMEWORK: netcoreapp2.0
   matrix:
