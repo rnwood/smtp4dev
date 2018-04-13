@@ -13,6 +13,8 @@ using HtmlAgilityPack;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
+    using System.Text.RegularExpressions;
+
     [Route("api/[controller]")]
     public class MessagesController : Controller
     {
@@ -89,6 +91,39 @@ namespace Rnwood.Smtp4dev.Controllers
             }
 
             return doc.DocumentNode.OuterHtml;
+        }
+
+        [HttpGet("last/to/{to}")]
+        public ApiModel.MessageSummary GetLastMessageTo(string to)
+        {
+            Message result = _dbContext.Messages.OrderByDescending(b => b.ReceivedDate).FirstOrDefault(b => b.To == to);
+            return result == null ? null : new ApiModel.MessageSummary(result);
+        }
+
+        [HttpGet("last")]
+        public ApiModel.MessageSummary GetLastMessage()
+        {
+            Message result = _dbContext.Messages.OrderByDescending(b => b.ReceivedDate).FirstOrDefault();
+            return result == null ? null : new ApiModel.MessageSummary(result);
+        }
+
+        [HttpGet("{id}/regex/{regex}/value")]
+        public string GetRegexFromMessageHtml(Guid id, string regex)
+        {
+            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+
+            string html = ApiModel.Message.GetHtml(result);
+
+            HtmlDocument doc = new HtmlDocument();
+            doc.LoadHtml(html);
+
+            Regex r = new Regex(regex);
+            Match match = r.Match(html);
+            if (match.Success)
+            {
+                return match.Value;
+            }
+            return string.Empty;
         }
 
         [HttpDelete("{id}")]
