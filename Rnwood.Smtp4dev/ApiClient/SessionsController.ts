@@ -1,14 +1,15 @@
 ﻿ 
 
 import SessionSummary from './SessionSummary';
+import BaseUrlProvider from '../BaseUrlProvider';
 import Session from './Session';
 import axios from "axios";
 
 export default class SessionsController {
     public _baseUrl: string;                
  
-    constructor(baseUrl: string = "/"){
-        this._baseUrl = baseUrl;
+    constructor(){
+        this._baseUrl = new BaseUrlProvider().getBaseUrl();;
     }
         
     

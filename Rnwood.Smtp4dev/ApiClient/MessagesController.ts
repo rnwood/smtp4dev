@@ -1,6 +1,7 @@
 ﻿ 
 
 import MessageSummary from './MessageSummary';
+import BaseUrlProvider from '../BaseUrlProvider';
 import Message from './Message';
 import FileStreamResult from './FileStreamResult';
 import axios from "axios";
@@ -8,8 +9,8 @@ import axios from "axios";
 export default class MessagesController {
     public _baseUrl: string;                
  
-    constructor(baseUrl: string = "/"){
-        this._baseUrl = baseUrl;
+    constructor(){
+        this._baseUrl = new BaseUrlProvider().getBaseUrl();
     }
         
     

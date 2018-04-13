@@ -3,6 +3,7 @@ import Vue from 'vue'
 import { HubConnection } from '@aspnet/signalr'
 import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
+import BaseUrlProvider from '../BaseUrlProvider';
 
 @Component({
     template: require('./sessionlist.html')
@@ -18,7 +19,7 @@ export default class SessionList extends Vue {
         });
     }
 
-    private connection = new HubConnection('/hubs/sessions');
+    private connection = new HubConnection(new BaseUrlProvider().getBaseUrl() + 'hubs/sessions');
     private connectionStarted = false;
 
     sessions: SessionSummary[] = [];
