@@ -70,8 +70,13 @@ export default class MessageList extends Vue {
             }
             this.messages = await new MessagesController().getSummaries();
         } catch (e) {
+            try {
+                // if websocket is not working, display messages
+                this.messages = await new MessagesController().getSummaries();
+            } catch (e) {
+                this.error = e;
+            }
             this.error = e;
-
         } finally {
             this.loading = false;
         }

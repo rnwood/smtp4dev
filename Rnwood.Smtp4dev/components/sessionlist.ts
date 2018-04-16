@@ -70,6 +70,12 @@ export default class SessionList extends Vue {
 
             this.sessions = await new SessionsController().getSummaries();
         } catch (e) {
+            try {
+                // if websocket is not working, display sessions
+                this.sessions = await new SessionsController().getSummaries();
+            } catch (e) {
+                this.error = e;
+            }
             this.error = e;
 
         } finally {
