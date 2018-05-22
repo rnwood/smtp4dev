@@ -103,7 +103,7 @@ namespace Rnwood.Smtp4dev.ApiModel
                        {
                            ContentId = result.ContentId,
                            FileName = e.ContentDisposition?.FileName,
-                           Url = $"/api/messages/{Id}/part/{result.ContentId}/content"
+                           Url = $"api/messages/{Id}/part/{result.ContentId}/content"
                        });
                    }
                }
