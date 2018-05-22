@@ -102,7 +102,9 @@ namespace Rnwood.Smtp4dev.ApiModel
                        p.Attachments.Add(new AttachmentSummary()
                        {
                            ContentId = result.ContentId,
-                           FileName = e.ContentDisposition?.FileName,
+                           FileName = string.IsNullOrEmpty(e.ContentType?.Name)
+                               ? e.ContentDisposition?.FileName
+                               : e.ContentType.Name,
                            Url = $"/api/messages/{Id}/part/{result.ContentId}/content"
                        });
                    }
