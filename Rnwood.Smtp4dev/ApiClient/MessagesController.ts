@@ -1,9 +1,8 @@
-﻿ 
-
-import MessageSummary from './MessageSummary';
+﻿import MessageSummary from './MessageSummary';
 import Message from './Message';
 import FileStreamResult from './FileStreamResult';
-import axios from "axios";
+import axios, { AxiosRequestConfig } from "axios";
+import MessageRequestConfig from './MessageRequestConfig';
 
 export default class MessagesController {
     public _baseUrl: string;                
@@ -12,16 +11,18 @@ export default class MessagesController {
         this._baseUrl = baseUrl;
     }
         
-    
-    
     // get: api/Messages  
     public getSummaries_url(): string {
         return `${this._baseUrl}api/Messages`;
     }
 
-    public async getSummaries(): Promise<MessageSummary[]> {
+    public async getSummaries(sortColumn?: string, sortIsDescending?: boolean): Promise<MessageSummary[]> {
 
-        return (await axios.get(this.getSummaries_url(), null || undefined)).data as MessageSummary[];
+        let config: AxiosRequestConfig = new MessageRequestConfig();
+        if (sortColumn != null) {
+            config.params = { sortColumn: sortColumn, sortIsDescending: sortIsDescending != null ? sortIsDescending : true };
+        }
+        return (await axios.get(this.getSummaries_url(), config)).data as MessageSummary[];
     }
     
     // get: api/Messages/${encodeURIComponent(id)}  

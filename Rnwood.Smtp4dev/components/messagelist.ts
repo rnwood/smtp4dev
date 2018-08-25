@@ -59,7 +59,7 @@ export default class MessageList extends Vue {
 
     }
 
-    async refresh() {
+    async refresh(sortColumn?: string, sortIsDescending?: boolean) {
 
         this.error = null;
 
@@ -68,7 +68,7 @@ export default class MessageList extends Vue {
                 await this.connection.start();
                 this.connectionStarted = true;
             }
-            this.messages = await new MessagesController().getSummaries();
+            this.messages = await new MessagesController().getSummaries(sortColumn, sortIsDescending);
         } catch (e) {
             this.error = e;
 
@@ -76,6 +76,15 @@ export default class MessageList extends Vue {
             this.loading = false;
         }
 
+    }
+
+    async sort(row: any) {
+        let descending: boolean = true;
+        if (row.order === "ascending") {
+            descending = false;
+        }
+
+        this.refresh(row.prop, descending);
     }
 
     async created() {

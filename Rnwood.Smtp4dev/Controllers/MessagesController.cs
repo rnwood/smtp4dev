@@ -1,15 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+
+using HtmlAgilityPack;
+
 using Microsoft.AspNetCore.Mvc;
+
+using Rnwood.Smtp4dev.ApiModel;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using System.IO;
-using MimeKit;
-using HtmlAgilityPack;
+
+using Message = Rnwood.Smtp4dev.DbModel.Message;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -22,14 +25,16 @@ namespace Rnwood.Smtp4dev.Controllers
             _messagesHub = messagesHub;
         }
 
-
         private Smtp4devDbContext _dbContext;
         private MessagesHub _messagesHub;
 
         [HttpGet]
-        public IEnumerable<ApiModel.MessageSummary> GetSummaries()
+        public IEnumerable<ApiModel.MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true)
         {
-            return _dbContext.Messages.Select(m => new ApiModel.MessageSummary(m));
+            var orderBy = Sort(sortColumn);
+            return sortIsDescending ? 
+                _dbContext.Messages.Select(m => new ApiModel.MessageSummary(m)).OrderByDescending(m => orderBy(m)) : 
+                _dbContext.Messages.Select(m => new ApiModel.MessageSummary(m)).OrderBy(m => orderBy(m));
         }
 
         [HttpGet("{id}")]
@@ -113,6 +118,19 @@ namespace Rnwood.Smtp4dev.Controllers
 
         }
 
-
+        private static Func<MessageSummary, object> Sort(string column)
+        {
+            switch (column.ToLower())
+            {
+                case "subject":
+                    return (m) => m.Subject;
+                case "from":
+                    return (m) => m.From;
+                case "to":
+                    return (m) => m.To;
+                default:
+                    return (m) => m.ReceivedDate;
+            }
+        }
     }
 }
