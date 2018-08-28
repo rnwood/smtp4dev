@@ -1,12 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Diagnostics;
 using System.IO;
 using System.Linq;
-using System.Threading.Tasks;
+
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Logging;
+
+using Rnwood.Smtp4dev.Service;
 
 namespace Rnwood.Smtp4dev
 {
@@ -14,19 +14,34 @@ namespace Rnwood.Smtp4dev
     {
         public static void Main(string[] args)
         {
-            BuildWebHost(args).Run();
+            var isService = !(Debugger.IsAttached || args.Contains("--console"));
+            var builder = CreateWebHost(args.Where(arg => arg != "--console").ToArray());
+            if (isService)
+            {
+                var pathToExe = Process.GetCurrentProcess().MainModule.FileName;
+                var pathToContentRoot = Path.GetDirectoryName(pathToExe);
+                builder.UseContentRoot(pathToContentRoot);
+            }
+
+            var host = builder.Build();
+
+            if (isService)
+            {
+                host.RunAsSmtp4devService();
+            }
+            else
+            {
+                host.Run();
+            }
         }
 
-        public static IWebHost BuildWebHost(string[] args)
+        public static IWebHostBuilder CreateWebHost(string[] args)
         {
             var config = new ConfigurationBuilder()
                 .AddCommandLine(args)
                 .Build();
 
-            return WebHost.CreateDefaultBuilder(args)
-                .UseConfiguration(config)
-                .UseStartup<Startup>()
-                .Build();
+            return WebHost.CreateDefaultBuilder(args).UseConfiguration(config).UseStartup<Startup>();
         }
     }
 }
