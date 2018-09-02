@@ -14,8 +14,8 @@ namespace Rnwood.Smtp4dev
     {
         public static void Main(string[] args)
         {
-            var isService = !(Debugger.IsAttached || args.Contains("--console"));
-            var builder = CreateWebHost(args.Where(arg => arg != "--console").ToArray());
+            var isService = !Debugger.IsAttached && args.Contains("--service");
+            var builder = CreateWebHost(args.Where(arg => arg != "--service").ToArray());
             if (isService)
             {
                 var pathToExe = Process.GetCurrentProcess().MainModule.FileName;
