@@ -1,39 +1,30 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+using System.IO;
+using System.Net;
 using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-using Microsoft.Extensions.Options;
-using Rnwood.Smtp4dev.DbModel;
-using Microsoft.EntityFrameworkCore;
-using Rnwood.SmtpServer;
-using Rnwood.Smtp4dev.Server;
-using Microsoft.Extensions.DependencyInjection.Extensions;
-using Microsoft.AspNetCore.SignalR;
-using Rnwood.Smtp4dev.Hubs;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Diagnostics;
-using System.Net;
-using System.IO;
+
 using Newtonsoft.Json;
+
+using Rnwood.Smtp4dev.DbModel;
+using Rnwood.Smtp4dev.Hubs;
+using Rnwood.Smtp4dev.Server;
 
 namespace Rnwood.Smtp4dev
 {
     public class Startup
     {
-
-        public Startup(IHostingEnvironment env)
+        public Startup(IConfiguration configuration)
         {
-
-            var builder = new ConfigurationBuilder()
-                .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddEnvironmentVariables();
-            Configuration = builder.Build();
+            Configuration = configuration;
         }
 
         public IConfiguration Configuration { get; }
@@ -57,7 +48,7 @@ namespace Rnwood.Smtp4dev
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory log)
         {
             app.UseExceptionHandler(new ExceptionHandlerOptions
             {

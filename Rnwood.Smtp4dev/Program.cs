@@ -1,4 +1,6 @@
-﻿using System.Diagnostics;
+﻿using System;
+using System.ComponentModel.Design;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 
@@ -12,20 +14,16 @@ namespace Rnwood.Smtp4dev
 {
     public class Program
     {
+        public static bool IsService { get; private set; }
+    
         public static void Main(string[] args)
         {
-            var isService = !Debugger.IsAttached && args.Contains("--service");
-            var builder = CreateWebHost(args.Where(arg => arg != "--service").ToArray());
-            if (isService)
-            {
-                var pathToExe = Process.GetCurrentProcess().MainModule.FileName;
-                var pathToContentRoot = Path.GetDirectoryName(pathToExe);
-                builder.UseContentRoot(pathToContentRoot);
-            }
+            if (!Debugger.IsAttached && args.Contains("--service"))
+                IsService = true;
 
-            var host = builder.Build();
-
-            if (isService)
+            var host = CreateWebHost(args.Where(arg => arg != "--service").ToArray());
+            
+            if (IsService)
             {
                 host.RunAsSmtp4devService();
             }
@@ -35,13 +33,32 @@ namespace Rnwood.Smtp4dev
             }
         }
 
-        public static IWebHostBuilder CreateWebHost(string[] args)
+        private static string GetContentRoot()
         {
-            var config = new ConfigurationBuilder()
-                .AddCommandLine(args)
-                .Build();
+            if (!IsService)
+                return Directory.GetCurrentDirectory();
 
-            return WebHost.CreateDefaultBuilder(args).UseConfiguration(config).UseStartup<Startup>();
+            var pathToExe = Process.GetCurrentProcess().MainModule.FileName;
+            return Path.GetDirectoryName(pathToExe);
+        }
+
+        private static IWebHost CreateWebHost(string[] args)
+        {
+            return WebHost
+                .CreateDefaultBuilder(args)
+                .UseContentRoot(GetContentRoot())
+                .ConfigureAppConfiguration(
+                    (hostingContext, config) =>
+                        {
+                            var env = hostingContext.HostingEnvironment;
+                            config
+                                .SetBasePath(env.ContentRootPath)
+                                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                                .AddEnvironmentVariables()
+                                .Build();
+                        })
+                .UseStartup<Startup>()
+                .Build();
         }
     }
 }
