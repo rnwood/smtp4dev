@@ -1,4 +1,4 @@
-FROM microsoft/aspnetcore-build:2.0 AS build
+FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /app
 
 # replace shell with bash so we can source files
@@ -41,7 +41,7 @@ FROM build AS publish
 WORKDIR /app/Rnwood.Smtp4dev
 RUN dotnet publish -c Release -o out
 
-FROM microsoft/aspnetcore:2.0 AS runtime
+FROM microsoft/dotnet:2.1-aspnetcore-runtime AS runtime
 WORKDIR /app
 EXPOSE 80
 EXPOSE 25
