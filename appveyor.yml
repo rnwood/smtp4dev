@@ -3,7 +3,7 @@ os: Visual Studio 2017
 configuration: Release
 skip_tags: true
 environment:
-  FRAMEWORK: netcoreapp2.0
+  FRAMEWORK: netcoreapp2.1
   matrix:
     - RUNTIME: noruntime
     - RUNTIME: win-x86      	
