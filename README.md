@@ -34,13 +34,25 @@ The version hosted on this repo is in heavy development. **Grab the [stable(r) v
 
 - Now configure your apps which send mail, to use the SMTP server on the machine where SMTP4dev is running (``localhost`` if they are on the same machine), and using the port you selected (``25`` by default).
 
+## How to run smtp4dev in Docker
+A Docker (Linux host) image is available. To run with the web interface on port 3000 and SMTP on port 25:
+
+```
+docker run -p 3000:80 -p 25:25 rnwood/smtp4dev
+```
+
 ## How to run smtp4dev as a service (Windows only)
 
 A service in Windows can be installed using New-Service in PowerShell, or sc in both command line or PowerShell. If you use sc in PowerShell, it must be run as sc.exe. sc is an alias for Set-Content.
 
 ### Install service in PowerShell
 
+```
 New-Service -Name Smtp4dev -BinaryPathName "{PathToExe} --service"
+```
 
 ### Install service in Cmd or PowerShell
+
+```
 sc.exe create Smtp4dev binPath= "{PathToExe} --service"
+```
