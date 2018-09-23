@@ -11,7 +11,7 @@
     </template>
 
     <template v-if="html">
-        <iframe class="fill" :srcdoc="html"></iframe>
+        <iframe @load="addAnchorTarget" class="fill" :srcdoc="html"></iframe>
     </template>
 
 </div>

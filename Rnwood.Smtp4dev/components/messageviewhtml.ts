@@ -51,4 +51,16 @@ export default class MessageViewHtml extends Vue {
     async destroyed() {
         
     }
+
+    async addAnchorTarget() {
+        const iframe = document.getElementsByTagName("iframe").length > 0 ? document.getElementsByTagName("iframe")[0] : null;
+        if (iframe != null && iframe.contentDocument != null) {
+            const anchors = iframe.contentDocument.querySelectorAll("a");
+            if (anchors != null) {
+                for (let i = 0; i < anchors.length; i++) {
+                    anchors[i].setAttribute("target", "_blank");
+                }
+            }
+        }
+    }
 }
