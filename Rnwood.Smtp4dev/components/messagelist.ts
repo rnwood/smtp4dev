@@ -1,8 +1,9 @@
 ﻿import Component from "vue-class-component";
 import Vue from 'vue'
-import { HubConnection } from '@aspnet/signalr'
+import { HubConnectionBuilder, HubConnection } from '@aspnet/signalr'
 import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
+import Index = require("@aspnet/signalr/dist/esm/index");
 
 @Component({
     template: require('./messagelist.html')
@@ -13,8 +14,7 @@ export default class MessageList extends Vue {
     constructor() {
         super();
 
-        this.connection = new HubConnection('/hubs/messages');
-
+        this.connection = new HubConnectionBuilder().withUrl('/hubs/messages').build();
         this.connection.on('messageschanged', data => {
             this.refresh();
         });
@@ -65,7 +65,10 @@ export default class MessageList extends Vue {
 
         try {
             if (!this.connectionStarted) {
-                await this.connection.start();
+                await this.connection
+                    .start()
+                    .then(() => console.log('Message connection started.'))
+                    .catch(err => console.log('Error establishing connection (' + err + ')'));
                 this.connectionStarted = true;
             }
             this.messages = await new MessagesController().getSummaries();
