@@ -1,5 +1,5 @@
-﻿import { Component, Prop,Watch } from 'vue-property-decorator'
-import Vue from 'vue'
+﻿import { Component, Prop, Watch } from 'vue-property-decorator';
+import Vue from 'vue';
 import MessagesController from "../ApiClient/MessagesController";
 import Message from "../ApiClient/Message";
 

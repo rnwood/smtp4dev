@@ -1,6 +1,6 @@
 ﻿import Component from "vue-class-component";
-import Vue from 'vue'
-import { HubConnectionBuilder, HubConnection } from '@aspnet/signalr'
+import Vue from 'vue';
+import { HubConnectionBuilder, HubConnection } from '@aspnet/signalr';
 import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
 import Index = require("@aspnet/signalr/dist/esm/index");

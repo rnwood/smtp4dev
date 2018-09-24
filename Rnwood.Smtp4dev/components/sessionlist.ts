@@ -1,6 +1,6 @@
 ﻿import Component from "vue-class-component";
-import Vue from 'vue'
-import { HubConnectionBuilder, HubConnection } from '@aspnet/signalr'
+import Vue from 'vue';
+import { HubConnectionBuilder, HubConnection } from '@aspnet/signalr';
 import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
 

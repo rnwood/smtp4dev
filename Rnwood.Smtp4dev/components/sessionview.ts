@@ -1,5 +1,5 @@
-﻿import { Component, Prop,Watch } from 'vue-property-decorator'
-import Vue from 'vue'
+﻿import { Component, Prop, Watch } from 'vue-property-decorator';
+import Vue from 'vue';
 import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
 import Session from "../ApiClient/Session";
