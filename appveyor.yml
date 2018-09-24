@@ -1,9 +1,9 @@
-version: 3.0.0-alpha-{build}
+version: 3.0.{build}-{branch}
 os: Visual Studio 2017
 configuration: Release
 skip_tags: true
 environment:
-  FRAMEWORK: netcoreapp2.0
+  FRAMEWORK: netcoreapp2.1
   matrix:
     - RUNTIME: noruntime
     - RUNTIME: win-x86      	
@@ -49,5 +49,5 @@ deploy:
     secure: 5zLYIRVYHWHyZYOUZ2F46AvAYb3OLIWs35PQUddGkyK3xkV7qCmaMT38PJY6OiY7
   prerelease: true
   on:
-    branch: master                 # release from master branch onl
+    branch: master                 # release from master branch only
     appveyor_repo_tag: false
