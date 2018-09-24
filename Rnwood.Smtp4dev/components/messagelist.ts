@@ -16,7 +16,7 @@ export default class MessageList extends Vue {
         super();
 		let baseUrl = new BaseUrlProvider().getBaseUrl();
 
-        this.connection = new HubConnectionBuilder().withUrl('baseUrl + hubs/messages').build();
+        this.connection = new HubConnectionBuilder().withUrl(baseUrl + 'hubs/messages').build();
         this.connection.on('messageschanged', data => {
             this.refresh();
         });
