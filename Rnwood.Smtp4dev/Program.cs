@@ -7,7 +7,8 @@ using System.Linq;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
-
+using Microsoft.Extensions.Logging;
+using NLog.Web;
 using Rnwood.Smtp4dev.Service;
 
 namespace Rnwood.Smtp4dev
@@ -18,18 +19,34 @@ namespace Rnwood.Smtp4dev
     
         public static void Main(string[] args)
         {
+            var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
             if (!Debugger.IsAttached && args.Contains("--service"))
                 IsService = true;
 
-            var host = CreateWebHost(args.Where(arg => arg != "--service").ToArray());
-            
-            if (IsService)
+            try
             {
-                host.RunAsSmtp4devService();
+                logger.Debug("SMTP4DEV starting");
+                var host = CreateWebHost(args.Where(arg => arg != "--service").ToArray());
+
+                if (IsService)
+                {
+                    host.RunAsSmtp4devService();
+                }
+                else
+                {
+                    host.Run();
+                }
             }
-            else
+            catch (Exception e)
             {
-                host.Run();
+                logger.Fatal(e, "Fatal exception encountered");
+                throw;
+            }
+            finally
+            {
+                logger.Debug("SMTP4DEV stopping");
+                NLog.LogManager.Flush();
+                NLog.LogManager.Shutdown();
             }
         }
 
@@ -56,8 +73,14 @@ namespace Rnwood.Smtp4dev
                                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                                 .AddEnvironmentVariables()
                                 .Build();
-                        })
+                        })                
                 .UseStartup<Startup>()
+                .ConfigureLogging(logging =>
+                {
+                    logging.ClearProviders();
+                    logging.SetMinimumLevel(LogLevel.Trace);
+                })
+                .UseNLog()
                 .Build();
         }
     }
