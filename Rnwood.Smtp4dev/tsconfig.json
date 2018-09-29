@@ -9,7 +9,7 @@
     "removeComments": false,
     "sourceMap": true,
     "target": "es5",
-    "lib": [ "es5", "es6", "dom" ],
+    "lib": ["es5", "es6", "dom"],
     "module": "commonjs",
     "strict": true,
     "moduleResolution": "node",

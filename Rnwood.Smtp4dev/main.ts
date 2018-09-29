@@ -1,17 +1,16 @@
-﻿import 'es6-collections';
-import 'element-theme-default/lib/index.css';
+﻿import "es6-collections";
+import "element-theme-default/lib/index.css";
 
 import Vue from "vue";
-import MessageList from './components/messagelist';
-import SessionList from './components/sessionlist';
-import MessageView from './components/messageview';
-import SessionView from './components/sessionview';
+import MessageList from "./components/messagelist";
+import SessionList from "./components/sessionlist";
+import MessageView from "./components/messageview";
+import SessionView from "./components/sessionview";
 import Component from "vue-class-component";
-import MessageSummary from "ApiClient/MessageSummary";
-import SessionSummary from "ApiClient/SessionSummary";
+import MessageSummary from "./ApiClient/MessageSummary";
+import SessionSummary from "./ApiClient/SessionSummary";
 
-import Element from 'element-ui';
-import axios from 'axios' 
+import Element from "element-ui";
 
 Vue.use(Element);
 
@@ -32,6 +31,11 @@ export default class Main extends Vue {
 }
 
 new Main({
-    el: '#app',
-    components: { messagelist: MessageList, messageview: MessageView, sessionlist: SessionList, sessionview: SessionView }
+    el: "#app",
+    components: {
+        messagelist: MessageList,
+        messageview: MessageView,
+        sessionlist: SessionList,
+        sessionview: SessionView
+    }
 });

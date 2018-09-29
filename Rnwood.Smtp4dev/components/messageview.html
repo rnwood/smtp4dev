@@ -36,20 +36,20 @@
                     <td>Subject:</td>
                     <td>{{message.subject}}</td>
                 </tr>
-            </table> 
+            </table>
         </div>
 
-        <el-tabs value="view" style="height: 100%; width:100%" class="fill">
+        <el-tabs value="view" style="height: 100%; width: 100%" class="fill">
 
 
             <el-tab-pane label="View" name="view" class="fillpanel h">
-                <messageviewattachments :message="message" />
-                <messageview-html :message="message" class="fill" />
+                <messageviewattachments :message="message"/>
+                <messageview-html :message="message" class="fill"/>
             </el-tab-pane>
 
             <el-tab-pane label="Headers" name="headers" class="fillpanel h">
                 <template v-if="message">
-                    <headers :headers="message.headers" class="fill" />
+                    <headers :headers="message.headers" class="fill"/>
                 </template>
             </el-tab-pane>
 
@@ -64,7 +64,9 @@
                     <div v-if="selectedPart" class="fill fillpanel">
 
                         <el-tabs value="headers" class="fill fillpanel h">
-                            <el-tab-pane label="Headers" name="headers"><headers :headers="selectedPart.headers" /></el-tab-pane>
+                            <el-tab-pane label="Headers" name="headers">
+                                <headers :headers="selectedPart.headers"/>
+                            </el-tab-pane>
 
 
                             <el-tab-pane label="Source" name="source" class="fill fillpanel">
@@ -78,8 +80,6 @@
                 </template>
             </el-tab-pane>
         </el-tabs>
-
-
 
 
     </div>

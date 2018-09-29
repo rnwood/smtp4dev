@@ -1,14 +1,14 @@
-﻿ 
+﻿
 
 export default class Header {
 
-    constructor(name: string, value: string, ) {
-         
-        this.name = name; 
+    constructor(name: string, value: string,) {
+
+        this.name = name;
         this.value = value;
     }
 
-     
-    name: string; 
+
+    name: string;
     value: string;
 }

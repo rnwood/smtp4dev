@@ -1,0 +1,7 @@
+2018-09-29 11:28:41.5521 Info Message Template Auto Format enabled
+2018-09-29 11:28:41.5779 Info Loading assembly: NLog.Web.AspNetCore
+2018-09-29 11:28:41.7596 Info Adding target File Target[allfile]
+2018-09-29 11:28:41.7596 Info Adding target ColoredConsole Target[console]
+2018-09-29 11:28:41.7933 Info Adding target File Target[ownFile-web]
+2018-09-29 11:28:41.8077 Info Configured from an XML element in F:\Repos\smtp4dev\Rnwood.Smtp4dev\bin\Debug\netcoreapp2.1\nlog.config...
+2018-09-29 11:28:41.8611 Info Found 60 configuration items

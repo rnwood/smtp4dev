@@ -3,4 +3,4 @@
     export default Vue;
 }
 
-declare var require: any
+declare var require: any;

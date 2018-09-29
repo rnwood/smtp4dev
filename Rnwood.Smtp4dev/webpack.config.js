@@ -1,22 +1,22 @@
 ﻿/// <binding ProjectOpened='Watch - Development' />
-var path = require('path');
+var path = require("path");
 
 module.exports = {
     entry: {
         site: ["./main.ts"]
     },
     output: {
-        filename: 'bundle.js',
-        path: path.resolve(__dirname, 'wwwroot/dist/'),
+        filename: "bundle.js",
+        path: path.resolve(__dirname, "wwwroot/dist/"),
         publicPath: "/dist/"
     },
     devtool: "source-map",
-   
+
     module: {
-        rules: [ 
+        rules: [
             {
                 test: /\.tsx?$/,
-                loader: 'ts-loader',
+                loader: "ts-loader",
                 exclude: /node_modules/,
                 options: {
                     appendTsSuffixTo: [/\.vue$/]
@@ -24,11 +24,11 @@ module.exports = {
             },
             {
                 test: /\.vue$/,
-                loader: 'vue-loader',
+                loader: "vue-loader",
                 options: {
                     loaders: {
-                        'scss': 'vue-style-loader!css-loader!sass-loader',
-                        'sass': 'vue-style-loader!css-loader!sass-loader?indentedSyntax'
+                        'scss': "vue-style-loader!css-loader!sass-loader",
+                        'sass': "vue-style-loader!css-loader!sass-loader?indentedSyntax"
                     }
                 },
                 exclude: /node_modules/
@@ -36,9 +36,9 @@ module.exports = {
             {
                 test: /\.css$/,
                 use: [
-                    { loader: 'style-loader' },
-                    { loader: 'css-loader' },
-                    { loader: 'postcss-loader', options: { postcss: {} } }
+                    { loader: "style-loader" },
+                    { loader: "css-loader" },
+                    { loader: "postcss-loader", options: { postcss: {} } }
                 ]
             },
             {
@@ -55,7 +55,7 @@ module.exports = {
     resolve: {
         extensions: [".tsx", ".ts", ".js", ".vue"],
         alias: {
-            vue$: 'vue/dist/vue.esm.js'
+            vue$: "vue/dist/vue.esm.js"
         }
     }
 };

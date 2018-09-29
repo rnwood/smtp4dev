@@ -1,92 +1,89 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
+using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
+using Rnwood.Smtp4dev.ApiModel;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using System.IO;
-using MimeKit;
-using HtmlAgilityPack;
+using Message = Rnwood.Smtp4dev.ApiModel.Message;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
     [Route("api/[controller]")]
     public class MessagesController : Controller
     {
+        private readonly Smtp4devDbContext _dbContext;
+        private readonly MessagesHub _messagesHub;
+
         public MessagesController(Smtp4devDbContext dbContext, MessagesHub messagesHub)
         {
             _dbContext = dbContext;
             _messagesHub = messagesHub;
         }
 
-
-        private Smtp4devDbContext _dbContext;
-        private MessagesHub _messagesHub;
-
         [HttpGet]
-        public IEnumerable<ApiModel.MessageSummary> GetSummaries()
+        public IEnumerable<MessageSummary> GetSummaries()
         {
-            return _dbContext.Messages.Select(m => new ApiModel.MessageSummary(m));
+            return _dbContext.Messages.Select(m => new MessageSummary(m));
         }
 
         [HttpGet("{id}")]
-        public ApiModel.Message GetMessage(Guid id)
+        public Message GetMessage(Guid id)
         {
-            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
-            return new ApiModel.Message(result);
+            var result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            return new Message(result);
         }
 
         [HttpGet("{id}/source")]
         public FileStreamResult DownloadMessage(Guid id)
         {
-            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
-            return new FileStreamResult(new MemoryStream(result.Data), "message/rfc822") { FileDownloadName = $"{id}.eml" };
+            var result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            return new FileStreamResult(new MemoryStream(result.Data), "message/rfc822")
+            {
+                FileDownloadName = $"{id}.eml"
+            };
         }
 
         [HttpGet("{id}/part/{cid}/content")]
         public FileStreamResult GetPartContent(Guid id, string cid)
         {
-            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            var result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
 
-            return ApiModel.Message.GetPartContent(result, cid);
+            return Message.GetPartContent(result, cid);
         }
 
         [HttpGet("{id}/part/{cid}/source")]
         public string GetPartSource(Guid id, string cid)
         {
-            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            var result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
 
-            return ApiModel.Message.GetPartSource(result, cid);
+            return Message.GetPartSource(result, cid);
         }
 
         [HttpGet("{id}/html")]
         public string GetMessageHtml(Guid id)
         {
-            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            var result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
 
-            string html = ApiModel.Message.GetHtml(result);
+            var html = Message.GetHtml(result);
 
-            if (html == null)
-            {
-                html = "<pre>" + HtmlAgilityPack.HtmlDocument.HtmlEncode(ApiModel.Message.GetText(result)) + "</pre>";
-            }
+            if (html == null) html = "<pre>" + HtmlDocument.HtmlEncode(Message.GetText(result)) + "</pre>";
 
-            HtmlDocument doc = new HtmlDocument();
+            var doc = new HtmlDocument();
             doc.LoadHtml(html);
 
-            HtmlNodeCollection imageElements = doc.DocumentNode.SelectNodes("//img[starts-with(@src, 'cid:')]");
+            var imageElements = doc.DocumentNode.SelectNodes("//img[starts-with(@src, 'cid:')]");
 
             if (imageElements != null)
-            {
-                foreach (HtmlNode imageElement in imageElements)
+                foreach (var imageElement in imageElements)
                 {
-                    string cid = imageElement.Attributes["src"].Value.Replace("cid:", "", StringComparison.OrdinalIgnoreCase);
+                    var cid = imageElement.Attributes["src"].Value
+                        .Replace("cid:", "", StringComparison.OrdinalIgnoreCase);
                     imageElement.Attributes["src"].Value = $"/api/Messages/{id.ToString()}/part/{cid}/content";
                 }
-            }
 
             return doc.DocumentNode.OuterHtml;
         }
@@ -94,25 +91,19 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpDelete("{id}")]
         public async Task Delete(Guid id)
         {
-
             _dbContext.Messages.RemoveRange(_dbContext.Messages.Where(m => m.Id == id));
             _dbContext.SaveChanges();
 
             await _messagesHub.OnMessagesChanged();
-
         }
 
         [HttpDelete("*")]
         public async Task DeleteAll()
         {
-
             _dbContext.Messages.RemoveRange(_dbContext.Messages);
             _dbContext.SaveChanges();
 
             await _messagesHub.OnMessagesChanged();
-
         }
-
-
     }
 }

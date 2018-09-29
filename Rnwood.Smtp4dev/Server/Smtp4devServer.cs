@@ -1,23 +1,28 @@
-﻿using Microsoft.AspNetCore.SignalR;
+﻿using System;
 using Microsoft.Extensions.Options;
-using MimeKit;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.SmtpServer;
-using System;
-using System.IO;
 
 namespace Rnwood.Smtp4dev.Server
 {
     public class Smtp4devServer
     {
-        public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptions<ServerOptions> serverOptions, MessagesHub messagesHub, SessionsHub sessionsHub)
+        private readonly Func<Smtp4devDbContext> dbContextFactory;
+
+        private readonly MessagesHub messagesHub;
+        private readonly SessionsHub sessionsHub;
+
+        private readonly DefaultServer smtpServer;
+
+        public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptions<ServerOptions> serverOptions,
+            MessagesHub messagesHub, SessionsHub sessionsHub)
         {
             this.dbContextFactory = dbContextFactory;
 
-            this.smtpServer = new DefaultServer(serverOptions.Value.AllowRemoteConnections, serverOptions.Value.Port);
-            this.smtpServer.MessageReceived += OnMessageReceived;
-            this.smtpServer.SessionCompleted += OnSessionCompleted;
+            smtpServer = new DefaultServer(serverOptions.Value.AllowRemoteConnections, serverOptions.Value.Port);
+            smtpServer.MessageReceived += OnMessageReceived;
+            smtpServer.SessionCompleted += OnSessionCompleted;
 
             this.messagesHub = messagesHub;
             this.sessionsHub = sessionsHub;
@@ -25,9 +30,9 @@ namespace Rnwood.Smtp4dev.Server
 
         private void OnSessionCompleted(object sender, SessionEventArgs e)
         {
-            Smtp4devDbContext dbContent = dbContextFactory();
+            var dbContent = dbContextFactory();
 
-            Session session = new Session();
+            var session = new Session();
             session.EndDate = e.Session.EndDate.GetValueOrDefault(DateTime.Now);
             session.ClientAddress = e.Session.ClientAddress.ToString();
             session.ClientName = e.Session.ClientName;
@@ -42,24 +47,18 @@ namespace Rnwood.Smtp4dev.Server
 
         private async void OnMessageReceived(object sender, MessageEventArgs e)
         {
-            Smtp4devDbContext dbContent = dbContextFactory();
+            var dbContent = dbContextFactory();
 
-            using (Stream stream = e.Message.GetData())
+            using (var stream = e.Message.GetData())
             {
-                Message message = await new MessageConverter().ConvertAsync(stream, e.Message.From, string.Join(", ", e.Message.To));
+                var message =
+                    await new MessageConverter().ConvertAsync(stream, e.Message.From, string.Join(", ", e.Message.To));
                 dbContent.Messages.Add(message);
             }
 
             dbContent.SaveChanges();
             messagesHub.OnMessagesChanged().Wait();
         }
-
-        private Func<Smtp4devDbContext> dbContextFactory;
-
-        private DefaultServer smtpServer;
-
-        private MessagesHub messagesHub;
-        private SessionsHub sessionsHub;
 
         public void Start()
         {

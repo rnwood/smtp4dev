@@ -1,14 +1,14 @@
-﻿import { Component, Prop,Watch } from 'vue-property-decorator'
-import Vue from 'vue'
+﻿import { Component, Prop, Watch } from "vue-property-decorator"
+import Vue from "vue"
 import MessagesController from "../ApiClient/MessagesController";
 import Message from "../ApiClient/Message";
 
 @Component({
-    template: require('./messageviewhtml.html')
+    template: require("./messageviewhtml.html")
 })
 export default class MessageViewHtml extends Vue {
     constructor() {
-        super(); 
+        super();
     }
 
     @Prop({ default: null })
@@ -21,13 +21,13 @@ export default class MessageViewHtml extends Vue {
 
     @Watch("message")
     async onMessageChanged(value: Message, oldValue: Message) {
-        
+
         await this.loadMessage();
-        
+
     }
 
     async loadMessage() {
-        
+
         this.error = null;
         this.loading = true;
         this.html = null;
@@ -40,15 +40,15 @@ export default class MessageViewHtml extends Vue {
             this.error = e;
         } finally {
             this.loading = false;
-        }   
+        }
     }
 
     async created() {
 
-     
+
     }
 
     async destroyed() {
-        
+
     }
 }

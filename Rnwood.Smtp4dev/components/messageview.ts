@@ -1,26 +1,26 @@
-﻿import { Component, Prop,Watch } from 'vue-property-decorator'
-import Vue from 'vue'
+﻿import { Component, Prop, Watch } from "vue-property-decorator"
+import Vue from "vue"
 import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
 import Message from "../ApiClient/Message";
 import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
-import Headers from './headers';
+import Headers from "./headers";
 import MessageViewHtml from "./messageviewhtml";
 import MessageViewAttachments from "./messageviewattachments";
 import MessagePartSource from "./messagepartsource";
 
-@Component({ 
-    template: require('./messageview.html'),
+@Component({
+    template: require("./messageview.html"),
     components: {
         headers: Headers,
         "messageview-html": MessageViewHtml,
-        "messageviewattachments" : MessageViewAttachments,
-        "messagepartsource" : MessagePartSource
+        "messageviewattachments": MessageViewAttachments,
+        "messagepartsource": MessagePartSource
     }
 })
 export default class MessageView extends Vue {
     constructor() {
-        super(); 
+        super();
     }
 
     @Prop({ default: null })
@@ -34,13 +34,13 @@ export default class MessageView extends Vue {
 
     @Watch("messageSummary")
     async onMessageChanged(value: MessageSummary, oldValue: MessageSummary) {
-        
+
         await this.loadMessage();
-        
+
     }
 
     async loadMessage() {
-        
+
         this.error = null;
         this.loading = true;
         this.message = null;
@@ -53,7 +53,7 @@ export default class MessageView extends Vue {
             this.error = e;
         } finally {
             this.loading = false;
-        }   
+        }
     }
 
     isLeaf(values: MessageEntitySummary[]) {
@@ -68,16 +68,16 @@ export default class MessageView extends Vue {
         if (this.messageSummary == null) {
             return;
         }
-        window.open(new MessagesController().downloadMessage_url(this.messageSummary.id))
+        window.open(new MessagesController().downloadMessage_url(this.messageSummary.id));
     }
 
 
     async created() {
 
-     
+
     }
 
     async destroyed() {
-        
+
     }
 }

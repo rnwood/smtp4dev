@@ -1,25 +1,25 @@
 ﻿using System;
-using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
-
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Logging;
+using NLog;
 using NLog.Web;
 using Rnwood.Smtp4dev.Service;
+using LogLevel = Microsoft.Extensions.Logging.LogLevel;
 
 namespace Rnwood.Smtp4dev
 {
     public class Program
     {
         public static bool IsService { get; private set; }
-    
+
         public static void Main(string[] args)
         {
-            var logger = NLog.Web.NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
+            var logger = NLogBuilder.ConfigureNLog("nlog.config").GetCurrentClassLogger();
             if (!Debugger.IsAttached && args.Contains("--service"))
                 IsService = true;
 
@@ -29,13 +29,9 @@ namespace Rnwood.Smtp4dev
                 var host = CreateWebHost(args.Where(arg => arg != "--service").ToArray());
 
                 if (IsService)
-                {
                     host.RunAsSmtp4devService();
-                }
                 else
-                {
                     host.Run();
-                }
             }
             catch (Exception e)
             {
@@ -45,8 +41,8 @@ namespace Rnwood.Smtp4dev
             finally
             {
                 logger.Debug("SMTP4DEV stopping");
-                NLog.LogManager.Flush();
-                NLog.LogManager.Shutdown();
+                LogManager.Flush();
+                LogManager.Shutdown();
             }
         }
 
@@ -66,14 +62,14 @@ namespace Rnwood.Smtp4dev
                 .UseContentRoot(GetContentRoot())
                 .ConfigureAppConfiguration(
                     (hostingContext, config) =>
-                        {
-                            var env = hostingContext.HostingEnvironment;
-                            config
-                                .SetBasePath(env.ContentRootPath)
-                                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                                .AddEnvironmentVariables()
-                                .Build();
-                        })                
+                    {
+                        var env = hostingContext.HostingEnvironment;
+                        config
+                            .SetBasePath(env.ContentRootPath)
+                            .AddJsonFile("appsettings.json", false, true)
+                            .AddEnvironmentVariables()
+                            .Build();
+                    })
                 .UseStartup<Startup>()
                 .ConfigureLogging(logging =>
                 {

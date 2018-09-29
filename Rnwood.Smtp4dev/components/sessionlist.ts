@@ -1,11 +1,11 @@
 ﻿import Component from "vue-class-component";
-import Vue from 'vue'
-import { HubConnectionBuilder, HubConnection } from '@aspnet/signalr'
+import Vue from "vue"
+import { HubConnectionBuilder, HubConnection } from "@aspnet/signalr"
 import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
 
 @Component({
-    template: require('./sessionlist.html')
+    template: require("./sessionlist.html")
 })
 export default class SessionList extends Vue {
 
@@ -13,10 +13,11 @@ export default class SessionList extends Vue {
     constructor() {
         super();
 
-        this.connection = new HubConnectionBuilder().withUrl('/hubs/sessions').build();
-        this.connection.on('sessionschanged', data => {
-            this.refresh();
-        });
+        this.connection = new HubConnectionBuilder().withUrl("/hubs/sessions").build();
+        this.connection.on("sessionschanged",
+            data => {
+                this.refresh();
+            });
     }
 
     private connection: HubConnection;
@@ -67,7 +68,8 @@ export default class SessionList extends Vue {
             if (!this.connectionStarted) {
                 await this.connection
                     .start()
-                    .then(() => console.log('Session connection started.')).catch(err => console.log('Error establishing connection (' + err + ')'));;
+                    .then(() => console.log("Session connection started."))
+                    .catch(err => console.log(`Error establishing connection (${err})`));;
                 this.connectionStarted = true;
             }
 

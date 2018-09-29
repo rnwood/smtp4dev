@@ -1,5 +1,4 @@
 ﻿using System.ServiceProcess;
-
 using Microsoft.AspNetCore.Hosting;
 
 namespace Rnwood.Smtp4dev.Service

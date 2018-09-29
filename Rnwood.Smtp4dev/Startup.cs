@@ -2,7 +2,6 @@
 using System.IO;
 using System.Net;
 using System.Threading.Tasks;
-
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
@@ -11,9 +10,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
 using Newtonsoft.Json;
-
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Server;
@@ -33,7 +30,8 @@ namespace Rnwood.Smtp4dev
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddDbContext<Smtp4devDbContext>(opt => opt.UseInMemoryDatabase("main"), ServiceLifetime.Transient, ServiceLifetime.Singleton);
+            services.AddDbContext<Smtp4devDbContext>(opt => opt.UseInMemoryDatabase("main"), ServiceLifetime.Transient,
+                ServiceLifetime.Singleton);
 
             services.AddSingleton<Smtp4devServer>();
             services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
@@ -70,26 +68,26 @@ namespace Rnwood.Smtp4dev
             app.ApplicationServices.GetService<Smtp4devServer>().Start();
 
             if (env.IsDevelopment())
-            {
-                LoadExampleMessagesAsync(app.ApplicationServices.GetService<Smtp4devDbContext>()).ContinueWith((t) => { }) ;
-            }
+                LoadExampleMessagesAsync(app.ApplicationServices.GetService<Smtp4devDbContext>())
+                    .ContinueWith(t => { });
         }
 
         private static async Task LoadExampleMessagesAsync(Smtp4devDbContext db)
-        {;
+        {
+            ;
 
-            MessageConverter messageConverter = new MessageConverter();
+            var messageConverter = new MessageConverter();
 
 
             using (Stream stream = File.OpenRead("example.eml"))
             {
-                Message message = await messageConverter.ConvertAsync(stream, "from@from.com", "to@to.com");
+                var message = await messageConverter.ConvertAsync(stream, "from@from.com", "to@to.com");
                 db.Messages.Add(message);
             }
 
             using (Stream stream = File.OpenRead("example2.eml"))
             {
-                Message message = await messageConverter.ConvertAsync(stream, "from2@from.com", "to2@to.com");
+                var message = await messageConverter.ConvertAsync(stream, "from2@from.com", "to2@to.com");
                 db.Messages.Add(message);
             }
 
@@ -101,7 +99,7 @@ namespace Rnwood.Smtp4dev
     {
         public async Task Invoke(HttpContext context)
         {
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+            context.Response.StatusCode = (int) HttpStatusCode.InternalServerError;
 
             var ex = context.Features.Get<IExceptionHandlerFeature>()?.Error;
             if (ex == null) return;
