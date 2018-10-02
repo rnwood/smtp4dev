@@ -1,5 +1,6 @@
 ﻿import Component from "vue-class-component";
 import Vue from 'vue'
+import { DefaultSortOptions } from 'element-ui/types/table'
 import { HubConnectionBuilder, HubConnection } from '@aspnet/signalr'
 import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
@@ -22,6 +23,8 @@ export default class MessageList extends Vue {
 
     private connection: HubConnection;
     private connectionStarted = false;
+    private selectedSortDescending: boolean = true;
+    private selectedSortColumn: string = "receivedDate";
 
     messages: MessageSummary[] = [];
     error: Error | null = null;
@@ -59,7 +62,7 @@ export default class MessageList extends Vue {
 
     }
 
-    async refresh(sortColumn?: string, sortIsDescending?: boolean) {
+    async refresh() {
 
         this.error = null;
 
@@ -71,7 +74,7 @@ export default class MessageList extends Vue {
                     .catch(err => console.log('Error establishing connection (' + err + ')'));
                 this.connectionStarted = true;
             }
-            this.messages = await new MessagesController().getSummaries(sortColumn, sortIsDescending);
+            this.messages = await new MessagesController().getSummaries(this.selectedSortColumn, this.selectedSortDescending);
         } catch (e) {
             this.error = e;
 
@@ -81,13 +84,16 @@ export default class MessageList extends Vue {
 
     }
 
-    async sort(row: any) {
+    async sort(defaultSortOptions: DefaultSortOptions) {
         let descending: boolean = true;
-        if (row.order === "ascending") {
+        if (defaultSortOptions.order === "ascending") {
             descending = false;
         }
 
-        this.refresh(row.prop, descending);
+        this.selectedSortColumn = defaultSortOptions.prop;
+        this.selectedSortDescending = descending;
+
+        this.refresh();
     }
 
     async created() {
