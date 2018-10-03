@@ -21,7 +21,7 @@ export default class SessionView extends Vue {
     loading = false;
 
     @Watch("sessionSummary")
-    async onMessageChanged(value: SessionSummary, oldValue: SessionSummary) {
+    async onMessageChanged(value: SessionSummary|null, oldValue: SessionSummary|null) {
         
         await this.loadSession();
         

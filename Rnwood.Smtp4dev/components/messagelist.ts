@@ -1,7 +1,7 @@
 ﻿import Component from "vue-class-component";
 import Vue from 'vue'
 import { DefaultSortOptions } from 'element-ui/types/table'
-import { HubConnectionBuilder, HubConnection } from '@aspnet/signalr'
+import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr'
 import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
 import Index = require("@aspnet/signalr/dist/esm/index");
@@ -16,7 +16,7 @@ export default class MessageList extends Vue {
         super();
 
         this.connection = new HubConnectionBuilder().withUrl('/hubs/messages').build();
-        this.connection.on('messageschanged', data => {
+        this.connection.on('messageschanged', () => {
             this.refresh();
         });
     }

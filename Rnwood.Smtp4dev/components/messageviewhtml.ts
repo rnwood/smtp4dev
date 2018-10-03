@@ -2,6 +2,7 @@
 import Vue from 'vue'
 import MessagesController from "../ApiClient/MessagesController";
 import Message from "../ApiClient/Message";
+import * as srcDoc from 'srcdoc-polyfill';
 
 @Component({
     template: require('./messageviewhtml.html')
@@ -20,10 +21,15 @@ export default class MessageViewHtml extends Vue {
     loading = false;
 
     @Watch("message")
-    async onMessageChanged(value: Message, oldValue: Message) {
+    async onMessageChanged(value: Message|null, oldValue: Message|null) {
         
         await this.loadMessage();
         
+    }
+
+    @Watch("html")
+    async onHtmlChanged(value: string) {
+        srcDoc.set(this.$refs.htmlframe, value);
     }
 
     async loadMessage() {
@@ -31,9 +37,10 @@ export default class MessageViewHtml extends Vue {
         this.error = null;
         this.loading = true;
         this.html = null;
-
+        
         try {
             if (this.message != null) {
+
                 this.html = await new MessagesController().getMessageHtml(this.message.id);
             }
         } catch (e) {

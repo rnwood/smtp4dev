@@ -4,3 +4,8 @@
 }
 
 declare var require: any
+
+declare module "srcdoc-polyfill" {
+   
+    export function set(element: any, html : string): void;
+}

@@ -11,9 +11,9 @@ import MessageSummary from "ApiClient/MessageSummary";
 import SessionSummary from "ApiClient/SessionSummary";
 
 import Element from 'element-ui';
-import axios from 'axios' 
 
 Vue.use(Element);
+
 
 @Component({})
 export default class Main extends Vue {

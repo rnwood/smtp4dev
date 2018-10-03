@@ -1,4 +1,4 @@
-﻿import { Component, Prop,Watch } from 'vue-property-decorator'
+﻿import { Component, Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
 import MessagesController from "../ApiClient/MessagesController";
 import Message from "../ApiClient/Message";
@@ -10,7 +10,7 @@ import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
 })
 export default class MessageViewAttachments extends Vue {
     constructor() {
-        super(); 
+        super();
     }
 
     @Prop({ default: null })
@@ -19,12 +19,16 @@ export default class MessageViewAttachments extends Vue {
 
 
     @Watch("message")
-    async onMessageChanged(value: Message, oldValue: Message) {
+    async onMessageChanged(value: Message | null, oldValue: Message | null) {
 
-        var parts = value.parts;
-        var result: AttachmentSummary[] = [] ;
+        var result: AttachmentSummary[] = [];
 
-        this.getAttachments(parts, result);
+        if (value != null) {
+
+            var parts = value.parts
+            this.getAttachments(parts, result);
+
+        }
         this.attachments = result
     }
 
@@ -44,10 +48,10 @@ export default class MessageViewAttachments extends Vue {
 
     async created() {
 
-     
+
     }
 
     async destroyed() {
-        
+
     }
 }

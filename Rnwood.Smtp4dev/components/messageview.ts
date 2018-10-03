@@ -33,7 +33,7 @@ export default class MessageView extends Vue {
     loading = false;
 
     @Watch("messageSummary")
-    async onMessageChanged(value: MessageSummary, oldValue: MessageSummary) {
+    async onMessageChanged(value: MessageSummary|null, oldValue: MessageSummary|null) {
         
         await this.loadMessage();
         

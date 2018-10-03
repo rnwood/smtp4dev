@@ -1,6 +1,6 @@
 ﻿import Component from "vue-class-component";
 import Vue from 'vue'
-import { HubConnectionBuilder, HubConnection } from '@aspnet/signalr'
+import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr'
 import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
 
@@ -14,7 +14,7 @@ export default class SessionList extends Vue {
         super();
 
         this.connection = new HubConnectionBuilder().withUrl('/hubs/sessions').build();
-        this.connection.on('sessionschanged', data => {
+        this.connection.on('sessionschanged', () => {
             this.refresh();
         });
     }
