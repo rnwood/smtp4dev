@@ -10,6 +10,7 @@
 
   <ItemGroup>
     <None Remove="ApiClient\FileStreamResult.ts" />
+    <None Remove="ApiClient\MessageRequestConfig.ts" />
     <None Remove="components\messagelist.ts" />
     <None Remove="npm-debug.log" />
   </ItemGroup>
@@ -42,6 +43,7 @@
 
   <ItemGroup>
     <TypeScriptCompile Include="ApiClient\FileStreamResult.ts" />
+    <TypeScriptCompile Include="ApiClient\MessageRequestConfig.ts" />
     <TypeScriptCompile Include="components\headers.ts" />
     <TypeScriptCompile Include="components\sessionlist.ts" />
     <TypeScriptCompile Include="components\messageview.ts" />
