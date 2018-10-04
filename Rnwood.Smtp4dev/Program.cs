@@ -15,14 +15,14 @@ namespace Rnwood.Smtp4dev
     public class Program
     {
         public static bool IsService { get; private set; }
-    
+
         public static void Main(string[] args)
         {
             if (!Debugger.IsAttached && args.Contains("--service"))
                 IsService = true;
 
             var host = CreateWebHost(args.Where(arg => arg != "--service").ToArray());
-            
+
             if (IsService)
             {
                 host.RunAsSmtp4devService();
@@ -35,11 +35,20 @@ namespace Rnwood.Smtp4dev
 
         private static string GetContentRoot()
         {
-            if (!IsService)
-                return Directory.GetCurrentDirectory();
+            string installLocation = Path.GetDirectoryName(typeof(Program).Assembly.Location);
 
-            var pathToExe = Process.GetCurrentProcess().MainModule.FileName;
-            return Path.GetDirectoryName(pathToExe);
+            if (Directory.Exists(Path.Join(installLocation, "wwwroot")))
+            {
+                return installLocation;
+            }
+
+            string cwd = Directory.GetCurrentDirectory();
+            if (Directory.Exists(Path.Join(cwd, "wwwroot")))
+            {
+                return cwd;
+            }
+
+            throw new ApplicationException($"Unable to find wwwroot in either '{installLocation}' or the CWD '{cwd}'");
         }
 
         private static IWebHost CreateWebHost(string[] args)
