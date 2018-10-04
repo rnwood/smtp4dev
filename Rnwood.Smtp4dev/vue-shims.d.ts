@@ -7,5 +7,5 @@ declare var require: any
 
 declare module "srcdoc-polyfill" {
    
-    export function set(element: any, html : string): void;
+    export function set(iframe: HTMLIFrameElement, html : string): void;
 }

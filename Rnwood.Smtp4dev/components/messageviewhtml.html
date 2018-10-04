@@ -11,7 +11,7 @@
     </template>
 
     <template v-show="html"
-        <iframe class="fill" ref="htmlframe"></iframe>
+        <iframe class="fill" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
     </template>
 
 </div>

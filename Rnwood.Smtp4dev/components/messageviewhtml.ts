@@ -29,7 +29,19 @@ export default class MessageViewHtml extends Vue {
 
     @Watch("html")
     async onHtmlChanged(value: string) {
-        srcDoc.set(this.$refs.htmlframe, value);
+        srcDoc.set(<HTMLIFrameElement>this.$refs.htmlframe, value);
+    }
+
+    async onHtmlFrameLoaded() {
+        var doc = (<HTMLIFrameElement> this.$refs.htmlframe).contentDocument;
+        if (!doc) {
+            return;
+        }
+
+        var baseElement = doc.body.querySelector("base") || doc.createElement("base");
+        baseElement.setAttribute("target", "_blank");
+
+        doc.body.appendChild(baseElement);
     }
 
     async loadMessage() {
