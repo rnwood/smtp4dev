@@ -56,3 +56,7 @@ New-Service -Name Smtp4dev -BinaryPathName "{PathToExe} --service"
 ```
 sc.exe create Smtp4dev binPath= "{PathToExe} --service"
 ```
+
+
+### Changing the SMTP port
+smtp4dev listens on 0.0.0.0 (all interfaces) port 25 by default. To change this either edit `ServerOptions\Port` in the ``appsettings.json`` before startup or add the ``--smtpport`` command line options (e.g. ``--smtpport 2525``).

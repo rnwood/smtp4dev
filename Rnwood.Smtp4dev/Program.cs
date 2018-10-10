@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
@@ -64,6 +65,10 @@ namespace Rnwood.Smtp4dev
                                 .SetBasePath(env.ContentRootPath)
                                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                                 .AddEnvironmentVariables()
+                                .AddCommandLine(args, new
+                                Dictionary<string, string>{
+                                    { "--smtpport", "ServerOptions:Port"}
+                                })
                                 .Build();
                         })
                 .UseStartup<Startup>()

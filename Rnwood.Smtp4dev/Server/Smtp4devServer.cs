@@ -63,7 +63,9 @@ namespace Rnwood.Smtp4dev.Server
 
         public void Start()
         {
+            
             smtpServer.Start();
+            Console.WriteLine($"SMTP Server is listening on port {smtpServer.PortNumber}");
         }
     }
 }
