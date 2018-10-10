@@ -8,13 +8,13 @@
 
     <div v-if="messageSummary" v-loading="loading" class="fillpanel h fill">
 
-        <el-button-group>
-
-            <el-button icon="el-icon-download" v-on:click="download">Download</el-button>
-        </el-button-group>
+        
+        <div class="toolbar">
+            <el-button type="primary" size="small" icon="el-icon-download" v-on:click="download">Download</el-button>
+        </div> 
 
         <div v-if="message" class="pad">
-            <table>
+            <table class="messageviewheader">
                 <tr>
                     <td>From:</td>
                     <td>{{message.from}}</td>
@@ -39,7 +39,7 @@
             </table> 
         </div>
 
-        <el-tabs value="view" style="height: 100%; width:100%" class="fill">
+        <el-tabs value="view" style="height: 100%; width:100%" class="fill"  type="border-card">
 
 
             <el-tab-pane label="View" name="view" class="fillpanel h">
@@ -84,8 +84,8 @@
 
     </div>
 
-    <div v-if="!messageSummary">
-        No message selected
+    <div v-if="!messageSummary" class="fill nodetails centrecontents">
+        <div>No message selected.</div> 
     </div>
 
 </div>

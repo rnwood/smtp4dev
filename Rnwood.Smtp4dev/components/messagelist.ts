@@ -5,6 +5,7 @@ import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr'
 import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
 import Index = require("@aspnet/signalr/dist/esm/index");
+import * as moment from 'moment';
 
 @Component({
     template: require('./messagelist.html')
@@ -34,6 +35,10 @@ export default class MessageList extends Vue {
     handleCurrentChange(message: MessageSummary | null): void {
         this.selectedmessage = message;
         this.$emit("selected-message-changed", message);
+    }
+
+    formatDate(row: number, column : number, cellValue: string, index:number): string {
+        return moment(String(cellValue)).format('YYYY-DD-MM hh:mm:ss');
     }
 
     async deleteSelected() {

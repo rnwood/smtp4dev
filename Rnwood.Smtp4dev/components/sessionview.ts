@@ -27,6 +27,8 @@ export default class SessionView extends Vue {
         
     }
 
+
+
     async loadSession() {
         
         this.error = null;

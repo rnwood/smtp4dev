@@ -12,6 +12,7 @@
             height: 100%;
             background: white;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-size: 14px;
         }
 
         #app {
@@ -41,11 +42,14 @@
             flex-direction: column;
         }
 
-            .messagelist .table {
-                overflow-y: scroll;
-                flex: 1;
-            }
+        .el-table {
+            
+        }
 
+        .messagelist .table, .sessionlist .table {
+            overflow-y: scroll;
+            flex: 1;
+        }
 
         .el-icon-caret-right:before {
             content: "" !important;
@@ -55,69 +59,117 @@
             display: flex;
             flex-direction: row;
             align-content: stretch;
+            column-gap: 10px
         }
 
-            .fillpanel.h {
-                flex-direction: column;
-            }
-
+        .fillpanel.h {
+            flex-direction: column;
+        }
         .fill {
             flex: 1 0 0;
             overflow: auto;
+        }
+
+        .centrecontents {
+            display: flex;
+            align-items: center;
+            align-content: center;
+            flex-direction: column;
+            align-self: center;
         }
 
         .pad {
             padding: 6px;
         }
 
+        .nopad {
+            padding: 0;
+        }
+
+        iframe {
+            border-width: 0;
+        }
+
         [v-cloak] {
             display: none
         }
+
+        .toolbar {
+            margin: 10px 0px;
+            padding: 6px;
+            background-color: #d1dbe5;
+        }
+
+        h1 {
+            margin: 0;
+            font-size: 1.2em;
+        }
+
+        header {
+            padding-left: 10px;
+        }
+
+        .messageviewheader td {
+            padding: 3px;
+        }
+
+        .nodetails {
+            color: #5e7382;
+            text-align: center;
+        }
+
     </style>
 </head>
 <body>
 
     <div id="app" v-cloak class="fillpanel">
 
-        <el-tabs id="maintabs" class="fill" value="messages">
-            <el-tab-pane label="Messages" name="messages" class="fillpanel">
-                <span slot="label"><i class="el-icon-message"></i> Messages</span>
+        <el-container class="fill fillpanel h">
 
-                <div class="fill fillpanel">
-                    <messagelist class="fill" @selected-message-changed="selectedMessageChanged" />
-                </div>
-                <div class="fill fillpanel">
-                    <messageview class="fill" v-bind:message-summary="selectedMessage" />
-                </div>
+            <el-header height="2em"><h1>smtp4dev</h1></el-header>
+            <el-main class="fill fillpanel">
 
-            </el-tab-pane>
+                <el-tabs id="maintabs" class="fill" value="messages" type="border-card">
+                    <el-tab-pane label="Messages" name="messages" class="fillpanel">
+                        <span slot="label"><i class="el-icon-message"></i> Messages</span>
 
-            <el-tab-pane label="Sessions" name="sessions" class="fillpanel">
-                <span slot="label"><i class="el-icon-document"></i> Sessions</span>
+                        <div class="fill fillpanel">
+                            <messagelist class="fill" @selected-message-changed="selectedMessageChanged" />
+                        </div>
+                        <div class="fill fillpanel">
+                            <messageview class="fill" v-bind:message-summary="selectedMessage" />
+                        </div>
 
-                <div class="fill fillpanel">
-                    <sessionlist class="fill" @selected-session-changed="selectedSessionChanged" />
-                </div>
+                    </el-tab-pane>
 
-                <div class="fill fillpanel">
-                    <sessionview class="fill" v-bind:session-summary="selectedSession" />
-                </div>
-            </el-tab-pane>
+                    <el-tab-pane label="Sessions" name="sessions" class="fillpanel">
+                        <span slot="label"><i class="el-icon-document"></i> Sessions</span>
 
-            <el-tab-pane label="Settings" name="settings fillpanel-h">
-                <span slot="label"><i class="el-icon-setting"></i> Settings</span>
+                        <div class="fill fillpanel">
+                            <sessionlist class="fill" @selected-session-changed="selectedSessionChanged" />
+                        </div>
 
+                        <div class="fill fillpanel">
+                            <sessionview class="fill" v-bind:session-summary="selectedSession" />
+                        </div>
+                    </el-tab-pane>
 
-                <div class="fill">
-                    <el-alert title="Coming soon!"
-                              type="info"
-                              description="To edit the settings, edit appsettings.json and restart the program"
-                              show-icon/>
-                </div>
-            </el-tab-pane>
-        </el-tabs>
+                    <el-tab-pane label="Settings" name="settings fillpanel-h">
+                        <span slot="label"><i class="el-icon-setting"></i> Settings</span>
 
 
+                        <div class="fill">
+                            <el-alert title="Coming soon!"
+                                      type="info"
+                                      description="To edit the settings, edit appsettings.json and restart the program"
+                                      show-icon />
+                        </div>
+                    </el-tab-pane>
+                </el-tabs>
+
+            </el-main>
+
+        </el-container>
 
     </div>
 

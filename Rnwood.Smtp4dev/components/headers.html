@@ -1,11 +1,11 @@
 ﻿<div class="headers">
 
-    <template v-if="headers">
+    <template v-show="headers">
 
-        <el-table ref="singleTable" :data="headers" empty-text="No headers" >
-            <el-table-column property="name" label="Name" width="120">
+        <el-table ref="singleTable" :data="headers" empty-text="No headers" :default-sort="{prop: 'name', order: 'ascending'}" >
+            <el-table-column property="name" label="Name" width="150" sortable>
             </el-table-column>
-            <el-table-column property="value" label="Value">
+            <el-table-column property="value" label="Value" sortable>
             </el-table-column>
         </el-table>
     </template>

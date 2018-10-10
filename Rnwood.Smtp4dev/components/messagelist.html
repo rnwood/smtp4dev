@@ -1,22 +1,20 @@
 ﻿<div class="messagelist">
-    
-    <el-button-group>
-        <el-button icon="el-icon-close" v-on:click="clear">Clear</el-button>
 
-        <el-button icon="el-icon-delete" v-on:click="deleteSelected" :disabled="!selectedmessage">Delete</el-button>
-    </el-button-group>
+    <div class="toolbar">
+        <el-button size="small" type="primary" icon="el-icon-close" v-on:click="clear">Clear</el-button>
+        <el-button size="small" type="primary" icon="el-icon-delete" v-on:click="deleteSelected" :disabled="!selectedmessage">Delete</el-button>
+    </div>
 
 
     <el-alert v-if="error" type="error" title="Error" show-icon>
         {{error.message}}
-
         <el-button v-on:click="refresh">Retry</el-button>
     </el-alert>
-    <el-table ref="singleTable" :data="messages" v-loading="loading" empty-text="No messages" 
-              highlight-current-row @current-change="handleCurrentChange" @sort-change="sort" class="table">
-        <el-table-column type="index" width="50">
-        </el-table-column>
-        <el-table-column property="receivedDate" label="Received" width="120" sortable="custom">
+
+    <el-table :data="messages" v-loading="loading" empty-text="No messages"
+              highlight-current-row @current-change="handleCurrentChange" @sort-change="sort" :default-sort="{prop: 'receivedDate', order: 'descending'}" class="table">
+
+        <el-table-column property="receivedDate" label="Received" width="120" sortable="custom" :formatter="formatDate">
         </el-table-column>
         <el-table-column property="from" label="From" width="120" sortable="custom">
         </el-table-column>
@@ -25,4 +23,5 @@
         <el-table-column property="subject" label="Subject" sortable="custom">
         </el-table-column>
     </el-table>
+
 </div>

@@ -1,9 +1,9 @@
 ﻿<div class="sessionlist">
     
-    <el-button-group>
-        <el-button icon="el-icon-close" v-on:click="clear">Clear</el-button>
-        <el-button icon="el-icon-delete" v-on:click="deleteSelected" :disabled="!selectedsession">Delete</el-button>
-    </el-button-group>
+    <div class="toolbar">
+        <el-button size="small" type="primary" icon="el-icon-close" v-on:click="clear">Clear</el-button>
+        <el-button size="small" type="primary" icon="el-icon-delete" v-on:click="deleteSelected" :disabled="!selectedsession">Delete</el-button>
+    </div>
 
 
     <el-alert v-if="error" type="error" title="Error" show-icon>
@@ -11,14 +11,12 @@
 
         <el-button v-on:click="refresh">Retry</el-button>
     </el-alert>
-    <el-table ref="singleTable" :data="sessions" v-loading="loading" empty-text="No sessions" highlight-current-row @current-change="handleCurrentChange" class="table">
-        <el-table-column type="index" width="50">
+    <el-table :data="sessions" v-loading="loading" empty-text="No sessions" highlight-current-row @current-change="handleCurrentChange" class="table" :default-sort = "{prop: 'endDate', order: 'descending'}">
+        <el-table-column property="endDate" label="End Date" width="120" sortable :formatter="formatDate">
         </el-table-column>
-        <el-table-column property="endDate" label="End Date" width="120">
+        <el-table-column property="clientAddress" label="Client Address" sortable>
         </el-table-column>
-        <el-table-column property="clientAddress" label="Client Address">
-        </el-table-column>
-        <el-table-column property="numberOfMessages" label="# Messages" width="120">
+        <el-table-column property="numberOfMessages" label="# Msgs" width="120" sortable>
         </el-table-column>
     </el-table>
 </div>

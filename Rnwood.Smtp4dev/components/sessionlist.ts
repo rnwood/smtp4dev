@@ -3,6 +3,7 @@ import Vue from 'vue'
 import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr'
 import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
+import * as moment from 'moment';
 
 @Component({
     template: require('./sessionlist.html')
@@ -30,6 +31,11 @@ export default class SessionList extends Vue {
     handleCurrentChange(session: SessionSummary | null): void {
         this.selectedsession = session;
         this.$emit("selected-session-changed", session);
+    }
+
+
+    formatDate(row: number, column: number, cellValue: string, index: number): string {
+        return moment(String(cellValue)).format('YYYY-DD-MM hh:mm:ss');
     }
 
     async deleteSelected() {
