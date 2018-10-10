@@ -5,10 +5,11 @@ skip_tags: true
 environment:
   FRAMEWORK: netcoreapp2.1
   matrix:
-    - RUNTIME: noruntime
-    - RUNTIME: win-x86      	
+    - RUNTIME: noruntime      	
+    - RUNTIME: win-x64    
     - RUNTIME: linux-x64
     - RUNTIME: osx-x64
+    - RUNTIME: win-x86
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
