@@ -3,6 +3,9 @@ os: Visual Studio 2017
 configuration: Release
 skip_tags: true
 environment:
+  DOCKERUSERNAME: rnwood
+  DOCKERPASSWORD:
+    secure: 5jWYD10eY+CLicPtEtSMng==
   FRAMEWORK: netcoreapp2.1
   matrix:
     - RUNTIME: docker
@@ -43,11 +46,12 @@ after_build:
  - ps: |
     $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
     if ($env:RUNTIME -eq "docker") {
-        #Nothing yet
+        docker login -u "$env:DOCKERUSERNAME" -p "$env:DOCKERPASSWORD"
+        docker push rnwood/smtp4dev:v3
     } elseif ($env:RUNTIME -ne "noruntime") {
-       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME --version-suffix $versionsuffix
+       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME --version-suffix $versionsuffix -o publish
     } else {
-       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK --version-suffix $versionsuffix	
+       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK --version-suffix $versionsuffix -o publish
     }
 artifacts:
 - path: Rnwood.Smtp4dev\publish
