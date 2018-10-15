@@ -30,12 +30,12 @@ install:
 - ps: |
     if ($env:RUNTIME -ne "docker") {
         Install-Product node ''
-        dotnet restore --packages nuget_packages
     }
 build_script:
  - ps: |
     if ($env:RUNTIME -eq "docker") {
-      docker build -t rnwood/smtp4dev:v3 .
+      docker pull rnwood/smtp4dev:v3
+      docker build --cache-from rnwood/smtp4dev:v3 -t rnwood/smtp4dev:v3 .
     } else {
         dotnet build Smtp4dev.sln -c $env:Configuration
     }
@@ -44,8 +44,7 @@ after_build:
     $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
     if ($env:RUNTIME -eq "docker") {
         #Nothing yet
-    }
-    else if ($env:RUNTIME -ne "noruntime") {
+    } else if ($env:RUNTIME -ne "noruntime") {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME 	--version-suffix $versionsuffix
     } else {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK --version-suffix $versionsuffix	
