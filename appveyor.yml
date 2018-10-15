@@ -8,8 +8,6 @@ environment:
     secure: 5jWYD10eY+CLicPtEtSMng==
   FRAMEWORK: netcoreapp2.1
   matrix:
-    - RUNTIME: docker
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
     - RUNTIME: noruntime      	
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: win-x64    
@@ -20,6 +18,8 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: win-x86
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - RUNTIME: docker
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
@@ -39,6 +39,7 @@ build_script:
     if ($env:RUNTIME -eq "docker") {
       docker pull rnwood/smtp4dev:v3
       docker build --cache-from rnwood/smtp4dev:v3 -t rnwood/smtp4dev:v3 .
+      docker tag rnwood/smtp4dev:v3 rnwood/smtp4dev:$($env:version)
     } else {
         dotnet build Smtp4dev.sln -c $env:Configuration
     }
