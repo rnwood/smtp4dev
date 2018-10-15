@@ -27,10 +27,10 @@ nuget:
   account_feed: false
   project_feed: false
 install:
-- ps: Install-Product node ''
 - ps: |
     if ($env:RUNTIME -ne "docker") {
-        dotnet restore
+        Install-Product node ''
+        dotnet restore --packages nuget_packages
     }
 build_script:
  - ps: |
@@ -66,3 +66,6 @@ deploy:
   on:
     branch: master                 # release from master branch only
     appveyor_repo_tag: false
+cache:
+    - Rnwood.Smtp4dev\node_modules -> Rnwood.Smtp4dev\package.json
+    - nuget_packages -> **\*.csproj
