@@ -35,9 +35,9 @@ install:
 build_script:
  - ps: |
     if ($env:RUNTIME -eq "docker") {
-      docker build .
+      docker build -t rnwood/smtp4dev:v3 .
     } else {
-        dotnet build Smtp4dev.sln -c %Configuration%
+        dotnet build Smtp4dev.sln -c $env:Configuration
     }
 after_build:
  - ps: |
