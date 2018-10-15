@@ -1,0 +1,6 @@
+﻿<template>
+    <div class="fillpanel pad" v-show="attachments">
+        <div v-for="attachment in attachments"><el-button size="small" icon="el-icon-document" type="primary" round v-on:click="openAttachment(attachment)">{{attachment.fileName}}</el-button></div>
+    </div>
+</template>
+<script src="./messageviewattachments.ts"></script>

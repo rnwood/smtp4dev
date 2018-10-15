@@ -34,7 +34,6 @@ RUN dotnet restore Rnwood.Smtp4dev
 # copy everything else and build app
 COPY . .
 WORKDIR /app/Rnwood.Smtp4dev
-RUN npm install
 RUN dotnet build
 
 FROM build AS publish

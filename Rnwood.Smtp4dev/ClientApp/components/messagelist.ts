@@ -1,15 +1,12 @@
-﻿import Component from "vue-class-component";
-import Vue from 'vue'
-import { DefaultSortOptions } from 'element-ui/types/table'
-import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr'
+﻿import { Component } from 'vue-property-decorator';
+import Vue from 'vue';
+import { DefaultSortOptions } from 'element-ui/types/table';
+import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
 import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
-import Index = require("@aspnet/signalr/dist/esm/index");
 import * as moment from 'moment';
 
-@Component({
-    template: require('./messagelist.html')
-})
+@Component
 export default class MessageList extends Vue {
 
 

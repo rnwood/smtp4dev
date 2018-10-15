@@ -4,9 +4,7 @@ import MessagesController from "../ApiClient/MessagesController";
 import Message from "../ApiClient/Message";
 import * as srcDoc from 'srcdoc-polyfill';
 
-@Component({
-    template: require('./messageviewhtml.html')
-})
+@Component
 export default class MessageViewHtml extends Vue {
     constructor() {
         super(); 
@@ -45,7 +43,7 @@ export default class MessageViewHtml extends Vue {
     }
 
     async loadMessage() {
-        
+       
         this.error = null;
         this.loading = true;
         this.html = null;
@@ -64,7 +62,7 @@ export default class MessageViewHtml extends Vue {
 
     async created() {
 
-     
+        this.loadMessage();
     }
 
     async destroyed() {

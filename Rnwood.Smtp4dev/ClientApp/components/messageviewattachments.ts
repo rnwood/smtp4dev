@@ -5,9 +5,7 @@ import Message from "../ApiClient/Message";
 import AttachmentSummary from "../ApiClient/AttachmentSummary";
 import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
 
-@Component({
-    template: require('./messageviewattachments.html')
-})
+@Component
 export default class MessageViewAttachments extends Vue {
     constructor() {
         super();
@@ -21,15 +19,19 @@ export default class MessageViewAttachments extends Vue {
     @Watch("message")
     async onMessageChanged(value: Message | null, oldValue: Message | null) {
 
+        await this.setAttachments();
+    }
+
+    async setAttachments() {
         var result: AttachmentSummary[] = [];
 
-        if (value != null) {
+        if (this.message != null) {
 
-            var parts = value.parts
+            var parts = this.message.parts
             this.getAttachments(parts, result);
 
         }
-        this.attachments = result
+        this.attachments = result;
     }
 
     getAttachments(parts: MessageEntitySummary[], result: AttachmentSummary[]) {
@@ -48,7 +50,7 @@ export default class MessageViewAttachments extends Vue {
 
     async created() {
 
-
+        await this.setAttachments();
     }
 
     async destroyed() {

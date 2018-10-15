@@ -1,15 +1,13 @@
-﻿import Component from "vue-class-component";
+﻿import { Component } from 'vue-property-decorator';
 import Vue from 'vue'
 import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr'
 import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
 import * as moment from 'moment';
 
-@Component({
-    template: require('./sessionlist.html')
-})
+@Component
 export default class SessionList extends Vue {
-
+    
 
     constructor() {
         super();

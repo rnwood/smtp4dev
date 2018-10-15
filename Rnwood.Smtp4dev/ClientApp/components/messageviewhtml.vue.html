@@ -1,0 +1,18 @@
+﻿<template>
+
+    <div class="fillpanel" v-loading="!html">
+        <el-alert v-if="error" type="error">
+            {{error.message}}
+
+            <el-button v-on:click="loadMessage">Retry</el-button>
+        </el-alert>
+
+        <template v-if="message && message.mimeParseError">
+            <el-alert type="error">Message parse error: {{message.mimeParseError}}</el-alert>
+        </template>
+
+
+            <iframe class="fill" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
+    </div>
+</template>
+<script src="./messageviewhtml.ts"></script>

@@ -1,0 +1,98 @@
+﻿<template>
+    <div class="messageview fill fillpanel">
+        <el-alert v-if="error" type="error">
+            {{error.message}}
+
+            <el-button v-on:click="loadMessage">Retry</el-button>
+        </el-alert>
+
+        <div v-if="messageSummary" v-loading="loading" class="fillpanel h fill">
+
+
+            <div class="toolbar">
+                <el-button type="primary" size="small" icon="el-icon-download" v-on:click="download">Download</el-button>
+            </div>
+
+            <div v-if="message" class="pad">
+                <table class="messageviewheader">
+                    <tr>
+                        <td>From:</td>
+                        <td>{{message.from}}</td>
+                    </tr>
+
+                    <tr>
+                        <td>To:</td>
+                        <td>{{message.to}}</td>
+                    </tr>
+                    <tr v-if="message.cc">
+                        <td>Cc:</td>
+                        <td>{{message.cc}}</td>
+                    </tr>
+                    <tr v-if="message.bcc">
+                        <td>Bcc:</td>
+                        <td>{{message.bcc}}</td>
+                    </tr>
+                    <tr>
+                        <td>Subject:</td>
+                        <td>{{message.subject}}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <el-tabs value="view" style="height: 100%; width:100%" class="fill" type="border-card">
+
+
+                <el-tab-pane label="View" name="view" class="fillpanel h">
+                    <messageviewattachments :message="message"></messageviewattachments>
+                    <messageview-html :message="message" class="fill"></messageview-html>
+                </el-tab-pane>
+
+                <el-tab-pane label="Headers" name="headers" class="fillpanel h">
+                    <headers  :headers="headers" class="fill"></headers>
+                </el-tab-pane>
+
+                <el-tab-pane label="Parts" name="parts" class="fillpanel h">
+
+
+
+
+                    <el-tree v-if="message" :data="message.parts" :props="{label: 'name', children: 'childParts', disabled: false, isLeaf: isLeaf}" @node-click="onPartSelection" highlight-current="true" empty-message="No parts" ref="partstree"></el-tree>
+
+
+                    <div v-show="selectedPart" class="fill fillpanel">
+
+                        <el-tabs value="headers" class="fill fillpanel h" type="border-card">
+                            <el-tab-pane label="Headers" name="headers" class="fill fillpanel">
+                                <headers :headers="selectedPartHeaders" class="fill"></headers>
+                            </el-tab-pane>
+
+
+                            <el-tab-pane label="Source" name="source" class="fill fillpanel">
+
+                                <messagepartsource class="fill" :messageEntitySummary="selectedPart"></messagepartsource>
+                            </el-tab-pane>
+
+                        </el-tabs>
+
+                    </div>
+
+                    <div v-if="!selectedPart" class="fill fillpanel">
+                        <div class="fill nodetails centrecontents">
+                            <div>No part selected.</div>
+                        </div>
+                    </div>
+                </el-tab-pane>
+            </el-tabs>
+
+
+
+
+        </div>
+
+        <div v-if="!messageSummary" class="fill nodetails centrecontents">
+            <div>No message selected.</div>
+        </div>
+    </div>
+
+</template>
+<script src="./messageview.ts"></script>

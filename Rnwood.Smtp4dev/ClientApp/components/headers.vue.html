@@ -1,13 +1,13 @@
-﻿<div class="headers">
+﻿<template>
 
-    <template v-show="headers">
-
-        <el-table :data="headers" empty-text="No headers" :default-sort="{prop: 'name', order: 'ascending'}" class="table" >
+    <div v-show="headers" class="headers">
+        <el-table :data="headers" empty-text="No headers" :default-sort="{prop: 'name', order: 'ascending'}" class="table fill">
             <el-table-column property="name" label="Name" width="100" sortable>
             </el-table-column>
             <el-table-column property="value" label="Value" width="500" sortable>
             </el-table-column>
         </el-table>
-    </template>
+    </div>
+</template>
 
-</div>
+<script src="./headers.ts"></script>

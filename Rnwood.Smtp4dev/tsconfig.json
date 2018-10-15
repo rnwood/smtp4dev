@@ -1,23 +1,18 @@
 {
-  "compileOnSave": true,
   "compilerOptions": {
-    "outDir": "./wwwroot/build/",
-    "noImplicitAny": true,
-    "noImplicitThis": false,
-    "noImplicitReturns": true,
-    "noEmitOnError": true,
-    "removeComments": false,
-    "sourceMap": true,
-    "target": "es5",
-    "lib": [ "es5", "es6", "dom" ],
-    "module": "commonjs",
-    "strict": true,
-    "moduleResolution": "node",
+    "allowSyntheticDefaultImports": true,
     "experimentalDecorators": true,
-    "baseUrl": "."
+    "module": "es2015",
+    "moduleResolution": "node",
+    "target": "es5",
+    "sourceMap": true,
+    "skipDefaultLibCheck": true,
+    "lib": [ "es5", "es6", "dom"],
+    "strict": true,
+    "types": ["webpack-env"]
   },
   "exclude": [
-    "node_modules",
-    "wwwroot"
+      "bin",
+      "node_modules"
   ]
 }

@@ -4,15 +4,13 @@ import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
 import Session from "../ApiClient/Session";
 
-@Component({ 
-    template: require('./sessionview.html')
-})
+@Component
 export default class SessionView extends Vue {
     constructor() {
         super(); 
     }
 
-    @Prop({ default: null })
+    @Prop({  })
     sessionSummary: SessionSummary | null = null;
     session: Session | null = null;
 

@@ -1,0 +1,26 @@
+﻿<template >
+
+    <div class="sessionview fill fillpanel">
+        <el-alert v-if="error" type="error">
+            {{error.message}}
+
+            <el-button v-on:click="loadMessage">Retry</el-button>
+        </el-alert>
+
+        <div v-if="sessionSummary" v-loading="loading" class="fillpanel h fill">
+            <el-tabs value="log" style="height: 100%; width:100%" class="fill" type="border-card">
+
+
+                <el-tab-pane label="Log" name="log" class="fillpanel">
+                    <textarea readonly class="fill" v-model="session.log" v-if="session" />
+                </el-tab-pane>
+            </el-tabs>
+        </div>
+
+        <div v-if="!sessionSummary" class="fill nodetails centrecontents">
+            <div>No session selected</div>
+        </div>
+    </div>
+
+</template>
+<script src="./sessionview.ts"></script>

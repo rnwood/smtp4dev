@@ -1,0 +1,14 @@
+﻿<template >
+    <div class="fillpanel" v-loading="loading">
+        <el-alert v-if="error" type="error">
+            {{error.message}}
+
+            <el-button v-on:click="loadMessage">Retry</el-button>
+        </el-alert>
+
+        <template v-if="source" class="fillpanel fill">
+            <textarea class="fill" readonly v-model="source"></textarea>
+        </template>
+    </div>
+</template>
+<script src="./messagepartsource.ts"></script>

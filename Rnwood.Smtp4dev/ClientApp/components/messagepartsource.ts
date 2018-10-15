@@ -3,9 +3,7 @@ import Vue from 'vue'
 import MessagesController from "../ApiClient/MessagesController";
 import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
 
-@Component({
-    template: require('./messagepartsource.html')
-})
+@Component
 export default class MessagePartSource extends Vue {
     constructor() {
         super(); 
@@ -13,9 +11,8 @@ export default class MessagePartSource extends Vue {
 
     @Prop({ default: null })
     messageEntitySummary: MessageEntitySummary | null = null;
+
     source: string | null = null;
-
-
     error: Error | null = null;
     loading = false;
 
@@ -44,8 +41,7 @@ export default class MessagePartSource extends Vue {
     }
 
     async created() {
-
-     
+        this.loadMessage();
     }
 
     async destroyed() {

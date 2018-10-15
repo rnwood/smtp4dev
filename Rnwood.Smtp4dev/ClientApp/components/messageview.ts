@@ -4,18 +4,13 @@ import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
 import Message from "../ApiClient/Message";
 import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
-import Headers from './headers';
-import MessageViewHtml from "./messageviewhtml";
-import MessageViewAttachments from "./messageviewattachments";
-import MessagePartSource from "./messagepartsource";
 
 @Component({ 
-    template: require('./messageview.html'),
     components: {
-        headers: Headers,
-        "messageview-html": MessageViewHtml,
-        "messageviewattachments" : MessageViewAttachments,
-        "messagepartsource" : MessagePartSource
+        headers: (<any>require('./headers.vue.html')).default,
+        "messageview-html": (<any>require('./messageviewhtml.vue.html')).default,
+        "messageviewattachments": (<any>require('./messageviewattachments.vue.html')).default,
+        "messagepartsource": (<any>require('./messagepartsource.vue.html')).default
     }
 })
 export default class MessageView extends Vue {
@@ -23,7 +18,7 @@ export default class MessageView extends Vue {
         super(); 
     }
 
-    @Prop({ default: null })
+    @Prop({})
     messageSummary: MessageSummary | null = null;
     message: Message | null = null;
     selectedPart: MessageEntitySummary | null = null;
@@ -33,17 +28,19 @@ export default class MessageView extends Vue {
     loading = false;
 
     @Watch("messageSummary")
-    async onMessageChanged(value: MessageSummary|null, oldValue: MessageSummary|null) {
+    async onMessageSummaryChange(value: MessageSummary|null, oldValue: MessageSummary|null) {
         
         await this.loadMessage();
         
     }
+
 
     async loadMessage() {
         
         this.error = null;
         this.loading = true;
         this.message = null;
+        this.selectedPart = null;
 
         try {
             if (this.messageSummary != null) {
@@ -60,8 +57,8 @@ export default class MessageView extends Vue {
         return values.length == 0;
     }
 
-    handleNodeClick(value: MessageEntitySummary) {
-        this.selectedPart = value;
+    onPartSelection(part: MessageEntitySummary|null) {
+        this.selectedPart = part;
     }
 
     async download() {
@@ -72,12 +69,20 @@ export default class MessageView extends Vue {
     }
 
 
-    async created() {
-
+    async mounted() {
+        await this.loadMessage();
      
     }
 
     async destroyed() {
         
+    }
+
+    get headers() {
+        return this.message != null ? this.message.headers : [];
+    }
+
+    get selectedPartHeaders() {
+        return this.selectedPart != null ? this.selectedPart.headers : [];
     }
 }
