@@ -5,11 +5,18 @@ skip_tags: true
 environment:
   FRAMEWORK: netcoreapp2.1
   matrix:
+    - RUNTIME: docker
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
     - RUNTIME: noruntime      	
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: win-x64    
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: linux-x64
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: osx-x64
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: win-x86
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
@@ -21,14 +28,24 @@ nuget:
   project_feed: false
 install:
 - ps: Install-Product node ''
-- cmd: |
-    dotnet restore
+- ps: |
+    if ($env:RUNTIME -ne "docker") {
+        dotnet restore
+    }
 build_script:
- - cmd: dotnet build Smtp4dev.sln -c %Configuration%
+ - ps: |
+    if ($env:RUNTIME -eq "docker") {
+      docker build .
+    } else {
+        dotnet build Smtp4dev.sln -c %Configuration%
+    }
 after_build:
  - ps: |
     $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
-    if ($env:RUNTIME -ne "noruntime") {
+    if ($env:RUNTIME -eq "docker") {
+        #Nothing yet
+    }
+    else if ($env:RUNTIME -ne "noruntime") {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME 	--version-suffix $versionsuffix
     } else {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK --version-suffix $versionsuffix	
