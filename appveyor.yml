@@ -44,17 +44,14 @@ after_build:
     $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
     if ($env:RUNTIME -eq "docker") {
         #Nothing yet
-    } else if ($env:RUNTIME -ne "noruntime") {
-       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME 	--version-suffix $versionsuffix
+    } elseif ($env:RUNTIME -ne "noruntime") {
+       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME --version-suffix $versionsuffix
     } else {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK --version-suffix $versionsuffix	
     }
 artifacts:
-- path: Rnwood.Smtp4dev\bin\$(configuration)\$(framework)\$(runtime)\publish
+- path: Rnwood.Smtp4dev\publish
   name: Smtp4dev-$(runtime)-v$(appveyor_build_version)
-  type: zip
-- path: Rnwood.Smtp4dev\bin\$(configuration)\$(framework)\publish
-  name: Smtp4dev-noruntime-v$(appveyor_build_version)
   type: zip
 deploy:
   provider: GitHub
