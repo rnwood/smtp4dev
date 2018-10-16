@@ -2,6 +2,9 @@ version: 3.0.{build}-{branch}
 os: Visual Studio 2017
 configuration: Release
 skip_tags: true
+branches:
+  except:
+    - azure-pipelines
 environment:
   DOCKERUSERNAME: rnwood
   DOCKERPASSWORD:
