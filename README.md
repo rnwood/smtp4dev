@@ -35,11 +35,17 @@ The version hosted on this repo is in heavy development. **Grab the [stable(r) v
 - Now configure your apps which send mail, to use the SMTP server on the machine where SMTP4dev is running (``localhost`` if they are on the same machine), and using the port you selected (``25`` by default).
 
 ## How to run smtp4dev in Docker
-A Docker (Linux host) image is available. To run with the web interface on port 3000 and SMTP on port 25:
+Docker images for both Windows and Linux are available. To run with the web interface on port 3000 and SMTP on port 2525:
 
+**Linux:**
 ```
-docker run -p 3000:80 -p 25:25 rnwood/smtp4dev
+docker run -p 3000:80 -p 2525:25 rnwood/smtp4dev:linux-amd64-v3
 ```
+**Windows:**
+```
+docker run -p 3000:80 -p 2525:25 rnwood/smtp4dev:windows-amd64-v3
+```
+Sorry no unified cross platform image tag available yet. To see the full list of available tags [see the Docker hub page for smtp4dev](https://hub.docker.com/r/rnwood/smtp4dev/tags/).
 
 ## How to run smtp4dev as a service (Windows only)
 
