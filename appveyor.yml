@@ -43,7 +43,8 @@ install:
 build_script:
  - ps: |
     if ($env:RUNTIME -eq "docker") {
-      docker build -m 4g -t rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -f Dockerfile.$($env:DOCKERFILE) .
+      docker pull rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3
+      docker build --cache-from rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -m 4g -t rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -f Dockerfile.$($env:DOCKERFILE) .
       docker tag rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)	  
     } else {
         dotnet build Smtp4dev.sln -c $env:Configuration
