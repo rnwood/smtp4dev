@@ -63,7 +63,7 @@ after_build:
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME --version-suffix $versionsuffix -o publish
     } else {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK --version-suffix $versionsuffix -o publish
-       dotnet pack Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK --version-suffix $versionsuffix
+       dotnet pack Rnwood.Smtp4dev -c $env:Configuration --version-suffix $versionsuffix
     }
 artifacts:
 - path: Rnwood.Smtp4dev\publish
