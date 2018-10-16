@@ -20,9 +20,11 @@ environment:
 #      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: docker
       DOCKERPLATFORM: windows-amd64
+      DOCKERFILE: windows
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: docker
       DOCKERPLATFORM: linux-amd64
+      DOCKERFILE: linux
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu	  
 assembly_info:
   patch: true
@@ -41,7 +43,7 @@ install:
 build_script:
  - ps: |
     if ($env:RUNTIME -eq "docker") {
-      docker build -m 4g -t rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -f Dockerfile.$($env:DOCKERPLATFORM) .
+      docker build -m 4g -t rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -f Dockerfile.$($env:DOCKERFILE) .
       docker tag rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)	  
     } else {
         dotnet build Smtp4dev.sln -c $env:Configuration
