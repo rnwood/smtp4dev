@@ -1,0 +1,11 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+pool:
+  vmImage: 'win1803'
+
+steps:
+- script: docker build --cache-from rnwood/smtp4dev:windows-amd64-v3 -m 4g -t rnwood/smtp4dev:windows-amd64 -f Dockerfile.windows .
+  displayName: 'Docker build'
