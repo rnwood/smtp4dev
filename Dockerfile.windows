@@ -1,12 +1,27 @@
-FROM microsoft/dotnet:2.1-sdk AS sdk
 
-FROM stefanscherer/node-windows:10-windowsservercore AS build
-
-COPY --from=sdk ["C:/Program Files/dotnet", "C:/Program Files/dotnet"]
-SHELL ["cmd", "/c"]
-RUN setx /M PATH "%PATH%;C:\Program Files\dotnet"
+FROM microsoft/windowsservercore as build
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
+ENV DOTNET_SDK_VERSION 2.1.403
+
+RUN Invoke-WebRequest -OutFile dotnet.zip https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$Env:DOTNET_SDK_VERSION/dotnet-sdk-$Env:DOTNET_SDK_VERSION-win-x64.zip; \
+Expand-Archive dotnet.zip -DestinationPath c:\dotnet; \
+Remove-Item -Force dotnet.zip
+
+RUN $env:PATH = $('c:\dotnet;{0}' -f $env:PATH) ;\
+[Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
+
+
+ENV NODE_VERSION 10.11.0
+
+RUN Invoke-WebRequest $('https://nodejs.org/dist/v{0}/node-v{0}-win-x64.zip' -f $env:NODE_VERSION) -OutFile 'node.zip' -UseBasicParsing ; \
+Expand-Archive node.zip -DestinationPath C:\ ;\
+Rename-Item -Path $('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\nodejs'
+
+RUN $env:PATH = 'C:\nodejs;{0}' -f $env:PATH ; \
+[Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
+
 WORKDIR /app
 
 # copy csproj and restore as distinct layers
@@ -14,11 +29,9 @@ COPY *.sln .
 COPY Rnwood.Smtp4dev/*.csproj ./Rnwood.Smtp4dev/
 RUN dotnet restore Rnwood.Smtp4dev
 
-# restore npm packages as a layer
-COPY Rnwood.Smtp4dev/package.json ./Rnwood.Smtp4dev/package.json
-RUN npm install Rnwood.Smtp4dev/package.json
-
 # copy everything else and build app
+
+WORKDIR /app
 COPY . .
 WORKDIR /app/Rnwood.Smtp4dev
 RUN dotnet publish -c Release -o out
