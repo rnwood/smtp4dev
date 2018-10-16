@@ -38,9 +38,9 @@ build_script:
  - ps: |
     if ($env:RUNTIME -eq "docker") {
       docker pull rnwood/smtp4dev:v3
-      docker build --cache-from rnwood/smtp4dev:v3 -t rnwood/smtp4dev:linux:v3 .
-      docker tag rnwood/smtp4dev:linux:v3 rnwood/smtp4dev:linux:$($env:APPVEYOR_BUILD_VERSION)
-      docker tag rnwood/smtp4dev:linux:v3 rnwood/smtp4dev:v3
+      docker build --cache-from rnwood/smtp4dev:v3 -t rnwood/smtp4dev-linux:v3 .
+      docker tag rnwood/smtp4dev-linux:v3 rnwood/smtp4dev-linux:$($env:APPVEYOR_BUILD_VERSION)
+      docker tag rnwood/smtp4dev-linux:v3 rnwood/smtp4dev:v3
     } else {
         dotnet build Smtp4dev.sln -c $env:Configuration
     }
@@ -49,9 +49,9 @@ after_build:
     $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
     if ($env:RUNTIME -eq "docker") {
         docker login -u "$env:DOCKERUSERNAME" -p "$env:DOCKERPASSWORD"
-        docker push rnwood/smtp4dev:linux:v3
+        docker push rnwood/smtp4dev-linux:v3
         docker push rnwood/smtp4dev:v3
-        docker push rnwood/smtp4dev:linux:$($env:APPVEYOR_BUILD_VERSION)
+        docker push rnwood/smtp4dev-linux:$($env:APPVEYOR_BUILD_VERSION)
     } elseif ($env:RUNTIME -ne "noruntime") {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME --version-suffix $versionsuffix -o publish
     } else {
