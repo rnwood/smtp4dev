@@ -5,8 +5,11 @@
     <VersionPrefix>3.0.0-alpha</VersionPrefix>
     <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-    <IsPackable>false</IsPackable>
+    <IsPackable>true</IsPackable>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>smtp4dev</ToolCommandName>
+    <PackageOutputPath>./bin/pkg</PackageOutputPath>
   </PropertyGroup>
 
   <ItemGroup>

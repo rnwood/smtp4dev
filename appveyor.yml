@@ -61,15 +61,20 @@ after_build:
         docker push rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)
     } elseif ($env:RUNTIME -ne "noruntime") {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME --version-suffix $versionsuffix -o publish
+	   
+	   
+	   
     } else {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK --version-suffix $versionsuffix -o publish
+       dotnet pack Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK --version-suffix $versionsuffix
     }
 artifacts:
 - path: Rnwood.Smtp4dev\publish
   name: Smtp4dev-$(runtime)-v$(appveyor_build_version)
   type: zip
+- path: Rnwood.Smtp4dev\bin\pkg\*.nupkg
 deploy:
-  provider: GitHub
+- provider: GitHub
   artifact: /.*\..*/
   auth_token:
     secure: 5zLYIRVYHWHyZYOUZ2F46AvAYb3OLIWs35PQUddGkyK3xkV7qCmaMT38PJY6OiY7
@@ -77,6 +82,13 @@ deploy:
   on:
     branch: master                 # release from master branch only
     appveyor_repo_tag: false
+- provider: NuGet
+  api_key:
+    secure: ISMI/iLYa+IKyqPkWpEYwgOceuVrR8mX3+sGEFr04Uo7FoM1goIGOqpr0JalCJPe
+  skip_symbols: false
+  artifact: /.*\.nupkg/
+  on:
+    branch: master                 # release from master branch only
+    appveyor_repo_tag: false
 cache:
     - Rnwood.Smtp4dev\node_modules -> Rnwood.Smtp4dev\package.json
-    - nuget_packages -> **\*.csproj
