@@ -7,5 +7,5 @@ pool:
   vmImage: 'win1803'
 
 steps:
-- script: docker build --cache-from rnwood/smtp4dev:windows-amd64-v3 -m 4g -t rnwood/smtp4dev:windows-amd64 -f Dockerfile.$($env:DOCKERFILE) .
+- script: docker build --cache-from rnwood/smtp4dev:windows-amd64-v3 -m 4g -t rnwood/smtp4dev:windows-amd64 -f Dockerfile.windows .
   displayName: 'Docker build'
