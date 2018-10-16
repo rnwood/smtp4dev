@@ -2,7 +2,7 @@
 smtp4dev - the mail server for development
 
 A dummy SMTP server for Windows, Linux, Mac OS-X (and maybe elsewhere where .NET Core is available). This repository hosts the development of v3 which will have a re-written web UI so that it can be shared amongst members of a team (the most requested feature in v2).
-For the stable smtp4dev version 2 (Windows only desktop app) please see [https://github.com/rnwood/smtp4dev/releases/tag/v2.0.10] and the v2.0 branch.
+The version hosted on this repo is in heavy development. **Grab the [stable(r) v2 version] (a Windows only desktop app) (https://github.com/rnwood/smtp4dev/releases/tag/v2.0.10) if you want something feature complete which you can just double click on and use.**
 
 *If you find smtp4dev useful, please consider supporting further development by making a donation:*
 
@@ -16,9 +16,8 @@ For the stable smtp4dev version 2 (Windows only desktop app) please see [https:/
 ![Screenshot 1](screenshot1.png)
 ![Screenshot 2](screenshot2.png)
 
-## How to run smtp4dev
 
-The version hosted on this repo is in heavy development. **Grab the [stable(r) v2 version](https://github.com/rnwood/smtp4dev/releases/tag/v2.0.10) if you want something feature complete which you can just double click on and use.**
+## How to run smtp4dev by downloading from github releases 
 
 *The MacOS release is totally untested. Please contribute instructions on how to use and feedback on any issues*
 
@@ -33,6 +32,18 @@ The version hosted on this repo is in heavy development. **Grab the [stable(r) v
 - Open your browser at `http://localhost:5000` (to run the web server on a different port or make it listen on interfaces other than loopback, add the command line arg `--server.urls "http://0.0.0.0:5001/"` when starting the executable.
 
 - Now configure your apps which send mail, to use the SMTP server on the machine where SMTP4dev is running (``localhost`` if they are on the same machine), and using the port you selected (``25`` by default).
+
+## How to run smtp4dev as a dotnet global tool
+
+If you're using the .NET Core SDK 2.1 or greater, you can install smtp4dev as a global tool using the following command:
+```
+dotnet tool install -g Rnwood.Smtp4dev --version "3.0.0-*"
+```
+Then you can start smtp4dev by running
+```
+smtp4dev
+```
+
 
 ## How to run smtp4dev in Docker
 Docker images for both Windows and Linux are available. To run with the web interface on port 3000 and SMTP on port 2525:
