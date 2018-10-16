@@ -8,16 +8,16 @@ environment:
     secure: 5jWYD10eY+CLicPtEtSMng==
   FRAMEWORK: netcoreapp2.1
   matrix:
-#    - RUNTIME: noruntime      	
-#      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-#    - RUNTIME: win-x64    
-#      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-#    - RUNTIME: linux-x64
-#      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-#    - RUNTIME: osx-x64
-#      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-#    - RUNTIME: win-x86
-#      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - RUNTIME: noruntime      	
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - RUNTIME: win-x64    
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - RUNTIME: linux-x64
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - RUNTIME: osx-x64
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - RUNTIME: win-x86
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: docker
       DOCKERPLATFORM: windows-amd64
       DOCKERFILE: windows
