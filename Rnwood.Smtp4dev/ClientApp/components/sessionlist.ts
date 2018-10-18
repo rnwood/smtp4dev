@@ -1,25 +1,29 @@
 ﻿import { Component } from 'vue-property-decorator';
 import Vue from 'vue'
-import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr'
 import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
 import * as moment from 'moment';
+import HubConnectionManager from '../HubConnectionManager';
 
-@Component
+@Component({
+    components: {
+        hubconnstatus: (<any>require('./hubconnectionstatus.vue.html')).default
+    }
+})
 export default class SessionList extends Vue {
     
 
     constructor() {
         super();
 
-        this.connection = new HubConnectionBuilder().withUrl('/hubs/sessions').build();
+        this.connection = new HubConnectionManager('/hubs/sessions');
         this.connection.on('sessionschanged', () => {
             this.refresh();
         });
+        this.connection.start();
     }
 
-    private connection: HubConnection;
-    private connectionStarted = false;
+    connection: HubConnectionManager;
 
     sessions: SessionSummary[] = [];
     error: Error | null = null;
@@ -65,16 +69,9 @@ export default class SessionList extends Vue {
     async refresh() {
 
         this.error = null;
+        this.loading = true;
 
         try {
-
-            if (!this.connectionStarted) {
-                await this.connection
-                    .start()
-                    .then(() => console.log('Session connection started.')).catch(err => console.log('Error establishing connection (' + err + ')'));;
-                this.connectionStarted = true;
-            }
-
             this.sessions = await new SessionsController().getSummaries();
         } catch (e) {
             this.error = e;
@@ -92,6 +89,5 @@ export default class SessionList extends Vue {
 
     async destroyed() {
         this.connection.stop();
-        this.connectionStarted = false;
     }
 }

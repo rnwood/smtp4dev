@@ -1,29 +1,34 @@
 ﻿import { Component } from 'vue-property-decorator';
 import Vue from 'vue';
 import { DefaultSortOptions } from 'element-ui/types/table';
-import { HubConnection, HubConnectionBuilder } from '@aspnet/signalr';
 import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
 import * as moment from 'moment';
+import HubConnectionManager from '../HubConnectionManager';
 
-@Component
+
+@Component({
+    components: {
+        hubconnstatus: (<any>require('./hubconnectionstatus.vue.html')).default
+    }
+})
 export default class MessageList extends Vue {
 
 
     constructor() {
         super();
 
-        this.connection = new HubConnectionBuilder().withUrl('/hubs/messages').build();
+        this.connection = new HubConnectionManager('/hubs/messages');
         this.connection.on('messageschanged', () => {
             this.refresh();
         });
+        this.connection.start();
     }
 
-    private connection: HubConnection;
-    private connectionStarted = false;
     private selectedSortDescending: boolean = true;
     private selectedSortColumn: string = "receivedDate";
 
+    connection: HubConnectionManager;
     messages: MessageSummary[] = [];
     error: Error | null = null;
     selectedmessage: MessageSummary | null = null;
@@ -34,7 +39,7 @@ export default class MessageList extends Vue {
         this.$emit("selected-message-changed", message);
     }
 
-    formatDate(row: number, column : number, cellValue: string, index:number): string {
+    formatDate(row: number, column: number, cellValue: string, index: number): string {
         return moment(String(cellValue)).format('YYYY-DD-MM hh:mm:ss');
     }
 
@@ -67,16 +72,11 @@ export default class MessageList extends Vue {
     async refresh() {
 
         this.error = null;
+        this.loading = true;
 
         try {
-            if (!this.connectionStarted) {
-                await this.connection
-                    .start()
-                    .then(() => console.log('Message connection started.'))
-                    .catch(err => console.log('Error establishing connection (' + err + ')'));
-                this.connectionStarted = true;
-            }
             this.messages = await new MessagesController().getSummaries(this.selectedSortColumn, this.selectedSortDescending);
+            
         } catch (e) {
             this.error = e;
 
@@ -105,6 +105,5 @@ export default class MessageList extends Vue {
 
     async destroyed() {
         this.connection.stop();
-        this.connectionStarted = false;
     }
 }
