@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
-    public class SessionSummary
+    public class SessionSummary : ICacheById
     {
         public SessionSummary(DbModel.Session dbSession)
         {

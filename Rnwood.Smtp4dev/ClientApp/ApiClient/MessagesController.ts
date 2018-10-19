@@ -1,8 +1,9 @@
-﻿import MessageSummary from './MessageSummary';
+﻿ 
+
+import MessageSummary from './MessageSummary';
 import Message from './Message';
 import FileStreamResult from './FileStreamResult';
-import axios, { AxiosRequestConfig } from "axios";
-import MessageRequestConfig from './MessageRequestConfig';
+import axios from "axios";
 
 export default class MessagesController {
     public _baseUrl: string;                
@@ -11,18 +12,16 @@ export default class MessagesController {
         this._baseUrl = baseUrl;
     }
         
-    // get: api/Messages  
-    public getSummaries_url(): string {
-        return `${this._baseUrl}api/Messages`;
+    
+    
+    // get: api/Messages?sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}  
+    public getSummaries_url(sortColumn: string, sortIsDescending: boolean): string {
+        return `${this._baseUrl}api/Messages?sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}`;
     }
 
-    public async getSummaries(sortColumn?: string, sortIsDescending?: boolean): Promise<MessageSummary[]> {
+    public async getSummaries(sortColumn: string, sortIsDescending: boolean): Promise<MessageSummary[]> {
 
-        let config: AxiosRequestConfig = new MessageRequestConfig();
-        if (sortColumn != null) {
-            config.params = { sortColumn: sortColumn, sortIsDescending: sortIsDescending != null ? sortIsDescending : true };
-        }
-        return (await axios.get(this.getSummaries_url(), config)).data as MessageSummary[];
+        return (await axios.get(this.getSummaries_url(sortColumn, sortIsDescending), null || undefined)).data as MessageSummary[];
     }
     
     // get: api/Messages/${encodeURIComponent(id)}  

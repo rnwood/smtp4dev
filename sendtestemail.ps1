@@ -1,0 +1,1 @@
+Send-MailMessage -To foo@bar.com -From from@from.com -Subject "Message $([Guid]::NewGuid())" -SmtpServer localhost

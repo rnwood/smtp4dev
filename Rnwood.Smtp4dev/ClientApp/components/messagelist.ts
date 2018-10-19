@@ -5,6 +5,8 @@ import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
 import * as moment from 'moment';
 import HubConnectionManager from '../HubConnectionManager';
+import sortedArraySync from '../sortedArraySync';
+import { Mutex } from 'async-mutex';
 
 
 @Component({
@@ -18,7 +20,7 @@ export default class MessageList extends Vue {
     constructor() {
         super();
 
-        this.connection = new HubConnectionManager('/hubs/messages');
+        this.connection = new HubConnectionManager('/hubs/messages', this.refresh);
         this.connection.on('messageschanged', () => {
             this.refresh();
         });
@@ -32,7 +34,7 @@ export default class MessageList extends Vue {
     messages: MessageSummary[] = [];
     error: Error | null = null;
     selectedmessage: MessageSummary | null = null;
-    loading = true;
+    loading = false;
 
     handleCurrentChange(message: MessageSummary | null): void {
         this.selectedmessage = message;
@@ -69,38 +71,65 @@ export default class MessageList extends Vue {
 
     }
 
-    async refresh() {
+    private lastSort: string | null = null;
+    private lastSortDescending: boolean = false;
+    private mutex = new Mutex();
 
-        this.error = null;
-        this.loading = true;
+    refresh = async () => {
+        var unlock = await this.mutex.acquire();
+        
 
         try {
-            this.messages = await new MessagesController().getSummaries(this.selectedSortColumn, this.selectedSortDescending);
+
+            this.error = null;
+            this.loading = true;
+
+
+            //Copy in case they are mutated during the async load below
+            let sortColumn = this.selectedSortColumn;
+            let sortDescending = this.selectedSortDescending;
+
+            var newMessages = await new MessagesController().getSummaries(sortColumn, sortDescending);
+
+            if (!this.lastSort || this.lastSort != sortColumn || this.lastSortDescending != sortDescending || newMessages.length == 0) {
+                this.messages.splice(0, this.messages.length, ...newMessages);
+            } else {
+
+                sortedArraySync(newMessages, this.messages, (a: MessageSummary, b: MessageSummary) => a.id == b.id);
+            }
+
+            this.lastSort = sortColumn;
+            this.lastSortDescending = this.selectedSortDescending;
+            
             
         } catch (e) {
             this.error = e;
 
         } finally {
             this.loading = false;
+            unlock();
         }
 
     }
 
-    async sort(defaultSortOptions: DefaultSortOptions) {
+    sort = async (sortOptions: DefaultSortOptions) => {
         let descending: boolean = true;
-        if (defaultSortOptions.order === "ascending") {
+        if (sortOptions.order === "ascending") {
             descending = false;
         }
 
-        this.selectedSortColumn = defaultSortOptions.prop;
-        this.selectedSortDescending = descending;
+        if (this.selectedSortColumn != sortOptions.prop || this.selectedSortDescending != descending) {
 
-        this.refresh();
+            this.selectedSortColumn = sortOptions.prop || "receivedDate";
+            this.selectedSortDescending = descending;
+
+            await this.refresh();
+        }
     }
 
     async created() {
 
-        this.refresh();
+        await this.refresh();
     }
 
     async destroyed() {

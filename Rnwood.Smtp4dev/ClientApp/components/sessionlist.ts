@@ -4,6 +4,8 @@ import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
 import * as moment from 'moment';
 import HubConnectionManager from '../HubConnectionManager';
+import sortedArraySync from '../sortedArraySync';
+import { Mutex } from 'async-mutex';
 
 @Component({
     components: {
@@ -11,12 +13,12 @@ import HubConnectionManager from '../HubConnectionManager';
     }
 })
 export default class SessionList extends Vue {
-    
+
 
     constructor() {
         super();
 
-        this.connection = new HubConnectionManager('/hubs/sessions');
+        this.connection = new HubConnectionManager('/hubs/sessions', this.refresh);
         this.connection.on('sessionschanged', () => {
             this.refresh();
         });
@@ -28,7 +30,8 @@ export default class SessionList extends Vue {
     sessions: SessionSummary[] = [];
     error: Error | null = null;
     selectedsession: SessionSummary | null = null;
-    loading = true;
+    loading = false;
+    private mutex = new Mutex();
 
     handleCurrentChange(session: SessionSummary | null): void {
         this.selectedsession = session;
@@ -66,18 +69,23 @@ export default class SessionList extends Vue {
 
     }
 
-    async refresh() {
+    refresh = async () => {
 
-        this.error = null;
-        this.loading = true;
+        var unlock = await this.mutex.acquire();
 
         try {
-            this.sessions = await new SessionsController().getSummaries();
+            this.error = null;
+            this.loading = true;
+
+            var newSessions = await new SessionsController().getSummaries();
+            sortedArraySync(newSessions, this.sessions, (a: SessionSummary, b: SessionSummary) => a.id == b.id);
+
         } catch (e) {
             this.error = e;
 
         } finally {
             this.loading = false;
+            unlock();
         }
 
     }

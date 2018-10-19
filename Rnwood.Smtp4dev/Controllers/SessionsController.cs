@@ -14,6 +14,8 @@ using HtmlAgilityPack;
 namespace Rnwood.Smtp4dev.Controllers
 {
     [Route("api/[controller]")]
+    [ApiController]
+    [UseEtagFilterAttribute]
     public class SessionsController : Controller
     {
         public SessionsController(Smtp4devDbContext dbContext, SessionsHub sessionsHub)
@@ -27,12 +29,14 @@ namespace Rnwood.Smtp4dev.Controllers
         private SessionsHub sessionsHub;
 
         [HttpGet]
+        [ResponseCache( Duration = 3600)]
         public IEnumerable<ApiModel.SessionSummary> GetSummaries()
         {
             return _dbContext.Sessions.Select(m => new ApiModel.SessionSummary(m));
         }
 
         [HttpGet("{id}")]
+        [ResponseCache( Duration = 3600)]
         public ApiModel.Session GetSession(Guid id)
         {
             Session result = _dbContext.Sessions.FirstOrDefault(m => m.Id == id);

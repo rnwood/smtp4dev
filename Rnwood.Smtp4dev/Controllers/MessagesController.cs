@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 
 using HtmlAgilityPack;
@@ -17,6 +18,8 @@ using Message = Rnwood.Smtp4dev.DbModel.Message;
 namespace Rnwood.Smtp4dev.Controllers
 {
     [Route("api/[controller]")]
+    [ApiController]
+    [UseEtagFilterAttribute]
     public class MessagesController : Controller
     {
         public MessagesController(Smtp4devDbContext dbContext, MessagesHub messagesHub)
@@ -29,48 +32,61 @@ namespace Rnwood.Smtp4dev.Controllers
         private MessagesHub _messagesHub;
 
         [HttpGet]
+        
         public IEnumerable<ApiModel.MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true)
         {
             var orderBy = Sort(sortColumn);
-            return sortIsDescending ? 
-                _dbContext.Messages.Select(m => new ApiModel.MessageSummary(m)).OrderByDescending(m => orderBy(m)) : 
-                _dbContext.Messages.Select(m => new ApiModel.MessageSummary(m)).OrderBy(m => orderBy(m));
+            return sortIsDescending ?
+                _dbContext.Messages.Select(m => new ApiModel.MessageSummary(m)).OrderByDescending(orderBy) :
+                _dbContext.Messages.Select(m => new ApiModel.MessageSummary(m)).OrderBy(orderBy);
+        }
+
+        private DbModel.Message GetDbMessage(Guid id)
+        {
+            return _dbContext.Messages.FirstOrDefault(m => m.Id == id) ??
+                throw new FileNotFoundException($"Message with id {id} was not found.");
         }
 
         [HttpGet("{id}")]
+        
         public ApiModel.Message GetMessage(Guid id)
         {
-            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            Message result = GetDbMessage(id);
+
             return new ApiModel.Message(result);
         }
 
         [HttpGet("{id}/source")]
+        
         public FileStreamResult DownloadMessage(Guid id)
         {
-            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            Message result = GetDbMessage(id);
             return new FileStreamResult(new MemoryStream(result.Data), "message/rfc822") { FileDownloadName = $"{id}.eml" };
         }
 
         [HttpGet("{id}/part/{cid}/content")]
+        
         public FileStreamResult GetPartContent(Guid id, string cid)
         {
-            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            Message result = GetDbMessage(id);
 
             return ApiModel.Message.GetPartContent(result, cid);
         }
 
         [HttpGet("{id}/part/{cid}/source")]
+        
         public string GetPartSource(Guid id, string cid)
         {
-            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            Message result = GetDbMessage(id);
 
             return ApiModel.Message.GetPartSource(result, cid);
         }
 
         [HttpGet("{id}/html")]
+        
         public string GetMessageHtml(Guid id)
         {
-            Message result = _dbContext.Messages.FirstOrDefault(m => m.Id == id);
+            Message result = GetDbMessage(id);
 
             string html = ApiModel.Message.GetHtml(result);
 
@@ -118,7 +134,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
         }
 
-        private static Func<MessageSummary, object> Sort(string column)
+        private static Expression<Func<MessageSummary, object>> Sort(string column)
         {
             switch (column.ToLower())
             {

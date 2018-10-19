@@ -195,6 +195,12 @@
       "integrity": "sha1-GdOGodntxufByF04iu28xW0zYC0=",
       "dev": true
     },
+    "async-mutex": {
+      "version": "0.1.3",
+      "resolved": "https://registry.npmjs.org/async-mutex/-/async-mutex-0.1.3.tgz",
+      "integrity": "sha1-Cq0hEjaXlas/F+M3RFVtLs9UdWY=",
+      "dev": true
+    },
     "async-validator": {
       "version": "1.8.5",
       "resolved": "https://registry.npmjs.org/async-validator/-/async-validator-1.8.5.tgz",

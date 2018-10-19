@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
-    public class MessageSummary
+    public class MessageSummary : ICacheById
     {
         public MessageSummary(DbModel.Message dbMessage)
         {

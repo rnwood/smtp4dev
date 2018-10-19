@@ -27,6 +27,15 @@
   <ItemGroup>
     <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
   </ItemGroup>
+
+  <ItemGroup>
+    <None Update="ClientApp\ApiClient\MessagesController.ts">
+      <CustomToolNamespace>Controllers\MessagesController.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\ApiClient\SessionsController.ts">
+      <CustomToolNamespace>Controllers\SessionsController.cs</CustomToolNamespace>
+    </None>
+  </ItemGroup>
   
   <Target Name="NpmInstall" BeforeTargets="Build">
 	<Exec Command="npm install" />
