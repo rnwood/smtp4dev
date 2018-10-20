@@ -14,6 +14,7 @@ using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Server;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Net.Http.Headers;
 
 namespace Rnwood.Smtp4dev
 {
@@ -29,12 +30,23 @@ namespace Rnwood.Smtp4dev
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            var serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
+           
             services.AddMvc();
 
             
             services.AddDbContext<Smtp4devDbContext>(opt => {
-                //opt.UseSqlite()
-                opt.UseInMemoryDatabase("main");
+
+                if (string.IsNullOrEmpty(serverOptions.Database) )
+                {
+                    Console.WriteLine("Using in memory database.");
+                    opt.UseInMemoryDatabase("main");
+                }
+                else
+                {
+                    Console.WriteLine("Using Sqlite database at " + Path.GetFullPath(serverOptions.Database));
+                    opt.UseSqlite($"Data Source='{serverOptions.Database}'");
+                }
             }, ServiceLifetime.Transient, ServiceLifetime.Singleton);
 
             services.AddSingleton<Smtp4devServer>();
@@ -65,7 +77,7 @@ namespace Rnwood.Smtp4dev
                     HotModuleReplacement = true
                 });
 			}
-			
+
             app.UseStaticFiles();
 
             app.UseWebSockets();
@@ -87,34 +99,14 @@ namespace Rnwood.Smtp4dev
             });
 
 
+            Smtp4devDbContext context = app.ApplicationServices.GetService<Smtp4devDbContext>();
+            if (!context.Database.IsInMemory())
+            {
+                context.Database.Migrate();
+            }
 
             app.ApplicationServices.GetService<Smtp4devServer>().Start();
-
-            if (env.IsDevelopment())
-            {
-                LoadExampleMessagesAsync(app.ApplicationServices.GetService<Smtp4devDbContext>()).ContinueWith((t) => { }) ;
-            }
         }
-
-        private static async Task LoadExampleMessagesAsync(Smtp4devDbContext db)
-        {;
-
-            MessageConverter messageConverter = new MessageConverter();
-
-
-            using (Stream stream = File.OpenRead("example.eml"))
-            {
-                Message message = await messageConverter.ConvertAsync(stream, "from@from.com", "to@to.com");
-                db.Messages.Add(message);
-            }
-
-            using (Stream stream = File.OpenRead("example2.eml"))
-            {
-                Message message = await messageConverter.ConvertAsync(stream, "from2@from.com", "to2@to.com");
-                db.Messages.Add(message);
-            }
-
-            db.SaveChanges();
-        }
+        
     }
 }

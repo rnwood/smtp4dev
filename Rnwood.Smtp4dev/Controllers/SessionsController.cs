@@ -29,14 +29,12 @@ namespace Rnwood.Smtp4dev.Controllers
         private SessionsHub sessionsHub;
 
         [HttpGet]
-        [ResponseCache( Duration = 3600)]
         public IEnumerable<ApiModel.SessionSummary> GetSummaries()
         {
             return _dbContext.Sessions.Select(m => new ApiModel.SessionSummary(m));
         }
 
         [HttpGet("{id}")]
-        [ResponseCache( Duration = 3600)]
         public ApiModel.Session GetSession(Guid id)
         {
             Session result = _dbContext.Sessions.FirstOrDefault(m => m.Id == id);

@@ -15,7 +15,6 @@ namespace Rnwood.Smtp4dev.Controllers
     {
         public UseEtagFilterAttribute()
         {
-
         }
 
         private const string IfNoneMatchHeader = "If-None-Match";
@@ -26,6 +25,8 @@ namespace Rnwood.Smtp4dev.Controllers
 
         public void OnActionExecuted(ActionExecutedContext context)
         {
+            
+
             if (context.HttpContext.Request.Method == HttpMethod.Get.Method)
             {
                 if (context.HttpContext.Response.StatusCode == 200)
@@ -37,8 +38,17 @@ namespace Rnwood.Smtp4dev.Controllers
                         string hashable = null;
                         if (results.Value is IEnumerable<ICacheById> cacheableList)
                         {
-                            hashable = string.Join(",", cacheableList.Select(i => i.Id.ToString()));
-                        } else if (results.Value is ICacheById cachableObject)
+                            if (cacheableList.Any())
+                            {
+                                hashable = string.Join(",", cacheableList.Select(i => i.Id.ToString()));
+                            }
+                            else
+                            {
+                                hashable = "empty";
+                            }
+
+                        }
+                        else if (results.Value is ICacheById cachableObject)
                         {
                             hashable = cachableObject.Id.ToString();
                         }

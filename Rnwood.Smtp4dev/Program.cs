@@ -26,7 +26,7 @@ namespace Rnwood.Smtp4dev
             if (!Debugger.IsAttached && args.Contains("--service"))
                 IsService = true;
 
-            var host = CreateWebHost(args.Where(arg => arg != "--service").ToArray());
+            var host = BuildWebHost(args.Where(arg => arg != "--service").ToArray());
 
             if (IsService)
             {
@@ -56,11 +56,13 @@ namespace Rnwood.Smtp4dev
             throw new ApplicationException($"Unable to find wwwroot in either '{installLocation}' or the CWD '{cwd}'");
         }
 
-        private static IWebHost CreateWebHost(string[] args)
+        private static IWebHost BuildWebHost(string[] args)
         {
+            Directory.SetCurrentDirectory(GetContentRoot());
+
             return WebHost
                 .CreateDefaultBuilder(args)
-                .UseContentRoot(GetContentRoot())
+                .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureAppConfiguration(
                     (hostingContext, config) =>
                         {
@@ -71,7 +73,8 @@ namespace Rnwood.Smtp4dev
                                 .AddEnvironmentVariables()
                                 .AddCommandLine(args, new
                                 Dictionary<string, string>{
-                                    { "--smtpport", "ServerOptions:Port"}
+                                    { "--smtpport", "ServerOptions:Port"},
+                                    { "--db", "ServerOptions:Database" }
                                 })
                                 .Build();
                         })

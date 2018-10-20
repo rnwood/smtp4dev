@@ -24,10 +24,11 @@
     <PackageReference Include="MimeKit" Version="2.0.6" />
     <PackageReference Include="Rnwood.SmtpServer" Version="3.0.0-alpha-0203" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.109.2" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.9" />
   </ItemGroup>
 
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.0.3" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.1.0-preview1-final" />
   </ItemGroup>
 
   <ItemGroup>

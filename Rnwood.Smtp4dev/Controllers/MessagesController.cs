@@ -12,6 +12,7 @@ using Microsoft.AspNetCore.Mvc;
 using Rnwood.Smtp4dev.ApiModel;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
+using System.Linq.Dynamic.Core;
 
 using Message = Rnwood.Smtp4dev.DbModel.Message;
 
@@ -34,11 +35,10 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpGet]
         
         public IEnumerable<ApiModel.MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true)
-        {
-            var orderBy = Sort(sortColumn);
-            return sortIsDescending ?
-                _dbContext.Messages.Select(m => new ApiModel.MessageSummary(m)).OrderByDescending(orderBy) :
-                _dbContext.Messages.Select(m => new ApiModel.MessageSummary(m)).OrderBy(orderBy);
+        { 
+                return _dbContext.Messages
+                .OrderBy(sortColumn + (sortIsDescending ? " DESC" : "" ))
+                .Select(m => new ApiModel.MessageSummary(m));
         }
 
         private DbModel.Message GetDbMessage(Guid id)
@@ -134,19 +134,5 @@ namespace Rnwood.Smtp4dev.Controllers
 
         }
 
-        private static Expression<Func<MessageSummary, object>> Sort(string column)
-        {
-            switch (column.ToLower())
-            {
-                case "subject":
-                    return (m) => m.Subject;
-                case "from":
-                    return (m) => m.From;
-                case "to":
-                    return (m) => m.To;
-                default:
-                    return (m) => m.ReceivedDate;
-            }
-        }
     }
 }

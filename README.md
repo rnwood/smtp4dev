@@ -75,5 +75,13 @@ sc.exe create Smtp4dev binPath= "{PathToExe} --service"
 ```
 
 
-### Changing the SMTP port
+### Configuration
+#### Changing where the database file is saved
+By default smtp4dev will create a Sqlite DB named ``database.db`` in application root direction when it runs.
+
+To change the path of this file use the ``--db "/path/to/file.db"`` command line option or edit ``ServerOptions\Database`` in ``appsettings.json``
+
+To use an in memory DB use an empty string (e.g. ``--db ""``)). All session and messages will be lost when the process exits.
+
+#### Changing the SMTP port
 smtp4dev listens on 0.0.0.0 (all interfaces) port 25 by default. To change this either edit `ServerOptions\Port` in the ``appsettings.json`` before startup or add the ``--smtpport`` command line options (e.g. ``--smtpport 2525``).

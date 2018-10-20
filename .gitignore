@@ -239,3 +239,4 @@ _Pvt_Extensions
 .fake/
 node_modules
 /Rnwood.Smtp4dev/wwwroot/dist
+/Rnwood.Smtp4dev/database.db
