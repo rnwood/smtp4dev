@@ -36,7 +36,7 @@ COPY . .
 WORKDIR /app/Rnwood.Smtp4dev
 RUN dotnet publish -c Release -o out
 
-FROM microsoft/dotnet:2.1-aspnetcore-runtime AS runtime
+FROM microsoft/dotnet:2.1.5-aspnetcore-runtime AS runtime
 WORKDIR /app
 EXPOSE 80
 EXPOSE 25
