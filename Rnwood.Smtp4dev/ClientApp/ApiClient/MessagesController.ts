@@ -63,6 +63,16 @@ export default class MessagesController {
 
         return (await axios.get(this.getPartSource_url(id, cid), null || undefined)).data as string;
     }
+
+    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/raw  
+    public getPartSourceRaw_url(id: string, cid: string): string {
+        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/raw`;
+    }
+
+    public async getPartSourceRaw(id: string, cid: string): Promise<string> {
+
+        return (await axios.get(this.getPartSourceRaw_url(id, cid), null || undefined)).data as string;
+    }
     
     // get: api/Messages/${encodeURIComponent(id)}/html  
     public getMessageHtml_url(id: string): string {

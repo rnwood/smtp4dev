@@ -16,6 +16,9 @@ export default class MessagePartSource extends Vue {
     error: Error | null = null;
     loading = false;
 
+    @Prop()
+    type: string = "source";
+
     @Watch("messageEntitySummary")
     async onMessageEntitySummaryChanged(value: MessageEntitySummary, oldValue: MessageEntitySummary) {
         
@@ -31,7 +34,12 @@ export default class MessagePartSource extends Vue {
 
         try {
             if (this.messageEntitySummary != null) {
-                this.source = await new MessagesController().getPartSource(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
+                if (this.type == "raw") {
+
+                    this.source = await new MessagesController().getPartSourceRaw(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
+                } else {
+                    this.source = await new MessagesController().getPartSource(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
+                }
             }
         } catch (e) {
             this.error = e;

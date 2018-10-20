@@ -117,8 +117,27 @@ namespace Rnwood.Smtp4dev.ApiModel
         internal static FileStreamResult GetPartContent(DbModel.Message result, string cid)
         {
             MimePart contentEntity = (MimePart)GetPart(result, cid);
-            return new FileStreamResult(contentEntity.ContentObject.Open(), contentEntity.ContentType.MimeType);
+            return new FileStreamResult(contentEntity.Content.Open(), contentEntity.ContentType.MimeType);
         }
+
+        internal static string GetPartContentAsText(DbModel.Message result, string cid)
+        {
+            MimeEntity contentEntity = GetPart(result, cid);
+
+            if (contentEntity is MimePart part)
+            {
+                using (StreamReader reader = new StreamReader(part.Content.Open()))
+                {
+                    return reader.ReadToEnd();
+                }
+            } else
+            {
+                return contentEntity.ToString();
+            }
+            
+        }
+
+
 
         internal static string GetPartSource(DbModel.Message result, string cid)
         {

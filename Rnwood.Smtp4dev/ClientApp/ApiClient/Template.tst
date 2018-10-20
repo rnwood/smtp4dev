@@ -1,4 +1,4 @@
-﻿${
+﻿${ 
     using Typewriter.Extensions.WebApi;
  
     string ReturnType(Method m) => m.Type.Name;

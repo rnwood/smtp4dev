@@ -31,7 +31,7 @@ namespace Rnwood.Smtp4dev.Controllers
             {
                 if (context.HttpContext.Response.StatusCode == 200)
                 {
-                    ObjectResult results = (ObjectResult)context.Result;
+                    ObjectResult results = context.Result as ObjectResult;
 
                     if (results != null)
                     {

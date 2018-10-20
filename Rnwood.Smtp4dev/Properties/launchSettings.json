@@ -17,6 +17,7 @@
     },
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
+      "commandLineArgs": "--db \"\"",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

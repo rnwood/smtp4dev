@@ -33,12 +33,12 @@ namespace Rnwood.Smtp4dev.Controllers
         private MessagesHub _messagesHub;
 
         [HttpGet]
-        
+
         public IEnumerable<ApiModel.MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true)
-        { 
-                return _dbContext.Messages
-                .OrderBy(sortColumn + (sortIsDescending ? " DESC" : "" ))
-                .Select(m => new ApiModel.MessageSummary(m));
+        {
+            return _dbContext.Messages
+            .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""))
+            .Select(m => new ApiModel.MessageSummary(m));
         }
 
         private DbModel.Message GetDbMessage(Guid id)
@@ -48,7 +48,7 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         [HttpGet("{id}")]
-        
+
         public ApiModel.Message GetMessage(Guid id)
         {
             Message result = GetDbMessage(id);
@@ -57,7 +57,7 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         [HttpGet("{id}/source")]
-        
+
         public FileStreamResult DownloadMessage(Guid id)
         {
             Message result = GetDbMessage(id);
@@ -65,7 +65,7 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         [HttpGet("{id}/part/{cid}/content")]
-        
+
         public FileStreamResult GetPartContent(Guid id, string cid)
         {
             Message result = GetDbMessage(id);
@@ -74,16 +74,24 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         [HttpGet("{id}/part/{cid}/source")]
-        
+
         public string GetPartSource(Guid id, string cid)
         {
             Message result = GetDbMessage(id);
 
+            return ApiModel.Message.GetPartContentAsText(result, cid);
+        }
+
+        [HttpGet("{id}/part/{cid}/raw")]
+
+        public string GetPartSourceRaw(Guid id, string cid)
+        {
+            Message result = GetDbMessage(id);
             return ApiModel.Message.GetPartSource(result, cid);
         }
 
         [HttpGet("{id}/html")]
-        
+
         public string GetMessageHtml(Guid id)
         {
             Message result = GetDbMessage(id);
