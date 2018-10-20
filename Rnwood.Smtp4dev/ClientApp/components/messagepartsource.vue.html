@@ -7,7 +7,7 @@
         </el-alert>
 
         <template v-if="source" class="fillpanel fill">
-            <textarea class="fill" readonly v-model="source"></textarea>
+            <textarea class="fill" readonly spellcheck="false">{{source}}</textarea>
         </template>
     </div>
 </template>

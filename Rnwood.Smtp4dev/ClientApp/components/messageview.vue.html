@@ -56,7 +56,7 @@
 
 
 
-                    <el-tree v-if="message" :data="message.parts" :props="{label: 'name', children: 'childParts', disabled: false, isLeaf: isLeaf}" @node-click="onPartSelection" highlight-current="true" empty-message="No parts" ref="partstree"></el-tree>
+                    <el-tree v-if="message" :data="message.parts" :props="{label: 'name', children: 'childParts', disabled: false, isLeaf: isLeaf}" @node-click="onPartSelection" highlight-current empty-message="No parts" ref="partstree"></el-tree>
 
 
                     <div v-show="selectedPart" class="fill fillpanel">

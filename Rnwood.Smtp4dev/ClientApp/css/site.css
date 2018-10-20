@@ -96,6 +96,13 @@ iframe {
 h1 {
     margin: 0;
     font-size: 1.2em;
+    float: left;
+}
+
+h2 {
+    margin: 0;
+    font-size: 1em;
+    float: right;
 }
 
 header {
