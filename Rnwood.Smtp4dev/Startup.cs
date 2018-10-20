@@ -1,23 +1,19 @@
 using System;
 using System.IO;
-using System.Net;
 using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
-using Newtonsoft.Json;
-
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Server;
+using Microsoft.EntityFrameworkCore;
 
 namespace Rnwood.Smtp4dev
 {
@@ -34,7 +30,12 @@ namespace Rnwood.Smtp4dev
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc();
-            services.AddDbContext<Smtp4devDbContext>(opt => opt.UseInMemoryDatabase("main"), ServiceLifetime.Transient, ServiceLifetime.Singleton);
+
+            
+            services.AddDbContext<Smtp4devDbContext>(opt => {
+                //opt.UseSqlite()
+                opt.UseInMemoryDatabase("main");
+            }, ServiceLifetime.Transient, ServiceLifetime.Singleton);
 
             services.AddSingleton<Smtp4devServer>();
             services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
@@ -114,30 +115,6 @@ namespace Rnwood.Smtp4dev
             }
 
             db.SaveChanges();
-        }
-    }
-
-    public class JsonExceptionMiddleware
-    {
-        public async Task Invoke(HttpContext context)
-        {
-            context.Response.StatusCode = (int)HttpStatusCode.InternalServerError;
-
-            var ex = context.Features.Get<IExceptionHandlerFeature>()?.Error;
-            if (ex == null) return;
-
-            var error = new
-            {
-                message = ex.Message
-            };
-
-            context.Response.ContentType = "application/json";
-
-            using (var writer = new StreamWriter(context.Response.Body))
-            {
-                new JsonSerializer().Serialize(writer, error);
-                await writer.FlushAsync().ConfigureAwait(false);
-            }
         }
     }
 }
