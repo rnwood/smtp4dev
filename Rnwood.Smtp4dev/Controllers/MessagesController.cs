@@ -25,25 +25,25 @@ namespace Rnwood.Smtp4dev.Controllers
     {
         public MessagesController(Smtp4devDbContext dbContext, MessagesHub messagesHub)
         {
-            _dbContext = dbContext;
-            _messagesHub = messagesHub;
+            this.dbContext = dbContext;
+            this.messagesHub = messagesHub;
         }
 
-        private Smtp4devDbContext _dbContext;
-        private MessagesHub _messagesHub;
+        private Smtp4devDbContext dbContext;
+        private MessagesHub messagesHub;
 
         [HttpGet]
 
         public IEnumerable<ApiModel.MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true)
         {
-            return _dbContext.Messages
+            return dbContext.Messages
             .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""))
             .Select(m => new ApiModel.MessageSummary(m));
         }
 
         private DbModel.Message GetDbMessage(Guid id)
         {
-            return _dbContext.Messages.FirstOrDefault(m => m.Id == id) ??
+            return dbContext.Messages.FirstOrDefault(m => m.Id == id) ??
                 throw new FileNotFoundException($"Message with id {id} was not found.");
         }
 
@@ -124,23 +124,23 @@ namespace Rnwood.Smtp4dev.Controllers
         public async Task Delete(Guid id)
         {
 
-            _dbContext.Messages.RemoveRange(_dbContext.Messages.Where(m => m.Id == id));
-            _dbContext.SaveChanges();
+            dbContext.Messages.RemoveRange(dbContext.Messages.Where(m => m.Id == id));
 
-            await _messagesHub.OnMessagesChanged();
+            dbContext.SaveChanges();
 
+            await messagesHub.OnMessagesChanged();
+         
         }
 
         [HttpDelete("*")]
         public async Task DeleteAll()
         {
+            dbContext.Messages.RemoveRange(dbContext.Messages);
 
-            _dbContext.Messages.RemoveRange(_dbContext.Messages);
-            _dbContext.SaveChanges();
+            dbContext.SaveChanges();
 
-            await _messagesHub.OnMessagesChanged();
-
-        }
+            await messagesHub.OnMessagesChanged();
+         }
 
     }
 }

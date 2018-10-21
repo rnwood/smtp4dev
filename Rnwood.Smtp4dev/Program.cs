@@ -74,7 +74,9 @@ namespace Rnwood.Smtp4dev
                                 .AddCommandLine(args, new
                                 Dictionary<string, string>{
                                     { "--smtpport", "ServerOptions:Port"},
-                                    { "--db", "ServerOptions:Database" }
+                                    { "--db", "ServerOptions:Database" },
+                                    { "--messagestokeep", "ServerOptions:NumberOfMessagesToKeep" },
+                                    { "--sessionstokeep", "ServerOptions:NumberOfSessionsToKeep" }
                                 })
                                 .Build();
                         })

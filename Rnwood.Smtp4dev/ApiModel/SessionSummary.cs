@@ -14,12 +14,14 @@ namespace Rnwood.Smtp4dev.ApiModel
             this.NumberOfMessages = dbSession.NumberOfMessages;
             this.Id = dbSession.Id;
             this.EndDate = dbSession.EndDate;
+            this.StartDate = dbSession.StartDate;
         }
 
         public string ClientAddress { get; private set; }
         public string ClientName { get; private set; }
         public int NumberOfMessages { get; private set; }
         public Guid Id { get; private set; }
-        public DateTime EndDate { get; private set; }
+        public DateTime? EndDate { get; private set; }
+        public DateTime StartDate { get; private set; }
     }
 }

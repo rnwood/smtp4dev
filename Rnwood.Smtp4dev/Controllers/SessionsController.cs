@@ -20,24 +20,25 @@ namespace Rnwood.Smtp4dev.Controllers
     {
         public SessionsController(Smtp4devDbContext dbContext, SessionsHub sessionsHub)
         {
-            _dbContext = dbContext;
+            this.dbContext = dbContext;
             this.sessionsHub = sessionsHub;
         }
 
 
-        private Smtp4devDbContext _dbContext;
+        private Smtp4devDbContext dbContext;
         private SessionsHub sessionsHub;
 
         [HttpGet]
         public IEnumerable<ApiModel.SessionSummary> GetSummaries()
         {
-            return _dbContext.Sessions.Select(m => new ApiModel.SessionSummary(m));
+            return dbContext.Sessions.Where(s => s.EndDate.HasValue)
+                .Select(m => new ApiModel.SessionSummary(m));
         }
 
         [HttpGet("{id}")]
         public ApiModel.Session GetSession(Guid id)
         {
-            Session result = _dbContext.Sessions.FirstOrDefault(m => m.Id == id);
+            Session result = dbContext.Sessions.FirstOrDefault(m => m.Id == id);
             return new ApiModel.Session(result);
         }
 
@@ -45,9 +46,9 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpDelete("{id}")]
         public async Task Delete(Guid id)
         {
+            dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.Id == id ));
 
-            _dbContext.Sessions.RemoveRange(_dbContext.Sessions.Where(s => s.Id == id));
-            _dbContext.SaveChanges();
+            dbContext.SaveChanges();
 
             await sessionsHub.OnSessionsChanged();
 
@@ -56,9 +57,9 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpDelete("*")]
         public async Task DeleteAll()
         {
-
-            _dbContext.Sessions.RemoveRange(_dbContext.Sessions);
-            _dbContext.SaveChanges();
+            dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue));
+         
+            dbContext.SaveChanges();
 
             await sessionsHub.OnSessionsChanged();
 

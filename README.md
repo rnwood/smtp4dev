@@ -76,6 +76,10 @@ sc.exe create Smtp4dev binPath= "{PathToExe} --service"
 
 
 ### Configuration
+#### Changing how many messages or sessions are kept
+smtp4dev keeps the latest 100 messages and 100 sessions by default.
+The ``--messagestokeep X`` and ``--sessionstokeep X` command line options can override this.
+
 #### Changing where the database file is saved
 By default smtp4dev will create a Sqlite DB named ``database.db`` in application root direction when it runs.
 

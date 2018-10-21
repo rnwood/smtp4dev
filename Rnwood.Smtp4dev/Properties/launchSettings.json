@@ -17,7 +17,7 @@
     },
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "--db \"\"",
+      "commandLineArgs": "--messagestokeep 10 --sessionstokeep 3",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

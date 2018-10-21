@@ -40,14 +40,6 @@ namespace Rnwood.Smtp4dev.Migrations
                     table.PrimaryKey("PK_Sessions", x => x.Id);
                 });
         }
-
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropTable(
-                name: "Messages");
-
-            migrationBuilder.DropTable(
-                name: "Sessions");
-        }
+        
     }
 }
