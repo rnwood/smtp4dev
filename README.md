@@ -78,14 +78,14 @@ sc.exe create Smtp4dev binPath= "{PathToExe} --service"
 ### Configuration
 #### Changing how many messages or sessions are kept
 smtp4dev keeps the latest 100 messages and 100 sessions by default.
-The ``--messagestokeep X`` and ``--sessionstokeep X` command line options can override this.
+The ``--messagestokeep X`` and ``--sessionstokeep X`` command line options can override this.
 
 #### Changing where the database file is saved
 By default smtp4dev will create a Sqlite DB named ``database.db`` in application root direction when it runs.
 
 To change the path of this file use the ``--db "/path/to/file.db"`` command line option or edit ``ServerOptions\Database`` in ``appsettings.json``
 
-To use an in memory DB use an empty string (e.g. ``--db=""``)). All session and messages will be lost when the process exits. (Docker: The ``==`` in the example is important as Docker will eat the empty quotes if ommitted.)
+To use an in memory DB use an empty string (e.g. ``--db=""``)). All session and messages will be lost when the process exits. (Docker: The ``=`` in the example is important as Docker will eat the empty quotes if ommitted.)
 
 #### Changing the SMTP port
 smtp4dev listens on 0.0.0.0 (all interfaces) port 25 by default. To change this either edit `ServerOptions\Port` in the ``appsettings.json`` before startup or add the ``--smtpport`` command line options (e.g. ``--smtpport 2525``).
