@@ -26,6 +26,9 @@
             <el-table-column property="to" label="To" width="120" sortable="custom">
             </el-table-column>
             <el-table-column property="subject" label="Subject" sortable="custom">
+                <template slot-scope="scope">
+                    {{scope.row.subject}} <i class="el-icon-document" v-if="scope.row.attachmentCount" :title="scope.row.attachmentCount + ' attachments'"></i>
+                </template>
             </el-table-column>
         </el-table>
     </div>

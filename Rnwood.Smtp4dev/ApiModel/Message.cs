@@ -90,7 +90,8 @@ namespace Rnwood.Smtp4dev.ApiModel
                    Name = e.ContentId + " - " + e.ContentType.MimeType,
                    Headers = e.Headers.Select(h => new Header { Name = h.Field, Value = h.Value }).ToList(),
                    ChildParts = new List<MessageEntitySummary>(),
-                   Attachments = new List<AttachmentSummary>()
+                   Attachments = new List<AttachmentSummary>(),
+                   Size = e.ToString().Length
                };
 
                if (p != null)

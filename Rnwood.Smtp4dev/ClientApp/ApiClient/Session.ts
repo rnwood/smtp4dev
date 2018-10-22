@@ -2,13 +2,15 @@
 
 export default class Session {
 
-    constructor(id: string, log: string, ) {
+    constructor(id: string, errorType: string, error: string, ) {
          
         this.id = id; 
-        this.log = log;
+        this.errorType = errorType; 
+        this.error = error;
     }
 
      
     id: string; 
-    log: string;
+    errorType: string; 
+    error: string;
 }

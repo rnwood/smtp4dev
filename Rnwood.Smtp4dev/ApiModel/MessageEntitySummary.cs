@@ -15,5 +15,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         public Guid MessageId { get; set; }
         public string ContentId { get; set; }
         public List<AttachmentSummary> Attachments { get; set; }
+
+        public int Size { get; set; }
     }
 }

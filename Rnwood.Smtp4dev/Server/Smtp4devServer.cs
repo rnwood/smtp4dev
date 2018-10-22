@@ -52,6 +52,8 @@ namespace Rnwood.Smtp4dev.Server
             session.ClientName = e.Session.ClientName;
             session.NumberOfMessages = e.Session.GetMessages().Length;
             session.Log = e.Session.GetLog().ReadToEnd();
+            session.SessionErrorType = e.Session.SessionErrorType;
+            session.SessionError = e.Session.SessionError?.ToString();
         }
 
         private void OnSessionCompleted(object sender, SessionEventArgs e)

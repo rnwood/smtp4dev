@@ -10,10 +10,10 @@
                 <el-tab-pane label="Messages" name="messages" class="fillpanel">
                     <span slot="label"><i class="el-icon-message"></i> Messages</span>
 
-                    <div class="fill fillpanel">
+                    <div class="fillhalf fillpanel">
                         <messagelist class="fill" @selected-message-changed="selectedMessageChanged" />
                     </div>
-                    <div class="fill fillpanel">
+                    <div class="fillhalf fillpanel">
                         <messageview class="fill" v-bind:message-summary="selectedMessage" />
                     </div>
 
@@ -22,11 +22,11 @@
                 <el-tab-pane label="Sessions" name="sessions" class="fillpanel">
                     <span slot="label"><i class="el-icon-document"></i> Sessions</span>
 
-                    <div class="fill fillpanel">
+                    <div class="fillhalf fillpanel">
                         <sessionlist class="fill" @selected-session-changed="selectedSessionChanged" />
                     </div>
 
-                    <div class="fill fillpanel">
+                    <div class="fillhalf fillpanel">
                         <sessionview class="fill" v-bind:session-summary="selectedSession" />
                     </div>
                 </el-tab-pane>

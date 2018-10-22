@@ -38,7 +38,6 @@ export default class SessionList extends Vue {
         this.$emit("selected-session-changed", session);
     }
 
-
     formatDate(row: number, column: number, cellValue: string, index: number): string {
         return moment(String(cellValue)).format('YYYY-DD-MM hh:mm:ss');
     }

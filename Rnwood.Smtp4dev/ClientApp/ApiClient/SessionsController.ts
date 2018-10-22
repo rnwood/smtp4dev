@@ -33,6 +33,16 @@ export default class SessionsController {
         return (await axios.get(this.getSession_url(id), null || undefined)).data as Session;
     }
     
+    // get: api/Sessions/${encodeURIComponent(id)}/log  
+    public getSessionLog_url(id: string): string {
+        return `${this._baseUrl}api/Sessions/${encodeURIComponent(id)}/log`;
+    }
+
+    public async getSessionLog(id: string): Promise<string> {
+
+        return (await axios.get(this.getSessionLog_url(id), null || undefined)).data as string;
+    }
+    
     // delete: api/Sessions/${encodeURIComponent(id)}  
     public delete_url(id: string): string {
         return `${this._baseUrl}api/Sessions/${encodeURIComponent(id)}`;

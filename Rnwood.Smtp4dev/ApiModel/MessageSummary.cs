@@ -16,6 +16,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             To = dbMessage.To;
             ReceivedDate = dbMessage.ReceivedDate;
             Subject = dbMessage.Subject;
+            AttachmentCount = dbMessage.AttachmentCount;
         }
 
         public Guid Id { get; set; }
@@ -25,6 +26,8 @@ namespace Rnwood.Smtp4dev.ApiModel
         public DateTime ReceivedDate { get; set; }
 
         public string Subject { get; set; }
+
+        public int AttachmentCount { get; set; }
         
     }
 }

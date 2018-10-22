@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rnwood.Smtp4dev.DbModel;
 
 namespace Rnwood.Smtp4dev.Migrations
 {
     [DbContext(typeof(Smtp4devDbContext))]
-    partial class Smtp4devDbContextModelSnapshot : ModelSnapshot
+    [Migration("20181022132948_AddSessionErrorInfo")]
+    partial class AddSessionErrorInfo
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -20,8 +22,6 @@ namespace Rnwood.Smtp4dev.Migrations
                 {
                     b.Property<Guid>("Id")
                         .ValueGeneratedOnAdd();
-
-                    b.Property<int>("AttachmentCount");
 
                     b.Property<byte[]>("Data");
 
@@ -61,7 +61,7 @@ namespace Rnwood.Smtp4dev.Migrations
 
                     b.Property<string>("SessionError");
 
-                    b.Property<int?>("SessionErrorType");
+                    b.Property<int>("SessionErrorType");
 
                     b.Property<DateTime>("StartDate");
 

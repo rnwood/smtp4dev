@@ -40,10 +40,11 @@ html, body {
 
 .messagelist .table, .sessionlist .table, .headers .table {
     overflow-y: scroll;
+    overflow-x: auto;
     flex: 1;
 }
 
-, .el-icon-caret-right:before {
+.el-icon-caret-right:before {
     content: "" !important;
 }
 
@@ -54,13 +55,18 @@ html, body {
     column-gap: 10px
 }
 
-    .fillpanel.h {
-        flex-direction: column;
-    }
+.fillpanel.h {
+    flex-direction: column;
+}
 
 .fill {
     flex: 1 0 0;
     overflow: auto;
+}
+
+.fillhalf {
+    flex: none;
+    width: 50%;
 }
 
 .centrecontents {
@@ -109,8 +115,9 @@ header {
     padding-left: 10px;
 }
 
-.messageviewheader td {
-    padding: 3px;
+.messageviewheader td, .sessionviewheader td {
+    padding: 5px;
+    vertical-align: top;
 }
 
 .nodetails {
@@ -120,4 +127,13 @@ header {
 
 .el-icon-caret-right:before {
     display: none;
+}
+
+tr.error td {
+    background-color: rgba(255, 73, 73, 0.40);
+}
+
+pre.source code {
+    overflow: auto;
+    text-wrap: none;
 }

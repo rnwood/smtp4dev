@@ -1329,6 +1329,12 @@
       "integrity": "sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==",
       "dev": true
     },
+    "highlight.js": {
+      "version": "9.13.1",
+      "resolved": "https://registry.npmjs.org/highlight.js/-/highlight.js-9.13.1.tgz",
+      "integrity": "sha512-Sc28JNQNDzaH6PORtRLMvif9RSn1mYuOoX3omVjnb0+HbpPygU2ALBI0R/wsiqCb4/fcp07Gdo8g+fhtFrQl6A==",
+      "dev": true
+    },
     "hmac-drbg": {
       "version": "1.0.1",
       "resolved": "https://registry.npmjs.org/hmac-drbg/-/hmac-drbg-1.0.1.tgz",
@@ -3363,6 +3369,15 @@
       "resolved": "https://registry.npmjs.org/vue-class-component/-/vue-class-component-6.3.0.tgz",
       "integrity": "sha512-i652iAt15d0HiH0ZKUNBqK/eGfOsg6GiHAdnAvaau+88CxngTmt47T/kOfbxWqvB6CU0fZZb3OCEGFc5UyyBIQ==",
       "dev": true
+    },
+    "vue-highlightjs": {
+      "version": "1.3.3",
+      "resolved": "https://registry.npmjs.org/vue-highlightjs/-/vue-highlightjs-1.3.3.tgz",
+      "integrity": "sha1-KaDVcTL8HOFc+mHolpGPW3GMXVI=",
+      "dev": true,
+      "requires": {
+        "highlight.js": "9.13.1"
+      }
     },
     "vue-hot-reload-api": {
       "version": "2.3.1",

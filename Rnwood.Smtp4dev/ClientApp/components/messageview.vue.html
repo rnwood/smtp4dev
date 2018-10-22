@@ -1,12 +1,12 @@
 ﻿<template>
-    <div class="messageview fill fillpanel">
+    <div class="messageview fill fillpanel" v-loading.body="loading">
         <el-alert v-if="error" type="error">
             {{error.message}}
 
             <el-button v-on:click="loadMessage">Retry</el-button>
         </el-alert>
 
-        <div v-if="messageSummary" v-loading="loading" class="fillpanel h fill">
+        <div v-if="messageSummary"  class="fillpanel h fill" >
 
 
             <div class="toolbar">

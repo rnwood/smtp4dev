@@ -15,6 +15,8 @@ namespace Rnwood.Smtp4dev.ApiModel
             this.Id = dbSession.Id;
             this.EndDate = dbSession.EndDate;
             this.StartDate = dbSession.StartDate;
+            this.TerminatedWithError = dbSession.SessionError != null;
+            this.Size = dbSession.Log?.Length ?? 0;
         }
 
         public string ClientAddress { get; private set; }
@@ -23,5 +25,8 @@ namespace Rnwood.Smtp4dev.ApiModel
         public Guid Id { get; private set; }
         public DateTime? EndDate { get; private set; }
         public DateTime StartDate { get; private set; }
+        public bool TerminatedWithError { get; private set; }
+
+        public int Size { get; private set; }
     }
 }

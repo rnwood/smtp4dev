@@ -28,5 +28,6 @@ namespace Rnwood.Smtp4dev.DbModel
         public string MimeParseError { get; set; }
 
         public Session Session { get; set;}
+        public int AttachmentCount { get; set; }
     }
 }

@@ -1,18 +1,24 @@
-﻿<template >
+﻿<template>
 
-    <div class="sessionview fill fillpanel">
+    <div class="sessionview fill fillpanel" v-loading.body="loading">
         <el-alert v-if="error" type="error">
             {{error.message}}
 
             <el-button v-on:click="loadMessage">Retry</el-button>
         </el-alert>
 
-        <div v-if="sessionSummary" v-loading="loading" class="fillpanel h fill">
+        <div v-if="sessionSummary"  class="fillpanel h fill">
             <el-tabs value="log" style="height: 100%; width:100%" class="fill" type="border-card">
 
+                <el-tab-pane label="Log" name="log" class="fillpanel h">
 
-                <el-tab-pane label="Log" name="log" class="fillpanel">
-                    <textarea readonly class="fill" v-model="session.log" v-if="session" />
+                    <div class="toolbar"><el-button size="small" @click="download">Open</el-button></div>
+
+                    <el-alert v-if="session && session.error" type="error" show-icon :closable="false" title="This session terminated abnormally">
+                        {{session.error}}
+                    </el-alert>
+
+                    <pre class="source fill fillpanel" v-if="log" v-highlightjs="log"><code lang="smtp" class="fill"></code></pre>
                 </el-tab-pane>
             </el-tabs>
         </div>

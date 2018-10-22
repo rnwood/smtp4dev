@@ -42,6 +42,13 @@ namespace Rnwood.Smtp4dev.Controllers
             return new ApiModel.Session(result);
         }
 
+        [HttpGet("{id}/log")]
+        public string GetSessionLog(Guid id)
+        {
+            Session result = dbContext.Sessions.FirstOrDefault(m => m.Id == id);
+            return result.Log;
+        }
+
 
         [HttpDelete("{id}")]
         public async Task Delete(Guid id)

@@ -1,13 +1,14 @@
-﻿<template >
-    <div class="fillpanel" v-loading="loading">
+﻿<template>
+    <div class="fillpanel h" v-loading="loading">
         <el-alert v-if="error" type="error">
             {{error.message}}
 
             <el-button v-on:click="loadMessage">Retry</el-button>
         </el-alert>
 
+        <div class="toolbar"><el-button size="small" @click="download">Open</el-button></div>
         <template v-if="source" class="fillpanel fill">
-            <textarea class="fill" readonly spellcheck="false">{{source}}</textarea>
+            <pre class="source fill fillpanel" v-highlightjs="source"><code class="fill"></code></pre>
         </template>
     </div>
 </template>

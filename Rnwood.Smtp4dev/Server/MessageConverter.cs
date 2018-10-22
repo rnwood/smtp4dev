@@ -1,4 +1,5 @@
 ﻿using MimeKit;
+using Rnwood.Smtp4dev.ApiModel;
 using Rnwood.Smtp4dev.DbModel;
 using System;
 using System.Collections.Generic;
@@ -11,7 +12,7 @@ namespace Rnwood.Smtp4dev.Server
 {
     public class MessageConverter
     {
-        public async Task<Message> ConvertAsync(Stream messageData, string envelopeFrom, string envelopeTo)
+        public async Task<DbModel.Message> ConvertAsync(Stream messageData, string envelopeFrom, string envelopeTo)
         {
             string subject = "";
             string mimeParseError = null;
@@ -49,6 +50,8 @@ namespace Rnwood.Smtp4dev.Server
                     cts.CancelAfter(TimeSpan.FromSeconds(10));
                     MimeMessage mime = await MimeMessage.LoadAsync(messageData, true, cts.Token).ConfigureAwait(false);
                     subject = mime.Subject;
+
+                    
                 }
                 catch (OperationCanceledException e)
                 {
@@ -61,7 +64,7 @@ namespace Rnwood.Smtp4dev.Server
             }
 
 
-            Message message = new Message()
+            DbModel.Message message = new DbModel.Message()
             {
                 Id = Guid.NewGuid(),
 
@@ -70,10 +73,23 @@ namespace Rnwood.Smtp4dev.Server
                 ReceivedDate = DateTime.Now,
                 Subject = subject,
                 Data = data,
-                MimeParseError = mimeParseError
+                MimeParseError = mimeParseError,
+                AttachmentCount = 0
+                
             };
 
+            var parts = new ApiModel.Message(message).Parts;
+            foreach(var part in parts) {
+                message.AttachmentCount += CountAttachments(part);
+            }
+            
+
             return message;
+        }
+
+        private int CountAttachments(MessageEntitySummary part)
+        {
+            return part.Attachments.Count + part.ChildParts.Sum(CountAttachments);
         }
     }
 }

@@ -13,6 +13,7 @@ export default class SessionView extends Vue {
     @Prop({  })
     sessionSummary: SessionSummary | null = null;
     session: Session | null = null;
+    log: string | null = null;
 
 
     error: Error | null = null;
@@ -25,17 +26,28 @@ export default class SessionView extends Vue {
         
     }
 
-
+    download() {
+        if (this.sessionSummary) {
+            window.open(new SessionsController().getSessionLog_url(this.sessionSummary.id));
+        }
+    }
 
     async loadSession() {
         
         this.error = null;
         this.loading = true;
         this.session = null;
+        this.log = null;
 
         try {
             if (this.sessionSummary != null) {
                 this.session = await new SessionsController().getSession(this.sessionSummary.id);
+
+                if (this.sessionSummary.size > 5 * 1024 * 1024) {
+                    this.log = "Large content cannot be shown here. Click above to download";
+                } else {
+                    this.log = await new SessionsController().getSessionLog(this.sessionSummary.id);
+                }
             }
         } catch (e) {
             this.error = e;
