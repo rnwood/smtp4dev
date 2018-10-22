@@ -1,7 +1,7 @@
 {
   "name": "rnwood.smtp4dev",
   "private": true,
-  "version": "0.0.0",
+  "version": "3.0.0",
   "devDependencies": {
     "@aspnet/signalr": "^1.0.4",
     "@types/webpack-env": "^1.13.0",
