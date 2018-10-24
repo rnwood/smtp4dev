@@ -23,7 +23,7 @@
     <PackageReference Include="xunit.runner.visualstudio" Version="2.3.1" />
     <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
     <PackageReference Include="System.Net.Security" Version="4.3.2" />
-    <PackageReference Include="xunit" Version="2.3.1" />
+    <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="Moq" Version="4.10.0" />
     <PackageReference Include="MailKit" Version="2.0.6" />
   </ItemGroup>
