@@ -14,14 +14,11 @@ nuget:
 install:
 - cmd: |
     dotnet restore
-    npm install -g gulp bower
 build_script:
  - cmd: dotnet build Rnwood.SmtpServer -c %Configuration%
 after_build:
  - ps: |
-    $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
-    dotnet pack Rnwood.SmtpServer -c $env:Configuration --version-suffix $versionsuffix
-    #get-item Rnwood.SmtpServer\bin\$($env:Configuration)\*.nupkg | foreach-object { appveyor PushArtifact $_.FullName }
+    dotnet pack Rnwood.SmtpServer -c $env:Configuration -p:"PackageVersion=$env:APPVEYOR_BUILD_VERSION"
 build:
   publish_nuget: false
   publish_nuget_symbols: false

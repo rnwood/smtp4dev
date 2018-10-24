@@ -3,7 +3,7 @@
   <PropertyGroup>
     <Description>Rnwood.SmtpServer is an SMTP server component that can be embedded in application to allow them to receive and process emails using the SMTP protocol. This component powers the popular Smtp4dev application.</Description>
     <Copyright>Robert N. Wood</Copyright>
-    <VersionPrefix>3.0.0-alpha</VersionPrefix>
+    <VersionPrefix>3.0</VersionPrefix>
     <Authors>Robert N. Wood &lt;rob@rnwood.co.uk&gt;</Authors>
     <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>Rnwood.SmtpServer</AssemblyName>
