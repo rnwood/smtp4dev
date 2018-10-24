@@ -1,7 +1,7 @@
-version: 3.0.{build}-{branch}
+version: 3.0.{build}-ci
 os: Visual Studio 2017
 configuration: Release
-skip_tags: true
+skip_tags:  false
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
@@ -11,6 +11,14 @@ assembly_info:
 nuget:
   account_feed: false
   project_feed: false
+init:
+ - ps: |
+    $version = $env:APPVEYOR_BUILD_VERSION
+    if ($env:APPVEYOR_REPO_TAG_NAME) {
+       Update-AppveyorBuild -version $env:APPVEYOR_REPO_TAG_NAME
+       $version = $env:APPVEYOR_REPO_TAG_NAME
+    }
+    Set-AppveyorBuildVariable 'PRERELEASE' (($version.Contains("-")).ToString())
 install:
 - cmd: |
     dotnet restore
@@ -33,15 +41,14 @@ deploy:
   artifact: /.*\..*/
   auth_token:
     secure: 5zLYIRVYHWHyZYOUZ2F46AvAYb3OLIWs35PQUddGkyK3xkV7qCmaMT38PJY6OiY7
-  prerelease: true
+  prerelease: $(PRERELEASE)
+  tag: $(APPVEYOR_REPO_TAG_NAME)
   on:
-    branch: master                 # release from master branch only
-    appveyor_repo_tag: false
+    branch: master
 - provider: NuGet
   api_key:
     secure: ISMI/iLYa+IKyqPkWpEYwgOceuVrR8mX3+sGEFr04Uo7FoM1goIGOqpr0JalCJPe
   skip_symbols: false
   artifact: /.*\.nupkg/
   on:
-    branch: master                 # release from master branch only
-    appveyor_repo_tag: false
+    branch: master
