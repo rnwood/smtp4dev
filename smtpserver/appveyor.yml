@@ -44,8 +44,15 @@ deploy:
   prerelease: $(PRERELEASE)
   tag: $(APPVEYOR_REPO_TAG_NAME)
   on:
+    appveyor_repo_tag: true
+- provider: GitHub
+  artifact: /.*\..*/
+  auth_token:
+    secure: 5zLYIRVYHWHyZYOUZ2F46AvAYb3OLIWs35PQUddGkyK3xkV7qCmaMT38PJY6OiY7
+  prerelease: $(PRERELEASE)
+  on:
     branch: master
-    appveyor_repo_tag: true 
+    appveyor_repo_tag: false
 - provider: NuGet
   api_key:
     secure: ISMI/iLYa+IKyqPkWpEYwgOceuVrR8mX3+sGEFr04Uo7FoM1goIGOqpr0JalCJPe
