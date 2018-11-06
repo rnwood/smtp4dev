@@ -1,48 +1,59 @@
-﻿#region
-
-using System;
-using System.Linq;
-using System.Net.Sockets;
-using System.Threading;
-using System.Threading.Tasks;
-using Xunit;
-using Xunit.Abstractions;
-
-#endregion
+﻿// <copyright file="ServerTests.cs" company="Rnwood.SmtpServer project contributors">
+// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
+// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
+// </copyright>
 
 namespace Rnwood.SmtpServer.Tests
 {
+    using System.Net.Sockets;
+    using System.Threading.Tasks;
+    using Xunit;
+
+    /// <summary>
+    /// Defines the <see cref="ServerTests" />
+    /// </summary>
     public class ServerTests
     {
-        private Server StartServer()
+        /// <summary>
+        /// The Start_CanConnect
+        /// </summary>
+        [Fact]
+        public async void Start_CanConnect()
         {
-            Server server = NewServer();
-            server.Start();
-            return server;
+            using (SmtpServer server = this.StartServer())
+            {
+                using (TcpClient client = new TcpClient())
+                {
+                    await client.ConnectAsync("localhost", server.PortNumber).ConfigureAwait(false);
+                }
+
+                server.Stop();
+            }
         }
 
-        private Server NewServer()
-        {
-            return new DefaultServer(false, Ports.AssignAutomatically);
-        }
-
+        /// <summary>
+        /// The Start_IsRunning
+        /// </summary>
         [Fact]
         public void Start_IsRunning()
         {
-            using (Server server = StartServer())
+            using (SmtpServer server = this.StartServer())
             {
                 Assert.True(server.IsRunning);
             }
         }
 
+        /// <summary>
+        /// The StartOnInusePort_StartupExceptionThrown
+        /// </summary>
         [Fact]
         public void StartOnInusePort_StartupExceptionThrown()
         {
-            using (Server server1 = new DefaultServer(false, Ports.AssignAutomatically))
+            using (SmtpServer server1 = new DefaultServer(false, StandardSmtpPort.AssignAutomatically))
             {
                 server1.Start();
 
-                using (Server server2 = new DefaultServer(false, server1.PortNumber))
+                using (SmtpServer server2 = new DefaultServer(false, server1.PortNumber))
                 {
                     Assert.Throws<SocketException>(() =>
                     {
@@ -52,89 +63,110 @@ namespace Rnwood.SmtpServer.Tests
             }
         }
 
-        [Fact]
-        public void Stop_NotRunning()
-        {
-            using (Server server = StartServer())
-            {
-                server.Stop();
-                Assert.False(server.IsRunning);
-            }
-        }
-
+        /// <summary>
+        /// The Stop_CannotConnect
+        /// </summary>
+        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
         [Fact]
         public async Task Stop_CannotConnect()
         {
-            using (Server server = StartServer())
+            using (SmtpServer server = this.StartServer())
             {
                 int portNumber = server.PortNumber;
                 server.Stop();
 
                 TcpClient client = new TcpClient();
                 await Assert.ThrowsAnyAsync<SocketException>(async () =>
-                    await client.ConnectAsync("localhost", portNumber)
-                );
+                    await client.ConnectAsync("localhost", portNumber).ConfigureAwait(false)
+                ).ConfigureAwait(false);
             }
         }
 
-        [Fact]
-        public async Task Stop_KillConnectionsTrue_ConnectionsKilled()
-        {
-            {
-                Server server = StartServer();
-
-                Task serverTask = Task.Run(async () =>
-                {
-                    await Task.Run(() => server.WaitForNextConnection()).WithTimeout("waiting for next server connection");
-                    Assert.Single(server.ActiveConnections);
-                    await Task.Run(() => server.Stop(true)).WithTimeout("stopping server");
-                    Assert.Empty(server.ActiveConnections);
-                });
-
-                using (TcpClient client = new TcpClient())
-                {
-                    await client.ConnectAsync("localhost", server.PortNumber).WithTimeout("waiting for client to connect");
-                    await serverTask.WithTimeout(30, "waiting for server task to complete");
-                }
-            }
-        }
-
+        /// <summary>
+        /// The Stop_KillConnectionFalse_ConnectionsNotKilled
+        /// </summary>
+        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
         [Fact]
         public async Task Stop_KillConnectionFalse_ConnectionsNotKilled()
         {
-            Server server = StartServer();
+            SmtpServer server = this.StartServer();
 
             Task serverTask = Task.Run(async () =>
             {
-                await Task.Run(() => server.WaitForNextConnection()).WithTimeout("waiting for next server connection");
+                await Task.Run(() => server.WaitForNextConnection()).WithTimeout("waiting for next server connection").ConfigureAwait(false);
                 Assert.Single(server.ActiveConnections);
 
-                await Task.Run(() => server.Stop(false)).WithTimeout("stopping server");
+                await Task.Run(() => server.Stop(false)).WithTimeout("stopping server").ConfigureAwait(false);
                 ;
                 Assert.Single(server.ActiveConnections);
-                await Task.Run(() => server.KillConnections()).WithTimeout("killing connections");
+                await Task.Run(() => server.KillConnections()).WithTimeout("killing connections").ConfigureAwait(false);
                 Assert.Empty(server.ActiveConnections);
             });
 
             using (TcpClient client = new TcpClient())
             {
-                await client.ConnectAsync("localhost", server.PortNumber).WithTimeout("waiting for client to connect");
-                await serverTask.WithTimeout(30, "waiting for server task to complete");
+                await client.ConnectAsync("localhost", server.PortNumber).WithTimeout("waiting for client to connect").ConfigureAwait(false);
+                await serverTask.WithTimeout(30, "waiting for server task to complete").ConfigureAwait(false);
             }
         }
 
+        /// <summary>
+        /// The Stop_KillConnectionsTrue_ConnectionsKilled
+        /// </summary>
+        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
         [Fact]
-        public async void Start_CanConnect()
+        public async Task Stop_KillConnectionsTrue_ConnectionsKilled()
         {
-            using (Server server = StartServer())
             {
+                SmtpServer server = this.StartServer();
+
+                Task serverTask = Task.Run(async () =>
+                {
+                    await Task.Run(() => server.WaitForNextConnection()).WithTimeout("waiting for next server connection").ConfigureAwait(false);
+                    Assert.Single(server.ActiveConnections);
+                    await Task.Run(() => server.Stop(true)).WithTimeout("stopping server").ConfigureAwait(false);
+                    Assert.Empty(server.ActiveConnections);
+                });
+
                 using (TcpClient client = new TcpClient())
                 {
-                    await client.ConnectAsync("localhost", server.PortNumber);
+                    await client.ConnectAsync("localhost", server.PortNumber).WithTimeout("waiting for client to connect").ConfigureAwait(false);
+                    await serverTask.WithTimeout(30, "waiting for server task to complete").ConfigureAwait(false);
                 }
-
-                server.Stop();
             }
+        }
+
+        /// <summary>
+        /// The Stop_NotRunning
+        /// </summary>
+        [Fact]
+        public void Stop_NotRunning()
+        {
+            using (SmtpServer server = this.StartServer())
+            {
+                server.Stop();
+                Assert.False(server.IsRunning);
+            }
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>The <see cref="SmtpServer"/></returns>
+        private SmtpServer NewServer()
+        {
+            return new DefaultServer(false, StandardSmtpPort.AssignAutomatically);
+        }
+
+        /// <summary>
+        ///
+        /// </summary>
+        /// <returns>The <see cref="SmtpServer"/></returns>
+        private SmtpServer StartServer()
+        {
+            SmtpServer server = this.NewServer();
+            server.Start();
+            return server;
         }
     }
 }

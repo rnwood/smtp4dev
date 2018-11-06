@@ -1,77 +1,85 @@
-﻿using Rnwood.SmtpServer.Extensions.Auth;
-using System;
-using System.IO;
-using System.Net;
+﻿// <copyright file="ISession.cs" company="Rnwood.SmtpServer project contributors">
+// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
+// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
+// </copyright>
 
 namespace Rnwood.SmtpServer
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Net;
+    using Rnwood.SmtpServer.Extensions.Auth;
+
+    /// <summary>
+    /// Defines the <see cref="ISession" />
+    /// </summary>
     public interface ISession : IDisposable
     {
         /// <summary>
-        /// Gets the date the session started.
+        /// Gets a value indicating whether this the client provided authentication.
         /// </summary>
-        /// <value>The start date.</value>
-        DateTime StartDate { get; }
+        bool Authenticated { get; }
 
         /// <summary>
-        /// Gets the date the session ended.
+        /// Gets the AuthenticationCredentials
         /// </summary>
-        /// <value>The end date.</value>
-        DateTime? EndDate { get; }
+        IAuthenticationCredentials AuthenticationCredentials { get; }
 
         /// <summary>
         /// Gets the IP address of the client that established this session.
         /// </summary>
-        /// <value>The client address.</value>
         IPAddress ClientAddress { get; }
 
         /// <summary>
+        /// Gets the ClientName
         /// Gets or sets the name of the client as reported in its HELO/EHLO command
         /// or null.
         /// </summary>
-        /// <value>The name of the client.</value>
         string ClientName { get; }
 
         /// <summary>
-        /// Gets or sets a value indicating whether the session is over a secure connection.
+        /// Gets a value indicating whether this <see cref="AbstractSession"/> completed normally (by the client issuing a QUIT command)
+        /// as opposed to abormal termination such as a connection timeout or unhandled errors in the server.
         /// </summary>
-        /// <value><c>true</c> if [secure connection]; otherwise, <c>false</c>.</value>
+        bool CompletedNormally { get; }
+
+        /// <summary>
+        /// Gets the date the session ended.
+        /// </summary>
+        DateTime? EndDate { get; }
+
+        /// <summary>
+        /// Gets a value indicating whether the session is over a secure connection.
+        /// </summary>
         bool SecureConnection { get; }
+
+        /// <summary>
+        /// Gets the error that caused the session to terminate if it didn't complete normally.
+        /// </summary>
+        Exception SessionError { get; }
+
+        /// <summary>
+        /// Gets a classification of the type of error which was experienced.
+        /// </summary>
+        SessionErrorType SessionErrorType { get; }
+
+        /// <summary>
+        /// Gets the date the session started.
+        /// </summary>
+        DateTime StartDate { get; }
 
         /// <summary>
         /// Gets the session log (all communication between the client and server)
         /// if session logging is enabled.
         /// </summary>
-        /// <value>The log.</value>
+        /// <returns>A <see cref="TextReader"/> which will read from the session log.</returns>
         TextReader GetLog();
 
         /// <summary>
-        /// Gets an array of messages recevied in this session.
+        /// Gets list of messages recevied in this session.
         /// </summary>
-        /// <value>The messages.</value>
-        IMessage[] GetMessages();
-
-        /// <summary>
-        /// Gets or sets a value indicating whether this <see cref="AbstractSession"/> completed normally (by the client issuing a QUIT command).
-        /// </summary>
-        /// <value><c>true</c> if the session completed normally; otherwise, <c>false</c>.</value>
-        bool CompletedNormally { get; }
-
-        /// <summary>
-        /// Gets a value indicating whether this <see cref="AbstractSession"/> is authenticated.
-        /// </summary>
-        /// <value><c>true</c> if authenticated; otherwise, <c>false</c>.</value>
-        bool Authenticated { get; }
-
-        IAuthenticationCredentials AuthenticationCredentials { get; }
-
-        /// <summary>
-        /// Gets the error that caused the session to terminate if it didn't complete normally.
-        /// </summary>
-        /// <seealso cref="CompletedNormally"/>
-        /// <value>The session error.</value>
-        Exception SessionError { get; }
-
-        SessionErrorType SessionErrorType { get; }
+        /// <returns>A read only list of messages</returns>
+        IReadOnlyCollection<IMessage> GetMessages();
     }
 }

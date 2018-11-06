@@ -1,26 +1,31 @@
-﻿#region
-
-using System;
-using System.Collections.Generic;
-
-#endregion
+﻿// <copyright file="VerbMap.cs" company="Rnwood.SmtpServer project contributors">
+// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
+// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
+// </copyright>
 
 namespace Rnwood.SmtpServer.Verbs
 {
+    using System;
+    using System.Collections.Generic;
+
+    /// <summary>
+    /// Defines the <see cref="VerbMap" />
+    /// </summary>
     public class VerbMap : IVerbMap
     {
-        private readonly Dictionary<string, IVerb> _processorVerbs = new Dictionary<string, IVerb>(StringComparer.CurrentCultureIgnoreCase);
+        private readonly Dictionary<string, IVerb> processorVerbs = new Dictionary<string, IVerb>(StringComparer.CurrentCultureIgnoreCase);
 
-        public void SetVerbProcessor(string verb, IVerb verbProcessor)
-        {
-            _processorVerbs[verb] = verbProcessor;
-        }
-
+        /// <inheritdoc/>
         public IVerb GetVerbProcessor(string verb)
         {
-            IVerb result = null;
-            _processorVerbs.TryGetValue(verb, out result);
+            this.processorVerbs.TryGetValue(verb, out IVerb result);
             return result;
+        }
+
+        /// <inheritdoc/>
+        public void SetVerbProcessor(string verb, IVerb verbProcessor)
+        {
+            this.processorVerbs[verb] = verbProcessor;
         }
     }
 }

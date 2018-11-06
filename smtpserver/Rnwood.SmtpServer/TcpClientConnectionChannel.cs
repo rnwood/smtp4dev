@@ -1,124 +1,211 @@
-﻿using System;
-using System.IO;
-using System.Net;
-using System.Net.Sockets;
-using System.Text;
-using System.Threading.Tasks;
+﻿// <copyright file="TcpClientConnectionChannel.cs" company="Rnwood.SmtpServer project contributors">
+// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
+// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
+// </copyright>
 
 namespace Rnwood.SmtpServer
 {
+    using System;
+    using System.IO;
+    using System.Linq;
+    using System.Net;
+    using System.Net.Sockets;
+    using System.Text;
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Defines the <see cref="TcpClientConnectionChannel" />
+    /// </summary>
     public class TcpClientConnectionChannel : IConnectionChannel
     {
+        private readonly TcpClient tcpClient;
+
+        private StreamReader reader;
+
+        private Stream stream;
+
+        private StreamWriter writer;
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="TcpClientConnectionChannel"/> class.
+        /// </summary>
+        /// <param name="tcpClient">The tcpClient<see cref="TcpClient"/></param>
         public TcpClientConnectionChannel(TcpClient tcpClient)
         {
-            _tcpClient = tcpClient;
-            _stream = tcpClient.GetStream();
-            IsConnected = true;
-            SetReaderEncoding(Encoding.ASCII);
+            this.tcpClient = tcpClient;
+            this.stream = tcpClient.GetStream();
+            this.IsConnected = true;
+            this.SetReaderEncoding(Encoding.ASCII);
         }
 
-        private readonly TcpClient _tcpClient;
-        private StreamReader _reader;
-        private Stream _stream;
-        private StreamWriter _writer;
+        /// <summary>
+        /// Defines the Closed
+        /// </summary>
+        public event AsyncEventHandler<EventArgs> ClosedEventHandler;
 
-        public Encoding ReaderEncoding
+        /// <summary>
+        /// Gets the ClientIPAddress
+        /// </summary>
+        public IPAddress ClientIPAddress => ((IPEndPoint)this.tcpClient.Client.RemoteEndPoint).Address;
+
+        /// <summary>
+        /// Gets a value indicating whether IsConnected
+        /// </summary>
+        public bool IsConnected { get; private set; }
+
+        /// <summary>
+        /// Gets the ReaderEncoding
+        /// </summary>
+        public Encoding ReaderEncoding { get; private set; }
+
+        /// <summary>
+        /// Gets or sets the ReceiveTimeout
+        /// </summary>
+        public TimeSpan ReceiveTimeout
         {
-            get;
-            private set;
+            get { return TimeSpan.FromMilliseconds(this.tcpClient.ReceiveTimeout); }
+            set { this.tcpClient.ReceiveTimeout = (int)Math.Min(int.MaxValue, value.TotalMilliseconds); }
         }
 
-        public void SetReaderEncoding(Encoding encoding)
+        /// <summary>
+        /// Gets or sets the SendTimeout
+        /// </summary>
+        public TimeSpan SendTimeout
         {
-            ReaderEncoding = encoding;
-            SetupReaderAndWriter();
+            get { return TimeSpan.FromMilliseconds(this.tcpClient.SendTimeout); }
+            set { this.tcpClient.SendTimeout = (int)Math.Min(int.MaxValue, value.TotalMilliseconds); }
         }
 
-        public bool IsConnected
+        /// <summary>
+        /// Applies the a filter to the stream which is used to read data from the channel.
+        /// </summary>
+        /// <param name="filter">The filter.</param>
+        /// <returns>
+        /// A <see cref="Task{T}" /> representing the async operation
+        /// </returns>
+        public async Task ApplyStreamFilter(Func<Stream, Task<Stream>> filter)
         {
-            get; private set;
+            this.stream = await filter(this.stream).ConfigureAwait(false);
+            this.SetupReaderAndWriter();
         }
 
-        public event EventHandler Closed;
-
-        public async Task FlushAsync()
+        /// <summary>
+        /// Closes the channel and notifies users via the <see cref="ClosedEventHandler" /> event.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Task{T}" /> representing the async operation
+        /// </returns>
+        public Task Close()
         {
-            await _writer.FlushAsync();
-        }
-
-        public Task CloseAync()
-        {
-            if (IsConnected)
+            if (this.IsConnected)
             {
-                IsConnected = false;
-                _tcpClient.Dispose();
+                this.IsConnected = false;
+                this.tcpClient.Dispose();
 
-                Closed?.Invoke(this, EventArgs.Empty);
+                foreach (Delegate handler in this.ClosedEventHandler?.GetInvocationList() ?? Enumerable.Empty<Delegate>())
+                {
+                    handler.DynamicInvoke(this, EventArgs.Empty);
+                }
             }
 
             return Task.CompletedTask;
         }
 
-        public TimeSpan ReceiveTimeout
+        /// <summary>
+        /// Flushes outgoing data.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Task{T}" /> representing the async operation
+        /// </returns>
+        public async Task Flush()
         {
-            get { return TimeSpan.FromMilliseconds(_tcpClient.ReceiveTimeout); }
-            set { _tcpClient.ReceiveTimeout = (int)Math.Min(int.MaxValue, value.TotalMilliseconds); }
+            await this.writer.FlushAsync().ConfigureAwait(false);
         }
 
-        public TimeSpan SendTimeout
-        {
-            get { return TimeSpan.FromMilliseconds(_tcpClient.SendTimeout); }
-            set { _tcpClient.SendTimeout = (int)Math.Min(int.MaxValue, value.TotalMilliseconds); }
-        }
-
-        public IPAddress ClientIPAddress
-        {
-            get { return ((IPEndPoint)_tcpClient.Client.RemoteEndPoint).Address; }
-        }
-
-        public async Task ApplyStreamFilterAsync(Func<Stream, Task<Stream>> filter)
-        {
-            _stream = await filter(_stream);
-            SetupReaderAndWriter();
-        }
-
-        private void SetupReaderAndWriter()
-        {
-            _writer = new StreamWriter(_stream, ReaderEncoding) { AutoFlush = true, NewLine = "\r\n" };
-            _reader = new StreamReader(_stream, ReaderEncoding);
-        }
-
-        public async Task<string> ReadLineAsync()
+        /// <summary>
+        /// Reads the next line from the channel using the currrent <see cref="ReaderEncoding" />
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Task{T}" /> representing the async operation
+        /// </returns>
+        /// <exception cref="System.IO.IOException">Reader returned null string</exception>
+        /// <exception cref="ConnectionUnexpectedlyClosedException">Read failed</exception>
+        public async Task<string> ReadLine()
         {
             try
             {
-                string text = await _reader.ReadLineAsync();
+                string text = await this.reader.ReadLineAsync().ConfigureAwait(false);
 
                 if (text == null)
                 {
-                    throw new IOException("Reader returned null string"); ;
+                    throw new IOException("Reader returned null string");
                 }
 
                 return text;
             }
             catch (IOException e)
             {
-                await CloseAync();
+                await this.Close().ConfigureAwait(false);
                 throw new ConnectionUnexpectedlyClosedException("Read failed", e);
             }
         }
 
-        public async Task WriteLineAsync(string text)
+        /// <inheritdoc/>
+        public void SetReaderEncoding(Encoding encoding)
+        {
+            this.ReaderEncoding = encoding;
+            this.SetupReaderAndWriter();
+        }
+
+        /// <inheritdoc/>
+        public async Task WriteLine(string text)
         {
             try
             {
-                await _writer.WriteLineAsync(text);
+                await this.writer.WriteLineAsync(text).ConfigureAwait(false);
             }
             catch (IOException e)
             {
-                await CloseAync();
+                await this.Close().ConfigureAwait(false);
                 throw new ConnectionUnexpectedlyClosedException("Write failed", e);
             }
+        }
+
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
+        {
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
+        {
+            if (!this.disposedValue)
+            {
+                if (disposing)
+                {
+                    this.writer.Dispose();
+                    this.reader.Dispose();
+                    this.stream.Dispose();
+                    this.tcpClient.Dispose();
+                }
+
+                this.disposedValue = true;
+            }
+        }
+
+        private void SetupReaderAndWriter()
+        {
+            this.writer = new StreamWriter(this.stream, this.ReaderEncoding) { AutoFlush = true, NewLine = "\r\n" };
+            this.reader = new StreamReader(this.stream, this.ReaderEncoding);
         }
     }
 }

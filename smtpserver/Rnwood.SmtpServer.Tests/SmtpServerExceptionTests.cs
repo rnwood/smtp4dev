@@ -1,11 +1,21 @@
-﻿using Xunit;
-using System;
+﻿// <copyright file="SmtpServerExceptionTests.cs" company="Rnwood.SmtpServer project contributors">
+// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
+// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
+// </copyright>
 
 namespace Rnwood.SmtpServer.Tests
 {
-    
+    using System;
+    using Xunit;
+
+    /// <summary>
+    /// Defines the <see cref="SmtpServerExceptionTests" />
+    /// </summary>
     public class SmtpServerExceptionTests
     {
+        /// <summary>
+        ///
+        /// </summary>
         [Fact]
         public void InnerException()
         {
@@ -16,6 +26,9 @@ namespace Rnwood.SmtpServer.Tests
             Assert.Same(innerException, e.InnerException);
         }
 
+        /// <summary>
+        ///
+        /// </summary>
         [Fact]
         public void SmtpResponse()
         {

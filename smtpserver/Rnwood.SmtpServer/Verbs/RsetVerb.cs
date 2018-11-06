@@ -1,13 +1,22 @@
-﻿using System.Threading.Tasks;
+﻿// <copyright file="RsetVerb.cs" company="Rnwood.SmtpServer project contributors">
+// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
+// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
+// </copyright>
 
 namespace Rnwood.SmtpServer.Verbs
 {
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Defines the <see cref="RsetVerb" />
+    /// </summary>
     public class RsetVerb : IVerb
     {
-        public async Task ProcessAsync(IConnection connection, SmtpCommand command)
+        /// <inheritdoc/>
+        public async Task Process(IConnection connection, SmtpCommand command)
         {
-            connection.AbortMessage();
-            await connection.WriteResponseAsync(new SmtpResponse(StandardSmtpResponseCode.OK, "Rset completed"));
+            await connection.AbortMessage().ConfigureAwait(false);
+            await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Rset completed")).ConfigureAwait(false);
         }
     }
 }

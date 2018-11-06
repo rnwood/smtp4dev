@@ -1,23 +1,23 @@
-﻿using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Reflection;
-using System.Threading.Tasks;
+﻿// <copyright file="Logging.cs" company="Rnwood.SmtpServer project contributors">
+// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
+// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
+// </copyright>
 
 namespace Rnwood.SmtpServer
 {
-    public class Logging
-    {
-        private static ILoggerFactory _factory = new LoggerFactory();
+    using Microsoft.Extensions.Logging;
 
-        public static ILoggerFactory Factory
-        {
-            get
-            {
-                return _factory;
-            }
-        }
+    /// <summary>
+    /// Helper class implementing logging
+    /// </summary>
+    internal static class Logging
+    {
+        /// <summary>
+        /// Gets the logging factory.
+        /// </summary>
+        /// <value>
+        /// The factory.
+        /// </value>
+        public static ILoggerFactory Factory { get; } = new LoggerFactory();
     }
 }

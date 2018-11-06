@@ -1,199 +1,118 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
+// <copyright file="MemoryMessage.cs" company="Rnwood.SmtpServer project contributors">
+// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
+// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
+// </copyright>
 
 namespace Rnwood.SmtpServer
 {
+    using System;
+    using System.Collections.Generic;
+    using System.IO;
+    using System.Threading.Tasks;
+
+    /// <summary>
+    /// Defines the <see cref="MemoryMessage" />
+    /// </summary>
     public class MemoryMessage : IMessage
     {
+        private readonly List<string> recipients = new List<string>();
+
+        private bool disposedValue = false; // To detect redundant calls
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MemoryMessage"/> class.
+        /// </summary>
         public MemoryMessage()
         {
         }
 
+        /// <summary>
+        /// Gets the DeclaredMessageSize
+        /// </summary>
+        public long? DeclaredMessageSize { get; internal set; }
+
+        /// <summary>
+        /// Gets a value indicating whether EightBitTransport
+        /// </summary>
+        public bool EightBitTransport { get; internal set; }
+
+        /// <summary>
+        /// Gets the From
+        /// </summary>
+        public string From { get; internal set; }
+
+        /// <summary>
+        /// Gets the ReceivedDate
+        /// </summary>
+        public DateTime ReceivedDate { get; internal set; }
+
+        /// <summary>
+        /// Gets a value indicating whether if message was received over a secure connection.
+        /// </summary>
+        public bool SecureConnection { get; internal set; }
+
+        /// <summary>
+        /// Gets the Session message was received on.
+        /// </summary>
+        public ISession Session { get; internal set; }
+
+        /// <summary>
+        /// Gets the recipient of the message as specified by the client when sending RCPT TO command.
+        /// </summary>
+        public IReadOnlyCollection<string> Recipients => this.RecipientsList.AsReadOnly();
+
+        /// <summary>
+        /// Gets or sets the message data.
+        /// </summary>
+        /// <value>
+        /// The data.
+        /// </value>
         internal byte[] Data { get; set; }
 
-        public DateTime ReceivedDate
+        /// <summary>
+        /// Gets the recipients list.
+        /// </summary>
+        /// <value>
+        /// The recipients list.
+        /// </value>
+        internal List<string> RecipientsList => this.recipients;
+
+        /// <summary>
+        /// Gets a stream which returns the message data.
+        /// </summary>
+        /// <returns>
+        /// A <see cref="Task{T}" /> representing the async operation
+        /// </returns>
+        public Task<Stream> GetData()
         {
-            get; private set;
+            return Task.FromResult<Stream>(
+                new MemoryStream(
+                    this.Data ?? Array.Empty<byte>(),
+                    false));
         }
 
-        public ISession Session
+        /// <summary>
+        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+        /// </summary>
+        public void Dispose()
         {
-            get; private set;
+            this.Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
-        public string From
+        /// <summary>
+        /// Releases unmanaged and - optionally - managed resources.
+        /// </summary>
+        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+        protected virtual void Dispose(bool disposing)
         {
-            get; private set;
-        }
-
-        private List<string> _to = new List<string>();
-
-        public string[] To
-        {
-            get { return _to.ToArray(); }
-        }
-
-        public bool SecureConnection
-        {
-            get; private set;
-        }
-
-        public bool EightBitTransport
-        {
-            get; private set;
-        }
-
-        public long? DeclaredMessageSize
-        {
-            get; private set;
-        }
-
-        public virtual void Dispose()
-        {
-        }
-
-        public Stream GetData()
-        {
-            return new MemoryStream(Data ?? new byte[0], false);
-        }
-
-        public class Builder : IMessageBuilder
-        {
-            public Builder() : this(new MemoryMessage())
+            if (!this.disposedValue)
             {
-            }
-
-            protected Builder(MemoryMessage message)
-            {
-                _message = message;
-            }
-
-            private MemoryMessage _message;
-
-            public Stream WriteData()
-            {
-                CloseNotifyingMemoryStream stream = new CloseNotifyingMemoryStream();
-                stream.Closing += (s, ea) =>
+                if (disposing)
                 {
-                    _message.Data = stream.ToArray();
-                };
-
-                return stream;
-            }
-
-            internal class CloseNotifyingMemoryStream : MemoryStream
-            {
-                public event EventHandler Closing;
-
-                protected override void Dispose(bool disposing)
-                {
-                    if (disposing)
-                    {
-                        if (Closing != null)
-                        {
-                            Closing(this, EventArgs.Empty);
-                        }
-                    }
-
-                    base.Dispose(disposing);
-                }
-            }
-
-            public ISession Session
-            {
-                get
-                {
-                    return _message.Session;
                 }
 
-                set
-                {
-                    _message.Session = value;
-                }
-            }
-
-            public DateTime ReceivedDate
-            {
-                get
-                {
-                    return _message.ReceivedDate;
-                }
-
-                set
-                {
-                    _message.ReceivedDate = value;
-                }
-            }
-
-            public string From
-            {
-                get
-                {
-                    return _message.From;
-                }
-
-                set
-                {
-                    _message.From = value;
-                }
-            }
-
-            public bool SecureConnection
-            {
-                get
-                {
-                    return _message.SecureConnection;
-                }
-
-                set
-                {
-                    _message.SecureConnection = value;
-                }
-            }
-
-            public bool EightBitTransport
-            {
-                get
-                {
-                    return _message.EightBitTransport;
-                }
-
-                set
-                {
-                    EightBitTransport = value;
-                }
-            }
-
-            public long? DeclaredMessageSize
-            {
-                get
-                {
-                    return _message.DeclaredMessageSize;
-                }
-
-                set
-                {
-                    _message.DeclaredMessageSize = value;
-                }
-            }
-
-            public ICollection<string> To
-            {
-                get
-                {
-                    return _message._to;
-                }
-            }
-
-            public virtual IMessage ToMessage()
-            {
-                return _message;
-            }
-
-            public Stream GetData()
-            {
-                return _message.GetData();
+                this.disposedValue = true;
             }
         }
     }

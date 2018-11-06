@@ -1,24 +1,30 @@
-﻿#region
-
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Text.RegularExpressions;
-
-#endregion
+﻿// <copyright file="SmtpCommand.cs" company="Rnwood.SmtpServer project contributors">
+// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
+// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
+// </copyright>
 
 namespace Rnwood.SmtpServer
 {
+    using System;
+    using System.Text.RegularExpressions;
+
+    /// <summary>
+    /// Defines the <see cref="SmtpCommand" /> which implements parsing of an SMTP command received from client to server.
+    /// </summary>
     public class SmtpCommand : IEquatable<SmtpCommand>
     {
-        public static Regex COMMANDREGEX = new Regex("(?'verb'[^ :]+)[ :]*(?'arguments'.*)");
+        private static readonly Regex COMMANDREGEX = new Regex("(?'verb'[^ :]+)[ :]*(?'arguments'.*)");
 
+        /// <summary>
+        /// Initializes a new instance of the <see cref="SmtpCommand"/> class.
+        /// </summary>
+        /// <param name="text">The text<see cref="string"/></param>
         public SmtpCommand(string text)
         {
-            Text = text;
+            this.Text = text;
 
-            IsValid = false;
-            IsEmpty = true;
+            this.IsValid = false;
+            this.IsEmpty = true;
 
             if (!string.IsNullOrEmpty(text))
             {
@@ -26,46 +32,96 @@ namespace Rnwood.SmtpServer
 
                 if (match.Success)
                 {
-                    Verb = match.Groups["verb"].Value;
-                    ArgumentsText = match.Groups["arguments"].Value ?? "";
-                    IsValid = true;
+                    this.Verb = match.Groups["verb"].Value;
+                    this.ArgumentsText = match.Groups["arguments"].Value ?? string.Empty;
+                    this.IsValid = true;
                 }
             }
         }
 
         /// <summary>
-        /// Gets the text.
+        /// Gets the arguments supplied after the VERB in the command as a single string.
         /// </summary>
-        /// <value>
-        /// The text.
-        /// </value>
-        public string Text { get; private set; }
-
         public string ArgumentsText { get; private set; }
 
-        public string Verb { get; private set; }
-
-        public bool IsValid { get; private set; }
+        /// <summary>
+        /// Gets a value indicating whether IsEmpty
+        /// </summary>
         public bool IsEmpty { get; private set; }
 
-        public bool Equals(SmtpCommand other)
-        {
-            if (ReferenceEquals(null, other)) return false;
-            if (ReferenceEquals(this, other)) return true;
-            return Equals(other.Text, Text);
-        }
+        /// <summary>
+        /// Gets a value indicating whether this command is valid - i.e. matching the pattern allowed.
+        /// </summary>
+        public bool IsValid { get; private set; }
 
+        /// <summary>
+        /// Gets the Text
+        /// </summary>
+        public string Text { get; private set; }
+
+        /// <summary>
+        /// Gets the Verb
+        /// </summary>
+        public string Verb { get; private set; }
+
+        /// <summary>
+        /// Determines whether the specified <see cref="object" />, is equal to this instance.
+        /// </summary>
+        /// <param name="obj">The obj<see cref="object" /></param>
+        /// <returns>
+        /// The <see cref="bool" />
+        /// </returns>
         public override bool Equals(object obj)
         {
-            if (ReferenceEquals(null, obj)) return false;
-            if (ReferenceEquals(this, obj)) return true;
-            if (obj.GetType() != typeof(SmtpCommand)) return false;
-            return Equals((SmtpCommand)obj);
+            if (obj is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, obj))
+            {
+                return true;
+            }
+
+            if (obj.GetType() != typeof(SmtpCommand))
+            {
+                return false;
+            }
+
+            return this.Equals((SmtpCommand)obj);
         }
 
+        /// <summary>
+        /// Indicates whether the current object is equal to another object of the same type.
+        /// </summary>
+        /// <param name="other">The other<see cref="SmtpCommand" /></param>
+        /// <returns>
+        /// The <see cref="bool" />
+        /// </returns>
+        public bool Equals(SmtpCommand other)
+        {
+            if (other is null)
+            {
+                return false;
+            }
+
+            if (ReferenceEquals(this, other))
+            {
+                return true;
+            }
+
+            return Equals(other.Text, this.Text);
+        }
+
+        /// <summary>
+        /// Returns a hash code for this instance.
+        /// </summary>
+        /// <returns>
+        /// The <see cref="int" />
+        /// </returns>
         public override int GetHashCode()
         {
-            return (Text != null ? Text.GetHashCode() : 0);
+            return this.Text != null ? this.Text.GetHashCode() : 0;
         }
     }
 }

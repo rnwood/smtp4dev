@@ -1,10 +1,20 @@
-﻿using Xunit;
+﻿// <copyright file="RandomIntegerGeneratorTests.cs" company="Rnwood.SmtpServer project contributors">
+// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
+// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
+// </copyright>
 
 namespace Rnwood.SmtpServer.Tests
 {
-    
+    using Xunit;
+
+    /// <summary>
+    /// Defines the <see cref="RandomIntegerGeneratorTests" />
+    /// </summary>
     public class RandomIntegerGeneratorTests
     {
+        /// <summary>
+        ///
+        /// </summary>
         [Fact]
         public void GenerateRandomInteger()
         {

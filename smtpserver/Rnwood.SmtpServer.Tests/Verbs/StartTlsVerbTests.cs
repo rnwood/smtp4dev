@@ -1,25 +1,33 @@
-﻿using Moq;
-using Rnwood.SmtpServer.Extensions;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
-using Xunit;
+﻿// <copyright file="StartTlsVerbTests.cs" company="Rnwood.SmtpServer project contributors">
+// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
+// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
+// </copyright>
 
 namespace Rnwood.SmtpServer.Tests.Verbs
 {
+    using System.Security.Cryptography.X509Certificates;
+    using System.Threading.Tasks;
+    using Moq;
+    using Rnwood.SmtpServer.Extensions;
+    using Xunit;
+
+    /// <summary>
+    /// Defines the <see cref="StartTlsVerbTests" />
+    /// </summary>
     public class StartTlsVerbTests
     {
+        /// <summary>
+        /// The NoCertificateAvailable_ReturnsErrorResponse
+        /// </summary>
+        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
         [Fact]
         public async Task NoCertificateAvailable_ReturnsErrorResponse()
         {
-            Mocks mocks = new Mocks();
-            mocks.ServerBehaviour.Setup(b => b.GetSSLCertificate(It.IsAny<IConnection>())).Returns<X509Certificate>(null);
+            TestMocks mocks = new TestMocks();
+            mocks.ServerBehaviour.Setup(b => b.GetSSLCertificate(It.IsAny<IConnection>())).ReturnsAsync((X509Certificate)null);
 
             StartTlsVerb verb = new StartTlsVerb();
-            await verb.ProcessAsync(mocks.Connection.Object, new SmtpCommand("STARTTLS"));
+            await verb.Process(mocks.Connection.Object, new SmtpCommand("STARTTLS")).ConfigureAwait(false);
 
             mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.CommandNotImplemented);
         }

@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <VersionPrefix>3.0.0-alpha</VersionPrefix>
@@ -26,6 +26,10 @@
     <PackageReference Include="xunit" Version="2.4.0" />
     <PackageReference Include="Moq" Version="4.10.0" />
     <PackageReference Include="MailKit" Version="2.0.6" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="../stylecop.json" />
   </ItemGroup>
 
 </Project>
