@@ -50,7 +50,7 @@
         <member name="M:Rnwood.SmtpServer.AbstractSession.AddMessage(Rnwood.SmtpServer.IMessage)">
             <inheritdoc/>
         </member>
-        <member name="M:Rnwood.SmtpServer.AbstractSession.AppendToLog(System.String)">
+        <member name="M:Rnwood.SmtpServer.AbstractSession.AppendLineToSessionLog(System.String)">
             <inheritdoc/>
         </member>
         <member name="M:Rnwood.SmtpServer.AbstractSession.GetLog">
@@ -1551,7 +1551,7 @@
             <param name="file">The file<see cref="T:System.IO.FileInfo"/></param>
             <param name="keepOnDispose">The keepOnDispose<see cref="T:System.Boolean"/></param>
         </member>
-        <member name="M:Rnwood.SmtpServer.FileSession.AppendToLog(System.String)">
+        <member name="M:Rnwood.SmtpServer.FileSession.AppendLineToSessionLog(System.String)">
             <inheritdoc/>
         </member>
         <member name="M:Rnwood.SmtpServer.FileSession.GetLog">
@@ -1826,11 +1826,10 @@
             </summary>
             <param name="message">The message<see cref="T:Rnwood.SmtpServer.IMessage"/></param>
         </member>
-        <member name="M:Rnwood.SmtpServer.IEditableSession.AppendToLog(System.String)">
-            <summary>
-            Appends a line of text to the session log.
-            </summary>
+        <member name="M:Rnwood.SmtpServer.IEditableSession.AppendLineToSessionLog(System.String)">
+            <summary>Appends a line of text to the session log.</summary>
             <param name="text">The text<see cref="T:System.String"/></param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task"/> representing the asynchronous operation.</returns>
         </member>
         <member name="T:Rnwood.SmtpServer.IMessage">
             <summary>
@@ -2379,11 +2378,6 @@
             Defines the <see cref="T:Rnwood.SmtpServer.MemorySession" />
             </summary>
         </member>
-        <member name="F:Rnwood.SmtpServer.MemorySession.log">
-            <summary>
-            Defines the log
-            </summary>
-        </member>
         <member name="M:Rnwood.SmtpServer.MemorySession.#ctor(System.Net.IPAddress,System.DateTime)">
             <summary>
             Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.MemorySession"/> class.
@@ -2391,7 +2385,7 @@
             <param name="clientAddress">The clientAddress<see cref="T:System.Net.IPAddress"/></param>
             <param name="startDate">The startDate<see cref="T:System.DateTime"/></param>
         </member>
-        <member name="M:Rnwood.SmtpServer.MemorySession.AppendToLog(System.String)">
+        <member name="M:Rnwood.SmtpServer.MemorySession.AppendLineToSessionLog(System.String)">
             <inheritdoc />
         </member>
         <member name="M:Rnwood.SmtpServer.MemorySession.GetLog">
@@ -2881,6 +2875,22 @@
             <summary>
             Gets the SmtpResponse
             </summary>
+        </member>
+        <member name="T:Rnwood.SmtpServer.SmtpStreamReader">
+            <summary>A stream writer which uses the correct \r\n line ending required for SMTP protocol.</summary>
+        </member>
+        <member name="M:Rnwood.SmtpServer.SmtpStreamReader.#ctor(System.IO.Stream,System.Text.Encoding)">
+            <summary>Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.SmtpStreamReader"/> class.</summary>
+            <param name="stream">The stream to write to.</param>
+            <param name="encoding">The character encoding to use.</param>
+        </member>
+        <member name="T:Rnwood.SmtpServer.SmtpStreamWriter">
+            <summary>A stream writer which uses the correct \r\n line ending required for SMTP protocol.</summary>
+        </member>
+        <member name="M:Rnwood.SmtpServer.SmtpStreamWriter.#ctor(System.IO.Stream,System.Text.Encoding)">
+            <summary>Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.SmtpStreamWriter"/> class.</summary>
+            <param name="stream">The stream to write to.</param>
+            <param name="encoding">The character encoding to use.</param>
         </member>
         <member name="T:Rnwood.SmtpServer.StandardSmtpPort">
             <summary>

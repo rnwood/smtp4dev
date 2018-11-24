@@ -8,6 +8,7 @@ namespace Rnwood.SmtpServer
     using System;
     using System.IO;
     using System.Net;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Implements an <see cref="ISession"/> where the session log is saved to a file.
@@ -34,18 +35,18 @@ namespace Rnwood.SmtpServer
         }
 
         /// <inheritdoc/>
-        public override void AppendToLog(string text)
+        public override async Task AppendLineToSessionLog(string text)
         {
             using (StreamWriter writer = this.file.AppendText())
             {
-                writer.WriteLine(text);
+                await writer.WriteLineAsync(text).ConfigureAwait(false);
             }
         }
 
         /// <inheritdoc/>
-        public override TextReader GetLog()
+        public override Task<TextReader> GetLog()
         {
-            return this.file.OpenText();
+            return Task.FromResult<TextReader>(this.file.OpenText());
         }
 
         /// <summary>

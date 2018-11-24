@@ -7,6 +7,7 @@ namespace Rnwood.SmtpServer
 {
     using System;
     using System.Net;
+    using System.Threading.Tasks;
     using Rnwood.SmtpServer.Extensions.Auth;
 
     /// <summary>
@@ -70,10 +71,9 @@ namespace Rnwood.SmtpServer
         /// <param name="message">The message<see cref="IMessage"/></param>
         void AddMessage(IMessage message);
 
-        /// <summary>
-        /// Appends a line of text to the session log.
-        /// </summary>
+        /// <summary>Appends a line of text to the session log.</summary>
         /// <param name="text">The text<see cref="string"/></param>
-        void AppendToLog(string text);
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        Task AppendLineToSessionLog(string text);
     }
 }

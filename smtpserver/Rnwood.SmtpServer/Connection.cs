@@ -113,7 +113,7 @@ namespace Rnwood.SmtpServer
         public async Task<string> ReadLine()
         {
             string text = await this.ConnectionChannel.ReadLine().ConfigureAwait(false);
-            this.Session.AppendToLog(text);
+            await this.Session.AppendLineToSessionLog(text).ConfigureAwait(false);
             return text;
         }
 
@@ -273,7 +273,7 @@ namespace Rnwood.SmtpServer
         protected async Task WriteLineAndFlush(string text, params object[] args)
         {
             string formattedText = string.Format(CultureInfo.InvariantCulture, text, args);
-            this.Session.AppendToLog(formattedText);
+            await this.Session.AppendLineToSessionLog(formattedText).ConfigureAwait(false);
             await this.ConnectionChannel.WriteLine(formattedText).ConfigureAwait(false);
             await this.ConnectionChannel.Flush().ConfigureAwait(false);
         }

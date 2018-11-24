@@ -9,16 +9,16 @@ namespace Rnwood.SmtpServer
     using System.IO;
     using System.Net;
     using System.Text;
+    using System.Threading.Tasks;
 
     /// <summary>
     /// Defines the <see cref="MemorySession" />
     /// </summary>
     public class MemorySession : AbstractSession
     {
-        /// <summary>
-        /// Defines the log
-        /// </summary>
-        private readonly StringBuilder log = new StringBuilder();
+        private readonly SmtpStreamWriter log;
+
+        private readonly MemoryStream logStream = new MemoryStream();
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MemorySession"/> class.
@@ -28,18 +28,21 @@ namespace Rnwood.SmtpServer
         public MemorySession(IPAddress clientAddress, DateTime startDate)
             : base(clientAddress, startDate)
         {
+            this.log = new SmtpStreamWriter(this.logStream, Encoding.UTF8);
         }
 
         /// <inheritdoc />
-        public override void AppendToLog(string text)
+        public override Task AppendLineToSessionLog(string text)
         {
-            this.log.AppendLine(text);
+            this.log.WriteLine(text);
+            return Task.CompletedTask;
         }
 
         /// <inheritdoc />
-        public override TextReader GetLog()
+        public override Task<TextReader> GetLog()
         {
-            return new StringReader(this.log.ToString());
+            this.log.Flush();
+            return Task.FromResult<TextReader>(new SmtpStreamReader(new MemoryStream(this.logStream.ToArray(), false), Encoding.UTF8));
         }
 
         /// <inheritdoc />

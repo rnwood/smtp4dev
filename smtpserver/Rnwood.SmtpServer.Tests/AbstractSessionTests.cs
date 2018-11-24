@@ -7,6 +7,7 @@ namespace Rnwood.SmtpServer.Tests
 {
     using System;
     using System.Linq;
+    using System.Threading.Tasks;
     using Moq;
     using Xunit;
 
@@ -19,39 +20,41 @@ namespace Rnwood.SmtpServer.Tests
         ///
         /// </summary>
         [Fact]
-        public void AddMessage()
+        public async Task AddMessage()
         {
             IEditableSession session = this.GetSession();
             Mock<IMessage> message = new Mock<IMessage>();
 
             session.AddMessage(message.Object);
 
-            Assert.Single(session.GetMessages());
-            Assert.Same(message.Object, session.GetMessages().First());
+            System.Collections.Generic.IReadOnlyCollection<IMessage> messages = await session.GetMessages();
+            Assert.Single(messages);
+            Assert.Same(message.Object, messages.First());
         }
 
         /// <summary>
         ///
         /// </summary>
         [Fact]
-        public void AppendToLog()
+        public async Task AppendToLog()
         {
             IEditableSession session = this.GetSession();
-            session.AppendToLog("Blah1");
-            session.AppendToLog("Blah2");
+            await session.AppendLineToSessionLog("Blah1");
+            await session.AppendLineToSessionLog("Blah2");
 
+            string sessionLog = (await session.GetLog()).ReadToEnd();
             Assert.Equal(new[] { "Blah1", "Blah2", "" },
-                                    session.GetLog().ReadToEnd().Split(new string[] { "\r\n" }, StringSplitOptions.None));
+                                    sessionLog.Split(new string[] { "\r\n" }, StringSplitOptions.None));
         }
 
         /// <summary>
         /// The GetMessages_InitiallyEmpty
         /// </summary>
         [Fact]
-        public void GetMessages_InitiallyEmpty()
+        public async Task GetMessages_InitiallyEmpty()
         {
             IEditableSession session = this.GetSession();
-            Assert.Empty(session.GetMessages());
+            Assert.Empty(await session.GetMessages());
         }
 
         /// <summary>

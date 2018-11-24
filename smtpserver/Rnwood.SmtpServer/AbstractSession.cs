@@ -9,6 +9,7 @@ namespace Rnwood.SmtpServer
     using System.Collections.Generic;
     using System.IO;
     using System.Net;
+    using System.Threading.Tasks;
     using Rnwood.SmtpServer.Extensions.Auth;
 
     /// <summary>
@@ -68,15 +69,15 @@ namespace Rnwood.SmtpServer
         }
 
         /// <inheritdoc/>
-        public abstract void AppendToLog(string text);
+        public abstract Task AppendLineToSessionLog(string text);
 
         /// <inheritdoc/>
-        public abstract TextReader GetLog();
+        public abstract Task<TextReader> GetLog();
 
         /// <inheritdoc/>
-        public IReadOnlyCollection<IMessage> GetMessages()
+        public Task<IReadOnlyCollection<IMessage>> GetMessages()
         {
-            return this.messages.AsReadOnly();
+            return Task.FromResult<IReadOnlyCollection<IMessage>>(this.messages.AsReadOnly());
         }
 
         /// <summary>

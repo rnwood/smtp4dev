@@ -9,6 +9,7 @@ namespace Rnwood.SmtpServer
     using System.Collections.Generic;
     using System.IO;
     using System.Net;
+    using System.Threading.Tasks;
     using Rnwood.SmtpServer.Extensions.Auth;
 
     /// <summary>
@@ -74,12 +75,12 @@ namespace Rnwood.SmtpServer
         /// if session logging is enabled.
         /// </summary>
         /// <returns>A <see cref="TextReader"/> which will read from the session log.</returns>
-        TextReader GetLog();
+        Task<TextReader> GetLog();
 
         /// <summary>
         /// Gets list of messages recevied in this session.
         /// </summary>
         /// <returns>A read only list of messages</returns>
-        IReadOnlyCollection<IMessage> GetMessages();
+        Task<IReadOnlyCollection<IMessage>> GetMessages();
     }
 }

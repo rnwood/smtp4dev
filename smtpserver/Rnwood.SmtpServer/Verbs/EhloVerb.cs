@@ -28,7 +28,7 @@ namespace Rnwood.SmtpServer
 
             connection.Session.ClientName = command.ArgumentsText ?? string.Empty;
 
-            StringBuilder text = new StringBuilder();
+            SmtpStringBuilder text = new SmtpStringBuilder();
             text.AppendLine("Nice to meet you.");
 
             foreach (Extensions.IExtensionProcessor extensionProcessor in connection.ExtensionProcessors)

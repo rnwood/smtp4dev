@@ -130,7 +130,7 @@ namespace Rnwood.SmtpServer
         /// <returns>A <see cref="string"/> that represents the response.</returns>
         public override string ToString()
         {
-            StringBuilder result = new StringBuilder();
+            SmtpStringBuilder result = new SmtpStringBuilder();
             string[] lines = this.Message.Split(new string[] { "\r\n" }, System.StringSplitOptions.None);
 
             for (int l = 0; l < lines.Length; l++)
