@@ -31,7 +31,7 @@ namespace Rnwood.SmtpServer
                 StandardSmtpResponseCode.StartMailInputEndWithDot,
                                                                "End message with period")).ConfigureAwait(false);
 
-            using (StreamWriter writer = new StreamWriter(await connection.CurrentMessage.WriteData().ConfigureAwait(false), connection.ReaderEncoding))
+            using (SmtpStreamWriter writer = new SmtpStreamWriter(await connection.CurrentMessage.WriteData().ConfigureAwait(false), connection.ReaderEncoding))
             {
                 bool firstLine = true;
 
@@ -45,7 +45,7 @@ namespace Rnwood.SmtpServer
 
                         if (!firstLine)
                         {
-                            writer.Write(Environment.NewLine);
+                            writer.Write("\r\n");
                         }
 
                         writer.Write(line);
