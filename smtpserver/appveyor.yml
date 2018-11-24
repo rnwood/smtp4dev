@@ -2,16 +2,15 @@ version: 3.1.0-ci@{build}
 image: Visual Studio 2017
 environment:
    matrix:
-     - FRAMEWORK: netcoreapp2.0      	
+     - TESTFRAMEWORK: netcoreapp2.0      	
        APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
        PUBLISH: 1
-     - FRAMEWORK: netcoreapp2.0      	
+     - TESTFRAMEWORK: netcoreapp2.0      	
        APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
        PUBLISH: 0
-     - FRAMEWORK: net462      	
+     - TESTFRAMEWORK: net462      	
        APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
        PUBLISH: 0
-configuration: Release
 skip_tags:  false
 assembly_info:
   patch: true
@@ -48,17 +47,17 @@ install:
     dotnet restore
 build_script:
  - ps: |
-    dotnet build Rnwood.SmtpServer -c $env:Configuration -f $env:FRAMEWORK
+    dotnet build Rnwood.SmtpServer -c Debug
 before_deploy:
  - ps: |
     if ($env:PUBLISH) {
-       dotnet pack Rnwood.SmtpServer -c $env:Configuration -p:"PackageVersion=$env:APPVEYOR_BUILD_VERSION"
+       dotnet pack Rnwood.SmtpServer -c Release -p:"PackageVersion=$env:APPVEYOR_BUILD_VERSION"
     }
 artifacts:
 - path: Rnwood.SmtpServer\bin\$(configuration)\*.nupkg
 test_script:
 - ps: |
-    dotnet test -f $env:FRAMEWORK Rnwood.SmtpServer.Tests\Rnwood.SmtpServer.Tests.csproj
+    dotnet test -f $env:TESTFRAMEWORK -r Debug Rnwood.SmtpServer.Tests\Rnwood.SmtpServer.Tests.csproj
 deploy:
 - provider: GitHub
   artifact: /.*\..*/
