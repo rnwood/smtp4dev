@@ -54,11 +54,6 @@ before_deploy:
     if ($env:PUBLISH) {
        dotnet pack Rnwood.SmtpServer -c $env:Configuration -p:"PackageVersion=$env:APPVEYOR_BUILD_VERSION"
     }
-build:
-  publish_nuget: false
-  publish_nuget_symbols: false
-  parallel: true
-  verbosity: minimal
 artifacts:
 - path: Rnwood.SmtpServer\bin\$(configuration)\*.nupkg
 test_script:
