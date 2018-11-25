@@ -13,7 +13,7 @@ namespace Rnwood.SmtpServer.Verbs
     /// </summary>
     public class VerbMap : IVerbMap
     {
-        private readonly Dictionary<string, IVerb> processorVerbs = new Dictionary<string, IVerb>(StringComparer.CurrentCultureIgnoreCase);
+        private readonly Dictionary<string, IVerb> processorVerbs = new Dictionary<string, IVerb>(StringComparer.OrdinalIgnoreCase);
 
         /// <inheritdoc/>
         public IVerb GetVerbProcessor(string verb)

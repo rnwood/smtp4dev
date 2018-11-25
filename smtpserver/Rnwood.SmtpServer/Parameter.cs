@@ -80,7 +80,8 @@ namespace Rnwood.SmtpServer
                 return true;
             }
 
-            return string.Equals(other.Name, this.Name, StringComparison.CurrentCultureIgnoreCase) && Equals(other.Value, this.Value);
+            return string.Equals(other.Name, this.Name, StringComparison.OrdinalIgnoreCase)
+                && string.Equals(other.Value, this.Value, StringComparison.OrdinalIgnoreCase);
         }
 
         /// <summary>
