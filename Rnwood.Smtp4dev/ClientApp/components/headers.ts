@@ -11,7 +11,6 @@ export default class Headers extends Vue {
     @Prop()
     headers: Header[] = [];
 
-
     async destroyed() {
         
     }
