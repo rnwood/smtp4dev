@@ -17,7 +17,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.App" Version="2.1.5" />
 		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="2.1.1" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.1.1" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.1.4" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.1.4" />
