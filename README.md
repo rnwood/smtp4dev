@@ -89,3 +89,6 @@ To use an in memory DB use an empty string (e.g. ``--db=""``)). All session and 
 
 #### Changing the SMTP port
 smtp4dev listens on 0.0.0.0 (all interfaces) port 25 by default. To change this either edit `ServerOptions\Port` in the ``appsettings.json`` before startup or add the ``--smtpport`` command line options (e.g. ``--smtpport 2525``).
+
+#### Changing the Web interface port
+The website listens on port 5000 by default. To change this add ``--webport`` command line options (e.g. ``--webport 5001``).

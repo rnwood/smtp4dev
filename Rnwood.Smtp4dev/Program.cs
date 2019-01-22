@@ -15,6 +15,8 @@ namespace Rnwood.Smtp4dev
 {
     public class Program
     {
+        public const int DEFAULT_WEB_PORT = 5000;
+
         public static bool IsService { get; private set; }
 
         public static void Main(string[] args)
@@ -59,6 +61,7 @@ namespace Rnwood.Smtp4dev
         private static IWebHost BuildWebHost(string[] args)
         {
             Directory.SetCurrentDirectory(GetContentRoot());
+            var webPort = ReadWebPortFromArgs(args);
 
             return WebHost
                 .CreateDefaultBuilder(args)
@@ -81,7 +84,20 @@ namespace Rnwood.Smtp4dev
                                 .Build();
                         })
                 .UseStartup<Startup>()
+                .UseUrls($"http://*:{webPort}")
                 .Build();
+        }
+
+        private static int ReadWebPortFromArgs(string[] args)
+        {
+            var index = Array.IndexOf(args,"--webport");
+            if (index < 0 || args.Length < index+2)
+                return DEFAULT_WEB_PORT;
+            
+            if(!int.TryParse(args[index+1], out var webPort))
+                return DEFAULT_WEB_PORT;
+
+            return webPort;
         }
     }
 }
