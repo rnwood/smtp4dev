@@ -1,7 +1,7 @@
 version: 3.1.0-ci@{build}
 image: Visual Studio 2017
 environment:
-   API_KEY:
+   API_TOKEN:
      secure: TUj13IEbYXS0fkN/51x9jq+JkgTrks7Fz+HejKDUPHo=
    matrix:
      - TESTFRAMEWORK: netcoreapp2.0      	
