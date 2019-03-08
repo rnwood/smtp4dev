@@ -63,7 +63,7 @@ init:
 install:
 - ps: |
     if ($env:RUNTIME -ne "docker") {
-        Install-Product node '' 2>&1
+        Install-Product node '' *>&1
     }
     write-host "Install done"
 build_script:
