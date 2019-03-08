@@ -31,6 +31,7 @@ init:
            Update-AppveyorBuild -version $env:APPVEYOR_REPO_TAG_NAME
        } catch {
           Add-AppveyorMessage -Message "Skipping github release label."
+          
           Exit-AppveyorBuild
        }
        $version = $env:APPVEYOR_REPO_TAG_NAME
@@ -48,8 +49,10 @@ install:
 build_script:
  - ps: |
     dotnet build Rnwood.SmtpServer -c Debug
-    if ($env:PUBLISH) {
+    if ($env:PUBLISH -eq "1") {
        dotnet pack Rnwood.SmtpServer -c Release -p:"PackageVersion=$env:APPVEYOR_BUILD_VERSION"
+    } else {
+      write-host "Skipping publish"
     }
 artifacts:
 - path: Rnwood.SmtpServer\bin\Release\*.nupkg
