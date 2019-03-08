@@ -31,9 +31,8 @@ namespace Rnwood.Smtp4dev.Controllers
             {
                 if (context.HttpContext.Response.StatusCode == 200)
                 {
-                    ObjectResult results = context.Result as ObjectResult;
 
-                    if (results != null)
+                    if (context.Result is ObjectResult results)
                     {
                         string hashable = null;
                         if (results.Value is IEnumerable<ICacheById> cacheableList)

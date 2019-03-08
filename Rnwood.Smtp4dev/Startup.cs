@@ -13,7 +13,6 @@ using Microsoft.Extensions.Logging;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Server;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Net.Http.Headers;
 
 namespace Rnwood.Smtp4dev
