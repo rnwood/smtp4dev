@@ -54,7 +54,7 @@ before_deploy:
        dotnet pack Rnwood.SmtpServer -c Release -p:"PackageVersion=$env:APPVEYOR_BUILD_VERSION"
     }
 artifacts:
-- path: Rnwood.SmtpServer\bin\$(configuration)\*.nupkg
+- path: Rnwood.SmtpServer\bin\Release\*.nupkg
 test_script:
 - ps: |
     dotnet test -f $env:TESTFRAMEWORK -r Debug Rnwood.SmtpServer.Tests\Rnwood.SmtpServer.Tests.csproj
