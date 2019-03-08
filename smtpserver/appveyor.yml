@@ -31,7 +31,7 @@ init:
            Update-AppveyorBuild -version $env:APPVEYOR_REPO_TAG_NAME
        } catch {
           Add-AppveyorMessage -Message "Skipping github release label. Deleting build $($env:APPVEYOR_BUILD_ID)"
-          Invoke-RestMethod -Uri "https://ci.appveyor.com/api/builds/$($env:APPVEYOR_BUILD_ID)" -Headers $headers -Method Delete -Headers @{
+          Invoke-RestMethod -Uri "https://ci.appveyor.com/api/builds/$($env:APPVEYOR_BUILD_ID)" -Method Delete -Headers @{
             "Authorization" = "Bearer $env:API_TOKEN"
             "Content-type" = "application/json"
           }
