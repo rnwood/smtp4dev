@@ -18,7 +18,7 @@ namespace Rnwood.SmtpServer
     /// <seealso cref="Rnwood.SmtpServer.IEditableSession" />
     public abstract class AbstractSession : IEditableSession
     {
-        private List<IMessage> messages;
+        private readonly List<IMessage> messages;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="AbstractSession"/> class.

@@ -5,6 +5,7 @@
 
 namespace Rnwood.SmtpServer.Tests
 {
+    using System;
     using System.Net.Sockets;
     using System.Threading.Tasks;
     using Xunit;
@@ -43,12 +44,26 @@ namespace Rnwood.SmtpServer.Tests
             }
         }
 
+        /// <summary>  Tests that the port number is returned via the PortNumber property when AssignAutomatically is used.</summary>
+        [Fact]
+        public void StartOnAutomaticPort_PortNumberReturned()
+        {
+            SmtpServer server = new DefaultServer(false, StandardSmtpPort.AssignAutomatically);
+            server.Start();
+            Assert.NotEqual(0, server.PortNumber);
+        }
+
         /// <summary>
         /// The StartOnInusePort_StartupExceptionThrown
         /// </summary>
-        [Fact]
+        [SkippableFact]
         public void StartOnInusePort_StartupExceptionThrown()
         {
+            //Exclusive port use is only available on Windows.
+            //On other platforms the listener with the most specific address will receive
+            //all the connections.
+            Skip.IfNot(Environment.OSVersion.Platform == PlatformID.Win32NT);
+
             using (SmtpServer server1 = new DefaultServer(false, StandardSmtpPort.AssignAutomatically))
             {
                 server1.Start();

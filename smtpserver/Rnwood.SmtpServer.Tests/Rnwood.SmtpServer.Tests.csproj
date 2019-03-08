@@ -27,10 +27,17 @@
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="Moq" Version="4.10.0" />
     <PackageReference Include="MailKit" Version="2.0.7" />
+    <PackageReference Include="Xunit.SkippableFact" Version="1.3.12" />
   </ItemGroup>
 
   <ItemGroup>
     <AdditionalFiles Include="../stylecop.json" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="mscorlib">
+      <HintPath>..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.2\mscorlib.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
 </Project>

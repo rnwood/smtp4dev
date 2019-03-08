@@ -2892,6 +2892,17 @@
             <param name="stream">The stream to write to.</param>
             <param name="encoding">The character encoding to use.</param>
         </member>
+        <member name="T:Rnwood.SmtpServer.SmtpStringBuilder">
+            <summary>Builds a multi line string where each line has the CRLF terminator required for SMTP.</summary>
+        </member>
+        <member name="M:Rnwood.SmtpServer.SmtpStringBuilder.AppendLine(System.String)">
+            <summary>Appends a line to the string and terminates it with the correct CRLF required for SMTP.</summary>
+            <param name="text">The text.</param>
+        </member>
+        <member name="M:Rnwood.SmtpServer.SmtpStringBuilder.ToString">
+            <summary>  Returns the complete string including all lines which have been appended separated with the correct CRLF.</summary>
+            <returns>A <see cref="T:System.String"/> that represents this instance.</returns>
+        </member>
         <member name="T:Rnwood.SmtpServer.StandardSmtpPort">
             <summary>
             Enumeration of the different standard TCP ports that the server can listen on

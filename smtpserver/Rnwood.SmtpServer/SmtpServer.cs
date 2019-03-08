@@ -16,10 +16,12 @@ namespace Rnwood.SmtpServer
     using Microsoft.Extensions.Logging;
     using Rnwood.SmtpServer.Verbs;
 
-    /// <summary>
-    /// Defines the <see cref="SmtpServer" />
-    /// </summary>
+#pragma warning disable CA1724 // Type names should not match namespaces
+                              /// <summary>
+                              /// Defines the <see cref="SmtpServer" />
+                              /// </summary>
     public class SmtpServer : ISmtpServer
+#pragma warning restore CA1724 // Type names should not match namespaces
     {
         /// <summary>
         /// Defines the activeConnections
