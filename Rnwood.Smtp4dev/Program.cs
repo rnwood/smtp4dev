@@ -19,7 +19,7 @@ namespace Rnwood.Smtp4dev
 
         public static void Main(string[] args)
         {
-            Version version = typeof(Program).Assembly.GetName().Version;
+            string version = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
             Console.WriteLine($"smtp4dev version {version}");
             Console.WriteLine("https://github.com/rnwood/smtp4dev\n");
 

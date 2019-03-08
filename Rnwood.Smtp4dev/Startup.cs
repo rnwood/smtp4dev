@@ -69,8 +69,11 @@ namespace Rnwood.Smtp4dev
             });
 
             app.UseDefaultFiles();
-			
-			if (env.IsDevelopment()) {
+
+
+            bool webpackConfigPresent = File.Exists(Path.Combine(env.ContentRootPath, "webpack.config.js"));
+
+			if (env.IsDevelopment() && webpackConfigPresent) {
 			    app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
                 {
                     HotModuleReplacement = true
