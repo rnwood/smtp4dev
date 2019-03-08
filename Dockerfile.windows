@@ -3,6 +3,8 @@ FROM microsoft/windowsservercore as build
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
+ARG versionsuffix
+ENV VERSIONSUFFIX $versionsuffix
 ENV DOTNET_SDK_VERSION 2.1.403
 
 RUN Invoke-WebRequest -OutFile dotnet.zip https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$Env:DOTNET_SDK_VERSION/dotnet-sdk-$Env:DOTNET_SDK_VERSION-win-x64.zip; \
@@ -34,7 +36,7 @@ RUN dotnet restore Rnwood.Smtp4dev
 WORKDIR /app
 COPY . .
 WORKDIR /app/Rnwood.Smtp4dev
-RUN dotnet publish -c Release -o out
+RUN dotnet publish -c Release -o out --version-suffix $VERSIONSUFFIX
 
 FROM microsoft/dotnet:2.1.5-aspnetcore-runtime AS runtime
 WORKDIR /app

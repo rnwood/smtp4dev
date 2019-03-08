@@ -48,7 +48,7 @@ smtp4dev
 ## How to run smtp4dev in Docker
 Docker images for both Windows and Linux are available. To run with the web interface on port 3000 and SMTP on port 2525:
 
-**Linux:**
+**Linux or Linux Containers on Windows/Other-OSs:**
 ```
 docker run -p 3000:80 -p 2525:25 rnwood/smtp4dev:linux-amd64-v3
 ```

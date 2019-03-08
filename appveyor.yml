@@ -45,12 +45,13 @@ install:
     }
 build_script:
  - ps: |
+    $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
     if ($env:RUNTIME -eq "docker") {
       docker pull rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3
-      docker build --cache-from rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -m 4g -t rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -f Dockerfile.$($env:DOCKERFILE) .
+      docker build --cache-from rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -m 4g -t rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -f Dockerfile.$($env:DOCKERFILE) --build-arg VERSIONSUFFIX=$versionsuffix .
       docker tag rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)	  
     } else {
-        dotnet build Smtp4dev.sln -c $env:Configuration
+        dotnet build Smtp4dev.sln -c $env:Configuration --version-suffix $versionsuffix
     }
 after_build:
  - ps: |
