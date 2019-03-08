@@ -1,8 +1,8 @@
 FROM microsoft/dotnet:2.1-sdk AS build
 WORKDIR /app
 
-ARG versionsuffix
-ENV VERSIONSUFFIX $versionsuffix
+ARG version
+ENV VERSION $version
 
 # replace shell with bash so we can source files
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
@@ -37,11 +37,11 @@ RUN dotnet restore Rnwood.Smtp4dev
 # copy everything else and build app
 COPY . .
 WORKDIR /app/Rnwood.Smtp4dev
-RUN dotnet build --version-suffix $VERSIONSUFFIX
+RUN dotnet build -p:Version=$VERSION
 
 FROM build AS publish
 WORKDIR /app/Rnwood.Smtp4dev
-RUN dotnet publish -c Release -o out --version-suffix $VERSIONSUFFIX
+RUN dotnet publish -c Release -o out -p:Version=$VERSION
 
 FROM microsoft/dotnet:2.1.5-aspnetcore-runtime AS runtime
 WORKDIR /app

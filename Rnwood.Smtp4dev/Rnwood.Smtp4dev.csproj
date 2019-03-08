@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>netcoreapp2.1</TargetFramework>
-		<VersionPrefix>3.0.0-alpha</VersionPrefix>
+		<VersionPrefix>3.1.0-dev</VersionPrefix>
 		<TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 		<TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>

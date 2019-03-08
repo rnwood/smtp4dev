@@ -1,7 +1,7 @@
-version: 3.0.{build}-{branch}
+version: 3.1.0-ci@{build}
 os: Visual Studio 2017
 configuration: Release
-skip_tags: true
+skip_tags: false
 branches:
   except:
     - azure-pipelines
@@ -38,6 +38,28 @@ assembly_info:
 nuget:
   account_feed: false
   project_feed: false
+init:
+ - ps: |
+    $ErrorActionPreference="Stop"
+    $version = $env:APPVEYOR_BUILD_VERSION
+    if ($env:APPVEYOR_REPO_TAG_NAME) {
+       write-host "Using label ${env:APPVEYOR_REPO_TAG_NAME} as version number"
+       try {
+           Update-AppveyorBuild -version $env:APPVEYOR_REPO_TAG_NAME
+       } catch {
+          Add-AppveyorMessage -Message "Skipping github release label."
+          
+          Exit-AppveyorBuild
+       }
+       $version = $env:APPVEYOR_REPO_TAG_NAME
+       Set-AppveyorBuildVariable 'PRERELEASE' (($version.Contains("-")).ToString())
+    } else {
+        $paddedbuild = ([int]$env:APPVEYOR_BUILD_NUMBER).ToString("0000")
+        write-host "Version is $version - replacing @${env:APPVEYOR_BUILD_NUMBER} with $paddedbuild"
+        Update-AppveyorBuild -version ($version.Replace("@${env:APPVEYOR_BUILD_NUMBER}", "$paddedbuild"))
+        Set-AppveyorBuildVariable 'PRERELEASE' "true"
+    }
+    
 install:
 - ps: |
     if ($env:RUNTIME -ne "docker") {
@@ -45,40 +67,48 @@ install:
     }
 build_script:
  - ps: |
-    $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
     if ($env:RUNTIME -eq "docker") {
       docker pull rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3
-      docker build --cache-from rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -m 4g -t rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -f Dockerfile.$($env:DOCKERFILE) --build-arg VERSIONSUFFIX=$versionsuffix .
+      docker build --cache-from rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -m 4g -t rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -f Dockerfile.$($env:DOCKERFILE) --build-arg version=$env:APPVEYOR_BUILD_VERSION .
       docker tag rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)	  
     } else {
-        dotnet build Smtp4dev.sln -c $env:Configuration --version-suffix $versionsuffix
+        dotnet build Smtp4dev.sln -c $env:Configuration -p:version=$env:APPVEYOR_BUILD_VERSION
     }
 after_build:
  - ps: |
-    $versionsuffix=$("{0:D4}" -f [convert]::ToInt32($env:APPVEYOR_BUILD_NUMBER, 10))
     if ($env:RUNTIME -eq "docker") {
         docker login -u "$env:DOCKERUSERNAME" -p "$env:DOCKERPASSWORD"
         docker push rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3
         docker push rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)
     } elseif ($env:RUNTIME -ne "noruntime") {
-       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME --version-suffix $versionsuffix -o publish
+       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME -p:version=$env:APPVEYOR_BUILD_VERSION -o publish
     } else {
-       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK --version-suffix $versionsuffix -o publish -p:PackAsTool=true
-       dotnet pack Rnwood.Smtp4dev -c $env:Configuration --version-suffix $versionsuffix -p:PackAsTool=true
+       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -p:version=$env:APPVEYOR_BUILD_VERSION -o publish -p:PackAsTool=true
+       dotnet pack Rnwood.Smtp4dev -c $env:Configuration -p:version=$env:APPVEYOR_BUILD_VERSION -p:PackAsTool=true
     }
 artifacts:
 - path: Rnwood.Smtp4dev\publish
   name: Smtp4dev-$(runtime)-v$(appveyor_build_version)
   type: zip
 - path: Rnwood.Smtp4dev\bin\pkg\*.nupkg
-deploy:
+cache:
+    - Rnwood.Smtp4dev\node_modules -> Rnwood.Smtp4dev\package.json
+deploy:    
 - provider: GitHub
   artifact: /.*\..*/
   auth_token:
     secure: 5zLYIRVYHWHyZYOUZ2F46AvAYb3OLIWs35PQUddGkyK3xkV7qCmaMT38PJY6OiY7
-  prerelease: true
+  prerelease: $(PRERELEASE)
+  tag: $(APPVEYOR_REPO_TAG_NAME)
   on:
-    branch: master                 # release from master branch only
+    appveyor_repo_tag: true
+- provider: GitHub
+  artifact: /.*\..*/
+  auth_token:
+    secure: 5zLYIRVYHWHyZYOUZ2F46AvAYb3OLIWs35PQUddGkyK3xkV7qCmaMT38PJY6OiY7
+  prerelease: $(PRERELEASE)
+  on:
+    branch: master
     appveyor_repo_tag: false
 - provider: NuGet
   api_key:
@@ -86,7 +116,4 @@ deploy:
   skip_symbols: false
   artifact: /.*\.nupkg/
   on:
-    branch: master                 # release from master branch only
-    appveyor_repo_tag: false
-cache:
-    - Rnwood.Smtp4dev\node_modules -> Rnwood.Smtp4dev\package.json
+    branch: master
