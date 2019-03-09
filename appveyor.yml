@@ -9,7 +9,7 @@ environment:
   DOCKERUSERNAME: rnwood
   DOCKERPASSWORD:
     secure: 5jWYD10eY+CLicPtEtSMng==
-  FRAMEWORK: netcoreapp2.1
+  FRAMEWORK: netcoreapp2.2
   matrix:
     - RUNTIME: noruntime      	
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
