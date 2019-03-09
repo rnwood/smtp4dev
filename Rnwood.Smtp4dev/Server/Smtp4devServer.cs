@@ -1,10 +1,9 @@
-﻿using Microsoft.AspNetCore.SignalR;
-using Microsoft.Extensions.Options;
-using MimeKit;
+﻿using Microsoft.Extensions.Options;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.SmtpServer;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -32,80 +31,72 @@ namespace Rnwood.Smtp4dev.Server
         private IOptions<ServerOptions> serverOptions;
         private readonly IDictionary<ISession, Guid> sessionToDbId = new Dictionary<ISession, Guid>();
 
-        private async Task OnSessionStarted(object sender, SessionEventArgs e)
+        private Task OnSessionStarted(object sender, SessionEventArgs e)
         {
-            Console.WriteLine($"Session started. Client address {e.Session.ClientAddress}");
-            Smtp4devDbContext dbContent = dbContextFactory();
-
-            Session session = new Session();
-            await UpdateDbSession(e, session);
-            dbContent.Sessions.Add(session);
-            dbContent.SaveChanges();
-
-            sessionToDbId[e.Session] = session.Id;
-        }
-
-        private static async Task UpdateDbSession(SessionEventArgs e, Session session)
-        {
-            session.StartDate = e.Session.StartDate;
-            session.EndDate = e.Session.EndDate;
-            session.ClientAddress = e.Session.ClientAddress.ToString();
-            session.ClientName = e.Session.ClientName;
-            session.NumberOfMessages = (await e.Session.GetMessages()).Count;
-            session.Log = (await e.Session.GetLog()).ReadToEnd();
-            session.SessionErrorType = e.Session.SessionErrorType;
-            session.SessionError = e.Session.SessionError?.ToString();
+            Console.WriteLine($"Session started. Client address {e.Session.ClientAddress}.");
+            processingQueue.Add(new SessionStartedDbUpdateEvent(e.Session, sessionToDbId));
+            return Task.CompletedTask;
         }
 
         private async Task OnSessionCompleted(object sender, SessionEventArgs e)
         {
             int messageCount = (await e.Session.GetMessages()).Count;
-
-            Console.WriteLine($"Session completed. Client address {e.Session.ClientAddress}. Number of messages {messageCount}");
-            Smtp4devDbContext dbContent = dbContextFactory();
-
-            Session session = dbContent.Sessions.Find(sessionToDbId[e.Session]);
-            await UpdateDbSession(e, session);
-            dbContent.SaveChanges();
-
-            TrimSessions(dbContent);
-            dbContent.SaveChanges();
-
-
-            sessionsHub.OnSessionsChanged().Wait();
+            Console.WriteLine($"Session completed. Client address {e.Session.ClientAddress}. Number of messages {messageCount}.");
+            processingQueue.Add(new SessionCompletedDbUpdateEvent(e.Session, sessionToDbId));
         }
+
 
         private async Task OnMessageReceived(object sender, MessageEventArgs e)
         {
-            Smtp4devDbContext dbContent = dbContextFactory();
-
             using (Stream stream = await e.Message.GetData())
             {
-                Message message = await new MessageConverter().ConvertAsync(stream, e.Message.From, string.Join(", ", e.Message.Recipients));
-
-                Session session = dbContent.Sessions.Find(sessionToDbId[e.Message.Session]);
-                message.Session = session;
-                dbContent.Messages.Add(message);
+                string to = string.Join(", ", e.Message.Recipients);
+                Console.WriteLine($"Message received. Client address {e.Message.Session.ClientAddress}. From {e.Message.From}. To {to}.");
+                Message message = await new MessageConverter().ConvertAsync(stream, e.Message.From, to);
+                processingQueue.Add(new MessageReceivedDbUpdateEvent(message, e.Message.Session, sessionToDbId));
             }
 
-            await dbContent.SaveChangesAsync();
-
-            TrimMessages(dbContent);
-            await dbContent.SaveChangesAsync();
-            await messagesHub.OnMessagesChanged();
         }
 
-        private void TrimMessages(Smtp4devDbContext dbContext)
+        internal static void TrimMessages(Smtp4devDbContext dbContext, ServerOptions serverOptions)
         {
-            dbContext.Messages.RemoveRange(dbContext.Messages.OrderByDescending(m => m.ReceivedDate).Skip(serverOptions.Value.NumberOfMessagesToKeep));
+            dbContext.Messages.RemoveRange(dbContext.Messages.OrderByDescending(m => m.ReceivedDate).Skip(serverOptions.NumberOfMessagesToKeep));
         }
 
-        private void TrimSessions(Smtp4devDbContext dbContext)
+        internal static void TrimSessions(Smtp4devDbContext dbContext, ServerOptions serverOptions)
         {
-            dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue).OrderByDescending(m => m.EndDate).Skip(serverOptions.Value.NumberOfSessionsToKeep));
+            dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue).OrderByDescending(m => m.EndDate).Skip(serverOptions.NumberOfSessionsToKeep));
+        }
+
+        private async Task ProcessingTaskWork()
+        {
+            Console.WriteLine("Message/session consuming thread running.");
+            while (!processingQueue.IsCompleted)
+            {
+                IDbUpdateEvent nextItem = null;
+                try
+                {
+                    nextItem = processingQueue.Take();
+                }
+                catch (InvalidOperationException)
+                {
+                    if (processingQueue.IsCompleted)
+                    {
+                        break;
+                    }
+
+                    throw;
+                }
+
+                await nextItem.Process(dbContextFactory, messagesHub, sessionsHub, serverOptions.Value);
+            }
+
+            Console.WriteLine("Message/session consuming thread ending.");
         }
 
         private readonly Func<Smtp4devDbContext> dbContextFactory;
+
+        private BlockingCollection<IDbUpdateEvent> processingQueue;
 
         private DefaultServer smtpServer;
 
@@ -115,22 +106,26 @@ namespace Rnwood.Smtp4dev.Server
         public void Start()
         {
             Smtp4devDbContext dbContent = dbContextFactory();
-            
-            foreach(Session unfinishedSession in dbContent.Sessions.Where(s => !s.EndDate.HasValue))
+
+            foreach (Session unfinishedSession in dbContent.Sessions.Where(s => !s.EndDate.HasValue))
             {
                 unfinishedSession.EndDate = DateTime.Now;
             }
             dbContent.SaveChanges();
 
-            TrimMessages(dbContent);
+            TrimMessages(dbContent, serverOptions.Value);
             dbContent.SaveChanges();
 
-            TrimSessions(dbContent);
+            TrimSessions(dbContent, serverOptions.Value);
             dbContent.SaveChanges();
             messagesHub.OnMessagesChanged().Wait();
             sessionsHub.OnSessionsChanged().Wait();
 
+            processingQueue = new BlockingCollection<IDbUpdateEvent>();
+            Task.Run(ProcessingTaskWork);
+
             smtpServer.Start();
+
             Console.WriteLine($"SMTP Server is listening on port {smtpServer.PortNumber}. Keeping last {serverOptions.Value.NumberOfMessagesToKeep} messages and {serverOptions.Value.NumberOfSessionsToKeep} sessions.");
 
         }
