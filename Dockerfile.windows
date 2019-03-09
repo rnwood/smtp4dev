@@ -36,6 +36,7 @@ RUN dotnet restore Rnwood.Smtp4dev
 WORKDIR /app
 COPY . .
 WORKDIR /app/Rnwood.Smtp4dev
+RUN dotnet build -p:Version=$VERSION
 RUN dotnet publish -c Release -o out -p:Version=$VERSION
 
 FROM microsoft/dotnet:2.1.5-aspnetcore-runtime AS runtime
