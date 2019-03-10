@@ -15,6 +15,7 @@ using Rnwood.Smtp4dev.Hubs;
 using System.Linq.Dynamic.Core;
 
 using Message = Rnwood.Smtp4dev.DbModel.Message;
+using Rnwood.Smtp4dev.Server;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -23,14 +24,14 @@ namespace Rnwood.Smtp4dev.Controllers
     [UseEtagFilterAttribute]
     public class MessagesController : Controller
     {
-        public MessagesController(Smtp4devDbContext dbContext, MessagesHub messagesHub)
+        public MessagesController(Smtp4devDbContext dbContext, Smtp4devServer server)
         {
             this.dbContext = dbContext;
-            this.messagesHub = messagesHub;
+            this.server = server;
         }
 
         private Smtp4devDbContext dbContext;
-        private MessagesHub messagesHub;
+        private Smtp4devServer server;
 
         [HttpGet]
 
@@ -123,23 +124,13 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpDelete("{id}")]
         public async Task Delete(Guid id)
         {
-
-            dbContext.Messages.RemoveRange(dbContext.Messages.Where(m => m.Id == id));
-
-            dbContext.SaveChanges();
-
-            await messagesHub.OnMessagesChanged();
-         
+            await server.DeleteMessage(id);
         }
 
         [HttpDelete("*")]
         public async Task DeleteAll()
         {
-            dbContext.Messages.RemoveRange(dbContext.Messages);
-
-            dbContext.SaveChanges();
-
-            await messagesHub.OnMessagesChanged();
+            await server.DeleteAllMessages();
          }
 
     }

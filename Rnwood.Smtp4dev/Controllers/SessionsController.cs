@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System.IO;
 using MimeKit;
 using HtmlAgilityPack;
+using Rnwood.Smtp4dev.Server;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -18,15 +19,15 @@ namespace Rnwood.Smtp4dev.Controllers
     [UseEtagFilterAttribute]
     public class SessionsController : Controller
     {
-        public SessionsController(Smtp4devDbContext dbContext, SessionsHub sessionsHub)
+        public SessionsController(Smtp4devDbContext dbContext, Smtp4devServer server)
         {
             this.dbContext = dbContext;
-            this.sessionsHub = sessionsHub;
+            this.server = server;
         }
 
 
         private Smtp4devDbContext dbContext;
-        private SessionsHub sessionsHub;
+        private Smtp4devServer server;
 
         [HttpGet]
         public IEnumerable<ApiModel.SessionSummary> GetSummaries()
@@ -53,23 +54,13 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpDelete("{id}")]
         public async Task Delete(Guid id)
         {
-            dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.Id == id ));
-
-            dbContext.SaveChanges();
-
-            await sessionsHub.OnSessionsChanged();
-
+            await server.DeleteSession(id);
         }
 
         [HttpDelete("*")]
         public async Task DeleteAll()
         {
-            dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue));
-         
-            dbContext.SaveChanges();
-
-            await sessionsHub.OnSessionsChanged();
-
+            await server.DeleteAllSessions();
         }
 
 
