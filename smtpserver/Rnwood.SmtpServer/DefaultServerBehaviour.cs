@@ -193,17 +193,13 @@ namespace Rnwood.SmtpServer
         /// <inheritdoc/>
         public virtual Task OnMessageCompleted(IConnection connection)
         {
-            this.MessageCompletedEventHandler?.Invoke(this, new ConnectionEventArgs(connection));
-
-            return Task.CompletedTask;
+            return this.MessageCompletedEventHandler?.Invoke(this, new ConnectionEventArgs(connection)) ?? Task.CompletedTask;
         }
 
         /// <inheritdoc/>
         public virtual Task OnMessageReceived(IConnection connection, IMessage message)
         {
-            this.MessageReceivedEventHandler?.Invoke(this, new MessageEventArgs(message));
-
-            return Task.CompletedTask;
+            return this.MessageReceivedEventHandler?.Invoke(this, new MessageEventArgs(message)) ?? Task.CompletedTask;
         }
 
         /// <inheritdoc/>
@@ -221,17 +217,13 @@ namespace Rnwood.SmtpServer
         /// <inheritdoc/>
         public virtual Task OnSessionCompleted(IConnection connection, ISession session)
         {
-            this.SessionCompletedEventHandler?.Invoke(this, new SessionEventArgs(session));
-
-            return Task.CompletedTask;
+            return this.SessionCompletedEventHandler?.Invoke(this, new SessionEventArgs(session)) ?? Task.CompletedTask;
         }
 
         /// <inheritdoc/>
         public virtual Task OnSessionStarted(IConnection connection, ISession session)
         {
-            this.SessionStartedEventHandler?.Invoke(this, new SessionEventArgs(session));
-
-            return Task.CompletedTask;
+            return this.SessionStartedEventHandler?.Invoke(this, new SessionEventArgs(session)) ?? Task.CompletedTask;
         }
 
         /// <inheritdoc/>
