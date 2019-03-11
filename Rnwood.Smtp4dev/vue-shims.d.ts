@@ -17,6 +17,4 @@ declare module "vue-highlightjs" {
     var VueHighlightJS: PluginObject<any>;
 
     export default VueHighlightJS;
-
-
 }

@@ -5,23 +5,31 @@ import VueRouter from 'vue-router';
 import Element from 'element-ui';
 import VueHighlightJS from 'vue-highlightjs';
 
-Vue.use(Element);
-Vue.use(VueRouter);
-Vue.use(VueHighlightJS)
+var supportedBrowser = typeof (document.createElement("p").style.flex) != "undefined" && window.hasOwnProperty("Reflect") && window.hasOwnProperty("Promise");
 
-const routes = [
-    { path: '/', component: (<any> require('./components/home/home.vue.html')).default },
-];
+if (!supportedBrowser) {
 
-var router = new VueRouter({ mode: 'history', routes: routes })
-var app = new Vue({
-    el: '#app-root',
-    router: router,
-    render: h => h((<any>require('./components/app/app.vue.html')).default)
-});
+    (<HTMLElement>document.getElementById("oldbrowser")).style.display = "block";
+    (<HTMLElement>document.getElementById("app-root")).style.display = "none";
 
+} else {
 
+    Vue.use(Element);
+    Vue.use(VueRouter);
+    Vue.use(VueHighlightJS)
 
+    const routes = [
+        { path: '/', component: (<any>require('./components/home/home.vue.html')).default },
+    ];
+
+    var router = new VueRouter({ mode: 'history', routes: routes })
+    var app = new Vue({
+        el: '#app-root',
+        router: router,
+        render: h => h((<any>require('./components/app/app.vue.html')).default)
+    });
+
+}
 
 
 
