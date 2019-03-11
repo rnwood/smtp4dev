@@ -49,12 +49,17 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         [HttpGet("{id}")]
-
         public ApiModel.Message GetMessage(Guid id)
         {
             Message result = GetDbMessage(id);
 
             return new ApiModel.Message(result);
+        }
+
+        [HttpPost("{id}")]
+        public Task MarkMessageRead(Guid id)
+        {
+            return server.MarkMessageRead(id);
         }
 
         [HttpGet("{id}/source")]
@@ -66,7 +71,6 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         [HttpGet("{id}/part/{cid}/content")]
-
         public FileStreamResult GetPartContent(Guid id, string cid)
         {
             Message result = GetDbMessage(id);

@@ -43,6 +43,21 @@ namespace Rnwood.Smtp4dev.Server
             dbSession.SessionError = session.SessionError?.ToString();
         }
 
+        internal Task MarkMessageRead(Guid id)
+        {
+            return QueueTask(async() => {
+                Smtp4devDbContext dbContent = dbContextFactory();
+                DbModel.Message message = await dbContent.Messages.FindAsync(id);
+
+                if (message.IsUnread)
+                {
+                    message.IsUnread = false;
+                    dbContent.SaveChanges();
+                    await messagesHub.OnMessagesChanged();
+                }
+            }, true);
+        }
+
         private async Task OnSessionStarted(object sender, SessionEventArgs e)
         {
             Console.WriteLine($"Session started. Client address {e.Session.ClientAddress}.");
@@ -128,6 +143,7 @@ namespace Rnwood.Smtp4dev.Server
                 string to = string.Join(", ", e.Message.Recipients);
                 Console.WriteLine($"Message received. Client address {e.Message.Session.ClientAddress}. From {e.Message.From}. To {to}.");
                 Message message = await new MessageConverter().ConvertAsync(stream, e.Message.From, to);
+                message.IsUnread = true;
 
                 await QueueTask(async () => {
                     Console.WriteLine("Processing received message");

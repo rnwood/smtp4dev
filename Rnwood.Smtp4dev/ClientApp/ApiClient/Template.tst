@@ -13,7 +13,7 @@
         }
         return String.Join("\n", neededImports.Distinct());
     }
-      
+     
     string ControllerImports(Class c){
         List<string> neededImports = c.Methods
 	        .Where(m => !m.Type.IsPrimitive && !m.Type.Name.Contains("void"))

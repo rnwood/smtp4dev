@@ -17,7 +17,7 @@
         </el-alert>
 
         <el-table :data="messages" v-loading="loading" empty-text="No messages"
-                  highlight-current-row @current-change="handleCurrentChange" @sort-change="sort" :default-sort="{prop: 'receivedDate', order: 'descending'}" class="table" type="selection" reserve-selection="true" row-key="id">
+                  highlight-current-row @current-change="handleCurrentChange" @sort-change="sort" :default-sort="{prop: 'receivedDate', order: 'descending'}" class="table" type="selection" reserve-selection="true" row-key="id" :row-class-name="getRowClass">
 
             <el-table-column property="receivedDate" label="Received" width="120" sortable="custom" :formatter="formatDate">
             </el-table-column>

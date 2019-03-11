@@ -34,6 +34,16 @@ export default class MessagesController {
         return (await axios.get(this.getMessage_url(id), null || undefined)).data as Message;
     }
     
+    // post: api/Messages/${encodeURIComponent(id)}  
+    public markMessageRead_url(id: string): string {
+        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}`;
+    }
+
+    public async markMessageRead(id: string): Promise<void> {
+
+        return (await axios.post(this.markMessageRead_url(id), null || undefined)).data as void;
+    }
+    
     // get: api/Messages/${encodeURIComponent(id)}/source  
     public downloadMessage_url(id: string): string {
         return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/source`;

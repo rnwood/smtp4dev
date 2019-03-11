@@ -44,7 +44,22 @@ export default class MessageView extends Vue {
 
         try {
             if (this.messageSummary != null) {
+
                 this.message = await new MessagesController().getMessage(this.messageSummary.id);
+
+                if (this.messageSummary.isUnread) {
+                    var currentMessageSummary = this.messageSummary;
+                    setTimeout(async () => {
+                        if (this.messageSummary != null && currentMessageSummary.id == this.messageSummary.id) {
+                            try {
+                                await new MessagesController().markMessageRead(this.messageSummary.id);
+                            } catch (e) {
+                                console.error(e);
+                            }
+                        }
+                    }, 2000)
+                }
+                
             }
         } catch (e) {
             this.error = e;

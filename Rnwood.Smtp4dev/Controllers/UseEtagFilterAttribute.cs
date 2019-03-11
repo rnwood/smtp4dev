@@ -35,11 +35,11 @@ namespace Rnwood.Smtp4dev.Controllers
                     if (context.Result is ObjectResult results)
                     {
                         string hashable = null;
-                        if (results.Value is IEnumerable<ICacheById> cacheableList)
+                        if (results.Value is IEnumerable<ICacheByKey> cacheableList)
                         {
                             if (cacheableList.Any())
                             {
-                                hashable = string.Join(",", cacheableList.Select(i => i.Id.ToString()));
+                                hashable = string.Join(",", cacheableList.Select(i => i.CacheKey));
                             }
                             else
                             {
@@ -47,9 +47,9 @@ namespace Rnwood.Smtp4dev.Controllers
                             }
 
                         }
-                        else if (results.Value is ICacheById cachableObject)
+                        else if (results.Value is ICacheByKey cachableObject)
                         {
-                            hashable = cachableObject.Id.ToString();
+                            hashable = cachableObject.CacheKey;
                         }
 
                         if (!string.IsNullOrEmpty(hashable))

@@ -7,6 +7,7 @@ import * as moment from 'moment';
 import HubConnectionManager from '../HubConnectionManager';
 import sortedArraySync from '../sortedArraySync';
 import { Mutex } from 'async-mutex';
+import Message from '../ApiClient/Message';
 
 
 @Component({
@@ -43,6 +44,10 @@ export default class MessageList extends Vue {
 
     formatDate(row: number, column: number, cellValue: string, index: number): string {
         return moment(String(cellValue)).format('YYYY-DD-MM hh:mm:ss');
+    }
+
+    getRowClass(event: { row: MessageSummary }): string {
+        return event.row.isUnread ? "unread" : "read";
     }
 
     async deleteSelected() {
@@ -95,7 +100,11 @@ export default class MessageList extends Vue {
                 this.messages.splice(0, this.messages.length, ...newMessages);
             } else {
 
-                sortedArraySync(newMessages, this.messages, (a: MessageSummary, b: MessageSummary) => a.id == b.id);
+                sortedArraySync(newMessages, this.messages,
+                    (a: MessageSummary, b: MessageSummary) => a.id == b.id, 
+                    (sourceItem: MessageSummary, targetItem: MessageSummary) => {
+                        targetItem.isUnread = sourceItem.isUnread;
+                    });
             }
 
             this.lastSort = sortColumn;

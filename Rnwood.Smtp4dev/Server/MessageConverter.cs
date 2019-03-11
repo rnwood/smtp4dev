@@ -75,7 +75,6 @@ namespace Rnwood.Smtp4dev.Server
                 Data = data,
                 MimeParseError = mimeParseError,
                 AttachmentCount = 0
-                
             };
 
             var parts = new ApiModel.Message(message).Parts;

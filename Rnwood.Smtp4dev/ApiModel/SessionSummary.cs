@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
-    public class SessionSummary : ICacheById
+    public class SessionSummary : ICacheByKey
     {
         public SessionSummary(DbModel.Session dbSession)
         {
@@ -28,5 +28,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         public bool TerminatedWithError { get; private set; }
 
         public int Size { get; private set; }
+
+        string ICacheByKey.CacheKey => Id.ToString();
     }
 }

@@ -5,8 +5,8 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
-    public interface ICacheById
+    public interface ICacheByKey
     {
-        Guid Id { get; }
+        string CacheKey { get; }
     }
 }

@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
-    public class MessageSummary : ICacheById
+    public class MessageSummary : ICacheByKey
     {
         public MessageSummary(DbModel.Message dbMessage)
         {
@@ -17,6 +17,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             ReceivedDate = dbMessage.ReceivedDate;
             Subject = dbMessage.Subject;
             AttachmentCount = dbMessage.AttachmentCount;
+            IsUnread = dbMessage.IsUnread;
         }
 
         public Guid Id { get; set; }
@@ -28,6 +29,9 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string Subject { get; set; }
 
         public int AttachmentCount { get; set; }
-        
+
+        public bool IsUnread { get; set; }
+
+        string ICacheByKey.CacheKey => Id.ToString() + IsUnread.ToString();
     }
 }
