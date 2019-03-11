@@ -35,7 +35,7 @@ The version hosted on this repo is in heavy development. **Grab the [stable(r) v
 
 ## How to run smtp4dev as a dotnet global tool
 
-If you're using the .NET Core SDK 2.1 or greater, you can install smtp4dev as a global tool using the following command:
+If you're using the .NET Core SDK 2.2 or greater, you can install smtp4dev as a global tool using the following command:
 ```
 dotnet tool install -g Rnwood.Smtp4dev --version "3.1.0-*"
 ```
