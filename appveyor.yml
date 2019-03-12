@@ -77,14 +77,18 @@ build_script:
 after_build:
  - ps: |
     if ($env:RUNTIME -eq "docker") {
-        docker login -u "$env:DOCKERUSERNAME" -p "$env:DOCKERPASSWORD"
-        docker push rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3
-        docker push rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)
     } elseif ($env:RUNTIME -ne "noruntime") {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME -p:version=$env:APPVEYOR_BUILD_VERSION -o publish
     } else {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -p:version=$env:APPVEYOR_BUILD_VERSION -o publish -p:PackAsTool=true
        dotnet pack Rnwood.Smtp4dev -c $env:Configuration -p:version=$env:APPVEYOR_BUILD_VERSION -p:PackAsTool=true
+    }
+before_deploy:
+ - ps: |
+    if ($env:RUNTIME -eq "docker") {
+        docker login -u "$env:DOCKERUSERNAME" -p "$env:DOCKERPASSWORD" *>&1
+        docker push rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3
+        docker push rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)
     }
 artifacts:
 - path: Rnwood.Smtp4dev\publish
