@@ -11,10 +11,8 @@ declare module "srcdoc-polyfill" {
     export function set(iframe: HTMLIFrameElement, html : string): void;
 }
 
-declare module "vue-highlightjs" {
-    import { PluginObject } from "vue";
+declare module "vue2-ace-editor" {
+    var AceEditor: any;
 
-    var VueHighlightJS: PluginObject<any>;
-
-    export default VueHighlightJS;
+    export default AceEditor;
 }

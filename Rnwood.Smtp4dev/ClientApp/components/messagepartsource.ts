@@ -1,12 +1,16 @@
-﻿import { Component, Prop,Watch } from 'vue-property-decorator'
+﻿import { Component, Prop, Watch } from 'vue-property-decorator'
 import Vue from 'vue'
 import MessagesController from "../ApiClient/MessagesController";
 import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
 
-@Component
+@Component({
+    components: {
+        textview: (<any>require('./textview.vue.html')).default
+    }
+})
 export default class MessagePartSource extends Vue {
     constructor() {
-        super(); 
+        super();
     }
 
     @Prop()
@@ -22,9 +26,9 @@ export default class MessagePartSource extends Vue {
 
     @Watch("messageEntitySummary")
     async onMessageEntitySummaryChanged(value: MessageEntitySummary, oldValue: MessageEntitySummary) {
-        
+
         await this.loadMessage();
-        
+
     }
 
     download() {
@@ -34,7 +38,7 @@ export default class MessagePartSource extends Vue {
     }
 
     async loadMessage() {
-        
+
         this.error = null;
         this.loading = true;
         this.source = null;
@@ -44,27 +48,19 @@ export default class MessagePartSource extends Vue {
             if (this.messageEntitySummary != null) {
                 if (this.type == "raw") {
                     this.sourceurl = new MessagesController().getPartSourceRaw_url(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
+                    this.source = await new MessagesController().getPartSourceRaw(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
 
-                    if (this.messageEntitySummary.size > 5 * 1024 * 1024) {
-                        this.source = "Large content cannot be shown here. Click above to download";
-                    } else {
-                        this.source = await new MessagesController().getPartSourceRaw(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
-                    }
                 } else {
                     this.sourceurl = new MessagesController().getPartSource_url(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
-                    if (this.messageEntitySummary.size > 5 * 1024 * 1024) {
-                        this.source = "Large content cannot be shown here. Click above to download";
-                    } else {
-                        this.source = await new MessagesController().getPartSource(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
-                    }
-                    
+                    this.source = await new MessagesController().getPartSource(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
+
                 }
             }
         } catch (e) {
             this.error = e;
         } finally {
             this.loading = false;
-        }   
+        }
     }
 
     async created() {
@@ -72,6 +68,6 @@ export default class MessagePartSource extends Vue {
     }
 
     async destroyed() {
-        
+
     }
 }

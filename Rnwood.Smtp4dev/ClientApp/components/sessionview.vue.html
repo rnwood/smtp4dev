@@ -18,7 +18,9 @@
                         {{session.error}}
                     </el-alert>
 
-                    <pre class="source fill fillpanel" v-if="log" v-highlightjs="log"><code lang="smtp" class="fill"></code></pre>
+                    <template v-show="log" class="fillpanel fill">
+                        <textview :text="log" class="fill"></textview>
+                    </template>
                 </el-tab-pane>
             </el-tabs>
         </div>
