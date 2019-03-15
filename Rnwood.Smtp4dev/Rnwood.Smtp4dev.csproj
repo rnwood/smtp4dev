@@ -75,6 +75,11 @@
 		<WebpackInputs Include="ClientApp\**" />
 	</ItemGroup>
 
+	<ItemGroup>
+	  <WebpackInputs Remove="ClientApp\components\textview.ts" />
+	  <WebpackInputs Remove="ClientApp\components\textview.vue.html" />
+	</ItemGroup>
+
 	<Target Name="DebugRunWebpack" AfterTargets="Build" Inputs="@(WebpackInputs)" Outputs="wwwroot\dist\.buildtimestamp">
 		<!-- Ensure Node.js is installed -->
 		<Exec Command="node --version" ContinueOnError="true">

@@ -298,6 +298,12 @@
       "integrity": "sha512-LxFiV5mefv0ley0SzqkOPR1bC4EbpPx8LkOz5vMe/Yi15t5hzwgO/G+tc7wOtL4PZTYjwHu8JnEiSLumuSjSfA==",
       "dev": true
     },
+    "brace": {
+      "version": "0.11.1",
+      "resolved": "https://registry.npmjs.org/brace/-/brace-0.11.1.tgz",
+      "integrity": "sha1-SJb8ydVE7vRfS7dmDbMg07N5/lg=",
+      "dev": true
+    },
     "brace-expansion": {
       "version": "1.1.8",
       "resolved": "https://registry.npmjs.org/brace-expansion/-/brace-expansion-1.1.8.tgz",
@@ -1327,12 +1333,6 @@
       "version": "1.2.0",
       "resolved": "https://registry.npmjs.org/he/-/he-1.2.0.tgz",
       "integrity": "sha512-F/1DnUGPopORZi0ni+CvrCgHQ5FyEAHRLSApuYWMmrbSwoN2Mn/7k+Gl38gJnR7yyDZk6WLXwiGod1JOWNDKGw==",
-      "dev": true
-    },
-    "highlight.js": {
-      "version": "9.13.1",
-      "resolved": "https://registry.npmjs.org/highlight.js/-/highlight.js-9.13.1.tgz",
-      "integrity": "sha512-Sc28JNQNDzaH6PORtRLMvif9RSn1mYuOoX3omVjnb0+HbpPygU2ALBI0R/wsiqCb4/fcp07Gdo8g+fhtFrQl6A==",
       "dev": true
     },
     "hmac-drbg": {
@@ -3370,15 +3370,6 @@
       "integrity": "sha512-i652iAt15d0HiH0ZKUNBqK/eGfOsg6GiHAdnAvaau+88CxngTmt47T/kOfbxWqvB6CU0fZZb3OCEGFc5UyyBIQ==",
       "dev": true
     },
-    "vue-highlightjs": {
-      "version": "1.3.3",
-      "resolved": "https://registry.npmjs.org/vue-highlightjs/-/vue-highlightjs-1.3.3.tgz",
-      "integrity": "sha1-KaDVcTL8HOFc+mHolpGPW3GMXVI=",
-      "dev": true,
-      "requires": {
-        "highlight.js": "9.13.1"
-      }
-    },
     "vue-hot-reload-api": {
       "version": "2.3.1",
       "resolved": "https://registry.npmjs.org/vue-hot-reload-api/-/vue-hot-reload-api-2.3.1.tgz",
@@ -3500,6 +3491,15 @@
       "resolved": "https://registry.npmjs.org/vue-template-es2015-compiler/-/vue-template-es2015-compiler-1.6.0.tgz",
       "integrity": "sha512-x3LV3wdmmERhVCYy3quqA57NJW7F3i6faas++pJQWtknWT+n7k30F4TVdHvCLn48peTJFRvCpxs3UuFPqgeELg==",
       "dev": true
+    },
+    "vue2-ace-editor": {
+      "version": "0.0.13",
+      "resolved": "https://registry.npmjs.org/vue2-ace-editor/-/vue2-ace-editor-0.0.13.tgz",
+      "integrity": "sha512-uQICyvJzYNix16xeYjNAINuNUQhPbqMR7UQsJeI+ycpEd2otsiNNU73jcZqHkpjuz0uaHDHnrpzQuI/RApsKXA==",
+      "dev": true,
+      "requires": {
+        "brace": "0.11.1"
+      }
     },
     "watchpack": {
       "version": "1.3.1",

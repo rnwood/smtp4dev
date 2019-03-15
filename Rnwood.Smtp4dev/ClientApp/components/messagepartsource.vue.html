@@ -7,8 +7,8 @@
         </el-alert>
 
         <div class="toolbar"><el-button size="small" @click="download">Open</el-button></div>
-        <template v-if="source" class="fillpanel fill">
-            <pre class="source fill fillpanel" v-highlightjs="source"><code class="fill"></code></pre>
+        <template v-show="source" class="fillpanel fill">
+            <textview :text="source" class="fill"></textview>
         </template>
     </div>
 </template>

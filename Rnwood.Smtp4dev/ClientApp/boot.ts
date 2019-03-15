@@ -1,9 +1,7 @@
 import './css/site.css';
-import '../node_modules/highlight.js/styles/vs2015.css'
 import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Element from 'element-ui';
-import VueHighlightJS from 'vue-highlightjs';
 
 var supportedBrowser = typeof (document.createElement("p").style.flex) != "undefined" && window.hasOwnProperty("Reflect") && window.hasOwnProperty("Promise");
 
@@ -16,7 +14,6 @@ if (!supportedBrowser) {
 
     Vue.use(Element);
     Vue.use(VueRouter);
-    Vue.use(VueHighlightJS)
 
     const routes = [
         { path: '/', component: (<any>require('./components/home/home.vue.html')).default },
