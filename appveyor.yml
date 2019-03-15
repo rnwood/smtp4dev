@@ -86,7 +86,7 @@ after_build:
 before_deploy:
  - ps: |
     if ($env:RUNTIME -eq "docker") {
-        cmd /c docker login -u "$env:DOCKERUSERNAME" -p "$env:DOCKERPASSWORD"
+        "$env:DOCKERPASSWORD" | docker login -u "$env:DOCKERUSERNAME" -password-stdin
         docker push rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3
         docker push rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)
     }
