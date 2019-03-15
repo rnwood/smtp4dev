@@ -21,6 +21,10 @@ environment:
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: win-x86
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - RUNTIME: win-arm
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+    - RUNTIME: linux-arm
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: docker
       DOCKERPLATFORM: windows-amd64
       DOCKERFILE: windows
