@@ -6,12 +6,14 @@ branches:
   except:
     - azure-pipelines
 environment:
+  APPVEYORAPIKEY:
+    secure: f6ZDvXLvu8fryoFvnGfIUdpvlUC6Rft/qZKbWGh5CFw=
   DOCKERUSERNAME: rnwood
   DOCKERPASSWORD:
     secure: 5jWYD10eY+CLicPtEtSMng==
   FRAMEWORK: netcoreapp2.2
   matrix:
-    - RUNTIME: noruntime      	
+    - RUNTIME: noruntime
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: win-x64    
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
@@ -32,7 +34,7 @@ environment:
     - RUNTIME: docker
       DOCKERPLATFORM: linux-amd64
       DOCKERFILE: linux
-      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu	  
+      APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
@@ -94,6 +96,20 @@ before_deploy:
         docker push rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3
         docker push rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)
     }
+after_deploy:
+ - ps: |
+    if ($env:APPVEYOR_REPO_TAG -eq "false") {
+      $headers = @{
+        "Authorization" = "Bearer $($env:APPVEYORAPIKEY)"
+        "Content-type" = "application/json"
+      }
+      $history = Invoke-RestMethod -Uri "https://ci.appveyor.com/api/projects/$($env:APPVEYOR_REPO_NAME)/history?recordsNumber=25&branch=$($env:APPVEYOR_REPO_BRANCH)" -Headers $headers  -Method Get
+      $buildtoremove = $history.builds | where-object { $_.tag -eq $env:APPVEYOR_BUILD_VERSION}
+      if ($buildtoremove) {
+        Invoke-RestMethod -uri "https://ci.appveyor.com/api/builds/$($env:APPVEYOR_REPO_NAME)/$($buildtoremove.version)"  -Headers $headers  -Method Delete
+        Invoke-RestMethod -uri "https://ci.appveyor.com/api/account/$($env:APPVEYOR_ACCOUNT_NAME)/builds/$($buildtoremove.buildid)"  -Headers $headers  -Method Delete
+      }
+    }
 artifacts:
 - path: Rnwood.Smtp4dev\publish
   name: Smtp4dev-$(runtime)-v$(appveyor_build_version)
@@ -125,3 +141,4 @@ deploy:
   artifact: /.*\.nupkg/
   on:
     branch: master
+  
