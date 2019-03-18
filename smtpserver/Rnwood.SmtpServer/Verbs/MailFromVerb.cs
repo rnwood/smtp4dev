@@ -85,12 +85,22 @@ namespace Rnwood.SmtpServer
             try
             {
                 await this.ParameterProcessorMap.Process(connection, arguments.Skip(1).ToArray(), true).ConfigureAwait(false);
+                this.ValidateFromString(from, connection);
                 await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "New message started")).ConfigureAwait(false);
             }
             catch
             {
                 await connection.AbortMessage().ConfigureAwait(false);
                 throw;
+            }
+        }
+
+        private void ValidateFromString(string from, IConnection connection)
+        {
+            if (!connection.CurrentMessage.EightBitTransport && !from.All(c => c < 128))
+            {
+                throw new SmtpServerException(
+                    new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments, "MAIL FROM value '{0}' contains non ASCII character(s). The client must use the SMTPUTF8 extension.", from));
             }
         }
     }

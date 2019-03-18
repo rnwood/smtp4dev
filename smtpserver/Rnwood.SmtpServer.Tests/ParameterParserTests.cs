@@ -19,11 +19,12 @@ namespace Rnwood.SmtpServer.Tests
         [Fact]
         public void MultipleParameters()
         {
-            ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA", "KEYB=VALUEB");
+            ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA", "KEYB=VALUEB", "KEYC");
 
-            Assert.Equal(2, parameterParser.Parameters.Count);
+            Assert.Equal(3, parameterParser.Parameters.Count);
             Assert.Equal(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters.First());
             Assert.Equal(new Parameter("KEYB", "VALUEB"), parameterParser.Parameters.ElementAt(1));
+            Assert.Equal(new Parameter("KEYC", null), parameterParser.Parameters.ElementAt(2));
         }
 
         /// <summary>

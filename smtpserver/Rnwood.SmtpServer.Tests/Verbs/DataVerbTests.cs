@@ -28,16 +28,6 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         }
 
         /// <summary>
-        /// The Data_8BitData_TruncatedTo7Bit
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        [Fact]
-        public async Task Data_8BitData_TruncatedTo7Bit()
-        {
-            await this.TestGoodDataAsync(new string[] { ((char)(0x41 + 128)).ToString(), "." }, "\u0041", false).ConfigureAwait(false);
-        }
-
-        /// <summary>
         /// The Data_AboveSizeLimit_Rejected
         /// </summary>
         /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>

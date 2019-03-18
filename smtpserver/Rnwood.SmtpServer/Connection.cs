@@ -123,12 +123,6 @@ namespace Rnwood.SmtpServer
             this.ConnectionChannel.SetReaderEncoding(encoding);
         }
 
-        /// <inheritdoc/>
-        public async Task SetReaderEncodingToDefault()
-        {
-            this.SetReaderEncoding(await this.Server.Behaviour.GetDefaultEncoding(this).ConfigureAwait(false));
-        }
-
         /// <summary>
         /// Returns a <see cref="string" /> that represents this instance.
         /// </summary>
@@ -159,8 +153,6 @@ namespace Rnwood.SmtpServer
             var extensions = await server.Behaviour.GetExtensions(connectionChannel).ConfigureAwait(false);
             IExtensionProcessor[] createConnectionExtensions(IConnection c) => extensions.Select(e => e.CreateExtensionProcessor(c)).ToArray();
             Connection result = new Connection(server, session, connectionChannel, verbMap, createConnectionExtensions);
-            await result.SetReaderEncodingToDefault().ConfigureAwait(false);
-
             return result;
         }
 
@@ -173,7 +165,6 @@ namespace Rnwood.SmtpServer
             try
             {
                 await this.Server.Behaviour.OnSessionStarted(this, this.Session).ConfigureAwait(false);
-                this.SetReaderEncoding(await this.Server.Behaviour.GetDefaultEncoding(this).ConfigureAwait(false));
 
                 if (await this.Server.Behaviour.IsSSLEnabled(this).ConfigureAwait(false))
                 {

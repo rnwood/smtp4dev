@@ -38,6 +38,31 @@ namespace Rnwood.SmtpServer.Tests
         /// </summary>
         /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
         [Fact]
+        public async Task SmtpClient_SmtpUtf8()
+        {
+            using (DefaultServer server = new DefaultServer(false, StandardSmtpPort.AssignAutomatically))
+            {
+                ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
+
+                server.MessageReceivedEventHandler += (o, ea) =>
+                {
+                    messages.Add(ea.Message);
+                    return Task.CompletedTask;
+                };
+                server.Start();
+
+                await this.SendMessageAsync(server, "ظػؿقط@to.com", "ظػؿقط@from.com").WithTimeout("sending message").ConfigureAwait(false);
+
+                Assert.Single(messages);
+                Assert.Equal("ظػؿقط@from.com", messages.First().From);
+            }
+        }
+
+        /// <summary>
+        /// The SmtpClient_NonSSL
+        /// </summary>
+        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
+        [Fact]
         public async Task SmtpClient_NonSSL()
         {
             using (DefaultServer server = new DefaultServer(false, StandardSmtpPort.AssignAutomatically))
@@ -113,7 +138,7 @@ namespace Rnwood.SmtpServer.Tests
 
                             for (int i = 0; i < numberOfMessagesPerThread; i++)
                             {
-                                MimeMessage message = NewMessage(i + "@" + localThreadId);
+                                MimeMessage message = NewMessage(i + "@" + localThreadId, "from@from.com");
 
                                 await client.SendAsync(message).ConfigureAwait(false);
                                 ;
@@ -142,10 +167,10 @@ namespace Rnwood.SmtpServer.Tests
         /// </summary>
         /// <param name="toAddress">The toAddress<see cref="string"/></param>
         /// <returns>The <see cref="MimeMessage"/></returns>
-        private static MimeMessage NewMessage(string toAddress)
+        private static MimeMessage NewMessage(string toAddress, string fromAddress)
         {
             MimeMessage message = new MimeMessage();
-            message.From.Add(new MailboxAddress("", "from@from.com"));
+            message.From.Add(new MailboxAddress("", fromAddress));
             message.To.Add(new MailboxAddress("", toAddress));
             message.Subject = "subject";
             message.Body = new TextPart("plain")
@@ -161,9 +186,9 @@ namespace Rnwood.SmtpServer.Tests
         /// <param name="server">The server<see cref="DefaultServer"/></param>
         /// <param name="toAddress">The toAddress<see cref="string"/></param>
         /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        private async Task SendMessageAsync(DefaultServer server, string toAddress)
+        private async Task SendMessageAsync(DefaultServer server, string toAddress, string fromAddress = "from@from.com")
         {
-            MimeMessage message = NewMessage(toAddress);
+            MimeMessage message = NewMessage(toAddress, fromAddress);
 
             using (SmtpClient client = new SmtpClient(new SmtpClientLogger(this.output)))
             {

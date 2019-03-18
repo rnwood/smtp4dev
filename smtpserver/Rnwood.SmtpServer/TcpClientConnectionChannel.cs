@@ -20,11 +20,11 @@ namespace Rnwood.SmtpServer
     {
         private readonly TcpClient tcpClient;
 
-        private StreamReader reader;
+        private SmtpStreamReader reader;
 
         private Stream stream;
 
-        private StreamWriter writer;
+        private SmtpStreamWriter writer;
 
         private bool disposedValue = false; // To detect redundant calls
 
@@ -37,7 +37,8 @@ namespace Rnwood.SmtpServer
             this.tcpClient = tcpClient;
             this.stream = tcpClient.GetStream();
             this.IsConnected = true;
-            this.SetReaderEncoding(Encoding.ASCII);
+            this.writer = new SmtpStreamWriter(this.stream, false) { AutoFlush = true };
+            this.SetReaderEncoding(new UTF8Encoding(false, true));
         }
 
         /// <summary>
@@ -88,7 +89,7 @@ namespace Rnwood.SmtpServer
         public async Task ApplyStreamFilter(Func<Stream, Task<Stream>> filter)
         {
             this.stream = await filter(this.stream).ConfigureAwait(false);
-            this.SetupReaderAndWriter();
+            this.SetupReader();
         }
 
         /// <summary>
@@ -156,7 +157,7 @@ namespace Rnwood.SmtpServer
         public void SetReaderEncoding(Encoding encoding)
         {
             this.ReaderEncoding = encoding;
-            this.SetupReaderAndWriter();
+            this.SetupReader();
         }
 
         /// <inheritdoc/>
@@ -202,10 +203,14 @@ namespace Rnwood.SmtpServer
             }
         }
 
-        private void SetupReaderAndWriter()
+        private void SetupReader()
         {
-            this.writer = new StreamWriter(this.stream, this.ReaderEncoding) { AutoFlush = true, NewLine = "\r\n" };
-            this.reader = new StreamReader(this.stream, this.ReaderEncoding);
+            if (this.reader != null)
+            {
+                this.reader.Dispose();
+            }
+
+            this.reader = new SmtpStreamReader(this.stream, this.ReaderEncoding, true);
         }
     }
 }

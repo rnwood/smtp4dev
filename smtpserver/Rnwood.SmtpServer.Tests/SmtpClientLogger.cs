@@ -50,7 +50,7 @@ namespace Rnwood.SmtpServer.Tests
            /// <param name="count">The count<see cref="int"/></param>
             public void LogClient(byte[] buffer, int offset, int count)
             {
-                this.testOutput.WriteLine(">>> " + Encoding.UTF8.GetString(buffer, offset, count).Replace(Environment.NewLine, "\n"));
+                this.testOutput.WriteLine(">>> " + Encoding.UTF8.GetString(buffer, offset, count).Replace("\r", "\\r").Replace("\n", "\\n\n"));
             }
 
            /// <summary>
@@ -70,7 +70,7 @@ namespace Rnwood.SmtpServer.Tests
            /// <param name="count">The count<see cref="int"/></param>
             public void LogServer(byte[] buffer, int offset, int count)
             {
-                this.testOutput.WriteLine("<<< " + Encoding.UTF8.GetString(buffer, offset, count).Replace(Environment.NewLine, "\\n"));
+                this.testOutput.WriteLine("<<< " + Encoding.UTF8.GetString(buffer, offset, count).Replace("\r", "\\r").Replace("\n", "\\n\n"));
             }
         }
     }

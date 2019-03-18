@@ -47,7 +47,7 @@ namespace Rnwood.SmtpServer
         /// <returns>
         /// A <see cref="Task{T}" /> representing the async operation
         /// </returns>
-        Task<Encoding> GetDefaultEncoding(IConnection connection);
+        Task<Encoding> GetDefaultMessageEncoding(IConnection connection);
 
         /// <summary>
         /// Gets the extensions that should be enabled for the specified connection.

@@ -6,6 +6,7 @@
 namespace Rnwood.SmtpServer.Tests
 {
     using System;
+    using System.Diagnostics;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -22,6 +23,12 @@ namespace Rnwood.SmtpServer.Tests
         /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
         public static async Task WithTimeout(this Task task, int seconds, string descriptionOfTask)
         {
+            if (Debugger.IsAttached)
+            {
+                await task;
+                return;
+            }
+
             Task completedTask = await Task.WhenAny(task, Task.Delay(seconds * 1000)).ConfigureAwait(false);
 
             if (completedTask != task)

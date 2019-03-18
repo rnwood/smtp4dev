@@ -16,8 +16,9 @@ namespace Rnwood.SmtpServer
         /// <summary>Initializes a new instance of the <see cref="SmtpStreamReader"/> class.</summary>
         /// <param name="stream">The stream to write to.</param>
         /// <param name="encoding">The character encoding to use.</param>
-        public SmtpStreamReader(Stream stream, Encoding encoding)
-            : base(stream, encoding)
+        /// <param name="leaveOpen">True if stream should be left open when the reader is disposed.</param>
+        public SmtpStreamReader(Stream stream, Encoding encoding, bool leaveOpen)
+            : base(stream, encoding, false, 1024 * 64, leaveOpen)
         {
         }
     }

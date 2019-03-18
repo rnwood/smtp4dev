@@ -7,6 +7,7 @@ namespace Rnwood.SmtpServer
 {
     using System;
     using System.IO;
+    using System.Text;
     using System.Threading.Tasks;
     using Rnwood.SmtpServer.Verbs;
 
@@ -27,56 +28,68 @@ namespace Rnwood.SmtpServer
             }
 
             connection.CurrentMessage.SecureConnection = connection.Session.SecureConnection;
-            await connection.WriteResponse(new SmtpResponse(
-                StandardSmtpResponseCode.StartMailInputEndWithDot,
-                                                               "End message with period")).ConfigureAwait(false);
 
-            using (SmtpStreamWriter writer = new SmtpStreamWriter(await connection.CurrentMessage.WriteData().ConfigureAwait(false), connection.ReaderEncoding))
+            connection.SetReaderEncoding(connection.CurrentMessage.EightBitTransport ?
+                new UTF8Encoding(false, true) :
+                await connection.Server.Behaviour.GetDefaultMessageEncoding(connection).ConfigureAwait(false));
+
+            try
             {
-                bool firstLine = true;
+                await connection.WriteResponse(new SmtpResponse(
+                    StandardSmtpResponseCode.StartMailInputEndWithDot,
+                                                                   "End message with period")).ConfigureAwait(false);
 
-                do
+                using (SmtpStreamWriter writer = new SmtpStreamWriter(await connection.CurrentMessage.WriteData().ConfigureAwait(false), false))
                 {
-                    string line = await connection.ReadLine().ConfigureAwait(false);
+                    bool firstLine = true;
 
-                    if (line != ".")
+                    do
                     {
-                        line = this.ProcessLine(line);
+                        string line = await connection.ReadLine().ConfigureAwait(false);
 
-                        if (!firstLine)
+                        if (line != ".")
                         {
-                            writer.Write("\r\n");
+                            line = this.ProcessLine(line);
+
+                            if (!firstLine)
+                            {
+                                writer.Write("\r\n");
+                            }
+
+                            writer.Write(line);
+                        }
+                        else
+                        {
+                            break;
                         }
 
-                        writer.Write(line);
+                        firstLine = false;
+                    }
+                    while (true);
+
+                    writer.Flush();
+                    long? maxMessageSize =
+                        await connection.Server.Behaviour.GetMaximumMessageSize(connection).ConfigureAwait(false);
+
+                    if (maxMessageSize.HasValue && writer.BaseStream.Length > maxMessageSize.Value)
+                    {
+                        await connection.WriteResponse(
+                            new SmtpResponse(
+                                StandardSmtpResponseCode.ExceededStorageAllocation,
+                                             "Message exceeds fixed size limit")).ConfigureAwait(false);
                     }
                     else
                     {
-                        break;
+                        writer.Dispose();
+                        await connection.Server.Behaviour.OnMessageCompleted(connection).ConfigureAwait(false);
+                        await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted")).ConfigureAwait(false);
+                        await connection.CommitMessage().ConfigureAwait(false);
                     }
-
-                    firstLine = false;
                 }
-                while (true);
-
-                writer.Flush();
-                long? maxMessageSize =
-                    await connection.Server.Behaviour.GetMaximumMessageSize(connection).ConfigureAwait(false);
-
-                if (maxMessageSize.HasValue && writer.BaseStream.Length > maxMessageSize.Value)
-                {
-                    await connection.WriteResponse(
-                        new SmtpResponse(
-                            StandardSmtpResponseCode.ExceededStorageAllocation,
-                                         "Message exceeds fixed size limit")).ConfigureAwait(false);
-                }
-                else
-                {
-                    writer.Dispose();
-                    await connection.Server.Behaviour.OnMessageCompleted(connection).ConfigureAwait(false);
-                    await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted")).ConfigureAwait(false);
-                    await connection.CommitMessage().ConfigureAwait(false);
-                }
+            }
+            finally
+            {
+                connection.SetReaderEncoding(new UTF8Encoding(false, true));
             }
         }
 

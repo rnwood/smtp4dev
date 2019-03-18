@@ -15,9 +15,9 @@ namespace Rnwood.SmtpServer
     {
         /// <summary>Initializes a new instance of the <see cref="SmtpStreamWriter"/> class.</summary>
         /// <param name="stream">The stream to write to.</param>
-        /// <param name="encoding">The character encoding to use.</param>
-        public SmtpStreamWriter(Stream stream, Encoding encoding)
-            : base(stream, encoding)
+        /// <param name="leaveOpen">True if stream should be closed when the writer is disposed.</param>
+        public SmtpStreamWriter(Stream stream, bool leaveOpen)
+            : base(stream, new UTF8Encoding(false, true), 1024 * 24, leaveOpen)
         {
             this.NewLine = "\r\n";
         }

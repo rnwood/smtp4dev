@@ -91,6 +91,13 @@ namespace Rnwood.SmtpServer
             return this.Equals((SmtpCommand)obj);
         }
 
+        /// <summary>Converts to string.</summary>
+        /// <returns>A <see cref="string"/> that represents this instance.</returns>
+        public override string ToString()
+        {
+            return this.Text;
+        }
+
         /// <summary>
         /// Indicates whether the current object is equal to another object of the same type.
         /// </summary>

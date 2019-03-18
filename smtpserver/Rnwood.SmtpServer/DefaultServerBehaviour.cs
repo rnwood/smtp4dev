@@ -110,7 +110,7 @@ namespace Rnwood.SmtpServer
         public virtual int PortNumber { get; private set; }
 
         /// <inheritdoc/>
-        public virtual Task<Encoding> GetDefaultEncoding(IConnection connection)
+        public virtual Task<Encoding> GetDefaultMessageEncoding(IConnection connection)
         {
             return Task.FromResult<Encoding>(new ASCIISevenBitTruncatingEncoding());
         }
@@ -118,7 +118,7 @@ namespace Rnwood.SmtpServer
         /// <inheritdoc/>
         public virtual Task<IEnumerable<IExtension>> GetExtensions(IConnectionChannel connectionChannel)
         {
-            List<IExtension> extensions = new List<IExtension>(new IExtension[] { new EightBitMimeExtension(), new SizeExtension() });
+            List<IExtension> extensions = new List<IExtension>(new IExtension[] { new EightBitMimeExtension(), new SizeExtension(), new SmtpUtfEightExtension() });
 
             if (this.sslCertificate != null)
             {

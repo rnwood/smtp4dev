@@ -5,6 +5,7 @@
 
 namespace Rnwood.SmtpServer.Extensions
 {
+    using System;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -37,18 +38,42 @@ namespace Rnwood.SmtpServer.Extensions
             public EightBitMimeExtensionProcessor(IConnection connection)
                 : base(connection)
             {
-                EightBitMimeDataVerb verb = new EightBitMimeDataVerb();
-                connection.VerbMap.SetVerbProcessor("DATA", verb);
-
                 MailVerb mailVerbProcessor = connection.MailVerb;
                 MailFromVerb mailFromProcessor = mailVerbProcessor.FromSubVerb;
-                mailFromProcessor.ParameterProcessorMap.SetProcessor("BODY", verb);
+                mailFromProcessor.ParameterProcessorMap.SetProcessor("BODY", new EightBitMimeBodyParameter());
             }
 
             /// <inheritdoc/>
             public override Task<string[]> GetEHLOKeywords()
             {
                 return Task.FromResult(new[] { "8BITMIME" });
+            }
+        }
+
+        private class EightBitMimeBodyParameter : IParameterProcessor
+        {
+            public Task SetParameter(IConnection connection, string key, string value)
+            {
+                if (key.Equals("BODY", StringComparison.OrdinalIgnoreCase))
+                {
+                    if (value.Equals("8BITMIME", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        connection.CurrentMessage.EightBitTransport = true;
+                    }
+                    else if (value.Equals("7BIT", StringComparison.OrdinalIgnoreCase))
+                    {
+                        connection.CurrentMessage.EightBitTransport = false;
+                    }
+                    else
+                    {
+                        throw new SmtpServerException(
+                            new SmtpResponse(
+                                StandardSmtpResponseCode.SyntaxErrorInCommandArguments,
+                                             "BODY parameter value invalid - must be either 7BIT or 8BITMIME"));
+                    }
+                }
+
+                return Task.CompletedTask;
             }
         }
     }

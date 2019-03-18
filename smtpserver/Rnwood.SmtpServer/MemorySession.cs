@@ -28,7 +28,7 @@ namespace Rnwood.SmtpServer
         public MemorySession(IPAddress clientAddress, DateTime startDate)
             : base(clientAddress, startDate)
         {
-            this.log = new SmtpStreamWriter(this.logStream, Encoding.UTF8);
+            this.log = new SmtpStreamWriter(this.logStream, false);
         }
 
         /// <inheritdoc />
@@ -42,7 +42,7 @@ namespace Rnwood.SmtpServer
         public override Task<TextReader> GetLog()
         {
             this.log.Flush();
-            return Task.FromResult<TextReader>(new SmtpStreamReader(new MemoryStream(this.logStream.ToArray(), false), Encoding.UTF8));
+            return Task.FromResult<TextReader>(new SmtpStreamReader(new MemoryStream(this.logStream.ToArray(), false), new UTF8Encoding(false, true), false));
         }
 
         /// <inheritdoc />

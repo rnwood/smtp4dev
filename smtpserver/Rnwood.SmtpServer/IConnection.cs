@@ -103,12 +103,6 @@ namespace Rnwood.SmtpServer
         void SetReaderEncoding(Encoding encoding);
 
         /// <summary>
-        /// Sets the encoding used by this connection to decode text to the default for the server.
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        Task SetReaderEncodingToDefault();
-
-        /// <summary>
         /// Writes an <see cref="SmtpResponse"/> to the client.
         /// </summary>
         /// <param name="response">The response<see cref="SmtpResponse"/></param>

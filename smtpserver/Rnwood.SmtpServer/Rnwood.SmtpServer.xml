@@ -348,9 +348,6 @@
         <member name="M:Rnwood.SmtpServer.Connection.SetReaderEncoding(System.Text.Encoding)">
             <inheritdoc/>
         </member>
-        <member name="M:Rnwood.SmtpServer.Connection.SetReaderEncodingToDefault">
-            <inheritdoc/>
-        </member>
         <member name="M:Rnwood.SmtpServer.Connection.ToString">
             <summary>
             Returns a <see cref="T:System.String" /> that represents this instance.
@@ -607,7 +604,7 @@
         <member name="P:Rnwood.SmtpServer.DefaultServerBehaviour.PortNumber">
             <inheritdoc/>
         </member>
-        <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.GetDefaultEncoding(Rnwood.SmtpServer.IConnection)">
+        <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.GetDefaultMessageEncoding(Rnwood.SmtpServer.IConnection)">
             <inheritdoc/>
         </member>
         <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.GetExtensions(Rnwood.SmtpServer.IConnectionChannel)">
@@ -1219,22 +1216,6 @@
             Gets the Username
             </summary>
         </member>
-        <member name="T:Rnwood.SmtpServer.Extensions.EightBitMimeDataVerb">
-            <summary>
-            Defines the <see cref="T:Rnwood.SmtpServer.Extensions.EightBitMimeDataVerb" />
-            </summary>
-        </member>
-        <member name="M:Rnwood.SmtpServer.Extensions.EightBitMimeDataVerb.#ctor">
-            <summary>
-            Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.Extensions.EightBitMimeDataVerb"/> class.
-            </summary>
-        </member>
-        <member name="M:Rnwood.SmtpServer.Extensions.EightBitMimeDataVerb.Process(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.SmtpCommand)">
-            <inheritdoc/>
-        </member>
-        <member name="M:Rnwood.SmtpServer.Extensions.EightBitMimeDataVerb.SetParameter(Rnwood.SmtpServer.IConnection,System.String,System.String)">
-            <inheritdoc/>
-        </member>
         <member name="T:Rnwood.SmtpServer.Extensions.EightBitMimeExtension">
             <summary>
             Defines the <see cref="T:Rnwood.SmtpServer.Extensions.EightBitMimeExtension" />
@@ -1341,6 +1322,14 @@
         </member>
         <member name="M:Rnwood.SmtpServer.Extensions.SizeExtension.SizeExtensionProcessor.SetParameter(Rnwood.SmtpServer.IConnection,System.String,System.String)">
             <inheritdoc/>
+        </member>
+        <member name="T:Rnwood.SmtpServer.Extensions.SmtpUtfEightExtension">
+            <summary>Implements the SMTPUTF8 extension.</summary>
+        </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.SmtpUtfEightExtension.CreateExtensionProcessor(Rnwood.SmtpServer.IConnection)">
+            <summary>Creates the extension processor for a connection.</summary>
+            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection"/></param>
+            <returns>The <see cref="T:Rnwood.SmtpServer.Extensions.IExtensionProcessor"/></returns>
         </member>
         <member name="T:Rnwood.SmtpServer.Extensions.StartTlsExtension">
             <summary>
@@ -1651,12 +1640,6 @@
             Sets the encoding used by this connection to decode text.
             </summary>
             <param name="encoding">The encoding<see cref="T:System.Text.Encoding"/></param>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IConnection.SetReaderEncodingToDefault">
-            <summary>
-            Sets the encoding used by this connection to decode text to the default for the server.
-            </summary>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the async operation</returns>
         </member>
         <member name="M:Rnwood.SmtpServer.IConnection.WriteResponse(Rnwood.SmtpServer.SmtpResponse)">
             <summary>
@@ -1995,7 +1978,7 @@
             Gets the TCP port number on which to listen for connections.
             </summary>
         </member>
-        <member name="M:Rnwood.SmtpServer.IServerBehaviour.GetDefaultEncoding(Rnwood.SmtpServer.IConnection)">
+        <member name="M:Rnwood.SmtpServer.IServerBehaviour.GetDefaultMessageEncoding(Rnwood.SmtpServer.IConnection)">
             <summary>
             Gets the default encoding for the server which will be used for all new connections until overridden by an extension etc.
             </summary>
@@ -2622,6 +2605,10 @@
             The <see cref="T:System.Boolean" />
             </returns>
         </member>
+        <member name="M:Rnwood.SmtpServer.SmtpCommand.ToString">
+            <summary>Converts to string.</summary>
+            <returns>A <see cref="T:System.String"/> that represents this instance.</returns>
+        </member>
         <member name="M:Rnwood.SmtpServer.SmtpCommand.Equals(Rnwood.SmtpServer.SmtpCommand)">
             <summary>
             Indicates whether the current object is equal to another object of the same type.
@@ -2879,18 +2866,19 @@
         <member name="T:Rnwood.SmtpServer.SmtpStreamReader">
             <summary>A stream writer which uses the correct \r\n line ending required for SMTP protocol.</summary>
         </member>
-        <member name="M:Rnwood.SmtpServer.SmtpStreamReader.#ctor(System.IO.Stream,System.Text.Encoding)">
+        <member name="M:Rnwood.SmtpServer.SmtpStreamReader.#ctor(System.IO.Stream,System.Text.Encoding,System.Boolean)">
             <summary>Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.SmtpStreamReader"/> class.</summary>
             <param name="stream">The stream to write to.</param>
             <param name="encoding">The character encoding to use.</param>
+            <param name="leaveOpen">True if stream should be left open when the reader is disposed.</param>
         </member>
         <member name="T:Rnwood.SmtpServer.SmtpStreamWriter">
             <summary>A stream writer which uses the correct \r\n line ending required for SMTP protocol.</summary>
         </member>
-        <member name="M:Rnwood.SmtpServer.SmtpStreamWriter.#ctor(System.IO.Stream,System.Text.Encoding)">
+        <member name="M:Rnwood.SmtpServer.SmtpStreamWriter.#ctor(System.IO.Stream,System.Boolean)">
             <summary>Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.SmtpStreamWriter"/> class.</summary>
             <param name="stream">The stream to write to.</param>
-            <param name="encoding">The character encoding to use.</param>
+            <param name="leaveOpen">True if stream should be closed when the writer is disposed.</param>
         </member>
         <member name="T:Rnwood.SmtpServer.SmtpStringBuilder">
             <summary>Builds a multi line string where each line has the CRLF terminator required for SMTP.</summary>

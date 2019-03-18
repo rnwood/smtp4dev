@@ -60,7 +60,7 @@ namespace Rnwood.SmtpServer
 
             set
             {
-                this.EightBitTransport = value;
+                this.message.EightBitTransport = value;
             }
         }
 
