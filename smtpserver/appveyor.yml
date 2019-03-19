@@ -50,7 +50,7 @@ build_script:
  - ps: |
     dotnet build Rnwood.SmtpServer -c Debug
     if ($env:PUBLISH -eq "1") {
-       dotnet pack Rnwood.SmtpServer -c Release -p:Version=$env:APPVEYOR_BUILD_VERSION -p:"PackageVersion=$env:APPVEYOR_BUILD_VERSION"
+       dotnet pack Rnwood.SmtpServer --include-source -c Release -p:Version=$env:APPVEYOR_BUILD_VERSION -p:"PackageVersion=$env:APPVEYOR_BUILD_VERSION"
     } else {
       write-host "Skipping publish"
     }
