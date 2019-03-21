@@ -16,7 +16,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.0" />
-		<PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.2" />
+		<PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.3" />
 		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="2.2.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
