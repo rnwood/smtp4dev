@@ -49,7 +49,7 @@ export default class MessageList extends Vue {
     }
 
     formatDate(row: number, column: number, cellValue: string, index: number): string {
-        return moment(String(cellValue)).format('YYYY-DD-MM hh:mm:ss');
+        return moment(String(cellValue)).format('YYYY-MM-DD HH:mm:ss');
     }
 
     getRowClass(event: { row: MessageSummary }): string {
