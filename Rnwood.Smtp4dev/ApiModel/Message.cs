@@ -120,7 +120,10 @@ namespace Rnwood.Smtp4dev.ApiModel
         internal static FileStreamResult GetPartContent(DbModel.Message result, string cid)
         {
             MimePart contentEntity = (MimePart)GetPart(result, cid);
-            return new FileStreamResult(contentEntity.Content.Open(), contentEntity.ContentType.MimeType);
+            return new FileStreamResult(contentEntity.Content.Open(), contentEntity.ContentType.MimeType)
+            {
+                FileDownloadName = contentEntity.FileName
+            };
         }
 
         internal static string GetPartContentAsText(DbModel.Message result, string cid)
