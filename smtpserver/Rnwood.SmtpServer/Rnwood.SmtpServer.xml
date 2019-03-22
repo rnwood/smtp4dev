@@ -604,7 +604,7 @@
         <member name="P:Rnwood.SmtpServer.DefaultServerBehaviour.PortNumber">
             <inheritdoc/>
         </member>
-        <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.GetDefaultMessageEncoding(Rnwood.SmtpServer.IConnection)">
+        <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.GetFallbackEncoding(Rnwood.SmtpServer.IConnection)">
             <inheritdoc/>
         </member>
         <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.GetExtensions(Rnwood.SmtpServer.IConnectionChannel)">
@@ -1978,9 +1978,9 @@
             Gets the TCP port number on which to listen for connections.
             </summary>
         </member>
-        <member name="M:Rnwood.SmtpServer.IServerBehaviour.GetDefaultMessageEncoding(Rnwood.SmtpServer.IConnection)">
+        <member name="M:Rnwood.SmtpServer.IServerBehaviour.GetFallbackEncoding(Rnwood.SmtpServer.IConnection)">
             <summary>
-            Gets the default encoding for the server which will be used for all new connections until overridden by an extension etc.
+            Gets an encoding which will be used if bytes received from the client cannot be decoded as ASCII/UTF-8.
             </summary>
             <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" /></param>
             <returns>
@@ -2869,8 +2869,21 @@
         <member name="M:Rnwood.SmtpServer.SmtpStreamReader.#ctor(System.IO.Stream,System.Text.Encoding,System.Boolean)">
             <summary>Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.SmtpStreamReader"/> class.</summary>
             <param name="stream">The stream to write to.</param>
-            <param name="encoding">The character encoding to use.</param>
+            <param name="fallbackEncoding">The character encoding to use to fallback to should a line not be decodable as UTF8</param>
             <param name="leaveOpen">True if stream should be left open when the reader is disposed.</param>
+        </member>
+        <member name="M:Rnwood.SmtpServer.SmtpStreamReader.ReadLineAsync(System.Threading.CancellationToken)">
+            <summary>Reads the a line from the stream which is terminated with a \n. The string will be decoded using UTF8 and falling back to the provided encoding if decoding fails.</summary>
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>A Task representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.SmtpStreamReader.Dispose">
+            <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
+        </member>
+        <member name="M:Rnwood.SmtpServer.SmtpStreamReader.Dispose(System.Boolean)">
+            <summary>Releases unmanaged and - optionally - managed resources.</summary>
+            <param name="disposing">
+              <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
         </member>
         <member name="T:Rnwood.SmtpServer.SmtpStreamWriter">
             <summary>A stream writer which uses the correct \r\n line ending required for SMTP protocol.</summary>

@@ -31,7 +31,7 @@ namespace Rnwood.SmtpServer
 
             connection.SetReaderEncoding(connection.CurrentMessage.EightBitTransport ?
                 new UTF8Encoding(false, true) :
-                await connection.Server.Behaviour.GetDefaultMessageEncoding(connection).ConfigureAwait(false));
+                await connection.Server.Behaviour.GetFallbackEncoding(connection).ConfigureAwait(false));
 
             try
             {

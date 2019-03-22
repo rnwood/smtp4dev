@@ -41,13 +41,13 @@ namespace Rnwood.SmtpServer
         int PortNumber { get; }
 
         /// <summary>
-        /// Gets the default encoding for the server which will be used for all new connections until overridden by an extension etc.
+        /// Gets an encoding which will be used if bytes received from the client cannot be decoded as ASCII/UTF-8.
         /// </summary>
         /// <param name="connection">The connection<see cref="IConnection" /></param>
         /// <returns>
         /// A <see cref="Task{T}" /> representing the async operation
         /// </returns>
-        Task<Encoding> GetDefaultMessageEncoding(IConnection connection);
+        Task<Encoding> GetFallbackEncoding(IConnection connection);
 
         /// <summary>
         /// Gets the extensions that should be enabled for the specified connection.

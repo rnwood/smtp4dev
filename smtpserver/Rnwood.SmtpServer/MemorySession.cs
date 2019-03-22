@@ -42,7 +42,7 @@ namespace Rnwood.SmtpServer
         public override Task<TextReader> GetLog()
         {
             this.log.Flush();
-            return Task.FromResult<TextReader>(new SmtpStreamReader(new MemoryStream(this.logStream.ToArray(), false), new UTF8Encoding(false, true), false));
+            return Task.FromResult<TextReader>(new StreamReader(new MemoryStream(this.logStream.ToArray(), false), new UTF8Encoding(false, true), false));
         }
 
         /// <inheritdoc />

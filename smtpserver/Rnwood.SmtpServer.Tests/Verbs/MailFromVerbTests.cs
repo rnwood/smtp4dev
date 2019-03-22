@@ -39,16 +39,6 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         /// </summary>
         /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
         [Fact]
-        public async Task Process_NonAsciiChars_Rejected()
-        {
-            await this.Process_AddressAsync("<ظػؿقط <rob@rnwood.co.uk>>", null, StandardSmtpResponseCode.SyntaxErrorInCommandArguments, true).ConfigureAwait(false);
-        }
-
-        /// <summary>
-        /// The Process_Address_NonAsciiChars_Rejected
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        [Fact]
         public async Task Process_NonAsciiChars_SmtpUtf8_Accepted()
         {
             await this.Process_AddressAsync("<ظػؿقط <rob@rnwood.co.uk>>", "ظػؿقط <rob@rnwood.co.uk>", StandardSmtpResponseCode.OK, eightBitMessage: true).ConfigureAwait(false);

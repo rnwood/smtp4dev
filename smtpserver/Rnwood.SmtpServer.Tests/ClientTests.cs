@@ -5,11 +5,13 @@
 
 namespace Rnwood.SmtpServer.Tests
 {
+    using System;
     using System.Collections.Concurrent;
     using System.Collections.Generic;
     using System.IO;
     using System.Linq;
     using System.Net.Mail;
+    using System.Net.Sockets;
     using System.Text;
     using System.Threading.Tasks;
     using MailKit.Net.Smtp;
@@ -58,6 +60,8 @@ namespace Rnwood.SmtpServer.Tests
 
                 Assert.Single(messages);
                 Assert.Equal("ظػؿقط@from.com", messages.First().From);
+
+                Assert.Equal("ظػؿقط@to.com", messages.First().Recipients.Single());
             }
         }
 
@@ -84,67 +88,7 @@ namespace Rnwood.SmtpServer.Tests
                 Assert.Single(messages);
                 Assert.Equal("from@from.com", messages.First().From);
             }
-        }
 
-        [Fact]
-        public async Task SmtpClient_UTF8Address()
-        {
-            using (DefaultServer server = new DefaultServer(false, StandardSmtpPort.AssignAutomatically))
-            {
-                try
-                {
-                    ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
-
-                    server.MessageReceivedEventHandler += (o, ea) =>
-                    {
-                        messages.Add(ea.Message);
-                        return Task.CompletedTask;
-                    };
-                    server.SessionCompletedEventHandler += async (o, ea) =>
-                    {
-                        using (TextReader logReader = await ea.Session.GetLog())
-                        {
-                            output.WriteLine(logReader.ReadToEnd());
-                        }
-                    };
-                    server.Start();
-
-                    await SendMessage_SmtpClient_Async(server, "квіточка@пошта.укр", "квіточка@пошта.укр").WithTimeout("sending message");
-
-                    server.Stop();
-
-                    Assert.Single(messages);
-                    Assert.Equal("квіточка@пошта.укр", messages.First().Recipients.SingleOrDefault());
-
-                }
-                finally
-                {
-                    server.Stop(true);
-                }
-
-            }
-
-            
-        }
-
-        [Fact]
-        public async Task MailKit_UTF8Address()
-        {
-            using (DefaultServer server = new DefaultServer(false, StandardSmtpPort.AssignAutomatically))
-            {
-                ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
-
-                server.MessageReceivedEventHandler += async (o, ea) =>
-                {
-                    messages.Add(ea.Message);
-                };
-                server.Start();
-
-                await SendMessage_MailKit_Async(server, "квіточка@пошта.укр").WithTimeout("sending message");
-
-                Assert.Single(messages);
-                Assert.Equal("квіточка@пошта.укр", messages.First().Recipients.SingleOrDefault());
-            }
         }
 
         /// <summary>
@@ -185,7 +129,6 @@ namespace Rnwood.SmtpServer.Tests
                                 MimeMessage message = NewMessage(i + "@" + localThreadId, "from@from.com");
 
                                 await client.SendAsync(message).ConfigureAwait(false);
-                                ;
                             }
 
                             await client.DisconnectAsync(true).ConfigureAwait(false);
@@ -242,20 +185,6 @@ namespace Rnwood.SmtpServer.Tests
             }
         }
 
-        private async Task SendMessage_SmtpClient_Async(DefaultServer server, string toAddress, string fromAddress)
-        {
-            MailMessage message = new System.Net.Mail.MailMessage();
-            message.Subject = "Test";
-            message.To.Add(new MailAddress(toAddress, toAddress, Encoding.UTF8));
-            message.From = new MailAddress(fromAddress, fromAddress, Encoding.UTF8);
-            message.Body = "Blah blah blah";
-
-            using (System.Net.Mail.SmtpClient client = new System.Net.Mail.SmtpClient("localhost", server.PortNumber))
-            {
-                client.DeliveryFormat = SmtpDeliveryFormat.International;
-                await client.SendMailAsync(message);
-            }
-
-        }
+    
     }
 }

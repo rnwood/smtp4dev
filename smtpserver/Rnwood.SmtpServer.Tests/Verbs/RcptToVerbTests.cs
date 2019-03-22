@@ -66,11 +66,6 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             await this.TestBadAddressAsync("rob@rnwood.co.uk").ConfigureAwait(false);
         }
 
-        [Fact]
-        public async Task NonAsciiAddress_ReturnsError()
-        {
-            await this.TestBadAddressAsync("<ظػؿقط <rob@rnwood.co.uk>>", asException: true).ConfigureAwait(false);
-        }
 
         [Fact]
         public async Task NonAsciiAddress_SmtpUtf8_Accepted()

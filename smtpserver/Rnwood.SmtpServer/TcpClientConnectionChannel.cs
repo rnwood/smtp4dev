@@ -11,6 +11,7 @@ namespace Rnwood.SmtpServer
     using System.Net;
     using System.Net.Sockets;
     using System.Text;
+    using System.Threading;
     using System.Threading.Tasks;
 
     /// <summary>
@@ -137,14 +138,17 @@ namespace Rnwood.SmtpServer
         {
             try
             {
-                string text = await this.reader.ReadLineAsync().ConfigureAwait(false);
-
-                if (text == null)
+                using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
                 {
-                    throw new IOException("Reader returned null string");
-                }
+                    string text = await this.reader.ReadLineAsync(cts.Token).ConfigureAwait(false);
 
-                return text;
+                    if (text == null)
+                    {
+                        throw new IOException("Reader returned null string");
+                    }
+
+                    return text;
+                }
             }
             catch (IOException e)
             {
