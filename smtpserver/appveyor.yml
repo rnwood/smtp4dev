@@ -1,14 +1,16 @@
 version: 3.1.0-ci@{build}
 image: Visual Studio 2017
 environment:
+  APPVEYORAPIKEY:
+   secure: f6ZDvXLvu8fryoFvnGfIUdpvlUC6Rft/qZKbWGh5CFw=
    matrix:
-     - TESTFRAMEWORK: netcoreapp2.0      	
+     - TESTFRAMEWORK: netcoreapp2.0
        APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
        PUBLISH: 1
-     - TESTFRAMEWORK: netcoreapp2.0      	
+     - TESTFRAMEWORK: netcoreapp2.0
        APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
        PUBLISH: 0
-     - TESTFRAMEWORK: net462      	
+     - TESTFRAMEWORK: net462
        APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
        PUBLISH: 0
 skip_tags:  false
@@ -59,6 +61,20 @@ artifacts:
 test_script:
 - ps: |
     dotnet test -f $env:TESTFRAMEWORK -r Debug Rnwood.SmtpServer.Tests\Rnwood.SmtpServer.Tests.csproj
+after_deploy:
+ - ps: |
+    if ($env:APPVEYOR_REPO_TAG -eq "false") {
+      $headers = @{
+        "Authorization" = "Bearer $($env:APPVEYORAPIKEY)"
+        "Content-type" = "application/json"
+      }
+      $history = Invoke-RestMethod -Uri "https://ci.appveyor.com/api/projects/$($env:APPVEYOR_ACCOUNT_NAME)/$($env:APPVEYOR_PROJECT_SLUG)/history?recordsNumber=25&branch=$($env:APPVEYOR_REPO_BRANCH)" -Headers $headers  -Method Get
+      $buildtoremove = $history.builds | where-object { $_.tag -eq $env:APPVEYOR_BUILD_VERSION}
+      if ($buildtoremove) {
+        Invoke-RestMethod -uri "https://ci.appveyor.com/api/builds/$($env:APPVEYOR_ACCOUNT_NAME)/$($env:APPVEYOR_PROJECT_SLUG)/$($buildtoremove.version)"  -Headers $headers  -Method Delete
+        Invoke-RestMethod -uri "https://ci.appveyor.com/api/account/$($env:APPVEYOR_ACCOUNT_NAME)/builds/$($buildtoremove.buildid)"  -Headers $headers  -Method Delete
+      }
+    }
 deploy:
 - provider: GitHub
   artifact: /.*\..*/
