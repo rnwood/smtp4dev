@@ -1,9 +1,7 @@
 version: 3.1.0-ci@{build}
 image: Visual Studio 2017
 environment:
-  APPVEYORAPIKEY:
-   secure: f6ZDvXLvu8fryoFvnGfIUdpvlUC6Rft/qZKbWGh5CFw=
-   matrix:
+  matrix:
      - TESTFRAMEWORK: netcoreapp2.0
        APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
        PUBLISH: 1
@@ -13,6 +11,8 @@ environment:
      - TESTFRAMEWORK: net462
        APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
        PUBLISH: 0
+  APPVEYORAPIKEY:
+   secure: f6ZDvXLvu8fryoFvnGfIUdpvlUC6Rft/qZKbWGh5CFw=
 skip_tags:  false
 assembly_info:
   patch: true
