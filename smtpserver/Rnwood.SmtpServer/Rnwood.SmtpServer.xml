@@ -310,9 +310,6 @@
         <member name="P:Rnwood.SmtpServer.Connection.MailVerb">
             <inheritdoc/>
         </member>
-        <member name="P:Rnwood.SmtpServer.Connection.ReaderEncoding">
-            <inheritdoc/>
-        </member>
         <member name="P:Rnwood.SmtpServer.Connection.Server">
             <inheritdoc/>
         </member>
@@ -343,9 +340,6 @@
             <inheritdoc/>
         </member>
         <member name="M:Rnwood.SmtpServer.Connection.ReadLine">
-            <inheritdoc/>
-        </member>
-        <member name="M:Rnwood.SmtpServer.Connection.SetReaderEncoding(System.Text.Encoding)">
             <inheritdoc/>
         </member>
         <member name="M:Rnwood.SmtpServer.Connection.ToString">
@@ -604,7 +598,7 @@
         <member name="P:Rnwood.SmtpServer.DefaultServerBehaviour.PortNumber">
             <inheritdoc/>
         </member>
-        <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.GetFallbackEncoding(Rnwood.SmtpServer.IConnection)">
+        <member name="P:Rnwood.SmtpServer.DefaultServerBehaviour.FallbackEncoding">
             <inheritdoc/>
         </member>
         <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.GetExtensions(Rnwood.SmtpServer.IConnectionChannel)">
@@ -1578,11 +1572,6 @@
             Gets the MailVerb
             </summary>
         </member>
-        <member name="P:Rnwood.SmtpServer.IConnection.ReaderEncoding">
-            <summary>
-            Gets the ReaderEncoding
-            </summary>
-        </member>
         <member name="P:Rnwood.SmtpServer.IConnection.Server">
             <summary>
             Gets the Server
@@ -1635,12 +1624,6 @@
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the async operation</returns>
         </member>
-        <member name="M:Rnwood.SmtpServer.IConnection.SetReaderEncoding(System.Text.Encoding)">
-            <summary>
-            Sets the encoding used by this connection to decode text.
-            </summary>
-            <param name="encoding">The encoding<see cref="T:System.Text.Encoding"/></param>
-        </member>
         <member name="M:Rnwood.SmtpServer.IConnection.WriteResponse(Rnwood.SmtpServer.SmtpResponse)">
             <summary>
             Writes an <see cref="T:Rnwood.SmtpServer.SmtpResponse"/> to the client.
@@ -1673,14 +1656,6 @@
             </summary>
             <value>
               <c>true</c> if this instance is connected; otherwise, <c>false</c>.
-            </value>
-        </member>
-        <member name="P:Rnwood.SmtpServer.IConnectionChannel.ReaderEncoding">
-            <summary>
-            Gets the current reader encoding used to read from channel and return string from the <see cref="M:Rnwood.SmtpServer.IConnectionChannel.ReadLine"/> method.
-            </summary>
-            <value>
-            The reader encoding.
             </value>
         </member>
         <member name="P:Rnwood.SmtpServer.IConnectionChannel.ReceiveTimeout">
@@ -1720,15 +1695,9 @@
         </member>
         <member name="M:Rnwood.SmtpServer.IConnectionChannel.ReadLine">
             <summary>
-            Reads the next line from the channel using the currrent <see cref="P:Rnwood.SmtpServer.IConnectionChannel.ReaderEncoding"/>
+            Reads the next line from the channel using the currrent <see cref="!:ReaderEncoding"/>
             </summary>
             <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the async operation</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IConnectionChannel.SetReaderEncoding(System.Text.Encoding)">
-            <summary>
-            Sets the encoding used by the <see cref="M:Rnwood.SmtpServer.IConnectionChannel.ReadLine"/> method to read lines from the channel.
-            </summary>
-            <param name="encoding">The encoding<see cref="T:System.Text.Encoding"/></param>
         </member>
         <member name="M:Rnwood.SmtpServer.IConnectionChannel.WriteLine(System.String)">
             <summary>
@@ -1978,14 +1947,10 @@
             Gets the TCP port number on which to listen for connections.
             </summary>
         </member>
-        <member name="M:Rnwood.SmtpServer.IServerBehaviour.GetFallbackEncoding(Rnwood.SmtpServer.IConnection)">
+        <member name="P:Rnwood.SmtpServer.IServerBehaviour.FallbackEncoding">
             <summary>
             Gets an encoding which will be used if bytes received from the client cannot be decoded as ASCII/UTF-8.
             </summary>
-            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" /></param>
-            <returns>
-            A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation
-            </returns>
         </member>
         <member name="M:Rnwood.SmtpServer.IServerBehaviour.GetExtensions(Rnwood.SmtpServer.IConnectionChannel)">
             <summary>
@@ -3029,7 +2994,7 @@
             Defines the <see cref="T:Rnwood.SmtpServer.TcpClientConnectionChannel" />
             </summary>
         </member>
-        <member name="M:Rnwood.SmtpServer.TcpClientConnectionChannel.#ctor(System.Net.Sockets.TcpClient)">
+        <member name="M:Rnwood.SmtpServer.TcpClientConnectionChannel.#ctor(System.Net.Sockets.TcpClient,System.Text.Encoding)">
             <summary>
             Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.TcpClientConnectionChannel"/> class.
             </summary>
@@ -3048,11 +3013,6 @@
         <member name="P:Rnwood.SmtpServer.TcpClientConnectionChannel.IsConnected">
             <summary>
             Gets a value indicating whether IsConnected
-            </summary>
-        </member>
-        <member name="P:Rnwood.SmtpServer.TcpClientConnectionChannel.ReaderEncoding">
-            <summary>
-            Gets the ReaderEncoding
             </summary>
         </member>
         <member name="P:Rnwood.SmtpServer.TcpClientConnectionChannel.ReceiveTimeout">
@@ -3092,16 +3052,13 @@
         </member>
         <member name="M:Rnwood.SmtpServer.TcpClientConnectionChannel.ReadLine">
             <summary>
-            Reads the next line from the channel using the currrent <see cref="P:Rnwood.SmtpServer.TcpClientConnectionChannel.ReaderEncoding" />
+            Reads the next line from the channel using the currrent <see cref="!:ReaderEncoding" />
             </summary>
             <returns>
             A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation
             </returns>
             <exception cref="T:System.IO.IOException">Reader returned null string</exception>
             <exception cref="T:Rnwood.SmtpServer.ConnectionUnexpectedlyClosedException">Read failed</exception>
-        </member>
-        <member name="M:Rnwood.SmtpServer.TcpClientConnectionChannel.SetReaderEncoding(System.Text.Encoding)">
-            <inheritdoc/>
         </member>
         <member name="M:Rnwood.SmtpServer.TcpClientConnectionChannel.WriteLine(System.String)">
             <inheritdoc/>

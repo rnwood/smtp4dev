@@ -7,6 +7,7 @@ namespace Rnwood.SmtpServer.Tests
 {
     using System.Net;
     using System.Net.Sockets;
+    using System.Text;
     using System.Threading.Tasks;
     using Xunit;
 
@@ -34,7 +35,7 @@ namespace Rnwood.SmtpServer.Tests
 
                 using (TcpClient serverTcpClient = await acceptTask.ConfigureAwait(false))
                 {
-                    TcpClientConnectionChannel channel = new TcpClientConnectionChannel(serverTcpClient);
+                    TcpClientConnectionChannel channel = new TcpClientConnectionChannel(serverTcpClient, Encoding.Default);
                     client.Dispose();
 
                     await Assert.ThrowsAsync<ConnectionUnexpectedlyClosedException>(async () =>

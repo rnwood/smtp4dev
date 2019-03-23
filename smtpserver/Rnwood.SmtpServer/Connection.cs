@@ -54,9 +54,6 @@ namespace Rnwood.SmtpServer
         public MailVerb MailVerb => (MailVerb)this.VerbMap.GetVerbProcessor("MAIL");
 
         /// <inheritdoc/>
-        public Encoding ReaderEncoding => this.ConnectionChannel.ReaderEncoding;
-
-        /// <inheritdoc/>
         public ISmtpServer Server { get; private set; }
 
         /// <inheritdoc/>
@@ -116,13 +113,7 @@ namespace Rnwood.SmtpServer
             await this.Session.AppendLineToSessionLog(text).ConfigureAwait(false);
             return text;
         }
-
-        /// <inheritdoc/>
-        public void SetReaderEncoding(Encoding encoding)
-        {
-            this.ConnectionChannel.SetReaderEncoding(encoding);
-        }
-
+        
         /// <summary>
         /// Returns a <see cref="string" /> that represents this instance.
         /// </summary>

@@ -110,10 +110,7 @@ namespace Rnwood.SmtpServer
         public virtual int PortNumber { get; private set; }
 
         /// <inheritdoc/>
-        public virtual Task<Encoding> GetFallbackEncoding(IConnection connection)
-        {
-            return Task.FromResult<Encoding>(Encoding.Default);
-        }
+        public virtual Encoding FallbackEncoding => Encoding.Default;
 
         /// <inheritdoc/>
         public virtual Task<IEnumerable<IExtension>> GetExtensions(IConnectionChannel connectionChannel)

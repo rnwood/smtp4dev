@@ -264,7 +264,7 @@ namespace Rnwood.SmtpServer
             {
                 this.logger.LogDebug("New connection from {0}", tcpClient.Client.RemoteEndPoint);
 
-                TcpClientConnectionChannel connectionChannel = new TcpClientConnectionChannel(tcpClient);
+                TcpClientConnectionChannel connectionChannel = new TcpClientConnectionChannel(tcpClient, this.Behaviour.FallbackEncoding);
                 connectionChannel.ReceiveTimeout = await this.Behaviour.GetReceiveTimeout(connectionChannel).ConfigureAwait(false);
                 connectionChannel.SendTimeout = await this.Behaviour.GetSendTimeout(connectionChannel).ConfigureAwait(false);
 

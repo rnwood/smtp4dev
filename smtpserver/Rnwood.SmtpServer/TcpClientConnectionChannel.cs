@@ -27,19 +27,22 @@ namespace Rnwood.SmtpServer
 
         private SmtpStreamWriter writer;
 
+        private readonly Encoding fallbackEncoding;
+
         private bool disposedValue = false; // To detect redundant calls
 
         /// <summary>
         /// Initializes a new instance of the <see cref="TcpClientConnectionChannel"/> class.
         /// </summary>
         /// <param name="tcpClient">The tcpClient<see cref="TcpClient"/></param>
-        public TcpClientConnectionChannel(TcpClient tcpClient)
+        public TcpClientConnectionChannel(TcpClient tcpClient, Encoding fallbackEncoding)
         {
             this.tcpClient = tcpClient;
             this.stream = tcpClient.GetStream();
             this.IsConnected = true;
+            this.fallbackEncoding = fallbackEncoding;
             this.writer = new SmtpStreamWriter(this.stream, false) { AutoFlush = true };
-            this.SetReaderEncoding(new UTF8Encoding(false, true));
+            this.SetupReader();
         }
 
         /// <summary>
@@ -58,11 +61,6 @@ namespace Rnwood.SmtpServer
         public bool IsConnected { get; private set; }
 
         /// <summary>
-        /// Gets the ReaderEncoding
-        /// </summary>
-        public Encoding ReaderEncoding { get; private set; }
-
-        /// <summary>
         /// Gets or sets the ReceiveTimeout
         /// </summary>
         public TimeSpan ReceiveTimeout
@@ -79,7 +77,6 @@ namespace Rnwood.SmtpServer
             get { return TimeSpan.FromMilliseconds(this.tcpClient.SendTimeout); }
             set { this.tcpClient.SendTimeout = (int)Math.Min(int.MaxValue, value.TotalMilliseconds); }
         }
-
         /// <summary>
         /// Applies the a filter to the stream which is used to read data from the channel.
         /// </summary>
@@ -158,13 +155,6 @@ namespace Rnwood.SmtpServer
         }
 
         /// <inheritdoc/>
-        public void SetReaderEncoding(Encoding encoding)
-        {
-            this.ReaderEncoding = encoding;
-            this.SetupReader();
-        }
-
-        /// <inheritdoc/>
         public async Task WriteLine(string text)
         {
             try
@@ -214,7 +204,7 @@ namespace Rnwood.SmtpServer
                 this.reader.Dispose();
             }
 
-            this.reader = new SmtpStreamReader(this.stream, this.ReaderEncoding, true);
+            this.reader = new SmtpStreamReader(this.stream, this.fallbackEncoding, true);
         }
     }
 }

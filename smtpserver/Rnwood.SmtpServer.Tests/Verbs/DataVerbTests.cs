@@ -24,7 +24,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         public async Task Data_8BitData_PassedThrough()
         {
             string data = ((char)(0x41 + 128)).ToString();
-            await this.TestGoodDataAsync(new string[] { data, "." }, data, true).ConfigureAwait(false);
+            await this.TestGoodDataAsync(new string[] { data, "." }, data).ConfigureAwait(false);
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         {
             //Check escaping of end of message character ".." is decoded to "."
             //but the .. after B should be left alone
-            await this.TestGoodDataAsync(new string[] { "A", "..", "B..", "." }, "A\r\n.\r\nB..", true).ConfigureAwait(false);
+            await this.TestGoodDataAsync(new string[] { "A", "..", "B..", "." }, "A\r\n.\r\nB..").ConfigureAwait(false);
         }
 
         /// <summary>
@@ -70,7 +70,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         [Fact]
         public async Task Data_EmptyMessage_Accepted()
         {
-            await this.TestGoodDataAsync(new string[] { "." }, "", true).ConfigureAwait(false);
+            await this.TestGoodDataAsync(new string[] { "." }, "").ConfigureAwait(false);
         }
 
         /// <summary>
@@ -141,16 +141,10 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         /// </summary>
         /// <param name="messageData">The messageData<see cref="string"/></param>
         /// <param name="expectedData">The expectedData<see cref="string"/></param>
-        /// <param name="eightBitClean">The eightBitClean<see cref="bool"/></param>
         /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        private async Task TestGoodDataAsync(string[] messageData, string expectedData, bool eightBitClean)
+        private async Task TestGoodDataAsync(string[] messageData, string expectedData)
         {
             TestMocks mocks = new TestMocks();
-
-            if (eightBitClean)
-            {
-                mocks.Connection.SetupGet(c => c.ReaderEncoding).Returns(Encoding.UTF8);
-            }
 
             MemoryMessageBuilder messageBuilder = new MemoryMessageBuilder();
             mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
@@ -165,7 +159,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.StartMailInputEndWithDot);
             mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
 
-            using (StreamReader dataReader = new StreamReader(await messageBuilder.GetData().ConfigureAwait(false), eightBitClean ? Encoding.UTF8 : new ASCIISevenBitTruncatingEncoding()))
+            using (StreamReader dataReader = new StreamReader(await messageBuilder.GetData().ConfigureAwait(false), Encoding.UTF8))
             {
                 Assert.Equal(expectedData, dataReader.ReadToEnd());
             }

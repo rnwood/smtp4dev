@@ -39,14 +39,6 @@ namespace Rnwood.SmtpServer
         bool IsConnected { get; }
 
         /// <summary>
-        /// Gets the current reader encoding used to read from channel and return string from the <see cref="ReadLine"/> method.
-        /// </summary>
-        /// <value>
-        /// The reader encoding.
-        /// </value>
-        Encoding ReaderEncoding { get; }
-
-        /// <summary>
         /// Gets or sets the receive timeout after which if data is expected but not received, the connection will be terminated.
         /// </summary>
         /// <value>
@@ -86,12 +78,6 @@ namespace Rnwood.SmtpServer
         /// </summary>
         /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
         Task<string> ReadLine();
-
-        /// <summary>
-        /// Sets the encoding used by the <see cref="ReadLine"/> method to read lines from the channel.
-        /// </summary>
-        /// <param name="encoding">The encoding<see cref="Encoding"/></param>
-        void SetReaderEncoding(Encoding encoding);
 
         /// <summary>
         /// Writes a line of text to the client.

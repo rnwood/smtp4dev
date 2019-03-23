@@ -40,11 +40,6 @@ namespace Rnwood.SmtpServer
         MailVerb MailVerb { get; }
 
         /// <summary>
-        /// Gets the ReaderEncoding
-        /// </summary>
-        Encoding ReaderEncoding { get; }
-
-        /// <summary>
         /// Gets the Server
         /// </summary>
         ISmtpServer Server { get; }
@@ -95,12 +90,6 @@ namespace Rnwood.SmtpServer
         /// </summary>
         /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
         Task<string> ReadLine();
-
-        /// <summary>
-        /// Sets the encoding used by this connection to decode text.
-        /// </summary>
-        /// <param name="encoding">The encoding<see cref="Encoding"/></param>
-        void SetReaderEncoding(Encoding encoding);
 
         /// <summary>
         /// Writes an <see cref="SmtpResponse"/> to the client.

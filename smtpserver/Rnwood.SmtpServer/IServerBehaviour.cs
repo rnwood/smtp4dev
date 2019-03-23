@@ -43,11 +43,7 @@ namespace Rnwood.SmtpServer
         /// <summary>
         /// Gets an encoding which will be used if bytes received from the client cannot be decoded as ASCII/UTF-8.
         /// </summary>
-        /// <param name="connection">The connection<see cref="IConnection" /></param>
-        /// <returns>
-        /// A <see cref="Task{T}" /> representing the async operation
-        /// </returns>
-        Task<Encoding> GetFallbackEncoding(IConnection connection);
+        Encoding FallbackEncoding { get; }
 
         /// <summary>
         /// Gets the extensions that should be enabled for the specified connection.

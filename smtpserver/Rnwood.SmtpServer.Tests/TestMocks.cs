@@ -6,6 +6,7 @@
 namespace Rnwood.SmtpServer.Tests
 {
     using System.Net;
+    using System.Text;
     using System.Threading.Tasks;
     using Moq;
     using Rnwood.SmtpServer.Extensions;
@@ -32,11 +33,11 @@ namespace Rnwood.SmtpServer.Tests
             this.ServerBehaviour.Setup(
                 sb => sb.OnCreateNewSession(It.IsAny<IConnectionChannel>())).
                 ReturnsAsync(this.Session.Object);
+            this.ServerBehaviour.Setup(s => s.FallbackEncoding).Returns(Encoding.GetEncoding("iso-8859-1"));
             this.ServerBehaviour.Setup(sb => sb.OnCreateNewMessage(It.IsAny<IConnection>())).ReturnsAsync(this.MessageBuilder.Object);
 
             this.Connection.SetupGet(c => c.Session).Returns(this.Session.Object);
             this.Connection.SetupGet(c => c.Server).Returns(this.Server.Object);
-            this.Connection.SetupGet(c => c.ReaderEncoding).Returns(new ASCIISevenBitTruncatingEncoding());
             this.Connection.Setup(s => s.CloseConnection()).Returns(() => this.ConnectionChannel.Object.Close());
             this.Connection.SetupGet(s => s.ExtensionProcessors).Returns(new IExtensionProcessor[0]);
 
