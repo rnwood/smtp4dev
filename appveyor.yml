@@ -28,13 +28,13 @@ environment:
     - RUNTIME: linux-arm
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
     - RUNTIME: docker
-      DOCKERPLATFORM: windows-amd64
-      DOCKERFILE: windows
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
-    - RUNTIME: docker
       DOCKERPLATFORM: linux-amd64
       DOCKERFILE: linux
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+    - RUNTIME: docker
+      DOCKERPLATFORM: windows-amd64
+      DOCKERFILE: windows
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
@@ -74,15 +74,17 @@ install:
 build_script:
  - ps: |
     if ($env:RUNTIME -eq "docker") {
-      docker pull rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3
-      docker build --cache-from rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -m 4g -t rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -f Dockerfile.$($env:DOCKERFILE) --build-arg version=$env:APPVEYOR_BUILD_VERSION .
-      docker tag rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)	  
+      docker build -m 4g -t rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 -f Dockerfile.$($env:DOCKERFILE) --build-arg version=$env:APPVEYOR_BUILD_VERSION .
+      docker tag rnwood/smtp4dev:$($env:DOCKERPLATFORM)-v3 rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)
+
     } else {
         dotnet build Smtp4dev.sln -c $env:Configuration -p:version=$env:APPVEYOR_BUILD_VERSION
     }
 after_build:
  - ps: |
     if ($env:RUNTIME -eq "docker") {
+       docker save "rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)" -o "Smtp4dev-docker-$($env:DOCKERPLATFORM)-v$($env:APPVEYOR_BUILD_VERSION).tar"
+       7z a "Smtp4dev-docker-$($env:DOCKERPLATFORM)-v$($env:APPVEYOR_BUILD_VERSION).tar.gz" "Smtp4dev-docker-$($env:DOCKERPLATFORM)-v$($env:APPVEYOR_BUILD_VERSION).tar"
     } elseif ($env:RUNTIME -ne "noruntime") {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME -p:version=$env:APPVEYOR_BUILD_VERSION -o publish
     } else {
@@ -111,6 +113,7 @@ after_deploy:
       }
     }
 artifacts:
+- path: '*.tar.gz'
 - path: Rnwood.Smtp4dev\publish
   name: Smtp4dev-$(runtime)-v$(appveyor_build_version)
   type: zip

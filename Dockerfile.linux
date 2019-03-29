@@ -1,8 +1,5 @@
-FROM microsoft/dotnet:2.2-sdk AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
 WORKDIR /app
-
-ARG version
-ENV VERSION $version
 
 # replace shell with bash so we can source files
 RUN rm /bin/sh && ln -s /bin/bash /bin/sh
@@ -34,6 +31,9 @@ COPY *.sln .
 COPY Rnwood.Smtp4dev/*.csproj ./Rnwood.Smtp4dev/
 RUN dotnet restore Rnwood.Smtp4dev
 
+ARG version
+ENV VERSION $version
+
 # copy everything else and build app
 COPY . .
 WORKDIR /app/Rnwood.Smtp4dev
@@ -43,7 +43,7 @@ FROM build AS publish
 WORKDIR /app/Rnwood.Smtp4dev
 RUN dotnet publish -c Release -o out -p:Version=$VERSION
 
-FROM microsoft/dotnet:2.1.5-aspnetcore-runtime AS runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.2 AS runtime
 WORKDIR /app
 EXPOSE 80
 EXPOSE 25
