@@ -11,7 +11,7 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/netcoreapp2.1/Rnwood.Smtp4dev.dll",
+            "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/netcoreapp2.2/Rnwood.Smtp4dev.dll",
             "args": [],
             "cwd": "${workspaceFolder}/Rnwood.Smtp4dev",
             "stopAtEntry": false,

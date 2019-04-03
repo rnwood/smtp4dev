@@ -135,7 +135,7 @@ namespace Rnwood.Smtp4dev.Server
                 await sessionsHub.OnSessionsChanged();
             }, true);
         }
-
+        
         private async Task OnMessageReceived(object sender, MessageEventArgs e)
         {
             using (Stream stream = await e.Message.GetData())
