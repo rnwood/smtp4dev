@@ -5,22 +5,22 @@
 
 namespace Rnwood.SmtpServer
 {
-    using System.Threading.Tasks;
-    using Rnwood.SmtpServer.Verbs;
+	using System.Threading.Tasks;
+	using Rnwood.SmtpServer.Verbs;
 
-    /// <summary>
-    /// Defines the <see cref="QuitVerb" />
-    /// </summary>
-    public class QuitVerb : IVerb
-    {
-        /// <inheritdoc/>
-        public async Task Process(IConnection connection, SmtpCommand command)
-        {
-            await connection.WriteResponse(new SmtpResponse(
-                StandardSmtpResponseCode.ClosingTransmissionChannel,
-                                                               "Goodbye")).ConfigureAwait(false);
-            await connection.CloseConnection().ConfigureAwait(false);
-            connection.Session.CompletedNormally = true;
-        }
-    }
+	/// <summary>
+	/// Defines the <see cref="QuitVerb" />.
+	/// </summary>
+	public class QuitVerb : IVerb
+	{
+		/// <inheritdoc/>
+		public async Task Process(IConnection connection, SmtpCommand command)
+		{
+			await connection.WriteResponse(new SmtpResponse(
+				StandardSmtpResponseCode.ClosingTransmissionChannel,
+				"Goodbye")).ConfigureAwait(false);
+			await connection.CloseConnection().ConfigureAwait(false);
+			connection.Session.CompletedNormally = true;
+		}
+	}
 }

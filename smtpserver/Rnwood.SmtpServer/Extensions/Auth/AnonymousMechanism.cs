@@ -5,21 +5,21 @@
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    /// <summary>
-    /// Defines the <see cref="AnonymousMechanism" /> which implements ANONYMOUS authentication.
-    /// </summary>
-    public class AnonymousMechanism : IAuthMechanism
-    {
-        /// <inheritdoc/>
-        public string Identifier => "ANONYMOUS";
+	/// <summary>
+	/// Defines the <see cref="AnonymousMechanism" /> which implements ANONYMOUS authentication.
+	/// </summary>
+	public class AnonymousMechanism : IAuthMechanism
+	{
+		/// <inheritdoc/>
+		public string Identifier => "ANONYMOUS";
 
-        /// <inheritdoc/>
-        public bool IsPlainText => false;
+		/// <inheritdoc/>
+		public bool IsPlainText => false;
 
-        /// <inheritdoc/>
-        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnection connection)
-        {
-            return new AnonymousMechanismProcessor(connection);
-        }
-    }
+		/// <inheritdoc/>
+		public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnection connection)
+		{
+			return new AnonymousMechanismProcessor(connection);
+		}
+	}
 }

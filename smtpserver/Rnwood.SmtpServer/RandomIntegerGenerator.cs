@@ -5,19 +5,19 @@
 
 namespace Rnwood.SmtpServer
 {
-    using System;
+	using System;
 
-    /// <summary>
-    /// Defines the <see cref="RandomIntegerGenerator" />
-    /// </summary>
-    public class RandomIntegerGenerator : IRandomIntegerGenerator
-    {
-        private static Random random = new Random();
+	/// <summary>
+	/// Defines the <see cref="RandomIntegerGenerator" />.
+	/// </summary>
+	public class RandomIntegerGenerator : IRandomIntegerGenerator
+	{
+		private static Random random = new Random();
 
-        /// <inheritdoc/>
-        public int GenerateRandomInteger(int minValue, int maxValue)
-        {
-            return random.Next(minValue, maxValue);
-        }
-    }
+		/// <inheritdoc/>
+		public int GenerateRandomInteger(int minValue, int maxValue)
+		{
+			return random.Next(minValue, maxValue);
+		}
+	}
 }

@@ -5,24 +5,24 @@
 
 namespace Rnwood.SmtpServer
 {
-    /// <summary>
-    /// Defines the AuthenticationResult
-    /// </summary>
-    public enum AuthenticationResult
-    {
-        /// <summary>
-        /// Defines the Success
-        /// </summary>
-        Success,
+	/// <summary>
+	/// Defines the AuthenticationResult.
+	/// </summary>
+	public enum AuthenticationResult
+	{
+		/// <summary>
+		/// Defines the Success
+		/// </summary>
+		Success,
 
-        /// <summary>
-        /// Defines the Failure
-        /// </summary>
-        Failure,
+		/// <summary>
+		/// Defines the Failure
+		/// </summary>
+		Failure,
 
-        /// <summary>
-        /// Defines the TemporaryFailure
-        /// </summary>
-        TemporaryFailure
-    }
+		/// <summary>
+		/// Defines the TemporaryFailure
+		/// </summary>
+		TemporaryFailure,
+	}
 }

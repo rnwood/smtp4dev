@@ -5,61 +5,61 @@
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    using System;
-    using System.Text;
-    using System.Threading.Tasks;
+	using System;
+	using System.Text;
+	using System.Threading.Tasks;
 
-    /// <summary>
-    /// Defines the <see cref="AuthMechanismProcessor" />
-    /// </summary>
-    public abstract class AuthMechanismProcessor : IAuthMechanismProcessor
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="AuthMechanismProcessor"/> class.
-        /// </summary>
-        /// <param name="connection">The connection<see cref="IConnection"/></param>
-        public AuthMechanismProcessor(IConnection connection)
-        {
-            this.Connection = connection;
-        }
+	/// <summary>
+	/// Defines the <see cref="AuthMechanismProcessor" />.
+	/// </summary>
+	public abstract class AuthMechanismProcessor : IAuthMechanismProcessor
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="AuthMechanismProcessor"/> class.
+		/// </summary>
+		/// <param name="connection">The connection<see cref="IConnection"/>.</param>
+		public AuthMechanismProcessor(IConnection connection)
+		{
+			this.Connection = connection;
+		}
 
-        /// <summary>
-        /// Gets the connection this processor is for
-        /// </summary>
-        /// <value>
-        /// The connection.
-        /// </value>
-        public IConnection Connection { get; private set; }
+		/// <summary>
+		/// Gets the connection this processor is for.
+		/// </summary>
+		/// <value>
+		/// The connection.
+		/// </value>
+		public IConnection Connection { get; private set; }
 
-        /// <inheritdoc />
-        public IAuthenticationCredentials Credentials { get; protected set; }
+		/// <inheritdoc />
+		public IAuthenticationCredentials Credentials { get; protected set; }
 
-        /// <inheritdoc />
-        public abstract Task<AuthMechanismProcessorStatus> ProcessResponse(string data);
+		/// <inheritdoc />
+		public abstract Task<AuthMechanismProcessorStatus> ProcessResponse(string data);
 
-        /// <summary>
-        /// Decodes a base64 encoded ASCII string and throws an exception if invalid.
-        /// </summary>
-        /// <param name="data">The data.</param>
-        /// <returns>The decoded ASCII string</returns>
-        /// <exception cref="BadBase64Exception">If the base64 encoded string is invalid</exception>
-        protected static string DecodeBase64(string data)
-        {
-            try
-            {
-                return Encoding.ASCII.GetString(Convert.FromBase64String(data));
-            }
-            catch (FormatException)
-            {
-                throw new BadBase64Exception(new SmtpResponse(
-                    StandardSmtpResponseCode.AuthenticationFailure,
-                                                               "Bad Base64 data"));
-            }
-        }
+		/// <summary>
+		/// Decodes a base64 encoded ASCII string and throws an exception if invalid.
+		/// </summary>
+		/// <param name="data">The data.</param>
+		/// <returns>The decoded ASCII string.</returns>
+		/// <exception cref="BadBase64Exception">If the base64 encoded string is invalid.</exception>
+		protected static string DecodeBase64(string data)
+		{
+			try
+			{
+				return Encoding.ASCII.GetString(Convert.FromBase64String(data));
+			}
+			catch (FormatException)
+			{
+				throw new BadBase64Exception(new SmtpResponse(
+					StandardSmtpResponseCode.AuthenticationFailure,
+					"Bad Base64 data"));
+			}
+		}
 
-        private static string EncodeBase64(string asciiString)
-        {
-            return Convert.ToBase64String(Encoding.ASCII.GetBytes(asciiString));
-        }
-    }
+		private static string EncodeBase64(string asciiString)
+		{
+			return Convert.ToBase64String(Encoding.ASCII.GetBytes(asciiString));
+		}
+	}
 }

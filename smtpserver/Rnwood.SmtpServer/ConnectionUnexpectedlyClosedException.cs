@@ -5,38 +5,38 @@
 
 namespace Rnwood.SmtpServer
 {
-    using System;
-    using System.IO;
+	using System;
+	using System.IO;
 
-    /// <summary>
-    /// Defines the <see cref="ConnectionUnexpectedlyClosedException" />
-    /// </summary>
-    public class ConnectionUnexpectedlyClosedException : IOException
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConnectionUnexpectedlyClosedException"/> class.
-        /// </summary>
-        public ConnectionUnexpectedlyClosedException()
-        {
-        }
+	/// <summary>
+	/// Defines the <see cref="ConnectionUnexpectedlyClosedException" />.
+	/// </summary>
+	public class ConnectionUnexpectedlyClosedException : IOException
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ConnectionUnexpectedlyClosedException"/> class.
+		/// </summary>
+		public ConnectionUnexpectedlyClosedException()
+		{
+		}
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConnectionUnexpectedlyClosedException"/> class.
-        /// </summary>
-        /// <param name="message">The message<see cref="string"/></param>
-        public ConnectionUnexpectedlyClosedException(string message)
-            : base(message)
-        {
-        }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ConnectionUnexpectedlyClosedException"/> class.
+		/// </summary>
+		/// <param name="message">The message<see cref="string"/>.</param>
+		public ConnectionUnexpectedlyClosedException(string message)
+			: base(message)
+		{
+		}
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="ConnectionUnexpectedlyClosedException"/> class.
-        /// </summary>
-        /// <param name="message">The message<see cref="string"/></param>
-        /// <param name="innerException">The innerException<see cref="Exception"/></param>
-        public ConnectionUnexpectedlyClosedException(string message, Exception innerException)
-            : base(message, innerException)
-        {
-        }
-    }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="ConnectionUnexpectedlyClosedException"/> class.
+		/// </summary>
+		/// <param name="message">The message<see cref="string"/>.</param>
+		/// <param name="innerException">The innerException<see cref="Exception"/>.</param>
+		public ConnectionUnexpectedlyClosedException(string message, Exception innerException)
+			: base(message, innerException)
+		{
+		}
+	}
 }

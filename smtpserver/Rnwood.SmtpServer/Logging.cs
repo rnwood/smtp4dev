@@ -5,19 +5,19 @@
 
 namespace Rnwood.SmtpServer
 {
-    using Microsoft.Extensions.Logging;
+	using Microsoft.Extensions.Logging;
 
-    /// <summary>
-    /// Helper class implementing logging
-    /// </summary>
-    internal static class Logging
-    {
-        /// <summary>
-        /// Gets the logging factory.
-        /// </summary>
-        /// <value>
-        /// The factory.
-        /// </value>
-        public static ILoggerFactory Factory { get; } = new LoggerFactory();
-    }
+	/// <summary>
+	/// Helper class implementing logging.
+	/// </summary>
+	internal static class Logging
+	{
+		/// <summary>
+		/// Gets the logging factory.
+		/// </summary>
+		/// <value>
+		/// The factory.
+		/// </value>
+		public static ILoggerFactory Factory { get; } = new LoggerFactory();
+	}
 }

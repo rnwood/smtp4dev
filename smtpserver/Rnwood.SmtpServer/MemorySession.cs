@@ -5,49 +5,51 @@
 
 namespace Rnwood.SmtpServer
 {
-    using System;
-    using System.IO;
-    using System.Net;
-    using System.Text;
-    using System.Threading.Tasks;
+	using System;
+	using System.IO;
+	using System.Net;
+	using System.Text;
+	using System.Threading.Tasks;
 
-    /// <summary>
-    /// Defines the <see cref="MemorySession" />
-    /// </summary>
-    public class MemorySession : AbstractSession
-    {
-        private readonly SmtpStreamWriter log;
+	/// <summary>
+	/// Defines the <see cref="MemorySession" />.
+	/// </summary>
+	public class MemorySession : AbstractSession
+	{
+		private readonly SmtpStreamWriter log;
 
-        private readonly MemoryStream logStream = new MemoryStream();
+		private readonly MemoryStream logStream = new MemoryStream();
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MemorySession"/> class.
-        /// </summary>
-        /// <param name="clientAddress">The clientAddress<see cref="IPAddress"/></param>
-        /// <param name="startDate">The startDate<see cref="DateTime"/></param>
-        public MemorySession(IPAddress clientAddress, DateTime startDate)
-            : base(clientAddress, startDate)
-        {
-            this.log = new SmtpStreamWriter(this.logStream, false);
-        }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MemorySession"/> class.
+		/// </summary>
+		/// <param name="clientAddress">The clientAddress<see cref="IPAddress"/>.</param>
+		/// <param name="startDate">The startDate<see cref="DateTime"/>.</param>
+		public MemorySession(IPAddress clientAddress, DateTime startDate)
+			: base(clientAddress, startDate)
+		{
+			this.log = new SmtpStreamWriter(this.logStream, false);
+		}
 
-        /// <inheritdoc />
-        public override Task AppendLineToSessionLog(string text)
-        {
-            this.log.WriteLine(text);
-            return Task.CompletedTask;
-        }
+		/// <inheritdoc />
+		public override Task AppendLineToSessionLog(string text)
+		{
+			this.log.WriteLine(text);
+			return Task.CompletedTask;
+		}
 
-        /// <inheritdoc />
-        public override Task<TextReader> GetLog()
-        {
-            this.log.Flush();
-            return Task.FromResult<TextReader>(new StreamReader(new MemoryStream(this.logStream.ToArray(), false), new UTF8Encoding(false, true), false));
-        }
+		/// <inheritdoc />
+		public override Task<TextReader> GetLog()
+		{
+			this.log.Flush();
+			return Task.FromResult<TextReader>(new StreamReader(new MemoryStream(this.logStream.ToArray(), false), new UTF8Encoding(false, true), false));
+		}
 
-        /// <inheritdoc />
-        protected override void Dispose(bool disposing)
-        {
-        }
-    }
+		/// <inheritdoc />
+		protected override void Dispose(bool disposing)
+		{
+			this.logStream.Dispose();
+			this.log.Dispose();
+		}
+	}
 }

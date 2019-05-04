@@ -5,17 +5,17 @@
 
 namespace Rnwood.SmtpServer.Verbs
 {
-    using System.Threading.Tasks;
+	using System.Threading.Tasks;
 
-    /// <summary>
-    /// Defines the <see cref="NoopVerb" />
-    /// </summary>
-    public class NoopVerb : IVerb
-    {
-        /// <inheritdoc/>
-        public async Task Process(IConnection connection, SmtpCommand command)
-        {
-            await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Successfully did nothing")).ConfigureAwait(false);
-        }
-    }
+	/// <summary>
+	/// Defines the <see cref="NoopVerb" />.
+	/// </summary>
+	public class NoopVerb : IVerb
+	{
+		/// <inheritdoc/>
+		public async Task Process(IConnection connection, SmtpCommand command)
+		{
+			await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Successfully did nothing")).ConfigureAwait(false);
+		}
+	}
 }

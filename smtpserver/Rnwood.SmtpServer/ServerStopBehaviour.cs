@@ -5,19 +5,19 @@
 
 namespace Rnwood.SmtpServer
 {
-    /// <summary>
-    /// Defines the ServerStopBehaviour
-    /// </summary>
-    public enum ServerStopBehaviour
-    {
-        /// <summary>
-        /// Defines the WaitForExistingConnections
-        /// </summary>
-        WaitForExistingConnections,
+	/// <summary>
+	/// Defines the ServerStopBehaviour.
+	/// </summary>
+	public enum ServerStopBehaviour
+	{
+		/// <summary>
+		/// Defines the WaitForExistingConnections
+		/// </summary>
+		WaitForExistingConnections,
 
-        /// <summary>
-        /// Defines the KillExistingConnections
-        /// </summary>
-        KillExistingConnections
-    }
+		/// <summary>
+		/// Defines the KillExistingConnections
+		/// </summary>
+		KillExistingConnections,
+	}
 }

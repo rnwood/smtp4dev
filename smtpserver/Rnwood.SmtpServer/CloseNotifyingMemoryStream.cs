@@ -5,33 +5,33 @@
 
 namespace Rnwood.SmtpServer
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Text;
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Text;
 
-    /// <summary>
-    /// Defines the <see cref="CloseNotifyingMemoryStream" /> which is a memory stream that fires an event when disposed.
-    /// </summary>
-    internal class CloseNotifyingMemoryStream : MemoryStream
-    {
-        /// <summary>
-        /// Occurs when the stream is disposed.
-        /// </summary>
-        public event EventHandler Closing;
+	/// <summary>
+	/// Defines the <see cref="CloseNotifyingMemoryStream" /> which is a memory stream that fires an event when disposed.
+	/// </summary>
+	internal class CloseNotifyingMemoryStream : MemoryStream
+	{
+		/// <summary>
+		/// Occurs when the stream is disposed.
+		/// </summary>
+		public event EventHandler Closing;
 
-        /// <summary>
-        /// Releases the unmanaged resources used by the <see cref="System.IO.MemoryStream"></see> class and optionally releases the managed resources.
-        /// </summary>
-        /// <param name="disposing">The disposing<see cref="bool" /></param>
-        protected override void Dispose(bool disposing)
-        {
-            if (disposing)
-            {
-                this.Closing?.Invoke(this, EventArgs.Empty);
-            }
+		/// <summary>
+		/// Releases the unmanaged resources used by the <see cref="System.IO.MemoryStream"></see> class and optionally releases the managed resources.
+		/// </summary>
+		/// <param name="disposing">The disposing<see cref="bool" />.</param>
+		protected override void Dispose(bool disposing)
+		{
+			if (disposing)
+			{
+				this.Closing?.Invoke(this, EventArgs.Empty);
+			}
 
-            base.Dispose(disposing);
-        }
-    }
+			base.Dispose(disposing);
+		}
+	}
 }

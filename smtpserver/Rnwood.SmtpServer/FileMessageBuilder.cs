@@ -5,159 +5,161 @@
 
 namespace Rnwood.SmtpServer
 {
-    using System;
-    using System.Collections.Generic;
-    using System.IO;
-    using System.Threading.Tasks;
+	using System;
+	using System.Collections.Generic;
+	using System.IO;
+	using System.Threading.Tasks;
 
-    /// <summary>
-    /// Implements a message builder which will build a <see cref="FileMessage"/>
-    /// </summary>
-    /// <seealso cref="Rnwood.SmtpServer.IMessageBuilder" />
-    public class FileMessageBuilder : IMessageBuilder
-    {
-        private readonly FileMessage message;
+	/// <summary>
+	/// Implements a message builder which will build a <see cref="FileMessage"/>.
+	/// </summary>
+	/// <seealso cref="Rnwood.SmtpServer.IMessageBuilder" />
+	public class FileMessageBuilder : IMessageBuilder
+	{
+#pragma warning disable CA2213 // Disposable fields should be disposed
+		private readonly FileMessage message;
+#pragma warning restore CA2213 // Disposable fields should be disposed
 
-        private bool disposedValue = false; // To detect redundant calls
+		private bool disposedValue = false; // To detect redundant calls
 
-        /// <summary>
-        /// Initializes a new instance of the <see cref="FileMessageBuilder"/> class.
-        /// </summary>
-        /// <param name="file">The file.</param>
-        /// <param name="keepOnDispose">if set to <c>true</c> [keep on dispose].</param>
-        public FileMessageBuilder(FileInfo file, bool keepOnDispose)
-        {
-            this.message = new FileMessage(file, keepOnDispose);
-        }
+		/// <summary>
+		/// Initializes a new instance of the <see cref="FileMessageBuilder"/> class.
+		/// </summary>
+		/// <param name="file">The file.</param>
+		/// <param name="keepOnDispose">if set to <c>true</c> [keep on dispose].</param>
+		public FileMessageBuilder(FileInfo file, bool keepOnDispose)
+		{
+			this.message = new FileMessage(file, keepOnDispose);
+		}
 
-        /// <inheritdoc/>
-        public long? DeclaredMessageSize
-        {
-            get
-            {
-                return this.message.DeclaredMessageSize;
-            }
+		/// <inheritdoc/>
+		public long? DeclaredMessageSize
+		{
+			get
+			{
+				return this.message.DeclaredMessageSize;
+			}
 
-            set
-            {
-                this.message.DeclaredMessageSize = value;
-            }
-        }
+			set
+			{
+				this.message.DeclaredMessageSize = value;
+			}
+		}
 
-        /// <inheritdoc/>
-        public bool EightBitTransport
-        {
-            get
-            {
-                return this.message.EightBitTransport;
-            }
+		/// <inheritdoc/>
+		public bool EightBitTransport
+		{
+			get
+			{
+				return this.message.EightBitTransport;
+			}
 
-            set
-            {
-                this.EightBitTransport = value;
-            }
-        }
+			set
+			{
+				this.EightBitTransport = value;
+			}
+		}
 
-        /// <inheritdoc/>
-        public string From
-        {
-            get
-            {
-                return this.message.From;
-            }
+		/// <inheritdoc/>
+		public string From
+		{
+			get
+			{
+				return this.message.From;
+			}
 
-            set
-            {
-                this.message.From = value;
-            }
-        }
+			set
+			{
+				this.message.From = value;
+			}
+		}
 
-        /// <inheritdoc/>
-        public DateTime ReceivedDate
-        {
-            get
-            {
-                return this.message.ReceivedDate;
-            }
+		/// <inheritdoc/>
+		public DateTime ReceivedDate
+		{
+			get
+			{
+				return this.message.ReceivedDate;
+			}
 
-            set
-            {
-                this.message.ReceivedDate = value;
-            }
-        }
+			set
+			{
+				this.message.ReceivedDate = value;
+			}
+		}
 
-        /// <inheritdoc/>
-        public bool SecureConnection
-        {
-            get
-            {
-                return this.message.SecureConnection;
-            }
+		/// <inheritdoc/>
+		public bool SecureConnection
+		{
+			get
+			{
+				return this.message.SecureConnection;
+			}
 
-            set
-            {
-                this.message.SecureConnection = value;
-            }
-        }
+			set
+			{
+				this.message.SecureConnection = value;
+			}
+		}
 
-        /// <inheritdoc/>
-        public ISession Session
-        {
-            get
-            {
-                return this.message.Session;
-            }
+		/// <inheritdoc/>
+		public ISession Session
+		{
+			get
+			{
+				return this.message.Session;
+			}
 
-            set
-            {
-                this.message.Session = value;
-            }
-        }
+			set
+			{
+				this.message.Session = value;
+			}
+		}
 
-        /// <inheritdoc/>
-        public ICollection<string> Recipients => this.message.RecipientsList;
+		/// <inheritdoc/>
+		public ICollection<string> Recipients => this.message.RecipientsList;
 
-        /// <inheritdoc/>
-        public async Task<Stream> GetData()
-        {
-            return await this.message.GetData().ConfigureAwait(false);
-        }
+		/// <inheritdoc/>
+		public async Task<Stream> GetData()
+		{
+			return await this.message.GetData().ConfigureAwait(false);
+		}
 
-        /// <inheritdoc/>
-        public Task<IMessage> ToMessage()
-        {
-            return Task.FromResult<IMessage>(this.message);
-        }
+		/// <inheritdoc/>
+		public Task<IMessage> ToMessage()
+		{
+			return Task.FromResult<IMessage>(this.message);
+		}
 
-        /// <inheritdoc/>
-        public Task<Stream> WriteData()
-        {
-            return Task.FromResult<Stream>(this.message.File.OpenWrite());
-        }
+		/// <inheritdoc/>
+		public Task<Stream> WriteData()
+		{
+			return Task.FromResult<Stream>(this.message.File.OpenWrite());
+		}
 
-        /// <summary>
-        /// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-        /// </summary>
-        public void Dispose()
-        {
-            this.Dispose(true);
-            GC.SuppressFinalize(this);
-        }
+		/// <summary>
+		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+		/// </summary>
+		public void Dispose()
+		{
+			this.Dispose(true);
+			GC.SuppressFinalize(this);
+		}
 
-        /// <summary>
-        /// Releases unmanaged and - optionally - managed resources.
-        /// </summary>
-        /// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-        protected virtual void Dispose(bool disposing)
-        {
-            if (!this.disposedValue)
-            {
-                if (disposing)
-                {
-                }
+		/// <summary>
+		/// Releases unmanaged and - optionally - managed resources.
+		/// </summary>
+		/// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
+		protected virtual void Dispose(bool disposing)
+		{
+			if (!this.disposedValue)
+			{
+				if (disposing)
+				{
+				}
 
-                this.disposedValue = true;
-            }
-        }
-    }
+				this.disposedValue = true;
+			}
+		}
+	}
 }

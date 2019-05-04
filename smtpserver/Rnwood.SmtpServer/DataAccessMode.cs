@@ -5,19 +5,19 @@
 
 namespace Rnwood.SmtpServer
 {
-    /// <summary>
-    /// Defines the DataAccessMode
-    /// </summary>
-    public enum DataAccessMode
-    {
-        /// <summary>
-        /// Defines the ForReading
-        /// </summary>
-        ForReading,
+	/// <summary>
+	/// Defines the DataAccessMode.
+	/// </summary>
+	public enum DataAccessMode
+	{
+		/// <summary>
+		/// Defines the ForReading
+		/// </summary>
+		ForReading,
 
-        /// <summary>
-        /// Defines the ForWriting
-        /// </summary>
-        ForWriting
-    }
+		/// <summary>
+		/// Defines the ForWriting
+		/// </summary>
+		ForWriting,
+	}
 }

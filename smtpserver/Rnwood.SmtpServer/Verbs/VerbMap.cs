@@ -5,27 +5,27 @@
 
 namespace Rnwood.SmtpServer.Verbs
 {
-    using System;
-    using System.Collections.Generic;
+	using System;
+	using System.Collections.Generic;
 
-    /// <summary>
-    /// Defines the <see cref="VerbMap" />
-    /// </summary>
-    public class VerbMap : IVerbMap
-    {
-        private readonly Dictionary<string, IVerb> processorVerbs = new Dictionary<string, IVerb>(StringComparer.OrdinalIgnoreCase);
+	/// <summary>
+	/// Defines the <see cref="VerbMap" />.
+	/// </summary>
+	public class VerbMap : IVerbMap
+	{
+		private readonly Dictionary<string, IVerb> processorVerbs = new Dictionary<string, IVerb>(StringComparer.OrdinalIgnoreCase);
 
-        /// <inheritdoc/>
-        public IVerb GetVerbProcessor(string verb)
-        {
-            this.processorVerbs.TryGetValue(verb, out IVerb result);
-            return result;
-        }
+		/// <inheritdoc/>
+		public IVerb GetVerbProcessor(string verb)
+		{
+			this.processorVerbs.TryGetValue(verb, out IVerb result);
+			return result;
+		}
 
-        /// <inheritdoc/>
-        public void SetVerbProcessor(string verb, IVerb verbProcessor)
-        {
-            this.processorVerbs[verb] = verbProcessor;
-        }
-    }
+		/// <inheritdoc/>
+		public void SetVerbProcessor(string verb, IVerb verbProcessor)
+		{
+			this.processorVerbs[verb] = verbProcessor;
+		}
+	}
 }

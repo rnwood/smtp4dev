@@ -5,18 +5,18 @@
 
 namespace Rnwood.SmtpServer.Verbs
 {
-    using System.Threading.Tasks;
+	using System.Threading.Tasks;
 
-    /// <summary>
-    /// Defines the <see cref="RsetVerb" />
-    /// </summary>
-    public class RsetVerb : IVerb
-    {
-        /// <inheritdoc/>
-        public async Task Process(IConnection connection, SmtpCommand command)
-        {
-            await connection.AbortMessage().ConfigureAwait(false);
-            await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Rset completed")).ConfigureAwait(false);
-        }
-    }
+	/// <summary>
+	/// Defines the <see cref="RsetVerb" />.
+	/// </summary>
+	public class RsetVerb : IVerb
+	{
+		/// <inheritdoc/>
+		public async Task Process(IConnection connection, SmtpCommand command)
+		{
+			await connection.AbortMessage().ConfigureAwait(false);
+			await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Rset completed")).ConfigureAwait(false);
+		}
+	}
 }

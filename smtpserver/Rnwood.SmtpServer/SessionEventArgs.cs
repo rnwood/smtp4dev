@@ -5,25 +5,25 @@
 
 namespace Rnwood.SmtpServer
 {
-    using System;
+	using System;
 
-    /// <summary>
-    /// Defines the <see cref="SessionEventArgs" />
-    /// </summary>
-    public class SessionEventArgs : EventArgs
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="SessionEventArgs"/> class.
-        /// </summary>
-        /// <param name="session">The session<see cref="ISession"/></param>
-        public SessionEventArgs(ISession session)
-        {
-            this.Session = session;
-        }
+	/// <summary>
+	/// Defines the <see cref="SessionEventArgs" />.
+	/// </summary>
+	public class SessionEventArgs : EventArgs
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="SessionEventArgs"/> class.
+		/// </summary>
+		/// <param name="session">The session<see cref="ISession"/>.</param>
+		public SessionEventArgs(ISession session)
+		{
+			this.Session = session;
+		}
 
-        /// <summary>
-        /// Gets the Session
-        /// </summary>
-        public ISession Session { get; private set; }
-    }
+		/// <summary>
+		/// Gets the Session.
+		/// </summary>
+		public ISession Session { get; private set; }
+	}
 }

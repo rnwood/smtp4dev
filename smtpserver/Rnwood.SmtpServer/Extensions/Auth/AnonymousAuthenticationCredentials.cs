@@ -5,10 +5,10 @@
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    /// <summary>
-    /// Defines the <see cref="AnonymousAuthenticationCredentials" />
-    /// </summary>
-    public class AnonymousAuthenticationCredentials : IAuthenticationCredentials
-    {
-    }
+	/// <summary>
+	/// Defines the <see cref="AnonymousAuthenticationCredentials" />.
+	/// </summary>
+	public class AnonymousAuthenticationCredentials : IAuthenticationCredentials
+	{
+	}
 }

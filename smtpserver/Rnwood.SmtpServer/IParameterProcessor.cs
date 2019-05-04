@@ -5,20 +5,20 @@
 
 namespace Rnwood.SmtpServer
 {
-    using System.Threading.Tasks;
+	using System.Threading.Tasks;
 
-    /// <summary>
-    /// Defines the <see cref="IParameterProcessor" />
-    /// </summary>
-    public interface IParameterProcessor
-    {
-        /// <summary>
-        /// Processes the parameter which has the <paramref name="key"/> and <paramref name="value"/> specified.
-        /// </summary>
-        /// <param name="connection">The connection<see cref="IConnection"/></param>
-        /// <param name="key">The key<see cref="string"/></param>
-        /// <param name="value">The value<see cref="string"/></param>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        Task SetParameter(IConnection connection, string key, string value);
-    }
+	/// <summary>
+	/// Defines the <see cref="IParameterProcessor" />.
+	/// </summary>
+	public interface IParameterProcessor
+	{
+		/// <summary>
+		/// Processes the parameter which has the <paramref name="key"/> and <paramref name="value"/> specified.
+		/// </summary>
+		/// <param name="connection">The connection<see cref="IConnection"/>.</param>
+		/// <param name="key">The key<see cref="string"/>.</param>
+		/// <param name="value">The value<see cref="string"/>.</param>
+		/// <returns>A <see cref="Task{T}"/> representing the async operation.</returns>
+		Task SetParameter(IConnection connection, string key, string value);
+	}
 }

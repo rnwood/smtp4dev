@@ -5,16 +5,16 @@
 
 namespace Rnwood.SmtpServer
 {
-    using System;
+	using System;
 
-    /// <summary>
-    /// Defines the <see cref="ISmtpServer" />
-    /// </summary>
-    public interface ISmtpServer : IDisposable
-    {
-        /// <summary>
-        /// Gets the Behaviour
-        /// </summary>
-        IServerBehaviour Behaviour { get; }
-    }
+	/// <summary>
+	/// Defines the <see cref="ISmtpServer" />.
+	/// </summary>
+	public interface ISmtpServer : IDisposable
+	{
+		/// <summary>
+		/// Gets the Behaviour.
+		/// </summary>
+		IServerBehaviour Behaviour { get; }
+	}
 }

@@ -5,21 +5,21 @@
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    /// <summary>
-    /// Defines the <see cref="CramMd5Mechanism" /> implementing the CRAM-MD5 auth mechanism.
-    /// </summary>
-    public class CramMd5Mechanism : IAuthMechanism
-    {
-        /// <inheritdoc/>
-        public string Identifier => "CRAM-MD5";
+	/// <summary>
+	/// Defines the <see cref="CramMd5Mechanism" /> implementing the CRAM-MD5 auth mechanism.
+	/// </summary>
+	public class CramMd5Mechanism : IAuthMechanism
+	{
+		/// <inheritdoc/>
+		public string Identifier => "CRAM-MD5";
 
-        /// <inheritdoc/>
-        public bool IsPlainText => false;
+		/// <inheritdoc/>
+		public bool IsPlainText => false;
 
-        /// <inheritdoc/>
-        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnection connection)
-        {
-            return new CramMd5MechanismProcessor(connection, new RandomIntegerGenerator(), new CurrentDateTimeProvider());
-        }
-    }
+		/// <inheritdoc/>
+		public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnection connection)
+		{
+			return new CramMd5MechanismProcessor(connection, new RandomIntegerGenerator(), new CurrentDateTimeProvider());
+		}
+	}
 }

@@ -5,30 +5,30 @@
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    /// <summary>
-    /// Defines the <see cref="UsernameAndPasswordAuthenticationCredentials" />
-    /// </summary>
-    public abstract class UsernameAndPasswordAuthenticationCredentials : IAuthenticationCredentials
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="UsernameAndPasswordAuthenticationCredentials"/> class.
-        /// </summary>
-        /// <param name="username">The username<see cref="string"/></param>
-        /// <param name="password">The password<see cref="string"/></param>
-        public UsernameAndPasswordAuthenticationCredentials(string username, string password)
-        {
-            this.Username = username;
-            this.Password = password;
-        }
+	/// <summary>
+	/// Defines the <see cref="UsernameAndPasswordAuthenticationCredentials" />.
+	/// </summary>
+	public abstract class UsernameAndPasswordAuthenticationCredentials : IAuthenticationCredentials
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="UsernameAndPasswordAuthenticationCredentials"/> class.
+		/// </summary>
+		/// <param name="username">The username<see cref="string"/>.</param>
+		/// <param name="password">The password<see cref="string"/>.</param>
+		public UsernameAndPasswordAuthenticationCredentials(string username, string password)
+		{
+			this.Username = username;
+			this.Password = password;
+		}
 
-        /// <summary>
-        /// Gets the Password
-        /// </summary>
-        public string Password { get; private set; }
+		/// <summary>
+		/// Gets the Password.
+		/// </summary>
+		public string Password { get; private set; }
 
-        /// <summary>
-        /// Gets the Username
-        /// </summary>
-        public string Username { get; private set; }
-    }
+		/// <summary>
+		/// Gets the Username.
+		/// </summary>
+		public string Username { get; private set; }
+	}
 }

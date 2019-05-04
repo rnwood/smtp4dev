@@ -5,25 +5,25 @@
 
 namespace Rnwood.SmtpServer
 {
-    using System;
+	using System;
 
-    /// <summary>
-    /// Defines the <see cref="MessageEventArgs" />
-    /// </summary>
-    public class MessageEventArgs : EventArgs
-    {
-        /// <summary>
-        /// Initializes a new instance of the <see cref="MessageEventArgs"/> class.
-        /// </summary>
-        /// <param name="message">The message<see cref="IMessage"/></param>
-        public MessageEventArgs(IMessage message)
-        {
-            this.Message = message;
-        }
+	/// <summary>
+	/// Defines the <see cref="MessageEventArgs" />.
+	/// </summary>
+	public class MessageEventArgs : EventArgs
+	{
+		/// <summary>
+		/// Initializes a new instance of the <see cref="MessageEventArgs"/> class.
+		/// </summary>
+		/// <param name="message">The message<see cref="IMessage"/>.</param>
+		public MessageEventArgs(IMessage message)
+		{
+			this.Message = message;
+		}
 
-        /// <summary>
-        /// Gets the Message
-        /// </summary>
-        public IMessage Message { get; private set; }
-    }
+		/// <summary>
+		/// Gets the Message.
+		/// </summary>
+		public IMessage Message { get; private set; }
+	}
 }

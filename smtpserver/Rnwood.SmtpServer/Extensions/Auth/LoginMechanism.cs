@@ -5,21 +5,21 @@
 
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
-    /// <summary>
-    /// Defines the <see cref="LoginMechanism" /> implementing the plain text LOGIN auth mechanism.
-    /// </summary>
-    public class LoginMechanism : IAuthMechanism
-    {
-        /// <inheritdoc/>
-        public string Identifier => "LOGIN";
+	/// <summary>
+	/// Defines the <see cref="LoginMechanism" /> implementing the plain text LOGIN auth mechanism.
+	/// </summary>
+	public class LoginMechanism : IAuthMechanism
+	{
+		/// <inheritdoc/>
+		public string Identifier => "LOGIN";
 
-        /// <inheritdoc/>
-        public bool IsPlainText => true;
+		/// <inheritdoc/>
+		public bool IsPlainText => true;
 
-        /// <inheritdoc/>
-        public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnection connection)
-        {
-            return new LoginMechanismProcessor(connection);
-        }
-    }
+		/// <inheritdoc/>
+		public IAuthMechanismProcessor CreateAuthMechanismProcessor(IConnection connection)
+		{
+			return new LoginMechanismProcessor(connection);
+		}
+	}
 }

@@ -6,11 +6,11 @@
 namespace Rnwood.SmtpServer.Extensions.Auth
 {
 #pragma warning disable CA1040 // Avoid empty interfaces
-    /// <summary>
-    /// Represents credentials supplied by the client.
-    /// </summary>
-    public interface IAuthenticationCredentials
-    {
-    }
+	/// <summary>
+	/// Represents credentials supplied by the client.
+	/// </summary>
+	public interface IAuthenticationCredentials
+	{
+	}
 #pragma warning restore CA1040 // Avoid empty interfaces
 }
