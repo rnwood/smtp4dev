@@ -152,7 +152,7 @@ namespace Rnwood.SmtpServer
 
 			this.logger.LogDebug("Listener active. Starting core task");
 
-			this.coreTask = Task.Run(() => this.Core());
+			this.coreTask = Task.Run(() => this.Core().Wait());
 		}
 
 		/// <summary>
@@ -283,7 +283,7 @@ namespace Rnwood.SmtpServer
 			}
 		}
 
-		private async void Core()
+		private async Task Core()
 		{
 			this.logger.LogDebug("Core task running");
 
@@ -292,6 +292,7 @@ namespace Rnwood.SmtpServer
 				this.logger.LogDebug("Waiting for new client");
 
 				await this.AcceptNextClient().ConfigureAwait(false);
+
 				this.nextConnectionEvent.Set();
 			}
 		}
