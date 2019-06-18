@@ -19,123 +19,123 @@ using Rnwood.Smtp4dev.Server;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
-    [Route("api/[controller]")]
-    [ApiController]
-    [UseEtagFilterAttribute]
-    public class MessagesController : Controller
-    {
-        public MessagesController(Smtp4devDbContext dbContext, Smtp4devServer server)
-        {
-            this.dbContext = dbContext;
-            this.server = server;
-        }
+	[Route("api/[controller]")]
+	[ApiController]
+	[UseEtagFilterAttribute]
+	public class MessagesController : Controller
+	{
+		public MessagesController(IMessagesRepository messagesRepository)
+		{
+			this.messagesRepository = messagesRepository;
+		}
 
-        private Smtp4devDbContext dbContext;
-        private Smtp4devServer server;
+		private IMessagesRepository messagesRepository;
 
-        [HttpGet]
+		[HttpGet]
 
-        public IEnumerable<ApiModel.MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true)
-        {
-            return dbContext.Messages
-            .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""))
-            .Select(m => new ApiModel.MessageSummary(m));
-        }
+		public IEnumerable<ApiModel.MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true)
+		{
+			return messagesRepository.GetMessages()
+			.OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""))
+			.Select(m => new ApiModel.MessageSummary(m));
+		}
 
-        private DbModel.Message GetDbMessage(Guid id)
-        {
-            return dbContext.Messages.FirstOrDefault(m => m.Id == id) ??
-                throw new FileNotFoundException($"Message with id {id} was not found.");
-        }
+		private DbModel.Message GetDbMessage(Guid id)
+		{
+			return messagesRepository.GetMessages().FirstOrDefault(m => m.Id == id) ??
+				throw new FileNotFoundException($"Message with id {id} was not found.");
+		}
 
-        [HttpGet("{id}")]
-        public ApiModel.Message GetMessage(Guid id)
-        {
-            Message result = GetDbMessage(id);
+		[HttpGet("{id}")]
+		public ApiModel.Message GetMessage(Guid id)
+		{
+			var result = new ApiModel.Message(GetDbMessage(id));
+			return result;
+		}
 
-            return new ApiModel.Message(result);
-        }
+		[HttpPost("{id}")]
+		public Task MarkMessageRead(Guid id)
+		{
+			return messagesRepository.MarkMessageRead(id);
+		}
 
-        [HttpPost("{id}")]
-        public Task MarkMessageRead(Guid id)
-        {
-            return server.MarkMessageRead(id);
-        }
+		[HttpGet("{id}/source")]
+		[ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
 
-        [HttpGet("{id}/source")]
+		public FileStreamResult DownloadMessage(Guid id)
+		{
+			Message result = GetDbMessage(id);
+			return new FileStreamResult(new MemoryStream(result.Data), "message/rfc822") { FileDownloadName = $"{id}.eml" };
+		}
 
-        public FileStreamResult DownloadMessage(Guid id)
-        {
-            Message result = GetDbMessage(id);
-            return new FileStreamResult(new MemoryStream(result.Data), "message/rfc822") { FileDownloadName = $"{id}.eml" };
-        }
+		[HttpGet("{id}/part/{partid}/content")]
+		[ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
+		public FileStreamResult GetPartContent(Guid id, string partid)
+		{
+			return ApiModel.Message.GetPartContent(GetMessage(id), partid);
+		}
 
-        [HttpGet("{id}/part/{cid}/content")]
-        public FileStreamResult GetPartContent(Guid id, string cid)
-        {
-            Message result = GetDbMessage(id);
+		[HttpGet("{id}/part/{partid}/source")]
+		[ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
+		public string GetPartSource(Guid id, string partid)
+		{
+			return ApiModel.Message.GetPartContentAsText(GetMessage(id), partid);
+		}
 
-            return ApiModel.Message.GetPartContent(result, cid);
-        }
+		[HttpGet("{id}/part/{partid}/raw")]
+		[ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
+		public string GetPartSourceRaw(Guid id, string partid)
+		{
+			return ApiModel.Message.GetPartSource(GetMessage(id), partid);
+		}
 
-        [HttpGet("{id}/part/{cid}/source")]
+		[HttpGet("{id}/html")]
+		[ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
+		public string GetMessageHtml(Guid id)
+		{
+			ApiModel.Message message = GetMessage(id);
 
-        public string GetPartSource(Guid id, string cid)
-        {
-            Message result = GetDbMessage(id);
+			string html = message.MimeMessage?.HtmlBody;
 
-            return ApiModel.Message.GetPartContentAsText(result, cid);
-        }
+			if (html == null)
+			{
+				html = "<pre>" + HtmlAgilityPack.HtmlDocument.HtmlEncode(message.MimeMessage?.TextBody) + "</pre>";
+			}
 
-        [HttpGet("{id}/part/{cid}/raw")]
+	
+			HtmlDocument doc = new HtmlDocument();
+			doc.LoadHtml(html);
 
-        public string GetPartSourceRaw(Guid id, string cid)
-        {
-            Message result = GetDbMessage(id);
-            return ApiModel.Message.GetPartSource(result, cid);
-        }
+			
 
-        [HttpGet("{id}/html")]
+			HtmlNodeCollection imageElements = doc.DocumentNode.SelectNodes("//img[starts-with(@src, 'cid:')]");
 
-        public string GetMessageHtml(Guid id)
-        {
-            Message result = GetDbMessage(id);
+			if (imageElements != null)
+			{
+				foreach (HtmlNode imageElement in imageElements)
+				{
+					string cid = imageElement.Attributes["src"].Value.Replace("cid:", "", StringComparison.OrdinalIgnoreCase);
 
-            string html = ApiModel.Message.GetHtml(result);
+					var part = message.Parts.Flatten(p => p.ChildParts).FirstOrDefault(p => p.ContentId == cid);
 
-            if (html == null)
-            {
-                html = "<pre>" + HtmlAgilityPack.HtmlDocument.HtmlEncode(ApiModel.Message.GetText(result)) + "</pre>";
-            }
+					imageElement.Attributes["src"].Value = $"/api/Messages/{id.ToString()}/part/{part?.Id ?? "notfound"}/content";
+				}
+			}
 
-            HtmlDocument doc = new HtmlDocument();
-            doc.LoadHtml(html);
+			return doc.DocumentNode.OuterHtml;
+		}
 
-            HtmlNodeCollection imageElements = doc.DocumentNode.SelectNodes("//img[starts-with(@src, 'cid:')]");
+		[HttpDelete("{id}")]
+		public async Task Delete(Guid id)
+		{
+			await messagesRepository.DeleteMessage(id);
+		}
 
-            if (imageElements != null)
-            {
-                foreach (HtmlNode imageElement in imageElements)
-                {
-                    string cid = imageElement.Attributes["src"].Value.Replace("cid:", "", StringComparison.OrdinalIgnoreCase);
-                    imageElement.Attributes["src"].Value = $"/api/Messages/{id.ToString()}/part/{cid}/content";
-                }
-            }
+		[HttpDelete("*")]
+		public async Task DeleteAll()
+		{
+			await messagesRepository.DeleteAllMessages();
+		}
 
-            return doc.DocumentNode.OuterHtml;
-        }
-
-        [HttpDelete("{id}")]
-        public async Task Delete(Guid id)
-        {
-            await server.DeleteMessage(id);
-        }
-
-        [HttpDelete("*")]
-        public async Task DeleteAll()
-        {
-            await server.DeleteAllMessages();
-         }
-
-    }
+	}
 }

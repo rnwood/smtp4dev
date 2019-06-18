@@ -47,12 +47,12 @@ export default class MessagePartSource extends Vue {
         try {
             if (this.messageEntitySummary != null) {
                 if (this.type == "raw") {
-                    this.sourceurl = new MessagesController().getPartSourceRaw_url(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
-                    this.source = await new MessagesController().getPartSourceRaw(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
+                    this.sourceurl = new MessagesController().getPartSourceRaw_url(this.messageEntitySummary.messageId, this.messageEntitySummary.id);
+                    this.source = await new MessagesController().getPartSourceRaw(this.messageEntitySummary.messageId, this.messageEntitySummary.id);
 
                 } else {
-                    this.sourceurl = new MessagesController().getPartSource_url(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
-                    this.source = await new MessagesController().getPartSource(this.messageEntitySummary.messageId, this.messageEntitySummary.contentId);
+                    this.sourceurl = new MessagesController().getPartSource_url(this.messageEntitySummary.messageId, this.messageEntitySummary.id);
+                    this.source = await new MessagesController().getPartSource(this.messageEntitySummary.messageId, this.messageEntitySummary.id);
 
                 }
             }

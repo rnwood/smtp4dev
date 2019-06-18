@@ -11,7 +11,7 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Server
 {
-    public class Smtp4devServer
+    public class Smtp4devServer : IMessagesRepository
     {
         public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptions<ServerOptions> serverOptions, MessagesHub messagesHub, SessionsHub sessionsHub)
         {
@@ -43,7 +43,13 @@ namespace Rnwood.Smtp4dev.Server
             dbSession.SessionError = session.SessionError?.ToString();
         }
 
-        internal Task MarkMessageRead(Guid id)
+		public IQueryable<DbModel.Message> GetMessages()
+		{
+			return dbContextFactory().Messages;
+		}
+
+
+        public Task MarkMessageRead(Guid id)
         {
             return QueueTask(async() => {
                 Smtp4devDbContext dbContent = dbContextFactory();
@@ -162,7 +168,7 @@ namespace Rnwood.Smtp4dev.Server
             }
         }
 
-        internal Task DeleteMessage(Guid id)
+        public Task DeleteMessage(Guid id)
         {
             return QueueTask(async () =>
             {
@@ -174,7 +180,7 @@ namespace Rnwood.Smtp4dev.Server
         }
 
 
-        internal Task DeleteAllMessages()
+        public Task DeleteAllMessages()
         {
             return QueueTask(async () =>
             {

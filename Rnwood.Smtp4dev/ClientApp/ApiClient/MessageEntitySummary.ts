@@ -5,12 +5,13 @@ import Header from './Header';
 import AttachmentSummary from './AttachmentSummary';
 export default class MessageEntitySummary {
 
-    constructor(headers: Header[], childParts: MessageEntitySummary[], name: string, messageId: string, contentId: string, attachments: AttachmentSummary[], size: number, ) {
+    constructor(headers: Header[], childParts: MessageEntitySummary[], name: string, messageId: string, id: string, contentId: string, attachments: AttachmentSummary[], size: number, ) {
          
         this.headers = headers; 
         this.childParts = childParts; 
         this.name = name; 
         this.messageId = messageId; 
+        this.id = id;
         this.contentId = contentId; 
         this.attachments = attachments; 
         this.size = size;
@@ -21,6 +22,7 @@ export default class MessageEntitySummary {
     childParts: MessageEntitySummary[]; 
     name: string; 
     messageId: string; 
+    id: string;
     contentId: string; 
     attachments: AttachmentSummary[]; 
     size: number;

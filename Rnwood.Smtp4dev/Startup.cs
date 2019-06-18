@@ -49,6 +49,7 @@ namespace Rnwood.Smtp4dev
             }, ServiceLifetime.Transient, ServiceLifetime.Singleton);
 
             services.AddSingleton<Smtp4devServer>();
+			services.AddSingleton<IMessagesRepository>(sp => sp.GetService<Smtp4devServer>());
             services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
 
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));

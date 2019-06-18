@@ -15,26 +15,35 @@ environment:
   matrix:
     - RUNTIME: noruntime
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      RUNTESTS: true
     - RUNTIME: win-x64    
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      RUNTESTS: false
     - RUNTIME: linux-x64
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      RUNTESTS: false
     - RUNTIME: osx-x64
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      RUNTESTS: false
     - RUNTIME: win-x86
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      RUNTESTS: false
     - RUNTIME: win-arm
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      RUNTESTS: false
     - RUNTIME: linux-arm
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      RUNTESTS: false
     - RUNTIME: docker
       DOCKERPLATFORM: linux-amd64
       DOCKERFILE: linux
       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+      RUNTESTS: false
     - RUNTIME: docker
       DOCKERPLATFORM: windows-amd64
       DOCKERFILE: windows
       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      RUNTESTS: false
 assembly_info:
   patch: true
   file: '**\SolutionInfo.*'
@@ -90,6 +99,11 @@ after_build:
     } else {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -p:version=$env:APPVEYOR_BUILD_VERSION -o publish -p:PackAsTool=true
        dotnet pack Rnwood.Smtp4dev -c $env:Configuration -p:version=$env:APPVEYOR_BUILD_VERSION -p:PackAsTool=true
+    }
+test_script:
+ - ps: |
+    if ($env:RUNTESTS -ne "false") {
+      dotnet test -r Debug Rnwood.Smtp4dev.Tests\Rnwood.Smtp4dev.Tests.csproj
     }
 before_deploy:
  - ps: |

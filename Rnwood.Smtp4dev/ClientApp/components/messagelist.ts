@@ -26,8 +26,8 @@ export default class MessageList extends Vue {
         }
 
         this.connection = new HubConnectionManager('/hubs/messages', this.refresh);
-        this.connection.on('messageschanged', () => {
-            this.refresh();
+        this.connection.on('messageschanged', async () => {
+            await this.refresh();
         });
         this.connection.start();
 
@@ -64,7 +64,7 @@ export default class MessageList extends Vue {
 
         try {
             await new MessagesController().delete(this.selectedmessage.id);
-            this.refresh();
+            await this.refresh();
         } catch (e) {
             this.error = e;
         }
@@ -75,7 +75,7 @@ export default class MessageList extends Vue {
 
         try {
             await new MessagesController().deleteAll();
-            this.refresh();
+            await this.refresh();
         } catch (e) {
             this.error = e;
         }
@@ -138,6 +138,7 @@ export default class MessageList extends Vue {
 
             
         } catch (e) {
+            console.error(e);
             this.error = e;
 
         } finally {
@@ -168,6 +169,6 @@ export default class MessageList extends Vue {
     }
 
     async destroyed() {
-        this.connection.stop();
+        await this.connection.stop();
     }
 }

@@ -17,7 +17,7 @@
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
             "launchBrowser": {
-                "enabled": true,
+                "enabled": false,
                 "args": "${auto-detect-url}",
                 "windows": {
                     "command": "cmd.exe",
@@ -42,6 +42,20 @@
             "type": "coreclr",
             "request": "attach",
             "processId": "${command:pickProcess}"
+        },
+        {
+            "name": "Debug in Chrome",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:28261",
+            "webRoot": "${workspaceFolder}/dist/",
+            "sourceMaps": true
         }
-    ,]
+    ],
+    "compounds": [
+        {
+            "name": ".NET Core Launch (web) AND Debug in Chrome",
+            "configurations": [".NET Core Launch (web)", "Debug in Chrome"]
+        }
+    ]
 }
