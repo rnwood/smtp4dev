@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:2.2 AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:2.2.203 AS build
 WORKDIR /app
 
 # replace shell with bash so we can source files
@@ -38,12 +38,13 @@ ENV VERSION $version
 COPY . .
 WORKDIR /app/Rnwood.Smtp4dev
 RUN dotnet build -p:Version=$VERSION
+RUN dotnet test -p:Version=$VERSION
 
 FROM build AS publish
 WORKDIR /app/Rnwood.Smtp4dev
 RUN dotnet publish -c Release -o out -p:Version=$VERSION
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:2.2 AS runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.2.4 AS runtime
 WORKDIR /app
 EXPOSE 80
 EXPOSE 25

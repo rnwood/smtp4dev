@@ -12,13 +12,13 @@ Rename-Item -Path $('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\no
 RUN $env:PATH = 'C:\nodejs;{0}' -f $env:PATH ; \
 [Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
 
-ENV DOTNET_SDK_VERSION 2.2.104
+ENV DOTNET_SDK_VERSION 2.2.203
 
 RUN Invoke-WebRequest -OutFile dotnet.zip https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$Env:DOTNET_SDK_VERSION/dotnet-sdk-$Env:DOTNET_SDK_VERSION-win-x64.zip; \
 Expand-Archive dotnet.zip -DestinationPath c:\sdk; \
 Remove-Item -Force dotnet.zip
 
-ENV ASPNETCORE_VERSION 2.2.3
+ENV ASPNETCORE_VERSION 2.2.4
 RUN Invoke-WebRequest -OutFile aspnetcore.zip https://dotnetcli.blob.core.windows.net/dotnet/aspnetcore/Runtime/$Env:ASPNETCORE_VERSION/aspnetcore-runtime-$Env:ASPNETCORE_VERSION-win-x64.zip; \
 Expand-Archive aspnetcore.zip -DestinationPath c:\dotnet; \
 Remove-Item -Force aspnetcore.zip
@@ -45,8 +45,9 @@ ARG version
 ENV VERSION $version
 COPY . .
 WORKDIR /app/Rnwood.Smtp4dev
-RUN dotnet build -p:Version=$env:VERSION ; \
-dotnet publish -c Release -o out -p:Version=$env:VERSION
+RUN dotnet build -p:Version=$env:VERSION
+RUN dotnet test -p:Version=$env:VERSION
+RUN dotnet publish -c Release -o out -p:Version=$env:VERSION
 
 FROM mcr.microsoft.com/windows/nanoserver:sac2016 as runtime
 EXPOSE 80
