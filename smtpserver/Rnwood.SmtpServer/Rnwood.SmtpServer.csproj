@@ -9,8 +9,8 @@
     <AssemblyName>Rnwood.SmtpServer</AssemblyName>
     <OutputType>Library</OutputType>
     <PackageId>Rnwood.SmtpServer</PackageId>
-    <PackageProjectUrl>http://github.com/rnwood/smtp4dev</PackageProjectUrl>
-    <PackageLicenseUrl>https://github.com/rnwood/smtp4dev/blob/master/LICENSE.md</PackageLicenseUrl>
+    <PackageProjectUrl>http://github.com/rnwood/smtpserver</PackageProjectUrl>
+    <PackageLicenseUrl>https://github.com/rnwood/smtpserver/blob/master/LICENSE.md</PackageLicenseUrl>
     <NetStandardImplicitPackageVersion>2.0.1</NetStandardImplicitPackageVersion>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
