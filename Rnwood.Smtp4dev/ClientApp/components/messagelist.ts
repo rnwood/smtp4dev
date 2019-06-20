@@ -31,7 +31,7 @@ export default class MessageList extends Vue {
         });
         this.connection.start();
 
-        
+
     }
 
     private selectedSortDescending: boolean = true;
@@ -86,10 +86,12 @@ export default class MessageList extends Vue {
     private lastSortDescending: boolean = false;
     private mutex = new Mutex();
     private initialLoadDone = false;
+    private visibleNotification: Notification | null = null;
+    private lastNotifiedMessage: MessageSummary | null = null;
 
     refresh = async () => {
         var unlock = await this.mutex.acquire();
-        
+
 
         try {
 
@@ -101,42 +103,68 @@ export default class MessageList extends Vue {
             let sortColumn = this.selectedSortColumn;
             let sortDescending = this.selectedSortDescending;
 
-           
-            var serverMessages = await new MessagesController().getSummaries(sortColumn, sortDescending);
 
-            var newMessages = serverMessages.filter((sm) => !this.messages.find(cm => cm.id == sm.id));
+            let serverMessages = await new MessagesController().getSummaries(sortColumn, sortDescending);
 
             if (!this.lastSort || this.lastSort != sortColumn || this.lastSortDescending != sortDescending || serverMessages.length == 0) {
                 this.messages.splice(0, this.messages.length, ...serverMessages);
             } else {
 
                 sortedArraySync(serverMessages, this.messages,
-                    (a: MessageSummary, b: MessageSummary) => a.id == b.id, 
+                    (a: MessageSummary, b: MessageSummary) => a.id == b.id,
                     (sourceItem: MessageSummary, targetItem: MessageSummary) => {
                         targetItem.isUnread = sourceItem.isUnread;
                     });
             }
 
 
-            if (this.initialLoadDone && Notification.permission == "granted") {
+            let messagesByDateDesc = this.messages.slice(0, this.messages.length);
+            messagesByDateDesc.sort(m => m.receivedDate.valueOf()).reverse();
 
-                for (let newMessage of newMessages) {
-                    var notification = new Notification("smtp4dev: New message", {
-                        body: "From: " + newMessage.from + "\nSubject: " + newMessage.subject,
+
+            if (this.initialLoadDone && Notification.permission == "granted" && this.messages.length) {
+
+
+                var unreadMessages = this.messages.filter(m => m.isUnread);
+                var lastMessage = messagesByDateDesc[0];
+
+                if ((this.lastNotifiedMessage && lastMessage.receivedDate > this.lastNotifiedMessage.receivedDate) || !this.lastNotifiedMessage) {
+
+                    if (this.visibleNotification) {
+                        this.visibleNotification.close();
+                    }
+                    this.visibleNotification = new Notification("smtp4dev: New message received. (" + unreadMessages.length + " unread messages)", {
+                        body: "From: " + lastMessage.from + "\nSubject: " + lastMessage.subject,
                     });
-                    notification.onclick = () => {
-                        (<ElTable>this.$refs.table).setCurrentRow(newMessage);
-                        this.handleCurrentChange(newMessage);
+
+                    this.visibleNotification.onclick = () => {
+                        (<ElTable>this.$refs.table).setCurrentRow(lastMessage);
+                        this.handleCurrentChange(lastMessage);
                     };
-                    setTimeout(() => notification.close(), 5000);
+                    this.visibleNotification.onclose = () => {
+                        this.visibleNotification = null;
+                    };
+
+                    setTimeout(() => {
+                        if (this.visibleNotification) {
+                            this.visibleNotification.close();
+                            this.visibleNotification = null;
+                        }
+                    }, 5000);
                 }
+
+
+
+
+
             }
 
             this.initialLoadDone = true;
+            this.lastNotifiedMessage = messagesByDateDesc.length ? messagesByDateDesc[0] : null;
             this.lastSort = sortColumn;
             this.lastSortDescending = this.selectedSortDescending;
 
-            
+
         } catch (e) {
             console.error(e);
             this.error = e;
