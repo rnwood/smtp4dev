@@ -28,6 +28,7 @@
     "vue-template-compiler": "^2.5.17",
     "vue2-ace-editor": "0.0.13",
     "webpack": "^2.2.0",
-    "webpack-hot-middleware": "^2.12.2"
+    "webpack-hot-middleware": "^2.12.2",
+    "ts-debounce": "1.0.0"
   }
 }

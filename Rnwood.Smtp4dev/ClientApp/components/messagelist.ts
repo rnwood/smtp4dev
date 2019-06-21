@@ -7,8 +7,7 @@ import * as moment from 'moment';
 import HubConnectionManager from '../HubConnectionManager';
 import sortedArraySync from '../sortedArraySync';
 import { Mutex } from 'async-mutex';
-import Message from '../ApiClient/Message';
-
+import MessageNotificationManager from "../MessageNotificationManager";
 
 @Component({
     components: {
@@ -20,10 +19,6 @@ export default class MessageList extends Vue {
 
     constructor() {
         super();
-
-        if (Notification.permission == "default") {
-            Notification.requestPermission();
-        }
 
         this.connection = new HubConnectionManager('/hubs/messages', this.refresh);
         this.connection.on('messageschanged', async () => {
@@ -42,14 +37,18 @@ export default class MessageList extends Vue {
     error: Error | null = null;
     selectedmessage: MessageSummary | null = null;
     loading = false;
+    private messageNotificationManager = new MessageNotificationManager(message => {
+        (<ElTable>this.$refs.table).setCurrentRow(message);
+        this.handleCurrentChange(message);
+    });
 
     handleCurrentChange(message: MessageSummary | null): void {
         this.selectedmessage = message;
         this.$emit("selected-message-changed", message);
     }
 
-    formatDate(row: number, column: number, cellValue: string, index: number): string {
-        return moment(String(cellValue)).format('YYYY-MM-DD HH:mm:ss');
+    formatDate(row: number, column: number, cellValue: Date, index: number): string {
+        return moment(cellValue).format('YYYY-MM-DD HH:mm:ss');
     }
 
     getRowClass(event: { row: MessageSummary }): string {
@@ -86,12 +85,9 @@ export default class MessageList extends Vue {
     private lastSortDescending: boolean = false;
     private mutex = new Mutex();
     private initialLoadDone = false;
-    private visibleNotification: Notification | null = null;
-    private lastNotifiedMessage: MessageSummary | null = null;
 
     refresh = async () => {
         var unlock = await this.mutex.acquire();
-
 
         try {
 
@@ -118,49 +114,15 @@ export default class MessageList extends Vue {
             }
 
 
-            let messagesByDateDesc = this.messages.slice(0, this.messages.length);
-            messagesByDateDesc.sort(m => m.receivedDate.valueOf()).reverse();
 
+            if (this.initialLoadDone) {
 
-            if (this.initialLoadDone && Notification.permission == "granted" && this.messages.length) {
-
-
-                var unreadMessages = this.messages.filter(m => m.isUnread);
-                var lastMessage = messagesByDateDesc[0];
-
-                if ((this.lastNotifiedMessage && lastMessage.receivedDate > this.lastNotifiedMessage.receivedDate) || !this.lastNotifiedMessage) {
-
-                    if (this.visibleNotification) {
-                        this.visibleNotification.close();
-                    }
-                    this.visibleNotification = new Notification("smtp4dev: New message received. (" + unreadMessages.length + " unread messages)", {
-                        body: "From: " + lastMessage.from + "\nSubject: " + lastMessage.subject,
-                    });
-
-                    this.visibleNotification.onclick = () => {
-                        (<ElTable>this.$refs.table).setCurrentRow(lastMessage);
-                        this.handleCurrentChange(lastMessage);
-                    };
-                    this.visibleNotification.onclose = () => {
-                        this.visibleNotification = null;
-                    };
-
-                    setTimeout(() => {
-                        if (this.visibleNotification) {
-                            this.visibleNotification.close();
-                            this.visibleNotification = null;
-                        }
-                    }, 5000);
-                }
-
-
-
-
-
+                this.messageNotificationManager.notifyMessages(this.messages);
+            } else {
+                this.messageNotificationManager.setInitialMessages(this.messages);
             }
 
             this.initialLoadDone = true;
-            this.lastNotifiedMessage = messagesByDateDesc.length ? messagesByDateDesc[0] : null;
             this.lastSort = sortColumn;
             this.lastSortDescending = this.selectedSortDescending;
 
@@ -175,6 +137,8 @@ export default class MessageList extends Vue {
         }
 
     }
+
+   
 
     sort = async (sortOptions: DefaultSortOptions) => {
         let descending: boolean = true;

@@ -38,8 +38,8 @@ export default class SessionList extends Vue {
         this.$emit("selected-session-changed", session);
     }
 
-    formatDate(row: number, column: number, cellValue: string, index: number): string {
-        return moment(String(cellValue)).format('YYYY-MM-DD HH:mm:ss');
+    formatDate(row: number, column: number, cellValue: Date, index: number): string {
+        return moment(cellValue).format('YYYY-MM-DD HH:mm:ss');
     }
 
     async deleteSelected() {

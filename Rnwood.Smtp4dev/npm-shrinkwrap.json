@@ -3761,6 +3761,12 @@
       "integrity": "sha1-fSKbH8xjfkZsoIEYCDanqr/4P0M=",
       "dev": true
     },
+    "ts-debounce": {
+      "version": "1.0.0",
+      "resolved": "https://registry.npmjs.org/ts-debounce/-/ts-debounce-1.0.0.tgz",
+      "integrity": "sha512-V+IzWj418IoqqxVJD6I0zjPtgIyvAJ8VyViqzcxZ0JRiJXsi5mCmy1yUKkWd2gUygT28a8JsVFCgqdrf2pLUHQ==",
+      "dev": true
+    },
     "tty-browserify": {
       "version": "0.0.0",
       "resolved": "https://registry.npmjs.org/tty-browserify/-/tty-browserify-0.0.0.tgz",
