@@ -76,8 +76,17 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="ClientApp\MessageNotificationManager.ts" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <WebpackInputs Remove="ClientApp\components\textview.ts" />
 	  <WebpackInputs Remove="ClientApp\components\textview.vue.html" />
+	  <WebpackInputs Remove="ClientApp\MessageNotificationManager.ts" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <TypeScriptCompile Include="ClientApp\MessageNotificationManager.ts" />
 	</ItemGroup>
 
 	<Target Name="DebugRunWebpack" AfterTargets="Build" Inputs="@(WebpackInputs)" Outputs="wwwroot\dist\.buildtimestamp">
