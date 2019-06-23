@@ -76,6 +76,10 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <Content Remove="appsettings.Development.json" />
+	</ItemGroup>
+
+	<ItemGroup>
 	  <None Remove="ClientApp\MessageNotificationManager.ts" />
 	</ItemGroup>
 
@@ -83,6 +87,10 @@
 	  <WebpackInputs Remove="ClientApp\components\textview.ts" />
 	  <WebpackInputs Remove="ClientApp\components\textview.vue.html" />
 	  <WebpackInputs Remove="ClientApp\MessageNotificationManager.ts" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Include="appsettings.Development.json" />
 	</ItemGroup>
 
 	<ItemGroup>

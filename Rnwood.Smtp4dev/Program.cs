@@ -64,13 +64,14 @@ namespace Rnwood.Smtp4dev
                 .CreateDefaultBuilder(args)
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .ConfigureAppConfiguration(
-                    (hostingContext, config) =>
+                    (hostingContext, configBuilder) =>
                         {
                             var env = hostingContext.HostingEnvironment;
-                            config
+                            var config = configBuilder
                                 .SetBasePath(env.ContentRootPath)
-                                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                                .AddEnvironmentVariables()
+                                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)			
+                                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+								.AddEnvironmentVariables()
                                 .AddCommandLine(args, new
                                 Dictionary<string, string>{
                                     { "--smtpport", "ServerOptions:Port"},
@@ -79,7 +80,9 @@ namespace Rnwood.Smtp4dev
                                     { "--sessionstokeep", "ServerOptions:NumberOfSessionsToKeep" }
                                 })
                                 .Build();
-                        })
+
+							hostingContext.HostingEnvironment.EnvironmentName = config["Environment"];
+                         })
                 .UseStartup<Startup>()
                 .Build();
         }
