@@ -87,21 +87,26 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 			return result;
 		}
 
-		private void RunE2ETest2(Action<IWebDriver, Uri, int> test)
-		{
-
-		}
 
 		private void RunE2ETest(Action<IWebDriver, Uri, int> test)
 		{
-			string outputPath = new DirectoryInfo("../../../../Rnwood.Smtp4dev/bin/").EnumerateDirectories().First().EnumerateDirectories().First().FullName;
+			string workingDir = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_WORKINGDIR");
+			string mainModule = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_BINARY");
 
-			string mainModule = Path.Combine(outputPath, "Rnwood.Smtp4dev.dll");
+			if (string.IsNullOrEmpty(workingDir))
+			{
+				workingDir = Path.GetFullPath("../../../../Rnwood.Smtp4dev");
+			}
+
+			if (string.IsNullOrEmpty(mainModule))
+			{
+				mainModule = Path.GetFullPath("../../../../Rnwood.Smtp4dev/bin/Debug/netcoreapp2.2/Rnwood.Smtp4dev.dll");
+			}
 
 			CancellationToken startupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
 
 			Thread captureOutputThread = null;
-			using (ProcessHost serverProcess = new ProcessHost("cmd", Path.GetFullPath("../../../../Rnwood.Smtp4dev/")))
+			using (ProcessHost serverProcess = new ProcessHost("cmd", workingDir))
 			{
 				serverProcess.StartAsChild($"/c dotnet \"{mainModule}\" --urls=\"http://*:0\" --smtpport=0 --db=\"\" 2>&1");
 
