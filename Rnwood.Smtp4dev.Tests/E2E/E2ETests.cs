@@ -70,7 +70,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 			});
 		}
 
-		private T WaitFor<T>(Func<T> findElement) where T:class
+		private T WaitFor<T>(Func<T> findElement) where T : class
 		{
 			T result = null;
 
@@ -79,49 +79,90 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 			while (result == null && !timeout.IsCancellationRequested)
 			{
 				result = findElement();
+				Thread.Sleep(100);
 			}
+
+			Assert.NotNull(result);
 
 			return result;
 		}
 
+		private void RunE2ETest2(Action<IWebDriver, Uri, int> test)
+		{
+
+		}
 
 		private void RunE2ETest(Action<IWebDriver, Uri, int> test)
 		{
 			string mainModule = Path.GetFullPath("../../../../Rnwood.Smtp4dev/bin/Debug/netcoreapp2.2/Rnwood.Smtp4dev.dll");
 
+			CancellationToken startupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
+
+			Thread captureOutputThread = null;
 			using (ProcessHost serverProcess = new ProcessHost("cmd", Path.GetFullPath("../../../../Rnwood.Smtp4dev/")))
 			{
 				serverProcess.StartAsChild($"/k dotnet \"{mainModule}\" --urls=\"http://*:0\" --smtpport=0 --db=\"\" 2>&1");
 
 				try
 				{
+					Uri baseUrl = null;
+					int? smtpPortNumber = 0;
 
-					string outputLines = serverProcess.StdOut.ReadAllWithTimeout(Encoding.UTF8, TimeSpan.FromSeconds(15));
-					output.WriteLine(outputLines);
-					Assert.True(serverProcess.IsAlive(), "Server process failed");
+					List<string> outputLines = new List<string>();
 
-					string nowRunningOutput = outputLines.Split("\n").FirstOrDefault(o => o.StartsWith("Now listening on: http://"));
-					Assert.NotEmpty(nowRunningOutput);
-
-					int portNumber = int.Parse(Regex.Replace(nowRunningOutput, @".*http://[^\s]+:(\d+)", "$1"));
-					Uri baseUrl = new Uri("http://localhost:" + portNumber);
-
-					string smtpServerRunningOutput = outputLines.Split("\n").FirstOrDefault(o => o.StartsWith("SMTP Server is listening on port"));
-					Assert.NotEmpty(smtpServerRunningOutput);
-
-					int smtpPortNumber = int.Parse(Regex.Replace(smtpServerRunningOutput, @"SMTP Server is listening on port (\d+).*", "$1"));
-
-					ChromeOptions options = new ChromeOptions();
-					if (!Debugger.IsAttached)
+					while (serverProcess.IsAlive() && (baseUrl == null || !smtpPortNumber.HasValue))
 					{
-						options.AddArgument("--headless");
+
+						string newLines = serverProcess.StdOut.ReadAllWithTimeout(Encoding.UTF8, TimeSpan.FromSeconds(15));
+						startupTimeout.ThrowIfCancellationRequested();
+						output.WriteLine(newLines);
+						outputLines.AddRange(newLines.Split("\n"));
+
+						string nowRunningOutput = outputLines.FirstOrDefault(o => o.StartsWith("Now listening on: http://"));
+						string smtpServerRunningOutput = outputLines.FirstOrDefault(o => o.StartsWith("SMTP Server is listening on port"));
+
+						if (!string.IsNullOrEmpty(nowRunningOutput) && !string.IsNullOrEmpty(smtpServerRunningOutput))
+						{
+							int portNumber = int.Parse(Regex.Replace(nowRunningOutput, @".*http://[^\s]+:(\d+)", "$1"));
+							baseUrl = new Uri("http://localhost:" + portNumber);
+							smtpPortNumber = int.Parse(Regex.Replace(smtpServerRunningOutput, @"SMTP Server is listening on port (\d+).*", "$1"));
+							break;
+						}
 					}
 
-					using (IWebDriver browser = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), options))
+					Assert.True(serverProcess.IsAlive(), "Server process failed");
+
+					captureOutputThread = new Thread((s) =>
+					{
+						do
+						{
+							string newStdOut = serverProcess.StdOut.ReadAllText(Encoding.UTF8);
+							if (!string.IsNullOrEmpty(newStdOut))
+							{
+								output.WriteLine(newStdOut);
+							}
+
+							string newStdErr = serverProcess.StdErr.ReadAllText(Encoding.UTF8);
+							if (!string.IsNullOrEmpty(newStdErr))
+							{
+								output.WriteLine(newStdErr);
+							}
+							Thread.Sleep(100);
+						} while (serverProcess.IsAlive());
+
+					});
+					captureOutputThread.Start();
+
+
+
+
+					ChromeOptions chromeOptions = new ChromeOptions();
+					//chromeOptions.AddArgument("--headless");
+					using (IWebDriver browser = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), chromeOptions))
 					{
 						try
 						{
-							test(browser, baseUrl, smtpPortNumber);
+							test(browser, baseUrl, smtpPortNumber.Value);
 
 						}
 						finally
@@ -133,16 +174,23 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 				}
 				finally
 				{
-					serverProcess.Kill();
-					output.WriteLine(serverProcess.StdOut.ReadAllText(Encoding.UTF8));
+					if (serverProcess.IsAlive())
+					{
+						serverProcess.Kill();
+					}
+
+					if (captureOutputThread != null)
+					{
+						if (!captureOutputThread.Join(TimeSpan.FromSeconds(10)))
+						{
+							captureOutputThread.Abort();
+						}
+					
+					}
 				}
 			}
-
-
-
 		}
+
 	}
-
-
 }
 
