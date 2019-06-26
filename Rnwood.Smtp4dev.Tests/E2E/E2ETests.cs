@@ -72,33 +72,70 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 		{
 			string mainModule = Path.GetFullPath("../../../../Rnwood.Smtp4dev/bin/Debug/netcoreapp2.2/Rnwood.Smtp4dev.dll");
 
-			using (ProcessHost serverProcess = new ProcessHost("cmd", Path.GetFullPath("../../../../Rnwood.Smtp4dev/")))
+			CancellationToken startupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
+
+			Task captureOutputThread = null;
+			using (ProcessHost serverProcess = new ProcessHost("dotnet", Path.GetFullPath("../../../../Rnwood.Smtp4dev/")))
 			{
-				serverProcess.StartAsChild($"/k dotnet \"{mainModule}\" --urls=\"http://*:0\" --smtpport=0 --db=\"\" 2>&1");
+				serverProcess.StartAsChild($"\"{mainModule}\" --urls=\"http://*:0\" --smtpport=0 --db=\"\"");
 
 				try
 				{
+					Uri baseUrl = null;
+					int? smtpPortNumber = 0;
 
-					string outputLines = serverProcess.StdOut.ReadAllWithTimeout(Encoding.UTF8, TimeSpan.FromSeconds(15));
-					output.WriteLine(outputLines);
+					List<string> outputLines = new List<string>();
+
+					while (serverProcess.IsAlive() && (baseUrl == null || !smtpPortNumber.HasValue)) {
+						
+						string newLines = serverProcess.StdOut.ReadAllWithTimeout(Encoding.UTF8, TimeSpan.FromSeconds(15));
+						startupTimeout.ThrowIfCancellationRequested();
+						output.WriteLine(newLines);
+						outputLines.AddRange(newLines.Split("\n"));
+
+						string nowRunningOutput = outputLines.FirstOrDefault(o => o.StartsWith("Now listening on: http://"));
+						string smtpServerRunningOutput = outputLines.FirstOrDefault(o => o.StartsWith("SMTP Server is listening on port"));
+
+						if (!string.IsNullOrEmpty(nowRunningOutput) && !string.IsNullOrEmpty(smtpServerRunningOutput))
+						{
+							int portNumber = int.Parse(Regex.Replace(nowRunningOutput, @".*http://[^\s]+:(\d+)", "$1"));
+							baseUrl = new Uri("http://localhost:" + portNumber);
+							smtpPortNumber = int.Parse(Regex.Replace(smtpServerRunningOutput, @"SMTP Server is listening on port (\d+).*", "$1"));
+							break;
+						}
+					}
+
 					Assert.True(serverProcess.IsAlive(), "Server process failed");
 
-					string nowRunningOutput = outputLines.Split("\n").FirstOrDefault(o => o.StartsWith("Now listening on: http://"));
-					Assert.NotEmpty(nowRunningOutput);
+					captureOutputThread = Task.Factory.StartNew(() =>
+					{
+						do
+						{
+							string newStdOut =  serverProcess.StdOut.ReadAllText(Encoding.UTF8);
+							if (newStdOut != null)
+							{
+								output.WriteLine(newStdOut);
+							}
 
-					int portNumber = int.Parse(Regex.Replace(nowRunningOutput, @".*http://[^\s]+:(\d+)", "$1"));
-					Uri baseUrl = new Uri("http://localhost:" + portNumber);
+							string newStdErr = serverProcess.StdErr.ReadAllText(Encoding.UTF8);
+							if (newStdErr != null)
+							{
+								output.WriteLine(newStdErr);
+							}
+						} while (serverProcess.IsAlive());
 
-					string smtpServerRunningOutput = outputLines.Split("\n").FirstOrDefault(o => o.StartsWith("SMTP Server is listening on port"));
-					Assert.NotEmpty(smtpServerRunningOutput);
+					});
 
-					int smtpPortNumber = int.Parse(Regex.Replace(smtpServerRunningOutput, @"SMTP Server is listening on port (\d+).*", "$1"));
 
-					using (IWebDriver browser = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location)))
+
+
+					ChromeOptions chromeOptions = new ChromeOptions();
+					//chromeOptions.AddArgument("--headless");
+					using (IWebDriver browser = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), chromeOptions))
 					{
 						try
 						{
-							test(browser, baseUrl, smtpPortNumber);
+							test(browser, baseUrl, smtpPortNumber.Value);
 
 						}
 						finally
@@ -110,8 +147,15 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 				}
 				finally
 				{
-					serverProcess.Kill();
-					output.WriteLine(serverProcess.StdOut.ReadAllText(Encoding.UTF8));
+					if (serverProcess.IsAlive())
+					{
+						serverProcess.Kill();
+					}
+
+					if (captureOutputThread != null)
+					{
+						captureOutputThread.Wait(TimeSpan.FromSeconds(10));
+					}
 				}
 			}
 
