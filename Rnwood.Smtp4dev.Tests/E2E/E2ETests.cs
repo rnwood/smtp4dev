@@ -42,6 +42,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 				browser.Navigate().GoToUrl(baseUrl);
 				HomePage homePage = new HomePage(browser);
 
+				HomePage.MessageListControl messageList = WaitFor(() => homePage.MessageList);
+				Assert.NotNull(messageList);
+
 				string messageSubject = Guid.NewGuid().ToString();
 				using (SmtpClient smtpClient = new SmtpClient())
 				{
@@ -60,11 +63,25 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 					smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 				}
 
-				var messageRow = homePage.MessageList?.Grid?.Rows?.SingleOrDefault();
+				HomePage.Grid.GridRow messageRow = WaitFor(() => messageList.Grid?.Rows?.SingleOrDefault());
 				Assert.NotNull(messageRow);
 
 				Assert.Contains(messageRow.Cells, c => c.Text.Contains(messageSubject));
 			});
+		}
+
+		private T WaitFor<T>(Func<T> findElement) where T:class
+		{
+			T result = null;
+
+			CancellationTokenSource timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+
+			while (result == null && !timeout.IsCancellationRequested)
+			{
+				result = findElement();
+			}
+
+			return result;
 		}
 
 
@@ -72,70 +89,39 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 		{
 			string mainModule = Path.GetFullPath("../../../../Rnwood.Smtp4dev/bin/Debug/netcoreapp2.2/Rnwood.Smtp4dev.dll");
 
-			CancellationToken startupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
-
-			Task captureOutputThread = null;
-			using (ProcessHost serverProcess = new ProcessHost("dotnet", Path.GetFullPath("../../../../Rnwood.Smtp4dev/")))
+			using (ProcessHost serverProcess = new ProcessHost("cmd", Path.GetFullPath("../../../../Rnwood.Smtp4dev/")))
 			{
-				serverProcess.StartAsChild($"\"{mainModule}\" --urls=\"http://*:0\" --smtpport=0 --db=\"\"");
+				serverProcess.StartAsChild($"/k dotnet \"{mainModule}\" --urls=\"http://*:0\" --smtpport=0 --db=\"\" 2>&1");
 
 				try
 				{
-					Uri baseUrl = null;
-					int? smtpPortNumber = 0;
 
-					List<string> outputLines = new List<string>();
-
-					while (serverProcess.IsAlive() && (baseUrl == null || !smtpPortNumber.HasValue)) {
-						
-						string newLines = serverProcess.StdOut.ReadAllWithTimeout(Encoding.UTF8, TimeSpan.FromSeconds(15));
-						startupTimeout.ThrowIfCancellationRequested();
-						output.WriteLine(newLines);
-						outputLines.AddRange(newLines.Split("\n"));
-
-						string nowRunningOutput = outputLines.FirstOrDefault(o => o.StartsWith("Now listening on: http://"));
-						string smtpServerRunningOutput = outputLines.FirstOrDefault(o => o.StartsWith("SMTP Server is listening on port"));
-
-						if (!string.IsNullOrEmpty(nowRunningOutput) && !string.IsNullOrEmpty(smtpServerRunningOutput))
-						{
-							int portNumber = int.Parse(Regex.Replace(nowRunningOutput, @".*http://[^\s]+:(\d+)", "$1"));
-							baseUrl = new Uri("http://localhost:" + portNumber);
-							smtpPortNumber = int.Parse(Regex.Replace(smtpServerRunningOutput, @"SMTP Server is listening on port (\d+).*", "$1"));
-							break;
-						}
-					}
-
+					string outputLines = serverProcess.StdOut.ReadAllWithTimeout(Encoding.UTF8, TimeSpan.FromSeconds(15));
+					output.WriteLine(outputLines);
 					Assert.True(serverProcess.IsAlive(), "Server process failed");
 
-					captureOutputThread = Task.Factory.StartNew(() =>
+					string nowRunningOutput = outputLines.Split("\n").FirstOrDefault(o => o.StartsWith("Now listening on: http://"));
+					Assert.NotEmpty(nowRunningOutput);
+
+					int portNumber = int.Parse(Regex.Replace(nowRunningOutput, @".*http://[^\s]+:(\d+)", "$1"));
+					Uri baseUrl = new Uri("http://localhost:" + portNumber);
+
+					string smtpServerRunningOutput = outputLines.Split("\n").FirstOrDefault(o => o.StartsWith("SMTP Server is listening on port"));
+					Assert.NotEmpty(smtpServerRunningOutput);
+
+					int smtpPortNumber = int.Parse(Regex.Replace(smtpServerRunningOutput, @"SMTP Server is listening on port (\d+).*", "$1"));
+
+					ChromeOptions options = new ChromeOptions();
+					if (!Debugger.IsAttached)
 					{
-						do
-						{
-							string newStdOut =  serverProcess.StdOut.ReadAllText(Encoding.UTF8);
-							if (newStdOut != null)
-							{
-								output.WriteLine(newStdOut);
-							}
+						options.AddArgument("--headless");
+					}
 
-							string newStdErr = serverProcess.StdErr.ReadAllText(Encoding.UTF8);
-							if (newStdErr != null)
-							{
-								output.WriteLine(newStdErr);
-							}
-						} while (serverProcess.IsAlive());
-
-					});
-
-
-
-
-					ChromeOptions chromeOptions = new ChromeOptions();
-					//chromeOptions.AddArgument("--headless");
-					using (IWebDriver browser = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), chromeOptions))
+					using (IWebDriver browser = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), options))
 					{
 						try
 						{
-							test(browser, baseUrl, smtpPortNumber.Value);
+							test(browser, baseUrl, smtpPortNumber);
 
 						}
 						finally
@@ -147,15 +133,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 				}
 				finally
 				{
-					if (serverProcess.IsAlive())
-					{
-						serverProcess.Kill();
-					}
-
-					if (captureOutputThread != null)
-					{
-						captureOutputThread.Wait(TimeSpan.FromSeconds(10));
-					}
+					serverProcess.Kill();
+					output.WriteLine(serverProcess.StdOut.ReadAllText(Encoding.UTF8));
 				}
 			}
 
