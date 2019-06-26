@@ -22,7 +22,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Rnwood.Smtp4dev.Tests.Client
+namespace Rnwood.Smtp4dev.Tests.E2E
 {
 	public class E2ETests
 	{
