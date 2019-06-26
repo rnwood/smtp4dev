@@ -94,14 +94,16 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
 		private void RunE2ETest(Action<IWebDriver, Uri, int> test)
 		{
-			string mainModule = Path.GetFullPath("../../../../Rnwood.Smtp4dev/bin/Debug/netcoreapp2.2/Rnwood.Smtp4dev.dll");
+			string outputPath = new DirectoryInfo("../../../../Rnwood.Smtp4dev/bin/").EnumerateDirectories().First().EnumerateDirectories().First().FullName;
+
+			string mainModule = Path.Combine(outputPath, "Rnwood.Smtp4dev.dll");
 
 			CancellationToken startupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
 
 			Thread captureOutputThread = null;
 			using (ProcessHost serverProcess = new ProcessHost("cmd", Path.GetFullPath("../../../../Rnwood.Smtp4dev/")))
 			{
-				serverProcess.StartAsChild($"/k dotnet \"{mainModule}\" --urls=\"http://*:0\" --smtpport=0 --db=\"\" 2>&1");
+				serverProcess.StartAsChild($"/c dotnet \"{mainModule}\" --urls=\"http://*:0\" --smtpport=0 --db=\"\" 2>&1");
 
 				try
 				{
@@ -157,7 +159,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
 
 					ChromeOptions chromeOptions = new ChromeOptions();
-					//chromeOptions.AddArgument("--headless");
+					if (!Debugger.IsAttached)
+					{
+						chromeOptions.AddArgument("--headless");
+					}
+
 					using (IWebDriver browser = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), chromeOptions))
 					{
 						try
