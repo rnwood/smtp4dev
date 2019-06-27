@@ -105,7 +105,8 @@ test_script:
     if ($env:RUNTESTS -ne "false") {
       $env:SMTP4DEV_E2E_BINARY = (resolve-path Rnwood.Smtp4dev\bin\$($env:Configuration)\$($env:FRAMEWORK)\Rnwood.Smtp4dev.dll).Path
       $env:SMTP4DEV_E2E_WORKINGDIR = (resolve-path Rnwood.Smtp4dev).Path
-      dotnet test -c $env:Configuration -f $env:FRAMEWORK  -r Debug Rnwood.Smtp4dev.Tests\Rnwood.Smtp4dev.Tests.csproj
+      dotnet test -c $env:Configuration -f $env:FRAMEWORK  -r Debug -v diag Rnwood.Smtp4dev.Tests\Rnwood.Smtp4dev.Tests.csproj
+      write-host "Tests complete"
     }
 before_deploy:
  - ps: |
