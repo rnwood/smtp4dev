@@ -1,4 +1,5 @@
 ﻿using MailKit.Net.Smtp;
+using Medallion.Shell;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Configuration;
@@ -7,8 +8,8 @@ using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.PageObjects;
 using Rnwood.Smtp4dev.Tests.E2E.PageModel;
-using RunProcess;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
@@ -103,64 +104,47 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 				mainModule = Path.GetFullPath("../../../../Rnwood.Smtp4dev/bin/Debug/netcoreapp2.2/Rnwood.Smtp4dev.dll");
 			}
 
-			CancellationToken startupTimeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
+			CancellationToken timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
+			Thread outputThread = null;
 
-			Thread captureOutputThread = null;
-			using (ProcessHost serverProcess = new ProcessHost("cmd", workingDir))
+			using (Command serverProcess = Command.Run("dotnet", new[] { mainModule, "--urls=http://*:0", "--smtpport=0", "--db=" }, o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
 			{
-				serverProcess.StartAsChild($"/c dotnet \"{mainModule}\" --urls=\"http://*:0\" --smtpport=0 --db=\"\" 2>&1");
-
 				try
 				{
+					IEnumerator<string> serverOutput = serverProcess.GetOutputAndErrorLines().GetEnumerator();
+
 					Uri baseUrl = null;
 					int? smtpPortNumber = 0;
 
-					List<string> outputLines = new List<string>();
 
-					while (serverProcess.IsAlive() && (baseUrl == null || !smtpPortNumber.HasValue))
+					while ((baseUrl == null || !smtpPortNumber.HasValue) && serverOutput.MoveNext())
 					{
+						string newLine = serverOutput.Current;
+						output.WriteLine(newLine);
 
-						string newLines = serverProcess.StdOut.ReadAllWithTimeout(Encoding.UTF8, TimeSpan.FromSeconds(15));
-						startupTimeout.ThrowIfCancellationRequested();
-						output.WriteLine(newLines);
-						outputLines.AddRange(newLines.Split("\n"));
-
-						string nowRunningOutput = outputLines.FirstOrDefault(o => o.StartsWith("Now listening on: http://"));
-						string smtpServerRunningOutput = outputLines.FirstOrDefault(o => o.StartsWith("SMTP Server is listening on port"));
-
-						if (!string.IsNullOrEmpty(nowRunningOutput) && !string.IsNullOrEmpty(smtpServerRunningOutput))
+						if (newLine.StartsWith("Now listening on: http://"))
 						{
-							int portNumber = int.Parse(Regex.Replace(nowRunningOutput, @".*http://[^\s]+:(\d+)", "$1"));
+							int portNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s]+:(\d+)", "$1"));
 							baseUrl = new Uri("http://localhost:" + portNumber);
-							smtpPortNumber = int.Parse(Regex.Replace(smtpServerRunningOutput, @"SMTP Server is listening on port (\d+).*", "$1"));
-							break;
+						}
+
+						if (newLine.StartsWith("SMTP Server is listening on port"))
+						{
+							smtpPortNumber = int.Parse(Regex.Replace(newLine, @"SMTP Server is listening on port (\d+).*", "$1"));
 						}
 					}
 
-					Assert.True(serverProcess.IsAlive(), "Server process failed");
+					Assert.False(serverProcess.Process.HasExited, "Server process failed");
 
-					captureOutputThread = new Thread((s) =>
+					outputThread = new Thread(() =>
 					{
-						do
+						while (serverOutput.MoveNext())
 						{
-							string newStdOut = serverProcess.StdOut.ReadAllText(Encoding.UTF8);
-							if (!string.IsNullOrEmpty(newStdOut))
-							{
-								output.WriteLine(newStdOut);
-							}
-
-							string newStdErr = serverProcess.StdErr.ReadAllText(Encoding.UTF8);
-							if (!string.IsNullOrEmpty(newStdErr))
-							{
-								output.WriteLine(newStdErr);
-							}
-							Thread.Sleep(100);
-						} while (serverProcess.IsAlive());
-
+							string newLine = serverOutput.Current;
+							output.WriteLine(newLine);
+						}
 					});
-					captureOutputThread.Start();
-
-
+					outputThread.Start();
 
 
 					ChromeOptions chromeOptions = new ChromeOptions();
@@ -185,23 +169,21 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 				}
 				finally
 				{
-					if (serverProcess.IsAlive())
-					{
-						serverProcess.Kill();
-					}
+					serverProcess.Kill();
 
-					if (captureOutputThread != null)
+					if (outputThread != null)
 					{
-						if (!captureOutputThread.Join(TimeSpan.FromSeconds(10)))
+						if (!outputThread.Join(TimeSpan.FromSeconds(5)))
 						{
-							captureOutputThread.Abort();
+							outputThread.Abort();
 						}
-					
-					}
 				}
+
+				
 			}
 		}
-
 	}
+
+}
 }
 

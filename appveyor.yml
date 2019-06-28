@@ -6,7 +6,6 @@ branches:
   except:
     - azure-pipelines
 environment:
-  APPVEYOR_RDP_PASSWORD: Password1
   APPVEYORAPIKEY:
     secure: f6ZDvXLvu8fryoFvnGfIUdpvlUC6Rft/qZKbWGh5CFw=
   DOCKERUSERNAME: rnwood
@@ -104,7 +103,6 @@ after_build:
 test_script:
  - ps: |
     if ($env:RUNTESTS -ne "false") {
-      iex ((new-object net.webclient).DownloadString('https://raw.githubusercontent.com/appveyor/ci/master/scripts/enable-rdp.ps1'))
       $env:SMTP4DEV_E2E_BINARY = (resolve-path Rnwood.Smtp4dev\bin\$($env:Configuration)\$($env:FRAMEWORK)\Rnwood.Smtp4dev.dll).Path
       $env:SMTP4DEV_E2E_WORKINGDIR = (resolve-path Rnwood.Smtp4dev).Path
       dotnet test -c $env:Configuration -f $env:FRAMEWORK  -r Debug --no-build --no-restore -v diag Rnwood.Smtp4dev.Tests\Rnwood.Smtp4dev.Tests.csproj
