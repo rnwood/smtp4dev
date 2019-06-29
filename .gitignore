@@ -240,3 +240,4 @@ _Pvt_Extensions
 node_modules
 /Rnwood.Smtp4dev/wwwroot/dist
 /Rnwood.Smtp4dev/database.db
+/Rnwood.Smtp4dev/out

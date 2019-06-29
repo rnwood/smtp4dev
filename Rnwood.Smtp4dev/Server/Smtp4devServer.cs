@@ -172,9 +172,6 @@ namespace Rnwood.Smtp4dev.Server
 
 				await QueueTask(() =>
 				{
-
-
-
 					Console.WriteLine("Processing received message");
 					Smtp4devDbContext dbContext = dbContextFactory();
 
@@ -187,6 +184,7 @@ namespace Rnwood.Smtp4dev.Server
 					Smtp4devServer.TrimMessages(dbContext, serverOptions.Value);
 					dbContext.SaveChanges();
 					messagesHub.OnMessagesChanged().Wait();
+					Console.WriteLine("Processing received message DONE");
 
 				}, false).ConfigureAwait(false);
 			}
