@@ -71,6 +71,47 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 			});
 		}
 
+		[Fact]
+		public void CheckUTF8MessageIsReceivedAndDisplayed()
+		{
+			RunE2ETest((browser, baseUrl, smtpPortNumber) =>
+			{
+
+				browser.Navigate().GoToUrl(baseUrl);
+				HomePage homePage = new HomePage(browser);
+
+				HomePage.MessageListControl messageList = WaitFor(() => homePage.MessageList);
+				Assert.NotNull(messageList);
+
+				string messageSubject = Guid.NewGuid().ToString();
+				using (SmtpClient smtpClient = new SmtpClient(){ })
+				{
+					MimeMessage message = new MimeMessage();
+					
+					message.To.Add(new MailboxAddress("ñఛ@example.com"));
+					message.From.Add(new MailboxAddress("ñఛ@example.com"));
+
+					message.Subject = messageSubject;
+					message.Body = new TextPart()
+					{
+						Text = "Body of end to end test"
+					};
+
+					smtpClient.Connect("localhost", smtpPortNumber, false, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+					
+					FormatOptions formatOptions = FormatOptions.Default.Clone();
+					formatOptions.International = true;
+					smtpClient.Send(formatOptions, message);
+					smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+				}
+
+				HomePage.Grid.GridRow messageRow = WaitFor(() => messageList.Grid?.Rows?.SingleOrDefault());
+				Assert.NotNull(messageRow);
+
+				Assert.Contains(messageRow.Cells, c => c.Text.Contains("ñఛ@example.com"));
+			});
+		}
+
 		private T WaitFor<T>(Func<T> findElement) where T : class
 		{
 			T result = null;
