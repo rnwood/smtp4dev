@@ -225,7 +225,7 @@ namespace Rnwood.Smtp4dev.Server
             dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue).OrderByDescending(m => m.EndDate).Skip(serverOptions.NumberOfSessionsToKeep));
         }
 
-        private async Task ProcessingTaskWork()
+        private Task ProcessingTaskWork()
         {
             Console.WriteLine("Message/session consuming thread running.");
             while (!processingQueue.IsCompleted && !priorityProcessingQueue.IsCompleted)
@@ -249,6 +249,7 @@ namespace Rnwood.Smtp4dev.Server
             }
 
             Console.WriteLine("Message/session consuming thread ending.");
+            return Task.CompletedTask;
         }
 
         private readonly Func<Smtp4devDbContext> dbContextFactory;
