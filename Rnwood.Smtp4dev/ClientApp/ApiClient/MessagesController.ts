@@ -6,17 +6,15 @@ import FileStreamResult from './FileStreamResult';
 import axios from "axios";
 
 export default class MessagesController {
-    public _baseUrl: string;                
- 
-    constructor(baseUrl: string = "/"){
-        this._baseUrl = baseUrl;
+               
+    constructor(){
     }
         
     
     
     // get: api/Messages?sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}  
     public getSummaries_url(sortColumn: string, sortIsDescending: boolean): string {
-        return `${this._baseUrl}api/Messages?sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}`;
+        return `api/Messages?sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}`;
     }
 
     public async getSummaries(sortColumn: string, sortIsDescending: boolean): Promise<MessageSummary[]> {
@@ -26,7 +24,7 @@ export default class MessagesController {
     
     // get: api/Messages/${encodeURIComponent(id)}  
     public getMessage_url(id: string): string {
-        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}`;
+        return `api/Messages/${encodeURIComponent(id)}`;
     }
 
     public async getMessage(id: string): Promise<Message> {
@@ -36,7 +34,7 @@ export default class MessagesController {
     
     // post: api/Messages/${encodeURIComponent(id)}  
     public markMessageRead_url(id: string): string {
-        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}`;
+        return `api/Messages/${encodeURIComponent(id)}`;
     }
 
     public async markMessageRead(id: string): Promise<void> {
@@ -46,7 +44,7 @@ export default class MessagesController {
     
     // get: api/Messages/${encodeURIComponent(id)}/source  
     public downloadMessage_url(id: string): string {
-        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/source`;
+        return `api/Messages/${encodeURIComponent(id)}/source`;
     }
 
     public async downloadMessage(id: string): Promise<FileStreamResult> {
@@ -54,39 +52,39 @@ export default class MessagesController {
         return (await axios.get(this.downloadMessage_url(id), null || undefined)).data as FileStreamResult;
     }
     
-    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/content  
-    public getPartContent_url(id: string, cid: string): string {
-        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/content`;
+    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content  
+    public getPartContent_url(id: string, partid: string): string {
+        return `api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content`;
     }
 
-    public async getPartContent(id: string, cid: string): Promise<FileStreamResult> {
+    public async getPartContent(id: string, partid: string): Promise<FileStreamResult> {
 
-        return (await axios.get(this.getPartContent_url(id, cid), null || undefined)).data as FileStreamResult;
-    }
-    
-    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/source  
-    public getPartSource_url(id: string, cid: string): string {
-        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/source`;
-    }
-
-    public async getPartSource(id: string, cid: string): Promise<string> {
-
-        return (await axios.get(this.getPartSource_url(id, cid), null || undefined)).data as string;
+        return (await axios.get(this.getPartContent_url(id, partid), null || undefined)).data as FileStreamResult;
     }
     
-    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/raw  
-    public getPartSourceRaw_url(id: string, cid: string): string {
-        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(cid)}/raw`;
+    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/source  
+    public getPartSource_url(id: string, partid: string): string {
+        return `api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/source`;
     }
 
-    public async getPartSourceRaw(id: string, cid: string): Promise<string> {
+    public async getPartSource(id: string, partid: string): Promise<string> {
 
-        return (await axios.get(this.getPartSourceRaw_url(id, cid), null || undefined)).data as string;
+        return (await axios.get(this.getPartSource_url(id, partid), null || undefined)).data as string;
+    }
+    
+    // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/raw  
+    public getPartSourceRaw_url(id: string, partid: string): string {
+        return `api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/raw`;
+    }
+
+    public async getPartSourceRaw(id: string, partid: string): Promise<string> {
+
+        return (await axios.get(this.getPartSourceRaw_url(id, partid), null || undefined)).data as string;
     }
     
     // get: api/Messages/${encodeURIComponent(id)}/html  
     public getMessageHtml_url(id: string): string {
-        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}/html`;
+        return `api/Messages/${encodeURIComponent(id)}/html`;
     }
 
     public async getMessageHtml(id: string): Promise<string> {
@@ -96,7 +94,7 @@ export default class MessagesController {
     
     // delete: api/Messages/${encodeURIComponent(id)}  
     public delete_url(id: string): string {
-        return `${this._baseUrl}api/Messages/${encodeURIComponent(id)}`;
+        return `api/Messages/${encodeURIComponent(id)}`;
     }
 
     public async delete(id: string): Promise<void> {
@@ -106,7 +104,7 @@ export default class MessagesController {
     
     // delete: api/Messages/*  
     public deleteAll_url(): string {
-        return `${this._baseUrl}api/Messages/*`;
+        return `api/Messages/*`;
     }
 
     public async deleteAll(): Promise<void> {

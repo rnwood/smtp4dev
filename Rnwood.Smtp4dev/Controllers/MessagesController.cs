@@ -118,7 +118,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
 					var part = message.Parts.Flatten(p => p.ChildParts).FirstOrDefault(p => p.ContentId == cid);
 
-					imageElement.Attributes["src"].Value = $"/api/Messages/{id.ToString()}/part/{part?.Id ?? "notfound"}/content";
+					imageElement.Attributes["src"].Value = $"api/Messages/{id.ToString()}/part/{part?.Id ?? "notfound"}/content";
 				}
 			}
 

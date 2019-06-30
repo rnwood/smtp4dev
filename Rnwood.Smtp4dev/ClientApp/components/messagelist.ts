@@ -20,7 +20,7 @@ export default class MessageList extends Vue {
     constructor() {
         super();
 
-        this.connection = new HubConnectionManager('/hubs/messages', this.refresh);
+        this.connection = new HubConnectionManager('hubs/messages', this.refresh);
         this.connection.on('messageschanged', async () => {
             await this.refresh();
         });

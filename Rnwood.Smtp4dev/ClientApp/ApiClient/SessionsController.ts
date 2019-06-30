@@ -5,17 +5,15 @@ import Session from './Session';
 import axios from "axios";
 
 export default class SessionsController {
-    public _baseUrl: string;                
- 
-    constructor(baseUrl: string = "/"){
-        this._baseUrl = baseUrl;
+               
+    constructor(){
     }
         
     
     
     // get: api/Sessions  
     public getSummaries_url(): string {
-        return `${this._baseUrl}api/Sessions`;
+        return `api/Sessions`;
     }
 
     public async getSummaries(): Promise<SessionSummary[]> {
@@ -25,7 +23,7 @@ export default class SessionsController {
     
     // get: api/Sessions/${encodeURIComponent(id)}  
     public getSession_url(id: string): string {
-        return `${this._baseUrl}api/Sessions/${encodeURIComponent(id)}`;
+        return `api/Sessions/${encodeURIComponent(id)}`;
     }
 
     public async getSession(id: string): Promise<Session> {
@@ -35,7 +33,7 @@ export default class SessionsController {
     
     // get: api/Sessions/${encodeURIComponent(id)}/log  
     public getSessionLog_url(id: string): string {
-        return `${this._baseUrl}api/Sessions/${encodeURIComponent(id)}/log`;
+        return `api/Sessions/${encodeURIComponent(id)}/log`;
     }
 
     public async getSessionLog(id: string): Promise<string> {
@@ -45,7 +43,7 @@ export default class SessionsController {
     
     // delete: api/Sessions/${encodeURIComponent(id)}  
     public delete_url(id: string): string {
-        return `${this._baseUrl}api/Sessions/${encodeURIComponent(id)}`;
+        return `api/Sessions/${encodeURIComponent(id)}`;
     }
 
     public async delete(id: string): Promise<void> {
@@ -55,7 +53,7 @@ export default class SessionsController {
     
     // delete: api/Sessions/*  
     public deleteAll_url(): string {
-        return `${this._baseUrl}api/Sessions/*`;
+        return `api/Sessions/*`;
     }
 
     public async deleteAll(): Promise<void> {
