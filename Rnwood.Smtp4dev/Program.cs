@@ -77,7 +77,8 @@ namespace Rnwood.Smtp4dev
                                     { "--smtpport", "ServerOptions:Port"},
                                     { "--db", "ServerOptions:Database" },
                                     { "--messagestokeep", "ServerOptions:NumberOfMessagesToKeep" },
-                                    { "--sessionstokeep", "ServerOptions:NumberOfSessionsToKeep" }
+                                    { "--sessionstokeep", "ServerOptions:NumberOfSessionsToKeep" },
+                                    { "--rooturl", "ServerOptions:RootUrl"}
                                 })
                                 .Build();
 

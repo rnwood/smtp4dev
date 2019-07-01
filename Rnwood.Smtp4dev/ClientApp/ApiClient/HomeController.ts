@@ -4,17 +4,15 @@ import IActionResult from './IActionResult';
 import axios from "axios";
 
 export default class HomeController {
-    public _baseUrl: string;                
- 
-    constructor(baseUrl: string = "/"){
-        this._baseUrl = baseUrl;
+               
+    constructor(){
     }
         
     
     
     // post: api/Home/  
     public index_url(): string {
-        return `${this._baseUrl}api/Home/`;
+        return `api/Home/`;
     }
 
     public async index(): Promise<IActionResult> {
@@ -24,7 +22,7 @@ export default class HomeController {
     
     // post: api/Home/  
     public error_url(): string {
-        return `${this._baseUrl}api/Home/`;
+        return `api/Home/`;
     }
 
     public async error(): Promise<IActionResult> {

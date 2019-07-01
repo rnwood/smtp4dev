@@ -29,7 +29,7 @@ namespace Rnwood.Smtp4dev
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
-            var serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
+            ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
 
             services.AddMvc();
 
@@ -63,30 +63,35 @@ namespace Rnwood.Smtp4dev
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory log)
         {
-            app.UseExceptionHandler(new ExceptionHandlerOptions
+            ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
+
+
+            Action<IApplicationBuilder> configure = subdir => {
+
+            subdir.UseExceptionHandler(new ExceptionHandlerOptions
             {
                 ExceptionHandler = new JsonExceptionMiddleware().Invoke
             });
 
-            app.UseDefaultFiles();
+            subdir.UseDefaultFiles();
 
 			if (env.IsDevelopment()) {
-			    app.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
+			    subdir.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
                 {
                     HotModuleReplacement = true
                 });
 			}
 
-            app.UseStaticFiles();
+            subdir.UseStaticFiles();
 
-            app.UseWebSockets();
-            app.UseSignalR(routes =>
+            subdir.UseWebSockets();
+            subdir.UseSignalR(routes =>
             {
                 routes.MapHub<MessagesHub>("/hubs/messages");
                 routes.MapHub<SessionsHub>("/hubs/sessions");
             });
 
-            app.UseMvc(routes =>
+            subdir.UseMvc(routes =>
             {
                 routes.MapRoute(
                     name: "default",
@@ -98,13 +103,21 @@ namespace Rnwood.Smtp4dev
             });
 
 
-            Smtp4devDbContext context = app.ApplicationServices.GetService<Smtp4devDbContext>();
+            Smtp4devDbContext context = subdir.ApplicationServices.GetService<Smtp4devDbContext>();
             if (!context.Database.IsInMemory())
             {
                 context.Database.Migrate();
             }
 
-            app.ApplicationServices.GetService<Smtp4devServer>().Start();
+            subdir.ApplicationServices.GetService<Smtp4devServer>().Start();
+            };
+
+            if (!string.IsNullOrEmpty(serverOptions.RootUrl))
+            {
+                app.Map(serverOptions.RootUrl, configure);
+            } else {
+                configure(app);
+            }
         }
         
     }

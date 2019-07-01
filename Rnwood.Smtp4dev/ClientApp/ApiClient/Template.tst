@@ -36,17 +36,15 @@ $Classes(*Controller)[$ControllerImports
 import axios from "axios";
 
 export default class $ServiceName {
-    public _baseUrl: string;                
- 
-    constructor(baseUrl: string = "/"){
-        this._baseUrl = baseUrl;
+               
+    constructor(){
     }
         
     $Methods[
     
     // $HttpMethod: $Url  
     public $name_url($Parameters(p => p.Type.IsPrimitive)[$name: $Type][, ]): string {
-        return `${this._baseUrl}$Url`;
+        return `$Url`;
     }
 
     public async $name($Parameters[$name: $Type][, ]): Promise<$ReturnType> {

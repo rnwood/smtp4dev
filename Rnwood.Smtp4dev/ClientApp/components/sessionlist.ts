@@ -18,7 +18,7 @@ export default class SessionList extends Vue {
     constructor() {
         super();
 
-        this.connection = new HubConnectionManager('/hubs/sessions', this.refresh);
+        this.connection = new HubConnectionManager('hubs/sessions', this.refresh);
         this.connection.on('sessionschanged', () => {
             this.refresh();
         });

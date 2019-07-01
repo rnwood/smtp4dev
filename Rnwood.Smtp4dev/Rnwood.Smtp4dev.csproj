@@ -36,6 +36,9 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<None Update="ClientApp\ApiClient\AttachmentSummary.ts">
+		  <CustomToolNamespace>ApiModel\AttachmentSummary.cs</CustomToolNamespace>
+		</None>
 		<None Update="ClientApp\ApiClient\HomeController.ts">
 			<CustomToolNamespace>Controllers\HomeController.cs</CustomToolNamespace>
 		</None>
