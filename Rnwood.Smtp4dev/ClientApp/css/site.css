@@ -93,12 +93,6 @@ iframe {
     display: none
 }
 
-.toolbar {
-    margin: 10px 0px;
-    padding: 6px;
-    background-color: #d1dbe5;
-}
-
 h1 {
     margin: 0;
     font-size: 1.2em;
@@ -140,4 +134,9 @@ pre.source code {
 
 .messagelist tr.unread {
     font-weight: bold;
+}
+
+.toolbar {
+    padding-top: 6px;
+    padding-bottom: 6px;
 }

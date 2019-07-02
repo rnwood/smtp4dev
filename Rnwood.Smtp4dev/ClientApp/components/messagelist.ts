@@ -1,4 +1,4 @@
-﻿import { Component } from 'vue-property-decorator';
+﻿import { Component, Watch } from 'vue-property-decorator';
 import Vue from 'vue';
 import { DefaultSortOptions, ElTable } from 'element-ui/types/table';
 import MessagesController from "../ApiClient/MessagesController";
@@ -8,6 +8,8 @@ import HubConnectionManager from '../HubConnectionManager';
 import sortedArraySync from '../sortedArraySync';
 import { Mutex } from 'async-mutex';
 import MessageNotificationManager from "../MessageNotificationManager";
+import { debounce } from 'ts-debounce';
+import localeindexof from 'locale-index-of';
 
 @Component({
     components: {
@@ -25,17 +27,19 @@ export default class MessageList extends Vue {
             await this.refresh();
         });
         this.connection.start();
-
-
     }
 
     private selectedSortDescending: boolean = true;
     private selectedSortColumn: string = "receivedDate";
+    private emptyText = "No messages";
 
     connection: HubConnectionManager;
     messages: MessageSummary[] = [];
+    filteredMessages: MessageSummary[] = [];
+
     error: Error | null = null;
     selectedmessage: MessageSummary | null = null;
+    searchTerm: string = "";
     loading = false;
     private messageNotificationManager = new MessageNotificationManager(message => {
         (<ElTable>this.$refs.table).setCurrentRow(message);
@@ -78,7 +82,31 @@ export default class MessageList extends Vue {
         } catch (e) {
             this.error = e;
         }
+    }
 
+    @Watch("searchTerm")
+    doSearch() {
+        this.debouncedUpdateFilteredMessages();
+    }
+
+    debouncedUpdateFilteredMessages = debounce(this.updateFilteredMessages, 200);
+
+    updateFilteredMessages() {
+        this.emptyText = "No messages matching '" + this.searchTerm + "'";
+
+        var caseInsentitiveIndexOf = (string: string, substring: string) => localeindexof(Intl)(string, substring, Intl.Collator, { sensitivity: "base" });
+
+        sortedArraySync(this.messages.filter(m =>
+                !this.searchTerm ||
+            caseInsentitiveIndexOf(m.subject, this.searchTerm) != -1 ||
+            caseInsentitiveIndexOf(m.to, this.searchTerm) != -1 || 
+            caseInsentitiveIndexOf(m.from,this.searchTerm) != -1
+            ),
+            this.filteredMessages,
+            (a: MessageSummary, b: MessageSummary) => a.id == b.id,
+            (sourceItem: MessageSummary, targetItem: MessageSummary) => {
+                targetItem.isUnread = sourceItem.isUnread;
+            });
     }
 
     private lastSort: string | null = null;
@@ -113,14 +141,14 @@ export default class MessageList extends Vue {
                     });
             }
 
-
-
             if (this.initialLoadDone) {
 
                 this.messageNotificationManager.notifyMessages(this.messages);
             } else {
                 this.messageNotificationManager.setInitialMessages(this.messages);
             }
+
+            this.updateFilteredMessages();
 
             this.initialLoadDone = true;
             this.lastSort = sortColumn;
@@ -136,9 +164,7 @@ export default class MessageList extends Vue {
             unlock();
         }
 
-    }
-
-   
+    }   
 
     sort = async (sortOptions: DefaultSortOptions) => {
         let descending: boolean = true;

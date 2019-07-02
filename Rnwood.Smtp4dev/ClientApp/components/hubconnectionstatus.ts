@@ -16,18 +16,14 @@ export default class HubConnectionStatus extends Vue {
         return this.connection && this.connection.connected ? "success" : this.connection && this.connection.started ? "warning" : "danger";
     }
 
-    buttonText(): string {
-        return this.connection && this.connection.connected ? "Connected" : this.connection && this.connection.started ? "Reconnecting..." : "Not connected";
-    }
-
     buttonTitle(): string {
         var errorText = this.connection && this.connection.error ? "\nError: " + this.connection.error.message : "";
 
-        return (this.connection && this.connection.started ? "Click to disconnect" : "Click to connect") + errorText;
+        return (this.connection && this.connection.started ? "Auto refresh enabled - Click to disconnect" : "Auto refresh disabled - click to enable") + errorText;
     }
 
     buttonIcon(): string {
-        return this.connection && this.connection.connected ? "el-icon-refresh" : this.connection && this.connection.started ? "el-icon-warning" : "el-icon-warning";
+        return this.connection && this.connection.connected ? "el-icon-success" : this.connection && this.connection.started ? "el-icon-warning" : "el-icon-warning";
     }
 
 

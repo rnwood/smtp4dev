@@ -1,10 +1,17 @@
 ﻿<template>
 
     <div class="messagelist">
+
         <div class="toolbar">
-            <el-button size="small" type="primary" icon="el-icon-close" v-on:click="clear">Clear</el-button>
-            <el-button size="small" type="primary" icon="el-icon-delete" v-on:click="deleteSelected" :disabled="!selectedmessage">Delete</el-button>
-            <el-button size="small" type="primary" icon="el-icon-refresh" v-on:click="refresh" :disabled="loading">Refresh</el-button>
+            <el-button-group>
+                <el-button size="small" type="primary" icon="el-icon-close" v-on:click="clear">Clear</el-button>
+                <el-button size="small" type="primary" icon="el-icon-delete" v-on:click="deleteSelected" :disabled="!selectedmessage">Delete</el-button>
+                <el-button size="small" type="primary" icon="el-icon-refresh" v-on:click="refresh" :disabled="loading">Refresh</el-button>
+            </el-button-group>
+
+
+            <el-input v-model="searchTerm" size="small" clearable placeholder="Search" prefix-icon="el-icon-search" style="width: 35%; min-width: 150px;" />
+
 
             <hubconnstatus style="float:right" :connection="connection"></hubconnstatus>
         </div>
@@ -14,7 +21,7 @@
             <el-button v-on:click="refresh">Retry</el-button>
         </el-alert>
 
-        <el-table :data="messages" v-loading="loading" empty-text="No messages"
+        <el-table :data="filteredMessages" v-loading="loading" :empty-text="emptyText"
                   highlight-current-row @current-change="handleCurrentChange" @sort-change="sort" :default-sort="{prop: 'receivedDate', order: 'descending'}" class="table" type="selection" reserve-selection="true" row-key="id" :row-class-name="getRowClass" ref="table">
 
             <el-table-column property="receivedDate" label="Received" width="120" sortable="custom" :formatter="formatDate">
@@ -25,7 +32,8 @@
             </el-table-column>
             <el-table-column property="subject" label="Subject" sortable="custom">
                 <template slot-scope="scope">
-                    {{scope.row.subject}} <i class="el-icon-document" v-if="scope.row.attachmentCount" :title="scope.row.attachmentCount + ' attachments'"></i>
+                    {{scope.row.subject}}
+                    <i class="el-icon-document" v-if="scope.row.attachmentCount" :title="scope.row.attachmentCount + ' attachments'"></i>
                 </template>
             </el-table-column>
         </el-table>

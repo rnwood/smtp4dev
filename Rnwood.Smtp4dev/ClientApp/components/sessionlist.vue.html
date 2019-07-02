@@ -1,10 +1,11 @@
 ﻿<template>
     <div class="sessionlist">
         <div class="toolbar">
-            <el-button size="small" type="primary" icon="el-icon-close" v-on:click="clear">Clear</el-button>
-            <el-button size="small" type="primary" icon="el-icon-delete" v-on:click="deleteSelected" :disabled="!selectedsession">Delete</el-button>
-            <el-button size="small" type="primary" icon="el-icon-refresh" v-on:click="refresh" :disabled="loading">Refresh</el-button>
-
+            <el-button-group>
+                <el-button size="small" type="primary" icon="el-icon-close" v-on:click="clear">Clear</el-button>
+                <el-button size="small" type="primary" icon="el-icon-delete" v-on:click="deleteSelected" :disabled="!selectedsession">Delete</el-button>
+                <el-button size="small" type="primary" icon="el-icon-refresh" v-on:click="refresh" :disabled="loading">Refresh</el-button>
+            </el-button-group>
 
             <hubconnstatus style="float:right" :connection="connection"></hubconnstatus>
         </div>

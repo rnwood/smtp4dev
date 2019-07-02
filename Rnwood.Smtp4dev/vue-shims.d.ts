@@ -16,3 +16,9 @@ declare module "vue2-ace-editor" {
 
     export default AceEditor;
 }
+
+declare module "locale-index-of" {
+
+    export default function (intl: any): (string: string, substring: string, locales: any, options: any) => number;
+
+}
