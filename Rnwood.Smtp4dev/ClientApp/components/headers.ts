@@ -8,8 +8,8 @@ export default class Headers extends Vue {
         super(); 
     }
 
-    @Prop()
-    headers: Header[] = [];
+    @Prop({ default: [] })
+    headers!: Header[];
 
     async destroyed() {
         

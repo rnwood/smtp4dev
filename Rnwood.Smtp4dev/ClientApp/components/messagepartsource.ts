@@ -21,8 +21,8 @@ export default class MessagePartSource extends Vue {
     error: Error | null = null;
     loading = false;
 
-    @Prop()
-    type: string = "source";
+    @Prop({ default: "source" } )
+    type!: "source" | "raw";
 
     @Watch("messageEntitySummary")
     async onMessageEntitySummaryChanged(value: MessageEntitySummary, oldValue: MessageEntitySummary) {
@@ -46,7 +46,7 @@ export default class MessagePartSource extends Vue {
 
         try {
             if (this.messageEntitySummary != null) {
-                if (this.type == "raw") {
+                if (this.type === "raw") {
                     this.sourceurl = new MessagesController().getPartSourceRaw_url(this.messageEntitySummary.messageId, this.messageEntitySummary.id);
                     this.source = await new MessagesController().getPartSourceRaw(this.messageEntitySummary.messageId, this.messageEntitySummary.id);
 

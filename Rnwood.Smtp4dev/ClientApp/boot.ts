@@ -3,6 +3,7 @@ import Vue from 'vue';
 import VueRouter from 'vue-router';
 import Element from 'element-ui';
 import axios from "axios";
+import {prollyfill as localeIndexOfProllyfill } from "locale-index-of";
 
 var supportedBrowser = typeof (document.createElement("p").style.flex) != "undefined" && window.hasOwnProperty("Reflect") && window.hasOwnProperty("Promise");
 
@@ -35,6 +36,7 @@ if (!supportedBrowser) {
         return response;
     });
 
+    localeIndexOfProllyfill();
 }
 
 var dateRegex = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;
@@ -58,10 +60,6 @@ function fixDates(data: any) {
             }
         }
     }
-
-
-
-
 }
 
 

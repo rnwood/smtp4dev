@@ -26,6 +26,18 @@ export default class TextView extends Vue {
         brace.setReadOnly(true);
     }
 
+    get textToShow() {
+        if (!this.text) {
+            return "";
+        }
+
+        return this.text;
+    }
+
+    set textToShow(value: string) {
+        //ignore
+    }
+
     async destroyed() {
         
     }

@@ -12,13 +12,23 @@ declare module "srcdoc-polyfill" {
 }
 
 declare module "vue2-ace-editor" {
-    var AceEditor: any;
+    interface AceEditor {
 
-    export default AceEditor;
+    }
+
+    var aceEditor: AceEditor;
+
+    export default aceEditor;
 }
 
 declare module "locale-index-of" {
 
-    export default function (intl: any): (string: string, substring: string, locales: any, options: any) => number;
+    export default function (intl: typeof Intl): (string: string, substring: string, locales: string | string[] | undefined, options: Intl.CollatorOptions | undefined) => number;
 
+    export function prollyfill(): void;
+}
+
+
+interface String {
+    localeIndexOf(substring: string, locales?: string | string[] | undefined, options?: Intl.CollatorOptions | undefined): number;
 }

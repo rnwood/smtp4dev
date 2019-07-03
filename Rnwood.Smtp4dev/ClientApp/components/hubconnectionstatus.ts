@@ -9,8 +9,8 @@ export default class HubConnectionStatus extends Vue {
         super();
     }
 
-    @Prop()
-    connection: HubConnectionManager | null = null;
+    @Prop({ default: undefined })
+    connection: HubConnectionManager | undefined;
 
     buttonType(): string {
         return this.connection && this.connection.connected ? "success" : this.connection && this.connection.started ? "warning" : "danger";

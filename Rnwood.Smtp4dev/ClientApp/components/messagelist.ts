@@ -94,13 +94,11 @@ export default class MessageList extends Vue {
     updateFilteredMessages() {
         this.emptyText = "No messages matching '" + this.searchTerm + "'";
 
-        var caseInsentitiveIndexOf = (string: string, substring: string) => localeindexof(Intl)(string, substring, Intl.Collator, { sensitivity: "base" });
-
         sortedArraySync(this.messages.filter(m =>
-                !this.searchTerm ||
-            caseInsentitiveIndexOf(m.subject, this.searchTerm) != -1 ||
-            caseInsentitiveIndexOf(m.to, this.searchTerm) != -1 || 
-            caseInsentitiveIndexOf(m.from,this.searchTerm) != -1
+            !this.searchTerm ||
+            m.subject.localeIndexOf(this.searchTerm, undefined, { sensitivity: "base" }) != -1 ||
+            m.to.localeIndexOf(this.searchTerm, undefined, { sensitivity: "base" }) != -1 || 
+            m.from.localeIndexOf(this.searchTerm, undefined, { sensitivity: "base" }) != -1
             ),
             this.filteredMessages,
             (a: MessageSummary, b: MessageSummary) => a.id == b.id,
