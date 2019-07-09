@@ -10,13 +10,13 @@
   </ItemGroup>
 
   <ItemGroup>
-	<PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.4">
+	<PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.5">
 		<AllowExplicitVersion>true</AllowExplicitVersion>
 	</PackageReference>
 
     <PackageReference Include="MailKit" Version="2.2.0" />
     <PackageReference Include="MedallionShell" Version="1.6.0" />
-    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.4" />
+    <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.5" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.2.0" />
     <PackageReference Include="Selenium.Chrome.WebDriver" Version="2.46.0" />
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
