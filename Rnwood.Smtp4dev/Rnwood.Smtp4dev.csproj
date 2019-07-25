@@ -15,7 +15,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.11" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
 		<PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.4">
 			<AllowExplicitVersion>true</AllowExplicitVersion>
 		</PackageReference>
