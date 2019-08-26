@@ -16,7 +16,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.12" />
-		<PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.4">
+		<PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.6">
 			<AllowExplicitVersion>true</AllowExplicitVersion>
 		</PackageReference>
 		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="2.2.0" />
