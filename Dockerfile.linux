@@ -44,7 +44,7 @@ FROM build AS publish
 WORKDIR /app/Rnwood.Smtp4dev
 RUN dotnet publish -c Release -o out -p:Version=$VERSION
 
-FROM mcr.microsoft.com/dotnet/core/aspnet:2.2.4 AS runtime
+FROM mcr.microsoft.com/dotnet/core/aspnet:2.2.6 AS runtime
 WORKDIR /app
 EXPOSE 80
 EXPOSE 25
