@@ -31,7 +31,7 @@ namespace Rnwood.Smtp4dev
         {
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
 
-            services.AddMvc();
+            services.AddMvc(option => option.EnableEndpointRouting = false);
 
             services.AddDbContext<Smtp4devDbContext>(opt => {
 
