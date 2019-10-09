@@ -78,7 +78,7 @@ init:
 install:
 - ps: |
     if ($env:RUNTIME -ne "docker") {
-        cmd /c powershell Install-Product node ''
+        Install-Product node ''
     }
 build_script:
  - ps: |
