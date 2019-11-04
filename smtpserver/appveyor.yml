@@ -94,7 +94,7 @@ deploy:
     appveyor_repo_tag: false
 - provider: NuGet
   api_key:
-    secure: ISMI/iLYa+IKyqPkWpEYwgOceuVrR8mX3+sGEFr04Uo7FoM1goIGOqpr0JalCJPe
+    secure: Gb9rQT6bnsZNXqtDNT6KXLAWMbS9U3TyNPJ6pRICRJFdbPgJ7i9sIZ423TUHA1xI
   skip_symbols: false
   artifact: /.*\.nupkg/
   on:
