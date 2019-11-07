@@ -18,7 +18,7 @@
     <PackageReference Include="MedallionShell" Version="1.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.6" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
-    <PackageReference Include="Selenium.Chrome.WebDriver" Version="2.46.0" />
+    <PackageReference Include="Selenium.Chrome.WebDriver" Version="77.0.0" />
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="4.6.0" />
