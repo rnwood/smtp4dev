@@ -14,7 +14,7 @@
 		<AllowExplicitVersion>true</AllowExplicitVersion>
 	</PackageReference>
 
-    <PackageReference Include="MailKit" Version="2.4.0.1" />
+    <PackageReference Include="MailKit" Version="2.4.1" />
     <PackageReference Include="MedallionShell" Version="1.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.6" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.4.0" />
