@@ -24,7 +24,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.2.6" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.6" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.0.1" />
 		<PackageReference Include="MimeKit" Version="2.4.0.1" />
 		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0426" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.112" />
