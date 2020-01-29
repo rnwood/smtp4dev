@@ -1,0 +1,5 @@
+{
+    "appPort": [2525, 8080],
+    "extensions": ["ms-vscode.csharp"]
+
+}

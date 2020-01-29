@@ -12,7 +12,7 @@
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/netcoreapp2.2/Rnwood.Smtp4dev.dll",
-            "args": [],
+            "args": ["--smtpport=2525", "--server.urls=8080"],
             "cwd": "${workspaceFolder}/Rnwood.Smtp4dev",
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
