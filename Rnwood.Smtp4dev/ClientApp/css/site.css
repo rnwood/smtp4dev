@@ -23,6 +23,7 @@ html, body {
 
 .el-tab-pane {
     flex: 1 0 0;
+    overflow: auto;
 }
 
 .el-tabs__content {
