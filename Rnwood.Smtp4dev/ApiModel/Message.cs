@@ -9,7 +9,6 @@ using Microsoft.AspNetCore.Mvc;
 using Rnwood.Smtp4dev.DbModel;
 using System.Net.Http.Headers;
 using Rnwood.Smtp4dev;
-using System.Web.Http;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {

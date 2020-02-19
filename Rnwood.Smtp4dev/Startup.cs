@@ -33,9 +33,10 @@ namespace Rnwood.Smtp4dev
 
             services.AddMvc();
 
-            services.AddDbContext<Smtp4devDbContext>(opt => {
+            services.AddDbContext<Smtp4devDbContext>(opt =>
+            {
 
-                if (string.IsNullOrEmpty(serverOptions.Database) )
+                if (string.IsNullOrEmpty(serverOptions.Database))
                 {
                     Console.WriteLine("Using in memory database.");
                     opt.UseInMemoryDatabase("main");
@@ -48,7 +49,7 @@ namespace Rnwood.Smtp4dev
             }, ServiceLifetime.Transient, ServiceLifetime.Singleton);
 
             services.AddSingleton<Smtp4devServer>();
-			services.AddSingleton<IMessagesRepository>(sp => sp.GetService<Smtp4devServer>());
+            services.AddSingleton<IMessagesRepository>(sp => sp.GetService<Smtp4devServer>());
             services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
 
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
@@ -65,60 +66,56 @@ namespace Rnwood.Smtp4dev
         {
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
 
+            app.UseRouting();
 
-            Action<IApplicationBuilder> configure = subdir => {
-
-            subdir.UseExceptionHandler(new ExceptionHandlerOptions
+            Action<IApplicationBuilder> configure = subdir =>
             {
-                ExceptionHandler = new JsonExceptionMiddleware().Invoke
-            });
 
-            subdir.UseDefaultFiles();
-
-			if (env.IsDevelopment()) {
-			    subdir.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
+                subdir.UseExceptionHandler(new ExceptionHandlerOptions
                 {
-                    HotModuleReplacement = true
+                    ExceptionHandler = new JsonExceptionMiddleware().Invoke
                 });
-			}
 
-            subdir.UseStaticFiles();
+                subdir.UseDefaultFiles();
 
-            subdir.UseWebSockets();
-            subdir.UseSignalR(routes =>
-            {
-                routes.MapHub<MessagesHub>("/hubs/messages");
-                routes.MapHub<SessionsHub>("/hubs/sessions");
-            });
+                if (env.IsDevelopment())
+                {
+                    subdir.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
+                    {
+                        HotModuleReplacement = true
+                    });
+                }
 
-            subdir.UseMvc(routes =>
-            {
-                routes.MapRoute(
-                    name: "default",
-                    template: "{controller=Home}/{action=Index}/{id?}");
+                subdir.UseStaticFiles();
 
-                routes.MapSpaFallbackRoute(
-                    name: "spa-fallback",
-                    defaults: new { controller = "Home", action = "Index" });
-            });
+                subdir.UseWebSockets();
 
+                subdir.UseEndpoints(e =>
+                {
+                    e.MapHub<MessagesHub>("/hubs/messages");
+                    e.MapHub<SessionsHub>("/hubs/sessions");
+                    
+                    e.MapDefaultControllerRoute();
+                });
 
-            Smtp4devDbContext context = subdir.ApplicationServices.GetService<Smtp4devDbContext>();
-            if (!context.Database.IsInMemory())
-            {
-                context.Database.Migrate();
-            }
+                Smtp4devDbContext context = subdir.ApplicationServices.GetService<Smtp4devDbContext>();
+                if (!context.Database.IsInMemory())
+                {
+                    context.Database.Migrate();
+                }
 
-            subdir.ApplicationServices.GetService<Smtp4devServer>().Start();
+                subdir.ApplicationServices.GetService<Smtp4devServer>().Start();
             };
 
             if (!string.IsNullOrEmpty(serverOptions.RootUrl))
             {
                 app.Map(serverOptions.RootUrl, configure);
-            } else {
+            }
+            else
+            {
                 configure(app);
             }
         }
-        
+
     }
 }

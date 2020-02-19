@@ -22,6 +22,8 @@ namespace Rnwood.Smtp4dev
             string version = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
             Console.WriteLine($"smtp4dev version {version}");
             Console.WriteLine("https://github.com/rnwood/smtp4dev\n");
+            Console.WriteLine($".NET Core runtime version: {Directory.GetParent(typeof(object).Assembly.Location).Name}\n");
+    
 
             if (!Debugger.IsAttached && args.Contains("--service"))
                 IsService = true;

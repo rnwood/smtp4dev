@@ -1,11 +1,12 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
 	<PropertyGroup>
-		<TargetFramework>netcoreapp2.2</TargetFramework>
+		<TargetFramework>netcoreapp3.1</TargetFramework>
 		<VersionPrefix>3.1.0-dev</VersionPrefix>
 		<TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 		<TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+    <RollForward>Major</RollForward>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(PackAsTool)'=='true'">
 		<IsPackable>true</IsPackable>
@@ -15,20 +16,19 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.16" />
-		<PackageReference Include="Microsoft.AspNetCore.App" Version="2.2.6">
-			<AllowExplicitVersion>true</AllowExplicitVersion>
-		</PackageReference>
-		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="2.2.0" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.19" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.1.2" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
+		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.2" />
 		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.2.6" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="2.2.6" />
-		<PackageReference Include="MimeKit" Version="2.4.0.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.1" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.1" />
+		<PackageReference Include="MimeKit" Version="2.5.1" />
 		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0426" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.112" />
-		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.19" />
+		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.20" />
 	</ItemGroup>
 
 	<ItemGroup>
