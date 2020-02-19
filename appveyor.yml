@@ -42,7 +42,7 @@ environment:
     - RUNTIME: docker
       DOCKERPLATFORM: windows-amd64
       DOCKERFILE: windows
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
       RUNTESTS: false
 assembly_info:
   patch: true

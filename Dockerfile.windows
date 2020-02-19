@@ -1,5 +1,5 @@
 
-FROM microsoft/windowsservercore:1809 as build
+FROM microsoft/windowsservercore:1607 as build
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
@@ -49,7 +49,7 @@ RUN dotnet build -p:Version=$env:VERSION
 RUN dotnet test -p:Version=$env:VERSION
 RUN dotnet publish -c Release -o out -p:Version=$env:VERSION
 
-FROM mcr.microsoft.com/windows/nanoserver:1809 as runtime
+FROM mcr.microsoft.com/windows/nanoserver:sac2016 as runtime
 EXPOSE 80
 EXPOSE 25
 COPY --from=build /dotnet /dotnet
