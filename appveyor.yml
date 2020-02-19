@@ -1,5 +1,5 @@
 version: 3.1.0-ci@{build}
-os: Visual Studio 2017
+os: Visual Studio 2019
 configuration: Release
 skip_tags: false
 branches:
@@ -11,28 +11,28 @@ environment:
   DOCKERUSERNAME: rnwood
   DOCKERPASSWORD:
     secure: 5jWYD10eY+CLicPtEtSMng==
-  FRAMEWORK: netcoreapp2.2
+  FRAMEWORK: netcoreapp3.1
   matrix:
     - RUNTIME: noruntime
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       RUNTESTS: true
     - RUNTIME: win-x64    
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       RUNTESTS: false
     - RUNTIME: linux-x64
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       RUNTESTS: false
     - RUNTIME: osx-x64
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       RUNTESTS: false
     - RUNTIME: win-x86
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       RUNTESTS: false
     - RUNTIME: win-arm
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       RUNTESTS: false
     - RUNTIME: linux-arm
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       RUNTESTS: false
     - RUNTIME: docker
       DOCKERPLATFORM: linux-amd64
@@ -42,7 +42,7 @@ environment:
     - RUNTIME: docker
       DOCKERPLATFORM: windows-amd64
       DOCKERFILE: windows
-      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+      APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
       RUNTESTS: false
 assembly_info:
   patch: true
