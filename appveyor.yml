@@ -95,7 +95,7 @@ after_build:
        docker save "rnwood/smtp4dev:$($env:DOCKERPLATFORM)-$($env:APPVEYOR_BUILD_VERSION)" -o "Smtp4dev-docker-$($env:DOCKERPLATFORM)-v$($env:APPVEYOR_BUILD_VERSION).tar"
        7z a "Smtp4dev-docker-$($env:DOCKERPLATFORM)-v$($env:APPVEYOR_BUILD_VERSION).tar.gz" "Smtp4dev-docker-$($env:DOCKERPLATFORM)-v$($env:APPVEYOR_BUILD_VERSION).tar"
     } elseif ($env:RUNTIME -ne "noruntime") {
-       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME -p:version=$env:APPVEYOR_BUILD_VERSION -o publish
+       dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -r $env:RUNTIME -p:version=$env:APPVEYOR_BUILD_VERSION -o Rnwood.Smtp4dev/publish
     } else {
        dotnet publish Rnwood.Smtp4dev -c $env:Configuration -f $env:FRAMEWORK -p:version=$env:APPVEYOR_BUILD_VERSION -o publish -p:PackAsTool=true
        dotnet pack Rnwood.Smtp4dev -c $env:Configuration -p:version=$env:APPVEYOR_BUILD_VERSION -p:PackAsTool=true
