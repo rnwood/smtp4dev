@@ -6,7 +6,7 @@
 		<TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 		<TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
-    <RollForward>LatestMajor</RollForward>
+    <RollForward>Major</RollForward>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(PackAsTool)'=='true'">
 		<IsPackable>true</IsPackable>
