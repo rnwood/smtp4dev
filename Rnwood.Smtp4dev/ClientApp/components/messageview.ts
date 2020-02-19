@@ -68,8 +68,8 @@ export default class MessageView extends Vue {
         }   
     }
 
-    isLeaf(values: MessageEntitySummary[]) {
-        return values.length == 0;
+    isLeaf(value: MessageEntitySummary[] | MessageEntitySummary) {
+        return !(value as MessageEntitySummary[]).length && !((value as MessageEntitySummary).childParts.length);
     }
 
     onPartSelection(part: MessageEntitySummary|null) {

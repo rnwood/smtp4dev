@@ -31,6 +31,10 @@ html, body {
     display: flex;
 }
 
+.el-table__body-wrapper {
+    overflow: visible !important;
+}
+
 .messagelist, .messageview, .sessionlist, .headers {
     display: flex;
     flex-direction: column;
@@ -40,35 +44,37 @@ html, body {
 }
 
 .messagelist .table, .sessionlist .table, .headers .table {
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: auto;
     flex: 1;
-}
-
-.el-icon-caret-right:before {
-    content: "" !important;
 }
 
 .fillpanel {
     display: flex;
     flex-direction: row;
     align-content: stretch;
-    column-gap: 10px
+    justify-content: space-between;
 }
 
 .fillpanel.h {
     flex-direction: column;
 }
 
-.fill {
+
+.fill, .fillhalf {
     flex: 1 0 0;
     overflow: auto;
+    box-sizing: border-box;
 }
 
-.fillhalf {
-    flex: none;
-    width: 50%;
+.fillpanel.h .fill {
+    margin-left: 0 !important;
 }
+
+.fillpanel .fill:not(:first-of-type), .fillpanel .fillhalf:not(:first-of-type) {
+    margin-left: 16px;
+}
+
 
 .centrecontents {
     display: flex;
@@ -76,6 +82,7 @@ html, body {
     align-content: center;
     flex-direction: column;
     align-self: center;
+
 }
 
 .pad {
@@ -118,10 +125,6 @@ header {
 .nodetails {
     color: #5e7382;
     text-align: center;
-}
-
-.el-icon-caret-right:before {
-    display: none;
 }
 
 tr.error td {
