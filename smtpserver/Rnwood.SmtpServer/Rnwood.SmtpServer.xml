@@ -547,7 +547,16 @@
             </summary>
             <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
             <param name="portNumber">The port number.</param>
-            <param name="sslCertificate">The SSL certificate.</param>
+            <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+        </member>
+        <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.#ctor(System.Boolean,System.Int32,System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Certificate)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.DefaultServerBehaviour"/> class.
+            </summary>
+            <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+            <param name="portNumber">The port number.</param>
+            <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+            <param name="startTlsCertificate">The TLS certificate to use for STARTTLS</param>
         </member>
         <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.#ctor(System.Boolean,System.Security.Cryptography.X509Certificates.X509Certificate)">
             <summary>

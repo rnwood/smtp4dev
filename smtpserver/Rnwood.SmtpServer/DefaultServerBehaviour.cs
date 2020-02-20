@@ -23,14 +23,15 @@ namespace Rnwood.SmtpServer
 	{
 		private readonly bool allowRemoteConnections;
 
-		private readonly X509Certificate sslCertificate;
+		private readonly X509Certificate implcitTlsCertificate;
+		private readonly X509Certificate startTlsCertificate;
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DefaultServerBehaviour"/> class.
 		/// </summary>
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
 		public DefaultServerBehaviour(bool allowRemoteConnections)
-			: this(allowRemoteConnections, 25, null)
+			: this(allowRemoteConnections, 25, null, null)
 		{
 		}
 
@@ -40,7 +41,7 @@ namespace Rnwood.SmtpServer
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
 		/// <param name="portNumber">The port number.</param>
 		public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber)
-			: this(allowRemoteConnections, portNumber, null)
+			: this(allowRemoteConnections, portNumber, null, null)
 		{
 		}
 
@@ -49,11 +50,23 @@ namespace Rnwood.SmtpServer
 		/// </summary>
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
 		/// <param name="portNumber">The port number.</param>
-		/// <param name="sslCertificate">The SSL certificate.</param>
-		public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber, X509Certificate sslCertificate)
+		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+		public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber, X509Certificate implcitTlsCertificate) : this(allowRemoteConnections, portNumber, implcitTlsCertificate, null)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DefaultServerBehaviour"/> class.
+		/// </summary>
+		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+		/// <param name="portNumber">The port number.</param>
+		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+		/// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS</param>
+		public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber, X509Certificate implcitTlsCertificate, X509Certificate startTlsCertificate)
 		{
 			this.PortNumber = portNumber;
-			this.sslCertificate = sslCertificate;
+			this.implcitTlsCertificate = implcitTlsCertificate;
+			this.startTlsCertificate = startTlsCertificate;
 			this.allowRemoteConnections = allowRemoteConnections;
 		}
 
@@ -63,7 +76,7 @@ namespace Rnwood.SmtpServer
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
 		/// <param name="sslCertificate">The SSL certificate.</param>
 		public DefaultServerBehaviour(bool allowRemoteConnections, X509Certificate sslCertificate)
-			: this(allowRemoteConnections, 587, sslCertificate)
+			: this(allowRemoteConnections, 587, sslCertificate, null)
 		{
 		}
 
@@ -117,7 +130,7 @@ namespace Rnwood.SmtpServer
 		{
 			List<IExtension> extensions = new List<IExtension>(new IExtension[] { new EightBitMimeExtension(), new SizeExtension(), new SmtpUtfEightExtension() });
 
-			if (this.sslCertificate != null)
+			if (this.startTlsCertificate != null)
 			{
 				extensions.Add(new StartTlsExtension());
 			}
@@ -146,7 +159,7 @@ namespace Rnwood.SmtpServer
 		/// <inheritdoc/>
 		public virtual Task<X509Certificate> GetSSLCertificate(IConnection connection)
 		{
-			return Task.FromResult(this.sslCertificate);
+			return Task.FromResult(this.implcitTlsCertificate ?? this.startTlsCertificate);
 		}
 
 		/// <inheritdoc/>
@@ -164,7 +177,7 @@ namespace Rnwood.SmtpServer
 		/// <inheritdoc/>
 		public Task<bool> IsSSLEnabled(IConnection connection)
 		{
-			return Task.FromResult(this.sslCertificate != null);
+			return Task.FromResult(this.implcitTlsCertificate != null);
 		}
 
 		/// <inheritdoc/>
