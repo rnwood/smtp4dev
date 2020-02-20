@@ -19,7 +19,7 @@ export default class HubConnectionStatus extends Vue {
     buttonTitle(): string {
         var errorText = this.connection && this.connection.error ? "\nError: " + this.connection.error.message : "";
 
-        return (this.connection && this.connection.started ? "Auto refresh enabled - Click to disconnect" : "Auto refresh disabled - click to enable") + errorText;
+        return (this.connection && this.connection.connected ? "Auto refresh enabled - Click to disconnect" : this.connection && this.connection.started ? "Auto refresh re-connecting..." : "Auto refresh disabled - click to enable") + errorText;
     }
 
     buttonIcon(): string {
