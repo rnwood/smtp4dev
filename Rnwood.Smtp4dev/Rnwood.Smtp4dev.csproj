@@ -85,11 +85,13 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="ClientApp\ApiClient\MessageWarning.ts" />
 	  <None Remove="ClientApp\components\home\file.ts" />
 	  <None Remove="ClientApp\MessageNotificationManager.ts" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <WebpackInputs Remove="ClientApp\ApiClient\MessageWarning.ts" />
 	  <WebpackInputs Remove="ClientApp\components\confirmationdialog.ts" />
 	  <WebpackInputs Remove="ClientApp\components\confirmationdialog.vue.html" />
 	  <WebpackInputs Remove="ClientApp\components\home\file.ts" />
@@ -103,6 +105,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <TypeScriptCompile Include="ClientApp\ApiClient\MessageWarning.ts" />
 	  <TypeScriptCompile Include="ClientApp\components\confirmationdialog.ts" />
 	  <TypeScriptCompile Include="ClientApp\MessageNotificationManager.ts" />
 	</ItemGroup>

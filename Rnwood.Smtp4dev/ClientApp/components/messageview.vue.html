@@ -1,12 +1,12 @@
 ﻿<template>
-    <div class="messageview fill fillpanel" v-loading.body="loading">
+    <div class="messageview fill vfillpanel" v-loading.body="loading">
         <el-alert v-if="error" type="error">
             {{error.message}}
 
             <el-button v-on:click="loadMessage">Retry</el-button>
         </el-alert>
 
-        <div v-if="messageSummary"  class="fillpanel h fill" >
+        <div v-if="messageSummary"  class="hfillpanel fill" >
 
 
             <div class="toolbar">
@@ -14,44 +14,47 @@
             </div>
 
             <div v-if="message" class="pad">
-                <table class="messageviewheader">
-                    <tr>
-                        <td>From:</td>
-                        <td>{{message.from}}</td>
-                    </tr>
+                <el-alert v-if="warnings" v-for="warning in warnings" v-bind:key="warning.details" :title="'Warning: ' + warning.details"
+                          type="warning" show-icon />
 
-                    <tr>
-                        <td>To:</td>
-                        <td>{{message.to}}</td>
-                    </tr>
-                    <tr v-if="message.cc">
-                        <td>Cc:</td>
-                        <td>{{message.cc}}</td>
-                    </tr>
-                    <tr v-if="message.bcc">
-                        <td>Bcc:</td>
-                        <td>{{message.bcc}}</td>
-                    </tr>
-                    <tr>
-                        <td>Subject:</td>
-                        <td>{{message.subject}}</td>
-                    </tr>
-                </table>
+                    <table class="messageviewheader">
+                        <tr>
+                            <td>From:</td>
+                            <td>{{message.from}}</td>
+                        </tr>
+
+                        <tr>
+                            <td>To:</td>
+                            <td>{{message.to}}</td>
+                        </tr>
+                        <tr v-if="message.cc">
+                            <td>Cc:</td>
+                            <td>{{message.cc}}</td>
+                        </tr>
+                        <tr v-if="message.bcc">
+                            <td>Bcc:</td>
+                            <td>{{message.bcc}}</td>
+                        </tr>
+                        <tr>
+                            <td>Subject:</td>
+                            <td>{{message.subject}}</td>
+                        </tr>
+                    </table>
             </div>
 
             <el-tabs value="view" style="height: 100%; width:100%" class="fill" type="border-card">
 
 
-                <el-tab-pane label="View" name="view" class="fillpanel h">
+                <el-tab-pane label="View" name="view" class="hfillpanel">
                     <messageviewattachments :message="message"></messageviewattachments>
                     <messageview-html :message="message" class="fill"></messageview-html>
                 </el-tab-pane>
 
-                <el-tab-pane label="Headers" name="headers" class="fillpanel h">
+                <el-tab-pane label="Headers" name="headers" class="hfillpanel">
                     <headers  :headers="headers" class="fill"></headers>
                 </el-tab-pane>
 
-                <el-tab-pane label="Parts" name="parts" class="fillpanel h">
+                <el-tab-pane label="Parts" name="parts" class="hfillpanel">
 
 
 
@@ -59,19 +62,19 @@
                     <el-tree v-if="message" :data="message.parts" :props="{label: 'name', children: 'childParts', disabled: false, isLeaf: isLeaf}" @node-click="onPartSelection" highlight-current empty-message="No parts" ref="partstree"></el-tree>
 
 
-                    <div v-show="selectedPart" class="fill fillpanel">
+                    <div v-show="selectedPart" class="fill vfillpanel">
 
-                        <el-tabs value="headers" class="fill fillpanel h" type="border-card">
-                            <el-tab-pane label="Headers" name="headers" class="fill fillpanel">
+                        <el-tabs value="headers" class="fill hfillpanel" type="border-card">
+                            <el-tab-pane label="Headers" name="headers" class="fill vfillpanel">
                                 <headers :headers="selectedPartHeaders" class="fill"></headers>
                             </el-tab-pane>
 
 
-                            <el-tab-pane label="Source" name="source" class="fill fillpanel">
+                            <el-tab-pane label="Source" name="source" class="fill vfillpanel">
                                 <messagepartsource class="fill" :messageEntitySummary="selectedPart" type="source"></messagepartsource>
                             </el-tab-pane>
 
-                            <el-tab-pane label="Raw" name="raw" class="fill fillpanel">
+                            <el-tab-pane label="Raw" name="raw" class="fill vfillpanel">
 
                                 <messagepartsource class="fill" :messageEntitySummary="selectedPart" type="raw"></messagepartsource>
                             </el-tab-pane>
@@ -80,7 +83,7 @@
 
                     </div>
 
-                    <div v-if="!selectedPart" class="fill fillpanel">
+                    <div v-if="!selectedPart" class="fill vfillpanel">
                         <div class="fill nodetails centrecontents">
                             <div>No part selected.</div>
                         </div>

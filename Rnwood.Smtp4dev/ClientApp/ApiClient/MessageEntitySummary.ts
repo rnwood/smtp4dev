@@ -3,9 +3,11 @@
 import Header from './Header';
 //AttachmentSummary[] from MessageEntitySummary
 import AttachmentSummary from './AttachmentSummary';
+//MessageWarning[] from MessageEntitySummary
+import MessageWarning from './MessageWarning';
 export default class MessageEntitySummary {
 
-    constructor(id: string, headers: Header[], childParts: MessageEntitySummary[], name: string, messageId: string, contentId: string, attachments: AttachmentSummary[], size: number, ) {
+    constructor(id: string, headers: Header[], childParts: MessageEntitySummary[], name: string, messageId: string, contentId: string, attachments: AttachmentSummary[], warnings: MessageWarning[], size: number, ) {
          
         this.id = id; 
         this.headers = headers; 
@@ -14,6 +16,7 @@ export default class MessageEntitySummary {
         this.messageId = messageId; 
         this.contentId = contentId; 
         this.attachments = attachments; 
+        this.warnings = warnings; 
         this.size = size;
     }
 
@@ -25,5 +28,6 @@ export default class MessageEntitySummary {
     messageId: string; 
     contentId: string; 
     attachments: AttachmentSummary[]; 
+    warnings: MessageWarning[]; 
     size: number;
 }

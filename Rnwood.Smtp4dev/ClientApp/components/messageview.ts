@@ -4,6 +4,7 @@ import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
 import Message from "../ApiClient/Message";
 import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
+import MessageWarning from '../ApiClient/MessageWarning';
 
 @Component({ 
     components: {
@@ -22,6 +23,7 @@ export default class MessageView extends Vue {
     messageSummary: MessageSummary | null = null;
     message: Message | null = null;
     selectedPart: MessageEntitySummary | null = null;
+    warnings: MessageWarning[] | null = null;
 
 
     error: Error | null = null;
@@ -46,6 +48,7 @@ export default class MessageView extends Vue {
             if (this.messageSummary != null) {
 
                 this.message = await new MessagesController().getMessage(this.messageSummary.id);
+                this.setWarnings();
 
                 if (this.messageSummary.isUnread) {
                     var currentMessageSummary = this.messageSummary;
@@ -57,7 +60,7 @@ export default class MessageView extends Vue {
                                 console.error(e);
                             }
                         }
-                    }, 2000)
+                    }, 2000);
                 }
                 
             }
@@ -66,6 +69,28 @@ export default class MessageView extends Vue {
         } finally {
             this.loading = false;
         }   
+    }
+
+    async setWarnings() {
+        var result: MessageWarning[] = [];
+
+        if (this.message != null) {
+
+            var parts = this.message.parts
+            this.getWarnings(parts, result);
+
+        }
+        this.warnings = result;
+    }
+
+    getWarnings(parts: MessageEntitySummary[], result: MessageWarning[]) {
+        for (let part of parts) {
+            for (let warning of part.warnings) {
+                result.push(warning);
+            }
+
+            this.getWarnings(part.childParts, result);
+        }
     }
 
     isLeaf(value: MessageEntitySummary[] | MessageEntitySummary) {

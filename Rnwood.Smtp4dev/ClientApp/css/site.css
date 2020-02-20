@@ -49,31 +49,53 @@ html, body {
     flex: 1;
 }
 
-.fillpanel {
+.vfillpanel {
     display: flex;
     flex-direction: row;
     align-content: stretch;
     justify-content: space-between;
 }
 
-.fillpanel.h {
+.hfillpanel {
+    display: flex;
     flex-direction: column;
+    align-content: stretch;
+    justify-content: space-between;
 }
 
 
-.fill, .fillhalf {
+.hfillpanel > .fill, .hfillpanel > .fillhalf {
     flex: 1 0 0;
     overflow: auto;
     box-sizing: border-box;
 }
 
-.fillpanel.h .fill {
-    margin-left: 0 !important;
+.vfillpanel  >.fill, .vfillpanel > .fillhalf {
+    flex: 1 0 0;
+    overflow: auto;
+    box-sizing: border-box;
 }
 
-.fillpanel .fill:not(:first-of-type), .fillpanel .fillhalf:not(:first-of-type) {
+.vfillpanel > .fill:not(:first-of-type), .vfillpanel > .fillhalf:not(:first-of-type) {
     margin-left: 16px;
 }
+
+.hfillpanel > .fill:not(:first-of-type), .hfillpanel > .fillhalf:not(:first-of-type) {
+    margin-top: 16px;
+}
+
+.vfillpanel > .fill:first-of-type, .vfillpanel > .fillhalf:first-of-type {
+    margin-left: 0;
+}
+
+.hfillpanel > .fill:first-of-type, .hfillpanel > .fillhalf:first-of-type {
+    margin-top: 0;
+}
+
+
+
+
+
 
 
 .centrecontents {
@@ -82,7 +104,6 @@ html, body {
     align-content: center;
     flex-direction: column;
     align-self: center;
-
 }
 
 .pad {
@@ -143,4 +164,8 @@ pre.source code {
 .toolbar {
     padding-top: 6px;
     padding-bottom: 6px;
+}
+
+.el-icon-caret-right:before {
+    display: none;
 }

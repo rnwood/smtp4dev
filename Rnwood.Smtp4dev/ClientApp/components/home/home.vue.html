@@ -2,31 +2,31 @@
 
 
 
-    <el-container class="fill fillpanel h">
+    <el-container class="fill hfillpanel">
 
         <el-header height="2em"><h1>smtp4dev</h1><h2><a href="https://github.com/rnwood/smtp4dev/" target="_blank">https://github.com/rnwood/smtp4dev/</a></h2></el-header>
-        <el-main class="fill fillpanel">
+        <el-main class="fill vfillpanel">
             <el-tabs id="maintabs" class="fill" value="messages" type="border-card">
-                <el-tab-pane label="Messages" name="messages" class="fillpanel">
+                <el-tab-pane label="Messages" name="messages" class="vfillpanel">
                     <span slot="label"><i class="el-icon-message"></i> Messages</span>
 
-                    <div class="fillhalf fillpanel">
+                    <div class="fillhalf vfillpanel">
                         <messagelist class="fill" @selected-message-changed="selectedMessageChanged" />
                     </div>
-                    <div class="fillhalf fillpanel">
+                    <div class="fillhalf vfillpanel">
                         <messageview class="fill" v-bind:message-summary="selectedMessage" />
                     </div>
 
                 </el-tab-pane>
 
-                <el-tab-pane label="Sessions" name="sessions" class="fillpanel">
+                <el-tab-pane label="Sessions" name="sessions" class="vfillpanel">
                     <span slot="label"><i class="el-icon-document"></i> Sessions</span>
 
-                    <div class="fillhalf fillpanel">
+                    <div class="fillhalf vfillpanel">
                         <sessionlist class="fill" @selected-session-changed="selectedSessionChanged" />
                     </div>
 
-                    <div class="fillhalf fillpanel">
+                    <div class="fillhalf vfillpanel">
                         <sessionview class="fill" v-bind:session-summary="selectedSession" />
                     </div>
                 </el-tab-pane>

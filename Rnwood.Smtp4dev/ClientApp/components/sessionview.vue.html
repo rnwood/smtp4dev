@@ -1,16 +1,16 @@
 ﻿<template>
 
-    <div class="sessionview fill fillpanel" v-loading.body="loading">
+    <div class="sessionview fill vfillpanel" v-loading.body="loading">
         <el-alert v-if="error" type="error">
             {{error.message}}
 
             <el-button v-on:click="loadMessage">Retry</el-button>
         </el-alert>
 
-        <div v-if="sessionSummary"  class="fillpanel h fill">
+        <div v-if="sessionSummary"  class="hfillpanel fill">
             <el-tabs value="log" style="height: 100%; width:100%" class="fill" type="border-card">
 
-                <el-tab-pane label="Log" name="log" class="fillpanel h">
+                <el-tab-pane label="Log" name="log" class="hfillpanel">
 
                     <div class="toolbar"><el-button size="small" @click="download">Open</el-button></div>
 
@@ -18,7 +18,7 @@
                         {{session.error}}
                     </el-alert>
 
-                    <template v-show="log" class="fillpanel fill">
+                    <template v-show="log" class="vfillpanel fill">
                         <textview :text="log" class="fill"></textview>
                     </template>
                 </el-tab-pane>

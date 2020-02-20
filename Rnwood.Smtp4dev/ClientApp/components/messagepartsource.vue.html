@@ -1,5 +1,5 @@
 ﻿<template>
-    <div class="fillpanel h" v-loading="loading">
+    <div class="hfillpanel" v-loading="loading">
         <el-alert v-if="error" type="error">
             {{error.message}}
 
@@ -7,7 +7,7 @@
         </el-alert>
 
         <div class="toolbar"><el-button size="small" @click="download">Open</el-button></div>
-        <template v-show="source" class="fillpanel fill">
+        <template v-show="source" class="vfillpanel fill">
             <textview :text="source" class="fill"></textview>
         </template>
     </div>
