@@ -85,10 +85,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="ClientApp\components\home\file.ts" />
 	  <None Remove="ClientApp\MessageNotificationManager.ts" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <WebpackInputs Remove="ClientApp\components\confirmationdialog.ts" />
+	  <WebpackInputs Remove="ClientApp\components\confirmationdialog.vue.html" />
+	  <WebpackInputs Remove="ClientApp\components\home\file.ts" />
 	  <WebpackInputs Remove="ClientApp\components\textview.ts" />
 	  <WebpackInputs Remove="ClientApp\components\textview.vue.html" />
 	  <WebpackInputs Remove="ClientApp\MessageNotificationManager.ts" />
@@ -99,6 +103,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <TypeScriptCompile Include="ClientApp\components\confirmationdialog.ts" />
 	  <TypeScriptCompile Include="ClientApp\MessageNotificationManager.ts" />
 	</ItemGroup>
 

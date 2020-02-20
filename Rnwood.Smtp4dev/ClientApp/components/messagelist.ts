@@ -13,7 +13,8 @@ import localeindexof from 'locale-index-of';
 
 @Component({
     components: {
-        hubconnstatus: (<any>require('./hubconnectionstatus.vue.html')).default
+        hubconnstatus: (<any>require('./hubconnectionstatus.vue.html')).default,
+        confirmationdialog: ((<any>require('./confirmationdialog.vue.html')).default)
     }
 })
 export default class MessageList extends Vue {
@@ -92,7 +93,11 @@ export default class MessageList extends Vue {
     debouncedUpdateFilteredMessages = debounce(this.updateFilteredMessages, 200);
 
     updateFilteredMessages() {
-        this.emptyText = "No messages matching '" + this.searchTerm + "'";
+        if (this.searchTerm) {
+            this.emptyText = "No messages matching '" + this.searchTerm + "'";
+        } else {
+            this.emptyText = "No messages";
+        }
 
         sortedArraySync(this.messages.filter(m =>
             !this.searchTerm ||

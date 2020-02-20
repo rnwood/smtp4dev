@@ -9,7 +9,8 @@ import { Mutex } from 'async-mutex';
 
 @Component({
     components: {
-        hubconnstatus: (<any>require('./hubconnectionstatus.vue.html')).default
+        hubconnstatus: (<any>require('./hubconnectionstatus.vue.html')).default,
+        confirmationdialog: ((<any>require('./confirmationdialog.vue.html')).default)
     }
 })
 export default class SessionList extends Vue {

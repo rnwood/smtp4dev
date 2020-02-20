@@ -4,7 +4,11 @@
 
         <div class="toolbar">
             <el-button-group>
-                <el-button size="small" type="primary" icon="el-icon-close" v-on:click="clear">Clear</el-button>
+                <confirmationdialog v-on:confirm="clear" always-key="deleteAllMessages" message="Are you sure you want to delete all messages?">
+                    <el-button size="small" type="primary" icon="el-icon-close" >Clear</el-button>
+                </confirmationdialog>
+
+
                 <el-button size="small" type="primary" icon="el-icon-delete" v-on:click="deleteSelected" :disabled="!selectedmessage">Delete</el-button>
                 <el-button size="small" type="primary" icon="el-icon-refresh" v-on:click="refresh" :disabled="loading">Refresh</el-button>
             </el-button-group>

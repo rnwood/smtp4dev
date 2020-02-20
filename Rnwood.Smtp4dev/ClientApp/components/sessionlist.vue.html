@@ -2,7 +2,10 @@
     <div class="sessionlist">
         <div class="toolbar">
             <el-button-group>
-                <el-button size="small" type="primary" icon="el-icon-close" v-on:click="clear">Clear</el-button>
+
+                <confirmationdialog v-on:confirm="clear" always-key="deleteAllSessions" message="Are you sure you want to delete all sessions?">
+                    <el-button size="small" type="primary" icon="el-icon-close">Clear</el-button>
+                </confirmationdialog>
                 <el-button size="small" type="primary" icon="el-icon-delete" v-on:click="deleteSelected" :disabled="!selectedsession">Delete</el-button>
                 <el-button size="small" type="primary" icon="el-icon-refresh" v-on:click="refresh" :disabled="loading">Refresh</el-button>
             </el-button-group>
@@ -10,14 +13,14 @@
             <hubconnstatus style="float:right" :connection="connection"></hubconnstatus>
         </div>
 
-        
+
 
         <el-alert v-if="error" type="error" title="Error" show-icon>
             {{error.message}}
 
             <el-button v-on:click="refresh">Retry</el-button>
         </el-alert>
-        <el-table :data="sessions" v-loading="loading" empty-text="No sessions" highlight-current-row @current-change="handleCurrentChange" class="table" 
+        <el-table :data="sessions" v-loading="loading" empty-text="No sessions" highlight-current-row @current-change="handleCurrentChange" class="table"
                   :default-sort="{prop: 'endDate', order: 'descending'}" type="selection" reserve-selection="true" row-key="id">
             <el-table-column property="endDate" label="End Date" width="120" sortable :formatter="formatDate">
             </el-table-column>
