@@ -30,6 +30,6 @@
     "webpack": "^2.2.0",
     "webpack-hot-middleware": "^2.25.0",
     "ts-debounce": "^1.0.0",
-    "locale-index-of": "^1.0.5"
+    "locale-index-of": "^1.0.7"
   }
 }
