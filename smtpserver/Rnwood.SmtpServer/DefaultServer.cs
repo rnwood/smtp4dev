@@ -34,7 +34,7 @@ namespace Rnwood.SmtpServer
 		/// </summary>
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
 		public DefaultServer(bool allowRemoteConnections)
-			: this(allowRemoteConnections, 25, null)
+			: this(allowRemoteConnections, 25, null, null)
 		{
 		}
 
@@ -46,7 +46,7 @@ namespace Rnwood.SmtpServer
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
 		/// <param name="portNumber">The port number.</param>
 		public DefaultServer(bool allowRemoteConnections, int portNumber)
-			: this(allowRemoteConnections, portNumber, null)
+			: this(allowRemoteConnections, portNumber, null, null)
 		{
 		}
 
@@ -58,15 +58,30 @@ namespace Rnwood.SmtpServer
 		///
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
 		/// <param name="portNumber">The port number.</param>
-		/// <param name="sslCertificate">The SSL certificate.</param>
-		public DefaultServer(bool allowRemoteConnections, int portNumber, X509Certificate sslCertificate)
-			: this(new DefaultServerBehaviour(allowRemoteConnections, portNumber, sslCertificate))
+		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+		public DefaultServer(bool allowRemoteConnections, int portNumber, X509Certificate implcitTlsCertificate)
+			: this(allowRemoteConnections, portNumber, implcitTlsCertificate, null)
+		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DefaultServer"/> class.
+		/// Initializes a new SMTP over SSL or SMTP with STARTTLS server on the specified port number
+		/// using the supplied SSL certificate.
+		/// </summary>
+		///
+		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
+		/// <param name="portNumber">The port number.</param>
+		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+		/// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
+		public DefaultServer(bool allowRemoteConnections, int portNumber, X509Certificate implcitTlsCertificate, X509Certificate startTlsCertificate)
+			: this(new DefaultServerBehaviour(allowRemoteConnections, portNumber, implcitTlsCertificate, startTlsCertificate))
 		{
 		}
 
 		/// <summary>
 		/// Initializes a new instance of the <see cref="DefaultServer" /> class.
-		/// Initializes a new SMTP over SSL server on the specified standard port number.
+		/// Initializes a new SMTP server on the specified standard port number.
 		/// </summary>
 		/// <param name="allowRemoteConnections">if set to <c>true</c> connection from remote computers are allowed.</param>
 		/// <param name="port">The standard port (or auto) to use.</param>

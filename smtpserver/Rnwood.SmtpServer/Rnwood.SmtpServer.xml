@@ -482,12 +482,24 @@
             
              <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
              <param name="portNumber">The port number.</param>
-             <param name="sslCertificate">The SSL certificate.</param>
+             <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+        </member>
+        <member name="M:Rnwood.SmtpServer.DefaultServer.#ctor(System.Boolean,System.Int32,System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Certificate)">
+             <summary>
+             Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.DefaultServer"/> class.
+             Initializes a new SMTP over SSL or SMTP with STARTTLS server on the specified port number
+             using the supplied SSL certificate.
+             </summary>
+            
+             <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
+             <param name="portNumber">The port number.</param>
+             <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+             <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
         </member>
         <member name="M:Rnwood.SmtpServer.DefaultServer.#ctor(System.Boolean,Rnwood.SmtpServer.StandardSmtpPort)">
             <summary>
             Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.DefaultServer" /> class.
-            Initializes a new SMTP over SSL server on the specified standard port number.
+            Initializes a new SMTP server on the specified standard port number.
             </summary>
             <param name="allowRemoteConnections">if set to <c>true</c> connection from remote computers are allowed.</param>
             <param name="port">The standard port (or auto) to use.</param>
@@ -563,7 +575,7 @@
             Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.DefaultServerBehaviour"/> class.
             </summary>
             <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-            <param name="sslCertificate">The SSL certificate.</param>
+            <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
         </member>
         <member name="E:Rnwood.SmtpServer.DefaultServerBehaviour.AuthenticationCredentialsValidationRequiredAsync">
             <summary>

@@ -74,9 +74,9 @@ namespace Rnwood.SmtpServer
 		/// Initializes a new instance of the <see cref="DefaultServerBehaviour"/> class.
 		/// </summary>
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-		/// <param name="sslCertificate">The SSL certificate.</param>
-		public DefaultServerBehaviour(bool allowRemoteConnections, X509Certificate sslCertificate)
-			: this(allowRemoteConnections, 587, sslCertificate, null)
+		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+		public DefaultServerBehaviour(bool allowRemoteConnections, X509Certificate implcitTlsCertificate)
+			: this(allowRemoteConnections, 587, implcitTlsCertificate, null)
 		{
 		}
 
