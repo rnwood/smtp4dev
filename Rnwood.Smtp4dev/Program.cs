@@ -23,7 +23,7 @@ namespace Rnwood.Smtp4dev
             Console.WriteLine($"smtp4dev version {version}");
             Console.WriteLine("https://github.com/rnwood/smtp4dev\n");
             Console.WriteLine($".NET Core runtime version: {Directory.GetParent(typeof(object).Assembly.Location).Name}\n");
-    
+
 
             if (!Debugger.IsAttached && args.Contains("--service"))
                 IsService = true;
@@ -71,21 +71,22 @@ namespace Rnwood.Smtp4dev
                             var env = hostingContext.HostingEnvironment;
                             var config = configBuilder
                                 .SetBasePath(env.ContentRootPath)
-                                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)			
+                                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-								.AddEnvironmentVariables()
+                                .AddEnvironmentVariables()
                                 .AddCommandLine(args, new
                                 Dictionary<string, string>{
                                     { "--smtpport", "ServerOptions:Port"},
                                     { "--db", "ServerOptions:Database" },
                                     { "--messagestokeep", "ServerOptions:NumberOfMessagesToKeep" },
                                     { "--sessionstokeep", "ServerOptions:NumberOfSessionsToKeep" },
-                                    { "--rooturl", "ServerOptions:RootUrl"}
+                                    { "--rooturl", "ServerOptions:RootUrl"},
+                                    { "--tlsmode", "ServerOptions:TlsMode"}
                                 })
                                 .Build();
 
-							hostingContext.HostingEnvironment.EnvironmentName = config["Environment"];
-                         })
+                            hostingContext.HostingEnvironment.EnvironmentName = config["Environment"];
+                        })
                 .UseStartup<Startup>()
                 .Build();
         }

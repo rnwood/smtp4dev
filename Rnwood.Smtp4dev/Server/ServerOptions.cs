@@ -16,5 +16,9 @@ namespace Rnwood.Smtp4dev.Server
         public int NumberOfSessionsToKeep { get; set; } = 100;
 
         public string RootUrl { get; set; }
+
+        public TlsMode TlsMode { get; set; } = TlsMode.StartTls;
+
+        public string TlsCertificate { get; set; }
     }
 }
