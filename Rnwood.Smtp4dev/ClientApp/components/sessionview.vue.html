@@ -7,16 +7,18 @@
             <el-button v-on:click="loadMessage">Retry</el-button>
         </el-alert>
 
-        <div v-if="sessionSummary"  class="hfillpanel fill">
+        <div v-if="sessionSummary" class="hfillpanel fill">
+            <el-alert v-if="session && session.error" type="warning" show-icon title="This session terminated abnormally">
+                {{session.error}}
+            </el-alert>
+
             <el-tabs value="log" style="height: 100%; width:100%" class="fill" type="border-card">
 
                 <el-tab-pane label="Log" name="log" class="hfillpanel">
 
                     <div class="toolbar"><el-button size="small" @click="download">Open</el-button></div>
 
-                    <el-alert v-if="session && session.error" type="error" show-icon :closable="false" title="This session terminated abnormally">
-                        {{session.error}}
-                    </el-alert>
+
 
                     <template v-show="log" class="vfillpanel fill">
                         <textview :text="log" class="fill"></textview>

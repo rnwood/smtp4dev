@@ -87,11 +87,11 @@ namespace Rnwood.Smtp4dev.Server
         {
             int messageCount = (await e.Session.GetMessages()).Count;
             Console.WriteLine($"Session completed. Client address {e.Session.ClientAddress}. Number of messages {messageCount}.");
-			activeSessionsToDbId.Remove(e.Session);
+
 
 			await QueueTask(() =>
 			{
-				Smtp4devDbContext dbContent = dbContextFactory();
+                Smtp4devDbContext dbContent = dbContextFactory();
 
 				Session dbSession = dbContent.Sessions.Find(activeSessionsToDbId[e.Session]);
 				UpdateDbSession(e.Session, dbSession).Wait();
@@ -100,7 +100,9 @@ namespace Rnwood.Smtp4dev.Server
 				Smtp4devServer.TrimSessions(dbContent, serverOptions.Value);
 				dbContent.SaveChanges();
 
-				sessionsHub.OnSessionsChanged().Wait();
+                activeSessionsToDbId.Remove(e.Session);
+
+                sessionsHub.OnSessionsChanged().Wait();
 
 			}, false).ConfigureAwait(false);
         }
@@ -117,6 +119,8 @@ namespace Rnwood.Smtp4dev.Server
 					tcs.SetResult(null);
 				}catch  (Exception e)
 				{
+                    Console.WriteLine(e.ToString());
+
 					tcs.SetException(e);
 				}
 
@@ -267,7 +271,7 @@ namespace Rnwood.Smtp4dev.Server
         {
             Smtp4devDbContext dbContent = dbContextFactory();
 
-            foreach (Session unfinishedSession in dbContent.Sessions.Where(s => !s.EndDate.HasValue))
+            foreach (Session unfinishedSession in dbContent.Sessions.Where(s => !s.EndDate.HasValue).ToArray())
             {
                 unfinishedSession.EndDate = DateTime.Now;
             }
