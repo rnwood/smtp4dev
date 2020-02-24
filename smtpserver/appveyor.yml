@@ -1,15 +1,15 @@
 version: 3.1.0-ci@{build}
-image: Visual Studio 2017
+image: Visual Studio 2019
 environment:
   matrix:
      - TESTFRAMEWORK: netcoreapp2.0
-       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
        PUBLISH: 1
      - TESTFRAMEWORK: netcoreapp2.0
        APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
        PUBLISH: 0
      - TESTFRAMEWORK: net462
-       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2017
+       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
        PUBLISH: 0
   APPVEYORAPIKEY:
    secure: f6ZDvXLvu8fryoFvnGfIUdpvlUC6Rft/qZKbWGh5CFw=
@@ -58,6 +58,7 @@ build_script:
     }
 artifacts:
 - path: Rnwood.SmtpServer\bin\Release\*.nupkg
+- path: Rnwood.SmtpServer\bin\Release\*.snupkg
 test_script:
 - ps: |
     dotnet test -f $env:TESTFRAMEWORK -r Debug Rnwood.SmtpServer.Tests\Rnwood.SmtpServer.Tests.csproj
@@ -96,6 +97,6 @@ deploy:
   api_key:
     secure: Gb9rQT6bnsZNXqtDNT6KXLAWMbS9U3TyNPJ6pRICRJFdbPgJ7i9sIZ423TUHA1xI
   skip_symbols: false
-  artifact: /.*\.nupkg/
+  artifact: /.*\.s?nupkg/
   on:
     branch: master
