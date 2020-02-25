@@ -3,7 +3,7 @@
   "private": true,
   "version": "3.0.0",
   "devDependencies": {
-    "@aspnet/signalr": "^1.0.4",
+    "@aspnet/signalr": "^1.1.4",
     "@types/webpack-env": "^1.13.0",
     "aspnet-webpack": "^2.0.3",
     "async-mutex": "^0.1.3",
