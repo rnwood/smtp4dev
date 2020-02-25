@@ -3939,9 +3939,9 @@
       }
     },
     "vue": {
-      "version": "2.5.17",
-      "resolved": "https://registry.npmjs.org/vue/-/vue-2.5.17.tgz",
-      "integrity": "sha512-mFbcWoDIJi0w0Za4emyLiW72Jae0yjANHbCVquMKijcavBGypqlF7zHRgMa5k4sesdv7hv2rB4JPdZfR+TPfhQ==",
+      "version": "2.6.11",
+      "resolved": "https://registry.npmjs.org/vue/-/vue-2.6.11.tgz",
+      "integrity": "sha512-VfPwgcGABbGAue9+sfrD4PuwFar7gPb1yl1UK1MwXoQPAw0BKSqWfoYCT/ThFrdEVWoI51dBuyCoiNU9bZDZxQ==",
       "dev": true
     },
     "vue-class-component": {
@@ -4057,9 +4057,9 @@
       }
     },
     "vue-template-compiler": {
-      "version": "2.5.17",
-      "resolved": "https://registry.npmjs.org/vue-template-compiler/-/vue-template-compiler-2.5.17.tgz",
-      "integrity": "sha512-63uI4syCwtGR5IJvZM0LN5tVsahrelomHtCxvRkZPJ/Tf3ADm1U1wG6KWycK3qCfqR+ygM5vewUvmJ0REAYksg==",
+      "version": "2.6.11",
+      "resolved": "https://registry.npmjs.org/vue-template-compiler/-/vue-template-compiler-2.6.11.tgz",
+      "integrity": "sha512-KIq15bvQDrcCjpGjrAhx4mUlyyHfdmTaoNfeoATHLAiWB+MU3cx4lOzMwrnUh9cCxy0Lt1T11hAFY6TQgroUAA==",
       "dev": true,
       "requires": {
         "de-indent": "^1.0.2",
