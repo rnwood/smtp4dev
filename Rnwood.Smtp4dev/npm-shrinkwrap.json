@@ -3945,9 +3945,9 @@
       "dev": true
     },
     "vue-class-component": {
-      "version": "6.3.0",
-      "resolved": "https://registry.npmjs.org/vue-class-component/-/vue-class-component-6.3.0.tgz",
-      "integrity": "sha512-i652iAt15d0HiH0ZKUNBqK/eGfOsg6GiHAdnAvaau+88CxngTmt47T/kOfbxWqvB6CU0fZZb3OCEGFc5UyyBIQ==",
+      "version": "7.2.3",
+      "resolved": "https://registry.npmjs.org/vue-class-component/-/vue-class-component-7.2.3.tgz",
+      "integrity": "sha512-oEqYpXKaFN+TaXU+mRLEx8dX0ah85aAJEe61mpdoUrq0Bhe/6sWhyZX1JjMQLhVsHAkncyhedhmCdDVSasUtDw==",
       "dev": true
     },
     "vue-hot-reload-api": {
@@ -4032,12 +4032,12 @@
       }
     },
     "vue-property-decorator": {
-      "version": "7.2.0",
-      "resolved": "https://registry.npmjs.org/vue-property-decorator/-/vue-property-decorator-7.2.0.tgz",
-      "integrity": "sha512-sCI6NVM3tEDg+mpZrQlgkddtxd9LbFWetue8D+nqO3agfSLz0KoC/UIi2P1l5E0TDhcUeIXS9rasuP2HWg+L4w==",
+      "version": "8.4.0",
+      "resolved": "https://registry.npmjs.org/vue-property-decorator/-/vue-property-decorator-8.4.0.tgz",
+      "integrity": "sha512-0o85LJSTLZvDaB7IXfmpONfAQZ7NgScFvptFSrlFFSsScR716muJb3mMFojNnKC3Vpm7CM4PsmHNdk30uuNpag==",
       "dev": true,
       "requires": {
-        "vue-class-component": "^6.2.0"
+        "vue-class-component": "^7.1.0"
       }
     },
     "vue-router": {

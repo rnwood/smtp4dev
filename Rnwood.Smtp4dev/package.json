@@ -23,7 +23,7 @@
     "url-loader": "^0.5.7",
     "vue": "^2.5.17",
     "vue-loader": "^14.2.3",
-    "vue-property-decorator": "^7.2.0",
+    "vue-property-decorator": "^8.4.0",
     "vue-router": "^3.0.1",
     "vue-template-compiler": "^2.5.17",
     "vue2-ace-editor": "0.0.13",
