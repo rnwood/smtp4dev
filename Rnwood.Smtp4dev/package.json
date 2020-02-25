@@ -13,7 +13,7 @@
     "css-loader": "^0.25.0",
     "element-theme-default": "1.4.13",
     "element-ui": "^2.13.0",
-    "event-source-polyfill": "^0.0.7",
+    "event-source-polyfill": "^1.0.12",
     "extract-text-webpack-plugin": "^2.0.0-rc",
     "file-loader": "^0.9.0",
     "moment": "^2.22.2",

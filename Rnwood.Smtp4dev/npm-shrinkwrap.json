@@ -1071,9 +1071,9 @@
       "dev": true
     },
     "event-source-polyfill": {
-      "version": "0.0.7",
-      "resolved": "https://registry.npmjs.org/event-source-polyfill/-/event-source-polyfill-0.0.7.tgz",
-      "integrity": "sha1-ee9QR7DH/TImKNpfhzR91WxmWSU=",
+      "version": "1.0.12",
+      "resolved": "https://registry.npmjs.org/event-source-polyfill/-/event-source-polyfill-1.0.12.tgz",
+      "integrity": "sha512-WjOTn0LIbaN08z/8gNt3GYAomAdm6cZ2lr/QdvhTTEipr5KR6lds2ziUH+p/Iob4Lk6NClKhwPOmn1NjQEcJCg==",
       "dev": true
     },
     "events": {
