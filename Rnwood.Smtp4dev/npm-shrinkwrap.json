@@ -2227,9 +2227,9 @@
       }
     },
     "locale-index-of": {
-      "version": "1.0.5",
-      "resolved": "https://registry.npmjs.org/locale-index-of/-/locale-index-of-1.0.5.tgz",
-      "integrity": "sha512-JvBhEHU6I2K9w4x9Hwb0AZcfhSVw+6rE0fFfS208OHBJiKhk8fmidJ5xjWJvD83Swp2z77QtVC5mCQwm8VEPmw==",
+      "version": "1.0.7",
+      "resolved": "https://registry.npmjs.org/locale-index-of/-/locale-index-of-1.0.7.tgz",
+      "integrity": "sha512-p/RqQ3tbLB3Lyt4wDXf6fi+0YkCiO5qmAZhIyamy/jsQA19VD3+Af22MzWQoT8pgn7wfqlABdlFyatu5AYhwcQ==",
       "dev": true
     },
     "lodash": {
