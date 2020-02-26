@@ -4041,9 +4041,9 @@
       }
     },
     "vue-router": {
-      "version": "3.0.1",
-      "resolved": "https://registry.npmjs.org/vue-router/-/vue-router-3.0.1.tgz",
-      "integrity": "sha512-vLLoY452L+JBpALMP5UHum9+7nzR9PeIBCghU9ZtJ1eWm6ieUI8Zb/DI3MYxH32bxkjzYV1LRjNv4qr8d+uX/w==",
+      "version": "3.1.5",
+      "resolved": "https://registry.npmjs.org/vue-router/-/vue-router-3.1.5.tgz",
+      "integrity": "sha512-BszkPvhl7I9h334GjckCh7sVFyjTPMMJFJ4Bsrem/Ik+B/9gt5tgrk8k4gGLO4ZpdvciVdg7O41gW4DisQWurg==",
       "dev": true
     },
     "vue-style-loader": {
