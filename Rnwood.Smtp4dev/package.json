@@ -16,7 +16,7 @@
     "event-source-polyfill": "^1.0.12",
     "extract-text-webpack-plugin": "^2.0.0-rc",
     "file-loader": "^0.9.0",
-    "moment": "^2.22.2",
+    "moment": "^2.24.0",
     "srcdoc-polyfill": "^1.0.0",
     "style-loader": "^0.13.1",
     "typescript": "3.8.2",
