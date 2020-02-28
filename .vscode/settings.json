@@ -1,0 +1,13 @@
+{
+  "eslint.lintTask.enable": true,
+  "eslint.validate": [
+    "typescript",
+    "vue"
+  ],
+  "eslint.workingDirectories": [
+    "Rnwood.Smtp4dev/ClientApp"
+  ],
+  "npm.includeDirectories": [
+    "Rnwood.Smtp4dev/ClientApp"
+  ]
+}

@@ -4,7 +4,6 @@ using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.SpaServices.Webpack;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -13,7 +12,9 @@ using Microsoft.Extensions.Logging;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Server;
-using Microsoft.Net.Http.Headers;
+using VueCliMiddleware;
+using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.SpaServices;
 
 namespace Rnwood.Smtp4dev
 {
@@ -30,8 +31,6 @@ namespace Rnwood.Smtp4dev
         public void ConfigureServices(IServiceCollection services)
         {
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
-
-            services.AddMvc();
 
             services.AddDbContext<Smtp4devDbContext>(opt =>
             {
@@ -58,35 +57,27 @@ namespace Rnwood.Smtp4dev
 
             services.AddSingleton<MessagesHub>();
             services.AddSingleton<SessionsHub>();
+
+            services.AddControllers();
+
+            services.AddSpaStaticFiles(o => o.RootPath = "ClientApp");
         }
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory log)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory log)
         {
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
 
             app.UseRouting();
 
+
             Action<IApplicationBuilder> configure = subdir =>
             {
-
-                subdir.UseExceptionHandler(new ExceptionHandlerOptions
-                {
-                    ExceptionHandler = new JsonExceptionMiddleware().Invoke
-                });
-
+                subdir.UseDeveloperExceptionPage();
                 subdir.UseDefaultFiles();
-
-                if (env.IsDevelopment())
-                {
-                    subdir.UseWebpackDevMiddleware(new WebpackDevMiddlewareOptions
-                    {
-                        HotModuleReplacement = true
-                    });
-                }
-
                 subdir.UseStaticFiles();
+                subdir.UseSpaStaticFiles();
 
                 subdir.UseWebSockets();
 
@@ -94,9 +85,23 @@ namespace Rnwood.Smtp4dev
                 {
                     e.MapHub<MessagesHub>("/hubs/messages");
                     e.MapHub<SessionsHub>("/hubs/sessions");
-                    
-                    e.MapDefaultControllerRoute();
+
+                    e.MapControllers();
+                    if (env.IsDevelopment())
+                    {
+                        e.MapToVueCliProxy(
+                        "{*path}",
+                        new SpaOptions { SourcePath = "ClientApp" },
+                        npmScript: "serve",
+                        regex: "Compiled successfully",
+                        forceKill: true
+                        );
+                    }
                 });
+
+                
+
+
 
                 Smtp4devDbContext context = subdir.ApplicationServices.GetService<Smtp4devDbContext>();
                 if (!context.Database.IsInMemory())

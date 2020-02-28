@@ -11,13 +11,12 @@
             "request": "launch",
             "preLaunchTask": "build",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/netcoreapp2.2/Rnwood.Smtp4dev.dll",
-            "args": ["--smtpport=2525", "--server.urls=8080"],
+            "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/netcoreapp3.1/Rnwood.Smtp4dev.dll",
             "cwd": "${workspaceFolder}/Rnwood.Smtp4dev",
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
             "launchBrowser": {
-                "enabled": false,
+                "enabled": true,
                 "args": "${auto-detect-url}",
                 "windows": {
                     "command": "cmd.exe",
@@ -32,9 +31,6 @@
             },
             "env": {
                 "ASPNETCORE_ENVIRONMENT": "Development"
-            },
-            "sourceFileMap": {
-                "/Views": "${workspaceFolder}/Views"
             }
         },
         {
@@ -42,20 +38,6 @@
             "type": "coreclr",
             "request": "attach",
             "processId": "${command:pickProcess}"
-        },
-        {
-            "name": "Debug in Chrome",
-            "type": "chrome",
-            "request": "launch",
-            "url": "http://localhost:28261",
-            "webRoot": "${workspaceFolder}/dist/",
-            "sourceMaps": true
-        }
-    ],
-    "compounds": [
-        {
-            "name": ".NET Core Launch (web) AND Debug in Chrome",
-            "configurations": [".NET Core Launch (web)", "Debug in Chrome"]
         }
     ]
 }

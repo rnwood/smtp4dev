@@ -14,14 +14,15 @@
 		<ToolCommandName>smtp4dev</ToolCommandName>
 		<PackageOutputPath>./bin/pkg</PackageOutputPath>
 	</PropertyGroup>
+	<PropertyGroup Condition="'$(Configuration)'==''">
+		<Configuration>Debug</Configuration>
+	</PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.21" />
-    <PackageReference Include="Microsoft.AspNetCore.App" />
 		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.1.2" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
-		<PackageReference Include="Microsoft.AspNetCore.SpaServices" Version="3.1.2" />
 		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.2" />
@@ -29,6 +30,7 @@
 		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0506" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.112" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.20" />
+		<PackageReference Include="VueCliMiddleware" Version="3.1.1" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -65,39 +67,8 @@
 		</None>
 	</ItemGroup>
 
-	<Target Name="NpmInstall" AfterTargets="Build" Inputs="package.json" Outputs="node_modules\.installedtimestamp">
-		<Message Importance="high" Text="Performing npm install..." />
-		<Exec Command="npm install" />
-		<Touch Files="node_modules\.installedtimestamp" AlwaysCreate="true" />
-	</Target>
-
-	<PropertyGroup> 
-		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck> 
-	</PropertyGroup>
-
-	<ItemGroup>
-		<WebpackInputs Include="Webpack.config*.js" />
-		<WebpackInputs Include="ClientApp\**" />
-	</ItemGroup>
-
 	<ItemGroup>
 	  <Content Remove="appsettings.Development.json" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <None Remove="ClientApp\ApiClient\MessageWarning.ts" />
-	  <None Remove="ClientApp\components\home\file.ts" />
-	  <None Remove="ClientApp\MessageNotificationManager.ts" />
-	</ItemGroup>
-
-	<ItemGroup>
-	  <WebpackInputs Remove="ClientApp\ApiClient\MessageWarning.ts" />
-	  <WebpackInputs Remove="ClientApp\components\confirmationdialog.ts" />
-	  <WebpackInputs Remove="ClientApp\components\confirmationdialog.vue.html" />
-	  <WebpackInputs Remove="ClientApp\components\home\file.ts" />
-	  <WebpackInputs Remove="ClientApp\components\textview.ts" />
-	  <WebpackInputs Remove="ClientApp\components\textview.vue.html" />
-	  <WebpackInputs Remove="ClientApp\MessageNotificationManager.ts" />
 	</ItemGroup>
 
 	<ItemGroup>
@@ -105,34 +76,49 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <TypeScriptCompile Include="ClientApp\ApiClient\MessageWarning.ts" />
-	  <TypeScriptCompile Include="ClientApp\components\confirmationdialog.ts" />
-	  <TypeScriptCompile Include="ClientApp\MessageNotificationManager.ts" />
+		<NpmInputs Include="ClientApp\package.json"/>
 	</ItemGroup>
 
-	<Target Name="DebugRunWebpack" AfterTargets="Build" Inputs="@(WebpackInputs)" Outputs="wwwroot\dist\.buildtimestamp">
+	<Target Name="NpmInstall" AfterTargets="Build" Inputs="@(NpmInputs)" Outputs="ClientApp\node_modules\.installedtimestamp">
+		<Message Importance="high" Text="Performing npm install..." />
+		<Exec Command="npm install" WorkingDirectory="ClientApp" CustomErrorRegularExpression="^npm ERR!.*" />
+		<Touch Files="ClientApp\node_modules\.installedtimestamp" AlwaysCreate="true" />
+		<ItemGroup>
+    		<FileWrites Include="ClientApp\node_modules\.installedtimestamp"/>
+  		</ItemGroup>
+	</Target>
+
+	<PropertyGroup> 
+		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck> 
+	</PropertyGroup>
+
+	<ItemGroup>
+		<ClientApp Include="ClientApp/**"/>
+	</ItemGroup>
+
+	<Target Name="DebugRunNpm" AfterTargets="Build" Inputs="@(ClientApp)" Outputs="wwwroot\.buildtimestamp">
+
 		<!-- Ensure Node.js is installed -->
 		<Exec Command="node --version" ContinueOnError="true">
 			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
 		</Exec>
 		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
 
-		<Message Importance="high" Text="Performing Webpack build..." />
+		<Message Importance="high" Text="Performing NPM build..." />
 
+		<Exec Condition=" '$(Configuration)' != 'Release' " Command="npm --prefix ClientApp run-script build --dev --configuration=dev" CustomErrorRegularExpression="^ERROR in" />
+		<Exec Condition=" '$(Configuration)' == 'Release' " Command="npm --prefix ClientApp run-script build" CustomErrorRegularExpression="^ERROR in" />
 
-
-		<Exec Condition=" '$(Configuration)' != 'Release' " Command="node node_modules/webpack/bin/webpack.js --config webpack.config.vendor.js" CustomErrorRegularExpression="^ERROR in" />
-		<Exec Condition=" '$(Configuration)' != 'Release' " Command="node node_modules/webpack/bin/webpack.js" CustomErrorRegularExpression="^ERROR in" />
-		<Exec Condition=" '$(Configuration)' == 'Release' " Command="node node_modules/webpack/bin/webpack.js --config webpack.config.vendor.js --env.prod" CustomErrorRegularExpression="^ERROR in" />
-		<Exec Condition=" '$(Configuration)' == 'Release' " Command="node node_modules/webpack/bin/webpack.js --env.prod" CustomErrorRegularExpression="^ERROR in" />
-
-		<Touch Files="wwwroot\dist\.buildtimestamp" AlwaysCreate="true" />
+		<Touch Files="wwwroot\.buildtimestamp" AlwaysCreate="true" />
+		<ItemGroup>
+    		<FileWrites Include="wwwroot\**"/>
+  		</ItemGroup>
 	</Target>
 
-	<Target Name="PublishRunWebpack" AfterTargets="ComputeFilesToPublish">
+	<Target Name="PublishRunNpm" AfterTargets="ComputeFilesToPublish">
 		<!-- Include the newly-built files in the publish output -->
 		<ItemGroup>
-			<DistFiles Include="wwwroot\dist\**" />
+			<DistFiles Include="wwwroot\**" />
 			<ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
 				<RelativePath>%(DistFiles.Identity)</RelativePath>
 				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
