@@ -83,9 +83,6 @@
 		<Message Importance="high" Text="Performing npm install..." />
 		<Exec Command="npm install" WorkingDirectory="ClientApp" CustomErrorRegularExpression="^npm ERR!.*" />
 		<Touch Files="ClientApp\node_modules\.installedtimestamp" AlwaysCreate="true" />
-		<ItemGroup>
-    		<FileWrites Include="ClientApp\node_modules\.installedtimestamp"/>
-  		</ItemGroup>
 	</Target>
 
 	<PropertyGroup> 
@@ -106,13 +103,10 @@
 
 		<Message Importance="high" Text="Performing NPM build..." />
 
-		<Exec Condition=" '$(Configuration)' != 'Release' " Command="npm --prefix ClientApp run-script build --dev --configuration=dev" CustomErrorRegularExpression="^ERROR in" />
+		<Exec Condition=" '$(Configuration)' != 'Release' " Command="npm --prefix ClientApp run-script build:dev" CustomErrorRegularExpression="^ERROR in" />
 		<Exec Condition=" '$(Configuration)' == 'Release' " Command="npm --prefix ClientApp run-script build" CustomErrorRegularExpression="^ERROR in" />
 
 		<Touch Files="wwwroot\.buildtimestamp" AlwaysCreate="true" />
-		<ItemGroup>
-    		<FileWrites Include="wwwroot\**"/>
-  		</ItemGroup>
 	</Target>
 
 	<Target Name="PublishRunNpm" AfterTargets="ComputeFilesToPublish">

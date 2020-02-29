@@ -57,11 +57,12 @@
       row-key="id"
       :row-class-name="getRowClass"
       ref="table"
+      stripe
     >
       <el-table-column
         property="receivedDate"
         label="Received"
-        width="120"
+        width="180"
         sortable="custom"
         :formatter="formatDate"
       ></el-table-column>
@@ -71,7 +72,7 @@
         <template slot-scope="scope">
           {{scope.row.subject}}
           <i
-            class="el-icon-document"
+            class="el-icon-paperclip"
             v-if="scope.row.attachmentCount"
             :title="scope.row.attachmentCount + ' attachments'"
           ></i>

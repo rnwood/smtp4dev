@@ -8,15 +8,9 @@
     "build:dev": "vue-cli-service build --mode development",
     "lint": "vue-cli-service lint"
   },
-  "dependencies": {
-    "core-js": "^3.4.3",
-    "node-sass": "^4.13.1",
-    "sass-loader": "^8.0.2",
-    "vue": "^2.6.10",
-    "vue-class-component": "^7.2.2",
-    "vue-property-decorator": "^8.3.0"
-  },
+  "dependencies": {},
   "devDependencies": {
+    "fibers": "^4.0.2",
     "@aspnet/signalr": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
@@ -30,7 +24,6 @@
     "axios": "^0.18.0",
     "babel-eslint": "^10.0.3",
     "brace": "^0.11.1",
-    "element-theme-default": "1.4.13",
     "element-ui": "^2.13.0",
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
@@ -39,11 +32,17 @@
     "srcdoc-polyfill": "^1.0.0",
     "ts-debounce": "^1.0.0",
     "typescript": "~3.7.5",
-    "vue-property-decorator": "^7.2.0",
     "vue-router": "^3.0.1",
     "vue-template-compiler": "^2.6.10",
     "vue2-ace-editor": "0.0.13",
-    "@fortawesome/fontawesome-free": "^5.12.1"
+    "@fortawesome/fontawesome-free": "^5.12.1",
+    "core-js": "^3.4.3",
+    "node-sass": "^4.13.1",
+    "sass": "^1.26.2",
+    "sass-loader": "^8.0.2",
+    "vue": "^2.6.10",
+    "vue-class-component": "^7.2.2",
+    "vue-property-decorator": "^8.3.0"
   },
   "eslintConfig": {
     "root": true,

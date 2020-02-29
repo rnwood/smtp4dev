@@ -1,36 +1,30 @@
 <template>
-
-    <div id='app-root' v-cloak class="vfillpanel">
-        <router-view></router-view>
-    </div>
-
+  <div id="app-root" v-cloak class="vfillpanel">
+    <transition name="slide-fade" mode="out-in">
+      <router-view></router-view>
+    </transition>
+  </div>
 </template>
 
 <script lang="ts">
-    import Vue from 'vue';
-    import { Component } from 'vue-property-decorator';
-    import 'element-theme-default/lib/index.css';
+import Vue from "vue";
+import { Component } from "vue-property-decorator";
 
-    @Component({})
-    export default class AppComponent extends Vue {
-    }
-
+@Component({})
+export default class AppComponent extends Vue {}
 </script>
 <style lang="scss">
 // Import Font Awesome 5 Free
-$fa-css-prefix: 'el-icon-fa';
-$fa-font-path: '~@fortawesome/fontawesome-free/webfonts';
+$fa-css-prefix: "el-icon-fa";
+$fa-font-path: "~@fortawesome/fontawesome-free/webfonts";
 
-@import '~@fortawesome/fontawesome-free/scss/fontawesome.scss';
-@import '~@fortawesome/fontawesome-free/scss/solid.scss';
-@import '~@fortawesome/fontawesome-free/scss/brands.scss';
+$__color-primary: #000047ff;
+$--font-path: "~element-ui/lib/theme-chalk/fonts";
+$--button-small-padding-vertical: 7px;
+$--button-small-padding-horizontal: 12px;
+$--input-small-padding-vertical: 7px;
 
-// Override Element UI's icon font
-.fas {
-  font-family: 'Font Awesome 5 Free' !important;
-}
 
-.fab {
-  font-family: 'Font Awesome 5 Brands' !important;
-}
+@import "~element-ui/packages/theme-chalk/src/index";
+
 </style>

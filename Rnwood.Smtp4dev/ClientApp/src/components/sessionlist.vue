@@ -43,6 +43,7 @@
       type="selection"
       reserve-selection="true"
       row-key="id"
+      stripe
     >
       <el-table-column
         property="endDate"

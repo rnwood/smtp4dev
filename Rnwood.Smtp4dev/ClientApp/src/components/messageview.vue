@@ -15,7 +15,7 @@
         >Download</el-button>
       </div>
 
-      <div v-if="message" class="pad">
+      <div class="pad">
         <el-alert
           v-for="warning in warnings"
           v-bind:key="warning.details"
@@ -27,39 +27,49 @@
         <table class="messageviewheader">
           <tr>
             <td>From:</td>
-            <td>{{message.from}}</td>
+            <td><span v-if="message">{{message.from}}</span></td>
           </tr>
 
           <tr>
             <td>To:</td>
-            <td>{{message.to}}</td>
+            <td><span v-if="message">{{message.to}}</span></td>
           </tr>
-          <tr v-if="message.cc">
+          <tr v-if="message && message.cc">
             <td>Cc:</td>
             <td>{{message.cc}}</td>
           </tr>
-          <tr v-if="message.bcc">
+          <tr v-if="message && message.bcc">
             <td>Bcc:</td>
             <td>{{message.bcc}}</td>
           </tr>
           <tr>
             <td>Subject:</td>
-            <td>{{message.subject}}</td>
+            <td><span v-if="message">{{message.subject}}</span></td>
           </tr>
         </table>
       </div>
 
       <el-tabs value="view" style="height: 100%; width:100%" class="fill" type="border-card">
-        <el-tab-pane label="View" name="view" class="hfillpanel">
+        <el-tab-pane name="view" class="hfillpanel">
+          <span slot="label">
+            <i class="el-icon-view"></i> View
+          </span>
           <messageviewattachments :message="message"></messageviewattachments>
           <messageview-html :message="message" class="fill"></messageview-html>
         </el-tab-pane>
 
-        <el-tab-pane label="Headers" name="headers" class="hfillpanel">
+        <el-tab-pane name="headers" class="hfillpanel">
+          <span slot="label">
+            <i class="el-icon-notebook-2"></i> Headers
+          </span>
           <headers :headers="headers" class="fill"></headers>
         </el-tab-pane>
 
-        <el-tab-pane label="Parts" name="parts" class="hfillpanel">
+        <el-tab-pane name="parts" class="hfillpanel">
+          <span slot="label">
+            <i class="el-icon-document-copy"></i> Parts
+          </span>
+
           <el-tree
             v-if="message"
             :data="message.parts"
@@ -68,7 +78,17 @@
             highlight-current
             empty-message="No parts"
             ref="partstree"
-          ></el-tree>
+            accordion
+            node-key="id"
+            :default-expanded-keys="['0']"
+          >
+            <span class="custom-tree-node" slot-scope="{ node, data }">
+              <i
+                :class="{'el-icon-document-copy': data.childParts.length, 'el-icon-document': data.childParts.length == 0 && !data.isAttachment, 'el-icon-paperclip': data.childParts.length == 0 && data.isAttachment}"
+              ></i>
+              {{ node.label }}
+            </span>
+          </el-tree>
 
           <div v-show="selectedPart" class="fill vfillpanel">
             <el-tabs value="headers" class="fill hfillpanel" type="border-card">
@@ -112,6 +132,7 @@ import Headers from "@/components/headers.vue";
 import MessageViewHtml from "@/components/messageviewhtml.vue";
 import MessageviewAttachments from "@/components/messageviewattachments.vue";
 import MessagePartsSource from "@/components/messagepartsource.vue";
+import { Tree } from "element-ui";
 
 @Component({
   components: {
@@ -130,7 +151,7 @@ export default class MessageView extends Vue {
   messageSummary: MessageSummary | null = null;
   message: Message | null = null;
   selectedPart: MessageEntitySummary | null = null;
-  warnings: MessageWarning[] | null = null;
+  warnings: MessageWarning[] = [];
 
   error: Error | null = null;
   loading = false;
@@ -154,6 +175,11 @@ export default class MessageView extends Vue {
         this.message = await new MessagesController().getMessage(
           this.messageSummary.id
         );
+        if (this.$refs.partstree) {
+          (<Tree>this.$refs.partstree).setCurrentNode(
+            (<Tree>this.$refs.partstree).getNode(0)
+          );
+        }
         this.setWarnings();
 
         if (this.messageSummary.isUnread) {

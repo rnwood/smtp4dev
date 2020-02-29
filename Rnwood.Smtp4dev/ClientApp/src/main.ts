@@ -11,8 +11,8 @@ var supportedBrowser = typeof (document.createElement("p").style.flex) != "undef
 
 if (!supportedBrowser) {
 
+    (<HTMLElement>document.getElementById("loading")).style.display = "none";
     (<HTMLElement>document.getElementById("oldbrowser")).style.display = "block";
-    (<HTMLElement>document.getElementById("app-root")).style.display = "none";
 
 } else {
 

@@ -1,17 +1,11 @@
 <template>
   <el-container class="fill hfillpanel">
-    <el-header height="25">
+    <el-header height="35">
       <h1>
         <a href="https://github.com/rnwood/smtp4dev/" target="_blank">
-          <img height="25" src="logo.png" alt="smtp4dev" />
+          <img height="35" src="logo.png" alt="smtp4dev" />
         </a>
       </h1>
-      <h2>
-        <a
-          href="https://github.com/rnwood/smtp4dev/"
-          target="_blank"
-        ><i class="fab fa-github"/></a>
-      </h2>
     </el-header>
     <el-main class="fill vfillpanel">
       <el-tabs id="maintabs" class="fill" value="messages" type="border-card">
@@ -30,7 +24,7 @@
 
         <el-tab-pane label="Sessions" name="sessions" class="vfillpanel">
           <span slot="label">
-            <i class="el-icon-document"></i> Sessions
+            <i class="el-icon-monitor"></i> Sessions
           </span>
 
           <div class="fillhalf vfillpanel">

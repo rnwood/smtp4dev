@@ -1,7 +1,7 @@
 ﻿<template>
 
     <div v-show="headers" class="headers">
-        <el-table :data="headers" empty-text="No headers" :default-sort="{prop: 'name', order: 'ascending'}" class="table fill">
+        <el-table :data="headers" empty-text="No headers" :default-sort="{prop: 'name', order: 'ascending'}" class="table fill" stripe>
             <el-table-column property="name" label="Name" width="150" sortable>
             </el-table-column>
             <el-table-column property="value" label="Value" sortable>
