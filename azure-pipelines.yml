@@ -2,7 +2,7 @@
 # Build a Docker image 
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
-name: 3.1.1-ci$(Date:yyyyMMdd).$(Rev:rrr)
+name: 3.1.1-ci$(Date:yyyyMMdd)$(Rev:rr)
 trigger:
 - feature-azure-pipelines-ci
 
