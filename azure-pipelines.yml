@@ -2,8 +2,9 @@
 # Build a Docker image 
 # https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
+name: 3.1.1-ci$(Date:yyyyMMdd).$(Rev:rrr)
 trigger:
-- master
+- feature-azure-pipelines-ci
 
 resources:
 - repo: self
@@ -24,7 +25,8 @@ stages:
       displayName: Build an image
       inputs:
         command: build
-        dockerfile: '**/Dockerfile.linux'
+        dockerfile: '**/Dockerfile'
+        arguments: '--build-arg version=$(Build.BuildNumber)'
         tags: |
           $(tag)
   - job: BuildWindows
@@ -36,6 +38,7 @@ stages:
       displayName: Build an image
       inputs:
         command: build
-        dockerfile: '**/Dockerfile.windows'
+        dockerfile: '**/Dockerfile'
+        arguments: '--build-arg version=$(Build.BuildNumber)'
         tags: |
           $(tag)

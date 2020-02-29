@@ -12,7 +12,7 @@ This version is in development, but now approaching a stable state.
 
 <a href='https://www.paypal.me/rnwood'><img alt='Donate' src='https://www.paypalobjects.com/webstatic/en_US/btn/btn_donate_pp_142x27.png'/></a>
 
-[![Build status](https://ci.appveyor.com/api/projects/status/tay9sajnfh4vy2x0/branch/master?svg=true)](https://ci.appveyor.com/project/rnwood/smtp4dev/branch/master)
+[![Build Status](https://dev.azure.com/smtp4dev/smtp4dev/_apis/build/status/rnwood.smtp4dev?branchName=master)](https://dev.azure.com/smtp4dev/smtp4dev/_build/latest?definitionId=2&branchName=master)
 [![Github Releases](https://img.shields.io/github/downloads/rnwood/smtp4dev/latest/total.svg)](https://github.com/rnwood/smtp4dev/releases) (+270k when prev hosted on Codeplex)
 
 ## Screenshots

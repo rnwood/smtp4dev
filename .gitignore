@@ -238,6 +238,6 @@ _Pvt_Extensions
 # FAKE - F# Make
 .fake/
 node_modules
-/Rnwood.Smtp4dev/wwwroot/dist
+/Rnwood.Smtp4dev/wwwroot/*
 /Rnwood.Smtp4dev/database.db
 /Rnwood.Smtp4dev/out
