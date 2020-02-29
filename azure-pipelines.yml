@@ -1,0 +1,76 @@
+name: 3.1.1-ci$(Date:yyyyMMdd)$(Rev:rr)
+trigger:
+- feature-azure-pipelines-ci
+
+resources:
+- repo: self
+
+variables:
+  tag: '$(Build.BuildId)'
+
+stages:
+- stage: Build
+  displayName: Build image
+  jobs:  
+  - job: BuildLinux
+    displayName: Build - Linux
+    variables:
+      DOCKER_BUILDKIT: 1
+    pool:
+      vmImage: 'ubuntu-18.04'
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        command: build
+        dockerfile: '**/Dockerfile.linux'
+        arguments: '--build-arg version=$(Build.BuildNumber) -t rnwood/smtp4dev:linux-amd64-v3.1 -t rnwood/smtp4dev:linux-amd64-$(Build.BuildNumber)'
+    - task: Docker@2
+      displayName: Push image
+      inputs:
+        containerRegistry: dockerhub-rnwood
+        repository: rnwood/smtp4dev
+        command: push
+        tags: |
+          linux-amd64-v3.1
+          linux-amd64-$(Build.BuildNumber)       
+  - job: BuildWindows
+    displayName: Build - Windows
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+    - task: Docker@2
+      displayName: Build an image
+      inputs:
+        command: build  
+        dockerfile: '**/Dockerfile.windows'
+        arguments: '--build-arg version=$(Build.BuildNumber) -t rnwood/smtp4dev:windows-amd64-v3.1 -t rnwood/smtp4dev:windows-amd64-$(Build.BuildNumber)'
+    - task: Docker@2
+      displayName: Push image
+      inputs:
+        containerRegistry: dockerhub-rnwood
+        repository: rnwood/smtp4dev        
+        command: push
+        tags: |
+          windows-amd64-v3.1
+          windows-amd64-$(Build.BuildNumber)
+  - job: BuildManifest
+    displayName: Build - BuildManifest
+    dependsOn:
+    - BuildLinux
+    - BuildWindows
+    variables:
+      DOCKER_CLI_EXPERIMENTAL: enabled
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+    - task: Docker@2
+      displayName: Login
+      inputs:
+        containerRegistry: dockerhub-rnwood
+        repository: rnwood/smtp4dev        
+        command: login
+    - powershell: docker manifest create rnwood/smtp4dev:v3.1 rnwood/smtp4dev:windows-amd64-v3.1 rnwood/smtp4dev:linux-amd64-v3.1
+    - powershell: docker manifest create rnwood/smtp4dev:$(Build.BuildNumber) rnwood/smtp4dev:windows-amd64-$(Build.BuildNumber) rnwood/smtp4dev:linux-amd64-$(Build.BuildNumber)
+    - powershell: docker manifest push rnwood/smtp4dev:v3.1
+    - powershell: docker manifest push rnwood/smtp4dev:$(Build.BuildNumber)

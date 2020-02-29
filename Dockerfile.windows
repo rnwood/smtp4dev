@@ -1,5 +1,5 @@
 
-FROM microsoft/windowsservercore:1607 as build
+FROM mcr.microsoft.com/windows/servercore:ltsc2019 as build
 
 SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
 
@@ -33,6 +33,11 @@ COPY *.sln .
 COPY Rnwood.Smtp4dev/*.csproj ./Rnwood.Smtp4dev/
 RUN dotnet restore Rnwood.Smtp4dev
 
+COPY Rnwood.Smtp4dev/npm-shrinkwrap.json ./Rnwood.Smtp4dev/
+COPY Rnwood.Smtp4dev/package.json ./Rnwood.Smtp4dev/
+WORKDIR /app/Rnwood.Smtp4dev
+RUN npm install
+
 # copy everything else and build app
 
 WORKDIR /app
@@ -44,7 +49,7 @@ RUN dotnet build -p:Version=$env:VERSION
 RUN dotnet test -p:Version=$env:VERSION
 RUN dotnet publish -c Release -o out -p:Version=$env:VERSION
 
-FROM mcr.microsoft.com/windows/nanoserver:sac2016 as runtime
+FROM mcr.microsoft.com/windows/nanoserver:1809 as runtime
 EXPOSE 80
 EXPOSE 25
 COPY --from=build /dotnet /dotnet

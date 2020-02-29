@@ -12,7 +12,7 @@ This version is in development, but now approaching a stable state.
 
 <a href='https://www.paypal.me/rnwood'><img alt='Donate' src='https://www.paypalobjects.com/webstatic/en_US/btn/btn_donate_pp_142x27.png'/></a>
 
-[![Build status](https://ci.appveyor.com/api/projects/status/tay9sajnfh4vy2x0/branch/master?svg=true)](https://ci.appveyor.com/project/rnwood/smtp4dev/branch/master)
+[![Build Status](https://dev.azure.com/smtp4dev/smtp4dev/_apis/build/status/rnwood.smtp4dev?branchName=master)](https://dev.azure.com/smtp4dev/smtp4dev/_build/latest?definitionId=2&branchName=master)
 [![Github Releases](https://img.shields.io/github/downloads/rnwood/smtp4dev/latest/total.svg)](https://github.com/rnwood/smtp4dev/releases) (+270k when prev hosted on Codeplex)
 
 ## Screenshots
@@ -54,13 +54,13 @@ Docker images for both Windows and Linux are available. To run with the web inte
 
 **Linux or Linux Containers on Windows/Other-OSs:**
 ```
-docker run -p 3000:80 -p 2525:25 rnwood/smtp4dev:linux-amd64-v3
+docker run -p 3000:80 -p 2525:25 rnwood/smtp4dev:v3
 ```
 **Windows:**
 ```
-docker run -p 3000:80 -p 2525:25 rnwood/smtp4dev:windows-amd64-v3
+docker run -p 3000:80 -p 2525:25 rnwood/smtp4dev:v3
 ```
-Sorry no unified cross platform image tag available yet. To see the full list of available tags [see the Docker hub page for smtp4dev](https://hub.docker.com/r/rnwood/smtp4dev/tags/).
+This is a cross platform tag which will work on either Windows or Linux. To see the full list of available tags [see the Docker hub page for smtp4dev](https://hub.docker.com/r/rnwood/smtp4dev/tags/).
 
 ## How to run smtp4dev as a service (Windows only)
 
