@@ -4,6 +4,7 @@
       {{error.message}}
       <el-button v-on:click="loadMessage">Retry</el-button>
     </el-alert>
+    <div v-if="error" class="hfillpanel fill">&nbsp;</div>
 
     <div v-if="sessionSummary" class="hfillpanel fill">
       <el-alert
