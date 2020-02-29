@@ -136,7 +136,7 @@ artifacts:
   type: zip
 - path: Rnwood.Smtp4dev\bin\pkg\*.nupkg
 cache:
-    - Rnwood.Smtp4dev\node_modules -> Rnwood.Smtp4dev\package.json
+    - Rnwood.Smtp4dev\ClientApp\node_modules -> Rnwood.Smtp4dev\ClientApp\package-lock.json
 deploy:    
 - provider: GitHub
   artifact: /.*\..*/
