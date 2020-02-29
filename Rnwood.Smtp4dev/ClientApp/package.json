@@ -10,7 +10,6 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "fibers": "^4.0.2",
     "@aspnet/signalr": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^2.18.0",
     "@typescript-eslint/parser": "^2.18.0",
