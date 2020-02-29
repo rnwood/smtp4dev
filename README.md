@@ -1,7 +1,7 @@
 # smtp4dev
-smtp4dev - the mail server for development
+smtp4dev - the fake SMTP email server for development and testing.
 
-A dummy SMTP server for Windows, Linux, Mac OS-X (and maybe elsewhere where .NET Core is available). 
+A dummy SMTP server for Windows, Linux, Mac OS-X (and maybe elsewhere where .NET Core is available). Lets you test your application without spamming your real customers and without needing to set up a complicated real email server with a special configuration. Messages received in smtp4dev can be viewed and inspected.
 
 This repository hosts the development of v3 which has a web UI so that it can be shared amongst members of a team, and be available cross platform.
 This version is in development, but now approaching a stable state.
