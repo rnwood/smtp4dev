@@ -33,11 +33,6 @@ COPY *.sln .
 COPY Rnwood.Smtp4dev/*.csproj ./Rnwood.Smtp4dev/
 RUN dotnet restore Rnwood.Smtp4dev
 
-COPY Rnwood.Smtp4dev/ClientApp/package-lock.json ./Rnwood.Smtp4dev/ClientApp
-COPY Rnwood.Smtp4dev/ClientApp/package.json ./Rnwood.Smtp4dev/ClientApp
-WORKDIR /app/Rnwood.Smtp4dev/ClientApp
-RUN npm install
-
 # copy everything else and build app
 
 WORKDIR /app
