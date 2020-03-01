@@ -4,7 +4,7 @@ configuration: Release
 skip_tags: false
 branches:
   except:
-    - azure-pipelines
+    - feature-azure-pipelines-ci
 environment:
   APPVEYORAPIKEY:
     secure: f6ZDvXLvu8fryoFvnGfIUdpvlUC6Rft/qZKbWGh5CFw=
