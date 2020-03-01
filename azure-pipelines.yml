@@ -26,8 +26,8 @@ stages:
         dockerfile: '**/Dockerfile.linux'
         arguments: '--build-arg version=$(Build.BuildNumber)'
         tags: |
-          linux-amd64-v3.1
-          linux-amd64-$(Build.BuildNumber)
+          rnwood/smtp4dev:linux-amd64-v3.1
+          rnwood/smtp4dev:linux-amd64-$(Build.BuildNumber)
     - task: Docker@2
       displayName: Push image
       inputs:
@@ -49,8 +49,8 @@ stages:
         dockerfile: '**/Dockerfile.windows'
         arguments: '--build-arg version=$(Build.BuildNumber)'
         tags: |
-          windows-amd64-v3.1
-          windows-amd64-$(Build.BuildNumber)
+          rnwood/smtp4dev:windows-amd64-v3.1
+          rnwood/smtp4dev:windows-amd64-$(Build.BuildNumber)
     - task: Docker@2
       displayName: Push image
       inputs:
