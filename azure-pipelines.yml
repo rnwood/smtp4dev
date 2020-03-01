@@ -11,11 +11,11 @@ variables:
 stages:
 - stage: Build
   displayName: Build image
-  variables:
-    DOCKER_BUILDKIT: 1
   jobs:  
   - job: BuildLinux
     displayName: Build - Linux
+    variables:
+      DOCKER_BUILDKIT: 1
     pool:
       vmImage: 'ubuntu-18.04'
     steps:
@@ -26,8 +26,8 @@ stages:
         dockerfile: '**/Dockerfile.linux'
         arguments: '--build-arg version=$(Build.BuildNumber)'
         tags: |
-          rnwood/smtp4dev:linux-amd64-v3.1
-          rnwood/smtp4dev:linux-amd64-$(Build.BuildNumber)
+          linux-amd64-v3.1
+          linux-amd64-$(Build.BuildNumber)
     - task: Docker@2
       displayName: Push image
       inputs:
@@ -49,8 +49,8 @@ stages:
         dockerfile: '**/Dockerfile.windows'
         arguments: '--build-arg version=$(Build.BuildNumber)'
         tags: |
-          rnwood/smtp4dev:windows-amd64-v3.1
-          rnwood/smtp4dev:windows-amd64-$(Build.BuildNumber)
+          windows-amd64-v3.1
+          windows-amd64-$(Build.BuildNumber)
     - task: Docker@2
       displayName: Push image
       inputs:
