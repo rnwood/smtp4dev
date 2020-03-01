@@ -28,14 +28,14 @@ stages:
           linux-amd64-v3.1
           linux-amd64-$(Build.BuildNumber)
     - task: Docker@2
-    displayName: Push image
-    inputs:
-      containerRegistry: dockerhub-rnwood
-      repository: smtp4dev
-      command: push
-      tags: |
-        linux-amd64-v3.1
-        linux-amd64-$(Build.BuildNumber)       
+      displayName: Push image
+      inputs:
+        containerRegistry: dockerhub-rnwood
+        repository: smtp4dev
+        command: push
+        tags: |
+          linux-amd64-v3.1
+          linux-amd64-$(Build.BuildNumber)       
   - job: BuildWindows
     displayName: Build - Windows
     pool:
@@ -54,7 +54,8 @@ stages:
       displayName: Push image
       inputs:
         containerRegistry: dockerhub-rnwood
-        repository: smtp4dev        command: push
+        repository: smtp4dev        
+        command: push
         tags: |
           windows-amd64-v3.1
           windows-amd64-$(Build.BuildNumber)              
