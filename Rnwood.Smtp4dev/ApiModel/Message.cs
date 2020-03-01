@@ -99,6 +99,7 @@ namespace Rnwood.Smtp4dev.ApiModel
                    Attachments = new List<AttachmentSummary>(),
                    Warnings = new List<MessageWarning>(),
                    Size = e.ToString().Length,
+                   IsAttachment = (e.ContentDisposition?.Disposition != "inline" && !string.IsNullOrEmpty(fileName)) || e.ContentDisposition?.Disposition == "attachment",
                    MimeEntity = e
                };
 
@@ -106,13 +107,7 @@ namespace Rnwood.Smtp4dev.ApiModel
                {
                    p.ChildParts.Add(result);
 
-
-
-
-
-                   bool isAttachment = (e.ContentDisposition?.Disposition != "inline" && !string.IsNullOrEmpty(fileName)) || e.ContentDisposition?.Disposition == "attachment";
-
-                   if (isAttachment)
+                   if (result.IsAttachment)
                    {
                        if (e.ContentDisposition?.Disposition != "attachment")
                        {

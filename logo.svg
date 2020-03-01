@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="210mm"
+   height="297mm"
+   viewBox="0 0 210 297"
+   version="1.1"
+   id="svg8"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
+   sodipodi:docname="logo.svg">
+  <defs
+     id="defs2">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="8.2198496 : 233.01012 : 1"
+       inkscape:vp_y="0 : 947.52429 : 0"
+       inkscape:vp_z="54.175802 : 234.96009 : 1"
+       inkscape:persp3d-origin="105.76528 : 108.46293 : 1"
+       id="perspective853" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="2.8284271"
+     inkscape:cx="173.67011"
+     inkscape:cy="954.9743"
+     inkscape:document-units="mm"
+     inkscape:current-layer="layer1"
+     showgrid="false"
+     inkscape:window-width="2560"
+     inkscape:window-height="1377"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     showguides="false" />
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <g
+       id="g893"
+       transform="matrix(0.94752429,0,0,0.94752429,2.3290117,4.8272202)"
+       inkscape:export-xdpi="121.36221"
+       inkscape:export-ydpi="121.36221"
+       style="fill:#000047;fill-opacity:1"
+       inkscape:export-filename="C:\src\smtp4dev\Rnwood.Smtp4dev\ClientApp\public\logo.png">
+      <g
+         inkscape:corner7="1.3678731 : 0.11462621 : 75.998211 : 1"
+         inkscape:corner0="3.1510884 : 0.15320263 : 0 : 1"
+         inkscape:perspectiveID="#perspective853"
+         style="fill:#000047;fill-opacity:1;stroke:#000000;stroke-width:2.92199993;stroke-miterlimit:4;stroke-dasharray:none"
+         id="g855"
+         sodipodi:type="inkscape:box3d">
+        <path
+           points="31.017251,66.49083 53.49065,60.697672 53.49065,60.216365 31.017251,57.197745 "
+           d="M 31.017251,57.197745 V 66.49083 L 53.49065,60.697672 v -0.481307 z"
+           inkscape:box3dsidetype="6"
+           style="fill:#000047;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2.92075348;stroke-linejoin:round"
+           id="path857"
+           sodipodi:type="inkscape:box3dside" />
+        <path
+           points="49.693943,69.542056 54.566357,60.658044 53.49065,60.697672 31.017251,66.49083 "
+           d="m 31.017251,66.49083 18.676692,3.051226 4.872414,-8.884012 -1.075707,0.03963 z"
+           inkscape:box3dsidetype="13"
+           style="fill:#000047;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2.92075348;stroke-linejoin:round"
+           id="path865"
+           sodipodi:type="inkscape:box3dside" />
+        <path
+           points="54.566357,60.165785 54.566357,60.658044 53.49065,60.697672 53.49065,60.216365 "
+           d="m 53.49065,60.216365 1.075707,-0.05058 v 0.492259 l -1.075707,0.03963 z"
+           inkscape:box3dsidetype="11"
+           style="fill:#000047;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2.92075348;stroke-linejoin:round"
+           id="path867"
+           sodipodi:type="inkscape:box3dside" />
+        <path
+           points="49.693943,53.250465 54.566357,60.165785 53.49065,60.216365 31.017251,57.197745 "
+           d="m 31.017251,57.197745 18.676692,-3.94728 4.872414,6.91532 -1.075707,0.05058 z"
+           inkscape:box3dsidetype="5"
+           style="fill:#000047;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2.92075348;stroke-linejoin:round"
+           id="path859"
+           sodipodi:type="inkscape:box3dside" />
+        <path
+           points="49.693943,69.542056 54.566357,60.658044 54.566357,60.165785 49.693943,53.250465 "
+           d="m 49.693943,53.250465 v 16.291591 l 4.872414,-8.884012 v -0.492259 z"
+           inkscape:box3dsidetype="14"
+           style="fill:#000047;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2.92075348;stroke-linejoin:round"
+           id="path863"
+           sodipodi:type="inkscape:box3dside" />
+        <path
+           points="49.693943,53.250465 49.693943,69.542056 31.017251,66.49083 31.017251,57.197745 "
+           d="m 31.017251,57.197745 18.676692,-3.94728 V 69.542056 L 31.017251,66.49083 Z"
+           inkscape:box3dsidetype="3"
+           style="fill:#000047;fill-opacity:1;fill-rule:evenodd;stroke:none;stroke-width:2.92075348;stroke-linejoin:round"
+           id="path861"
+           sodipodi:type="inkscape:box3dside" />
+      </g>
+      <path
+         sodipodi:nodetypes="ccc"
+         inkscape:connector-curvature="0"
+         id="path869"
+         d="m 30.995555,57.197842 8.526562,4.86496 10.234938,-8.811552"
+         style="fill:#000047;fill-opacity:1;stroke:#f9f9f9;stroke-width:1.26762092;stroke-linecap:butt;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:0.18840583" />
+    </g>
+    <flowRoot
+       xml:space="preserve"
+       id="flowRoot815"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#8686bf;fill-opacity:1;stroke:none;"
+       transform="scale(0.26458333)"
+       inkscape:export-xdpi="121.36221"
+       inkscape:export-ydpi="121.36221"
+       inkscape:export-filename="C:\src\smtp4dev\Rnwood.Smtp4dev\ClientApp\public\logo.png"><flowRegion
+         id="flowRegion817"
+         style="fill:#8686bf;fill-opacity:1;"><rect
+           id="rect819"
+           width="303"
+           height="116"
+           x="118"
+           y="207.51968"
+           style="fill:#8686bf;fill-opacity:1;" /></flowRegion><flowPara
+         id="flowPara821"
+         style="fill:#000080"><flowSpan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Rockwell;-inkscape-font-specification:Rockwell;letter-spacing:-1.53999972px;fill:#000080;fill-opacity:1"
+           id="flowSpan825"><flowSpan
+             style="fill:#ffffff"
+             id="flowSpan895">smt<flowSpan
+   style="letter-spacing:-3.55000004px"
+   id="flowSpan899">p</flowSpan></flowSpan><flowSpan
+             style="fill:#000000;letter-spacing:-2.40000003px"
+             id="flowSpan897">4</flowSpan></flowSpan><flowSpan
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Courier New';-inkscape-font-specification:'Courier New';letter-spacing:-4.46000187px;fill:#000000;fill-opacity:1"
+           id="flowSpan823">dev</flowSpan></flowPara></flowRoot>  </g>
+</svg>

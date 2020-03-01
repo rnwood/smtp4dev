@@ -142,7 +142,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
 			if (string.IsNullOrEmpty(mainModule))
 			{
-				mainModule = Path.GetFullPath("../../../../Rnwood.Smtp4dev/bin/Debug/netcoreapp2.2/Rnwood.Smtp4dev.dll");
+				mainModule = Path.GetFullPath("../../../../Rnwood.Smtp4dev/bin/Debug/netcoreapp3.1/Rnwood.Smtp4dev.dll");
 			}
 
 			CancellationToken timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;

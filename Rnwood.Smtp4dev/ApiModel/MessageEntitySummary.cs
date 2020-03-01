@@ -22,6 +22,8 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public int Size { get; set; }
 
+        public bool IsAttachment{ get; set;}
+
         [JsonIgnore]
         internal MimeEntity MimeEntity { get; set; }
     }
