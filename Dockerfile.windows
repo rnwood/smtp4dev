@@ -1,3 +1,5 @@
+SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
+
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1.102 AS build
 WORKDIR /app
 
