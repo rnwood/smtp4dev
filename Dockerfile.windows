@@ -1,9 +1,18 @@
-FROM diamol/node:10.15.2 as nodejs
-
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1.102 AS build
-COPY --from=nodejs /nodejs /nodejs
-ENV PATH="/nodejs"
 WORKDIR /app
+
+ENV NODE_VERSION 10.11.0
+
+RUN Invoke-WebRequest $('https://nodejs.org/dist/v{0}/node-v{0}-win-x64.zip' -f $env:NODE_VERSION) -OutFile 'node.zip' -UseBasicParsing ; \
+Expand-Archive node.zip -DestinationPath C:\ ;\
+Rename-Item -Path $('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\nodejs'
+
+RUN $env:PATH = 'C:\nodejs;{0}' -f $env:PATH ; \
+[Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
+
+# confirm installation
+RUN node -v
+RUN npm -v
 
 # copy csproj and restore as distinct layers
 COPY *.sln .

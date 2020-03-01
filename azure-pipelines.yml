@@ -25,7 +25,7 @@ stages:
       displayName: Build an image
       inputs:
         command: build
-        dockerfile: '**/Dockerfile'
+        dockerfile: '**/Dockerfile.linux'
         arguments: '--build-arg version=$(Build.BuildNumber)'
         tags: |
           $(tag)
@@ -38,7 +38,7 @@ stages:
       displayName: Build an image
       inputs:
         command: build
-        dockerfile: '**/Dockerfile'
+        dockerfile: '**/Dockerfile.windows'
         arguments: '--build-arg version=$(Build.BuildNumber)'
         tags: |
           $(tag)
