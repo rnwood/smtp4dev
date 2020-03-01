@@ -1,7 +1,3 @@
-# Docker
-# Build a Docker image 
-# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
-
 name: 3.1.1-ci$(Date:yyyyMMdd)$(Rev:rr)
 trigger:
 - feature-azure-pipelines-ci
@@ -11,6 +7,7 @@ resources:
 
 variables:
   tag: '$(Build.BuildId)'
+  DOCKER_BUILDKIT: 1
 
 stages:
 - stage: Build
@@ -28,7 +25,17 @@ stages:
         dockerfile: '**/Dockerfile.linux'
         arguments: '--build-arg version=$(Build.BuildNumber)'
         tags: |
-          $(tag)
+          linux-amd64-v3.1
+          linux-amd64-$(Build.BuildNumber)
+    - task: Docker@2
+    displayName: Push image
+    inputs:
+      containerRegistry: dockerhub-rnwood
+      repository: smtp4dev
+      command: push
+      tags: |
+        linux-amd64-v3.1
+        linux-amd64-$(Build.BuildNumber)       
   - job: BuildWindows
     displayName: Build - Windows
     pool:
@@ -41,4 +48,13 @@ stages:
         dockerfile: '**/Dockerfile.windows'
         arguments: '--build-arg version=$(Build.BuildNumber)'
         tags: |
-          $(tag)
+          windows-amd64-v3.1
+          windows-amd64-$(Build.BuildNumber)
+      - task: Docker@2
+      displayName: Push image
+      inputs:
+        containerRegistry: dockerhub-rnwood
+        repository: smtp4dev        command: push
+        tags: |
+          windows-amd64-v3.1
+          windows-amd64-$(Build.BuildNumber)              
