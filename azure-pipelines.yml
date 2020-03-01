@@ -7,11 +7,12 @@ resources:
 
 variables:
   tag: '$(Build.BuildId)'
-  DOCKER_BUILDKIT: 1
 
 stages:
 - stage: Build
   displayName: Build image
+  variables:
+    DOCKER_BUILDKIT: 1
   jobs:  
   - job: BuildLinux
     displayName: Build - Linux
