@@ -9,10 +9,9 @@ Rename-Item "C:\node-v$($env:NODE_VERSION)-win-x64" c:\nodejs
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.2 AS base
 WORKDIR /app
 EXPOSE 80
-COPY --from=downloadnodejs C:\nodejs\ C:\Windows\system32\
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1.102 AS build
-COPY --from=downloadnodejs C:\nodejs\ C:\Windows\system32\
+COPY --from=downloadnodejs C:\nodejs C:\Windows\system32\
 WORKDIR /app
 
 # confirm installation
