@@ -51,7 +51,6 @@ stages:
           docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs
           docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-base
           docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build
-          docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-publish
     - task: Docker@2
       displayName: Build cache image - downloadnodejs
       inputs:
@@ -71,17 +70,11 @@ stages:
         dockerfile: '**/Dockerfile.windows'
         arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-base --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) --target build -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build'                
     - task: Docker@2
-      displayName: Build cache image - publish
-      inputs:
-        command: build  
-        dockerfile: '**/Dockerfile.windows'
-        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-publish --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-base --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) --target publish -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-publish'  
-    - task: Docker@2
       displayName: Build image
       inputs:
         command: build  
         dockerfile: '**/Dockerfile.windows'
-        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-publish --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-base --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) -t $(docker_repo):windows-amd64-$(Build.BuildNumber)'
+        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-base --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) -t $(docker_repo):windows-amd64-$(Build.BuildNumber)'
     - task: Docker@2
       displayName: Push image
       inputs:
@@ -93,7 +86,6 @@ stages:
           windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs
           windows-amd64-$(docker_tag_suffix)-buildcache-base
           windows-amd64-$(docker_tag_suffix)-buildcache-build
-          windows-amd64-$(docker_tag_suffix)-buildcache-publish
   - job: DockerManifest
     displayName: Docker Create Manifest
     dependsOn:
