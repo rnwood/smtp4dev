@@ -22,12 +22,13 @@ stages:
     pool:
       vmImage: 'ubuntu-18.04'
     steps:
+    - powershell: docker pull $(docker_repo):linux-amd64-$(docker_tag_suffix)
     - task: Docker@2
       displayName: Build an image
       inputs:
         command: build
         dockerfile: '**/Dockerfile.linux'
-        arguments: '--build-arg version=$(Build.BuildNumber) -t $(docker_repo):linux-amd64-$(Build.BuildNumber)'
+        arguments: '--cache-from $(docker_repo):linux-amd64-$(docker_tag_suffix) --build-arg version=$(Build.BuildNumber) -t $(docker_repo):linux-amd64-$(Build.BuildNumber)'
     - task: Docker@2
       displayName: Push image
       inputs:
@@ -41,12 +42,13 @@ stages:
     pool:
       vmImage: 'windows-2019'
     steps:
+    - powershell: docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)
     - task: Docker@2
       displayName: Build an image
       inputs:
         command: build  
         dockerfile: '**/Dockerfile.windows'
-        arguments: '--build-arg version=$(Build.BuildNumber) -t $(docker_repo):windows-amd64-$(Build.BuildNumber)'
+        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix) --build-arg version=$(Build.BuildNumber) -t $(docker_repo):windows-amd64-$(Build.BuildNumber)'
     - task: Docker@2
       displayName: Push image
       inputs:
@@ -89,9 +91,12 @@ stages:
         containerRegistry: $(docker_registry)
         repository: $(docker_repo)        
         command: login
-    - powershell: docker tag $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):windows-amd64-$(docker_tag_suffix)
-    - powershell: docker tag $(docker_repo):linux-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(docker_tag_suffix)
-    - powershell: docker push $(docker_repo):windows-amd64-$(docker_tag_suffix)
-    - powershell: docker push $(docker_repo):linux-amd64-$(docker_tag_suffix)
-    - powershell: docker manifest create $(docker_repo):$(docker_tag_suffix) $(docker_repo):windows-amd64-$(docker_tag_suffix) $(docker_repo):linux-amd64-$(docker_tag_suffix)
-    - powershell: docker manifest push $(docker_repo):$(docker_tag_suffix)
+    - powershell: |
+       docker pull $(docker_repo):windows-amd64-$(Build.BuildNumber)
+       docker pull $(docker_repo):linux-amd64-$(Build.BuildNumber)
+       docker tag $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):windows-amd64-$(docker_tag_suffix)
+       docker tag $(docker_repo):linux-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(docker_tag_suffix)
+       docker push $(docker_repo):windows-amd64-$(docker_tag_suffix)
+       docker push $(docker_repo):linux-amd64-$(docker_tag_suffix)
+       docker manifest create $(docker_repo):$(docker_tag_suffix) $(docker_repo):windows-amd64-$(docker_tag_suffix) $(docker_repo):linux-amd64-$(docker_tag_suffix)
+       docker manifest push $(docker_repo):$(docker_tag_suffix)
