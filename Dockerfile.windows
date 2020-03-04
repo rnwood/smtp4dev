@@ -2,8 +2,8 @@
 FROM mcr.microsoft.com/powershell:nanoserver-1809 AS downloadnodejs
 ENV NODE_VERSION 10.11.0
 SHELL ["pwsh", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPreference='silentlyContinue';"]
-RUN Invoke-WebRequest -OutFile c:\nodejs.zip -UseBasicParsing "https://nodejs.org/dist/v$($env:NODE_VERSION)/node-v$($env:NODE_VERSION)-win-x64.zip"; `
-Expand-Archive c:\nodejs.zip -DestinationPath C:\; `
+RUN Invoke-WebRequest -OutFile $($env:TEMP)\nodejs.zip -UseBasicParsing "https://nodejs.org/dist/v$($env:NODE_VERSION)/node-v$($env:NODE_VERSION)-win-x64.zip"; `
+Expand-Archive $($env:TEMP)\nodejs.zip -DestinationPath C:\; `
 Rename-Item "C:\node-v$($env:NODE_VERSION)-win-x64" c:\nodejs
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.2 AS base
