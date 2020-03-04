@@ -45,12 +45,10 @@ stages:
       displayName: Pull image to use as cache
       inputs:
         targetType: inline
+        ignoreLASTEXITCODE: true
         script: |
-          try {
-            docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-cache
-          } catch {
-            write-warning "Failed to pull cache image"
-          }
+          docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-cache
+          
     - task: Docker@2
       displayName: Build image - for cache
       inputs:
