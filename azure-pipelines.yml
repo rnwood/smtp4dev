@@ -12,144 +12,180 @@ variables:
   docker_repo: 'rnwood/smtp4dev'
   docker_tag_suffix: 'v$(version_majorminor)'
   docker_registry: 'dockerhub-rnwood'
+  netcoresdk_version: '3.1.102'
 
 stages:
 - stage: Build
   displayName: Build
-  jobs:  
-  - job: DockerBuildLinux
-    displayName: DockerBuild - Linux
+  jobs:
+  - job: Build
+    displayName: Build
     pool:
       vmImage: 'ubuntu-18.04'
     steps:
-    - task: Docker@2
-      displayName: Build image
+    - task: UseDotNet@2
+      displayName: Install .NET Core SDK v$(netcoresdk_version)
       inputs:
-        command: build
-        dockerfile: '**/Dockerfile.linux'
-        arguments: '--build-arg version=$(Build.BuildNumber) -t $(docker_repo):linux-amd64-$(Build.BuildNumber)'
-    - task: Docker@2
-      displayName: Push image
+        packageType: sdk
+        version: $(netcoresdk_version)
+    - task: DotNetCoreCLI@2
+      displayName: Build .NET Core Global Tool
       inputs:
-        containerRegistry: $(docker_registry)
-        repository: $(docker_repo)
-        command: push
-        tags: |
-          linux-amd64-$(Build.BuildNumber)       
-  - job: DockerBuildWindows
-    displayName: DockerBuild - Windows
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-    - task: PowerShell@2
-      displayName: Pull images to use as cache
+        command: pack
+        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+        arguments: '-c Release -p:version=$($(Build.BuildNumber) -p:PackAsTool=true'
+    - task: DotNetCoreCLI@2
+      displayName: Build .NET Core - no runtime
       inputs:
-        targetType: inline
-        ignoreLASTEXITCODE: true
-        script: |
-          $ErrorActionPreference="Continue"
-          (
-            (start-job { docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs }),
-            (start-job { docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build })
-          ) | receive-job -wait
-    - task: Docker@2
-      displayName: Build cache image - downloadnodejs
+        command: publish
+        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+        arguments: '-c Release -p:version=$($(Build.BuildNumber)'
+    - task: DotNetCoreCLI@2
+      displayName: Build .NET Core - win-x64
       inputs:
-        command: build  
-        dockerfile: '**/Dockerfile.windows'
-        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) --target downloadnodejs -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs'
-    - task: Docker@2
-      displayName: Build cache image - build
+        command: publish
+        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+        arguments: '-c Release -r win-x64 -p:version=$($(Build.BuildNumber)'        
+    - task: DotNetCoreCLI@2
+      displayName: Build .NET Core - linux-x64
       inputs:
-        command: build  
-        dockerfile: '**/Dockerfile.windows'
-        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) --target build -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build'                
-    - task: Docker@2
-      displayName: Build image
-      inputs:
-        command: build  
-        dockerfile: '**/Dockerfile.windows'
-        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) -t $(docker_repo):windows-amd64-$(Build.BuildNumber)'
-    - task: Docker@2
-      displayName: Push image
-      inputs:
-        containerRegistry: $(docker_registry)
-        repository: $(docker_repo)        
-        command: push
-        tags: |
-          windows-amd64-$(Build.BuildNumber)
-          windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs
-          windows-amd64-$(docker_tag_suffix)-buildcache-build
-  - job: DockerManifest
-    displayName: Docker Create Manifest
-    dependsOn:
-    - DockerBuildLinux
-    - DockerBuildWindows
-    variables:
-      DOCKER_CLI_EXPERIMENTAL: enabled
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-    - task: Docker@2
-      displayName: Login.
-      inputs:
-        containerRegistry: $(docker_registry)
-        repository: $(docker_repo)        
-        command: login
-    - task: PowerShell@2
-      displayName: Create cross platform manifest
-      inputs:
-        targetType: inline
-        script: |
-          docker manifest create $(docker_repo):$(Build.BuildNumber) $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(Build.BuildNumber)
-          docker manifest push $(docker_repo):$(Build.BuildNumber)
-- stage: Release
-  displayName: Release
-  jobs:  
-  - job: DockerReleaseTagLinux
-    displayName: Docker Release Tag - Linux
-    variables:
-      DOCKER_CLI_EXPERIMENTAL: enabled
-    pool:
-      vmImage: 'ubuntu-18.04'
-    steps:
-    - checkout: none
-    - task: Docker@2
-      displayName: Login.
-      inputs:
-        containerRegistry: $(docker_registry)
-        repository: $(docker_repo)        
-        command: login
-    - task: PowerShell@2
-      displayName: Tag release
-      inputs:
-        targetType: inline
-        script: |
-          docker pull $(docker_repo):linux-amd64-$(Build.BuildNumber)
-          docker tag $(docker_repo):linux-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(docker_tag_suffix)
-          docker push $(docker_repo):linux-amd64-$(docker_tag_suffix)
-  - job: DockerRelease
-    displayName: Docker Release
-    dependsOn: DockerReleaseTagLinux
-    variables:
-      DOCKER_CLI_EXPERIMENTAL: enabled
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-    - checkout: none
-    - task: Docker@2
-      displayName: Login.
-      inputs:
-        containerRegistry: $(docker_registry)
-        repository: $(docker_repo)        
-        command: login
-    - task: PowerShell@2
-      displayName: Tag release
-      inputs:
-        targetType: inline
-        script: |
-          docker pull $(docker_repo):windows-amd64-$(Build.BuildNumber)
-          docker tag $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):windows-amd64-$(docker_tag_suffix)
-          docker push $(docker_repo):windows-amd64-$(docker_tag_suffix)
-          docker manifest create $(docker_repo):$(docker_tag_suffix) $(docker_repo):windows-amd64-$(docker_tag_suffix) $(docker_repo):linux-amd64-$(docker_tag_suffix)
-          docker manifest push $(docker_repo):$(docker_tag_suffix)
+        command: publish
+        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+        arguments: '-c Release -r linux-x64 -p:version=$($(Build.BuildNumber)' 
+        
+#   - job: DockerBuildLinux
+#     displayName: DockerBuild - Linux
+#     pool:
+#       vmImage: 'ubuntu-18.04'
+#     steps:
+#     - task: Docker@2
+#       displayName: Build image
+#       inputs:
+#         command: build
+#         dockerfile: '**/Dockerfile.linux'
+#         arguments: '--build-arg version=$(Build.BuildNumber) -t $(docker_repo):linux-amd64-$(Build.BuildNumber)'
+#     - task: Docker@2
+#       displayName: Push image
+#       inputs:
+#         containerRegistry: $(docker_registry)
+#         repository: $(docker_repo)
+#         command: push
+#         tags: |
+#           linux-amd64-$(Build.BuildNumber)       
+#   - job: DockerBuildWindows
+#     displayName: DockerBuild - Windows
+#     pool:
+#       vmImage: 'windows-2019'
+#     steps:
+#     - task: PowerShell@2
+#       displayName: Pull images to use as cache
+#       inputs:
+#         targetType: inline
+#         ignoreLASTEXITCODE: true
+#         script: |
+#           $ErrorActionPreference="Continue"
+#           (
+#             (start-job { docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs }),
+#             (start-job { docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build })
+#           ) | receive-job -wait
+#     - task: Docker@2
+#       displayName: Build cache image - downloadnodejs
+#       inputs:
+#         command: build  
+#         dockerfile: '**/Dockerfile.windows'
+#         arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) --target downloadnodejs -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs'
+#     - task: Docker@2
+#       displayName: Build cache image - build
+#       inputs:
+#         command: build  
+#         dockerfile: '**/Dockerfile.windows'
+#         arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) --target build -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build'                
+#     - task: Docker@2
+#       displayName: Build image
+#       inputs:
+#         command: build  
+#         dockerfile: '**/Dockerfile.windows'
+#         arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) -t $(docker_repo):windows-amd64-$(Build.BuildNumber)'
+#     - task: Docker@2
+#       displayName: Push image
+#       inputs:
+#         containerRegistry: $(docker_registry)
+#         repository: $(docker_repo)        
+#         command: push
+#         tags: |
+#           windows-amd64-$(Build.BuildNumber)
+#           windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs
+#           windows-amd64-$(docker_tag_suffix)-buildcache-build
+#   - job: DockerManifest
+#     displayName: Docker Create Manifest
+#     dependsOn:
+#     - DockerBuildLinux
+#     - DockerBuildWindows
+#     variables:
+#       DOCKER_CLI_EXPERIMENTAL: enabled
+#     pool:
+#       vmImage: 'windows-2019'
+#     steps:
+#     - task: Docker@2
+#       displayName: Login.
+#       inputs:
+#         containerRegistry: $(docker_registry)
+#         repository: $(docker_repo)        
+#         command: login
+#     - task: PowerShell@2
+#       displayName: Create cross platform manifest
+#       inputs:
+#         targetType: inline
+#         script: |
+#           docker manifest create $(docker_repo):$(Build.BuildNumber) $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(Build.BuildNumber)
+#           docker manifest push $(docker_repo):$(Build.BuildNumber)
+# - stage: Release
+#   displayName: Release
+#   jobs:  
+#   - job: DockerReleaseTagLinux
+#     displayName: Docker Release Tag - Linux
+#     variables:
+#       DOCKER_CLI_EXPERIMENTAL: enabled
+#     pool:
+#       vmImage: 'ubuntu-18.04'
+#     steps:
+#     - checkout: none
+#     - task: Docker@2
+#       displayName: Login.
+#       inputs:
+#         containerRegistry: $(docker_registry)
+#         repository: $(docker_repo)        
+#         command: login
+#     - task: PowerShell@2
+#       displayName: Tag release
+#       inputs:
+#         targetType: inline
+#         script: |
+#           docker pull $(docker_repo):linux-amd64-$(Build.BuildNumber)
+#           docker tag $(docker_repo):linux-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(docker_tag_suffix)
+#           docker push $(docker_repo):linux-amd64-$(docker_tag_suffix)
+#   - job: DockerRelease
+#     displayName: Docker Release
+#     dependsOn: DockerReleaseTagLinux
+#     variables:
+#       DOCKER_CLI_EXPERIMENTAL: enabled
+#     pool:
+#       vmImage: 'windows-2019'
+#     steps:
+#     - checkout: none
+#     - task: Docker@2
+#       displayName: Login.
+#       inputs:
+#         containerRegistry: $(docker_registry)
+#         repository: $(docker_repo)        
+#         command: login
+#     - task: PowerShell@2
+#       displayName: Tag release
+#       inputs:
+#         targetType: inline
+#         script: |
+#           docker pull $(docker_repo):windows-amd64-$(Build.BuildNumber)
+#           docker tag $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):windows-amd64-$(docker_tag_suffix)
+#           docker push $(docker_repo):windows-amd64-$(docker_tag_suffix)
+#           docker manifest create $(docker_repo):$(docker_tag_suffix) $(docker_repo):windows-amd64-$(docker_tag_suffix) $(docker_repo):linux-amd64-$(docker_tag_suffix)
+#           docker manifest push $(docker_repo):$(docker_tag_suffix)
