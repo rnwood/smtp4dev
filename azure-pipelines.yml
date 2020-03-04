@@ -32,9 +32,9 @@ stages:
       displayName: Build .NET Core Global Tool
       inputs:
         command: pack
-        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+        searchPatternPack: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
         outputDir: '$(Build.ArtifactStagingDirectory)/dotnetglobaltool'
-        arguments: '-c Release -p:PackAsTool=true -p:version=$(Build.BuildNumber) -p:PackAsTool=true'
+        arguments: '-c Release -p:PackAsTool=true -p:version=$(Build.BuildNumber)'
     - publish: $(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg
       artifact: dotnetglobaltool
     - task: DotNetCoreCLI@2
