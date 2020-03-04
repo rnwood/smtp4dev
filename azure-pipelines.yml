@@ -47,6 +47,7 @@ stages:
         targetType: inline
         ignoreLASTEXITCODE: true
         script: |
+          $ErrorActionPreference="Continue"
           docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs
           docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-base
           docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build
