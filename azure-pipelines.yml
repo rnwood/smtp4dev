@@ -44,7 +44,7 @@ stages:
       inputs:
         command: build  
         dockerfile: '**/Dockerfile.windows'
-        arguments: '--isolation hyperv --build-arg version=$(Build.BuildNumber) -t rnwood/smtp4dev:windows-amd64-v3.1 -t rnwood/smtp4dev:windows-amd64-$(Build.BuildNumber)'
+        arguments: '--build-arg version=$(Build.BuildNumber) -t rnwood/smtp4dev:windows-amd64-v3.1 -t rnwood/smtp4dev:windows-amd64-$(Build.BuildNumber)'
     - task: Docker@2
       displayName: Push image
       inputs:
