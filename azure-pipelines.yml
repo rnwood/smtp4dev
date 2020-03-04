@@ -113,6 +113,7 @@ stages:
     pool:
       vmImage: 'ubuntu-18.04'
     steps:
+    - checkout: none
     - task: Docker@2
       displayName: Login.
       inputs:
@@ -135,6 +136,7 @@ stages:
     pool:
       vmImage: 'windows-2019'
     steps:
+    - checkout: none
     - task: Docker@2
       displayName: Login.
       inputs:
