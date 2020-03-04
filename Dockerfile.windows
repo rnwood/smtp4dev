@@ -2,9 +2,9 @@
 FROM mcr.microsoft.com/powershell:nanoserver-1809 AS downloadnodejs
 ENV NODE_VERSION 10.11.0
 SHELL ["pwsh", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPreference='silentlyContinue';"]
-RUN Invoke-WebRequest -OutFile \"$($env:TEMP)\nodejs.zip\" -UseBasicParsing \"https://nodejs.org/dist/v$($env:NODE_VERSION)/node-v$($env:NODE_VERSION)-win-x64.zip\"
-RUN Expand-Archive \"$($env:TEMP)\nodejs.zip\" -DestinationPath C:\
-RUN Rename-Item \"C:\node-v$($env:NODE_VERSION)-win-x64\" c:\nodejs
+RUN Invoke-WebRequest -OutFile \"$($env:TEMP)\nodejs.zip\" -UseBasicParsing \"https://nodejs.org/dist/v$($env:NODE_VERSION)/node-v$($env:NODE_VERSION)-win-x64.zip\" ; `
+Expand-Archive \"$($env:TEMP)\nodejs.zip\" -DestinationPath C:\ ; `
+Rename-Item \"C:\node-v$($env:NODE_VERSION)-win-x64\" c:\nodejs
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.2 AS base
 WORKDIR /app
@@ -24,17 +24,17 @@ COPY Rnwood.Smtp4dev/*.csproj ./Rnwood.Smtp4dev/
 RUN dotnet restore Rnwood.Smtp4dev
 
 ARG version
-ENV VERSION $version
+RUN echo Version is %version%
 
 # copy everything else and build app
 COPY . .
 WORKDIR /app/Rnwood.Smtp4dev
-RUN dotnet build -p:Version=$VERSION
-RUN dotnet test -p:Version=$VERSION
+RUN dotnet build -p:Version=%version%
+RUN dotnet test -p:Version=%version%
 
 FROM build AS publish
 WORKDIR /app/Rnwood.Smtp4dev
-RUN dotnet publish -c Release -o out -p:Version=$VERSION
+RUN dotnet publish -c Release -o out -p:Version=%version%
 
 
 FROM base AS final
