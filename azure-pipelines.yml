@@ -22,17 +22,12 @@ stages:
     pool:
       vmImage: 'ubuntu-18.04'
     steps:
-    - task: PowerShell@2
-      displayName: Pull image to use as cache
-      inputs:
-        targetType: inline
-        script: docker pull $(docker_repo):linux-amd64-$(docker_tag_suffix)
     - task: Docker@2
       displayName: Build image
       inputs:
         command: build
         dockerfile: '**/Dockerfile.linux'
-        arguments: '--cache-from $(docker_repo):linux-amd64-$(docker_tag_suffix) --build-arg version=$(Build.BuildNumber) -t $(docker_repo):linux-amd64-$(Build.BuildNumber)'
+        arguments: '--build-arg version=$(Build.BuildNumber) -t $(docker_repo):linux-amd64-$(Build.BuildNumber)'
     - task: Docker@2
       displayName: Push image
       inputs:
@@ -50,7 +45,18 @@ stages:
       displayName: Pull image to use as cache
       inputs:
         targetType: inline
-        script: docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)
+        script: |
+          try {
+            docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-cache
+          } catch {
+            write-warning "Failed to pull cache image"
+          }
+    - task: Docker@2
+      displayName: Build image - for cache
+      inputs:
+        command: build  
+        dockerfile: '**/Dockerfile.windows'
+        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-cache --build-arg version=$(Build.BuildNumber) --target publish -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-cache'      
     - task: Docker@2
       displayName: Build image
       inputs:
@@ -65,6 +71,7 @@ stages:
         command: push
         tags: |
           windows-amd64-$(Build.BuildNumber)
+          windows-amd64-$(docker_tag_suffix)-cache
   - job: DockerManifest
     displayName: Docker Create Manifest
     dependsOn:
