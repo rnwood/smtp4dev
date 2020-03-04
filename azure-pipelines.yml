@@ -22,9 +22,12 @@ stages:
     pool:
       vmImage: 'ubuntu-18.04'
     steps:
-    - powershell: docker pull $(docker_repo):linux-amd64-$(docker_tag_suffix)
+    - task: PowerShell@2
+      displayName: Pull image to use as cache
+      inputs:
+        script: docker pull $(docker_repo):linux-amd64-$(docker_tag_suffix)
     - task: Docker@2
-      displayName: Build an image
+      displayName: Build image
       inputs:
         command: build
         dockerfile: '**/Dockerfile.linux'
@@ -42,9 +45,12 @@ stages:
     pool:
       vmImage: 'windows-2019'
     steps:
-    - powershell: docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)
+    - task: PowerShell@2
+      displayName: Pull image to use as cache
+      inputs:
+        script: docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)
     - task: Docker@2
-      displayName: Build an image
+      displayName: Build image
       inputs:
         command: build  
         dockerfile: '**/Dockerfile.windows'
@@ -68,13 +74,17 @@ stages:
       vmImage: 'windows-2019'
     steps:
     - task: Docker@2
-      displayName: Create cross platform manifest tags.
+      displayName: Login.
       inputs:
         containerRegistry: $(docker_registry)
         repository: $(docker_repo)        
         command: login
-    - powershell: docker manifest create $(docker_repo):$(Build.BuildNumber) $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(Build.BuildNumber)
-    - powershell: docker manifest push $(docker_repo):$(Build.BuildNumber)
+    - task: PowerShell@2
+      displayName: Create cross platform manifest
+      inputs:
+        script: |
+          docker manifest create $(docker_repo):$(Build.BuildNumber) $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(Build.BuildNumber)
+          docker manifest push $(docker_repo):$(Build.BuildNumber)
 - stage: Release
   displayName: Release
   jobs:        
@@ -86,17 +96,20 @@ stages:
       vmImage: 'windows-2019'
     steps:
     - task: Docker@2
-      displayName: Tag release.
+      displayName: Login.
       inputs:
         containerRegistry: $(docker_registry)
         repository: $(docker_repo)        
         command: login
-    - powershell: |
-       docker pull $(docker_repo):windows-amd64-$(Build.BuildNumber)
-       docker pull $(docker_repo):linux-amd64-$(Build.BuildNumber)
-       docker tag $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):windows-amd64-$(docker_tag_suffix)
-       docker tag $(docker_repo):linux-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(docker_tag_suffix)
-       docker push $(docker_repo):windows-amd64-$(docker_tag_suffix)
-       docker push $(docker_repo):linux-amd64-$(docker_tag_suffix)
-       docker manifest create $(docker_repo):$(docker_tag_suffix) $(docker_repo):windows-amd64-$(docker_tag_suffix) $(docker_repo):linux-amd64-$(docker_tag_suffix)
-       docker manifest push $(docker_repo):$(docker_tag_suffix)
+    - task: PowerShell@2
+      displayName: Tag release
+      inputs:
+        script: |
+          docker pull $(docker_repo):windows-amd64-$(Build.BuildNumber)
+          docker pull --platform linux $(docker_repo):linux-amd64-$(Build.BuildNumber)
+          docker tag $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):windows-amd64-$(docker_tag_suffix)
+          docker tag --platform linux $(docker_repo):linux-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(docker_tag_suffix)
+          docker push $(docker_repo):windows-amd64-$(docker_tag_suffix)
+          docker push --platform linux $(docker_repo):linux-amd64-$(docker_tag_suffix)
+          docker manifest create $(docker_repo):$(docker_tag_suffix) $(docker_repo):windows-amd64-$(docker_tag_suffix) $(docker_repo):linux-amd64-$(docker_tag_suffix)
+          docker manifest push $(docker_repo):$(docker_tag_suffix)
