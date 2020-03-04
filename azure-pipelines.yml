@@ -57,6 +57,9 @@ stages:
           windows-amd64-$(Build.BuildNumber)
   - job: DockerManifest
     displayName: Docker Create Manifest
+    dependsOn: |
+      DockerBuildLinux
+      DockerBuildWindows
     variables:
       DOCKER_CLI_EXPERIMENTAL: enabled
     pool:
