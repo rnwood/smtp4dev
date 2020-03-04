@@ -49,7 +49,6 @@ stages:
         script: |
           $ErrorActionPreference="Continue"
           docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs
-          docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-base
           docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build
     - task: Docker@2
       displayName: Build cache image - downloadnodejs
@@ -58,23 +57,17 @@ stages:
         dockerfile: '**/Dockerfile.windows'
         arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) --target downloadnodejs -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs'
     - task: Docker@2
-      displayName: Build cache image - base
-      inputs:
-        command: build  
-        dockerfile: '**/Dockerfile.windows'
-        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-base --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) --target base -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-base'        
-    - task: Docker@2
       displayName: Build cache image - build
       inputs:
         command: build  
         dockerfile: '**/Dockerfile.windows'
-        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-base --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) --target build -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build'                
+        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) --target build -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build'                
     - task: Docker@2
       displayName: Build image
       inputs:
         command: build  
         dockerfile: '**/Dockerfile.windows'
-        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-base --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) -t $(docker_repo):windows-amd64-$(Build.BuildNumber)'
+        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(Build.BuildNumber) -t $(docker_repo):windows-amd64-$(Build.BuildNumber)'
     - task: Docker@2
       displayName: Push image
       inputs:
@@ -84,7 +77,6 @@ stages:
         tags: |
           windows-amd64-$(Build.BuildNumber)
           windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs
-          windows-amd64-$(docker_tag_suffix)-buildcache-base
           windows-amd64-$(docker_tag_suffix)-buildcache-build
   - job: DockerManifest
     displayName: Docker Create Manifest

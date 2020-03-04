@@ -31,18 +31,23 @@ COPY *.sln .
 COPY Rnwood.Smtp4dev/*.csproj ./Rnwood.Smtp4dev/
 RUN dotnet restore Rnwood.Smtp4dev
 
+COPY /Rnwood.Smtp4dev/ClientApp /app/Rnwood.Smtp4dev/ClientApp
+COPY /Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj /app/Rnwood.Smtp4dev
+WORKDIR /app/Rnwood.Smtp4dev
+
+
+RUN dotnet msbuild -p:Configuration=Release -t:NpmInstall -t:DebugRunNpm
+
+COPY / /app
+
 ARG version
 ENV VERSION $version
 
-# copy everything else and build app
-COPY . .
-WORKDIR /app/Rnwood.Smtp4dev
-RUN dotnet build -p:Version=$VERSION
-RUN dotnet test -p:Version=$VERSION
+RUN dotnet build --no-restore -p:Version=$VERSION
 
 FROM build AS publish
 WORKDIR /app/Rnwood.Smtp4dev
-RUN dotnet publish -c Release -o out -p:Version=$VERSION
+RUN dotnet publish --no-restore -c Release -o out -p:Version=$VERSION
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.2 AS runtime
 WORKDIR /app
