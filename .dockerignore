@@ -6,4 +6,5 @@
 .vscode
 **/bin
 **/obj
-**/node_modules
+Rnwood.Smtp4dev/ClientApp/node_modules
+Rnwood.Smtp4dev/wwwroot
