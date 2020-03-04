@@ -48,8 +48,10 @@ stages:
         ignoreLASTEXITCODE: true
         script: |
           $ErrorActionPreference="Continue"
-          docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs
-          docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build
+          (
+            (start-job { docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs }),
+            (start-job { docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build })
+          ) | receive-job -wait
     - task: Docker@2
       displayName: Build cache image - downloadnodejs
       inputs:
