@@ -33,25 +33,34 @@ stages:
       inputs:
         command: pack
         projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        arguments: '-c Release -p:version=$($(Build.BuildNumber) -p:PackAsTool=true'
+        outputDir: '$(Build.ArtifactStagingDirectory)/dotnetglobaltool'
+        arguments: '-c Release -p:version=$(Build.BuildNumber) -p:PackAsTool=true'
+    - publish: $(Build.ArtifactStagingDirectory)/dotnetglobaltool
+      artifact: dotnetglobaltool
     - task: DotNetCoreCLI@2
       displayName: Build .NET Core - no runtime
       inputs:
         command: publish
         projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        arguments: '-c Release -p:version=$($(Build.BuildNumber)'
+        arguments: '-c Release -p:version=$(Build.BuildNumber) -o "$(Build.ArtifactStagingDirectory)/noruntime"'
+    - publish: $(Build.ArtifactStagingDirectory)/noruntime
+      artifact: noruntime        
     - task: DotNetCoreCLI@2
       displayName: Build .NET Core - win-x64
       inputs:
         command: publish
         projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        arguments: '-c Release -r win-x64 -p:version=$($(Build.BuildNumber)'        
+        arguments: '-c Release -r win-x64 -p:version=$(Build.BuildNumber) -o "$(Build.ArtifactStagingDirectory)/win-x64"'        
+    - publish: $(Build.ArtifactStagingDirectory)/win-x64
+      artifact: win-x64        
     - task: DotNetCoreCLI@2
       displayName: Build .NET Core - linux-x64
       inputs:
         command: publish
         projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        arguments: '-c Release -r linux-x64 -p:version=$($(Build.BuildNumber)' 
+        arguments: '-c Release -r linux-x64 -p:version=$(Build.BuildNumber)  -o "$(Build.ArtifactStagingDirectory)/linux-x64"' 
+    - publish: $(Build.ArtifactStagingDirectory)/linux-x64
+      artifact: linux-x64               
         
 #   - job: DockerBuildLinux
 #     displayName: DockerBuild - Linux
