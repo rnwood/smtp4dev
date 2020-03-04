@@ -161,10 +161,7 @@ stages:
         targetType: inline
         script: |
           docker pull $(docker_repo):windows-amd64-$(Build.BuildNumber)
-          docker pull --platform linux $(docker_repo):linux-amd64-$(Build.BuildNumber)
           docker tag $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):windows-amd64-$(docker_tag_suffix)
-          docker tag --platform linux $(docker_repo):linux-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(docker_tag_suffix)
           docker push $(docker_repo):windows-amd64-$(docker_tag_suffix)
-          docker push --platform linux $(docker_repo):linux-amd64-$(docker_tag_suffix)
           docker manifest create $(docker_repo):$(docker_tag_suffix) $(docker_repo):windows-amd64-$(docker_tag_suffix) $(docker_repo):linux-amd64-$(docker_tag_suffix)
           docker manifest push $(docker_repo):$(docker_tag_suffix)
