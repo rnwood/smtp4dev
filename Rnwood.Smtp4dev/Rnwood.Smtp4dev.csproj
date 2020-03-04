@@ -79,9 +79,9 @@
 		<NpmInputs Include="ClientApp\package.json"/>
 	</ItemGroup>
 
-	<Target Name="NpmInstall" AfterTargets="Build" Inputs="@(NpmInputs)" Outputs="ClientApp\node_modules\.installedtimestamp">
+	<Target Name="NpmInstall" AfterTargets="Build" Inputs="@(NpmInputs)" Outputs="ClientApp\node_modules\.installedtimestamp" Condition="'$(SkipClientApp)'!='true'">
 		<Message Importance="high" Text="Performing npm install..." />
-		<Exec Command="npm install" WorkingDirectory="ClientApp" CustomErrorRegularExpression="^npm ERR!.*" />
+		<Exec Command="npm install --no-progress" WorkingDirectory="ClientApp" CustomErrorRegularExpression="^npm ERR!.*" />
 		<Touch Files="ClientApp\node_modules\.installedtimestamp" AlwaysCreate="true" />
 	</Target>
 
@@ -93,7 +93,7 @@
 		<ClientApp Include="ClientApp/**"/>
 	</ItemGroup>
 
-	<Target Name="DebugRunNpm" AfterTargets="Build" Inputs="@(ClientApp)" Outputs="wwwroot\.buildtimestamp">
+	<Target Name="DebugRunNpm" AfterTargets="Build" Inputs="@(ClientApp)" Outputs="wwwroot\.buildtimestamp" Condition="'$(SkipClientApp)'!='true'">
 
 		<!-- Ensure Node.js is installed -->
 		<Exec Command="node --version" ContinueOnError="true">
