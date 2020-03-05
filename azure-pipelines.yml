@@ -13,7 +13,6 @@ variables:
   docker_tag_suffix: 'v$(version_majorminor)'
   docker_registry: 'dockerhub-rnwood'
   netcoresdk_version: '3.1.102'
-  releasebranch: feature-azure-pipelines-ci
 
 stages:
 - stage: Build
@@ -195,7 +194,7 @@ stages:
         command: test
       
 - stage: Release
-  condition: eq(variables['Build.SourceBranch'], 'refs/heads/$(releasebranch)')  
+  condition:  eq(variables['Build.SourceBranch'], 'refs/heads/feature-azurepiplines-ci')  
   displayName: Release
   jobs:  
   - job: Release
