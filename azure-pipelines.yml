@@ -194,7 +194,7 @@ stages:
         command: test
       
 - stage: Release
-  condition:  eq(variables['Build.SourceBranch'], 'refs/heads/feature-azurepiplines-ci')  
+  condition:  eq(variables['Build.SourceBranch'], 'refs/heads/feature-azure-pipelines-ci')  
   displayName: Release
   jobs:  
   - job: Release
