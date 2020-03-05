@@ -195,7 +195,7 @@ stages:
         command: test
       
 - stage: Release
-  condition: equals(variables['Build.SourceBranch'], 'refs/heads/$(releasebranch)')  
+  condition: eq(variables['Build.SourceBranch'], 'refs/heads/$(releasebranch)')  
   displayName: Release
   jobs:  
   - job: Release
