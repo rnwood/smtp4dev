@@ -29,10 +29,6 @@ stages:
         packageType: sdk
         version: $(netcoresdk_version)
     - task: DotNetCoreCLI@2
-      displayName: Run Tests
-      inputs:
-        command: test
-    - task: DotNetCoreCLI@2
       displayName: Build .NET Core Global Tool
       inputs:
         command: custom
@@ -88,7 +84,25 @@ stages:
         arguments: '-c Release -r linux-x64 -p:version=$(Build.BuildNumber)  -o "$(Build.ArtifactStagingDirectory)/linux-arm"' 
     - publish: $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev.zip
       artifact: linux-arm        
-#   - job: DockerBuildLinux
+
+- stage: Tests
+  displayName: Build
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+    - task: UseDotNet@2
+      displayName: Install .NET Core SDK v$(netcoresdk_version)
+      inputs:
+        packageType: sdk
+        version: $(netcoresdk_version)
+    - task: DotNetCoreCLI@2
+      displayName: Run Tests
+      inputs:
+        command: test
+      #   - job: DockerBuildLinux
 #     displayName: DockerBuild - Linux
 #     pool:
 #       vmImage: 'ubuntu-18.04'
