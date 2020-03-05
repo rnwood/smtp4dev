@@ -209,7 +209,7 @@ stages:
         command: test
       
 - stage: Release
-  condition:  and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/feature-azure-pipelines-ci'))
+  condition:  and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   displayName: Release
   jobs:  
   - job: Release
