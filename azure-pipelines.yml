@@ -45,7 +45,7 @@ stages:
         arguments: '-c Release -p:version=$(Build.BuildNumber) -o "$(Build.ArtifactStagingDirectory)/noruntime"'
     - powershell: move-item $(Build.ArtifactStagingDirectory)/noruntime/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/noruntime/Rnwood.Smtp4dev-noruntime-$(tag).zip
       displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/noruntime/*.zip
+    - publish: $(Build.ArtifactStagingDirectory)/noruntime
       artifact: noruntime        
     - task: DotNetCoreCLI@2
       displayName: Build .NET Core - win-x64
@@ -55,7 +55,7 @@ stages:
         arguments: '-c Release -r win-x64 -p:version=$(Build.BuildNumber) -o "$(Build.ArtifactStagingDirectory)/win-x64"'        
     - powershell: move-item $(Build.ArtifactStagingDirectory)/win-x64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/win-x64/Rnwood.Smtp4dev-win-x64-$(tag).zip
       displayName: Rename artifact        
-    - publish: $(Build.ArtifactStagingDirectory)/win-x64/*.zip
+    - publish: $(Build.ArtifactStagingDirectory)/win-x64
       artifact: win-x64        
     - task: DotNetCoreCLI@2
       displayName: Build .NET Core - linux-x64
@@ -65,7 +65,7 @@ stages:
         arguments: '-c Release -r linux-x64 -p:version=$(Build.BuildNumber)  -o "$(Build.ArtifactStagingDirectory)/linux-x64"' 
     - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-x64/Rnwood.Smtp4dev-linux-x64-$(tag).zip
       displayName: Rename artifact        
-    - publish: $(Build.ArtifactStagingDirectory)/linux-x64/*.zip
+    - publish: $(Build.ArtifactStagingDirectory)/linux-x64
       artifact: linux-x64       
     - task: DotNetCoreCLI@2
       displayName: Build .NET Core - osx-x64
@@ -75,7 +75,7 @@ stages:
         arguments: '-c Release -r osx-x64 -p:version=$(Build.BuildNumber)  -o "$(Build.ArtifactStagingDirectory)/osx-x64"' 
     - powershell: move-item $(Build.ArtifactStagingDirectory)/osx-x64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/osx-x64/Rnwood.Smtp4dev-osx-x64-$(tag).zip
       displayName: Rename artifact        
-    - publish: $(Build.ArtifactStagingDirectory)/osx-x64/*.zip
+    - publish: $(Build.ArtifactStagingDirectory)/osx-x64
       artifact: osx-x64   
     - task: DotNetCoreCLI@2
       displayName: Build .NET Core - win-arm
@@ -85,7 +85,7 @@ stages:
         arguments: '-c Release -r win-arm -p:version=$(Build.BuildNumber)  -o "$(Build.ArtifactStagingDirectory)/win-arm"' 
     - powershell: move-item $(Build.ArtifactStagingDirectory)/win-arm/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/win-arm/Rnwood.Smtp4dev-win-arm-$(tag).zip
       displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/win-arm/*.zip
+    - publish: $(Build.ArtifactStagingDirectory)/win-arm
       artifact: win-arm
     - task: DotNetCoreCLI@2
       displayName: Build .NET Core - linux-arm
@@ -95,7 +95,7 @@ stages:
         arguments: '-c Release -r linux-arm -p:version=$(Build.BuildNumber)  -o "$(Build.ArtifactStagingDirectory)/linux-arm"' 
     - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev-noruntime-$(tag).zip
       displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/linux-arm/*.zip
+    - publish: $(Build.ArtifactStagingDirectory)/linux-arm
       artifact: linux-arm     
 
 #   - job: DockerBuildLinux
@@ -206,7 +206,7 @@ stages:
         command: test
       
 - stage: Release
-  condition:  eq(variables['Build.SourceBranch'], 'refs/heads/feature-azure-pipelines-ci')  
+  condition:  and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/feature-azure-pipelines-ci'))
   displayName: Release
   jobs:  
   - job: Release
