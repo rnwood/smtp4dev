@@ -217,11 +217,15 @@ stages:
     - task: DownloadPipelineArtifact@2
       inputs:
         path: $(Build.ArtifactStagingDirectory)
-    - task: NuGetPublisher@0
+    - task:  NuGetCommand@2
       displayName: Publish .net global tool to nuget
       inputs:
-        connectedServiceName: nuget_rnwood
-        searchPattern: $(Build.ArtifactStagingDirectory)/**/*.nupkg
+        command: push
+        packagesToPush: $(Build.ArtifactStagingDirectory)/**/*.nupkg 
+        versioningScheme: byEnvVar
+        versionEnvVar: $(tag)
+        nuGetFeedType: external
+        externalFeedCredentials: nuget_rnwood
     - task: GitHubRelease@1
       inputs:
         gitHubConnection: github.com_rnwood
