@@ -4,8 +4,7 @@
 .gitignore
 .vs
 .vscode
-docker-compose.yml
-docker-compose.*.yml
-*/bin
-*/obj
-*/node_modules
+**/bin
+**/obj
+Rnwood.Smtp4dev/ClientApp/node_modules
+Rnwood.Smtp4dev/wwwroot

@@ -1,32 +1,18 @@
-
-FROM microsoft/windowsservercore:1607 as build
-
-SHELL ["powershell", "-Command", "$ErrorActionPreference = 'Stop'; $ProgressPreference = 'SilentlyContinue';"]
-
+# escape=`
+FROM mcr.microsoft.com/powershell:nanoserver-1809 AS downloadnodejs
 ENV NODE_VERSION 10.11.0
+SHELL ["pwsh", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPreference='silentlyContinue';"]
+RUN Invoke-WebRequest -OutFile \"$($env:TEMP)\nodejs.zip\" -UseBasicParsing \"https://nodejs.org/dist/v$($env:NODE_VERSION)/node-v$($env:NODE_VERSION)-win-x64.zip\" ; `
+Expand-Archive \"$($env:TEMP)\nodejs.zip\" -DestinationPath C:\ ; `
+Rename-Item \"C:\node-v$($env:NODE_VERSION)-win-x64\" c:\nodejs
 
-RUN Invoke-WebRequest $('https://nodejs.org/dist/v{0}/node-v{0}-win-x64.zip' -f $env:NODE_VERSION) -OutFile 'node.zip' -UseBasicParsing ; \
-Expand-Archive node.zip -DestinationPath C:\ ;\
-Rename-Item -Path $('C:\node-v{0}-win-x64' -f $env:NODE_VERSION) -NewName 'C:\nodejs'
-
-RUN $env:PATH = 'C:\nodejs;{0}' -f $env:PATH ; \
-[Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
-
-ENV DOTNET_SDK_VERSION 3.1.102
-
-RUN Invoke-WebRequest -OutFile dotnet.zip https://dotnetcli.blob.core.windows.net/dotnet/Sdk/$Env:DOTNET_SDK_VERSION/dotnet-sdk-$Env:DOTNET_SDK_VERSION-win-x64.zip; \
-Expand-Archive dotnet.zip -DestinationPath c:\sdk; \
-Remove-Item -Force dotnet.zip
-
-ENV ASPNETCORE_VERSION 3.1.2
-RUN Invoke-WebRequest -OutFile aspnetcore.zip https://dotnetcli.blob.core.windows.net/dotnet/aspnetcore/Runtime/$Env:ASPNETCORE_VERSION/aspnetcore-runtime-$Env:ASPNETCORE_VERSION-win-x64.zip; \
-Expand-Archive aspnetcore.zip -DestinationPath c:\dotnet; \
-Remove-Item -Force aspnetcore.zip
-
-RUN $env:PATH = $('c:\sdk;{0}' -f $env:PATH) ;\
-[Environment]::SetEnvironmentVariable('PATH', $env:PATH, [EnvironmentVariableTarget]::Machine)
-
+FROM mcr.microsoft.com/dotnet/core/sdk:3.1.102 AS build
+COPY --from=downloadnodejs C:\nodejs C:\Windows\system32\
 WORKDIR /app
+
+# confirm installation
+RUN node -v
+RUN npm -v
 
 # copy csproj and restore as distinct layers
 COPY *.sln .
@@ -34,25 +20,29 @@ COPY Rnwood.Smtp4dev/*.csproj ./Rnwood.Smtp4dev/
 RUN dotnet restore Rnwood.Smtp4dev
 
 # copy everything else and build app
-
-WORKDIR /app
-ARG version
-ENV VERSION $version
-COPY . .
+COPY /Rnwood.Smtp4dev/ClientApp /app/Rnwood.Smtp4dev/ClientApp
+COPY /Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj /app/Rnwood.Smtp4dev
 WORKDIR /app/Rnwood.Smtp4dev
-RUN dotnet build -p:Version=$env:VERSION
-RUN dotnet test -p:Version=$env:VERSION
-RUN dotnet publish -c Release -o out -p:Version=$env:VERSION
 
-FROM mcr.microsoft.com/windows/nanoserver:sac2016 as runtime
+
+RUN dotnet msbuild -p:Configuration=Release -t:NpmInstall -t:DebugRunNpm
+
+COPY / /app
+
+ARG version
+ENV VERSION=$version
+RUN echo Version is %VERSION%
+
+RUN dotnet build --no-restore -c Release -p:SkipClientApp=true -p:Version=%VERSION%
+
+FROM build AS publish
+WORKDIR /app/Rnwood.Smtp4dev
+RUN echo Version is %VERSION%
+RUN dotnet publish --no-restore -c Release -o out -p:SkipClientApp=true -p:Version=%VERSION%
+
+
+FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.2 AS final
 EXPOSE 80
-EXPOSE 25
-COPY --from=build /dotnet /dotnet
-
-COPY --from=build /app/Rnwood.Smtp4dev/out /app
-
-ENV ASPNETCORE_URLS=http://+:80 \
-DOTNET_RUNNING_IN_CONTAINER=true
-
-WORKDIR /dotnet
-ENTRYPOINT ["dotnet", "/app/Rnwood.Smtp4dev.dll"]
+WORKDIR /app
+COPY --from=publish /app/Rnwood.Smtp4dev/out ./
+ENTRYPOINT ["dotnet", "Rnwood.Smtp4dev.dll"]
