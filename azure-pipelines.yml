@@ -8,7 +8,7 @@ resources:
 variables:
   version_majorminor: '3.1'
   version: '3.1.1'
-  tag: '$(Build.BuildId)'
+  tag: '$(Build.BuildNumber)'
   docker_repo: 'rnwood/smtp4dev'
   docker_tag_suffix: 'v$(version_majorminor)'
   docker_registry: 'dockerhub-rnwood'
@@ -213,10 +213,15 @@ stages:
     pool:
       vmImage: 'ubuntu-18.04'
     steps:
+    - checkout: none
     - task: DownloadPipelineArtifact@2
       inputs:
         path: $(Build.ArtifactStagingDirectory)
-        
+    - task: NuGetPublisher@0
+      displayName: Publish .net global tool to nuget
+      inputs:
+        connectedServiceName: nuget_rnwood
+        searchPattern: $(Build.ArtifactStagingDirectory)/**/*.nupkg
     - task: GitHubRelease@1
       inputs:
         gitHubConnection: github.com_rnwood
