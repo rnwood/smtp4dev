@@ -203,21 +203,19 @@ stages:
     steps:
     - task: DownloadPipelineArtifact@2
       inputs:
-        path: $(Pipeline.Workspace)
+        path: $(Build.ArtifactStagingDirectory)
         
     - task: GitHubRelease@1
       inputs:
         gitHubConnection: github.com_rnwood
         repositoryName: rnwood/smtp4dev
         action: create
-        tag: $(tag)
         title: $(tag)
-        tagSource: userSpecifiedTag
+        tagSource: gitTag
         isDraft: true
         isPreRelease: true
         changeLogCompareToRelease: lastNonDraftRelease 
-        assets: |
-          **/*
+        assets: $(Build.ArtifactStagingDirectory)/**/*
 
 #   - job: DockerReleaseTagLinux
 #     displayName: Docker Release Tag - Linux
