@@ -6,11 +6,14 @@ resources:
 - repo: self
 
 variables:
-  version_majorminor: '3.1'
-  version: '3.1.1'
+  version_major: '3'
+  version_minor: '1'
+  version_release: '0'
+  version_majorminor: '$(version_major).$(version_minor)'
+  version: '$(version_major).$(version_minor).$(version_release)'
   tag: '$(Build.BuildNumber)'
   docker_repo: 'rnwood/smtp4dev'
-  docker_tag_suffix: 'v$(version_majorminor)'
+  docker_tag_suffix: 'v$(version_major)'
   docker_registry: 'dockerhub-rnwood'
   netcoresdk_version: '3.1.102'
 
@@ -217,12 +220,13 @@ stages:
     - task: DownloadPipelineArtifact@2
       inputs:
         path: $(Build.ArtifactStagingDirectory)
-    - task: DotNetCoreCLI@2
+    - task: NuGetCommand@2
       inputs:
         command: 'push'
-        searchPatternPush: '$(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg'
+        packagesToPush: '$(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg'
         nuGetFeedType: 'external'
-        externalEndPoint: 'nuget_rnwood'
+        publishFeedCredentials: 'nuget_rnwood'
+        
 
     - task: GitHubRelease@1
       inputs:
