@@ -13,11 +13,13 @@ variables:
   docker_tag_suffix: 'v$(version_majorminor)'
   docker_registry: 'dockerhub-rnwood'
   netcoresdk_version: '3.1.102'
+  releasebranch: feature-azure-pipelines-ci
 
 stages:
 - stage: Build
   displayName: Build
   jobs:
+
   - job: Build
     displayName: Build
     pool:
@@ -83,26 +85,9 @@ stages:
         projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
         arguments: '-c Release -r linux-x64 -p:version=$(Build.BuildNumber)  -o "$(Build.ArtifactStagingDirectory)/linux-arm"' 
     - publish: $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev.zip
-      artifact: linux-arm        
+      artifact: linux-arm     
 
-- stage: Tests
-  displayName: Build
-  jobs:
-  - job: Build
-    displayName: Build
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-    - task: UseDotNet@2
-      displayName: Install .NET Core SDK v$(netcoresdk_version)
-      inputs:
-        packageType: sdk
-        version: $(netcoresdk_version)
-    - task: DotNetCoreCLI@2
-      displayName: Run Tests
-      inputs:
-        command: test
-      #   - job: DockerBuildLinux
+#   - job: DockerBuildLinux
 #     displayName: DockerBuild - Linux
 #     pool:
 #       vmImage: 'ubuntu-18.04'
@@ -165,6 +150,7 @@ stages:
 #           windows-amd64-$(Build.BuildNumber)
 #           windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs
 #           windows-amd64-$(docker_tag_suffix)-buildcache-build
+
 #   - job: DockerManifest
 #     displayName: Docker Create Manifest
 #     dependsOn:
@@ -187,10 +173,53 @@ stages:
 #         targetType: inline
 #         script: |
 #           docker manifest create $(docker_repo):$(Build.BuildNumber) $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(Build.BuildNumber)
-#           docker manifest push $(docker_repo):$(Build.BuildNumber)
-# - stage: Release
-#   displayName: Release
-#   jobs:  
+#           docker manifest push $(docker_repo):$(Build.BuildNumber)         
+
+- stage: Test
+  displayName: Test
+  jobs:
+
+  - job: Test
+    displayName: Test
+    pool:
+      vmImage: 'windows-2019'
+    steps:
+    - task: UseDotNet@2
+      displayName: Install .NET Core SDK v$(netcoresdk_version)
+      inputs:
+        packageType: sdk
+        version: $(netcoresdk_version)
+    - task: DotNetCoreCLI@2
+      displayName: Run Tests
+      inputs:
+        command: test
+      
+- stage: Release
+  condition: equals(variables['Build.SourceBranch'], 'refs/heads/$(releasebranch)')  
+  displayName: Release
+  jobs:  
+  - job: Release
+    pool:
+      vmImage: 'ubuntu-18.04'
+    steps:
+    - task: DownloadPipelineArtifact@2
+      inputs:
+        path: $(Pipeline.Workspace)
+        
+    - task: GitHubRelease@1
+      inputs:
+        gitHubConnection: github.com_rnwood
+        repositoryName: rnwood/smtp4dev
+        action: create
+        tag: $(tag)
+        title: $(tag)
+        tagSource: userSpecifiedTag
+        isDraft: true
+        isPreRelease: true
+        changeLogCompareToRelease: lastNonDraftRelease 
+        assets: |
+          **/*
+
 #   - job: DockerReleaseTagLinux
 #     displayName: Docker Release Tag - Linux
 #     variables:
@@ -213,6 +242,7 @@ stages:
 #           docker pull $(docker_repo):linux-amd64-$(Build.BuildNumber)
 #           docker tag $(docker_repo):linux-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(docker_tag_suffix)
 #           docker push $(docker_repo):linux-amd64-$(docker_tag_suffix)
+
 #   - job: DockerRelease
 #     displayName: Docker Release
 #     dependsOn: DockerReleaseTagLinux
