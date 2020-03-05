@@ -220,7 +220,7 @@ stages:
     - task: DotNetCoreCLI@2
       inputs:
         command: 'push'
-        searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+        searchPatternPush: '$(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg'
         nuGetFeedType: 'external'
         externalEndPoint: 'nuget_rnwood'
 
