@@ -211,7 +211,8 @@ stages:
         repositoryName: rnwood/smtp4dev
         action: create
         title: $(tag)
-        tagSource: gitTag
+        tag: $(tag)
+        tagSource: userSpecifiedTag
         isDraft: true
         isPreRelease: true
         changeLogCompareToRelease: lastNonDraftRelease 
