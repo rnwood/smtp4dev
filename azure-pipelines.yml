@@ -226,6 +226,8 @@ stages:
         versionEnvVar: $(tag)
         nuGetFeedType: external
         externalFeedCredentials: nuget_rnwood
+        feedsToUse: select
+        includeNuGetOrg: true
     - task: GitHubRelease@1
       inputs:
         gitHubConnection: github.com_rnwood
