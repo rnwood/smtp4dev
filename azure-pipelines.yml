@@ -217,17 +217,13 @@ stages:
     - task: DownloadPipelineArtifact@2
       inputs:
         path: $(Build.ArtifactStagingDirectory)
-    - task:  NuGetCommand@2
-      displayName: Publish .net global tool to nuget
+    - task: DotNetCoreCLI@2
       inputs:
-        command: push
-        packagesToPush: $(Build.ArtifactStagingDirectory)/**/*.nupkg 
-        versioningScheme: byEnvVar
-        versionEnvVar: $(tag)
-        nuGetFeedType: external
-        externalFeedCredentials: nuget_rnwood
-        feedsToUse: select
-        includeNuGetOrg: true
+        command: 'push'
+        searchPatternPush: '$(Build.ArtifactStagingDirectory)/*.nupkg'
+        nuGetFeedType: 'external'
+        externalEndPoint: 'nuget_rnwood'
+
     - task: GitHubRelease@1
       inputs:
         gitHubConnection: github.com_rnwood
