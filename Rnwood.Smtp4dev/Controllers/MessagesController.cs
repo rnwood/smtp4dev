@@ -99,7 +99,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
 			if (html == null)
 			{
-				html = "<pre>" + HtmlAgilityPack.HtmlDocument.HtmlEncode(message.MimeMessage?.TextBody) + "</pre>";
+				html = "<pre>" + HtmlAgilityPack.HtmlDocument.HtmlEncode(message.MimeMessage?.TextBody ?? "") + "</pre>";
 			}
 
 	
