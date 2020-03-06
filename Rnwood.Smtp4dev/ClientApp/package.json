@@ -33,7 +33,7 @@
     "typescript": "~3.8.3",
     "vue-router": "^3.0.1",
     "vue-template-compiler": "^2.6.10",
-    "vue2-ace-editor": "0.0.13",
+    "vue2-ace-editor": "0.0.15",
     "@fortawesome/fontawesome-free": "^5.12.1",
     "core-js": "^3.4.3",
     "node-sass": "^4.13.1",
