@@ -263,6 +263,8 @@ stages:
           docker pull $(docker_repo):linux-amd64-$(Build.BuildNumber)
           docker tag $(docker_repo):linux-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-$(docker_tag_suffix)
           docker push $(docker_repo):linux-amd64-$(docker_tag_suffix)
+          docker tag $(docker_repo):linux-amd64-$(Build.BuildNumber) $(docker_repo):linux-amd64-latest
+          docker push $(docker_repo):linux-amd64-latest
 
   - job: DockerRelease
     displayName: Docker Release
@@ -287,5 +289,9 @@ stages:
           docker pull $(docker_repo):windows-amd64-$(Build.BuildNumber)
           docker tag $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):windows-amd64-$(docker_tag_suffix)
           docker push $(docker_repo):windows-amd64-$(docker_tag_suffix)
+          docker tag $(docker_repo):windows-amd64-$(Build.BuildNumber) $(docker_repo):windows-amd64-latest
+          docker push $(docker_repo):windows-amd64-latest
           docker manifest create $(docker_repo):$(docker_tag_suffix) $(docker_repo):windows-amd64-$(docker_tag_suffix) $(docker_repo):linux-amd64-$(docker_tag_suffix)
           docker manifest push $(docker_repo):$(docker_tag_suffix)
+          docker manifest create $(docker_repo):latest $(docker_repo):windows-amd64-latest $(docker_repo):linux-amd64-latest
+          docker manifest push $(docker_repo):latest
