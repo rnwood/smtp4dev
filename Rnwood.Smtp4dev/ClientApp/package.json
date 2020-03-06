@@ -16,7 +16,7 @@
     "@vue/cli-plugin-babel": "^4.1.0",
     "@vue/cli-plugin-eslint": "^4.1.0",
     "@vue/cli-plugin-typescript": "^4.2.2",
-    "@vue/cli-service": "^4.1.0",
+    "@vue/cli-service": "^4.2.3",
     "@vue/eslint-config-typescript": "^5.0.1",
     "aspnet-webpack": "^3.0.0",
     "async-mutex": "^0.1.3",
