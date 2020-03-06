@@ -192,9 +192,8 @@ stages:
 - stage: Test
   displayName: Test
   jobs:
-
-  - job: Test
-    displayName: Test
+  - job: TestOnWindows
+    displayName: Test - Windows
     pool:
       vmImage: 'windows-2019'
     steps:
@@ -207,7 +206,35 @@ stages:
       displayName: Run Tests
       inputs:
         command: test
-      
+  - job: TestOnLinux
+    displayName: Test - Linux
+    pool:
+      vmImage: 'ubuntu-18.04'
+    steps:
+    - task: UseDotNet@2
+      displayName: Install .NET Core SDK v$(netcoresdk_version)
+      inputs:
+        packageType: sdk
+        version: $(netcoresdk_version)
+    - task: DotNetCoreCLI@2
+      displayName: Run Tests
+      inputs:
+        command: test
+  - job: TestOnMacOSX
+    displayName: Test - MacOSX
+    pool:
+      vmImage: 'macOS-10.15'
+    steps:
+    - task: UseDotNet@2
+      displayName: Install .NET Core SDK v$(netcoresdk_version)
+      inputs:
+        packageType: sdk
+        version: $(netcoresdk_version)
+    - task: DotNetCoreCLI@2
+      displayName: Run Tests
+      inputs:
+        command: test
+  
 - stage: Release
   condition:  and(succeeded(), eq(variables['Build.SourceBranch'], 'refs/heads/master'))
   displayName: Release
