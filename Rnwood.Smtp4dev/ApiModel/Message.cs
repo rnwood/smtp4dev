@@ -51,27 +51,27 @@ namespace Rnwood.Smtp4dev.ApiModel
 
                     if (MimeMessage.To != null)
                     {
-                        To = string.Join(", ", MimeMessage.To.Select(t => t.ToString()));
+                        To = string.Join(", ", MimeMessage.To.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())));
 
                         foreach (MailboxAddress to in MimeMessage.To.Where(t => t is MailboxAddress))
                         {
-                            recipients.Remove(to.Address);
+                            recipients.Remove(PunyCodeReplacer.DecodePunycode(to.Address));
                         }
                     }
 
                     if (MimeMessage.Cc != null)
                     {
-                        Cc = string.Join(", ", MimeMessage.Cc.Select(t => t.ToString()));
+                        Cc = string.Join(", ", MimeMessage.Cc.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())));
 
                         foreach (MailboxAddress cc in MimeMessage.Cc.Where(t => t is MailboxAddress))
                         {
-                            recipients.Remove(cc.Address);
+                            recipients.Remove(PunyCodeReplacer.DecodePunycode(cc.Address));
                         }
                     }
 
                     Bcc = string.Join(", ", recipients);
 
-                    Headers = MimeMessage.Headers.Select(h => new Header { Name = h.Field, Value = h.Value }).ToList();
+                    Headers = MimeMessage.Headers.Select(h => new Header { Name = h.Field, Value = PunyCodeReplacer.DecodePunycode(h.Value) }).ToList();
                     Parts.Add(HandleMimeEntity(MimeMessage.Body));
                 }
             }
@@ -84,9 +84,10 @@ namespace Rnwood.Smtp4dev.ApiModel
 
             return MimeEntityVisitor.VisitWithResults<MessageEntitySummary>(entity, (e, p) =>
            {
-               string fileName = string.IsNullOrEmpty(e.ContentType?.Name)
+               string fileName = PunyCodeReplacer.DecodePunycode(string.IsNullOrEmpty(e.ContentType?.Name)
             ? e.ContentDisposition?.FileName
-            : e.ContentType.Name;
+            : e.ContentType.Name);
+
 
                MessageEntitySummary result = new MessageEntitySummary()
                {
@@ -94,7 +95,7 @@ namespace Rnwood.Smtp4dev.ApiModel
                    Id = index.ToString(),
                    ContentId = e.ContentId,
                    Name = (fileName ?? e.ContentId ?? index.ToString()) + " - " + e.ContentType.MimeType,
-                   Headers = e.Headers.Select(h => new Header { Name = h.Field, Value = h.Value }).ToList(),
+                   Headers = e.Headers.Select(h => new Header { Name = h.Field, Value = PunyCodeReplacer.DecodePunycode(h.Value) }).ToList(),
                    ChildParts = new List<MessageEntitySummary>(),
                    Attachments = new List<AttachmentSummary>(),
                    Warnings = new List<MessageWarning>(),

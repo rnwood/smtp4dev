@@ -3,8 +3,10 @@ using Rnwood.Smtp4dev.ApiModel;
 using Rnwood.Smtp4dev.DbModel;
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,18 +32,21 @@ namespace Rnwood.Smtp4dev.Server
                     if (dataReader.ReadLine().Length != 0)
                     {
                         foundHeaders = true;
-                    } else
+                    }
+                    else
                     {
                         foundSeparator = true;
                         break;
                     }
-                }   
+                }
             }
 
             if (!foundHeaders || !foundSeparator)
             {
                 mimeParseError = "Malformed MIME message. No headers found";
-            } else {
+            }
+            else
+            {
 
                 messageData.Seek(0, SeekOrigin.Begin);
                 try
@@ -51,7 +56,7 @@ namespace Rnwood.Smtp4dev.Server
                     MimeMessage mime = await MimeMessage.LoadAsync(messageData, true, cts.Token).ConfigureAwait(false);
                     subject = mime.Subject;
 
-                    
+
                 }
                 catch (OperationCanceledException e)
                 {
@@ -68,23 +73,25 @@ namespace Rnwood.Smtp4dev.Server
             {
                 Id = Guid.NewGuid(),
 
-                From = envelopeFrom,
-                To = envelopeTo,
+                From = PunyCodeReplacer.DecodePunycode(envelopeFrom),
+                To = PunyCodeReplacer.DecodePunycode(envelopeTo),
                 ReceivedDate = DateTime.Now,
-                Subject = subject,
+                Subject = PunyCodeReplacer.DecodePunycode(subject),
                 Data = data,
                 MimeParseError = mimeParseError,
                 AttachmentCount = 0
             };
 
             var parts = new ApiModel.Message(message).Parts;
-            foreach(var part in parts) {
+            foreach (var part in parts)
+            {
                 message.AttachmentCount += CountAttachments(part);
             }
-            
+
 
             return message;
         }
+
 
         private int CountAttachments(MessageEntitySummary part)
         {
