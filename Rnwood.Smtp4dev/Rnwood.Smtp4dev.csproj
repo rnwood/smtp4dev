@@ -29,7 +29,7 @@
 		<PackageReference Include="MimeKit" Version="2.5.1" />
 		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0506" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.112" />
-		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.21" />
+		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.22" />
 		<PackageReference Include="VueCliMiddleware" Version="3.1.1" />
 	</ItemGroup>
 
