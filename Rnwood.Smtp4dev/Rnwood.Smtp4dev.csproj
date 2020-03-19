@@ -26,7 +26,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.2" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.2" />
-		<PackageReference Include="MimeKit" Version="2.5.1" />
+		<PackageReference Include="MimeKit" Version="2.5.2" />
 		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0506" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.112" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.22" />
