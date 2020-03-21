@@ -40,6 +40,7 @@ namespace Rnwood.SmtpServer.Tests
             this.Connection.SetupGet(c => c.Server).Returns(this.Server.Object);
             this.Connection.Setup(s => s.CloseConnection()).Returns(() => this.ConnectionChannel.Object.Close());
             this.Connection.SetupGet(s => s.ExtensionProcessors).Returns(new IExtensionProcessor[0]);
+            this.Connection.SetupGet(c => c.VerbMap).Returns(this.VerbMap.Object);
 
             this.Server.SetupGet(s => s.Behaviour).Returns(this.ServerBehaviour.Object);
 

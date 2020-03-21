@@ -47,11 +47,11 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 		/// <inheritdoc/>
 		public async Task<string[]> GetEHLOKeywords()
 		{
-			IEnumerable<IAuthMechanism> mechanisms = await this.GetEnabledAuthMechanisms().ConfigureAwait(false);
-
+			IAuthMechanism[] mechanisms = (await this.GetEnabledAuthMechanisms().ConfigureAwait(false)).ToArray();
+			
 			if (mechanisms.Any())
 			{
-				string mids = string.Join(" ", mechanisms);
+				string mids = string.Join(" ", mechanisms.Select(m => m.Identifier));
 
 				return new[]
 						   {

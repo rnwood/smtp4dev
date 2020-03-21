@@ -51,8 +51,10 @@ namespace Rnwood.SmtpServer.Extensions
 				{
 					result = new[] { "STARTTLS" };
 				}
-
-				result = Array.Empty<string>();
+				else
+				{
+					result = Array.Empty<string>();
+				}
 
 				return Task.FromResult(result);
 			}
