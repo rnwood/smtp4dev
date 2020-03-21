@@ -128,10 +128,15 @@ export default class MessageList extends Vue {
   loading = false;
   private messageNotificationManager = new MessageNotificationManager(
     message => {
-      (<ElTable>this.$refs.table).setCurrentRow(message);
+      this.selectMessage(message);
       this.handleCurrentChange(message);
     }
   );
+
+  selectMessage(message: MessageSummary) {
+    (<ElTable>this.$refs.table).setCurrentRow(message);
+    this.handleCurrentChange(message);
+  }
 
   handleCurrentChange(message: MessageSummary | null) {
     this.selectedmessage = message;
@@ -155,8 +160,15 @@ export default class MessageList extends Vue {
       return;
     }
 
+    let messageToDelete = this.selectedmessage;
+
+    let nextIndex = this.filteredMessages.indexOf(messageToDelete)+1;
+    if (nextIndex < this.filteredMessages.length){
+      this.selectMessage(this.filteredMessages[nextIndex]);
+    }
+
     try {
-      await new MessagesController().delete(this.selectedmessage.id);
+      await new MessagesController().delete(messageToDelete.id);
       await this.refresh();
     } catch (e) {
       this.error = e;
@@ -206,6 +218,10 @@ export default class MessageList extends Vue {
         targetItem.isUnread = sourceItem.isUnread;
       }
     );
+
+    if (!this.filteredMessages.some(m => this.selectedmessage != null && m.id == this.selectedmessage.id)) {
+      this.handleCurrentChange(null);
+    }
   }
 
   private lastSort: string | null = null;

@@ -44,6 +44,7 @@
       reserve-selection="true"
       row-key="id"
       stripe
+      ref="table"
     >
       <el-table-column
         property="endDate"
@@ -71,12 +72,13 @@ import { Component } from "vue-property-decorator";
 import Vue from "vue";
 import SessionsController from "../ApiClient/SessionsController";
 import SessionSummary from "../ApiClient/SessionSummary";
-import * as moment from 'moment';
+import * as moment from "moment";
 import HubConnectionManager from "../HubConnectionManager";
 import sortedArraySync from "../sortedArraySync";
 import { Mutex } from "async-mutex";
-import HubConnectionStatus from "@/components/hubconnectionstatus.vue"
-import ConfirmationDialog from "@/components/confirmationdialog.vue"
+import HubConnectionStatus from "@/components/hubconnectionstatus.vue";
+import ConfirmationDialog from "@/components/confirmationdialog.vue";
+import { ElTable } from "element-ui/types/table";
 
 @Component({
   components: {
@@ -114,7 +116,12 @@ export default class SessionList extends Vue {
     cellValue: Date,
     index: number
   ): string {
-    return (<any> moment)(cellValue).format("YYYY-MM-DD HH:mm:ss");
+    return (<any>moment)(cellValue).format("YYYY-MM-DD HH:mm:ss");
+  }
+
+  selectSession(session: SessionSummary) {
+    (<ElTable>this.$refs.table).setCurrentRow(session);
+    this.handleCurrentChange(session);
   }
 
   async deleteSelected() {
@@ -122,8 +129,15 @@ export default class SessionList extends Vue {
       return;
     }
 
+    let sessionToDelete = this.selectedsession;
+
+    let nextIndex = this.sessions.indexOf(sessionToDelete)-1;
+    if (nextIndex >= 0){
+      this.selectSession(this.sessions[nextIndex]);
+    }
+
     try {
-      await new SessionsController().delete(this.selectedsession.id);
+      await new SessionsController().delete(sessionToDelete.id);
       this.refresh();
     } catch (e) {
       this.error = e;
@@ -152,6 +166,14 @@ export default class SessionList extends Vue {
         this.sessions,
         (a: SessionSummary, b: SessionSummary) => a.id == b.id
       );
+
+      if (
+        !this.sessions.some(
+          m => this.selectedsession != null && m.id == this.selectedsession.id
+        )
+      ) {
+        this.handleCurrentChange(null);
+      }
     } catch (e) {
       this.error = e;
     } finally {

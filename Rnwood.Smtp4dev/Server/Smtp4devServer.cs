@@ -146,7 +146,7 @@ namespace Rnwood.Smtp4dev.Server
 
 				Session session = dbContext.Sessions.FirstOrDefault(s => s.Id == id);
 
-				if (session == null) {
+				if (session != null) {
 					dbContext.Sessions.Remove(session);
 					dbContext.SaveChanges();
 					sessionsHub.OnSessionsChanged().Wait();
