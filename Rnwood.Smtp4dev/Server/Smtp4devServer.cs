@@ -27,8 +27,57 @@ namespace Rnwood.Smtp4dev.Server
     {
         public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptions<ServerOptions> serverOptions, MessagesHub messagesHub, SessionsHub sessionsHub)
         {
+            this.messagesHub = messagesHub;
+            this.sessionsHub = sessionsHub;
+            this.serverOptions = serverOptions;
             this.dbContextFactory = dbContextFactory;
-            System.Security.Cryptography.X509Certificates.X509Certificate cert = CreateSelfSignedCertificate();
+
+
+            System.Security.Cryptography.X509Certificates.X509Certificate2 cert = null;
+
+            Console.WriteLine($"TLS mode {serverOptions.Value.TlsMode}");
+
+            if (serverOptions.Value.TlsMode != TlsMode.None)
+            {
+
+                if (!string.IsNullOrEmpty(serverOptions.Value.TlsCertificate))
+                {
+                    Console.WriteLine($"Using certificate from {serverOptions.Value.TlsCertificate}");
+                    cert = new X509Certificate2(File.ReadAllBytes(serverOptions.Value.TlsCertificate), "", X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+
+                }
+                else
+                {
+                    string pfxPath = Path.GetFullPath("selfsigned-certificate.pfx");
+                    string cerPath = Path.GetFullPath("selfsigned-certificate.cer");
+
+                    if (File.Exists(pfxPath))
+                    {
+                        cert = new X509Certificate2(File.ReadAllBytes(pfxPath), "", X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+
+                        if (cert.Subject != $"CN={serverOptions.Value.HostName}" || DateTime.Parse(cert.GetExpirationDateString()) < DateTime.Now.AddDays(30))
+                        {
+                            cert = null;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"Using existing self-signed certificate with subject name '{serverOptions.Value.HostName} and expiry date {cert.GetExpirationDateString()}");
+                        }
+                    }
+
+                    if (cert == null)
+                    {
+                        cert = CreateSelfSignedCertificate();
+                        File.WriteAllBytes(pfxPath, cert.Export(X509ContentType.Pkcs12));
+                        File.WriteAllBytes(cerPath, cert.Export(X509ContentType.Cert));
+                        Console.WriteLine($"Generated new self-signed certificate with subject name '{serverOptions.Value.HostName} and expiry date {cert.GetExpirationDateString()}");
+                    }
+
+                    Console.WriteLine($"Ensure that the hostname you enter into clients and '{serverOptions.Value.HostName}' from ServerOptions:HostName configuration match exactly");
+                    Console.WriteLine($"and trust the issuer certificate at {cerPath} in your client/OS to avoid certificate validation errors.");
+                }
+            }
+            Console.WriteLine();
 
             ServerOptions serverOptionsValue = serverOptions.Value;
             this.smtpServer = new DefaultServer(serverOptionsValue.AllowRemoteConnections, serverOptionsValue.Port,
@@ -38,24 +87,24 @@ namespace Rnwood.Smtp4dev.Server
             this.smtpServer.MessageReceivedEventHandler += OnMessageReceived;
             this.smtpServer.SessionCompletedEventHandler += OnSessionCompleted;
             this.smtpServer.SessionStartedHandler += OnSessionStarted;
+            this.smtpServer.AuthenticationCredentialsValidationRequiredEventHandler += OnAuthenticationCredentialsValidationRequired;
 
-            this.messagesHub = messagesHub;
-            this.sessionsHub = sessionsHub;
-
-            this.serverOptions = serverOptions; ;
         }
 
-        private static System.Security.Cryptography.X509Certificates.X509Certificate CreateSelfSignedCertificate()
+        private Task OnAuthenticationCredentialsValidationRequired(object sender, AuthenticationCredentialsValidationEventArgs e)
+        {
+            e.AuthenticationResult = AuthenticationResult.Success;
+            return Task.CompletedTask;
+        }
+
+        private System.Security.Cryptography.X509Certificates.X509Certificate2 CreateSelfSignedCertificate()
         {
             CryptoApiRandomGenerator randomGenerator = new CryptoApiRandomGenerator();
             SecureRandom random = new SecureRandom(randomGenerator);
 
             X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
-            certGenerator.SetSubjectDN(new X509Name("CN=" + IPGlobalProperties.GetIPGlobalProperties().HostName));
-            certGenerator.SetIssuerDN(new X509Name("CN=" + IPGlobalProperties.GetIPGlobalProperties().HostName));
-
-            GeneralNames subjectAltName = new GeneralNames(new GeneralName(GeneralName.DnsName, IPGlobalProperties.GetIPGlobalProperties().HostName + "." + IPGlobalProperties.GetIPGlobalProperties().DomainName));
-            certGenerator.AddExtension(X509Extensions.SubjectAlternativeName, false, subjectAltName);
+            certGenerator.SetSubjectDN(new X509Name("CN=" + serverOptions.Value.HostName));
+            certGenerator.SetIssuerDN(new X509Name("CN=" + serverOptions.Value.HostName));
 
             BigInteger serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
             certGenerator.SetSerialNumber(serialNumber);
@@ -205,7 +254,8 @@ namespace Rnwood.Smtp4dev.Server
                 Smtp4devDbContext dbContext = dbContextFactory();
 
                 Session session = dbContext.Sessions.FirstOrDefault(s => s.Id == id);
-				if (session != null) {
+                if (session != null)
+                {
                     dbContext.Sessions.Remove(session);
                     dbContext.SaveChanges();
                     sessionsHub.OnSessionsChanged().Wait();
@@ -348,8 +398,7 @@ namespace Rnwood.Smtp4dev.Server
 
             smtpServer.Start();
 
-            string certDesc = string.IsNullOrEmpty(serverOptions.Value.TlsCertificate) ? "<self signed>" : serverOptions.Value.TlsCertificate;
-            Console.WriteLine($"SMTP Server is listening on port {smtpServer.PortNumber} with TLS mode '{serverOptions.Value.TlsMode}' cert '{certDesc}'.\nKeeping last {serverOptions.Value.NumberOfMessagesToKeep} messages and {serverOptions.Value.NumberOfSessionsToKeep} sessions.");
+            Console.WriteLine($"SMTP Server is listening on port {smtpServer.PortNumber}.\nKeeping last {serverOptions.Value.NumberOfMessagesToKeep} messages and {serverOptions.Value.NumberOfSessionsToKeep} sessions.");
 
         }
     }

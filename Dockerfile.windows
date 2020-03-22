@@ -43,6 +43,7 @@ RUN dotnet publish --no-restore -c Release -o out -p:SkipClientApp=true -p:Versi
 
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.2 AS final
 EXPOSE 80
-WORKDIR /app
-COPY --from=publish /app/Rnwood.Smtp4dev/out ./
-ENTRYPOINT ["dotnet", "Rnwood.Smtp4dev.dll"]
+RUN mkdir /data
+WORKDIR /data
+COPY --from=publish /app/Rnwood.Smtp4dev/out /app
+ENTRYPOINT ["dotnet", "/app/Rnwood.Smtp4dev.dll"]

@@ -8,6 +8,7 @@ namespace Rnwood.Smtp4dev.Server
     public enum TlsMode
     {
         StartTls,
+        None,
         ImplicitTls
     }
 }
