@@ -42,8 +42,7 @@ namespace Rnwood.SmtpServer
 			this.stream = tcpClient.GetStream();
 			this.IsConnected = true;
 			this.fallbackEncoding = fallbackEncoding;
-			this.writer = new SmtpStreamWriter(this.stream, false) { AutoFlush = true };
-			this.SetupReader();
+			this.SetupReaderAndWriter();
 		}
 
 		/// <summary>
@@ -89,7 +88,7 @@ namespace Rnwood.SmtpServer
 		public async Task ApplyStreamFilter(Func<Stream, Task<Stream>> filter)
 		{
 			this.stream = await filter(this.stream).ConfigureAwait(false);
-			this.SetupReader();
+			this.SetupReaderAndWriter();
 		}
 
 		/// <summary>
@@ -199,7 +198,7 @@ namespace Rnwood.SmtpServer
 			}
 		}
 
-		private void SetupReader()
+		private void SetupReaderAndWriter()
 		{
 			if (this.reader != null)
 			{
@@ -207,6 +206,13 @@ namespace Rnwood.SmtpServer
 			}
 
 			this.reader = new SmtpStreamReader(this.stream, this.fallbackEncoding, true);
+
+			if(this.writer != null)
+			{
+				this.writer.Dispose();
+			}
+
+			this.writer = new SmtpStreamWriter(this.stream, true) { AutoFlush = true };
 		}
 	}
 }
