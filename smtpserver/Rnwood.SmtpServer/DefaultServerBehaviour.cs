@@ -83,7 +83,7 @@ namespace Rnwood.SmtpServer
 		/// <summary>
 		/// Occurs when authentication credential provided by the client need to be validated.
 		/// </summary>
-		public event AsyncEventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequiredAsync;
+		public event AsyncEventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequiredEventHandler;
 
 		/// <summary>
 		/// Occurs when a command is received from a client.
@@ -135,6 +135,11 @@ namespace Rnwood.SmtpServer
 				extensions.Add(new StartTlsExtension());
 			}
 
+			if (this.AuthenticationCredentialsValidationRequiredEventHandler != null)
+			{
+				extensions.Add(new AuthExtension());
+			}
+
 			return Task.FromResult<IEnumerable<IExtension>>(extensions);
 		}
 
@@ -165,7 +170,7 @@ namespace Rnwood.SmtpServer
 		/// <inheritdoc/>
 		public virtual Task<bool> IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism)
 		{
-			return Task.FromResult(false);
+			return Task.FromResult(true);
 		}
 
 		/// <inheritdoc/>
@@ -241,7 +246,7 @@ namespace Rnwood.SmtpServer
 			IConnection connection,
 			IAuthenticationCredentials request)
 		{
-			var handlers = this.AuthenticationCredentialsValidationRequiredAsync;
+			var handlers = this.AuthenticationCredentialsValidationRequiredEventHandler;
 
 			if (handlers != null)
 			{

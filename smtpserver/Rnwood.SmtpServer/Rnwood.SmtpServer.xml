@@ -577,7 +577,7 @@
             <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
             <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
         </member>
-        <member name="E:Rnwood.SmtpServer.DefaultServerBehaviour.AuthenticationCredentialsValidationRequiredAsync">
+        <member name="E:Rnwood.SmtpServer.DefaultServerBehaviour.AuthenticationCredentialsValidationRequiredEventHandler">
             <summary>
             Occurs when authentication credential provided by the client need to be validated.
             </summary>

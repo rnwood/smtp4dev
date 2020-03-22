@@ -100,8 +100,8 @@ namespace Rnwood.SmtpServer
 		/// </summary>
 		public event AsyncEventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequiredEventHandler
 		{
-			add { this.Behaviour.AuthenticationCredentialsValidationRequiredAsync += value; }
-			remove { this.Behaviour.AuthenticationCredentialsValidationRequiredAsync -= value; }
+			add { this.Behaviour.AuthenticationCredentialsValidationRequiredEventHandler += value; }
+			remove { this.Behaviour.AuthenticationCredentialsValidationRequiredEventHandler -= value; }
 		}
 
 		/// <summary>
