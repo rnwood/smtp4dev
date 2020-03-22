@@ -17,15 +17,6 @@ namespace Rnwood.SmtpServer
 		/// <inheritdoc/>
 		public async Task Process(IConnection connection, SmtpCommand command)
 		{
-			if (!string.IsNullOrEmpty(connection.Session.ClientName))
-			{
-				await connection.WriteResponse(
-					new SmtpResponse(
-						StandardSmtpResponseCode.BadSequenceOfCommands,
-						"You already said HELO")).ConfigureAwait(false);
-				return;
-			}
-
 			connection.Session.ClientName = command.ArgumentsText ?? string.Empty;
 
 			SmtpStringBuilder text = new SmtpStringBuilder();

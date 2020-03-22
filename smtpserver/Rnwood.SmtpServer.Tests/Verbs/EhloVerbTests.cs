@@ -25,7 +25,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             TestMocks mocks = new TestMocks();
             EhloVerb ehloVerb = new EhloVerb();
             await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO")).ConfigureAwait(false);
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
 
             mocks.Session.VerifySet(s => s.ClientName = "");
         }
@@ -66,7 +66,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             EhloVerb ehloVerb = new EhloVerb();
             await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar")).ConfigureAwait(false);
 
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         }
 
         /// <summary>
@@ -107,12 +107,14 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         public async Task Process_SaidHeloAlready_Allowed()
         {
             TestMocks mocks = new TestMocks();
+			
 
             EhloVerb verb = new EhloVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foo.blah")).ConfigureAwait(false);
-            await verb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foo.blah")).ConfigureAwait(false);
+			await verb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foo.blah")).ConfigureAwait(false);
+			mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK, Times.Exactly(2));
 
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
-        }
+
+		}
     }
 }

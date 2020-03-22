@@ -5,12 +5,14 @@
 
 namespace Rnwood.SmtpServer.Tests
 {
-    using System.Net;
+	using System;
+	using System.Net;
     using System.Text;
     using System.Threading.Tasks;
     using Moq;
     using Rnwood.SmtpServer.Extensions;
-    using Rnwood.SmtpServer.Verbs;
+	using Rnwood.SmtpServer.Extensions.Auth;
+	using Rnwood.SmtpServer.Verbs;
 
     /// <summary>
     /// Defines the <see cref="TestMocks" />
@@ -22,25 +24,40 @@ namespace Rnwood.SmtpServer.Tests
         /// </summary>
         public TestMocks()
         {
-            this.Connection = new Mock<IConnection>();
-            this.ConnectionChannel = new Mock<IConnectionChannel>();
-            this.Session = new Mock<IEditableSession>();
-            this.Server = new Mock<ISmtpServer>();
-            this.ServerBehaviour = new Mock<IServerBehaviour>();
-            this.MessageBuilder = new Mock<IMessageBuilder>();
-            this.VerbMap = new Mock<IVerbMap>();
+            this.Connection = new Mock<IConnection>(MockBehavior.Strict);
+            this.ConnectionChannel = new Mock<IConnectionChannel>(MockBehavior.Strict);
+            this.Session = new Mock<MemorySession>(IPAddress.Loopback, DateTime.Now) { CallBase = true };
+            this.Server = new Mock<ISmtpServer>(MockBehavior.Strict);
+            this.ServerBehaviour = new Mock<IServerBehaviour>(MockBehavior.Strict);
+            this.MessageBuilder = new Mock<MemoryMessageBuilder>() { CallBase = true };
+            this.VerbMap = new Mock<VerbMap>() { CallBase = true };
 
             this.ServerBehaviour.Setup(
                 sb => sb.OnCreateNewSession(It.IsAny<IConnectionChannel>())).
                 ReturnsAsync(this.Session.Object);
             this.ServerBehaviour.Setup(s => s.FallbackEncoding).Returns(Encoding.GetEncoding("iso-8859-1"));
             this.ServerBehaviour.Setup(sb => sb.OnCreateNewMessage(It.IsAny<IConnection>())).ReturnsAsync(this.MessageBuilder.Object);
+			this.ServerBehaviour.Setup(sb => sb.GetExtensions(It.IsAny<IConnectionChannel>())).ReturnsAsync(new IExtension[0]);
+			this.ServerBehaviour.Setup(sb => sb.OnSessionCompleted(It.IsAny<IConnection>(), It.IsAny<ISession>())).Returns(Task.CompletedTask);
+			this.ServerBehaviour.SetupGet(sb => sb.DomainName).Returns("tests");
+			this.ServerBehaviour.Setup(sb => sb.IsSSLEnabled(It.IsAny<IConnection>())).Returns(Task.FromResult(false));
+			this.ServerBehaviour.Setup(sb => sb.OnSessionStarted(It.IsAny<IConnection>(), It.IsAny<ISession>())).Returns(Task.CompletedTask);
+			this.ServerBehaviour.Setup(sb => sb.OnMessageRecipientAdding(It.IsAny<IConnection>(), It.IsAny<IMessageBuilder>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+			this.ServerBehaviour.Setup(sb => sb.OnMessageStart(It.IsAny<IConnection>(), It.IsAny<string>())).Returns(Task.CompletedTask);
+			this.ServerBehaviour.Setup(sb => sb.OnMessageReceived(It.IsAny<IConnection>(), It.IsAny<IMessage>())).Returns(Task.CompletedTask);
+			this.ServerBehaviour.Setup(sb => sb.OnMessageCompleted(It.IsAny<IConnection>())).Returns(Task.CompletedTask);
+			this.ServerBehaviour.Setup(sb => sb.OnCommandReceived(It.IsAny<IConnection>(), It.IsAny<SmtpCommand>())).Returns(Task.CompletedTask);
+			this.ServerBehaviour.SetupGet(sb => sb.MaximumNumberOfSequentialBadCommands).Returns(0);
+			this.ServerBehaviour.Setup(sb => sb.ValidateAuthenticationCredentials(It.IsAny<IConnection>(), It.IsAny<IAuthenticationCredentials>())).Returns(Task.FromResult(AuthenticationResult.Failure));
 
+			this.Connection.SetupAllProperties();
             this.Connection.SetupGet(c => c.Session).Returns(this.Session.Object);
             this.Connection.SetupGet(c => c.Server).Returns(this.Server.Object);
             this.Connection.Setup(s => s.CloseConnection()).Returns(() => this.ConnectionChannel.Object.Close());
             this.Connection.SetupGet(s => s.ExtensionProcessors).Returns(new IExtensionProcessor[0]);
             this.Connection.SetupGet(c => c.VerbMap).Returns(this.VerbMap.Object);
+			this.Connection.Setup(c => c.WriteResponse(It.IsAny<SmtpResponse>())).Returns(Task.CompletedTask);
+			this.Connection.Setup(c => c.CommitMessage()).Returns(Task.CompletedTask);
 
             this.Server.SetupGet(s => s.Behaviour).Returns(this.ServerBehaviour.Object);
 
@@ -48,6 +65,9 @@ namespace Rnwood.SmtpServer.Tests
             this.ConnectionChannel.Setup(s => s.IsConnected).Returns(() => isConnected);
             this.ConnectionChannel.Setup(s => s.Close()).Returns(() => Task.Run(() => isConnected = false));
             this.ConnectionChannel.Setup(s => s.ClientIPAddress).Returns(IPAddress.Loopback);
+			this.ConnectionChannel.Setup(s => s.WriteLine(It.IsAny<string>())).Returns(Task.CompletedTask);
+			this.ConnectionChannel.Setup(s => s.Flush()).Returns(Task.CompletedTask);
+
         }
 
         /// <summary>
@@ -63,7 +83,7 @@ namespace Rnwood.SmtpServer.Tests
         /// <summary>
         /// Gets the MessageBuilder
         /// </summary>
-        public Mock<IMessageBuilder> MessageBuilder { get; private set; }
+        public Mock<MemoryMessageBuilder> MessageBuilder { get; private set; }
 
         /// <summary>
         /// Gets the Server
@@ -78,20 +98,26 @@ namespace Rnwood.SmtpServer.Tests
         /// <summary>
         /// Gets the Session
         /// </summary>
-        public Mock<IEditableSession> Session { get; private set; }
+        public Mock<MemorySession> Session { get; private set; }
 
         /// <summary>
         /// Gets the VerbMap
         /// </summary>
-        public Mock<IVerbMap> VerbMap { get; private set; }
+        public Mock<VerbMap> VerbMap { get; private set; }
 
         /// <summary>
         ///
         /// </summary>
         /// <param name="responseCode">The responseCode<see cref="StandardSmtpResponseCode"/></param>
-        public void VerifyWriteResponseAsync(StandardSmtpResponseCode responseCode)
+        public void VerifyWriteResponse(StandardSmtpResponseCode responseCode, Times times)
         {
-            this.Connection.Verify(c => c.WriteResponse(It.Is<SmtpResponse>(r => r.Code == (int)responseCode)));
+            this.Connection.Verify(c => c.WriteResponse(It.Is<SmtpResponse>(r => r.Code == (int)responseCode)), times);
         }
-    }
+
+		public void VerifyWriteResponse(StandardSmtpResponseCode responseCode)
+		{
+			VerifyWriteResponse(responseCode, Times.Once());
+		}
+
+	}
 }

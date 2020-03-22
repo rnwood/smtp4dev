@@ -47,8 +47,8 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             DataVerb verb = new DataVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
 
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.StartMailInputEndWithDot);
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.ExceededStorageAllocation);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.ExceededStorageAllocation);
         }
 
         /// <summary>
@@ -93,8 +93,8 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             DataVerb verb = new DataVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
 
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.StartMailInputEndWithDot);
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         }
 
         /// <summary>
@@ -109,7 +109,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             DataVerb verb = new DataVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
 
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.BadSequenceOfCommands);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
         }
 
         /// <summary>
@@ -132,8 +132,8 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             DataVerb verb = new DataVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
 
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.StartMailInputEndWithDot);
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         }
 
         /// <summary>
@@ -156,8 +156,8 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             DataVerb verb = new DataVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
 
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.StartMailInputEndWithDot);
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
 
             using (StreamReader dataReader = new StreamReader(await messageBuilder.GetData().ConfigureAwait(false), Encoding.UTF8))
             {

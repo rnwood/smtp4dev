@@ -33,37 +33,37 @@ namespace Rnwood.SmtpServer
 		}
 
 		/// <inheritdoc/>
-		public bool Authenticated { get; set; }
+		public virtual bool Authenticated { get; set; }
 
 		/// <inheritdoc/>
-		public IAuthenticationCredentials AuthenticationCredentials { get; set; }
+		public virtual IAuthenticationCredentials AuthenticationCredentials { get; set; }
 
 		/// <inheritdoc/>
-		public IPAddress ClientAddress { get; set; }
+		public virtual IPAddress ClientAddress { get; set; }
 
 		/// <inheritdoc/>
-		public string ClientName { get; set; }
+		public virtual string ClientName { get; set; }
 
 		/// <inheritdoc/>
-		public bool CompletedNormally { get; set; }
+		public virtual bool CompletedNormally { get; set; }
 
 		/// <inheritdoc/>
-		public DateTime? EndDate { get; set; }
+		public virtual DateTime? EndDate { get; set; }
 
 		/// <inheritdoc/>
-		public bool SecureConnection { get; set; }
+		public virtual bool SecureConnection { get; set; }
 
 		/// <inheritdoc/>
-		public Exception SessionError { get; set; }
+		public virtual Exception SessionError { get; set; }
 
 		/// <inheritdoc/>
-		public SessionErrorType SessionErrorType { get; set; }
+		public virtual SessionErrorType SessionErrorType { get; set; }
 
 		/// <inheritdoc/>
-		public DateTime StartDate { get; set; }
+		public virtual DateTime StartDate { get; set; }
 
 		/// <inheritdoc/>
-		public void AddMessage(IMessage message)
+		public virtual void AddMessage(IMessage message)
 		{
 			this.messages.Add(message);
 		}
@@ -75,7 +75,7 @@ namespace Rnwood.SmtpServer
 		public abstract Task<TextReader> GetLog();
 
 		/// <inheritdoc/>
-		public Task<IReadOnlyCollection<IMessage>> GetMessages()
+		public virtual Task<IReadOnlyCollection<IMessage>> GetMessages()
 		{
 			return Task.FromResult<IReadOnlyCollection<IMessage>>(this.messages.AsReadOnly());
 		}

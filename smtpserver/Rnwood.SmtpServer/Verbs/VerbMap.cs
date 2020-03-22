@@ -16,14 +16,14 @@ namespace Rnwood.SmtpServer.Verbs
 		private readonly Dictionary<string, IVerb> processorVerbs = new Dictionary<string, IVerb>(StringComparer.OrdinalIgnoreCase);
 
 		/// <inheritdoc/>
-		public IVerb GetVerbProcessor(string verb)
+		public virtual IVerb GetVerbProcessor(string verb)
 		{
 			this.processorVerbs.TryGetValue(verb, out IVerb result);
 			return result;
 		}
 
 		/// <inheritdoc/>
-		public void SetVerbProcessor(string verb, IVerb verbProcessor)
+		public virtual void SetVerbProcessor(string verb, IVerb verbProcessor)
 		{
 			this.processorVerbs[verb] = verbProcessor;
 		}

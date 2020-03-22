@@ -23,11 +23,14 @@ namespace Rnwood.SmtpServer.Tests.Verbs
         {
             TestMocks mocks = new TestMocks();
 
-            RsetVerb verb = new RsetVerb();
+			mocks.Connection.Setup(c => c.AbortMessage()).Returns(Task.CompletedTask).Verifiable();
+
+			RsetVerb verb = new RsetVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("RSET")).ConfigureAwait(false);
 
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
-            mocks.Connection.Verify(c => c.AbortMessage());
+
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+			mocks.Connection.Verify();
         }
     }
 }

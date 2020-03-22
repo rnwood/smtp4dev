@@ -26,7 +26,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             NoopVerb verb = new NoopVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("NOOP")).ConfigureAwait(false);
 
-            mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
+            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         }
     }
 }

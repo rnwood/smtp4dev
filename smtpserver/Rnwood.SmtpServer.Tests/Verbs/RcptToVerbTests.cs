@@ -90,7 +90,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 			if (!asException)
 			{
 				await verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address)).ConfigureAwait(false);
-				mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
+				mocks.VerifyWriteResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
 			}
 			else
 			{
@@ -116,7 +116,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 			RcptToVerb verb = new RcptToVerb();
 			await verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address)).ConfigureAwait(false);
 
-			mocks.VerifyWriteResponseAsync(StandardSmtpResponseCode.OK);
+			mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
 			Assert.Equal(expectedAddress, messageBuilder.Recipients.First());
 		}
 	}

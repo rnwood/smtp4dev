@@ -70,8 +70,10 @@ namespace Rnwood.SmtpServer.Tests.Extensions.Auth
         public async Task ProcessResponse_PasswordAcceptedAfterUserNameInInitialRequest()
         {
             TestMocks mocks = new TestMocks();
+			mocks.ServerBehaviour.Setup(sb => sb.ValidateAuthenticationCredentials(It.IsAny<IConnection>(), It.IsAny<IAuthenticationCredentials>())).Returns(Task.FromResult(AuthenticationResult.Success));
 
-            LoginMechanismProcessor processor = this.Setup(mocks);
+
+			LoginMechanismProcessor processor = this.Setup(mocks);
             AuthMechanismProcessorStatus result = await processor.ProcessResponse(EncodeBase64("rob")).ConfigureAwait(false);
 
             Assert.Equal(AuthMechanismProcessorStatus.Continue, result);
