@@ -60,11 +60,27 @@ namespace Rnwood.Smtp4dev
 
         private static IWebHost BuildWebHost(string[] args)
         {
-            Directory.SetCurrentDirectory(GetContentRoot());
+            string contentRoot = GetContentRoot();
+            
+            string dataDir = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "smtp4dev");
+            if (!Directory.Exists(dataDir)) {
+                Directory.CreateDirectory(dataDir);
+            }
+
+            //Migrate to new location
+            if (File.Exists(Path.Join(contentRoot, "database.db")) && !File.Exists(Path.Join(dataDir, "database.db")))
+            {
+                File.Move(
+                    Path.Join(contentRoot, "database.db"),
+                    Path.Join(dataDir, "database.db")
+                );
+            }
+
+            Directory.SetCurrentDirectory(dataDir);
 
             return WebHost
                 .CreateDefaultBuilder(args)
-                .UseContentRoot(Directory.GetCurrentDirectory())
+                .UseContentRoot(contentRoot)
                 .ConfigureAppConfiguration(
                     (hostingContext, configBuilder) =>
                         {
@@ -73,6 +89,7 @@ namespace Rnwood.Smtp4dev
                                 .SetBasePath(env.ContentRootPath)
                                 .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
                                 .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
+                                .AddJsonFile(Path.Join(dataDir, "appsettings.json"), optional: true, reloadOnChange: true)
                                 .AddEnvironmentVariables()
                                 .AddCommandLine(args, new
                                 Dictionary<string, string>{
@@ -81,7 +98,7 @@ namespace Rnwood.Smtp4dev
                                     { "--messagestokeep", "ServerOptions:NumberOfMessagesToKeep" },
                                     { "--sessionstokeep", "ServerOptions:NumberOfSessionsToKeep" },
                                     { "--rooturl", "ServerOptions:RootUrl"},
-                                    { "--tlsmode", "ServerOptions:TlsMode"},                       
+                                    { "--tlsmode", "ServerOptions:TlsMode"},
                                     { "--hostname", "ServerOptions:HostName"}
                                 })
                                 .Build();
