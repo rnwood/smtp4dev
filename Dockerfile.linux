@@ -46,7 +46,7 @@ RUN dotnet publish --no-restore -c Release -o out -p:Version=$VERSION
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1.2 AS runtime
 COPY --from=publish /app/Rnwood.Smtp4dev/out /app
 VOLUME ['/smtp4dev']
-WORKDIR /smtp4dev
+WORKDIR /
 ENV XDG_CONFIG_HOME /
 EXPOSE 80
 EXPOSE 25

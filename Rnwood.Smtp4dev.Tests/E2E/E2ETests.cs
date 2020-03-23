@@ -1,4 +1,5 @@
 ﻿using MailKit.Net.Smtp;
+using MailKit.Security;
 using Medallion.Shell;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server.Features;
@@ -59,7 +60,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         Text = "Body of end to end test"
                     };
 
-                    smtpClient.Connect("localhost", smtpPortNumber, false, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.None, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
                     smtpClient.Send(message);
                     smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
                 }
@@ -97,7 +98,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         Text = "Body of end to end test"
                     };
 
-                    smtpClient.Connect("localhost", smtpPortNumber, false, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.None, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
                     FormatOptions formatOptions = FormatOptions.Default.Clone();
                     formatOptions.International = true;

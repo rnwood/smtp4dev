@@ -47,6 +47,5 @@ COPY --from=publish /app/Rnwood.Smtp4dev/out /app
 EXPOSE 80
 EXPOSE 25
 VOLUME c:\smtp4dev
-WORKDIR c:\smtp4dev
-ENV APPDATA /
+WORKDIR c:\
 ENTRYPOINT ["dotnet", "/app/Rnwood.Smtp4dev.dll"]
