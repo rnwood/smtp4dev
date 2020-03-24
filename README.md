@@ -57,6 +57,8 @@ docker run -p 3000:80 -p 2525:25 rnwood/smtp4dev:v3
 ```
 This is a cross platform tag which will work on either Windows or Linux. To see the full list of available tags [see the Docker hub page for smtp4dev](https://hub.docker.com/r/rnwood/smtp4dev/tags/).
 
+The folder ``/smtp4dev`` will be used for the database and auto-generated TLS certificate. You can mount a directory outside of the container here for peristent storage.
+
 ## How to run smtp4dev as a service (Windows only)
 
 A service in Windows can be installed using New-Service in PowerShell, or sc in both command line or PowerShell. If you use sc in PowerShell, it must be run as sc.exe. sc is an alias for Set-Content.
@@ -80,9 +82,12 @@ smtp4dev keeps the latest 100 messages and 100 sessions by default.
 The ``--messagestokeep X`` and ``--sessionstokeep X`` command line options can override this.
 
 #### Changing where the database file is saved
-By default smtp4dev will create a Sqlite DB named ``database.db`` in application root direction when it runs.
+By default smtp4dev will create a Sqlite DB named ``database.db`` in ``<APPDATA>\smtp4dev`` directory when it runs (``<APPDATA>`` is environment variable ``APPDATA`` on Windows and ``XDG_CONFIG_HOME`` on most other platforms).
+For Docker images, the default path is ``/smtp4dev`` - see above.
 
 To change the path of this file use the ``--db "/path/to/file.db"`` command line option or edit ``ServerOptions\Database`` in ``appsettings.json``
+
+
 
 To use an in memory DB use an empty string (e.g. ``--db=""``)). All session and messages will be lost when the process exits. (Docker: The ``=`` in the example is important as Docker will eat the empty quotes if ommitted.)
 
