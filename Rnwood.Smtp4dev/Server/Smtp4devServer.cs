@@ -35,7 +35,7 @@ namespace Rnwood.Smtp4dev.Server
 
             System.Security.Cryptography.X509Certificates.X509Certificate2 cert = null;
 
-            Console.WriteLine($"TLS mode {serverOptions.Value.TlsMode}");
+            Console.WriteLine($"\nTLS mode: {serverOptions.Value.TlsMode}");
 
             if (serverOptions.Value.TlsMode != TlsMode.None)
             {

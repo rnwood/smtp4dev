@@ -99,6 +99,7 @@ namespace Rnwood.Smtp4dev
                                     { "--sessionstokeep", "ServerOptions:NumberOfSessionsToKeep" },
                                     { "--rooturl", "ServerOptions:RootUrl"},
                                     { "--tlsmode", "ServerOptions:TlsMode"},
+                                    { "--tlscertificate", "ServerOptions:TlsCertificate"},
                                     { "--hostname", "ServerOptions:HostName"}
                                 })
                                 .Build();
