@@ -30,7 +30,7 @@
 		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0534" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.8.6" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.112" />
-		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.22" />
+		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.0.23" />
 		<PackageReference Include="VueCliMiddleware" Version="3.1.1" />
 	</ItemGroup>
 
