@@ -50,6 +50,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 string messageSubject = Guid.NewGuid().ToString();
                 using (SmtpClient smtpClient = new SmtpClient())
                 {
+                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.None;
+                    smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                    smtpClient.CheckCertificateRevocation = false;
                     MimeMessage message = new MimeMessage();
                     message.To.Add(new MailboxAddress("to@to.com"));
                     message.From.Add(new MailboxAddress("from@from.com"));
@@ -60,7 +63,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         Text = "Body of end to end test"
                     };
 
-                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.None, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.StartTls, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
                     smtpClient.Send(message);
                     smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
                 }
@@ -87,6 +90,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 string messageSubject = Guid.NewGuid().ToString();
                 using (SmtpClient smtpClient = new SmtpClient() { })
                 {
+                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.None;
+                    smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                    smtpClient.CheckCertificateRevocation = false;
                     MimeMessage message = new MimeMessage();
 
                     message.To.Add(new MailboxAddress("ñఛ@example.com"));
@@ -98,7 +104,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         Text = "Body of end to end test"
                     };
 
-                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.None, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.StartTls, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
                     FormatOptions formatOptions = FormatOptions.Default.Clone();
                     formatOptions.International = true;
