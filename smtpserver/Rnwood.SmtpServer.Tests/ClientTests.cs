@@ -12,10 +12,20 @@ namespace Rnwood.SmtpServer.Tests
 	using System.Linq;
 	using System.Net.Mail;
 	using System.Net.Sockets;
+	using System.Security.Cryptography.X509Certificates;
 	using System.Text;
 	using System.Threading.Tasks;
 	using MailKit.Net.Smtp;
 	using MimeKit;
+	using Org.BouncyCastle.Asn1.X509;
+	using Org.BouncyCastle.Crypto;
+	using Org.BouncyCastle.Crypto.Generators;
+	using Org.BouncyCastle.Crypto.Prng;
+	using Org.BouncyCastle.Math;
+	using Org.BouncyCastle.Pkcs;
+	using Org.BouncyCastle.Security;
+	using Org.BouncyCastle.Utilities;
+	using Org.BouncyCastle.X509;
 	using Xunit;
 	using Xunit.Abstractions;
 
@@ -88,7 +98,56 @@ namespace Rnwood.SmtpServer.Tests
 				Assert.Single(messages);
 				Assert.Equal("from@from.com", messages.First().From);
 			}
+		}
 
+		/// <summary>
+		/// Tests mailkit connecting using STARTTLS
+		/// </summary>
+		/// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
+		[Fact]
+		public async Task MailKit_StartTLS()
+		{
+			using (DefaultServer server = new DefaultServer(false, (int) StandardSmtpPort.AssignAutomatically, null, CreateSelfSignedCertificate()))
+			{
+				ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
+
+				server.MessageReceivedEventHandler += (o, ea) =>
+				{
+					messages.Add(ea.Message);
+					return Task.CompletedTask;
+				};
+				server.Start();
+
+				await this.SendMessage_MailKit_Async(server, "to@to.com", secureSocketOptions: MailKit.Security.SecureSocketOptions.StartTls).WithTimeout("sending message").ConfigureAwait(false);
+
+				Assert.Single(messages);
+				Assert.Equal("from@from.com", messages.First().From);
+			}
+		}
+
+		/// <summary>
+		/// Tests mailkit connecting using implicit TLS
+		/// </summary>
+		/// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
+		[Fact]
+		public async Task MailKit_ImplicitTLS()
+		{
+			using (DefaultServer server = new DefaultServer(false, (int)StandardSmtpPort.AssignAutomatically, CreateSelfSignedCertificate(), null))
+			{
+				ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
+
+				server.MessageReceivedEventHandler += (o, ea) =>
+				{
+					messages.Add(ea.Message);
+					return Task.CompletedTask;
+				};
+				server.Start();
+
+				await this.SendMessage_MailKit_Async(server, "to@to.com", secureSocketOptions: MailKit.Security.SecureSocketOptions.SslOnConnect).WithTimeout("sending message").ConfigureAwait(false);
+
+				Assert.Single(messages);
+				Assert.Equal("from@from.com", messages.First().From);
+			}
 		}
 
 		/// <summary>
@@ -173,16 +232,54 @@ namespace Rnwood.SmtpServer.Tests
 		/// <param name="server">The server<see cref="DefaultServer"/></param>
 		/// <param name="toAddress">The toAddress<see cref="string"/></param>
 		/// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-		private async Task SendMessage_MailKit_Async(DefaultServer server, string toAddress, string fromAddress = "from@from.com")
+		private async Task SendMessage_MailKit_Async(DefaultServer server, string toAddress, string fromAddress = "from@from.com", MailKit.Security.SecureSocketOptions secureSocketOptions = MailKit.Security.SecureSocketOptions.None)
 		{
 			MimeMessage message = NewMessage(toAddress, fromAddress);
 
 			using (MailKit.Net.Smtp.SmtpClient client = new MailKit.Net.Smtp.SmtpClient(new SmtpClientLogger(this.output)))
 			{
-				await client.ConnectAsync("localhost", server.PortNumber).ConfigureAwait(false);
+
+				await client.ConnectAsync("localhost", server.PortNumber, secureSocketOptions).ConfigureAwait(false);
 				await client.SendAsync(new FormatOptions { International = true }, message).ConfigureAwait(false);
 				await client.DisconnectAsync(true).ConfigureAwait(false);
 			}
+		}
+
+		private System.Security.Cryptography.X509Certificates.X509Certificate2 CreateSelfSignedCertificate()
+		{
+			CryptoApiRandomGenerator randomGenerator = new CryptoApiRandomGenerator();
+			SecureRandom random = new SecureRandom(randomGenerator);
+
+			X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
+			certGenerator.SetSubjectDN(new X509Name("CN=localhost"));
+			certGenerator.SetIssuerDN(new X509Name("CN=localhost"));
+
+			BigInteger serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
+			certGenerator.SetSerialNumber(serialNumber);
+			certGenerator.SetSignatureAlgorithm("SHA256WithRSA");
+
+			certGenerator.SetNotBefore(DateTime.UtcNow.Date);
+			certGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(10));
+
+			KeyGenerationParameters keyGenerationParameters = new KeyGenerationParameters(random, 2048);
+
+			RsaKeyPairGenerator keyPairGenerator = new RsaKeyPairGenerator();
+			keyPairGenerator.Init(keyGenerationParameters);
+			AsymmetricCipherKeyPair keypair = keyPairGenerator.GenerateKeyPair();
+			certGenerator.SetPublicKey(keypair.Public);
+
+			Org.BouncyCastle.X509.X509Certificate cert = certGenerator.Generate(keypair.Private, random);
+
+			Pkcs12Store store = new Pkcs12Store();
+			var certificateEntry = new X509CertificateEntry(cert);
+			store.SetCertificateEntry("cert", certificateEntry);
+			store.SetKeyEntry("cert", new AsymmetricKeyEntry(keypair.Private), new[] { certificateEntry });
+			var stream = new MemoryStream();
+			store.Save(stream, "".ToCharArray(), random);
+
+			return new X509Certificate2(
+				stream.ToArray(), "",
+				X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
 		}
 
 

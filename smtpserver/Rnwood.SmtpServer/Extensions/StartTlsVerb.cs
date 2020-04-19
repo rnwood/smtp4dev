@@ -5,7 +5,11 @@
 
 namespace Rnwood.SmtpServer.Extensions
 {
+	using System;
 	using System.Net.Security;
+	using System.Reflection;
+	using System.Runtime.InteropServices;
+	using System.Runtime.Versioning;
 	using System.Security.Authentication;
 	using System.Security.Cryptography.X509Certificates;
 	using System.Threading.Tasks;
@@ -31,9 +35,17 @@ namespace Rnwood.SmtpServer.Extensions
 				StandardSmtpResponseCode.ServiceReady,
 				"Ready to start TLS")).ConfigureAwait(false);
 
-#pragma warning disable 0618
-			var sslProtos = SslProtocols.Ssl2 | SslProtocols.Ssl3 | SslProtocols.Tls;
-#pragma warning restore 0618
+			SslProtocols sslProtos;
+
+			string ver = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+			if (ver == null || !ver.StartsWith(".NETCoreApp,"))
+			{
+				sslProtos = SslProtocols.Tls12 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Ssl3 | SslProtocols.Ssl2;
+			}
+			else
+			{
+				sslProtos = SslProtocols.None;
+			}
 
 			await connection.ApplyStreamFilter(async stream =>
 													 {

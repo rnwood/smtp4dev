@@ -11,6 +11,9 @@ namespace Rnwood.SmtpServer
 	using System.IO;
 	using System.Linq;
 	using System.Net.Security;
+	using System.Reflection;
+	using System.Runtime.Versioning;
+	using System.Security.Authentication;
 	using System.Text;
 	using System.Threading.Tasks;
 	using Rnwood.SmtpServer.Extensions;
@@ -147,6 +150,29 @@ namespace Rnwood.SmtpServer
 			return result;
 		}
 
+		internal async Task<Stream> StartImplicitTls(Stream s)
+		{
+			SslStream sslStream = new SslStream(s);
+
+			SslProtocols sslProtos;
+
+			string ver = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+			if (ver == null || !ver.StartsWith(".NETCoreApp,"))
+			{
+				sslProtos = SslProtocols.Tls12 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Ssl3 | SslProtocols.Ssl2;
+			}
+			else
+			{
+				sslProtos = SslProtocols.None;
+			}
+
+			System.Security.Cryptography.X509Certificates.X509Certificate cert = 
+				await this.Server.Behaviour.GetSSLCertificate(this).ConfigureAwait(false);
+
+			await sslStream.AuthenticateAsServerAsync(cert, false, sslProtos, false).ConfigureAwait(false);
+			return sslStream;
+		}
+
 		/// <summary>
 		/// Starts processing of this connection.
 		/// </summary>
@@ -159,12 +185,8 @@ namespace Rnwood.SmtpServer
 
 				if (await this.Server.Behaviour.IsSSLEnabled(this).ConfigureAwait(false))
 				{
-					await this.ConnectionChannel.ApplyStreamFilter(async s =>
-					{
-						SslStream sslStream = new SslStream(s);
-						await sslStream.AuthenticateAsServerAsync(await this.Server.Behaviour.GetSSLCertificate(this).ConfigureAwait(false)).ConfigureAwait(false);
-						return sslStream;
-					}).ConfigureAwait(false);
+
+					await this.ConnectionChannel.ApplyStreamFilter(this.StartImplicitTls).ConfigureAwait(false);
 
 					this.Session.SecureConnection = true;
 				}
