@@ -12,7 +12,7 @@
   "devDependencies": {
     "@aspnet/signalr": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^2.27.0",
-    "@typescript-eslint/parser": "^2.28.0",
+    "@typescript-eslint/parser": "^2.29.0",
     "@vue/cli-plugin-babel": "^4.3.1",
     "@vue/cli-plugin-eslint": "^4.3.1",
     "@vue/cli-plugin-typescript": "^4.3.1",
