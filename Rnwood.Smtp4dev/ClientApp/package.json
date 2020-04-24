@@ -37,7 +37,7 @@
     "@fortawesome/fontawesome-free": "^5.13.0",
     "core-js": "^3.6.5",
     "node-sass": "^4.13.1",
-    "sass": "^1.26.3",
+    "sass": "^1.26.5",
     "sass-loader": "^8.0.2",
     "vue": "^2.6.10",
     "vue-class-component": "^7.2.2",
