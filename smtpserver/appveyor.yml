@@ -6,7 +6,7 @@ environment:
        APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
        PUBLISH: 1
      - TESTFRAMEWORK: netcoreapp2.0
-       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu
+       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
        PUBLISH: 0
      - TESTFRAMEWORK: net462
        APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2019
