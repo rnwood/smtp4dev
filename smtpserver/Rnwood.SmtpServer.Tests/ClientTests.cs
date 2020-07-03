@@ -238,6 +238,10 @@ namespace Rnwood.SmtpServer.Tests
 
 			using (MailKit.Net.Smtp.SmtpClient client = new MailKit.Net.Smtp.SmtpClient(new SmtpClientLogger(this.output)))
 			{
+				client.CheckCertificateRevocation = false;
+				client.ServerCertificateValidationCallback = (mysender, certificate, chain, sslPolicyErrors) => {
+					return true;
+				};
 				client.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
 				await client.ConnectAsync("localhost", server.PortNumber, secureSocketOptions).ConfigureAwait(false);
 				await client.SendAsync(new FormatOptions { International = true }, message).ConfigureAwait(false);

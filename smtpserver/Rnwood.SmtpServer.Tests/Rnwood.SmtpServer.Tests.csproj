@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <VersionPrefix>3.0.0-alpha</VersionPrefix>
+    <VersionPrefix>3.0</VersionPrefix>
     <TargetFrameworks>netcoreapp2.0;net462</TargetFrameworks>
     <AssemblyName>Rnwood.SmtpServer.Tests</AssemblyName>
     <OutputType>Library</OutputType>
