@@ -50,7 +50,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 string messageSubject = Guid.NewGuid().ToString();
                 using (SmtpClient smtpClient = new SmtpClient())
                 {
-                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.None;
+                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
                     smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
                     smtpClient.CheckCertificateRevocation = false;
                     MimeMessage message = new MimeMessage();
@@ -155,7 +155,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             CancellationToken timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
             Thread outputThread = null;
 
-            using (Command serverProcess = Command.Run("dotnet", new[] { mainModule, "--urls=http://*:0", "--smtpport=0", "--db=" }, o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
+            using (Command serverProcess = Command.Run("dotnet", new[] { mainModule, "--urls=http://*:0", "--smtpport=0", "--db=", "--tlsmode=StartTls" }, o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
             {
                 try
                 {
