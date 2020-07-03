@@ -10,6 +10,7 @@ This version is in development, but now approaching a stable state.
 
 *If you find smtp4dev useful, please consider supporting further development by making a donation:*
 
+<a href="https://www.patreon.com/bePatron?u=38204828" data-patreon-widget-type="become-patron-button"><img alt='Become a Patreon' src='https://c5.patreon.com/external/logo/become_a_patron_button.png'></a>
 <a href='https://www.paypal.me/rnwood'><img alt='Donate' src='https://www.paypalobjects.com/webstatic/en_US/btn/btn_donate_pp_142x27.png'/></a>
 
 [![Build Status](https://dev.azure.com/smtp4dev/smtp4dev/_apis/build/status/rnwood.smtp4dev?branchName=master)](https://dev.azure.com/smtp4dev/smtp4dev/_build/latest?definitionId=2&branchName=master)
