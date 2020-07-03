@@ -76,6 +76,10 @@ namespace Rnwood.Smtp4dev.Server
                     Console.WriteLine($"Ensure that the hostname you enter into clients and '{serverOptions.Value.HostName}' from ServerOptions:HostName configuration match exactly");
                     Console.WriteLine($"and trust the issuer certificate at {cerPath} in your client/OS to avoid certificate validation errors.");
                 }
+            } else
+            {
+                Console.WriteLine("SSL/TLS is now disabled by default");
+                Console.WriteLine("To enable use set TlsMode option (values 'ImplicitTls' or 'StartTls') on command line or in appsettings.json and follow the instruction about hostname and certificate trust on first startup.");
             }
             Console.WriteLine();
 
