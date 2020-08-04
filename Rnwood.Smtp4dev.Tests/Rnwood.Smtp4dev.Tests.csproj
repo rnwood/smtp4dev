@@ -10,7 +10,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="MailKit" Version="2.6.0" />
+    <PackageReference Include="MailKit" Version="2.8.0" />
     <PackageReference Include="MedallionShell" Version="1.6.1" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.6.1" />
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
