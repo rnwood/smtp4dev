@@ -27,7 +27,7 @@
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^5.0.0",
     "locale-index-of": "^1.0.5",
-    "moment": "^2.24.0",
+    "moment": "^2.27.0",
     "srcdoc-polyfill": "^1.0.0",
     "ts-debounce": "^1.0.0",
     "typescript": "~3.9.7",
