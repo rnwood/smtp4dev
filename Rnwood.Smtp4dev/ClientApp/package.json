@@ -34,7 +34,7 @@
     "vue-router": "^3.4.2",
     "vue-template-compiler": "^2.6.10",
     "vue2-ace-editor": "0.0.15",
-    "@fortawesome/fontawesome-free": "^5.13.0",
+    "@fortawesome/fontawesome-free": "^5.14.0",
     "core-js": "^3.6.5",
     "node-sass": "^4.14.1",
     "sass": "^1.26.10",
