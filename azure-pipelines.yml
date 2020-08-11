@@ -8,7 +8,7 @@ resources:
 variables:
   version_major: '3'
   version_minor: '1'
-  version_release: '0'
+  version_release: '1'
   version_majorminor: '$(version_major).$(version_minor)'
   version: '$(version_major).$(version_minor).$(version_release)'
   tag: '$(Build.BuildNumber)'
