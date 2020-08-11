@@ -84,10 +84,9 @@ namespace Rnwood.Smtp4dev.ApiModel
 
             return MimeEntityVisitor.VisitWithResults<MessageEntitySummary>(entity, (e, p) =>
            {
-               string fileName = PunyCodeReplacer.DecodePunycode(string.IsNullOrEmpty(e.ContentType?.Name)
+               string fileName = PunyCodeReplacer.DecodePunycode(!string.IsNullOrEmpty(e.ContentDisposition?.FileName)
             ? e.ContentDisposition?.FileName
-            : e.ContentType.Name);
-
+            : e.ContentType?.Name);
 
                MessageEntitySummary result = new MessageEntitySummary()
                {
