@@ -13,7 +13,7 @@
     "@aspnet/signalr": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
     "@typescript-eslint/parser": "^2.34.0",
-    "@vue/cli-plugin-babel": "^4.5.3",
+    "@vue/cli-plugin-babel": "^4.5.4",
     "@vue/cli-plugin-eslint": "^4.5.3",
     "@vue/cli-plugin-typescript": "^4.4.6",
     "@vue/cli-service": "^4.3.1",
