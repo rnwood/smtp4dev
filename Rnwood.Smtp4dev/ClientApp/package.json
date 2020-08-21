@@ -29,7 +29,7 @@
     "locale-index-of": "^1.0.8",
     "moment": "^2.27.0",
     "srcdoc-polyfill": "^1.0.0",
-    "ts-debounce": "^1.0.0",
+    "ts-debounce": "^2.0.1",
     "typescript": "~3.9.7",
     "vue-router": "^3.4.3",
     "vue-template-compiler": "^2.6.12",
