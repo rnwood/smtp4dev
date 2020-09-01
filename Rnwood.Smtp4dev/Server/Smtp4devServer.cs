@@ -16,21 +16,24 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
-using System.Runtime.CompilerServices;
+using System.Net.Mail;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using MimeKit;
 
 namespace Rnwood.Smtp4dev.Server
 {
     public class Smtp4devServer : IMessagesRepository
     {
-        public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptions<ServerOptions> serverOptions, MessagesHub messagesHub, SessionsHub sessionsHub)
+        public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptions<ServerOptions> serverOptions, 
+            IOptions<RelayOptions> relayOptions, MessagesHub messagesHub, SessionsHub sessionsHub, SmtpClient relaySmtpClient)
         {
             this.messagesHub = messagesHub;
             this.sessionsHub = sessionsHub;
             this.serverOptions = serverOptions;
+            this.relayOptions = relayOptions;
             this.dbContextFactory = dbContextFactory;
+            this.relaySmtpClient = relaySmtpClient;
 
 
             System.Security.Cryptography.X509Certificates.X509Certificate2 cert = null;
@@ -139,7 +142,8 @@ namespace Rnwood.Smtp4dev.Server
                 X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
         }
 
-        private IOptions<ServerOptions> serverOptions;
+        private readonly IOptions<ServerOptions> serverOptions;
+        private readonly IOptions<RelayOptions> relayOptions;
         private readonly IDictionary<ISession, Guid> activeSessionsToDbId = new Dictionary<ISession, Guid>();
 
         private static async Task UpdateDbSession(ISession session, Session dbSession)
@@ -287,6 +291,8 @@ namespace Rnwood.Smtp4dev.Server
                 Message message = new MessageConverter().ConvertAsync(stream, e.Message.From, to).Result;
                 message.IsUnread = true;
 
+                RelayMessage(message);
+
                 await QueueTask(() =>
                 {
                     Console.WriteLine("Processing received message");
@@ -304,6 +310,45 @@ namespace Rnwood.Smtp4dev.Server
                     Console.WriteLine("Processing received message DONE");
 
                 }, false).ConfigureAwait(false);
+            }
+        }
+
+        private void RelayMessage(Message message)
+        {
+            if (!relayOptions.Value.IsEnabled)
+            {
+                return;
+            }
+
+            try
+            {
+
+                var apiMsg = new ApiModel.Message(message);
+                var newEmail = new MailMessage
+                {
+                    From = new MailAddress(relayOptions.Value.SenderAddress),
+                    Subject = apiMsg.MimeMessage.Subject,
+                    Body = apiMsg.MimeMessage.HtmlBody,
+                    IsBodyHtml = true,
+                };
+
+                apiMsg.To.Split(';')
+                    .Where(to => relayOptions.Value.AllowedEmails
+                        .Any(allowed => string.Equals(allowed, to, StringComparison.OrdinalIgnoreCase)))
+                    .ToList()
+                    .ForEach(newEmail.To.Add);
+
+                apiMsg.MimeMessage.Attachments
+                    .Select(mimeEntity => mimeEntity as MimePart).Where(mimePart => mimePart != null)
+                    .Select(x => new Attachment(x.Content.Stream, x.FileName, x.ContentType.MimeType))
+                    .ToList()
+                    .ForEach(newEmail.Attachments.Add);
+
+                relaySmtpClient.Send(newEmail);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine("Can not relay message: " + e.Message);
             }
         }
 
@@ -374,6 +419,7 @@ namespace Rnwood.Smtp4dev.Server
         private BlockingCollection<Action> priorityProcessingQueue;
 
         private DefaultServer smtpServer;
+        private SmtpClient relaySmtpClient;
 
         private MessagesHub messagesHub;
         private SessionsHub sessionsHub;

@@ -1,6 +1,7 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
+using System.Net;
+using System.Net.Mail;
 
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -31,6 +32,7 @@ namespace Rnwood.Smtp4dev
         public void ConfigureServices(IServiceCollection services)
         {
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
+            RelayOptions relayOptions = Configuration.GetSection("RelayOptions").Get<RelayOptions>();
 
             services.AddDbContext<Smtp4devDbContext>(opt =>
             {
@@ -50,9 +52,22 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<Smtp4devServer>();
             services.AddSingleton<IMessagesRepository>(sp => sp.GetService<Smtp4devServer>());
             services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
-
+            
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
+            services.Configure<RelayOptions>(Configuration.GetSection("RelayOptions"));
 
+            if (relayOptions.IsEnabled)
+            {
+                services.AddSingleton(new SmtpClient(relayOptions.SmtpServer, relayOptions.SmtpPort)
+                {
+                    Credentials = new NetworkCredential(relayOptions.Login, relayOptions.Password),
+                });
+            }
+            else
+            {
+                services.AddSingleton<SmtpClient>(_ => null);
+            }
+            
             services.AddSignalR();
 
             services.AddSingleton<MessagesHub>();
@@ -91,7 +106,7 @@ namespace Rnwood.Smtp4dev
                     {
                         e.MapToVueCliProxy(
                         "{*path}",
-                        new SpaOptions { SourcePath = "ClientApp" },
+                        new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp") },
                         npmScript: "serve",
                         regex: "Compiled successfully",
                         forceKill: true
