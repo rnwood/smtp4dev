@@ -1,8 +1,6 @@
 using System;
 using System.IO;
 using System.Net;
-using System.Net.Mail;
-
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -16,6 +14,7 @@ using Rnwood.Smtp4dev.Server;
 using VueCliMiddleware;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SpaServices;
+using MailKit.Net.Smtp;
 
 namespace Rnwood.Smtp4dev
 {
@@ -52,22 +51,29 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<Smtp4devServer>();
             services.AddSingleton<IMessagesRepository>(sp => sp.GetService<Smtp4devServer>());
             services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
-            
+
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
             services.Configure<RelayOptions>(Configuration.GetSection("RelayOptions"));
 
-            if (relayOptions.IsEnabled)
+            services.AddSingleton<Func<SmtpClient>>(() =>
             {
-                services.AddSingleton(new SmtpClient(relayOptions.SmtpServer, relayOptions.SmtpPort)
+                if (!relayOptions.IsEnabled)
                 {
-                    Credentials = new NetworkCredential(relayOptions.Login, relayOptions.Password),
-                });
-            }
-            else
-            {
-                services.AddSingleton<SmtpClient>(_ => null);
-            }
-            
+                    return null;
+                }
+
+                SmtpClient result = new SmtpClient();
+                result.Connect(relayOptions.SmtpServer, relayOptions.SmtpPort);
+
+                if (!string.IsNullOrEmpty(relayOptions.Login))
+                {
+                    result.Authenticate(relayOptions.Login, relayOptions.Password);
+                }
+
+                return result;
+            });
+
+
             services.AddSignalR();
 
             services.AddSingleton<MessagesHub>();
@@ -114,7 +120,7 @@ namespace Rnwood.Smtp4dev
                     }
                 });
 
-                
+
 
 
 

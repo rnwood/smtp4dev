@@ -16,25 +16,24 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net.Mail;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
 using MimeKit;
+using MailKit.Net.Smtp;
 
 namespace Rnwood.Smtp4dev.Server
 {
     public class Smtp4devServer : IMessagesRepository
     {
-        public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptions<ServerOptions> serverOptions, 
-            IOptions<RelayOptions> relayOptions, MessagesHub messagesHub, SessionsHub sessionsHub, SmtpClient relaySmtpClient)
+        public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptions<ServerOptions> serverOptions,
+            IOptions<RelayOptions> relayOptions, MessagesHub messagesHub, SessionsHub sessionsHub, Func<SmtpClient> relaySmtpClientFactory)
         {
             this.messagesHub = messagesHub;
             this.sessionsHub = sessionsHub;
             this.serverOptions = serverOptions;
             this.relayOptions = relayOptions;
             this.dbContextFactory = dbContextFactory;
-            this.relaySmtpClient = relaySmtpClient;
-
+            this.relaySmtpClientFactory = relaySmtpClientFactory;
 
             System.Security.Cryptography.X509Certificates.X509Certificate2 cert = null;
 
@@ -79,7 +78,8 @@ namespace Rnwood.Smtp4dev.Server
                     Console.WriteLine($"Ensure that the hostname you enter into clients and '{serverOptions.Value.HostName}' from ServerOptions:HostName configuration match exactly");
                     Console.WriteLine($"and trust the issuer certificate at {cerPath} in your client/OS to avoid certificate validation errors.");
                 }
-            } else
+            }
+            else
             {
                 Console.WriteLine("SSL/TLS is now disabled by default");
                 Console.WriteLine("To enable use set TlsMode option (values 'ImplicitTls' or 'StartTls') on command line or in appsettings.json and follow the instruction about hostname and certificate trust on first startup.");
@@ -290,13 +290,14 @@ namespace Rnwood.Smtp4dev.Server
                 Console.WriteLine($"Message received. Client address {e.Message.Session.ClientAddress}. From {e.Message.From}. To {to}.");
                 Message message = new MessageConverter().ConvertAsync(stream, e.Message.From, to).Result;
                 message.IsUnread = true;
-
-                RelayMessage(message);
+                               
 
                 await QueueTask(() =>
                 {
                     Console.WriteLine("Processing received message");
                     Smtp4devDbContext dbContext = dbContextFactory();
+
+                    RelayMessage(message);
 
                     Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
                     message.Session = dbSession;
@@ -320,36 +321,32 @@ namespace Rnwood.Smtp4dev.Server
                 return;
             }
 
-            try
+            foreach (string envelopeTo in message.To.Split(";"))
             {
+                Console.WriteLine($"Relaying message to {envelopeTo}");
 
-                var apiMsg = new ApiModel.Message(message);
-                var newEmail = new MailMessage
+                try
                 {
-                    From = new MailAddress(relayOptions.Value.SenderAddress),
-                    Subject = apiMsg.MimeMessage.Subject,
-                    Body = apiMsg.MimeMessage.HtmlBody,
-                    IsBodyHtml = true,
-                };
+                    MailboxAddress recipient = MailboxAddress.Parse(envelopeTo);
+                    if (relayOptions.Value.AllowedEmails.Contains(recipient.Address, StringComparer.OrdinalIgnoreCase))
+                    {
+                        using (SmtpClient relaySmtpClient = relaySmtpClientFactory())
+                        {
+                            var apiMsg = new ApiModel.Message(message);
+                            MimeMessage newEmail = apiMsg.MimeMessage;
+                            MailboxAddress sender = MailboxAddress.Parse(relayOptions.Value.SenderAddress);
+                            relaySmtpClient.Send(newEmail, sender, new[] { recipient });
+                        }
+                    }
 
-                apiMsg.To.Split(';')
-                    .Where(to => relayOptions.Value.AllowedEmails
-                        .Any(allowed => string.Equals(allowed, to, StringComparison.OrdinalIgnoreCase)))
-                    .ToList()
-                    .ForEach(newEmail.To.Add);
-
-                apiMsg.MimeMessage.Attachments
-                    .Select(mimeEntity => mimeEntity as MimePart).Where(mimePart => mimePart != null)
-                    .Select(x => new Attachment(x.Content.Stream, x.FileName, x.ContentType.MimeType))
-                    .ToList()
-                    .ForEach(newEmail.Attachments.Add);
-
-                relaySmtpClient.Send(newEmail);
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Can not relay message to {envelopeTo}: {e.ToString()}");
+                    message.RelayError = e.Message;
+                }
             }
-            catch (Exception e)
-            {
-                Console.WriteLine("Can not relay message: " + e.Message);
-            }
+
         }
 
         public Task DeleteMessage(Guid id)
@@ -419,7 +416,7 @@ namespace Rnwood.Smtp4dev.Server
         private BlockingCollection<Action> priorityProcessingQueue;
 
         private DefaultServer smtpServer;
-        private SmtpClient relaySmtpClient;
+        private Func<SmtpClient> relaySmtpClientFactory;
 
         private MessagesHub messagesHub;
         private SessionsHub sessionsHub;

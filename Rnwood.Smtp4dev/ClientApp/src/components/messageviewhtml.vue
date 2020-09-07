@@ -1,16 +1,19 @@
 ﻿<template>
 
-    <div class="vfillpanel" v-loading="!html">
+    <div class="hfillpanel" v-loading="!html">
         <el-alert v-if="error" type="error">
             {{error.message}}
 
             <el-button v-on:click="loadMessage">Retry</el-button>
         </el-alert>
 
+        <div v-if="message && message.relayError">
+            <el-alert type="error">Message relay error: {{message.relayError}}</el-alert>
+        </div>
+
         <template v-if="message && message.mimeParseError">
             <el-alert type="error">Message parse error: {{message.mimeParseError}}</el-alert>
         </template>
-
 
         <iframe class="fill" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
     </div>
@@ -48,43 +51,43 @@
             srcDoc.set(<HTMLIFrameElement>this.$refs.htmlframe, value);
         }
 
-    async onHtmlFrameLoaded() {
-        var doc = (<HTMLIFrameElement> this.$refs.htmlframe).contentDocument;
-        if (!doc) {
-            return;
-                }
-
-                var baseElement = doc.body.querySelector("base") || doc.createElement("base");
-                baseElement.setAttribute("target", "_blank");
-
-                doc.body.appendChild(baseElement);
+        async onHtmlFrameLoaded() {
+            var doc = (<HTMLIFrameElement>this.$refs.htmlframe).contentDocument;
+            if (!doc) {
+                return;
             }
 
-    async loadMessage() {
+            var baseElement = doc.body.querySelector("base") || doc.createElement("base");
+            baseElement.setAttribute("target", "_blank");
 
-                        this.error = null;
-                    this.loading = true;
-                    this.html = null;
+            doc.body.appendChild(baseElement);
+        }
 
-        try {
-            if (this.message != null) {
+        async loadMessage() {
 
-                        this.html = await new MessagesController().getMessageHtml(this.message.id);
+            this.error = null;
+            this.loading = true;
+            this.html = null;
+
+            try {
+                if (this.message != null) {
+
+                    this.html = await new MessagesController().getMessageHtml(this.message.id);
                 }
-        } catch (e) {
-                        this.error = e;
-        } finally {
-                        this.loading = false;
-                }
+            } catch (e) {
+                this.error = e;
+            } finally {
+                this.loading = false;
             }
+        }
 
-    async created() {
+        async created() {
 
-                        this.loadMessage();
-                }
+            this.loadMessage();
+        }
 
-    async destroyed() {
+        async destroyed() {
 
-                    }
-                    }
+        }
+    }
 </script>
