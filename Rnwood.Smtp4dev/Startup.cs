@@ -133,9 +133,9 @@ namespace Rnwood.Smtp4dev
                 subdir.ApplicationServices.GetService<Smtp4devServer>().Start();
             };
 
-            if (!string.IsNullOrEmpty(serverOptions.RootUrl))
+            if (!string.IsNullOrEmpty(serverOptions.RootPath))
             {
-                app.Map(serverOptions.RootUrl, configure);
+                app.Map(serverOptions.RootPath, configure);
             }
             else
             {
