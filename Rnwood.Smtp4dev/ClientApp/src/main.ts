@@ -23,7 +23,11 @@ if (!supportedBrowser) {
         { path: '/', component: Home },
     ];
 
-    var router = new VueRouter({ mode: 'history', routes: routes })
+    var router = new VueRouter({
+        base: location.pathname,
+        mode: 'history',
+        routes: routes
+    })
     var app = new Vue({
         el: '#app-root',
         router: router,

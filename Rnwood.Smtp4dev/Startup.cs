@@ -15,6 +15,7 @@ using VueCliMiddleware;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SpaServices;
 using MailKit.Net.Smtp;
+using Microsoft.AspNetCore.Rewrite;
 
 namespace Rnwood.Smtp4dev
 {
@@ -92,9 +93,9 @@ namespace Rnwood.Smtp4dev
 
             app.UseRouting();
 
-
             Action<IApplicationBuilder> configure = subdir =>
             {
+                subdir.UseRouting();
                 subdir.UseDeveloperExceptionPage();
                 subdir.UseDefaultFiles();
                 subdir.UseStaticFiles();
@@ -133,9 +134,14 @@ namespace Rnwood.Smtp4dev
                 subdir.ApplicationServices.GetService<Smtp4devServer>().Start();
             };
 
-            if (!string.IsNullOrEmpty(serverOptions.RootUrl))
+            if (!string.IsNullOrEmpty(serverOptions.BasePath) && serverOptions.BasePath != "/")
             {
-                app.Map(serverOptions.RootUrl, configure);
+                RewriteOptions rewrites = new RewriteOptions();
+                rewrites.AddRedirect("^" + serverOptions.BasePath.TrimEnd('/') + "$", serverOptions.BasePath.TrimEnd('/') + "/"); ;
+                rewrites.AddRedirect("^(/)?$", serverOptions.BasePath.TrimEnd('/') + "/"); ;
+                app.UseRewriter(rewrites);
+
+                app.Map(serverOptions.BasePath, configure);
             }
             else
             {
