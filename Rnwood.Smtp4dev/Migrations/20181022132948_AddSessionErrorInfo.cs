@@ -7,7 +7,6 @@ namespace Rnwood.Smtp4dev.Migrations
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            
             migrationBuilder.AddColumn<string>(
                 name: "SessionError",
                 table: "Sessions",

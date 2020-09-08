@@ -27,6 +27,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             Subject = dbMessage.Subject;
 
             Parts = new List<ApiModel.MessageEntitySummary>();
+            RelayError = dbMessage.RelayError;
 
             if (dbMessage.MimeParseError != null)
             {
@@ -210,6 +211,8 @@ namespace Rnwood.Smtp4dev.ApiModel
         public List<Header> Headers { get; set; }
 
         public string MimeParseError { get; set; }
+
+        public string RelayError { get; set; }
 
         internal MimeMessage MimeMessage { get; set; }
 

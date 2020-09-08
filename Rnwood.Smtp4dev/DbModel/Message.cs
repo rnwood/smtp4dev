@@ -31,5 +31,6 @@ namespace Rnwood.Smtp4dev.DbModel
         public int AttachmentCount { get; set; }
 
         public bool IsUnread { get; set; }
+        public string RelayError { get; internal set; }
     }
 }

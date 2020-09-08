@@ -1,7 +1,6 @@
 using System;
 using System.IO;
-using System.Threading.Tasks;
-
+using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +14,7 @@ using Rnwood.Smtp4dev.Server;
 using VueCliMiddleware;
 using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SpaServices;
+using MailKit.Net.Smtp;
 
 namespace Rnwood.Smtp4dev
 {
@@ -31,6 +31,7 @@ namespace Rnwood.Smtp4dev
         public void ConfigureServices(IServiceCollection services)
         {
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
+            RelayOptions relayOptions = Configuration.GetSection("RelayOptions").Get<RelayOptions>();
 
             services.AddDbContext<Smtp4devDbContext>(opt =>
             {
@@ -52,6 +53,26 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
 
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
+            services.Configure<RelayOptions>(Configuration.GetSection("RelayOptions"));
+
+            services.AddSingleton<Func<SmtpClient>>(() =>
+            {
+                if (!relayOptions.IsEnabled)
+                {
+                    return null;
+                }
+
+                SmtpClient result = new SmtpClient();
+                result.Connect(relayOptions.SmtpServer, relayOptions.SmtpPort);
+
+                if (!string.IsNullOrEmpty(relayOptions.Login))
+                {
+                    result.Authenticate(relayOptions.Login, relayOptions.Password);
+                }
+
+                return result;
+            });
+
 
             services.AddSignalR();
 
@@ -91,7 +112,7 @@ namespace Rnwood.Smtp4dev
                     {
                         e.MapToVueCliProxy(
                         "{*path}",
-                        new SpaOptions { SourcePath = "ClientApp" },
+                        new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp") },
                         npmScript: "serve",
                         regex: "Compiled successfully",
                         forceKill: true
@@ -99,7 +120,7 @@ namespace Rnwood.Smtp4dev
                     }
                 });
 
-                
+
 
 
 
