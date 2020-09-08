@@ -117,9 +117,12 @@ namespace Rnwood.Smtp4dev
 
             bool help = false;
 
+
+
             OptionSet options = new OptionSet
             {
                 { "h|help|?", "Shows this message and exits", _ =>  help = true},
+                { "urls=", "The URLs the web interface should listen on. For example, http://localhost:123. Use `*` in place of hostname to listen for requests on any IP address or hostname using the specified port and protocol (for example, http://*:5000)", _ => { } },
                 { "hostname=", "Specifies the server hostname. Used in auto-generated TLS certificate if enabled.", data => map.Add(data, x => x.ServerOptions.HostName) },
                 { "allowremoteconnections", "Specifies if remote connections will be allowed to the SMTP server.", data => map.Add(data, x => x.ServerOptions.AllowRemoteConnections) },
                 { "smtpport=", "Set the port the SMTP server listens on. Specify 0 to assign automatically", data => map.Add(data, x => x.ServerOptions.Port) },
@@ -128,7 +131,13 @@ namespace Rnwood.Smtp4dev
                 { "sessionstokeep=", "Specifies the number of sessions to keep", data => map.Add(data, x=> x.ServerOptions.NumberOfSessionsToKeep) },
                 { "tlsmode=", "Specifies the TLS mode to use. None=Off. StartTls=On demand if client supports STARTTLS. ImplicitTls=TLS as soon as connection is established.", data => map.Add(data, x=> x.ServerOptions.TlsMode) },
                 { "tlscertificate=", "Specifies the TLS certificate to use if TLS is enabled/requested. Specify \"\" to use an auto-generated self-signed certificate (then see console output on first startup)", data => map.Add(data, x=> x.ServerOptions.TlsCertificate) },
-                { "rootpath=", "Specifies the virtual path from web server root where SMTP4DEV web interface will be hosted. e.g. '/smtp4dev'", data => map.Add(data, x => x.ServerOptions.RootPath) }
+                { "basepath=", "Specifies the virtual path from web server root where SMTP4DEV web interface will be hosted. e.g. \"/\" or \"/smtp4dev\"", data => map.Add(data, x => x.ServerOptions.BasePath) },
+                { "relaysmtpserver=", "Sets the name of the SMTP server that will be used to relay messages or \"\" if messages should not be relayed", data => map.Add(data, x=> x.RelayOptions.SmtpServer) },
+                { "relaysmtpport=", "Sets the port number for the SMTP server used to relay messages", data => map.Add(data, x=> x.RelayOptions.SmtpServer) },
+                { "relayallowedemails=", "A comma separated list of recipient addresses for which messages will be relayed. An empty list means that no messages are relayed", data => map.Add(data, x=> x.RelayOptions.AllowedEmailsString) },
+                { "relaysenderaddress=", "Specifies the address used in MAIL FROM when relaying messages. (Sender address in message headers is left unmodified). The sender of each message is used if not specified.", data => map.Add(data, x=> x.RelayOptions.SenderAddress) },
+                { "relayusername=", "The username for the SMTP server used to relay messages. If \"\" no authentication is attempted", data => map.Add(data, x=> x.RelayOptions.Login) },
+                { "relaypassword=", "The password for the SMTP server used to relay messages", data => map.Add(data, x=> x.RelayOptions.Password) }
             };
 
             try
@@ -140,7 +149,8 @@ namespace Rnwood.Smtp4dev
                     help = true;
                 }
 
-            } catch (OptionException e)
+            }
+            catch (OptionException e)
             {
                 Console.Error.WriteLine("Invalid command line: " + e.Message);
                 help = true;
@@ -149,10 +159,15 @@ namespace Rnwood.Smtp4dev
             if (help)
             {
                 Console.Error.WriteLine();
-                Console.Error.WriteLine("For information about default values see documentation in appsettings.json.");
+                Console.Error.WriteLine(" > For information about default values see documentation in appsettings.json.");
                 Console.Error.WriteLine();
                 options.WriteOptionDescriptions(Console.Error);
                 return null;
+            } else
+            {
+                Console.Error.WriteLine();
+                Console.Error.WriteLine(" > For help use argument --help");
+                Console.Error.WriteLine();
             }
 
             return map;
@@ -162,5 +177,6 @@ namespace Rnwood.Smtp4dev
     class CommandLineOptions
     {
         public ServerOptions ServerOptions { get; set; }
+        public RelayOptions RelayOptions { get; set; }
     }
 }

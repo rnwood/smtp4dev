@@ -290,7 +290,7 @@ namespace Rnwood.Smtp4dev.Server
                 Console.WriteLine($"Message received. Client address {e.Message.Session.ClientAddress}. From {e.Message.From}. To {to}.");
                 Message message = new MessageConverter().ConvertAsync(stream, e.Message.From, to).Result;
                 message.IsUnread = true;
-                               
+
 
                 await QueueTask(() =>
                 {
@@ -334,7 +334,10 @@ namespace Rnwood.Smtp4dev.Server
                         {
                             var apiMsg = new ApiModel.Message(message);
                             MimeMessage newEmail = apiMsg.MimeMessage;
-                            MailboxAddress sender = MailboxAddress.Parse(relayOptions.Value.SenderAddress);
+                            MailboxAddress sender = MailboxAddress.Parse(
+                                !string.IsNullOrEmpty(relayOptions.Value.SenderAddress)
+                                ? relayOptions.Value.SenderAddress
+                                : apiMsg.From);
                             relaySmtpClient.Send(newEmail, sender, new[] { recipient });
                         }
                     }

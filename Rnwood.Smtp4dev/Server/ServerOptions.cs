@@ -15,7 +15,7 @@ namespace Rnwood.Smtp4dev.Server
         public int NumberOfMessagesToKeep { get; set; } = 100;
         public int NumberOfSessionsToKeep { get; set; } = 100;
 
-        public string RootPath { get; set; }
+        public string BasePath { get; set; } = "/";
 
         public TlsMode TlsMode { get; set; } = TlsMode.None;
 

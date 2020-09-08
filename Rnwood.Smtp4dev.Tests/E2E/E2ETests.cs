@@ -36,7 +36,18 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         }
 
         [Fact]
-        public void CheckMessageIsReceivedAndDisplayed()
+        public void CheckMessageIsReceivedAndDisplayed_RootBasePath()
+        {
+            CheckMessageIsReceivedAndDisplayed(null);
+        }
+
+        [Fact]
+        public void CheckMessageIsReceivedAndDisplayed_NonRootBasePath()
+        {
+            CheckMessageIsReceivedAndDisplayed("/smtp4dev");
+        }
+
+        private void CheckMessageIsReceivedAndDisplayed(string basePath)
         {
             RunE2ETest((browser, baseUrl, smtpPortNumber) =>
             {
@@ -137,7 +148,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         }
 
 
-        private void RunE2ETest(Action<IWebDriver, Uri, int> test)
+        private void RunE2ETest(Action<IWebDriver, Uri, int> test, string basePath=null)
         {
             string workingDir = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_WORKINGDIR");
             string mainModule = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_BINARY");
@@ -155,7 +166,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             CancellationToken timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
             Thread outputThread = null;
 
-            using (Command serverProcess = Command.Run("dotnet", new[] { mainModule, "--urls=http://*:0", "--smtpport=0", "--db=", "--tlsmode=StartTls" }, o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
+            
+            List<string> args = new List<string> { mainModule, "--urls=http://*:0", "--smtpport=0", "--db=", "--tlsmode=StartTls" };
+            if (basePath != null)
+            {
+                args.Add($"--basepath {basePath}");
+            }
+
+            using (Command serverProcess = Command.Run("dotnet", args, o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
             {
                 try
                 {
@@ -173,7 +191,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         if (newLine.StartsWith("Now listening on: http://"))
                         {
                             int portNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s]+:(\d+)", "$1"));
-                            baseUrl = new Uri("http://localhost:" + portNumber);
+                            baseUrl = new Uri($"http://localhost:{portNumber}{basePath ?? ""}" );
                         }
 
                         if (newLine.StartsWith("SMTP Server is listening on port"))
