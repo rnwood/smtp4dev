@@ -64,6 +64,18 @@ The folder ``/smtp4dev`` will be used for the database and auto-generated TLS ce
 
 A service in Windows can be installed using New-Service in PowerShell, or sc in both command line or PowerShell. If you use sc in PowerShell, it must be run as sc.exe. sc is an alias for Set-Content.
 
+## How to run smtp4dev in Windows IIS
+
+Download a smtp4dev release and unzip. You must pick the win-x64 version.
+
+Create a site in IIS and set the path to where you unzipped smtp4dev. You can also host in a virtual directory under another site, but don't forget to convert the directory to an application.
+
+Grant permission to the IIS app pool to read and modify the files. The principal name is `IIS APPPOOL\<name>` where `<name>` is the name of the app pool, which is the name of the site you created unless you changed something.
+
+Edit the application pool and set '.NET CLR version' to 'No managed code'
+
+You can then access the site via the ports/hostname set in bindings that are set in IIS. If you see an error check the `Application` event log for details and you'll see any errors output from IIS.
+
 ### Install service in PowerShell
 
 ```
