@@ -12,7 +12,7 @@ resources:
 variables:
   civersion_major: '3'
   civersion_minor: '1'
-  civersion_release: '1'
+  civersion_release: '2'
   civersion_majorminor: '$(civersion_major).$(civersion_minor)'
   civersion: '$(civersion_major).$(civersion_minor).$(civersion_release)'
 
