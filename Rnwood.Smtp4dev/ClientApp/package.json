@@ -38,7 +38,7 @@
     "core-js": "^3.6.5",
     "node-sass": "^4.14.1",
     "sass": "^1.26.10",
-    "sass-loader": "^8.0.2",
+    "sass-loader": "^10.0.2",
     "vue": "^2.6.12",
     "vue-class-component": "^7.2.5",
     "vue-property-decorator": "^9.0.0"
