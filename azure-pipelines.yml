@@ -93,17 +93,29 @@ stages:
     - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-x64/Rnwood.Smtp4dev-linux-x64-$(tag).zip
       displayName: Rename artifact        
     - publish: $(Build.ArtifactStagingDirectory)/linux-x64
-      artifact: linux-x64       
+      artifact: linux-x64  
+      
     - task: DotNetCoreCLI@2
-      displayName: Build .NET Core - osx-x64
+      displayName: Build .NET Core - linux-musl-x64
       inputs:
         command: publish
         projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        arguments: '-c Release -r osx-x64 -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/osx-x64"' 
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/osx-x64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/osx-x64/Rnwood.Smtp4dev-osx-x64-$(tag).zip
+        arguments: '-c Release -r linux-musl-x64 -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/linux-musl-x64"' 
+    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-musl-x64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-musl-x64/Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip
       displayName: Rename artifact        
-    - publish: $(Build.ArtifactStagingDirectory)/osx-x64
-      artifact: osx-x64   
+    - publish: $(Build.ArtifactStagingDirectory)/linux-musl-x64
+      artifact: linux-musl-x64            
+      
+    # - task: DotNetCoreCLI@2
+    #   displayName: Build .NET Core - osx-x64
+    #   inputs:
+    #     command: publish
+    #     projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+    #     arguments: '-c Release -r osx-x64 -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/osx-x64"' 
+    # - powershell: move-item $(Build.ArtifactStagingDirectory)/osx-x64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/osx-x64/Rnwood.Smtp4dev-osx-x64-$(tag).zip
+    #   displayName: Rename artifact        
+    # - publish: $(Build.ArtifactStagingDirectory)/osx-x64
+    #   artifact: osx-x64   
     - task: DotNetCoreCLI@2
       displayName: Build .NET Core - win-arm
       inputs:
@@ -120,10 +132,30 @@ stages:
         command: publish
         projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
         arguments: '-c Release -r linux-arm -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/linux-arm"' 
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev-noruntime-$(tag).zip
+    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev-arm-$(tag).zip
       displayName: Rename artifact
     - publish: $(Build.ArtifactStagingDirectory)/linux-arm
       artifact: linux-arm     
+    - task: DotNetCoreCLI@2
+      displayName: Build .NET Core - win-arm64
+      inputs:
+        command: publish
+        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+        arguments: '-c Release -r win-arm64 -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/win-arm64"' 
+    - powershell: move-item $(Build.ArtifactStagingDirectory)/win-arm64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/win-arm64/Rnwood.Smtp4dev-win-arm64-$(tag).zip
+      displayName: Rename artifact
+    - publish: $(Build.ArtifactStagingDirectory)/win-arm64
+      artifact: win-arm64
+    - task: DotNetCoreCLI@2
+      displayName: Build .NET Core - linux-arm64
+      inputs:
+        command: publish
+        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+        arguments: '-c Release -r linux-arm64 -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/linux-arm64"' 
+    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-arm64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-arm64/Rnwood.Smtp4dev-arm64-$(tag).zip
+      displayName: Rename artifact
+    - publish: $(Build.ArtifactStagingDirectory)/linux-arm64
+      artifact: linux-arm64           
 
   - job: DockerBuildLinux
     displayName: DockerBuild - Linux
