@@ -136,27 +136,6 @@ stages:
       displayName: Rename artifact
     - publish: $(Build.ArtifactStagingDirectory)/linux-arm
       artifact: linux-arm     
-    - task: DotNetCoreCLI@2
-      displayName: Build .NET Core - win-arm64
-      inputs:
-        command: publish
-        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        arguments: '-c Release -r win-arm64 -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/win-arm64"' 
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/win-arm64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/win-arm64/Rnwood.Smtp4dev-win-arm64-$(tag).zip
-      displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/win-arm64
-      artifact: win-arm64
-    - task: DotNetCoreCLI@2
-      displayName: Build .NET Core - linux-arm64
-      inputs:
-        command: publish
-        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        arguments: '-c Release -r linux-arm64 -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/linux-arm64"' 
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-arm64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-arm64/Rnwood.Smtp4dev-arm64-$(tag).zip
-      displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/linux-arm64
-      artifact: linux-arm64           
-
   - job: DockerBuildLinux
     displayName: DockerBuild - Linux
     pool:
