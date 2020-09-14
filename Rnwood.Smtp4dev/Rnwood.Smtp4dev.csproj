@@ -32,7 +32,7 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="3.1.8" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="3.1.8" />
-		<PackageReference Include="MimeKit" Version="2.9.1" />
+		<PackageReference Include="MimeKit" Version="2.9.2" />
 		<PackageReference Include="Mono.Options" Version="6.6.0.161" />
 		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0579" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.8.6.7" />
