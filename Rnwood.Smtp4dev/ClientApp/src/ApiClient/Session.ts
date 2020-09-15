@@ -1,7 +1,7 @@
-﻿ 
+﻿
 
 export default class Session {
-
+ 
     constructor(id: string, errorType: string, error: string, ) {
          
         this.id = id; 

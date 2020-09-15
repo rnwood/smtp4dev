@@ -17,37 +17,44 @@
       </div>
 
       <div class="pad">
-        <el-alert
-          v-for="warning in warnings"
-          v-bind:key="warning.details"
-          :title="'Warning: ' + warning.details"
-          type="warning"
-          show-icon
-        />
+          <el-alert v-for="warning in warnings"
+                    v-bind:key="warning.details"
+                    :title="'Warning: ' + warning.details"
+                    type="warning"
+                    show-icon />
 
-        <table class="messageviewheader">
-          <tr>
-            <td>From:</td>
-            <td><span v-if="message">{{message.from}}</span></td>
-          </tr>
+          <table class="messageviewheader">
+              <tr>
+                  <td>From:</td>
+                  <td><span v-if="message">{{message.from}}</span></td>
+              </tr>
 
-          <tr>
-            <td>To:</td>
-            <td><span v-if="message">{{message.to}}</span></td>
-          </tr>
-          <tr v-if="message && message.cc">
-            <td>Cc:</td>
-            <td>{{message.cc}}</td>
-          </tr>
-          <tr v-if="message && message.bcc">
-            <td>Bcc:</td>
-            <td>{{message.bcc}}</td>
-          </tr>
-          <tr>
-            <td>Subject:</td>
-            <td><span v-if="message">{{message.subject}}</span></td>
-          </tr>
-        </table>
+              <tr>
+                  <td>To:</td>
+                  <td><span v-if="message">{{message.to}}</span></td>
+              </tr>
+              <tr v-if="message && message.cc">
+                  <td>Cc:</td>
+                  <td>{{message.cc}}</td>
+              </tr>
+              <tr v-if="message && message.bcc">
+                  <td>Bcc:</td>
+                  <td>{{message.bcc}}</td>
+              </tr>
+              <tr>
+                  <td>Subject:</td>
+                  <td><span v-if="message">{{message.subject}}</span></td>
+              </tr>
+          </table>
+
+
+          <div v-if="message && message.relayError">
+              <el-alert type="error">Message relay error: {{message.relayError}}</el-alert>
+          </div>
+
+          <template v-if="message && message.mimeParseError">
+              <el-alert type="error">Message parse error: {{message.mimeParseError}}</el-alert>
+          </template>
       </div>
 
       <el-tabs value="view" style="height: 100%; width:100%" class="fill" type="border-card">

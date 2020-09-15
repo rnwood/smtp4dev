@@ -2,6 +2,7 @@
     using Typewriter.Extensions.WebApi;
  
     string ReturnType(Method m) => m.Type.Name;
+    string ParamType(Parameter p) => p.Type.Name.Replace("Delta<", "Partial<");
     string ServiceName(Class c) => c.Name;
      
     string Imports(Class c){
@@ -20,10 +21,10 @@
 	        .Select(p => "import " + p.Type.Name.TrimEnd('[',']') + " from './" + p.Type.Name.TrimEnd('[',']') + "';").ToList();
         return String.Join("\n", neededImports.Distinct());
     } 
-} 
+}
 $Classes(c => c.Namespace == "Rnwood.Smtp4dev.ApiModel")[$Imports
 export default class $Name$TypeParameters {
-
+ 
     constructor($Properties(p => !p.Attributes.Any(a => a.Name.Contains("JsonIgnoreAttribute")))[$name: $Type, ]) {
         $Properties(p => !p.Attributes.Any(a => a.Name.Contains("JsonIgnoreAttribute")))[ 
         this.$name = $name;]
@@ -47,7 +48,7 @@ export default class $ServiceName {
         return `$Url`;
     }
 
-    public async $name($Parameters[$name: $Type][, ]): Promise<$ReturnType> {
+    public async $name($Parameters[$name: $ParamType][, ]): Promise<$ReturnType> {
 
         return (await axios.$HttpMethod(this.$name_url($Parameters(p => p.Type.IsPrimitive)[$name][, ]), $RequestData || undefined)).data as $ReturnType;
     }]

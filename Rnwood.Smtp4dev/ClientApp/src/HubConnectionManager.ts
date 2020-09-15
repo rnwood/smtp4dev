@@ -4,15 +4,23 @@ export default class HubConnectionManager {
 
     private _connection: HubConnection;
     connected: boolean = false;
-    connectedCallback: () => void;
+    private connectedCallbacks: (() => void)[] = [];
     started: boolean = false;
     error: Error|null = null;
 
-    constructor(url: string, connectedCallback: () => void) {
+    constructor(url: string) {
         this._connection = new HubConnectionBuilder().withUrl(url).configureLogging(LogLevel.Trace).build();
         this._connection.onclose(this.onConnectionClosed.bind(this));
-        this.connectedCallback = connectedCallback;
         //this._connection.serverTimeoutInMilliseconds = 5000;
+    }
+
+    async addOnConnectedCallback(connectedCallback: () => void) {
+
+        this.connectedCallbacks.push(connectedCallback);
+
+        if (this.connected) {
+            connectedCallback();
+        }
     }
 
     async start() {
@@ -26,7 +34,10 @@ export default class HubConnectionManager {
         try {
             await this._connection.start();
             this.connected = true;
-            this.connectedCallback();
+
+            for (let connectedCallback of this.connectedCallbacks) {
+                connectedCallback();
+            }
         } catch (e) {
             this.error = e;
         }

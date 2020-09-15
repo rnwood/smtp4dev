@@ -76,13 +76,12 @@ namespace Rnwood.Smtp4dev
 
 
             services.AddSignalR();
-
-            services.AddSingleton<MessagesHub>();
-            services.AddSingleton<SessionsHub>();
+            services.AddSingleton<NotificationsHub>();
 
             services.AddControllers();
 
             services.AddSpaStaticFiles(o => o.RootPath = "ClientApp");
+
         }
 
 
@@ -105,8 +104,7 @@ namespace Rnwood.Smtp4dev
 
                 subdir.UseEndpoints(e =>
                 {
-                    e.MapHub<MessagesHub>("/hubs/messages");
-                    e.MapHub<SessionsHub>("/hubs/sessions");
+                    e.MapHub<NotificationsHub>("/hubs/notifications");
 
                     e.MapControllers();
                     if (env.IsDevelopment())
@@ -116,7 +114,8 @@ namespace Rnwood.Smtp4dev
                         new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp") },
                         npmScript: "serve",
                         regex: "Compiled successfully",
-                        forceKill: true
+                        forceKill: true,
+                        port: 8123
                         );
                     }
                 });
@@ -131,7 +130,7 @@ namespace Rnwood.Smtp4dev
                     context.Database.Migrate();
                 }
 
-                subdir.ApplicationServices.GetService<Smtp4devServer>().Start();
+                subdir.ApplicationServices.GetService<Smtp4devServer>().TryStart();
             };
 
             if (!string.IsNullOrEmpty(serverOptions.BasePath) && serverOptions.BasePath != "/")
@@ -147,6 +146,8 @@ namespace Rnwood.Smtp4dev
             {
                 configure(app);
             }
+
+
         }
 
     }

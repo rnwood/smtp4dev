@@ -1,7 +1,7 @@
-﻿ 
+﻿
 
 export default class SessionSummary {
-
+ 
     constructor(clientAddress: string, clientName: string, numberOfMessages: number, id: string, endDate: Date, startDate: Date, terminatedWithError: boolean, size: number, ) {
          
         this.clientAddress = clientAddress; 

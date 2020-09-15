@@ -122,6 +122,7 @@ namespace Rnwood.Smtp4dev
             OptionSet options = new OptionSet
             {
                 { "h|help|?", "Shows this message and exits", _ =>  help = true},
+                { "service", "Required to run when registered as a Windows service. To register service: sc.exe create Smtp4dev binPath= \"{PathToExe} --service\"", _ => { } },
                 { "urls=", "The URLs the web interface should listen on. For example, http://localhost:123. Use `*` in place of hostname to listen for requests on any IP address or hostname using the specified port and protocol (for example, http://*:5000)", _ => { } },
                 { "hostname=", "Specifies the server hostname. Used in auto-generated TLS certificate if enabled.", data => map.Add(data, x => x.ServerOptions.HostName) },
                 { "allowremoteconnections", "Specifies if remote connections will be allowed to the SMTP server.", data => map.Add(data, x => x.ServerOptions.AllowRemoteConnections) },

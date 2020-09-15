@@ -1,4 +1,4 @@
-﻿ 
+﻿
 
 import MessageSummary from './MessageSummary';
 import Message from './Message';

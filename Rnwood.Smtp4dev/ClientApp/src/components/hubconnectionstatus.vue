@@ -1,5 +1,5 @@
 ﻿<template>
-    <el-button size="small" :type="buttonType()" :icon="buttonIcon()" @click="buttonClick" :title="buttonTitle()"></el-button>
+    <el-button v-show="!connection || !connection.connected" size="small" :type="buttonType()" :icon="buttonIcon()" @click="buttonClick" :title="buttonTitle()">{{buttonText()}}</el-button>
 </template>
 
 <script lang="ts">
@@ -14,11 +14,17 @@
             super();
         }
 
-        @Prop({ default: undefined })
-        connection: HubConnectionManager | undefined;
+        @Prop({ default: null })
+        connection: HubConnectionManager | null = null;
 
         buttonType(): string {
             return this.connection && this.connection.connected ? "success" : this.connection && this.connection.started ? "warning" : "danger";
+        }
+
+        buttonText(): string {
+var errorText = this.connection && this.connection.error ? "\nError: " + this.connection.error.message : "";
+
+            return (this.connection && this.connection.connected ? "Auto refresh enabled" : this.connection && this.connection.started ? "Connecting..." : "Auto refresh disabled") + errorText;
         }
 
         buttonTitle(): string {

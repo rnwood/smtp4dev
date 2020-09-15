@@ -1,7 +1,7 @@
-﻿ 
+﻿
 
 export default class MessageSummary {
-
+ 
     constructor(id: string, from: string, to: string, receivedDate: Date, subject: string, attachmentCount: number, isUnread: boolean, ) {
          
         this.id = id; 
