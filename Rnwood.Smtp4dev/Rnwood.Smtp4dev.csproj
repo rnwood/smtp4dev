@@ -21,7 +21,7 @@
 	<ItemGroup>
 		<PackageReference Include="CommandLiners.MonoOptions" Version="1.0.36" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.24" />
-		<PackageReference Include="MailKit" Version="2.8.0" />
+		<PackageReference Include="MailKit" Version="2.9.0" />
 		<PackageReference Include="Microsoft.AspNet.OData" Version="7.4.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.1.8" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
