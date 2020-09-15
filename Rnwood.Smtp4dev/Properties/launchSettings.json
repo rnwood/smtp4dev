@@ -18,12 +18,11 @@
     },
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "--urls http://blah:123",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "http://localhost:28261/"
+      "applicationUrl": "http://localhost:5000/"
     }
   }
 }

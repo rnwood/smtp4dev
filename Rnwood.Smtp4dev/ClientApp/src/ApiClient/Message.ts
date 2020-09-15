@@ -1,11 +1,11 @@
-﻿ 
+﻿
 //MessageEntitySummary[] from Message
 import MessageEntitySummary from './MessageEntitySummary';
 //Header[] from Message
 import Header from './Header';
 export default class Message {
-
-    constructor(id: string, from: string, to: string, cc: string, bcc: string, receivedDate: Date, subject: string, parts: MessageEntitySummary[], headers: Header[], mimeParseError: string, relayError: string,) {
+ 
+    constructor(id: string, from: string, to: string, cc: string, bcc: string, receivedDate: Date, subject: string, parts: MessageEntitySummary[], headers: Header[], mimeParseError: string, relayError: string, ) {
          
         this.id = id; 
         this.from = from; 
@@ -16,7 +16,7 @@ export default class Message {
         this.subject = subject; 
         this.parts = parts; 
         this.headers = headers; 
-        this.mimeParseError = mimeParseError;
+        this.mimeParseError = mimeParseError; 
         this.relayError = relayError;
     }
 
@@ -30,6 +30,6 @@ export default class Message {
     subject: string; 
     parts: MessageEntitySummary[]; 
     headers: Header[]; 
-    mimeParseError: string;
+    mimeParseError: string; 
     relayError: string;
 }

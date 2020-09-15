@@ -7,14 +7,6 @@
             <el-button v-on:click="loadMessage">Retry</el-button>
         </el-alert>
 
-        <div v-if="message && message.relayError">
-            <el-alert type="error">Message relay error: {{message.relayError}}</el-alert>
-        </div>
-
-        <template v-if="message && message.mimeParseError">
-            <el-alert type="error">Message parse error: {{message.mimeParseError}}</el-alert>
-        </template>
-
         <iframe class="fill" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
     </div>
 </template>

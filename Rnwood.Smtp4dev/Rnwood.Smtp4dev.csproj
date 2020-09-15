@@ -22,6 +22,7 @@
 		<PackageReference Include="CommandLiners.MonoOptions" Version="1.0.36" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.24" />
 		<PackageReference Include="MailKit" Version="2.8.0" />
+		<PackageReference Include="Microsoft.AspNet.OData" Version="7.4.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.1.8" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
@@ -38,6 +39,7 @@
 		<PackageReference Include="Portable.BouncyCastle" Version="1.8.6.7" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.113.1" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.2" />
+		<PackageReference Include="System.Reactive" Version="4.4.1" />
 		<PackageReference Include="VueCliMiddleware" Version="3.1.1" />
 	</ItemGroup>
 
@@ -73,6 +75,42 @@
 		<None Update="ClientApp\ApiClient\SessionSummary.ts">
 			<CustomToolNamespace>ApiModel\SessionSummary.cs</CustomToolNamespace>
 		</None>
+		<None Update="ClientApp\src\ApiClient\AttachmentSummary.ts">
+		  <CustomToolNamespace>ApiModel\AttachmentSummary.cs</CustomToolNamespace>
+		</None>
+		<None Update="ClientApp\src\ApiClient\Header.ts">
+		  <CustomToolNamespace>ApiModel\Header.cs</CustomToolNamespace>
+		</None>
+		<None Update="ClientApp\src\ApiClient\HomeController.ts">
+		  <CustomToolNamespace>Controllers\HomeController.cs</CustomToolNamespace>
+		</None>
+		<None Update="ClientApp\src\ApiClient\Message.ts">
+		  <CustomToolNamespace>ApiModel\Message.cs</CustomToolNamespace>
+		</None>
+		<None Update="ClientApp\src\ApiClient\MessageEntitySummary.ts">
+		  <CustomToolNamespace>ApiModel\MessageEntitySummary.cs</CustomToolNamespace>
+		</None>
+		<None Update="ClientApp\src\ApiClient\MessagesController.ts">
+		  <CustomToolNamespace>Controllers\MessagesController.cs</CustomToolNamespace>
+		</None>
+		<None Update="ClientApp\src\ApiClient\MessageSummary.ts">
+		  <CustomToolNamespace>ApiModel\MessageSummary.cs</CustomToolNamespace>
+		</None>
+		<None Update="ClientApp\src\ApiClient\MessageWarning.ts">
+		  <CustomToolNamespace>ApiModel\MessageWarning.cs</CustomToolNamespace>
+		</None>
+		<None Update="ClientApp\src\ApiClient\MimeEntityVisitor.ts">
+		  <CustomToolNamespace>ApiModel\MimeEntityVisitor.cs</CustomToolNamespace>
+		</None>
+		<None Update="ClientApp\src\ApiClient\Session.ts">
+		  <CustomToolNamespace>ApiModel\Session.cs</CustomToolNamespace>
+		</None>
+		<None Update="ClientApp\src\ApiClient\SessionsController.ts">
+		  <CustomToolNamespace>Controllers\SessionsController.cs</CustomToolNamespace>
+		</None>
+		<None Update="ClientApp\src\ApiClient\SessionSummary.ts">
+		  <CustomToolNamespace>ApiModel\SessionSummary.cs</CustomToolNamespace>
+		</None>
 	</ItemGroup>
 
 	<ItemGroup>
@@ -99,6 +137,21 @@
 
 	<ItemGroup>
 		<ClientApp Include="ClientApp/**" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <ClientApp Remove="ClientApp\src\ApiClient\Server.ts" />
+	  <ClientApp Remove="ClientApp\src\ApiClient\ServerController.ts" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <None Remove="ClientApp\src\ApiClient\Server.ts" />
+	  <None Remove="ClientApp\src\ApiClient\ServerController.ts" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <TypeScriptCompile Include="ClientApp\src\ApiClient\Server.ts" />
+	  <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerController.ts" />
 	</ItemGroup>
 
 	<Target Name="DebugRunNpm" AfterTargets="Build" Inputs="@(ClientApp)" Outputs="wwwroot\.buildtimestamp" Condition="'$(SkipClientApp)'!='true'">

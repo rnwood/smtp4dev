@@ -1,4 +1,4 @@
-﻿ 
+﻿
 
 import SessionSummary from './SessionSummary';
 import Session from './Session';
