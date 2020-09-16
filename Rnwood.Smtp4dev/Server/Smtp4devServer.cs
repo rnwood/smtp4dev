@@ -313,7 +313,7 @@ namespace Rnwood.Smtp4dev.Server
                 return;
             }
 
-            foreach (string envelopeTo in message.To.Split(";"))
+            foreach (string envelopeTo in message.To.Split(","))
             {
                 Console.WriteLine($"Relaying message to {envelopeTo}");
 
