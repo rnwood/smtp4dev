@@ -142,16 +142,20 @@
 	<ItemGroup>
 	  <ClientApp Remove="ClientApp\src\ApiClient\Server.ts" />
 	  <ClientApp Remove="ClientApp\src\ApiClient\ServerController.ts" />
+	  <ClientApp Remove="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
+	  <ClientApp Remove="ClientApp\src\components\settingsdialog.vue" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <None Remove="ClientApp\src\ApiClient\Server.ts" />
 	  <None Remove="ClientApp\src\ApiClient\ServerController.ts" />
+	  <None Remove="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
 	</ItemGroup>
 
 	<ItemGroup>
 	  <TypeScriptCompile Include="ClientApp\src\ApiClient\Server.ts" />
 	  <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerController.ts" />
+	  <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
 	</ItemGroup>
 
 	<Target Name="DebugRunNpm" AfterTargets="Build" Inputs="@(ClientApp)" Outputs="wwwroot\.buildtimestamp" Condition="'$(SkipClientApp)'!='true'">

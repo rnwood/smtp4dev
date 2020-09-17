@@ -128,11 +128,6 @@ h1 {
     float: left;
 }
 
-h2 {
-    margin: 0;
-    font-size: 1em;
-    float: right;;
-}
 
 .messageviewheader td, .sessionviewheader td {
     padding: 5px;

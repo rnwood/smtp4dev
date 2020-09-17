@@ -16,6 +16,8 @@
 
         public string Password { get; set; } = "";
 
+        [Newtonsoft.Json.JsonIgnore]
+        [System.Text.Json.Serialization.JsonIgnore]
         public string AllowedEmailsString
         {
             get

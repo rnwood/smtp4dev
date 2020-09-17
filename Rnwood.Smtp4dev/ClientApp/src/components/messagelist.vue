@@ -19,13 +19,12 @@
                            v-on:click="refresh"
                            :disabled="loading">Refresh</el-button>                   
             </el-button-group>
-
             <el-input v-model="searchTerm"
                       size="small"
                       clearable
                       placeholder="Search"
                       prefix-icon="el-icon-search"
-                      style="width: 35%; min-width: 150px;" />
+                      style="float: right; width: 35%; min-width: 150px;" />
         </div>
 
         <el-alert v-if="error" type="error" title="Error" show-icon>

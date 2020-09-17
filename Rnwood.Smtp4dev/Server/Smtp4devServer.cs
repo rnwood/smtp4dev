@@ -39,7 +39,7 @@ namespace Rnwood.Smtp4dev.Server
 
             IDisposable eventHandler = null;
             var obs = Observable.FromEvent<ServerOptions>(e => eventHandler = serverOptions.OnChange(e), e=> eventHandler.Dispose());
-            obs.Throttle(TimeSpan.FromSeconds(3)).Subscribe(OnServerOptionsChanged);
+            obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
 
             taskQueue.Start();
         }
