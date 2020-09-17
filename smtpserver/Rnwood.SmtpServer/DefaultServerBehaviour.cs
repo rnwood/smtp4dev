@@ -51,7 +51,8 @@ namespace Rnwood.SmtpServer
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
 		/// <param name="portNumber">The port number.</param>
 		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-		public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber, X509Certificate implcitTlsCertificate) : this(allowRemoteConnections, portNumber, implcitTlsCertificate, null)
+		public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber, X509Certificate implcitTlsCertificate)
+			: this(allowRemoteConnections, portNumber, implcitTlsCertificate, null)
 		{
 		}
 
@@ -63,7 +64,21 @@ namespace Rnwood.SmtpServer
 		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
 		/// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS</param>
 		public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber, X509Certificate implcitTlsCertificate, X509Certificate startTlsCertificate)
+			: this(allowRemoteConnections, Dns.GetHostName(), portNumber, implcitTlsCertificate, startTlsCertificate)
 		{
+		}
+
+		/// <summary>
+		/// Initializes a new instance of the <see cref="DefaultServerBehaviour"/> class.
+		/// </summary>
+		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+		/// <param name="domainName">The domain name the server will send in greeting</param>
+		/// <param name="portNumber">The port number.</param>
+		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+		/// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS</param>
+		public DefaultServerBehaviour(bool allowRemoteConnections, string domainName, int portNumber, X509Certificate implcitTlsCertificate, X509Certificate startTlsCertificate)
+		{
+			this.DomainName = domainName;
 			this.PortNumber = portNumber;
 			this.implcitTlsCertificate = implcitTlsCertificate;
 			this.startTlsCertificate = startTlsCertificate;
@@ -111,7 +126,7 @@ namespace Rnwood.SmtpServer
 		public event AsyncEventHandler<SessionEventArgs> SessionStartedEventHandler;
 
 		/// <inheritdoc/>
-		public virtual string DomainName => Environment.MachineName;
+		public virtual string DomainName { get; private set; }
 
 		/// <inheritdoc/>
 		public virtual IPAddress IpAddress => this.allowRemoteConnections ? IPAddress.Any : IPAddress.Loopback;

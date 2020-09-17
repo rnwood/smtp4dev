@@ -10,6 +10,7 @@ namespace Rnwood.SmtpServer.Tests
 	using System.Collections.Generic;
 	using System.IO;
 	using System.Linq;
+	using System.Net;
 	using System.Net.Mail;
 	using System.Net.Sockets;
 	using System.Security.Cryptography.X509Certificates;
@@ -107,7 +108,7 @@ namespace Rnwood.SmtpServer.Tests
 		[Fact]
 		public async Task MailKit_StartTLS()
 		{
-			using (DefaultServer server = new DefaultServer(false, (int) StandardSmtpPort.AssignAutomatically, null, CreateSelfSignedCertificate()))
+			using (DefaultServer server = new DefaultServer(false, Dns.GetHostName(),(int) StandardSmtpPort.AssignAutomatically, null, CreateSelfSignedCertificate()))
 			{
 				ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -132,7 +133,7 @@ namespace Rnwood.SmtpServer.Tests
 		[Fact]
 		public async Task MailKit_ImplicitTLS()
 		{
-			using (DefaultServer server = new DefaultServer(false, (int)StandardSmtpPort.AssignAutomatically, CreateSelfSignedCertificate(), null))
+			using (DefaultServer server = new DefaultServer(false, Dns.GetHostName(),(int)StandardSmtpPort.AssignAutomatically, CreateSelfSignedCertificate(), null))
 			{
 				ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 

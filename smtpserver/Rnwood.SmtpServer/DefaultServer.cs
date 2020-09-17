@@ -6,6 +6,7 @@
 namespace Rnwood.SmtpServer
 {
 	using System;
+	using System.Net;
 	using System.Security.Cryptography.X509Certificates;
 	using System.Threading.Tasks;
 
@@ -34,7 +35,7 @@ namespace Rnwood.SmtpServer
 		/// </summary>
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
 		public DefaultServer(bool allowRemoteConnections)
-			: this(allowRemoteConnections, 25, null, null)
+			: this(allowRemoteConnections, Dns.GetHostName(), 25,  null, null)
 		{
 		}
 
@@ -46,7 +47,7 @@ namespace Rnwood.SmtpServer
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
 		/// <param name="portNumber">The port number.</param>
 		public DefaultServer(bool allowRemoteConnections, int portNumber)
-			: this(allowRemoteConnections, portNumber, null, null)
+			: this(allowRemoteConnections, Dns.GetHostName(), portNumber, null, null)
 		{
 		}
 
@@ -60,7 +61,7 @@ namespace Rnwood.SmtpServer
 		/// <param name="portNumber">The port number.</param>
 		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
 		public DefaultServer(bool allowRemoteConnections, int portNumber, X509Certificate implcitTlsCertificate)
-			: this(allowRemoteConnections, portNumber, implcitTlsCertificate, null)
+			: this(allowRemoteConnections, Dns.GetHostName(), portNumber, implcitTlsCertificate, null)
 		{
 		}
 
@@ -71,11 +72,12 @@ namespace Rnwood.SmtpServer
 		/// </summary>
 		///
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
+		/// <param name="domainName">The domain name the server will send in greeting</param>
 		/// <param name="portNumber">The port number.</param>
 		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
 		/// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
-		public DefaultServer(bool allowRemoteConnections, int portNumber, X509Certificate implcitTlsCertificate, X509Certificate startTlsCertificate)
-			: this(new DefaultServerBehaviour(allowRemoteConnections, portNumber, implcitTlsCertificate, startTlsCertificate))
+		public DefaultServer(bool allowRemoteConnections, string domainName, int portNumber, X509Certificate implcitTlsCertificate, X509Certificate startTlsCertificate)
+			: this(new DefaultServerBehaviour(allowRemoteConnections, domainName, portNumber, implcitTlsCertificate, startTlsCertificate))
 		{
 		}
 
