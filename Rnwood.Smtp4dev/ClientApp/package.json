@@ -30,7 +30,7 @@
     "moment": "^2.27.0",
     "srcdoc-polyfill": "^1.0.0",
     "ts-debounce": "^2.0.1",
-    "typescript": "~4.0.2",
+    "typescript": "~4.0.3",
     "vue-router": "^3.4.3",
     "vue-template-compiler": "^2.6.12",
     "vue2-ace-editor": "0.0.15",
