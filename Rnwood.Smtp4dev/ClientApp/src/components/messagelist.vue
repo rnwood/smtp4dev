@@ -16,7 +16,6 @@
                            icon="el-icon-refresh"
                            v-on:click="refresh"
                            :disabled="loading" title="Refresh"></el-button>                   
-            
 
             <el-input v-model="searchTerm"
                       clearable

@@ -1,6 +1,9 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Server
@@ -21,6 +24,8 @@ namespace Rnwood.Smtp4dev.Server
 
         public string TlsCertificate { get; set; }
 
-        public string HostName { get; set;} = "localhost";
+        public string HostName { get; set;} = Dns.GetHostName();
+
+       
     }
 }

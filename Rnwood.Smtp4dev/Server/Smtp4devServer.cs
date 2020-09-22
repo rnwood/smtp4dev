@@ -27,7 +27,7 @@ namespace Rnwood.Smtp4dev.Server
     public class Smtp4devServer : IMessagesRepository
     {
         public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptionsMonitor<ServerOptions> serverOptions,
-            IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<SmtpClient> relaySmtpClientFactory)
+            IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions,SmtpClient> relaySmtpClientFactory)
         {
             this.notificationsHub = notificationsHub;
             this.serverOptions = serverOptions;
@@ -39,7 +39,7 @@ namespace Rnwood.Smtp4dev.Server
 
             IDisposable eventHandler = null;
             var obs = Observable.FromEvent<ServerOptions>(e => eventHandler = serverOptions.OnChange(e), e=> eventHandler.Dispose());
-            obs.Throttle(TimeSpan.FromSeconds(3)).Subscribe(OnServerOptionsChanged);
+            obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
 
             taskQueue.Start();
         }
@@ -64,7 +64,7 @@ namespace Rnwood.Smtp4dev.Server
             X509Certificate2 cert = GetTlsCertificate();
 
             ServerOptions serverOptionsValue = serverOptions.CurrentValue;
-            this.smtpServer = new DefaultServer(serverOptionsValue.AllowRemoteConnections, serverOptionsValue.Port,
+            this.smtpServer = new DefaultServer(serverOptionsValue.AllowRemoteConnections, serverOptionsValue.HostName, serverOptionsValue.Port,
                 serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
                 serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null
             );
@@ -315,14 +315,14 @@ namespace Rnwood.Smtp4dev.Server
 
             foreach (string envelopeTo in message.To.Split(","))
             {
-                Console.WriteLine($"Relaying message to {envelopeTo}");
-
                 try
                 {
                     MailboxAddress recipient = MailboxAddress.Parse(envelopeTo);
                     if (relayOptions.CurrentValue.AllowedEmails.Contains(recipient.Address, StringComparer.OrdinalIgnoreCase))
                     {
-                        using (SmtpClient relaySmtpClient = relaySmtpClientFactory())
+                        Console.WriteLine($"Relaying message to {envelopeTo}");
+
+                        using (SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue))
                         {
                             var apiMsg = new ApiModel.Message(message);
                             MimeMessage newEmail = apiMsg.MimeMessage;
@@ -383,7 +383,7 @@ namespace Rnwood.Smtp4dev.Server
         private readonly Func<Smtp4devDbContext> dbContextFactory;
         private TaskQueue taskQueue = new TaskQueue();
         private DefaultServer smtpServer;
-        private Func<SmtpClient> relaySmtpClientFactory;
+        private Func<RelayOptions,SmtpClient> relaySmtpClientFactory;
         private NotificationsHub notificationsHub;
  
         public Exception Exception { get; private set; }

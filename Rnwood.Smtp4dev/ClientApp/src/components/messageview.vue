@@ -6,6 +6,7 @@
         </el-alert>
 
 
+
         <div v-if="messageSummary" class="hfillpanel fill">
             <div class="toolbar">
                 <el-button icon="el-icon-download"
@@ -115,6 +116,9 @@
                         </div>
                     </div>
                 </el-tab-pane>
+                <el-tab-pane label="Source" name="source" class="fill vfillpanel">
+                    <messagesource class="fill" :message="message" type="source"></messagesource>
+                </el-tab-pane>
             </el-tabs>
         </div>
 
@@ -135,6 +139,7 @@
     import MessageViewHtml from "@/components/messageviewhtml.vue";
     import MessageviewAttachments from "@/components/messageviewattachments.vue";
     import MessagePartsSource from "@/components/messagepartsource.vue";
+    import MessageSource from "@/components/messagesource.vue";
     import { Tree } from "element-ui";
 
     @Component({
@@ -142,7 +147,8 @@
             headers: Headers,
             "messageview-html": MessageViewHtml,
             messageviewattachments: MessageviewAttachments,
-            messagepartsource: MessagePartsSource
+            messagepartsource: MessagePartsSource,
+            messagesource: MessageSource
         }
     })
     export default class MessageView extends Vue {

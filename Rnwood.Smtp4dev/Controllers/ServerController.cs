@@ -6,12 +6,13 @@ using Microsoft.AspNetCore.Mvc;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using System.IO;
 using MimeKit;
 using HtmlAgilityPack;
 using Rnwood.Smtp4dev.Server;
 using Microsoft.AspNet.OData;
+using Microsoft.Extensions.Options;
+using System.Text.Json;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -19,13 +20,17 @@ namespace Rnwood.Smtp4dev.Controllers
     [ApiController]
     public class ServerController : Controller
     {
-        public ServerController(Smtp4devServer server)
+        public ServerController(Smtp4devServer server, IOptionsMonitor<ServerOptions> serverOptions, IOptionsMonitor<RelayOptions> relayOptions)
         {
             this.server = server;
+            this.serverOptions = serverOptions;
+            this.relayOptions = relayOptions;
         }
 
 
         private Smtp4devServer server;
+        private IOptionsMonitor<ServerOptions> serverOptions;
+        private IOptionsMonitor<RelayOptions> relayOptions;
 
         [HttpGet]
         public ApiModel.Server GetServer()
@@ -33,21 +38,55 @@ namespace Rnwood.Smtp4dev.Controllers
             return new ApiModel.Server()
             {
                 IsRunning = server.IsRunning,
-                PortNumber = server.PortNumber,
-                Exception = server.Exception?.Message
+                PortNumber = serverOptions.CurrentValue.Port,
+                HostName = serverOptions.CurrentValue.HostName,
+                AllowRemoteConnections = serverOptions.CurrentValue.AllowRemoteConnections,
+                NumberOfMessagesToKeep = serverOptions.CurrentValue.NumberOfMessagesToKeep,
+                NumberOfSessionsToKeep = serverOptions.CurrentValue.NumberOfSessionsToKeep,
+                Exception = server.Exception?.Message,
+                RelayOptions = new ApiModel.ServerRelayOptions
+                {
+                    SmtpServer = relayOptions.CurrentValue.SmtpServer,
+                    SmtpPort = relayOptions.CurrentValue.SmtpPort,
+                    Login = relayOptions.CurrentValue.Login,
+                    Password = relayOptions.CurrentValue.Password,
+                    AllowedEmails = relayOptions.CurrentValue.AllowedEmails,
+                    SenderAddress = relayOptions.CurrentValue.SenderAddress
+                }
             };
         }
 
         [HttpPost]
         public void UpdateServer(ApiModel.Server serverUpdate)
         {
+            ServerOptions newSettings = serverOptions.CurrentValue;
+            RelayOptions newRelaySettings = relayOptions.CurrentValue;
+
+            newSettings.Port = serverUpdate.PortNumber;
+            newSettings.HostName = serverUpdate.HostName;
+            newSettings.AllowRemoteConnections = serverUpdate.AllowRemoteConnections;
+            newSettings.NumberOfMessagesToKeep = serverUpdate.NumberOfMessagesToKeep;
+            newSettings.NumberOfSessionsToKeep = serverUpdate.NumberOfSessionsToKeep;
+
+            newRelaySettings.SmtpServer = serverUpdate.RelayOptions.SmtpServer;
+            newRelaySettings.SmtpPort = serverUpdate.RelayOptions.SmtpPort;
+            newRelaySettings.SenderAddress = serverUpdate.RelayOptions.SenderAddress;
+            newRelaySettings.Login = serverUpdate.RelayOptions.Login;
+            newRelaySettings.Password = serverUpdate.RelayOptions.Password;
+            newRelaySettings.AllowedEmails = serverUpdate.RelayOptions.AllowedEmails;
+
             if (!serverUpdate.IsRunning && this.server.IsRunning)
             {
                 this.server.Stop();
-            }else if (serverUpdate.IsRunning && !this.server.IsRunning)
+            }
+            else if (serverUpdate.IsRunning && !this.server.IsRunning)
             {
                 this.server.TryStart();
             }
+
+            string dataDir = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "smtp4dev");
+            string settingsFile = Path.Join(dataDir, "appsettings.json");
+            System.IO.File.WriteAllText(settingsFile, JsonSerializer.Serialize(new { ServerOptions = newSettings, RelayOptions = newRelaySettings }, new JsonSerializerOptions { WriteIndented = true }));
         }
 
     }

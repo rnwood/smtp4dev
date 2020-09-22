@@ -31,8 +31,10 @@ namespace Rnwood.Smtp4dev
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
+            services.Configure<RelayOptions>(Configuration.GetSection("RelayOptions"));
+
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
-            RelayOptions relayOptions = Configuration.GetSection("RelayOptions").Get<RelayOptions>();
 
             services.AddDbContext<Smtp4devDbContext>(opt =>
             {
@@ -53,10 +55,9 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<IMessagesRepository>(sp => sp.GetService<Smtp4devServer>());
             services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
 
-            services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
-            services.Configure<RelayOptions>(Configuration.GetSection("RelayOptions"));
 
-            services.AddSingleton<Func<SmtpClient>>(() =>
+
+            services.AddSingleton<Func<RelayOptions, SmtpClient>>((relayOptions) =>
             {
                 if (!relayOptions.IsEnabled)
                 {

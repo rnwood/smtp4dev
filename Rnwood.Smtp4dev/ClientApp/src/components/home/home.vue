@@ -6,9 +6,11 @@
                     <img height="35" src="logo.png" alt="smtp4dev" />
                 </a>
             </h1>
+            <el-button style="float:right; font-size: 1.7em; padding: 6px; margin: 0 3px" circle icon="el-icon-setting" title="Settings" @click="settingsVisible = true"></el-button>&nbsp;
             <hubconnstatus style="float:right" :connection="connection"></hubconnstatus>
             <serverstatus style="float:right" v-show="connection && connection.connected" :connection="connection"></serverstatus>
         </el-header>
+        <settingsdialog :visible="settingsVisible" :connection="connection" v-on:closed="settingsVisible = false" />
         <el-main class="fill vfillpanel">
             <el-tabs id="maintabs" class="fill" value="messages" type="border-card">
                 <el-tab-pane label="Messages" name="messages" class="vfillpanel">
@@ -60,6 +62,7 @@
     import SessionView from "@/components/sessionview.vue";
     import HubConnectionManager from "@/HubConnectionManager";
     import ServerStatus from "@/components/serverstatus.vue";
+    import SettingsDialog from "@/components/settingsdialog.vue";
     import HubConnectionStatus from "@/components/hubconnectionstatus.vue";
     import { Splitpanes, Pane } from 'splitpanes';
     import 'splitpanes/dist/splitpanes.css';
@@ -72,6 +75,7 @@
             sessionview: SessionView,
             hubconnstatus: HubConnectionStatus,
             serverstatus: ServerStatus,
+            settingsdialog: SettingsDialog,
             splitpanes: Splitpanes,
             pane: Pane
         }
@@ -81,6 +85,8 @@
         selectedSession: SessionSummary | null = null;
 
         connection: HubConnectionManager | null = null;
+
+        settingsVisible: boolean = false;
 
         selectedMessageChanged(selectedMessage: MessageSummary | null) {
             this.selectedMessage = selectedMessage;
