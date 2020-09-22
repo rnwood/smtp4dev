@@ -52,6 +52,16 @@ export default class MessagesController {
         return (await axios.get(this.downloadMessage_url(id), null || undefined)).data as FileStreamResult;
     }
     
+    // post: api/Messages/${encodeURIComponent(id)}/relay/${encodeURIComponent(address)}  
+    public relayMessage_url(id: string, address: string): string {
+        return `api/Messages/${encodeURIComponent(id)}/relay/${encodeURIComponent(address)}`;
+    }
+
+    public async relayMessage(id: string, address: string): Promise<void> {
+
+        return (await axios.post(this.relayMessage_url(id, address), null || undefined)).data as void;
+    }
+    
     // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content  
     public getPartContent_url(id: string, partid: string): string {
         return `api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content`;

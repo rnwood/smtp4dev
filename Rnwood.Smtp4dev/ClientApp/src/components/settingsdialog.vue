@@ -60,14 +60,14 @@
                         </el-form-item>
 
                         <el-form-item label="Auto-Relay Recipients" v-show="isRelayEnabled" prop="isRelayEnabled">
-                            <div v-for="(email, index) in server.relayOptions.allowedEmails" :key="index">
-                                <el-form-item :prop="'relayOptionsAllowedEmails[' + index + '].value'" :rules="{required: true, message: 'Required'}">
-                                    <el-input v-model="server.relayOptions.allowedEmails[index]">
-                                        <el-button slot="append" @click="server.relayOptions.allowedEmails.splice(index, 1)">Remove</el-button>
+                            <div v-for="(email, index) in server.relayOptions.automaticEmails" :key="index">
+                                <el-form-item :prop="'relayOptionsAutomaticEmails[' + index + '].value'" :rules="{required: true, message: 'Required'}">
+                                    <el-input v-model="server.relayOptions.automaticEmails[index]">
+                                        <el-button slot="append" @click="server.relayOptions.automaticEmails.splice(index, 1)">Remove</el-button>
                                     </el-input>
                                 </el-form-item>
                             </div>
-                            <el-button size="small" @click="server.relayOptions.allowedEmails.push('')">New Auto-Relay Recipient</el-button>
+                            <el-button size="small" @click="server.relayOptions.automaticEmails.push('')">New Auto-Relay Recipient</el-button>
                         </el-form-item>
                     </el-tab-pane>
                 </el-tabs>
@@ -148,16 +148,16 @@
             }
         }
      
-        relayOptionsAllowedEmails: any[] = [];
+        relayOptionsAutomaticEmails: any[] = [];
 
-        @Watch("server.relayOptions.allowedEmails")
-        updateAllowedEmailsForValidation() {
+        @Watch("server.relayOptions.automaticEmails")
+        updateAutomaticEmailsForValidation() {
 
             if (!this.server) {
                 return;
             }
 
-            this.relayOptionsAllowedEmails = this.server.relayOptions.allowedEmails.map((v, i) => {
+            this.relayOptionsAutomaticEmails = this.server.relayOptions.automaticEmails.map((v, i) => {
                 return { value: v };
             });
 

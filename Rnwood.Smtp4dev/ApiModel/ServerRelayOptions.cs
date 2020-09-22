@@ -11,7 +11,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public int SmtpPort { get; set; }
 
-        public string[] AllowedEmails { get; set; }
+        public string[] AutomaticEmails { get; set; }
 
         public string SenderAddress { get; set; }
 

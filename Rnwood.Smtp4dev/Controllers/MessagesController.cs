@@ -16,6 +16,7 @@ using System.Linq.Dynamic.Core;
 
 using Message = Rnwood.Smtp4dev.DbModel.Message;
 using Rnwood.Smtp4dev.Server;
+using MimeKit;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -24,12 +25,14 @@ namespace Rnwood.Smtp4dev.Controllers
 	[UseEtagFilterAttribute]
 	public class MessagesController : Controller
 	{
-		public MessagesController(IMessagesRepository messagesRepository)
+		public MessagesController(IMessagesRepository messagesRepository, Smtp4devServer server)
 		{
 			this.messagesRepository = messagesRepository;
+			this.server = server;
 		}
 
 		private IMessagesRepository messagesRepository;
+		private Smtp4devServer server;
 
 		[HttpGet]
 
@@ -66,6 +69,20 @@ namespace Rnwood.Smtp4dev.Controllers
 		{
 			Message result = GetDbMessage(id);
 			return new FileStreamResult(new MemoryStream(result.Data), "message/rfc822") { FileDownloadName = $"{id}.eml" };
+		}
+
+		[HttpPost("{id}/relay/{address}")]
+
+		public void RelayMessage(Guid id, string address)
+		{
+			Message message = GetDbMessage(id);
+            Dictionary<MailboxAddress, Exception> relayErrors = server.TryRelayMessage(message, string.IsNullOrEmpty( address) ? null : new[] { new MailboxAddress(address) });
+
+			if (relayErrors.Any())
+			{
+				string relayErrorSummary = string.Join(". ", relayErrors.Select(e => e.Key.Address + ": " + e.Value.Message));
+				throw new System.Web.Http.HttpResponseException(new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError) { ReasonPhrase = "Failed to relay to recipients: " + relayErrorSummary });
+			}
 		}
 
 		[HttpGet("{id}/part/{partid}/content")]

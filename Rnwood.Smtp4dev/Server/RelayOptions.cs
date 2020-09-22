@@ -8,7 +8,7 @@
 
         public int SmtpPort { get; set; } = 25;
 
-        public string[] AllowedEmails { get; set; } = new string[0];
+        public string[] AutomaticEmails { get; set; } = new string[0];
 
         public string SenderAddress { get; set; } = "";
 
@@ -18,15 +18,15 @@
 
         [Newtonsoft.Json.JsonIgnore]
         [System.Text.Json.Serialization.JsonIgnore]
-        public string AllowedEmailsString
+        public string AutomaticEmailsString
         {
             get
             {
-                return string.Join(",", AllowedEmails);
+                return string.Join(",", AutomaticEmails);
             }
             set
             {
-                this.AllowedEmails = value.Split(',');
+                this.AutomaticEmails = value.Split(',');
             }
         }
     }

@@ -1,21 +1,21 @@
 ﻿<template>
     <div class="messagelist">
         <div class="toolbar">
-            
-                <confirmationdialog v-on:confirm="clear"
-                                    always-key="deleteAllMessages"
-                                    message="Are you sure you want to delete all messages?">
-                    <el-button  icon="el-icon-close" title="Clear"></el-button>
-                </confirmationdialog>
 
-                <el-button 
-                           icon="el-icon-delete"
-                           v-on:click="deleteSelected"
-                           :disabled="!selectedmessage" title="Delete"></el-button>
-                <el-button 
-                           icon="el-icon-refresh"
-                           v-on:click="refresh"
-                           :disabled="loading" title="Refresh"></el-button>                   
+            <confirmationdialog v-on:confirm="clear"
+                                always-key="deleteAllMessages"
+                                message="Are you sure you want to delete all messages?">
+                <el-button icon="el-icon-close" title="Clear"></el-button>
+            </confirmationdialog>
+
+            <el-button icon="el-icon-delete"
+                       v-on:click="deleteSelected"
+                       :disabled="!selectedmessage" title="Delete"></el-button>
+            <el-button icon="el-icon-refresh"
+                       v-on:click="refresh"
+                       :disabled="loading" title="Refresh"></el-button>
+
+            <el-button v-on:click="relaySelected"  icon="el-icon-d-arrow-right" :disabled="!selectedmessage" title="Relay"></el-button>
 
             <el-input v-model="searchTerm"
                       clearable
@@ -90,7 +90,7 @@
         private selectedSortColumn: string = "receivedDate";
 
 
-        @Prop({default: null})
+        @Prop({ default: null })
         connection: HubConnectionManager | null = null;
 
         messages: MessageSummary[] = [];
@@ -128,6 +128,18 @@
 
         getRowClass(event: { row: MessageSummary }): string {
             return event.row.isUnread ? "unread" : "read";
+        }
+
+        async relaySelected() {
+            if (this.selectedmessage == null) {
+                return;
+            }
+
+            try {
+                new MessagesController().relayMessage(this.selectedmessage.id, "rob@rnwood.co.uk");
+            } catch (e) {
+                this.loading = false;
+            }
         }
 
         async deleteSelected() {
@@ -219,7 +231,7 @@
 
         initialLoadDone = false;
 
-        async refresh(silent: boolean=false) {
+        async refresh(silent: boolean = false) {
             var unlock = await this.mutex.acquire();
 
             try {
@@ -297,7 +309,7 @@
         }
 
         @Watch("connection")
-        async onConnectionChanged () {
+        async onConnectionChanged() {
 
             if (this.connection) {
                 this.connection.on("messageschanged", async () => {
