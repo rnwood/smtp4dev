@@ -160,35 +160,12 @@ stages:
     pool:
       vmImage: 'windows-2019'
     steps:
-    - task: PowerShell@2
-      displayName: Pull images to use as cache
-      inputs:
-        targetType: inline
-        ignoreLASTEXITCODE: true
-        script: |
-          $ErrorActionPreference="Continue"
-          (
-            (start-job { docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs }),
-            (start-job { docker pull $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build })
-          ) | receive-job -wait
-    - task: Docker@2
-      displayName: Build cache image - downloadnodejs
-      inputs:
-        command: build  
-        dockerfile: '**/Dockerfile.windows'
-        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(tag) --target downloadnodejs -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs'
-    - task: Docker@2
-      displayName: Build cache image - build
-      inputs:
-        command: build  
-        dockerfile: '**/Dockerfile.windows'
-        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(tag) --target build -t $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build'                
     - task: Docker@2
       displayName: Build image
       inputs:
         command: build  
         dockerfile: '**/Dockerfile.windows'
-        arguments: '--cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-build --cache-from $(docker_repo):windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs --build-arg version=$(tag) -t $(docker_repo):windows-amd64-$(tag)'
+        arguments: '--build-arg version=$(tag) -t $(docker_repo):windows-amd64-$(tag)'
     - task: Docker@2
       displayName: Push image
       inputs:
@@ -197,9 +174,6 @@ stages:
         command: push
         tags: |
           windows-amd64-$(tag)
-          windows-amd64-$(docker_tag_suffix)-buildcache-downloadnodejs
-          windows-amd64-$(docker_tag_suffix)-buildcache-build
-
   - job: DockerManifest
     displayName: Docker Create Manifest
     dependsOn:

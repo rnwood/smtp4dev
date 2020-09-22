@@ -8,7 +8,9 @@
     "build:dev": "vue-cli-service build --mode development",
     "lint": "vue-cli-service lint"
   },
-  "dependencies": {},
+  "dependencies": {
+    "splitpanes": "^2.2.1"
+  },
   "devDependencies": {
     "@aspnet/signalr": "^1.0.4",
     "@typescript-eslint/eslint-plugin": "^2.34.0",
@@ -27,20 +29,20 @@
     "eslint": "^5.16.0",
     "eslint-plugin-vue": "^6.2.2",
     "locale-index-of": "^1.0.8",
-    "moment": "^2.27.0",
+    "moment": "^2.28.0",
     "srcdoc-polyfill": "^1.0.0",
     "ts-debounce": "^2.0.1",
-    "typescript": "~4.0.2",
+    "typescript": "~4.0.3",
     "vue-router": "^3.4.3",
     "vue-template-compiler": "^2.6.12",
     "vue2-ace-editor": "0.0.15",
     "@fortawesome/fontawesome-free": "^5.14.0",
     "core-js": "^3.6.5",
     "node-sass": "^4.14.1",
-    "sass": "^1.26.10",
+    "sass": "^1.26.11",
     "sass-loader": "^10.0.2",
     "vue": "^2.6.12",
-    "vue-class-component": "^7.2.5",
+    "vue-class-component": "^7.2.6",
     "vue-property-decorator": "^9.0.0"
   },
   "eslintConfig": {

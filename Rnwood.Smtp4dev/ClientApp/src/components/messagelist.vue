@@ -1,26 +1,23 @@
 ﻿<template>
     <div class="messagelist">
         <div class="toolbar">
-            <el-button-group>
+            
                 <confirmationdialog v-on:confirm="clear"
                                     always-key="deleteAllMessages"
                                     message="Are you sure you want to delete all messages?">
-                    <el-button size="small" type="primary" icon="el-icon-close">Clear</el-button>
+                    <el-button  icon="el-icon-close" title="Clear"></el-button>
                 </confirmationdialog>
 
-                <el-button size="small"
-                           type="primary"
+                <el-button 
                            icon="el-icon-delete"
                            v-on:click="deleteSelected"
-                           :disabled="!selectedmessage">Delete</el-button>
-                <el-button size="small"
-                           type="primary"
+                           :disabled="!selectedmessage" title="Delete"></el-button>
+                <el-button 
                            icon="el-icon-refresh"
                            v-on:click="refresh"
-                           :disabled="loading">Refresh</el-button>                   
-            </el-button-group>
+                           :disabled="loading" title="Refresh"></el-button>                   
+
             <el-input v-model="searchTerm"
-                      size="small"
                       clearable
                       placeholder="Search"
                       prefix-icon="el-icon-search"

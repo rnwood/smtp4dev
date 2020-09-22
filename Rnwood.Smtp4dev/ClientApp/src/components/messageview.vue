@@ -6,11 +6,10 @@
         </el-alert>
 
 
+
         <div v-if="messageSummary" class="hfillpanel fill">
             <div class="toolbar">
-                <el-button type="primary"
-                           size="small"
-                           icon="el-icon-download"
+                <el-button icon="el-icon-download"
                            v-on:click="download">Download</el-button>
             </div>
 
@@ -95,6 +94,9 @@
                     <div v-show="selectedPart" class="fill vfillpanel">
                         <el-tabs value="headers" class="fill hfillpanel" type="border-card">
                             <el-tab-pane label="Headers" name="headers" class="fill vfillpanel">
+                                <span slot="label">
+                                    <i class="el-icon-notebook-2"></i> Headers
+                                </span>
                                 <headers :headers="selectedPartHeaders" class="fill"></headers>
                             </el-tab-pane>
 
@@ -114,7 +116,6 @@
                         </div>
                     </div>
                 </el-tab-pane>
-
                 <el-tab-pane label="Source" name="source" class="fill vfillpanel">
                     <messagesource class="fill" :message="message" type="source"></messagesource>
                 </el-tab-pane>

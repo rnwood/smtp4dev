@@ -1,23 +1,19 @@
 ﻿<template>
     <div class="sessionlist">
         <div class="toolbar">
-            <el-button-group>
+            
                 <confirmationdialog v-on:confirm="clear"
                                     always-key="deleteAllSessions"
                                     message="Are you sure you want to delete all sessions?">
-                    <el-button size="small" type="primary" icon="el-icon-close">Clear</el-button>
+                    <el-button icon="el-icon-close" title="Clear"></el-button>
                 </confirmationdialog>
-                <el-button size="small"
-                           type="primary"
+                <el-button
                            icon="el-icon-delete"
                            v-on:click="deleteSelected"
-                           :disabled="!selectedsession">Delete</el-button>
-                <el-button size="small"
-                           type="primary"
-                           icon="el-icon-refresh"
+                           :disabled="!selectedsession" title="Delete"></el-button>
+                <el-button icon="el-icon-refresh"
                            v-on:click="refresh"
-                           :disabled="loading">Refresh</el-button>
-            </el-button-group>
+                           :disabled="loading" title="Refresh"></el-button>
         </div>
 
         <el-alert v-if="error" type="error" title="Error" show-icon>

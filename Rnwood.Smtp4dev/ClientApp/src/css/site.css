@@ -160,3 +160,7 @@ pre.source code {
 .el-header {
     padding-left: 5px !important;
 }
+
+.splitpanes.default-theme .splitpanes__pane {
+    background-color: transparent !important;
+}
