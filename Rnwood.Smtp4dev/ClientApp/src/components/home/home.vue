@@ -75,7 +75,7 @@
             sessionview: SessionView,
             hubconnstatus: HubConnectionStatus,
             serverstatus: ServerStatus,
-            settingsdialog: SettingsDialog
+            settingsdialog: SettingsDialog,
             splitpanes: Splitpanes,
             pane: Pane
         }
