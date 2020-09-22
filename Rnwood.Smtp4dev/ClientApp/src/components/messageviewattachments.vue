@@ -1,6 +1,6 @@
 ﻿<template>
     <div class="vfillpanel pad" v-show="attachments">
-        <div v-for="attachment in attachments" :key="attachment.id"><el-button size="small" icon="el-icon-paperclip" type="secondary" round v-on:click="openAttachment(attachment)">{{attachment.fileName}}</el-button></div>
+        <div v-for="attachment in attachments" :key="attachment.id"><el-button icon="el-icon-paperclip" size="small" type="primary" round v-on:click="openAttachment(attachment)">{{attachment.fileName}}</el-button></div>
     </div>
 </template>
 <script lang="ts">

@@ -24,3 +24,8 @@ declare module "locale-index-of" {
 interface String {
     localeIndexOf(substring: string, locales?: string | string[] | undefined, options?: Intl.CollatorOptions | undefined): number;
 }
+
+declare module "splitpanes" {
+    export var Splitpanes: any;
+    export var Pane: any;
+}

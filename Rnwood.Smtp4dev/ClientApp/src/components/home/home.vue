@@ -16,12 +16,15 @@
                         <i class="el-icon-message"></i> Messages
                     </span>
 
-                    <div class="fillhalf vfillpanel">
-                        <messagelist class="fill" @selected-message-changed="selectedMessageChanged" :connection="connection" />
-                    </div>
-                    <div class="fillhalf vfillpanel">
-                        <messageview class="fill" v-bind:message-summary="selectedMessage" />
-                    </div>
+                    <splitpanes class="default-theme fill" @resize="messageListPaneSize = $event[0].size">
+
+                        <pane class="hfillpanel" :size="messageListPaneSize">
+                            <messagelist class="fill" @selected-message-changed="selectedMessageChanged" :connection="connection" />
+                        </pane>
+                        <pane class="hfillpanel" :size="100-messageListPaneSize">
+                            <messageview class="fill" v-bind:message-summary="selectedMessage" />
+                        </pane>
+                    </splitpanes>
                 </el-tab-pane>
 
                 <el-tab-pane label="Sessions" name="sessions" class="vfillpanel">
@@ -29,13 +32,16 @@
                         <i class="el-icon-monitor"></i> Sessions
                     </span>
 
-                    <div class="fillhalf vfillpanel">
-                        <sessionlist class="fill" @selected-session-changed="selectedSessionChanged" :connection="connection" />
-                    </div>
+                    <splitpanes class="default-theme fill" @resize="sessionListPaneSize = $event[0].size">
 
-                    <div class="fillhalf vfillpanel">
-                        <sessionview class="fill" v-bind:session-summary="selectedSession" />
-                    </div>
+                        <pane class="vfillpanel" :size="sessionListPaneSize">
+                            <sessionlist class="fill" @selected-session-changed="selectedSessionChanged" :connection="connection" />
+                        </pane>
+
+                        <pane class="vfillpanel" :size="100-sessionListPaneSize">
+                            <sessionview class="fill" v-bind:session-summary="selectedSession" />
+                        </pane>
+                    </splitpanes>
                 </el-tab-pane>
             </el-tabs>
         </el-main>
@@ -55,6 +61,8 @@
     import HubConnectionManager from "@/HubConnectionManager";
     import ServerStatus from "@/components/serverstatus.vue";
     import HubConnectionStatus from "@/components/hubconnectionstatus.vue";
+    import { Splitpanes, Pane } from 'splitpanes';
+    import 'splitpanes/dist/splitpanes.css';
 
     @Component({
         components: {
@@ -63,7 +71,9 @@
             sessionlist: SessionList,
             sessionview: SessionView,
             hubconnstatus: HubConnectionStatus,
-            serverstatus: ServerStatus
+            serverstatus: ServerStatus,
+            splitpanes: Splitpanes,
+            pane: Pane
         }
     })
     export default class Home extends Vue {
@@ -78,6 +88,34 @@
 
         selectedSessionChanged(selectedSession: SessionSummary | null) {
             this.selectedSession = selectedSession;
+        }
+
+        get messageListPaneSize(): number {
+
+            var storedValue = window.localStorage.getItem("messagelist-panelsize");
+            if (storedValue) {
+                return Number(storedValue);
+            }
+
+            return 40;
+        }
+
+        set messageListPaneSize(value: number) {
+            window.localStorage.setItem("messagelist-panelsize", value.toString());
+        }
+
+        get sessionListPaneSize(): number {
+
+            var storedValue = window.localStorage.getItem("sessionlist-panelsize");
+            if (storedValue) {
+                return Number(storedValue);
+            }
+
+            return 40;
+        }
+
+        set sessionListPaneSize(value: number) {
+            window.localStorage.setItem("sessionlist-panelsize", value.toString());
         }
 
         constructor() {
