@@ -59,7 +59,7 @@ namespace Rnwood.Smtp4dev.Controllers
 			return messagesRepository.MarkMessageRead(id);
 		}
 
-		[HttpGet("{id}/source")]
+		[HttpGet("{id}/download")]
 		[ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
 
 		public FileStreamResult DownloadMessage(Guid id)
@@ -87,6 +87,22 @@ namespace Rnwood.Smtp4dev.Controllers
 		public string GetPartSourceRaw(Guid id, string partid)
 		{
 			return ApiModel.Message.GetPartSource(GetMessage(id), partid);
+		}
+
+		[HttpGet("{id}/raw")]
+		[ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
+		public string GetMessageSourceRaw(Guid id)
+		{
+			ApiModel.Message message = GetMessage(id);
+			return System.Text.Encoding.UTF8.GetString(message.Data);
+		}
+
+		[HttpGet("{id}/source")]
+		[ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
+		public string GetMessageSource(Guid id)
+		{
+			ApiModel.Message message = GetMessage(id);
+			return message.MimeMessage.ToString();
 		}
 
 		[HttpGet("{id}/html")]

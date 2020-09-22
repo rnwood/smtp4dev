@@ -18,6 +18,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public Message(DbModel.Message dbMessage)
         {
+            Data = dbMessage.Data;
             Id = dbMessage.Id;
             From = dbMessage.From;
             To = dbMessage.To;
@@ -215,6 +216,8 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string RelayError { get; set; }
 
         internal MimeMessage MimeMessage { get; set; }
+
+        internal byte[] Data { get; set; }
 
         string ICacheByKey.CacheKey => Id.ToString();
     }
