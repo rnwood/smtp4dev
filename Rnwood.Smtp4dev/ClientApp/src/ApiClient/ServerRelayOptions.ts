@@ -2,11 +2,11 @@
 
 export default class ServerRelayOptions {
  
-    constructor(smtpServer: string, smtpPort: number, allowedEmails: string[], senderAddress: string, login: string, password: string, ) {
+    constructor(smtpServer: string, smtpPort: number, automaticEmails: string[], senderAddress: string, login: string, password: string, ) {
          
         this.smtpServer = smtpServer; 
         this.smtpPort = smtpPort; 
-        this.allowedEmails = allowedEmails; 
+        this.automaticEmails = automaticEmails; 
         this.senderAddress = senderAddress; 
         this.login = login; 
         this.password = password;
@@ -15,7 +15,7 @@ export default class ServerRelayOptions {
      
     smtpServer: string; 
     smtpPort: number; 
-    allowedEmails: string[]; 
+    automaticEmails: string[]; 
     senderAddress: string; 
     login: string; 
     password: string;

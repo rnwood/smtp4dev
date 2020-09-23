@@ -27,7 +27,7 @@ namespace Rnwood.Smtp4dev.Server
     public class Smtp4devServer : IMessagesRepository
     {
         public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptionsMonitor<ServerOptions> serverOptions,
-            IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions,SmtpClient> relaySmtpClientFactory)
+            IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory)
         {
             this.notificationsHub = notificationsHub;
             this.serverOptions = serverOptions;
@@ -38,7 +38,7 @@ namespace Rnwood.Smtp4dev.Server
             DoCleanup();
 
             IDisposable eventHandler = null;
-            var obs = Observable.FromEvent<ServerOptions>(e => eventHandler = serverOptions.OnChange(e), e=> eventHandler.Dispose());
+            var obs = Observable.FromEvent<ServerOptions>(e => eventHandler = serverOptions.OnChange(e), e => eventHandler.Dispose());
             obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
 
             taskQueue.Start();
@@ -51,7 +51,8 @@ namespace Rnwood.Smtp4dev.Server
                 Console.WriteLine("ServerOptions changed. Restarting server...");
                 Stop();
                 TryStart();
-            } else
+            }
+            else
             {
                 Console.WriteLine("ServerOptions changed.");
             }
@@ -245,7 +246,7 @@ namespace Rnwood.Smtp4dev.Server
             }, false).ConfigureAwait(false);
         }
 
-     
+
 
         internal Task DeleteSession(Guid id)
         {
@@ -289,7 +290,8 @@ namespace Rnwood.Smtp4dev.Server
                     Console.WriteLine("Processing received message");
                     Smtp4devDbContext dbContext = dbContextFactory();
 
-                    RelayMessage(message);
+                    Dictionary<MailboxAddress, Exception> relayErrors = TryRelayMessage(message, null);
+                    message.RelayError = string.Join("\n", relayErrors.Select(e => e.Key.ToString() + ": " + e.Value.Message));
 
                     Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
                     message.Session = dbSession;
@@ -306,21 +308,35 @@ namespace Rnwood.Smtp4dev.Server
             }
         }
 
-        private void RelayMessage(Message message)
+        public Dictionary<MailboxAddress, Exception> TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
         {
+            Dictionary<MailboxAddress, Exception> result = new Dictionary<MailboxAddress, Exception>();
+
             if (!relayOptions.CurrentValue.IsEnabled)
             {
-                return;
+                return result;
             }
 
-            foreach (string envelopeTo in message.To.Split(","))
+            MailboxAddress[] recipients;
+
+            if (overrideRecipients == null)
+            {
+                recipients = message.To
+                    .Split(",")
+                    .Select(r => MailboxAddress.Parse(r))
+                    .Where(r => relayOptions.CurrentValue.AutomaticEmails.Contains(r.Address, StringComparer.OrdinalIgnoreCase))
+                    .ToArray();
+            } else
+            {
+                recipients = overrideRecipients;
+            }
+
+            foreach (MailboxAddress recipient in recipients)
             {
                 try
                 {
-                    MailboxAddress recipient = MailboxAddress.Parse(envelopeTo);
-                    if (relayOptions.CurrentValue.AllowedEmails.Contains(recipient.Address, StringComparer.OrdinalIgnoreCase))
-                    {
-                        Console.WriteLine($"Relaying message to {envelopeTo}");
+                    
+                        Console.WriteLine($"Relaying message to {recipient}");
 
                         using (SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue))
                         {
@@ -332,16 +348,17 @@ namespace Rnwood.Smtp4dev.Server
                                 : apiMsg.From);
                             relaySmtpClient.Send(newEmail, sender, new[] { recipient });
                         }
-                    }
+                    
 
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Can not relay message to {envelopeTo}: {e.ToString()}");
-                    message.RelayError = e.Message;
+                    Console.WriteLine($"Can not relay message to {recipient}: {e.ToString()}");
+                    result[recipient] = e;
                 }
             }
 
+            return result;
         }
 
         public Task DeleteMessage(Guid id)
@@ -383,9 +400,9 @@ namespace Rnwood.Smtp4dev.Server
         private readonly Func<Smtp4devDbContext> dbContextFactory;
         private TaskQueue taskQueue = new TaskQueue();
         private DefaultServer smtpServer;
-        private Func<RelayOptions,SmtpClient> relaySmtpClientFactory;
+        private Func<RelayOptions, SmtpClient> relaySmtpClientFactory;
         private NotificationsHub notificationsHub;
- 
+
         public Exception Exception { get; private set; }
 
         public bool IsRunning
@@ -419,7 +436,8 @@ namespace Rnwood.Smtp4dev.Server
             {
                 Console.Error.WriteLine("The SMTP server failed to start: " + e.ToString());
                 this.Exception = e;
-            } finally
+            }
+            finally
             {
                 this.notificationsHub.OnServerChanged().Wait();
             }

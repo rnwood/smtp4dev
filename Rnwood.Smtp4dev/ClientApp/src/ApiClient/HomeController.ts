@@ -1,6 +1,6 @@
 ﻿
 
-import IActionResult from './IActionResult';
+
 import axios from "axios";
 
 export default class HomeController {
@@ -15,9 +15,9 @@ export default class HomeController {
         return `api/Home/`;
     }
 
-    public async index(): Promise<IActionResult> {
+    public async index(): Promise<void> {
 
-        return (await axios.post(this.index_url(), null || undefined)).data as IActionResult;
+        return (await axios.post(this.index_url(), null || undefined)).data as void;
     }
     
     // post: api/Home/  
@@ -25,8 +25,8 @@ export default class HomeController {
         return `api/Home/`;
     }
 
-    public async error(): Promise<IActionResult> {
+    public async error(): Promise<void> {
 
-        return (await axios.post(this.error_url(), null || undefined)).data as IActionResult;
+        return (await axios.post(this.error_url(), null || undefined)).data as void;
     }
 }

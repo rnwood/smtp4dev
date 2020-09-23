@@ -1,21 +1,21 @@
 ﻿<template>
     <div class="messagelist">
         <div class="toolbar">
-            
-                <confirmationdialog v-on:confirm="clear"
-                                    always-key="deleteAllMessages"
-                                    message="Are you sure you want to delete all messages?">
-                    <el-button  icon="el-icon-close" title="Clear"></el-button>
-                </confirmationdialog>
 
-                <el-button 
-                           icon="el-icon-delete"
-                           v-on:click="deleteSelected"
-                           :disabled="!selectedmessage" title="Delete"></el-button>
-                <el-button 
-                           icon="el-icon-refresh"
-                           v-on:click="refresh"
-                           :disabled="loading" title="Refresh"></el-button>                   
+            <confirmationdialog v-on:confirm="clear"
+                                always-key="deleteAllMessages"
+                                message="Are you sure you want to delete all messages?">
+                <el-button icon="el-icon-close" title="Clear"></el-button>
+            </confirmationdialog>
+
+            <el-button icon="el-icon-delete"
+                       v-on:click="deleteSelected"
+                       :disabled="!selectedmessage" title="Delete"></el-button>
+            <el-button icon="el-icon-refresh"
+                       v-on:click="refresh"
+                       :disabled="loading" title="Refresh"></el-button>
+
+            <el-button v-on:click="relaySelected" icon="el-icon-d-arrow-right" :disabled="!selectedmessage || !isRelayAvailable" :loading="isRelayInProgress" title="Relay"></el-button>
 
             <el-input v-model="searchTerm"
                       clearable
@@ -75,6 +75,8 @@
     import { debounce } from "ts-debounce";
 
     import ConfirmationDialog from "@/components/confirmationdialog.vue";
+    import { MessageBoxInputData } from 'element-ui/types/message-box';
+    import ServerController from '../ApiClient/ServerController';
 
     @Component({
         components: {
@@ -90,11 +92,14 @@
         private selectedSortColumn: string = "receivedDate";
 
 
-        @Prop({default: null})
+        @Prop({ default: null })
         connection: HubConnectionManager | null = null;
 
         messages: MessageSummary[] = [];
         filteredMessages: MessageSummary[] = [];
+
+        isRelayInProgress: boolean = false;
+        isRelayAvailable: boolean = false;
 
         emptyText: string = "No messages";
         error: Error | null = null;
@@ -130,6 +135,43 @@
             return event.row.isUnread ? "unread" : "read";
         }
 
+        async relaySelected() {
+            if (this.selectedmessage == null) {
+                return;
+            }
+
+            
+            let emails: string[];
+
+            try {
+
+                let dialogResult = <MessageBoxInputData>await this.$prompt('Email address(es) to relay to (separate multiple with ,)', 'Relay Message', {
+                    confirmButtonText: 'OK',
+                    inputValue: this.selectedmessage.to,
+                    cancelButtonText: 'Cancel',
+                    inputPattern: /[^, ]+(, *[^, ]+)*/,
+                    inputErrorMessage: 'Invalid email addresses'
+                });
+
+                emails = (<string>dialogResult.value).split(",").map(e => e.trim());
+            } catch {
+                return;
+            }
+
+            try {
+                this.isRelayInProgress = true;
+                await new MessagesController().relayMessage(this.selectedmessage.id, { overrideRecipientAddresses: emails });
+
+                this.$notify.success({ title: "Relay Message Success", message: "Completed OK" });
+            } catch (e) {
+                var message = e.response?.data?.detail ?? e.sessage;
+
+                this.$notify.error({ title: "Relay Message Failed", message: message });
+            } finally {
+                this.isRelayInProgress = false;
+            }
+        }
+
         async deleteSelected() {
             if (this.selectedmessage == null) {
                 return;
@@ -148,7 +190,7 @@
                 await new MessagesController().delete(messageToDelete.id);
                 await this.refresh();
             } catch (e) {
-                this.error = e;
+                this.$notify.error({ title: "Delete Message Failed", message: e.message });
             } finally {
                 this.loading = false;
             }
@@ -160,7 +202,7 @@
                 await new MessagesController().deleteAll();
                 await this.refresh();
             } catch (e) {
-                this.error = e;
+                this.$notify.error({ title: "Clear Messages Failed", message: e.message });
             } finally {
                 this.loading = false;
             }
@@ -219,7 +261,7 @@
 
         initialLoadDone = false;
 
-        async refresh(silent: boolean=false) {
+        async refresh(silent: boolean = false) {
             var unlock = await this.mutex.acquire();
 
             try {
@@ -265,8 +307,9 @@
                 this.initialLoadDone = true;
                 this.lastSort = sortColumn;
                 this.lastSortDescending = this.selectedSortDescending;
+
+                this.isRelayAvailable = !!await (await new ServerController().getServer()).relayOptions.smtpServer;
             } catch (e) {
-                console.error(e);
                 this.error = e;
             } finally {
                 this.loading = false;
@@ -297,13 +340,18 @@
         }
 
         @Watch("connection")
-        async onConnectionChanged () {
+        async onConnectionChanged() {
 
             if (this.connection) {
                 this.connection.on("messageschanged", async () => {
                     await this.refresh(true);
                 });
-                this.connection.addOnConnectedCallback(() => this.refresh(true));
+                this.connection.on("serverchanged", async () => {
+                    await this.refresh(true);
+                });
+                this.connection.addOnConnectedCallback(() => {
+                    this.refresh(true);
+                });
             }
         }
 

@@ -12,7 +12,7 @@
             "cwd": "${workspaceFolder}/Rnwood.Smtp4dev",
             "args": "--urls http://localhost:5000",
             "stopAtEntry": false,
-            "internalConsoleOptions": "openOnSessionStart"
+            "internalConsoleOptions": "openOnSessionStart",
         },
         {
             "type": "chrome",
@@ -20,9 +20,11 @@
             "name": "Chrome",
             "url": "http://localhost:5000",
             "webRoot": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp/src",
+            "breakOnLoad": true,
             "sourceMapPathOverrides": {
-                "webpack:///./src/*": "${webRoot}/*"
+              "webpack:///src/*": "${webRoot}/*"
             }
+
         }
     ],
     "compounds": [{

@@ -10,7 +10,6 @@ using System.IO;
 using MimeKit;
 using HtmlAgilityPack;
 using Rnwood.Smtp4dev.Server;
-using Microsoft.AspNet.OData;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 
@@ -50,7 +49,7 @@ namespace Rnwood.Smtp4dev.Controllers
                     SmtpPort = relayOptions.CurrentValue.SmtpPort,
                     Login = relayOptions.CurrentValue.Login,
                     Password = relayOptions.CurrentValue.Password,
-                    AllowedEmails = relayOptions.CurrentValue.AllowedEmails,
+                    AutomaticEmails = relayOptions.CurrentValue.AutomaticEmails,
                     SenderAddress = relayOptions.CurrentValue.SenderAddress
                 }
             };
@@ -73,7 +72,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newRelaySettings.SenderAddress = serverUpdate.RelayOptions.SenderAddress;
             newRelaySettings.Login = serverUpdate.RelayOptions.Login;
             newRelaySettings.Password = serverUpdate.RelayOptions.Password;
-            newRelaySettings.AllowedEmails = serverUpdate.RelayOptions.AllowedEmails;
+            newRelaySettings.AutomaticEmails = serverUpdate.RelayOptions.AutomaticEmails;
 
             if (!serverUpdate.IsRunning && this.server.IsRunning)
             {

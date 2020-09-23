@@ -1,4 +1,7 @@
 module.exports = {
     outputDir: '../wwwroot',
-    publicPath: './'
+    publicPath: './',
+    configureWebpack: {
+        devtool: 'source-map'
+    }
 }

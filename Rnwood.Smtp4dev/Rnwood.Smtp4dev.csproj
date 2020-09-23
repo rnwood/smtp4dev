@@ -22,7 +22,6 @@
 		<PackageReference Include="CommandLiners.MonoOptions" Version="1.0.36" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.24" />
 		<PackageReference Include="MailKit" Version="2.9.0" />
-		<PackageReference Include="Microsoft.AspNet.OData" Version="7.5.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.1.8" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
@@ -140,6 +139,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <ClientApp Remove="ClientApp\src\ApiClient\MessageRelayOptions.cs" />
+	  <ClientApp Remove="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
 	  <ClientApp Remove="ClientApp\src\ApiClient\Server.ts" />
 	  <ClientApp Remove="ClientApp\src\ApiClient\ServerController.ts" />
 	  <ClientApp Remove="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
@@ -148,12 +149,14 @@
 	</ItemGroup>
 
 	<ItemGroup>
+	  <None Remove="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
 	  <None Remove="ClientApp\src\ApiClient\Server.ts" />
 	  <None Remove="ClientApp\src\ApiClient\ServerController.ts" />
 	  <None Remove="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
 	</ItemGroup>
 
 	<ItemGroup>
+	  <TypeScriptCompile Include="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
 	  <TypeScriptCompile Include="ClientApp\src\ApiClient\Server.ts" />
 	  <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerController.ts" />
 	  <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
