@@ -117,7 +117,7 @@
                 await new SessionsController().delete(sessionToDelete.id);
                 this.refresh();
             } catch (e) {
-                this.error = e;
+                this.$notify.error({ title: "Delete Session Failed", message: e.message });
             } finally {
                 this.loading = false;
             }
@@ -129,7 +129,7 @@
                 await new SessionsController().deleteAll();
                 this.refresh();
             } catch (e) {
-                this.error = e;
+                this.$notify.error({ title: "Clear Sessions Failed", message: e.message });
             } finally {
                 this.loading = false;
             }

@@ -1,7 +1,7 @@
 ﻿${ 
     using Typewriter.Extensions.WebApi;
  
-    string ReturnType(Method m) => m.Type.Name;
+    string ReturnType(Method m) => m.Type.Name == "IActionResult" ? "void" : m.Type.Name;
     string ParamType(Parameter p) => p.Type.Name.Replace("Delta<", "Partial<");
     string ServiceName(Class c) => c.Name;
      
@@ -16,10 +16,17 @@
     }
      
     string ControllerImports(Class c){
-        List<string> neededImports = c.Methods
-	        .Where(m => !m.Type.IsPrimitive && !m.Type.Name.Contains("void"))
+        List<string> returnTypeImports = c.Methods
+	        .Where(m => !m.Type.IsPrimitive && !m.Type.Name.Contains("void") && m.Type.Name != "IActionResult")
 	        .Select(p => "import " + p.Type.Name.TrimEnd('[',']') + " from './" + p.Type.Name.TrimEnd('[',']') + "';").ToList();
-        return String.Join("\n", neededImports.Distinct());
+
+        List<string> paramTypeImports = c.Methods
+            .SelectMany(m => m.Parameters)
+	        .Where(p => !p.Type.IsPrimitive)
+	        .Select(p => "import " + p.Type.Name.TrimEnd('[',']') + " from './" + p.Type.Name.TrimEnd('[',']') + "';").ToList();
+
+
+        return String.Join("\n", returnTypeImports.Concat(paramTypeImports).Distinct());
     } 
 }
 $Classes(c => c.Namespace == "Rnwood.Smtp4dev.ApiModel")[$Imports

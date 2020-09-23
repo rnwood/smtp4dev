@@ -15,7 +15,7 @@
                        v-on:click="refresh"
                        :disabled="loading" title="Refresh"></el-button>
 
-            <el-button v-on:click="relaySelected"  icon="el-icon-d-arrow-right" :disabled="!selectedmessage" :loading="isRelayInProgress" title="Relay"></el-button>
+            <el-button v-on:click="relaySelected" icon="el-icon-d-arrow-right" :disabled="!selectedmessage || !isRelayAvailable" :loading="isRelayInProgress" title="Relay"></el-button>
 
             <el-input v-model="searchTerm"
                       clearable
@@ -75,6 +75,8 @@
     import { debounce } from "ts-debounce";
 
     import ConfirmationDialog from "@/components/confirmationdialog.vue";
+    import { MessageBoxInputData } from 'element-ui/types/message-box';
+    import ServerController from '../ApiClient/ServerController';
 
     @Component({
         components: {
@@ -97,6 +99,7 @@
         filteredMessages: MessageSummary[] = [];
 
         isRelayInProgress: boolean = false;
+        isRelayAvailable: boolean = false;
 
         emptyText: string = "No messages";
         error: Error | null = null;
@@ -137,11 +140,33 @@
                 return;
             }
 
+            
+            let emails: string[];
+
+            try {
+
+                let dialogResult = <MessageBoxInputData>await this.$prompt('Email address(es) to relay to (separate multiple with ,)', 'Relay Message', {
+                    confirmButtonText: 'OK',
+                    inputValue: this.selectedmessage.to,
+                    cancelButtonText: 'Cancel',
+                    inputPattern: /[^, ]+(, *[^, ]+)*/,
+                    inputErrorMessage: 'Invalid email addresses'
+                });
+
+                emails = (<string>dialogResult.value).split(",").map(e => e.trim());
+            } catch {
+                return;
+            }
+
             try {
                 this.isRelayInProgress = true;
-                await new MessagesController().relayMessage(this.selectedmessage.id, "rob@rnwood.co.uk");
+                await new MessagesController().relayMessage(this.selectedmessage.id, { overrideRecipientAddresses: emails });
+
+                this.$notify.success({ title: "Relay Message Success", message: "Completed OK" });
             } catch (e) {
-                console.error(e);
+                var message = e.response?.data?.detail ?? e.sessage;
+
+                this.$notify.error({ title: "Relay Message Failed", message: message });
             } finally {
                 this.isRelayInProgress = false;
             }
@@ -165,7 +190,7 @@
                 await new MessagesController().delete(messageToDelete.id);
                 await this.refresh();
             } catch (e) {
-                this.error = e;
+                this.$notify.error({ title: "Delete Message Failed", message: e.message });
             } finally {
                 this.loading = false;
             }
@@ -177,7 +202,7 @@
                 await new MessagesController().deleteAll();
                 await this.refresh();
             } catch (e) {
-                this.error = e;
+                this.$notify.error({ title: "Clear Messages Failed", message: e.message });
             } finally {
                 this.loading = false;
             }
@@ -282,8 +307,9 @@
                 this.initialLoadDone = true;
                 this.lastSort = sortColumn;
                 this.lastSortDescending = this.selectedSortDescending;
+
+                this.isRelayAvailable = !!await (await new ServerController().getServer()).relayOptions.smtpServer;
             } catch (e) {
-                console.error(e);
                 this.error = e;
             } finally {
                 this.loading = false;
@@ -320,7 +346,12 @@
                 this.connection.on("messageschanged", async () => {
                     await this.refresh(true);
                 });
-                this.connection.addOnConnectedCallback(() => this.refresh(true));
+                this.connection.on("serverchanged", async () => {
+                    await this.refresh(true);
+                });
+                this.connection.addOnConnectedCallback(() => {
+                    this.refresh(true);
+                });
             }
         }
 

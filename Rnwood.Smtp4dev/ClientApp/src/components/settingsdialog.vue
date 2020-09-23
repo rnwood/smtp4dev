@@ -1,5 +1,5 @@
 ﻿<template>
-    <el-dialog title="Settings" :visible.sync="visible" width="80%" :close-on-click-modal="false" :open="refresh" :before-close="handleClose">
+    <el-dialog title="Settings" :visible.sync="visible" width="80%" :close-on-click-modal="false" @open="refresh" :before-close="handleClose">
         <div v-loading="loading">
             <el-alert v-if="error" type="error" title="Error" show-icon>
                 {{error.message}}
@@ -145,6 +145,7 @@
             this.isRelayEnabledValue = value;
             if (!this.isRelayEnabledValue && this.server) {
                 this.server.relayOptions.smtpServer = "";
+                this.server.relayOptions.automaticEmails.splice(0, this.server.relayOptions.automaticEmails.length);
             }
         }
      

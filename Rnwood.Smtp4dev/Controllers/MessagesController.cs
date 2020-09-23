@@ -71,18 +71,20 @@ namespace Rnwood.Smtp4dev.Controllers
 			return new FileStreamResult(new MemoryStream(result.Data), "message/rfc822") { FileDownloadName = $"{id}.eml" };
 		}
 
-		[HttpPost("{id}/relay/{address}")]
+		[HttpPost("{id}/relay")]
 
-		public void RelayMessage(Guid id, string address)
+		public IActionResult RelayMessage(Guid id, [FromBody] MessageRelayOptions options)
 		{
 			Message message = GetDbMessage(id);
-            Dictionary<MailboxAddress, Exception> relayErrors = server.TryRelayMessage(message, string.IsNullOrEmpty( address) ? null : new[] { new MailboxAddress(address) });
+            Dictionary<MailboxAddress, Exception> relayErrors = server.TryRelayMessage(message, options?.OverrideRecipientAddresses?.Length > 0 ? options?.OverrideRecipientAddresses.Select(a => MailboxAddress.Parse(a)).ToArray() : null);
 
 			if (relayErrors.Any())
 			{
 				string relayErrorSummary = string.Join(". ", relayErrors.Select(e => e.Key.Address + ": " + e.Value.Message));
-				throw new System.Web.Http.HttpResponseException(new System.Net.Http.HttpResponseMessage(System.Net.HttpStatusCode.InternalServerError) { ReasonPhrase = "Failed to relay to recipients: " + relayErrorSummary });
+				return Problem("Failed to relay to recipients: " + relayErrorSummary);
 			}
+
+			return Ok();
 		}
 
 		[HttpGet("{id}/part/{partid}/content")]

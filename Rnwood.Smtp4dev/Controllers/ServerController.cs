@@ -10,7 +10,6 @@ using System.IO;
 using MimeKit;
 using HtmlAgilityPack;
 using Rnwood.Smtp4dev.Server;
-using Microsoft.AspNet.OData;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 

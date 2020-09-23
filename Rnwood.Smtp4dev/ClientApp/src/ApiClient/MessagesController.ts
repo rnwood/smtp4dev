@@ -3,6 +3,7 @@
 import MessageSummary from './MessageSummary';
 import Message from './Message';
 import FileStreamResult from './FileStreamResult';
+import MessageRelayOptions from './MessageRelayOptions';
 import axios from "axios";
 
 export default class MessagesController {
@@ -52,14 +53,14 @@ export default class MessagesController {
         return (await axios.get(this.downloadMessage_url(id), null || undefined)).data as FileStreamResult;
     }
     
-    // post: api/Messages/${encodeURIComponent(id)}/relay/${encodeURIComponent(address)}  
-    public relayMessage_url(id: string, address: string): string {
-        return `api/Messages/${encodeURIComponent(id)}/relay/${encodeURIComponent(address)}`;
+    // post: api/Messages/${encodeURIComponent(id)}/relay  
+    public relayMessage_url(id: string): string {
+        return `api/Messages/${encodeURIComponent(id)}/relay`;
     }
 
-    public async relayMessage(id: string, address: string): Promise<void> {
+    public async relayMessage(id: string, options: MessageRelayOptions): Promise<void> {
 
-        return (await axios.post(this.relayMessage_url(id, address), null || undefined)).data as void;
+        return (await axios.post(this.relayMessage_url(id), options || undefined)).data as void;
     }
     
     // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content  
