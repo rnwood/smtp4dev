@@ -19,7 +19,7 @@ namespace Rnwood.Smtp4dev.Tests
 			DbModel.Message testMessage1 = await GetTestMessage1();
 
 			TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
-			MessagesController messagesController = new MessagesController(messagesRepository);
+			MessagesController messagesController = new MessagesController(messagesRepository, null);
 
 			ApiModel.Message result = messagesController.GetMessage(testMessage1.Id);
 
@@ -76,7 +76,7 @@ new MemoryStream(Encoding.UTF8.GetBytes(message.ToString())), "from@envelope.com
 		{
 			DbModel.Message testMessage1 = await GetTestMessage1();
 			TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
-			MessagesController messagesController = new MessagesController(messagesRepository);
+			MessagesController messagesController = new MessagesController(messagesRepository, null);
 
 			var parts = messagesController.GetMessage(testMessage1.Id).Parts.Flatten(p => p.ChildParts).SelectMany(p => p.Attachments);
 
