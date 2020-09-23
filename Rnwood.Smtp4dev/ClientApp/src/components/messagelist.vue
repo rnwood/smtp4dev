@@ -15,7 +15,7 @@
                        v-on:click="refresh"
                        :disabled="loading" title="Refresh"></el-button>
 
-            <el-button v-on:click="relaySelected"  icon="el-icon-d-arrow-right" :disabled="!selectedmessage" title="Relay"></el-button>
+            <el-button v-on:click="relaySelected"  icon="el-icon-d-arrow-right" :disabled="!selectedmessage" :loading="isRelayInProgress" title="Relay"></el-button>
 
             <el-input v-model="searchTerm"
                       clearable
@@ -96,6 +96,8 @@
         messages: MessageSummary[] = [];
         filteredMessages: MessageSummary[] = [];
 
+        isRelayInProgress: boolean = false;
+
         emptyText: string = "No messages";
         error: Error | null = null;
         selectedmessage: MessageSummary | null = null;
@@ -136,9 +138,12 @@
             }
 
             try {
-                new MessagesController().relayMessage(this.selectedmessage.id, "rob@rnwood.co.uk");
+                this.isRelayInProgress = true;
+                await new MessagesController().relayMessage(this.selectedmessage.id, "rob@rnwood.co.uk");
             } catch (e) {
-                this.loading = false;
+                console.error(e);
+            } finally {
+                this.isRelayInProgress = false;
             }
         }
 
