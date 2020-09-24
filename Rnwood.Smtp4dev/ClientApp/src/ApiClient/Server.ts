@@ -3,7 +3,7 @@
 import ServerRelayOptions from './ServerRelayOptions';
 export default class Server {
  
-    constructor(isRunning: boolean, exception: string, portNumber: number, hostName: string, allowRemoteConnections: boolean, numberOfMessagesToKeep: number, numberOfSessionsToKeep: number, relayOptions: ServerRelayOptions, ) {
+    constructor(isRunning: boolean, exception: string, portNumber: number, hostName: string, allowRemoteConnections: boolean, numberOfMessagesToKeep: number, numberOfSessionsToKeep: number, relayOptions: ServerRelayOptions, imapPortNumber: number, ) {
          
         this.isRunning = isRunning; 
         this.exception = exception; 
@@ -12,7 +12,8 @@ export default class Server {
         this.allowRemoteConnections = allowRemoteConnections; 
         this.numberOfMessagesToKeep = numberOfMessagesToKeep; 
         this.numberOfSessionsToKeep = numberOfSessionsToKeep; 
-        this.relayOptions = relayOptions;
+        this.relayOptions = relayOptions; 
+        this.imapPortNumber = imapPortNumber;
     }
 
      
@@ -23,5 +24,6 @@ export default class Server {
     allowRemoteConnections: boolean; 
     numberOfMessagesToKeep: number; 
     numberOfSessionsToKeep: number; 
-    relayOptions: ServerRelayOptions;
+    relayOptions: ServerRelayOptions; 
+    imapPortNumber: number;
 }

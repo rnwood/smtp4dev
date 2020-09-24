@@ -22,7 +22,11 @@
                     </el-tab-pane>
 
 
-
+                    <el-tab-pane label="IMAP Server">
+                        <el-form-item label="Port Number" prop="server.imapPortNumber">
+                            <el-input-number :min=1 :max=65535 controls-position="right" v-model="server.imapPortNumber" />
+                        </el-form-item>
+                    </el-tab-pane>
 
                     <el-tab-pane label="Limits">
 

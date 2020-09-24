@@ -4,37 +4,73 @@ using LumiSoft.Net.IMAP.Server;
 using LumiSoft.Net.Mail;
 using LumiSoft.Net.Mime;
 using LumiSoft.Net.MIME;
+using Microsoft.Extensions.Options;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Server
 {
     public class ImapServer
     {
-        public ImapServer(IMessagesRepository messagesRepository)
+        public ImapServer(IMessagesRepository messagesRepository, IOptionsMonitor<ServerOptions> serverOptions)
         {
             this.messagesRepository = messagesRepository;
+            this.serverOptions = serverOptions;
+
+            IDisposable eventHandler = null;
+            var obs = Observable.FromEvent<ServerOptions>(e => eventHandler = serverOptions.OnChange(e), e => eventHandler.Dispose());
+            obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
         }
 
-        public void Start()
+        private void OnServerOptionsChanged(ServerOptions serverOptions)
         {
+            Stop();
+
+            TryStart();
+        }
+
+        public bool IsRunning
+        {
+            get
+            {
+                return imapServer?.IsRunning ?? false;
+            }
+        }
+
+        public void TryStart()
+        {
+            if (!serverOptions.CurrentValue.ImapPort.HasValue)
+            {
+                Console.WriteLine($"IMAP server disabled");
+                return;
+            }
+
             imapServer = new IMAP_Server()
             {
-                Bindings = new[] { new IPBindInfo(Dns.GetHostName(), BindInfoProtocol.TCP, IPAddress.Any, 143) }
+                Bindings = new[] { new IPBindInfo(Dns.GetHostName(), BindInfoProtocol.TCP, serverOptions.CurrentValue.AllowRemoteConnections ? IPAddress.Any : IPAddress.Loopback, serverOptions.CurrentValue.ImapPort.Value) }
             };
             imapServer.SessionCreated += (o, ea) => new SessionHandler(ea.Session, this.messagesRepository);
 
-            imapServer.Logger = new LumiSoft.Net.Log.Logger();
-            imapServer.Logger.WriteLog += Logger_WriteLog;
+            //imapServer.Logger = new LumiSoft.Net.Log.Logger();
+            //imapServer.Logger.WriteLog += Logger_WriteLog;
 
             imapServer.Start();
+            Console.WriteLine($"IMAP Server listening on port {imapServer.Bindings[0].Port}");
+        }
+
+        public void Stop()
+        {
+            imapServer?.Stop();
+            imapServer = null;
         }
 
         private IMessagesRepository messagesRepository;
         private IMAP_Server imapServer;
+        private IOptionsMonitor<ServerOptions> serverOptions;
 
         private void Logger_WriteLog(object sender, LumiSoft.Net.Log.WriteLogEventArgs e)
         {
@@ -74,34 +110,26 @@ namespace Rnwood.Smtp4dev.Server
 
             private void Session_Delete(object sender, IMAP_e_Folder e)
             {
-                
+
             }
 
             private IMessagesRepository messagesRepository;
             private IMAP_Session session;
-            private Dictionary<Guid, long> messageIdToUid = new Dictionary<Guid, long>();
 
             private void Session_GetMessagesInfo(object sender, IMAP_e_MessagesInfo e)
             {
                 foreach (var message in messagesRepository.GetMessages())
                 {
-                    long uid;
-                    if (!messageIdToUid.TryGetValue(message.Id, out uid))
-                    {
-                        uid = messageIdToUid.Any() ? messageIdToUid.Values.Max() + 1 : 1;
-                        messageIdToUid[message.Id] = uid;
-                    }
-
                     List<string> flags = new List<string>();
                     if (!message.IsUnread)
                     {
                         flags.Add("Seen");
                     }
 
-                    e.MessagesInfo.Add(new IMAP_MessageInfo(message.Id.ToString(), uid, flags.ToArray(), message.Data.Length, message.ReceivedDate));
+                    e.MessagesInfo.Add(new IMAP_MessageInfo(message.Id.ToString(), message.ImapUid, flags.ToArray(), message.Data.Length, message.ReceivedDate));
                 }
             }
-                       
+
             private void Session_Fetch(object sender, IMAP_e_Fetch e)
             {
                 foreach (var msgInfo in e.MessagesInfo)

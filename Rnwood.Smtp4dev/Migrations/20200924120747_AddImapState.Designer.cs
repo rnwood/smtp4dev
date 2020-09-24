@@ -2,15 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rnwood.Smtp4dev.DbModel;
 
 namespace Rnwood.Smtp4dev.Migrations
 {
     [DbContext(typeof(Smtp4devDbContext))]
-    partial class Smtp4devDbContextModelSnapshot : ModelSnapshot
+    [Migration("20200924120747_AddImapState")]
+    partial class AddImapState
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -19,6 +21,7 @@ namespace Rnwood.Smtp4dev.Migrations
             modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.ImapState", b =>
                 {
                     b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("TEXT");
 
                     b.Property<long>("LastUid")

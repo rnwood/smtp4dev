@@ -1,4 +1,4 @@
-﻿using Microsoft.Extensions.Options;
+using Microsoft.Extensions.Options;
 using Org.BouncyCastle.Asn1.X509;
 using Org.BouncyCastle.Crypto;
 using Org.BouncyCastle.Crypto.Generators;
@@ -43,8 +43,6 @@ namespace Rnwood.Smtp4dev.Server
             obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
 
             taskQueue.Start();
-
-            new ImapServer(this).Start();
 
         }
 
@@ -199,7 +197,7 @@ namespace Rnwood.Smtp4dev.Server
                 Smtp4devDbContext dbContent = dbContextFactory();
                 DbModel.Message message = dbContent.Messages.FindAsync(id).Result;
 
-                if (message.IsUnread)
+                if (message?.IsUnread)
                 {
                     message.IsUnread = false;
                     dbContent.SaveChanges();
@@ -296,6 +294,11 @@ namespace Rnwood.Smtp4dev.Server
 
                     Dictionary<MailboxAddress, Exception> relayErrors = TryRelayMessage(message, null);
                     message.RelayError = string.Join("\n", relayErrors.Select(e => e.Key.ToString() + ": " + e.Value.Message));
+
+                    ImapState imapState = dbContext.ImapState.Single();
+                    imapState.LastUid = Math.Max(0, imapState.LastUid+1);
+                    message.ImapUid = imapState.LastUid;
+
 
                     Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
                     message.Session = dbSession;
