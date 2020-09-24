@@ -197,7 +197,7 @@ namespace Rnwood.Smtp4dev.Server
                 Smtp4devDbContext dbContent = dbContextFactory();
                 DbModel.Message message = dbContent.Messages.FindAsync(id).Result;
 
-                if (message?.IsUnread)
+                if (message?.IsUnread == true)
                 {
                     message.IsUnread = false;
                     dbContent.SaveChanges();

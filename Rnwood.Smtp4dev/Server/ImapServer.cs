@@ -51,12 +51,10 @@ namespace Rnwood.Smtp4dev.Server
 
             imapServer = new IMAP_Server()
             {
-                Bindings = new[] { new IPBindInfo(Dns.GetHostName(), BindInfoProtocol.TCP, serverOptions.CurrentValue.AllowRemoteConnections ? IPAddress.Any : IPAddress.Loopback, serverOptions.CurrentValue.ImapPort.Value) }
+                Bindings = new[] { new IPBindInfo(Dns.GetHostName(), BindInfoProtocol.TCP, serverOptions.CurrentValue.AllowRemoteConnections ? IPAddress.Any : IPAddress.Loopback, serverOptions.CurrentValue.ImapPort.Value) },
+                GreetingText = "smtp4dev"
             };
             imapServer.SessionCreated += (o, ea) => new SessionHandler(ea.Session, this.messagesRepository);
-
-            //imapServer.Logger = new LumiSoft.Net.Log.Logger();
-            //imapServer.Logger.WriteLog += Logger_WriteLog;
 
             imapServer.Start();
             Console.WriteLine($"IMAP Server listening on port {imapServer.Bindings[0].Port}");
@@ -87,9 +85,24 @@ namespace Rnwood.Smtp4dev.Server
                 session.Fetch += Session_Fetch;
                 session.GetMessagesInfo += Session_GetMessagesInfo;
                 session.Capabilities.Remove("QUOTA");
-                session.Delete += Session_Delete;
+                session.Capabilities.Remove("NAMESPACE");
                 session.Store += Session_Store;
+                session.Select += Session_Select;
                 this.messagesRepository = messagesRepository;
+            }
+
+
+            private void Session_Select(object sender, IMAP_e_Select e)
+            {
+                e.Flags.Clear();
+                e.Flags.Add("\\Deleted");
+                e.Flags.Add("\\Seen");
+
+                e.PermanentFlags.Clear();
+                e.PermanentFlags.Add("\\Deleted");
+                e.PermanentFlags.Add("\\Seen");
+
+                e.FolderUID = 1234;
             }
 
             private void Session_Store(object sender, IMAP_e_Store e)
@@ -108,25 +121,24 @@ namespace Rnwood.Smtp4dev.Server
                 }
             }
 
-            private void Session_Delete(object sender, IMAP_e_Folder e)
-            {
-
-            }
 
             private IMessagesRepository messagesRepository;
             private IMAP_Session session;
 
             private void Session_GetMessagesInfo(object sender, IMAP_e_MessagesInfo e)
             {
-                foreach (var message in messagesRepository.GetMessages())
+                if (e.Folder == "INBOX")
                 {
-                    List<string> flags = new List<string>();
-                    if (!message.IsUnread)
+                    foreach (var message in messagesRepository.GetMessages())
                     {
-                        flags.Add("Seen");
-                    }
+                        List<string> flags = new List<string>();
+                        if (!message.IsUnread)
+                        {
+                            flags.Add("Seen");
+                        }
 
-                    e.MessagesInfo.Add(new IMAP_MessageInfo(message.Id.ToString(), message.ImapUid, flags.ToArray(), message.Data.Length, message.ReceivedDate));
+                        e.MessagesInfo.Add(new IMAP_MessageInfo(message.Id.ToString(), message.ImapUid, flags.ToArray(), message.Data.Length, message.ReceivedDate));
+                    }
                 }
             }
 

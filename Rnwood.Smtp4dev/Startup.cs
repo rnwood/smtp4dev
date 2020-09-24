@@ -28,9 +28,6 @@ namespace Rnwood.Smtp4dev
 
         public IConfiguration Configuration { get; }
 
-        public static readonly ILoggerFactory MyLoggerFactory
-= LoggerFactory.Create(builder => { builder.AddConsole(); });
-
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
@@ -41,7 +38,6 @@ namespace Rnwood.Smtp4dev
 
             services.AddDbContext<Smtp4devDbContext>(opt =>
             {
-                opt.UseLoggerFactory(MyLoggerFactory);
                 if (string.IsNullOrEmpty(serverOptions.Database))
                 {
                     Console.WriteLine("Using in memory database.");
