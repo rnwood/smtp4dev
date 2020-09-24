@@ -79,7 +79,8 @@ namespace Rnwood.Smtp4dev.Server
                 Subject = PunyCodeReplacer.DecodePunycode(subject),
                 Data = data,
                 MimeParseError = mimeParseError,
-                AttachmentCount = 0
+                AttachmentCount = 0,
+                
             };
 
             var parts = new ApiModel.Message(message).Parts;

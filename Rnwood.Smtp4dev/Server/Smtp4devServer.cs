@@ -21,6 +21,7 @@ using System.Threading.Tasks;
 using MimeKit;
 using MailKit.Net.Smtp;
 using System.Reactive.Linq;
+using System.Linq.Expressions;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -42,6 +43,9 @@ namespace Rnwood.Smtp4dev.Server
             obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
 
             taskQueue.Start();
+
+            new ImapServer(this).Start();
+
         }
 
         private void OnServerOptionsChanged(ServerOptions arg1)
