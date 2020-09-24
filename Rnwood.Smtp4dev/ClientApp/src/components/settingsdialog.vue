@@ -1,4 +1,4 @@
-﻿<template>
+<template>
     <el-dialog title="Settings" :visible.sync="visible" width="80%" :close-on-click-modal="false" @open="refresh" :before-close="handleClose">
         <div v-loading="loading">
             <el-alert v-if="error" type="error" title="Error" show-icon>
@@ -22,7 +22,11 @@
                     </el-tab-pane>
 
 
-
+                    <el-tab-pane label="IMAP Server">
+                        <el-form-item label="Port Number" prop="server.imapPortNumber">
+                            <el-input-number :min=1 :max=65535 controls-position="right" v-model="server.imapPortNumber" />
+                        </el-form-item>
+                    </el-tab-pane>
 
                     <el-tab-pane label="Limits">
 
@@ -148,7 +152,7 @@
                 this.server.relayOptions.automaticEmails.splice(0, this.server.relayOptions.automaticEmails.length);
             }
         }
-     
+             
         relayOptionsAutomaticEmails: any[] = [];
 
         @Watch("server.relayOptions.automaticEmails")

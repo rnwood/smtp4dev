@@ -12,12 +12,5 @@ namespace Rnwood.Smtp4dev.Migrations
                 nullable: false,
                 defaultValue: false);
         }
-
-        protected override void Down(MigrationBuilder migrationBuilder)
-        {
-            migrationBuilder.DropColumn(
-                name: "IsUnread",
-                table: "Messages");
-        }
     }
 }

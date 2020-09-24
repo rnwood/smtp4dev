@@ -22,6 +22,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         public int NumberOfSessionsToKeep { get; set; }
 
         public ServerRelayOptions RelayOptions { get; set; }
+        public int? ImapPortNumber { get; set; }
     }
 
 }

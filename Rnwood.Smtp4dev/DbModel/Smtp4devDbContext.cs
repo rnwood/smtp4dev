@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -15,6 +16,8 @@ namespace Rnwood.Smtp4dev.DbModel
 
         public DbSet<Message> Messages { get; set; }
         public DbSet<Session> Sessions { get; set; }
+
+        public DbSet<ImapState> ImapState { get; set; }
     }
 
 }

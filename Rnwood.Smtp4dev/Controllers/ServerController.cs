@@ -19,15 +19,17 @@ namespace Rnwood.Smtp4dev.Controllers
     [ApiController]
     public class ServerController : Controller
     {
-        public ServerController(Smtp4devServer server, IOptionsMonitor<ServerOptions> serverOptions, IOptionsMonitor<RelayOptions> relayOptions)
+        public ServerController(Smtp4devServer server, ImapServer imapServer, IOptionsMonitor<ServerOptions> serverOptions, IOptionsMonitor<RelayOptions> relayOptions)
         {
             this.server = server;
+            this.imapServer = imapServer;
             this.serverOptions = serverOptions;
             this.relayOptions = relayOptions;
         }
 
 
         private Smtp4devServer server;
+        private ImapServer imapServer;
         private IOptionsMonitor<ServerOptions> serverOptions;
         private IOptionsMonitor<RelayOptions> relayOptions;
 
@@ -38,6 +40,7 @@ namespace Rnwood.Smtp4dev.Controllers
             {
                 IsRunning = server.IsRunning,
                 PortNumber = serverOptions.CurrentValue.Port,
+                ImapPortNumber = serverOptions.CurrentValue.ImapPort,
                 HostName = serverOptions.CurrentValue.HostName,
                 AllowRemoteConnections = serverOptions.CurrentValue.AllowRemoteConnections,
                 NumberOfMessagesToKeep = serverOptions.CurrentValue.NumberOfMessagesToKeep,
@@ -66,6 +69,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.AllowRemoteConnections = serverUpdate.AllowRemoteConnections;
             newSettings.NumberOfMessagesToKeep = serverUpdate.NumberOfMessagesToKeep;
             newSettings.NumberOfSessionsToKeep = serverUpdate.NumberOfSessionsToKeep;
+            newSettings.ImapPort = serverUpdate.ImapPortNumber;
 
             newRelaySettings.SmtpServer = serverUpdate.RelayOptions.SmtpServer;
             newRelaySettings.SmtpPort = serverUpdate.RelayOptions.SmtpPort;
@@ -81,6 +85,15 @@ namespace Rnwood.Smtp4dev.Controllers
             else if (serverUpdate.IsRunning && !this.server.IsRunning)
             {
                 this.server.TryStart();
+            }
+
+            if (!serverUpdate.IsRunning && this.imapServer.IsRunning)
+            {
+                this.imapServer.Stop();
+            }
+            else if (serverUpdate.IsRunning && !this.imapServer.IsRunning)
+            {
+                this.imapServer.TryStart();
             }
 
             string dataDir = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "smtp4dev");

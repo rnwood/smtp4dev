@@ -38,7 +38,6 @@ namespace Rnwood.Smtp4dev
 
             services.AddDbContext<Smtp4devDbContext>(opt =>
             {
-
                 if (string.IsNullOrEmpty(serverOptions.Database))
                 {
                     Console.WriteLine("Using in memory database.");
@@ -52,10 +51,9 @@ namespace Rnwood.Smtp4dev
             }, ServiceLifetime.Transient, ServiceLifetime.Singleton);
 
             services.AddSingleton<Smtp4devServer>();
+            services.AddSingleton<ImapServer>();
             services.AddSingleton<IMessagesRepository>(sp => sp.GetService<Smtp4devServer>());
             services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
-
-
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>((relayOptions) =>
             {
@@ -132,6 +130,7 @@ namespace Rnwood.Smtp4dev
                 }
 
                 subdir.ApplicationServices.GetService<Smtp4devServer>().TryStart();
+                subdir.ApplicationServices.GetService<ImapServer>().TryStart();
             };
 
             if (!string.IsNullOrEmpty(serverOptions.BasePath) && serverOptions.BasePath != "/")
