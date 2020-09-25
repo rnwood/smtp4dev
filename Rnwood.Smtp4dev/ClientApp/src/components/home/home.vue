@@ -129,7 +129,7 @@
         }
 
         async mounted() {
-            this.connection = new HubConnectionManager("/hubs/notifications")
+            this.connection = new HubConnectionManager("hubs/notifications")
             this.connection.start();
         }
 

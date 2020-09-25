@@ -124,6 +124,7 @@ namespace Rnwood.Smtp4dev
 
 
                 Smtp4devDbContext context = subdir.ApplicationServices.GetService<Smtp4devDbContext>();
+                context.Database.EnsureCreated();
                 if (!context.Database.IsInMemory())
                 {
                     context.Database.Migrate();

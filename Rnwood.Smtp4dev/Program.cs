@@ -80,7 +80,8 @@ namespace Rnwood.Smtp4dev
                 );
             }
 
-            MapOptions<CommandLineOptions> commandLineOptions = TryParseCommandLine(args);
+            bool noUserSettings;
+            MapOptions<CommandLineOptions> commandLineOptions = TryParseCommandLine(args, out noUserSettings);
             if (commandLineOptions == null)
             {
                 Environment.Exit(1);
@@ -95,12 +96,20 @@ namespace Rnwood.Smtp4dev
                 .ConfigureAppConfiguration(
                     (hostingContext, configBuilder) =>
                     {
-                        var env = hostingContext.HostingEnvironment;
-                        var config = configBuilder
+                        IWebHostEnvironment env = hostingContext.HostingEnvironment;
+
+                        IConfigurationBuilder cb = configBuilder
                             .SetBasePath(env.ContentRootPath)
-                            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                            .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true)
-                            .AddJsonFile(Path.Join(dataDir, "appsettings.json"), optional: true, reloadOnChange: true)
+                            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+                        if (!noUserSettings)
+                        {
+                            cb = cb.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
+                            cb = cb.AddJsonFile(Path.Join(dataDir, "appsettings.json"), optional: true, reloadOnChange: true);
+                        }
+
+                        IConfigurationRoot config =
+                            cb
                             .AddEnvironmentVariables()
                             .AddCommandLineOptions(commandLineOptions)
                             .Build();
@@ -111,12 +120,12 @@ namespace Rnwood.Smtp4dev
                 .Build();
         }
 
-        private static MapOptions<CommandLineOptions> TryParseCommandLine(string[] args)
+        private static MapOptions<CommandLineOptions> TryParseCommandLine(string[] args, out bool noUserSettings)
         {
             MapOptions<CommandLineOptions> map = new MapOptions<CommandLineOptions>();
 
             bool help = false;
-
+            bool noUserSettingsValue = noUserSettings = false;
 
 
             OptionSet options = new OptionSet
@@ -139,12 +148,14 @@ namespace Rnwood.Smtp4dev
                 { "relaysenderaddress=", "Specifies the address used in MAIL FROM when relaying messages. (Sender address in message headers is left unmodified). The sender of each message is used if not specified.", data => map.Add(data, x=> x.RelayOptions.SenderAddress) },
                 { "relayusername=", "The username for the SMTP server used to relay messages. If \"\" no authentication is attempted", data => map.Add(data, x=> x.RelayOptions.Login) },
                 { "relaypassword=", "The password for the SMTP server used to relay messages", data => map.Add(data, x=> x.RelayOptions.Password) },
-                { "imapport=", "Specifies the port the IMAP server will listen on - allows standard email clients to view/retrieve messages", data => map.Add(data, x=> x.ServerOptions.ImapPort) }
+                { "imapport=", "Specifies the port the IMAP server will listen on - allows standard email clients to view/retrieve messages", data => map.Add(data, x=> x.ServerOptions.ImapPort) },
+                { "nousersettings", "", data => noUserSettingsValue = true }
             };
 
             try
             {
                 List<string> badArgs = options.Parse(args);
+                noUserSettings = noUserSettingsValue;
                 if (badArgs.Any())
                 {
                     Console.Error.WriteLine("Unrecognised command line arguments: " + string.Join(" ", badArgs));
@@ -165,7 +176,8 @@ namespace Rnwood.Smtp4dev
                 Console.Error.WriteLine();
                 options.WriteOptionDescriptions(Console.Error);
                 return null;
-            } else
+            }
+            else
             {
                 Console.Error.WriteLine();
                 Console.Error.WriteLine(" > For help use argument --help");
@@ -180,5 +192,7 @@ namespace Rnwood.Smtp4dev
     {
         public ServerOptions ServerOptions { get; set; }
         public RelayOptions RelayOptions { get; set; }
+
+        public bool NoUserSettings { get; set; }
     }
 }

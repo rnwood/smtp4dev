@@ -5,6 +5,7 @@ using LumiSoft.Net.Mail;
 using LumiSoft.Net.Mime;
 using LumiSoft.Net.MIME;
 using Microsoft.Extensions.Options;
+using Rnwood.Smtp4dev.DbModel;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,7 +17,7 @@ namespace Rnwood.Smtp4dev.Server
 {
     public class ImapServer
     {
-        public ImapServer(IMessagesRepository messagesRepository, IOptionsMonitor<ServerOptions> serverOptions)
+        public ImapServer(IMessagesRepository messagesRepository, IOptionsMonitor<ServerOptions> serverOptions, Func<Smtp4devDbContext> dbContextFactory)
         {
             this.messagesRepository = messagesRepository;
             this.serverOptions = serverOptions;
@@ -24,6 +25,17 @@ namespace Rnwood.Smtp4dev.Server
             IDisposable eventHandler = null;
             var obs = Observable.FromEvent<ServerOptions>(e => eventHandler = serverOptions.OnChange(e), e => eventHandler.Dispose());
             obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
+
+            var dbContext = dbContextFactory();
+            if (dbContext.ImapState.FirstOrDefault() == null)
+            {
+                dbContext.Add(new ImapState
+                {
+                    Id = Guid.Empty,
+                    LastUid = 1
+                });
+                dbContext.SaveChanges();
+            }
         }
 
         private void OnServerOptionsChanged(ServerOptions serverOptions)

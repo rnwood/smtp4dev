@@ -83,7 +83,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 Assert.NotNull(messageRow);
 
                 Assert.Contains(messageRow.Cells, c => c.Text.Contains(messageSubject));
-            });
+            }, basePath);
         }
 
         [Fact]
@@ -167,10 +167,10 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             Thread outputThread = null;
 
             
-            List<string> args = new List<string> { mainModule, "--urls=http://*:0", "--smtpport=0", "--db=", "--tlsmode=StartTls" };
+            List<string> args = new List<string> { mainModule, "--nousersettings", "--urls=http://*:0", "--smtpport=0", "--db=", "--tlsmode=StartTls" };
             if (basePath != null)
             {
-                args.Add($"--basepath {basePath}");
+                args.Add($"--basepath={basePath}");
             }
 
             using (Command serverProcess = Command.Run("dotnet", args, o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
