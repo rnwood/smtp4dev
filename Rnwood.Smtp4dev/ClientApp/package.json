@@ -33,7 +33,7 @@
     "srcdoc-polyfill": "^1.0.0",
     "ts-debounce": "^2.0.1",
     "typescript": "~4.0.3",
-    "vue-router": "^3.4.4",
+    "vue-router": "^3.4.5",
     "vue-template-compiler": "^2.6.12",
     "vue2-ace-editor": "0.0.15",
     "@fortawesome/fontawesome-free": "^5.14.0",
