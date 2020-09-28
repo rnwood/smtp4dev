@@ -45,6 +45,12 @@ namespace Rnwood.Smtp4dev
                 }
                 else
                 {
+                    if (serverOptions.RecreateDb && File.Exists(serverOptions.Database))
+                    {
+                        Console.WriteLine("Deleting Sqlite database.");
+                        File.Delete(serverOptions.Database);
+                    }
+
                     Console.WriteLine("Using Sqlite database at " + Path.GetFullPath(serverOptions.Database));
                     opt.UseSqlite($"Data Source='{serverOptions.Database}'");
                 }

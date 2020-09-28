@@ -27,5 +27,7 @@ namespace Rnwood.Smtp4dev.Server
         public string HostName { get; set; } = Dns.GetHostName();
 
         public int? ImapPort { get; set; } = 143;
+
+        public bool RecreateDb { get; set; }
     }
 }

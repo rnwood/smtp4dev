@@ -80,13 +80,16 @@ namespace Rnwood.Smtp4dev
                 );
             }
 
-            bool noUserSettings;
-            MapOptions<CommandLineOptions> commandLineOptions = TryParseCommandLine(args, out noUserSettings);
+            MapOptions<CommandLineOptions> commandLineOptions = TryParseCommandLine(args);
             if (commandLineOptions == null)
             {
                 Environment.Exit(1);
                 return null;
             }
+
+            CommandLineOptions cmdLineOptions = new CommandLineOptions();
+            new ConfigurationBuilder().AddCommandLineOptions(commandLineOptions).Build().Bind(cmdLineOptions);
+
 
             Directory.SetCurrentDirectory(dataDir);
 
@@ -102,7 +105,7 @@ namespace Rnwood.Smtp4dev
                             .SetBasePath(env.ContentRootPath)
                             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-                        if (!noUserSettings)
+                        if (!cmdLineOptions.NoUserSettings)
                         {
                             cb = cb.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
                             cb = cb.AddJsonFile(Path.Join(dataDir, "appsettings.json"), optional: true, reloadOnChange: true);
@@ -120,13 +123,11 @@ namespace Rnwood.Smtp4dev
                 .Build();
         }
 
-        private static MapOptions<CommandLineOptions> TryParseCommandLine(string[] args, out bool noUserSettings)
+        private static MapOptions<CommandLineOptions> TryParseCommandLine(string[] args)
         {
             MapOptions<CommandLineOptions> map = new MapOptions<CommandLineOptions>();
 
             bool help = false;
-            bool noUserSettingsValue = noUserSettings = false;
-
 
             OptionSet options = new OptionSet
             {
@@ -134,7 +135,7 @@ namespace Rnwood.Smtp4dev
                 { "service", "Required to run when registered as a Windows service. To register service: sc.exe create Smtp4dev binPath= \"{PathToExe} --service\"", _ => { } },
                 { "urls=", "The URLs the web interface should listen on. For example, http://localhost:123. Use `*` in place of hostname to listen for requests on any IP address or hostname using the specified port and protocol (for example, http://*:5000)", _ => { } },
                 { "hostname=", "Specifies the server hostname. Used in auto-generated TLS certificate if enabled.", data => map.Add(data, x => x.ServerOptions.HostName) },
-                { "allowremoteconnections", "Specifies if remote connections will be allowed to the SMTP and IMAP servers.", data => map.Add(data, x => x.ServerOptions.AllowRemoteConnections) },
+                { "allowremoteconnections", "Specifies if remote connections will be allowed to the SMTP and IMAP servers. Use -allowremoteconnections+ to enable or -allowremoteconnections- to disable", data => map.Add((data !=null).ToString(), x => x.ServerOptions.AllowRemoteConnections) },
                 { "smtpport=", "Set the port the SMTP server listens on. Specify 0 to assign automatically", data => map.Add(data, x => x.ServerOptions.Port) },
                 { "db=", "Specifies the path where the database will be stored relative to APPDATA env var on Windows or XDG_CONFIG_HOME on non-Windows. Specify \"\" to use an in memory database.", data => map.Add(data, x => x.ServerOptions.Database) },
                 { "messagestokeep=", "Specifies the number of messages to keep", data => map.Add(data, x=> x.ServerOptions.NumberOfMessagesToKeep) },
@@ -149,13 +150,13 @@ namespace Rnwood.Smtp4dev
                 { "relayusername=", "The username for the SMTP server used to relay messages. If \"\" no authentication is attempted", data => map.Add(data, x=> x.RelayOptions.Login) },
                 { "relaypassword=", "The password for the SMTP server used to relay messages", data => map.Add(data, x=> x.RelayOptions.Password) },
                 { "imapport=", "Specifies the port the IMAP server will listen on - allows standard email clients to view/retrieve messages", data => map.Add(data, x=> x.ServerOptions.ImapPort) },
-                { "nousersettings", "", data => noUserSettingsValue = true }
+                { "nousersettings", "Skip loading of appsetttings.json file in %APPDATA%", data => map.Add((data !=null).ToString(), x=> x.NoUserSettings) },
+                { "recreatedb", "Recreates the DB on startup if it already exists", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.RecreateDb) }
             };
 
             try
             {
                 List<string> badArgs = options.Parse(args);
-                noUserSettings = noUserSettingsValue;
                 if (badArgs.Any())
                 {
                     Console.Error.WriteLine("Unrecognised command line arguments: " + string.Join(" ", badArgs));
@@ -194,5 +195,6 @@ namespace Rnwood.Smtp4dev
         public RelayOptions RelayOptions { get; set; }
 
         public bool NoUserSettings { get; set; }
+
     }
 }
