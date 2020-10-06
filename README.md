@@ -21,5 +21,10 @@ A dummy SMTP server for Windows, Linux, Mac OS-X (and maybe elsewhere where .NET
 
 ![Screenshot 1](screenshot1.png)
 ![Screenshot 2](screenshot2.png)
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Frnwood%2Fsmtp4dev.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Frnwood%2Fsmtp4dev?ref=badge_shield)
 
 
+
+
+## License
+[![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Frnwood%2Fsmtp4dev.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Frnwood%2Fsmtp4dev?ref=badge_large)
