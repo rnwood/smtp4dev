@@ -40,7 +40,7 @@
     "core-js": "^3.6.5",
     "node-sass": "^4.14.1",
     "sass": "^1.27.0",
-    "sass-loader": "^10.0.3",
+    "sass-loader": "^10.0.4",
     "vue": "^2.6.12",
     "vue-class-component": "^7.2.6",
     "vue-property-decorator": "^9.0.2"
