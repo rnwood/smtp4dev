@@ -99,12 +99,11 @@ namespace Rnwood.Smtp4dev.Server
 
             if (serverOptions.CurrentValue.TlsMode != TlsMode.None)
             {
-
                 if (!string.IsNullOrEmpty(serverOptions.CurrentValue.TlsCertificate))
                 {
+                    var pfxPassword = serverOptions.CurrentValue.TlsCertificatePassword ?? "";
                     Console.WriteLine($"Using certificate from {serverOptions.CurrentValue.TlsCertificate}");
-                    cert = new X509Certificate2(File.ReadAllBytes(serverOptions.CurrentValue.TlsCertificate), "", X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
-
+                    cert = new X509Certificate2(File.ReadAllBytes(serverOptions.CurrentValue.TlsCertificate), pfxPassword, X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
                 }
                 else
                 {

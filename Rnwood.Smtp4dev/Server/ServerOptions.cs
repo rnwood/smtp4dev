@@ -24,6 +24,8 @@ namespace Rnwood.Smtp4dev.Server
 
         public string TlsCertificate { get; set; }
 
+        public string TlsCertificatePassword { get; set; } = "";
+
         public string HostName { get; set; } = Dns.GetHostName();
 
         public int? ImapPort { get; set; } = 143;
