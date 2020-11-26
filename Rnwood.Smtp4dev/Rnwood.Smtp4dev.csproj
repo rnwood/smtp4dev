@@ -35,7 +35,7 @@
 		<PackageReference Include="MimeKit" Version="2.10.0" />
 		<PackageReference Include="Mono.Options" Version="6.6.0.161" />
 		<PackageReference Include="New.LumiSoft.Net" Version="1.0.0" />
-		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0609" />
+		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0620" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.8.8" />
 		<PackageReference Include="System.Data.SQLite" Version="1.0.113.6" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.6" />
