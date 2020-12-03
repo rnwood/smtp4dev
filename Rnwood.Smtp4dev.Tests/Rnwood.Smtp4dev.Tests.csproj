@@ -12,7 +12,7 @@
   <ItemGroup>
     <PackageReference Include="MailKit" Version="2.9.0" />
     <PackageReference Include="MedallionShell" Version="1.6.2" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.8.3" />
     <PackageReference Include="Selenium.Support" Version="3.141.0" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="85.0.4183.8700" />
