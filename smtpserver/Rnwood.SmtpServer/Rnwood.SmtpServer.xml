@@ -2755,6 +2755,7 @@
             <summary>
             Gets the ActiveConnections.
             </summary>
+            <remarks>Note: this is not thread-safe for enumeration.</remarks>
         </member>
         <member name="P:Rnwood.SmtpServer.SmtpServer.Behaviour">
             <summary>

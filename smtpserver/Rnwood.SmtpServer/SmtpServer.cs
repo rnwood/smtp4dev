@@ -75,6 +75,7 @@ namespace Rnwood.SmtpServer
 		/// <summary>
 		/// Gets the ActiveConnections.
 		/// </summary>
+		/// <remarks>Note: this is not thread-safe for enumeration.</remarks>
 		public IEnumerable<IConnection> ActiveConnections => this.activeConnections.Cast<IConnection>();
 
 		/// <summary>
@@ -123,10 +124,13 @@ namespace Rnwood.SmtpServer
 			this.logger.LogDebug("Killing client connections");
 
 			List<Task> killTasks = new List<Task>();
-			foreach (Connection connection in this.activeConnections.Cast<Connection>().ToArray())
+			lock (this.activeConnections.SyncRoot)
 			{
-				this.logger.LogDebug("Killing connection {0}", connection);
-				killTasks.Add(connection.CloseConnection());
+				foreach (Connection connection in this.activeConnections.Cast<Connection>().ToArray())
+				{
+					this.logger.LogDebug("Killing connection {0}", connection);
+					killTasks.Add(connection.CloseConnection());
+				}
 			}
 
 			Task.WaitAll(killTasks.ToArray());
