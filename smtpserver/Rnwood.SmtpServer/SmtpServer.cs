@@ -253,6 +253,17 @@ namespace Rnwood.SmtpServer
 			{
 				tcpClient = await this.listener.AcceptTcpClientAsync().ConfigureAwait(false);
 			}
+			catch (SocketException)
+			{
+				if (this.IsRunning)
+				{
+					throw;
+				}
+
+				this.logger.LogDebug("Got SocketException on listener, shutting down");
+
+				// normal - caused by _listener.Stop();
+			}
 			catch (InvalidOperationException)
 			{
 				if (this.IsRunning)
