@@ -77,6 +77,7 @@
     import ConfirmationDialog from "@/components/confirmationdialog.vue";
     import { MessageBoxInputData } from 'element-ui/types/message-box';
     import ServerController from '../ApiClient/ServerController';
+    import { mapOrder } from '@/components/utils/mapOrder';
 
     @Component({
         components: {
@@ -140,7 +141,7 @@
                 return;
             }
 
-            
+
             let emails: string[];
 
             try {
@@ -227,18 +228,7 @@
                 }
 
                 sortedArraySync(
-                    this.messages.filter(
-                        m =>
-                            !this.searchTerm ||
-                            m.subject.localeIndexOf(this.searchTerm, undefined, {
-                                sensitivity: "base"
-                            }) != -1 ||
-                            m.to.localeIndexOf(this.searchTerm, undefined, {
-                                sensitivity: "base"
-                            }) != -1 ||
-                            m.from.localeIndexOf(this.searchTerm, undefined, {
-                                sensitivity: "base"
-                            }) != -1
+                    this.messages.filter(m => this.searchTermPredicate(m)
                     ),
                     this.filteredMessages,
                     (a: MessageSummary, b: MessageSummary) => a.id == b.id,
@@ -246,6 +236,9 @@
                         targetItem.isUnread = sourceItem.isUnread;
                     }
                 );
+                
+                const sortedMessageIds = this.messages.map(m=>m.id);
+                this.filteredMessages = mapOrder(this.filteredMessages, sortedMessageIds, 'id');
 
                 if (!this.filteredMessages.some(m => this.selectedmessage != null && m.id == this.selectedmessage.id)) {
                     this.handleCurrentChange(null);
@@ -255,7 +248,20 @@
             }
         }
 
-        private lastSort: string | null = null;
+      private searchTermPredicate(m: MessageSummary) {
+        return !this.searchTerm ||
+            m.subject.localeIndexOf(this.searchTerm, undefined, {
+              sensitivity: "base"
+            }) != -1 ||
+            m.to.localeIndexOf(this.searchTerm, undefined, {
+              sensitivity: "base"
+            }) != -1 ||
+            m.from.localeIndexOf(this.searchTerm, undefined, {
+              sensitivity: "base"
+            }) != -1;
+      }
+
+      private lastSort: string | null = null;
         private lastSortDescending: boolean = false;
         private mutex = new Mutex();
 
