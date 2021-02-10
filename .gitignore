@@ -242,3 +242,4 @@ node_modules
 /Rnwood.Smtp4dev/database.db
 /Rnwood.Smtp4dev/out
 /Rnwood.Smtp4dev/selfsigned-certificate.cer
+/Rnwood.Smtp4dev/ClientApp/.idea/*
