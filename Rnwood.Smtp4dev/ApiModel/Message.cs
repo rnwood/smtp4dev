@@ -3,18 +3,13 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Rnwood.Smtp4dev.DbModel;
-using System.Net.Http.Headers;
-using Rnwood.Smtp4dev;
+using Newtonsoft.Json;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
     public class Message : ICacheByKey
     {
-
 
         public Message(DbModel.Message dbMessage)
         {
@@ -26,6 +21,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             Bcc = "";
             ReceivedDate = dbMessage.ReceivedDate;
             Subject = dbMessage.Subject;
+            SecureConnection = dbMessage.SecureConnection;
 
             Parts = new List<ApiModel.MessageEntitySummary>();
             RelayError = dbMessage.RelayError;
@@ -204,6 +200,8 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string Cc { get; set; }
         public string Bcc { get; set; }
         public DateTime ReceivedDate { get; set; }
+        
+        public bool SecureConnection { get; set; }
 
         public string Subject { get; set; }
 

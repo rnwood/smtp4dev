@@ -1,23 +1,21 @@
 ﻿using MimeKit;
 using Rnwood.Smtp4dev.ApiModel;
-using Rnwood.Smtp4dev.DbModel;
 using System;
-using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
+using Rnwood.SmtpServer;
 
 namespace Rnwood.Smtp4dev.Server
 {
     public class MessageConverter
     {
-        public async Task<DbModel.Message> ConvertAsync(Stream messageData, string envelopeFrom, string envelopeTo)
+        public async Task<DbModel.Message> ConvertAsync(Stream messageData, IMessage messageEnvelope)
         {
             string subject = "";
             string mimeParseError = null;
+            string toAddress = string.Join(", ", messageEnvelope.Recipients);
 
             byte[] data = new byte[messageData.Length];
             await messageData.ReadAsync(data, 0, data.Length);
@@ -68,31 +66,27 @@ namespace Rnwood.Smtp4dev.Server
                 }
             }
 
-
-            DbModel.Message message = new DbModel.Message()
+            var message = new DbModel.Message
             {
                 Id = Guid.NewGuid(),
-
-                From = PunyCodeReplacer.DecodePunycode(envelopeFrom),
-                To = PunyCodeReplacer.DecodePunycode(envelopeTo),
+                From = PunyCodeReplacer.DecodePunycode(messageEnvelope.From),
+                To = PunyCodeReplacer.DecodePunycode(toAddress),
                 ReceivedDate = DateTime.Now,
                 Subject = PunyCodeReplacer.DecodePunycode(subject),
                 Data = data,
                 MimeParseError = mimeParseError,
                 AttachmentCount = 0,
-                
+                SecureConnection = messageEnvelope.SecureConnection
             };
 
-            var parts = new ApiModel.Message(message).Parts;
+            var parts = new Message(message).Parts;
             foreach (var part in parts)
             {
                 message.AttachmentCount += CountAttachments(part);
             }
 
-
             return message;
         }
-
 
         private int CountAttachments(MessageEntitySummary part)
         {

@@ -42,6 +42,10 @@
                         <td>Subject:</td>
                         <td><span v-if="message">{{message.subject}}</span></td>
                     </tr>
+                    <tr>
+                        <td>Secure:</td>
+                        <td><span v-if="message">{{message.secureConnection}}</span></td>
+                    </tr>
                 </table>
 
 
