@@ -3,6 +3,7 @@ trigger:
     include:
       - master
       - refs/tags/*.*.*
+      - refs/tags/*.*.*.*
     exclude:
       - refs/tags/*-ci*
 
