@@ -13,6 +13,7 @@
 		<PackAsTool>true</PackAsTool>
 		<ToolCommandName>smtp4dev</ToolCommandName>
 		<PackageOutputPath>./bin/pkg</PackageOutputPath>
+		<PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(Configuration)'==''">
 		<Configuration>Debug</Configuration>
