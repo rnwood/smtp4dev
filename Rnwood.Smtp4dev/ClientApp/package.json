@@ -37,7 +37,7 @@
     "vue-template-compiler": "^2.6.12",
     "vue2-ace-editor": "0.0.15",
     "@fortawesome/fontawesome-free": "^5.15.1",
-    "core-js": "^3.8.0",
+    "core-js": "^3.9.1",
     "node-sass": "^4.14.1",
     "sass": "^1.29.0",
     "sass-loader": "^10.1.0",
