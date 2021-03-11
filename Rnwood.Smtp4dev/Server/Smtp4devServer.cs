@@ -279,39 +279,36 @@ namespace Rnwood.Smtp4dev.Server
 
         private async Task OnMessageReceived(object sender, MessageEventArgs e)
         {
-            using (Stream stream = e.Message.GetData().Result)
+            Message message = new MessageConverter().ConvertAsync(e.Message).Result;
+            Console.WriteLine($"Message received. Client address {e.Message.Session.ClientAddress}. From {e.Message.From}. To {message.To}.");
+            message.IsUnread = true;
+
+
+            await taskQueue.QueueTask(() =>
             {
-                Message message = new MessageConverter().ConvertAsync(stream, e.Message).Result;
-                Console.WriteLine($"Message received. Client address {e.Message.Session.ClientAddress}. From {e.Message.From}. To {message.To}.");
-                message.IsUnread = true;
+                Console.WriteLine("Processing received message");
+                Smtp4devDbContext dbContext = dbContextFactory();
+
+                Dictionary<MailboxAddress, Exception> relayErrors = TryRelayMessage(message, null);
+                message.RelayError = string.Join("\n", relayErrors.Select(e => e.Key.ToString() + ": " + e.Value.Message));
+
+                ImapState imapState = dbContext.ImapState.Single();
+                imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
+                message.ImapUid = imapState.LastUid;
 
 
-                await taskQueue.QueueTask(() =>
-                {
-                    Console.WriteLine("Processing received message");
-                    Smtp4devDbContext dbContext = dbContextFactory();
+                Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
+                message.Session = dbSession;
+                dbContext.Messages.Add(message);
 
-                    Dictionary<MailboxAddress, Exception> relayErrors = TryRelayMessage(message, null);
-                    message.RelayError = string.Join("\n", relayErrors.Select(e => e.Key.ToString() + ": " + e.Value.Message));
+                dbContext.SaveChanges();
 
-                    ImapState imapState = dbContext.ImapState.Single();
-                    imapState.LastUid = Math.Max(0, imapState.LastUid+1);
-                    message.ImapUid = imapState.LastUid;
+                TrimMessages(dbContext);
+                dbContext.SaveChanges();
+                notificationsHub.OnMessagesChanged().Wait();
+                Console.WriteLine("Processing received message DONE");
 
-
-                    Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
-                    message.Session = dbSession;
-                    dbContext.Messages.Add(message);
-
-                    dbContext.SaveChanges();
-
-                    TrimMessages(dbContext);
-                    dbContext.SaveChanges();
-                    notificationsHub.OnMessagesChanged().Wait();
-                    Console.WriteLine("Processing received message DONE");
-
-                }, false).ConfigureAwait(false);
-            }
+            }, false).ConfigureAwait(false);
         }
 
         public Dictionary<MailboxAddress, Exception> TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
@@ -332,7 +329,8 @@ namespace Rnwood.Smtp4dev.Server
                     .Select(r => MailboxAddress.Parse(r))
                     .Where(r => relayOptions.CurrentValue.AutomaticEmails.Contains(r.Address, StringComparer.OrdinalIgnoreCase))
                     .ToArray();
-            } else
+            }
+            else
             {
                 recipients = overrideRecipients;
             }
@@ -341,20 +339,20 @@ namespace Rnwood.Smtp4dev.Server
             {
                 try
                 {
-                    
-                        Console.WriteLine($"Relaying message to {recipient}");
 
-                        using (SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue))
-                        {
-                            var apiMsg = new ApiModel.Message(message);
-                            MimeMessage newEmail = apiMsg.MimeMessage;
-                            MailboxAddress sender = MailboxAddress.Parse(
-                                !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)
-                                ? relayOptions.CurrentValue.SenderAddress
-                                : apiMsg.From);
-                            relaySmtpClient.Send(newEmail, sender, new[] { recipient });
-                        }
-                    
+                    Console.WriteLine($"Relaying message to {recipient}");
+
+                    using (SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue))
+                    {
+                        var apiMsg = new ApiModel.Message(message);
+                        MimeMessage newEmail = apiMsg.MimeMessage;
+                        MailboxAddress sender = MailboxAddress.Parse(
+                            !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)
+                            ? relayOptions.CurrentValue.SenderAddress
+                            : apiMsg.From);
+                        relaySmtpClient.Send(newEmail, sender, new[] { recipient });
+                    }
+
 
                 }
                 catch (Exception e)

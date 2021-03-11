@@ -11,81 +11,86 @@ namespace Rnwood.Smtp4dev.Server
 {
     public class MessageConverter
     {
-        public async Task<DbModel.Message> ConvertAsync(Stream messageData, IMessage messageEnvelope)
+        public async Task<DbModel.Message> ConvertAsync(IMessage message)
         {
             string subject = "";
             string mimeParseError = null;
-            string toAddress = string.Join(", ", messageEnvelope.Recipients);
+            string toAddress = string.Join(", ", message.Recipients);
 
-            byte[] data = new byte[messageData.Length];
-            await messageData.ReadAsync(data, 0, data.Length);
-
-
-            bool foundHeaders = false;
-            bool foundSeparator = false;
-            using (StreamReader dataReader = new StreamReader(new MemoryStream(data)))
+            byte[] data;
+            using (Stream messageData = await message.GetData())
             {
-                while (!dataReader.EndOfStream)
+                data = new byte[messageData.Length];
+                await messageData.ReadAsync(data, 0, data.Length);
+
+
+
+                bool foundHeaders = false;
+                bool foundSeparator = false;
+                using (StreamReader dataReader = new StreamReader(new MemoryStream(data)))
                 {
-                    if (dataReader.ReadLine().Length != 0)
+                    while (!dataReader.EndOfStream)
                     {
-                        foundHeaders = true;
+                        if (dataReader.ReadLine().Length != 0)
+                        {
+                            foundHeaders = true;
+                        }
+                        else
+                        {
+                            foundSeparator = true;
+                            break;
+                        }
                     }
-                    else
+                }
+
+                if (!foundHeaders || !foundSeparator)
+                {
+                    mimeParseError = "Malformed MIME message. No headers found";
+                }
+                else
+                {
+
+                    messageData.Seek(0, SeekOrigin.Begin);
+                    try
                     {
-                        foundSeparator = true;
-                        break;
+                        CancellationTokenSource cts = new CancellationTokenSource();
+                        cts.CancelAfter(TimeSpan.FromSeconds(10));
+                        MimeMessage mime = await MimeMessage.LoadAsync(messageData, true, cts.Token).ConfigureAwait(false);
+                        subject = mime.Subject;
+
+
+                    }
+                    catch (OperationCanceledException e)
+                    {
+                        mimeParseError = e.Message;
+                    }
+                    catch (FormatException e)
+                    {
+                        mimeParseError = e.Message;
                     }
                 }
             }
 
-            if (!foundHeaders || !foundSeparator)
-            {
-                mimeParseError = "Malformed MIME message. No headers found";
-            }
-            else
-            {
-
-                messageData.Seek(0, SeekOrigin.Begin);
-                try
-                {
-                    CancellationTokenSource cts = new CancellationTokenSource();
-                    cts.CancelAfter(TimeSpan.FromSeconds(10));
-                    MimeMessage mime = await MimeMessage.LoadAsync(messageData, true, cts.Token).ConfigureAwait(false);
-                    subject = mime.Subject;
-
-
-                }
-                catch (OperationCanceledException e)
-                {
-                    mimeParseError = e.Message;
-                }
-                catch (FormatException e)
-                {
-                    mimeParseError = e.Message;
-                }
-            }
-
-            var message = new DbModel.Message
+            DbModel.Message result = new DbModel.Message
             {
                 Id = Guid.NewGuid(),
-                From = PunyCodeReplacer.DecodePunycode(messageEnvelope.From),
+                From = PunyCodeReplacer.DecodePunycode(message.From),
                 To = PunyCodeReplacer.DecodePunycode(toAddress),
                 ReceivedDate = DateTime.Now,
                 Subject = PunyCodeReplacer.DecodePunycode(subject),
                 Data = data,
                 MimeParseError = mimeParseError,
                 AttachmentCount = 0,
-                SecureConnection = messageEnvelope.SecureConnection
+                SecureConnection = message.SecureConnection
             };
 
-            var parts = new Message(message).Parts;
+            var parts = new Message(result).Parts;
             foreach (var part in parts)
             {
-                message.AttachmentCount += CountAttachments(part);
+                result.AttachmentCount += CountAttachments(part);
             }
 
-            return message;
+            return result;
         }
 
         private int CountAttachments(MessageEntitySummary part)
