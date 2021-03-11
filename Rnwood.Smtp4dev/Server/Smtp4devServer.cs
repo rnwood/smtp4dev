@@ -281,9 +281,8 @@ namespace Rnwood.Smtp4dev.Server
         {
             using (Stream stream = e.Message.GetData().Result)
             {
-                string to = string.Join(", ", e.Message.Recipients);
-                Console.WriteLine($"Message received. Client address {e.Message.Session.ClientAddress}. From {e.Message.From}. To {to}.");
-                Message message = new MessageConverter().ConvertAsync(stream, e.Message.From, to).Result;
+                Message message = new MessageConverter().ConvertAsync(stream, e.Message).Result;
+                Console.WriteLine($"Message received. Client address {e.Message.Session.ClientAddress}. From {e.Message.From}. To {message.To}.");
                 message.IsUnread = true;
 
 

@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.DbModel
 {
@@ -11,7 +8,6 @@ namespace Rnwood.Smtp4dev.DbModel
 
         public Message()
         {
-
         }
 
         [Key]
@@ -34,5 +30,7 @@ namespace Rnwood.Smtp4dev.DbModel
 
         public bool IsUnread { get; set; }
         public string RelayError { get; internal set; }
+        
+        public bool SecureConnection { get; set; }
     }
 }
