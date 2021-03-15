@@ -8,7 +8,7 @@ declare module "vue2-ace-editor" {
 
     }
 
-    var aceEditor: AceEditor;
+    const aceEditor: AceEditor;
 
     export default aceEditor;
 }
@@ -26,6 +26,6 @@ interface String {
 }
 
 declare module "splitpanes" {
-    export var Splitpanes: any;
-    export var Pane: any;
+    export const Splitpanes: any;
+    export const Pane: any;
 }

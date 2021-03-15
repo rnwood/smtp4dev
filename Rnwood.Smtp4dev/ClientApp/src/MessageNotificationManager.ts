@@ -15,7 +15,7 @@ export default class MessageNotificationManager {
     private currentNotification: Notification | null = null;
 
     setInitialMessages(messages: MessageSummary[]) {
-        let messagesByDate = this.sortMessages(messages);
+        const messagesByDate = this.sortMessages(messages);
         this.lastNotifiedMessage = messagesByDate[messagesByDate.length - 1];
     }
 
@@ -28,13 +28,13 @@ export default class MessageNotificationManager {
 
     private updateNotifications(messages: MessageSummary[]) {
         //Sort by something stable. Multiple messages may be received at same instant so use id as secondary
-        let messagesByDate = this.sortMessages(messages);
-        var unnotifiedMessages: MessageSummary[];
+        const messagesByDate = this.sortMessages(messages);
+        let unnotifiedMessages: MessageSummary[];
         if (!this.lastNotifiedMessage) {
             unnotifiedMessages = messagesByDate;
         }
         else {
-            var indexOfLastNotifiedMessage = messagesByDate.indexOf(this.lastNotifiedMessage);
+            const indexOfLastNotifiedMessage = messagesByDate.indexOf(this.lastNotifiedMessage);
             if (indexOfLastNotifiedMessage != -1) {
                 unnotifiedMessages = messagesByDate.slice(indexOfLastNotifiedMessage + 1);
             }
@@ -55,7 +55,7 @@ export default class MessageNotificationManager {
                     clearTimeout(this.visibleNotificationCloseTimeout);
                 }
 
-                var notification = this.currentNotification = new Notification("smtp4dev: " + unnotifiedMessages.length + " new message(s) received.", {
+                const notification = this.currentNotification = new Notification("smtp4dev: " + unnotifiedMessages.length + " new message(s) received.", {
                     body: unnotifiedMessages.slice(0, 5).map(m => "From: " + m.from + " - " + m.subject).join("\n") + (unnotifiedMessages.length > 5 ? "..." : ""),
                     tag: "newmessages",
                     renotify: true,
@@ -81,7 +81,7 @@ export default class MessageNotificationManager {
     }
 
     private sortMessages(messages: MessageSummary[]) {
-        let messagesByDate = messages.slice(0, messages.length);
+        const messagesByDate = messages.slice(0, messages.length);
         messagesByDate.sort((m1, m2) => {
             if (m1.receivedDate == m2.receivedDate) {
                 if (m1.id > m2.id) {

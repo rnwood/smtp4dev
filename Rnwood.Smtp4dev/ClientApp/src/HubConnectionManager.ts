@@ -35,7 +35,7 @@ export default class HubConnectionManager {
             await this._connection.start();
             this.connected = true;
 
-            for (let connectedCallback of this.connectedCallbacks) {
+            for (const connectedCallback of this.connectedCallbacks) {
                 connectedCallback();
             }
         } catch (e) {

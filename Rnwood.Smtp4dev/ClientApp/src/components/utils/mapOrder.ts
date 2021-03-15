@@ -3,7 +3,7 @@
  */
 export function mapOrder<T>(array: T[], order: unknown[], key: keyof T) {
   array.sort(function(a, b) {
-    var A = a[key],
+    const A = a[key],
       B = b[key];
 
     if (order.indexOf(A) > order.indexOf(B)) {
