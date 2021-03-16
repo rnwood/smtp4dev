@@ -4,9 +4,6 @@ FROM mcr.microsoft.com/powershell:nanoserver-1809 AS downloadnodejs
 ENV NODE_VERSION 14.16.0
 SHELL ["pwsh", "-Command", "$ErrorActionPreference = 'Stop';$ProgressPreference='silentlyContinue';"]
 
-https://nodejs.org/dist/v14.16.0/node-v14.16.0-win-x64.zip
-https://nodejs.org/dist/v14.16.0/node-v$($env:NODE_VERSION)-x64.zip
-
 RUN Invoke-WebRequest -OutFile \"$($env:TEMP)\nodejs.zip\" -UseBasicParsing \"https://nodejs.org/dist/v$($env:NODE_VERSION)/node-v$($env:NODE_VERSION)-win-x64.zip\" ; `
 Expand-Archive \"$($env:TEMP)\nodejs.zip\" -DestinationPath C:\ ; `
 Rename-Item \"C:\node-v$($env:NODE_VERSION)-win-x64\" c:\nodejs
