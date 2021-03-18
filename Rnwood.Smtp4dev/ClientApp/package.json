@@ -18,7 +18,7 @@
     "@typescript-eslint/parser": "^4.18.0",
     "@vue/cli-plugin-babel": "^4.5.12",
     "@vue/cli-plugin-eslint": "^4.5.12",
-    "@vue/cli-plugin-typescript": "^4.5.11",
+    "@vue/cli-plugin-typescript": "^4.5.12",
     "@vue/cli-service": "^4.5.11",
     "@vue/eslint-config-typescript": "^7.0.0",
     "aspnet-webpack": "^3.0.0",
