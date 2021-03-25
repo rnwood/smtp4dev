@@ -23,9 +23,9 @@
             <el-button size="small" @click="download">Open</el-button>
           </div>
 
-          <template v-show="log" class="vfillpanel fill">
+          <div v-show="log" class="vfillpanel fill">
             <textview :text="log" class="fill"></textview>
-          </template>
+          </div>
         </el-tab-pane>
       </el-tabs>
     </div>
