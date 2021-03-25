@@ -134,6 +134,7 @@
 
 	<PropertyGroup> 
 		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck> 
+		<UserSecretsId>166ca2db-ad20-40b7-95ab-1634e9dd4404</UserSecretsId> 
 	</PropertyGroup>
 
 	<ItemGroup>
