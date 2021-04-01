@@ -7,6 +7,7 @@
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 		<TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <RollForward>Major</RollForward>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
 	</PropertyGroup>
 	<PropertyGroup Condition="'$(PackAsTool)'=='true'">
 		<IsPackable>true</IsPackable>
