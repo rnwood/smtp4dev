@@ -11,20 +11,20 @@ resources:
 - repo: self
 
 variables:
-  civersion_major: '3'
-  civersion_minor: '1'
-  civersion_release: '3'
-  civersion_majorminor: '$(civersion_major).$(civersion_minor)'
-  civersion: '$(civersion_major).$(civersion_minor).$(civersion_release)'
+  ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
+    iscibuild: ${{ true }}
 
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
+    isreleasebuild: ${{ true }}
     tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
+    docker_tag_suffixes: 'v$(civersion_major) v$(civersion_majorminor) $(tag) latest'
 
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
+    civersion: '3.1.3'
     tag: $[ format('$(civersion)-ci{0:yyyyMMdd}{1}', pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
+    docker_tag_suffixes: 'prerelease'
 
   docker_repo: 'rnwood/smtp4dev'
-  docker_tag_suffix: 'v$(civersion_major)'
   docker_registry: 'dockerhub-rnwood'
   netcoresdk_version: '3.1.102'
 
@@ -250,7 +250,7 @@ stages:
         command: test
   
 - stage: Release
-  condition:  and(succeeded(), or(startsWith(variables['Build.SourceBranch'], 'refs/tags/'),eq(variables['Build.SourceBranch'], 'refs/heads/master')))
+  condition:  and(succeeded(), or(variables['isreleasebuild'], variables['iscibuild']))
   displayName: Release
   jobs:  
   - job: Release
@@ -279,10 +279,10 @@ stages:
         tagSource: userSpecifiedTag
         isDraft: false
 
-        ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
+        ${{ if variables['isreleasebuild'] }}:
           isPreRelease: false
           changeLogCompareToRelease: lastFullRelease
-        ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
+        ${{ if not(variables['isreleasebuild']) }}:
           isPreRelease: true
           changeLogCompareToRelease: lastNonDraftRelease
          
@@ -308,10 +308,11 @@ stages:
         targetType: inline
         script: |
           docker pull $(docker_repo):linux-amd64-$(tag)
-          docker tag $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-amd64-$(docker_tag_suffix)
-          docker push $(docker_repo):linux-amd64-$(docker_tag_suffix)
-          docker tag $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-amd64-latest
-          docker push $(docker_repo):linux-amd64-latest
+
+          ("$(docker_tag_suffix)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
+            docker tag $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-amd64-$_
+            docker push $(docker_repo):linux-amd64-$_
+          }
 
   - job: DockerRelease
     displayName: Docker Release
@@ -323,7 +324,7 @@ stages:
     steps:
     - checkout: none
     - task: Docker@2
-      displayName: Login.
+      displayName: Login
       inputs:
         containerRegistry: $(docker_registry)
         repository: $(docker_repo)        
@@ -334,11 +335,12 @@ stages:
         targetType: inline
         script: |
           docker pull $(docker_repo):windows-amd64-$(tag)
-          docker tag $(docker_repo):windows-amd64-$(tag) $(docker_repo):windows-amd64-$(docker_tag_suffix)
-          docker push $(docker_repo):windows-amd64-$(docker_tag_suffix)
-          docker tag $(docker_repo):windows-amd64-$(tag) $(docker_repo):windows-amd64-latest
-          docker push $(docker_repo):windows-amd64-latest
-          docker manifest create $(docker_repo):$(docker_tag_suffix) $(docker_repo):windows-amd64-$(docker_tag_suffix) $(docker_repo):linux-amd64-$(docker_tag_suffix)
+          
+          docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-amd64-$(tag) $(docker_repo):linux-amd64-$(tagZSZZZ)
           docker manifest push $(docker_repo):$(docker_tag_suffix)
-          docker manifest create $(docker_repo):latest $(docker_repo):windows-amd64-latest $(docker_repo):linux-amd64-latest
-          docker manifest push $(docker_repo):latest
+
+          ("$(docker_tag_suffix)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
+            docker tag $(docker_repo):windows-amd64-$(tag) $(docker_repo):windows-amd64-$_
+            docker push $(docker_repo):windows-amd64-$_
+          }
+
