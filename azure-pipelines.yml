@@ -13,6 +13,7 @@ resources:
 variables:
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
     iscibuild: ${{ true }}
+    docker_tags: 'prerelease'
 
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
     isreleasebuild: ${{ true }}
@@ -22,7 +23,6 @@ variables:
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
     civersion: '3.1.3'
     tag: $[ format('$(civersion)-ci{0:yyyyMMdd}{1}', pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
-    docker_tags: 'prerelease'
 
   docker_repo: 'rnwood/smtp4dev'
   docker_registry: 'dockerhub-rnwood'
@@ -345,8 +345,8 @@ stages:
           docker manifest push $(docker_repo):$(tag)
 
           ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
-            docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-amd64-$(tag) $(docker_repo):linux-amd64-$(tag)
-            docker manifest push $(docker_repo):$(tag)
+            docker manifest create $(docker_repo):$_ $(docker_repo):windows-amd64-$_ $(docker_repo):linux-amd64-$_
+            docker manifest push $(docker_repo):$_
           }
 
 
