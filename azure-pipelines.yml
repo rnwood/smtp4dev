@@ -18,7 +18,7 @@ variables:
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
     isreleasebuild: ${{ true }}
     tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
-    docker_tags: 'v$(civersion_major) v$(civersion_majorminor) latest'
+    docker_tags: 'v3 v3.1 latest'
 
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
     civersion: '3.1.3'
