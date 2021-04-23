@@ -150,7 +150,7 @@ stages:
         arguments: '--build-arg version=$(tag) -t $(docker_repo):linux-amd64-$(tag)'
     - task: Docker@2
       displayName: Push image
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+      condition: or(variables['isreleasebuild'], variables['iscibuild'])
       inputs:
         containerRegistry: $(docker_registry)
         repository: $(docker_repo)
@@ -170,7 +170,7 @@ stages:
         arguments: '--build-arg version=$(tag) -t $(docker_repo):windows-amd64-$(tag)'
     - task: Docker@2
       displayName: Push image
-      condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+      condition: or(variables['isreleasebuild'], variables['iscibuild'])
       inputs:
         containerRegistry: $(docker_registry)
         repository: $(docker_repo)        
@@ -179,7 +179,7 @@ stages:
           windows-amd64-$(tag)
   - job: DockerManifest
     displayName: Docker Create Manifest
-    condition: eq(variables['Build.SourceBranch'], 'refs/heads/master')
+    condition: or(variables['isreleasebuild'], variables['iscibuild'])
     dependsOn:
     - DockerBuildLinux
     - DockerBuildWindows
