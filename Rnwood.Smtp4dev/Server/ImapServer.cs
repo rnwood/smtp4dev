@@ -12,21 +12,24 @@ using System.Linq;
 using System.Net;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Rnwood.Smtp4dev.Server
 {
     public class ImapServer
     {
-        public ImapServer(IMessagesRepository messagesRepository, IOptionsMonitor<ServerOptions> serverOptions, Func<Smtp4devDbContext> dbContextFactory)
+        public ImapServer(IMessagesRepository messagesRepository, IOptionsMonitor<ServerOptions> serverOptions, IServiceScopeFactory serviceScopeFactory)
         {
             this.messagesRepository = messagesRepository;
             this.serverOptions = serverOptions;
+            this.serviceScopeFactory = serviceScopeFactory;
 
             IDisposable eventHandler = null;
             var obs = Observable.FromEvent<ServerOptions>(e => eventHandler = serverOptions.OnChange(e), e => eventHandler.Dispose());
             obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
 
-            var dbContext = dbContextFactory();
+            using var scope = serviceScopeFactory.CreateScope();
+            var dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
             if (dbContext.ImapState.FirstOrDefault() == null)
             {
                 dbContext.Add(new ImapState
@@ -81,6 +84,7 @@ namespace Rnwood.Smtp4dev.Server
         private IMessagesRepository messagesRepository;
         private IMAP_Server imapServer;
         private IOptionsMonitor<ServerOptions> serverOptions;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
         private void Logger_WriteLog(object sender, LumiSoft.Net.Log.WriteLogEventArgs e)
         {
