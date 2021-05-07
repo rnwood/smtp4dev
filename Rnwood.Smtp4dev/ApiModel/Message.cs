@@ -183,7 +183,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         private static MimeEntity GetPart(Message message, string id)
         {
-            MessageEntitySummary part = message.Parts.Flatten(p => p.ChildParts).FirstOrDefault(p => p.Id == id);
+            MessageEntitySummary part = message.Parts.Flatten(p => p.ChildParts).SingleOrDefault(p => p.Id == id);
 
             if (part == null)
             {

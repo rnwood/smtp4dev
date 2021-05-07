@@ -30,7 +30,7 @@ namespace Rnwood.Smtp4dev.Server
 
             using var scope = serviceScopeFactory.CreateScope();
             var dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-            if (dbContext.ImapState.FirstOrDefault() == null)
+            if (!dbContext.ImapState.Any())
             {
                 dbContext.Add(new ImapState
                 {
@@ -162,7 +162,7 @@ namespace Rnwood.Smtp4dev.Server
             {
                 foreach (var msgInfo in e.MessagesInfo)
                 {
-                    var dbMessage = this.messagesRepository.GetMessages().FirstOrDefault(m => m.Id == new Guid(msgInfo.ID));
+                    var dbMessage = this.messagesRepository.GetMessages().SingleOrDefault(m => m.Id == new Guid(msgInfo.ID));
 
                     if (dbMessage != null)
                     {

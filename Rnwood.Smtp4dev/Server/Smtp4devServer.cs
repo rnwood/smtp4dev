@@ -260,8 +260,7 @@ namespace Rnwood.Smtp4dev.Server
             {
                 using var scope = serviceScopeFactory.CreateScope();
                 Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-
-                Session session = dbContext.Sessions.FirstOrDefault(s => s.Id == id);
+                Session session = dbContext.Sessions.SingleOrDefault(s => s.Id == id);
                 if (session != null)
                 {
                     dbContext.Sessions.Remove(session);
