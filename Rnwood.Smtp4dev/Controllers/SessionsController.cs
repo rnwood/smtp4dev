@@ -39,14 +39,14 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpGet("{id}")]
         public ApiModel.Session GetSession(Guid id)
         {
-            Session result = dbContext.Sessions.FirstOrDefault(m => m.Id == id);
+            Session result = dbContext.Sessions.SingleOrDefault(m => m.Id == id);
             return new ApiModel.Session(result);
         }
 
         [HttpGet("{id}/log")]
         public string GetSessionLog(Guid id)
         {
-            Session result = dbContext.Sessions.FirstOrDefault(m => m.Id == id);
+            Session result = dbContext.Sessions.SingleOrDefault(m => m.Id == id);
             return result.Log;
         }
 

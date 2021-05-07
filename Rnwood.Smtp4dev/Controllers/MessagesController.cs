@@ -45,7 +45,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
 		private DbModel.Message GetDbMessage(Guid id)
 		{
-			return messagesRepository.GetMessages().FirstOrDefault(m => m.Id == id) ??
+			return messagesRepository.GetMessages().SingleOrDefault(m => m.Id == id) ??
 				throw new FileNotFoundException($"Message with id {id} was not found.");
 		}
 
@@ -151,7 +151,7 @@ namespace Rnwood.Smtp4dev.Controllers
 				{
 					string cid = imageElement.Attributes["src"].Value.Replace("cid:", "", StringComparison.OrdinalIgnoreCase);
 
-					var part = message.Parts.Flatten(p => p.ChildParts).FirstOrDefault(p => p.ContentId == cid);
+					var part = message.Parts.Flatten(p => p.ChildParts).SingleOrDefault(p => p.ContentId == cid);
 
 					imageElement.Attributes["src"].Value = $"api/Messages/{id.ToString()}/part/{part?.Id ?? "notfound"}/content";
 				}
