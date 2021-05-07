@@ -22,18 +22,19 @@ using MimeKit;
 using MailKit.Net.Smtp;
 using System.Reactive.Linq;
 using System.Linq.Expressions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace Rnwood.Smtp4dev.Server
 {
     public class Smtp4devServer : IMessagesRepository
     {
-        public Smtp4devServer(Func<Smtp4devDbContext> dbContextFactory, IOptionsMonitor<ServerOptions> serverOptions,
+        public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<ServerOptions> serverOptions,
             IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory)
         {
             this.notificationsHub = notificationsHub;
             this.serverOptions = serverOptions;
             this.relayOptions = relayOptions;
-            this.dbContextFactory = dbContextFactory;
+            this.serviceScopeFactory = serviceScopeFactory;
             this.relaySmtpClientFactory = relaySmtpClientFactory;
 
             DoCleanup();
@@ -143,19 +144,20 @@ namespace Rnwood.Smtp4dev.Server
 
         private void DoCleanup()
         {
-            Smtp4devDbContext dbContent = this.dbContextFactory();
+            using var scope = serviceScopeFactory.CreateScope();
+            Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
 
-            foreach (Session unfinishedSession in dbContent.Sessions.Where(s => !s.EndDate.HasValue).ToArray())
+            foreach (Session unfinishedSession in dbContext.Sessions.Where(s => !s.EndDate.HasValue).ToArray())
             {
                 unfinishedSession.EndDate = DateTime.Now;
             }
-            dbContent.SaveChanges();
+            dbContext.SaveChanges();
 
-            TrimMessages(dbContent);
-            dbContent.SaveChanges();
+            TrimMessages(dbContext);
+            dbContext.SaveChanges();
 
-            TrimSessions(dbContent);
-            dbContent.SaveChanges();
+            TrimSessions(dbContext);
+            dbContext.SaveChanges();
 
             this.notificationsHub.OnMessagesChanged().Wait();
             this.notificationsHub.OnSessionsChanged().Wait();
@@ -186,7 +188,7 @@ namespace Rnwood.Smtp4dev.Server
 
         public IQueryable<DbModel.Message> GetMessages()
         {
-            return dbContextFactory().Messages;
+            return serviceScopeFactory.CreateScope().ServiceProvider.GetService<Smtp4devDbContext>().Messages;
         }
 
 
@@ -194,13 +196,14 @@ namespace Rnwood.Smtp4dev.Server
         {
             return taskQueue.QueueTask(() =>
             {
-                Smtp4devDbContext dbContent = dbContextFactory();
-                DbModel.Message message = dbContent.Messages.FindAsync(id).Result;
+                using var scope = serviceScopeFactory.CreateScope();
+                var dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+                DbModel.Message message = dbContext.Messages.FindAsync(id).Result;
 
                 if (message?.IsUnread == true)
                 {
                     message.IsUnread = false;
-                    dbContent.SaveChanges();
+                    dbContext.SaveChanges();
                     notificationsHub.OnMessagesChanged().Wait();
                 }
             }, true);
@@ -211,13 +214,13 @@ namespace Rnwood.Smtp4dev.Server
             Console.WriteLine($"Session started. Client address {e.Session.ClientAddress}.");
             await taskQueue.QueueTask(() =>
             {
-
-                Smtp4devDbContext dbContent = dbContextFactory();
+                using var scope = serviceScopeFactory.CreateScope();
+                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
 
                 Session dbSession = new Session();
                 UpdateDbSession(e.Session, dbSession).Wait();
-                dbContent.Sessions.Add(dbSession);
-                dbContent.SaveChanges();
+                dbContext.Sessions.Add(dbSession);
+                dbContext.SaveChanges();
 
                 activeSessionsToDbId[e.Session] = dbSession.Id;
 
@@ -232,14 +235,15 @@ namespace Rnwood.Smtp4dev.Server
 
             await taskQueue.QueueTask(() =>
             {
-                Smtp4devDbContext dbContent = dbContextFactory();
+                using var scope = serviceScopeFactory.CreateScope();
+                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
 
-                Session dbSession = dbContent.Sessions.Find(activeSessionsToDbId[e.Session]);
+                Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Session]);
                 UpdateDbSession(e.Session, dbSession).Wait();
-                dbContent.SaveChanges();
+                dbContext.SaveChanges();
 
-                TrimSessions(dbContent);
-                dbContent.SaveChanges();
+                TrimSessions(dbContext);
+                dbContext.SaveChanges();
 
                 activeSessionsToDbId.Remove(e.Session);
 
@@ -254,7 +258,8 @@ namespace Rnwood.Smtp4dev.Server
         {
             return taskQueue.QueueTask(() =>
             {
-                Smtp4devDbContext dbContext = dbContextFactory();
+                using var scope = serviceScopeFactory.CreateScope();
+                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
 
                 Session session = dbContext.Sessions.FirstOrDefault(s => s.Id == id);
                 if (session != null)
@@ -270,7 +275,8 @@ namespace Rnwood.Smtp4dev.Server
         {
             return taskQueue.QueueTask(() =>
             {
-                Smtp4devDbContext dbContext = dbContextFactory();
+                using var scope = serviceScopeFactory.CreateScope();
+                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
                 dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue));
                 dbContext.SaveChanges();
                 notificationsHub.OnSessionsChanged().Wait();
@@ -287,7 +293,8 @@ namespace Rnwood.Smtp4dev.Server
             await taskQueue.QueueTask(() =>
             {
                 Console.WriteLine("Processing received message");
-                Smtp4devDbContext dbContext = dbContextFactory();
+                using var scope = serviceScopeFactory.CreateScope();
+                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
 
                 Dictionary<MailboxAddress, Exception> relayErrors = TryRelayMessage(message, null);
                 message.RelayError = string.Join("\n", relayErrors.Select(e => e.Key.ToString() + ": " + e.Value.Message));
@@ -369,7 +376,8 @@ namespace Rnwood.Smtp4dev.Server
         {
             return taskQueue.QueueTask(() =>
             {
-                Smtp4devDbContext dbContext = dbContextFactory();
+                using var scope = serviceScopeFactory.CreateScope();
+                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
                 dbContext.Messages.RemoveRange(dbContext.Messages.Where(m => m.Id == id));
                 dbContext.SaveChanges();
                 notificationsHub.OnMessagesChanged().Wait();
@@ -381,7 +389,8 @@ namespace Rnwood.Smtp4dev.Server
         {
             return taskQueue.QueueTask(() =>
             {
-                Smtp4devDbContext dbContext = dbContextFactory();
+                using var scope = serviceScopeFactory.CreateScope();
+                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
                 dbContext.Messages.RemoveRange(dbContext.Messages);
                 dbContext.SaveChanges();
                 notificationsHub.OnMessagesChanged().Wait();
@@ -401,11 +410,11 @@ namespace Rnwood.Smtp4dev.Server
         }
 
 
-        private readonly Func<Smtp4devDbContext> dbContextFactory;
         private TaskQueue taskQueue = new TaskQueue();
         private DefaultServer smtpServer;
         private Func<RelayOptions, SmtpClient> relaySmtpClientFactory;
         private NotificationsHub notificationsHub;
+        private readonly IServiceScopeFactory serviceScopeFactory;
 
         public Exception Exception { get; private set; }
 
