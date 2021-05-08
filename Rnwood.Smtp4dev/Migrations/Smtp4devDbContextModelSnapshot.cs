@@ -3,6 +3,7 @@ using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.DbModel;
 
 namespace Rnwood.Smtp4dev.Migrations

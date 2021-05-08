@@ -13,6 +13,7 @@ using System.Net;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
+using Rnwood.Smtp4dev.Data;
 
 namespace Rnwood.Smtp4dev.Server
 {

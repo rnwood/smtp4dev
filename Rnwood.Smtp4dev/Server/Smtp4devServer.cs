@@ -1,18 +1,8 @@
 using Microsoft.Extensions.Options;
-using Org.BouncyCastle.Asn1.X509;
-using Org.BouncyCastle.Crypto;
-using Org.BouncyCastle.Crypto.Generators;
-using Org.BouncyCastle.Crypto.Prng;
-using Org.BouncyCastle.Math;
-using Org.BouncyCastle.Pkcs;
-using Org.BouncyCastle.Security;
-using Org.BouncyCastle.Utilities;
-using Org.BouncyCastle.X509;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.SmtpServer;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -21,21 +11,22 @@ using System.Threading.Tasks;
 using MimeKit;
 using MailKit.Net.Smtp;
 using System.Reactive.Linq;
-using System.Linq.Expressions;
 using Microsoft.Extensions.DependencyInjection;
+using Rnwood.Smtp4dev.Data;
 
 namespace Rnwood.Smtp4dev.Server
 {
-    public class Smtp4devServer : IMessagesRepository
+    public class Smtp4devServer
     {
         public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<ServerOptions> serverOptions,
-            IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory)
+            IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory, ITaskQueue taskQueue)
         {
             this.notificationsHub = notificationsHub;
             this.serverOptions = serverOptions;
             this.relayOptions = relayOptions;
             this.serviceScopeFactory = serviceScopeFactory;
             this.relaySmtpClientFactory = relaySmtpClientFactory;
+            this.taskQueue = taskQueue;
 
             DoCleanup();
 
@@ -44,7 +35,6 @@ namespace Rnwood.Smtp4dev.Server
             obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
 
             taskQueue.Start();
-
         }
 
         private void OnServerOptionsChanged(ServerOptions arg1)
@@ -186,29 +176,6 @@ namespace Rnwood.Smtp4dev.Server
             dbSession.SessionError = session.SessionError?.ToString();
         }
 
-        public IQueryable<DbModel.Message> GetMessages()
-        {
-            return serviceScopeFactory.CreateScope().ServiceProvider.GetService<Smtp4devDbContext>().Messages;
-        }
-
-
-        public Task MarkMessageRead(Guid id)
-        {
-            return taskQueue.QueueTask(() =>
-            {
-                using var scope = serviceScopeFactory.CreateScope();
-                var dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-                DbModel.Message message = dbContext.Messages.FindAsync(id).Result;
-
-                if (message?.IsUnread == true)
-                {
-                    message.IsUnread = false;
-                    dbContext.SaveChanges();
-                    notificationsHub.OnMessagesChanged().Wait();
-                }
-            }, true);
-        }
-
         private async Task OnSessionStarted(object sender, SessionEventArgs e)
         {
             Console.WriteLine($"Session started. Client address {e.Session.ClientAddress}.");
@@ -302,9 +269,7 @@ namespace Rnwood.Smtp4dev.Server
                 imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
                 message.ImapUid = imapState.LastUid;
 
-
-                Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
-                message.Session = dbSession;
+                message.Session = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
                 dbContext.Messages.Add(message);
 
                 dbContext.SaveChanges();
@@ -371,33 +336,6 @@ namespace Rnwood.Smtp4dev.Server
             return result;
         }
 
-        public Task DeleteMessage(Guid id)
-        {
-            return taskQueue.QueueTask(() =>
-            {
-                using var scope = serviceScopeFactory.CreateScope();
-                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-                dbContext.Messages.RemoveRange(dbContext.Messages.Where(m => m.Id == id));
-                dbContext.SaveChanges();
-                notificationsHub.OnMessagesChanged().Wait();
-            }, true);
-        }
-
-
-        public Task DeleteAllMessages()
-        {
-            return taskQueue.QueueTask(() =>
-            {
-                using var scope = serviceScopeFactory.CreateScope();
-                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-                dbContext.Messages.RemoveRange(dbContext.Messages);
-                dbContext.SaveChanges();
-                notificationsHub.OnMessagesChanged().Wait();
-            }, true);
-        }
-
-
-
         private void TrimMessages(Smtp4devDbContext dbContext)
         {
             dbContext.Messages.RemoveRange(dbContext.Messages.OrderByDescending(m => m.ReceivedDate).Skip(serverOptions.CurrentValue.NumberOfMessagesToKeep));
@@ -409,7 +347,7 @@ namespace Rnwood.Smtp4dev.Server
         }
 
 
-        private TaskQueue taskQueue = new TaskQueue();
+        private readonly ITaskQueue taskQueue;
         private DefaultServer smtpServer;
         private Func<RelayOptions, SmtpClient> relaySmtpClientFactory;
         private NotificationsHub notificationsHub;

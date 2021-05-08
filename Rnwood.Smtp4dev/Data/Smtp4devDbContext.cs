@@ -1,11 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+using Rnwood.Smtp4dev.DbModel;
 
-namespace Rnwood.Smtp4dev.DbModel
+namespace Rnwood.Smtp4dev.Data
 {
     public class Smtp4devDbContext : DbContext
     {
