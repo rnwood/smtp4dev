@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Data.Entity;
 using System.IO;
 using System.Linq;
 using System.Linq.Expressions;
@@ -10,13 +11,12 @@ using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 
 using Rnwood.Smtp4dev.ApiModel;
-using Rnwood.Smtp4dev.DbModel;
-using Rnwood.Smtp4dev.Hubs;
 using System.Linq.Dynamic.Core;
 
 using Message = Rnwood.Smtp4dev.DbModel.Message;
 using Rnwood.Smtp4dev.Server;
 using MimeKit;
+using Rnwood.Smtp4dev.Data;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -31,8 +31,8 @@ namespace Rnwood.Smtp4dev.Controllers
 			this.server = server;
 		}
 
-		private IMessagesRepository messagesRepository;
-		private Smtp4devServer server;
+		private readonly IMessagesRepository messagesRepository;
+		private readonly Smtp4devServer server;
 
 		[HttpGet]
 
@@ -40,20 +40,18 @@ namespace Rnwood.Smtp4dev.Controllers
 		{
 			return messagesRepository.GetMessages()
 			.OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""))
-			.Select(m => new ApiModel.MessageSummary(m));
+			.Select(m => new MessageSummary(m));
 		}
 
-		private DbModel.Message GetDbMessage(Guid id)
-		{
-			return messagesRepository.GetMessages().SingleOrDefault(m => m.Id == id) ??
-				throw new FileNotFoundException($"Message with id {id} was not found.");
+		private Message GetDbMessage(Guid id)
+        {
+			return messagesRepository.GetMessages().SingleOrDefault(m => m.Id == id) ?? throw new FileNotFoundException($"Message with id {id} was not found.");
 		}
 
 		[HttpGet("{id}")]
 		public ApiModel.Message GetMessage(Guid id)
 		{
-			var result = new ApiModel.Message(GetDbMessage(id));
-			return result;
+			return new ApiModel.Message(GetDbMessage(id));
 		}
 
 		[HttpPost("{id}")]

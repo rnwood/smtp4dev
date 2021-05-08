@@ -4,13 +4,11 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
     public class Message : ICacheByKey
     {
-
         public Message(DbModel.Message dbMessage)
         {
             Data = dbMessage.Data;
@@ -23,70 +21,69 @@ namespace Rnwood.Smtp4dev.ApiModel
             Subject = dbMessage.Subject;
             SecureConnection = dbMessage.SecureConnection;
 
-            Parts = new List<ApiModel.MessageEntitySummary>();
+            Parts = new List<MessageEntitySummary>(1);
             RelayError = dbMessage.RelayError;
 
             if (dbMessage.MimeParseError != null)
             {
                 MimeParseError = dbMessage.MimeParseError;
-                Headers = new List<Header>();
-                Parts = new List<MessageEntitySummary>();
+                Headers = new List<Header>(0);
             }
             else
             {
-                using (MemoryStream stream = new MemoryStream(dbMessage.Data))
+                using var stream = new MemoryStream(dbMessage.Data);
+                MimeMessage = MimeMessage.Load(stream);
+
+                if (MimeMessage.From != null)
                 {
-                    MimeMessage = MimeMessage.Load(stream);
-
-                    if (MimeMessage.From != null)
-                    {
-                        From = MimeMessage.From.ToString();
-                    }
-
-                    List<string> recipients = new List<string>(dbMessage.To.Split(",")
-                        .Select(r => r.Trim())
-                        .Where(r => !string.IsNullOrEmpty(r)));
-
-                    if (MimeMessage.To != null)
-                    {
-                        To = string.Join(", ", MimeMessage.To.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())));
-
-                        foreach (MailboxAddress to in MimeMessage.To.Where(t => t is MailboxAddress))
-                        {
-                            recipients.Remove(PunyCodeReplacer.DecodePunycode(to.Address));
-                        }
-                    }
-
-                    if (MimeMessage.Cc != null)
-                    {
-                        Cc = string.Join(", ", MimeMessage.Cc.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())));
-
-                        foreach (MailboxAddress cc in MimeMessage.Cc.Where(t => t is MailboxAddress))
-                        {
-                            recipients.Remove(PunyCodeReplacer.DecodePunycode(cc.Address));
-                        }
-                    }
-
-                    Bcc = string.Join(", ", recipients);
-
-                    Headers = MimeMessage.Headers.Select(h => new Header { Name = h.Field, Value = PunyCodeReplacer.DecodePunycode(h.Value) }).ToList();
-                    Parts.Add(HandleMimeEntity(MimeMessage.Body));
+                    From = MimeMessage.From.ToString();
                 }
+
+                var recipients = new List<string>(dbMessage.To.Split(",")
+                    .Select(r => r.Trim())
+                    .Where(r => !string.IsNullOrEmpty(r)));
+
+                if (MimeMessage.To != null)
+                {
+                    To = string.Join(", ", MimeMessage.To.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())));
+
+                    foreach (var internetAddress in MimeMessage.To.Where(t => t is MailboxAddress))
+                    {
+                        var to = (MailboxAddress) internetAddress;
+                        recipients.Remove(PunyCodeReplacer.DecodePunycode(to.Address));
+                    }
+                }
+
+                if (MimeMessage.Cc != null)
+                {
+                    Cc = string.Join(", ", MimeMessage.Cc.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())));
+
+                    foreach (var internetAddress in MimeMessage.Cc.Where(t => t is MailboxAddress))
+                    {
+                        var cc = (MailboxAddress) internetAddress;
+                        recipients.Remove(PunyCodeReplacer.DecodePunycode(cc.Address));
+                    }
+                }
+
+                Bcc = string.Join(", ", recipients);
+
+                Headers = MimeMessage.Headers.Select(h => new Header { Name = h.Field, Value = PunyCodeReplacer.DecodePunycode(h.Value) }).ToList();
+                Parts.Add(HandleMimeEntity(MimeMessage.Body));
             }
         }
 
 
         private MessageEntitySummary HandleMimeEntity(MimeEntity entity)
         {
-            int index = 0;
+            var index = 0;
 
             return MimeEntityVisitor.VisitWithResults<MessageEntitySummary>(entity, (e, p) =>
            {
-               string fileName = PunyCodeReplacer.DecodePunycode(!string.IsNullOrEmpty(e.ContentDisposition?.FileName)
+               var fileName = PunyCodeReplacer.DecodePunycode(!string.IsNullOrEmpty(e.ContentDisposition?.FileName)
             ? e.ContentDisposition?.FileName
             : e.ContentType?.Name);
 
-               MessageEntitySummary result = new MessageEntitySummary()
+               var result = new MessageEntitySummary
                {
                    MessageId = Id,
                    Id = index.ToString(),
@@ -135,7 +132,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         internal static FileStreamResult GetPartContent(Message result, string cid)
         {
-            MimeEntity contentEntity = GetPart(result, cid);
+            var contentEntity = GetPart(result, cid);
 
             if (contentEntity is MimePart mimePart)
             {
@@ -146,7 +143,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             }
             else
             {
-                MemoryStream outputStream = new MemoryStream();
+                var outputStream = new MemoryStream();
                 contentEntity.WriteTo(outputStream, true);
                 outputStream.Seek(0, SeekOrigin.Begin);
 
@@ -156,19 +153,15 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         internal static string GetPartContentAsText(Message result, string id)
         {
-            MimeEntity contentEntity = GetPart(result, id);
+            var contentEntity = GetPart(result, id);
 
             if (contentEntity is MimePart part)
             {
-                using (StreamReader reader = new StreamReader(part.Content.Open()))
-                {
-                    return reader.ReadToEnd();
-                }
+                using var reader = new StreamReader(part.Content.Open());
+                return reader.ReadToEnd();
             }
-            else
-            {
-                return contentEntity.ToString();
-            }
+
+            return contentEntity.ToString();
 
         }
 
@@ -176,14 +169,14 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         internal static string GetPartSource(Message message, string id)
         {
-            MimeEntity contentEntity = GetPart(message, id);
+            var contentEntity = GetPart(message, id);
             return contentEntity.ToString();
         }
 
 
         private static MimeEntity GetPart(Message message, string id)
         {
-            MessageEntitySummary part = message.Parts.Flatten(p => p.ChildParts).SingleOrDefault(p => p.Id == id);
+            var part = message.Parts.Flatten(p => p.ChildParts).SingleOrDefault(p => p.Id == id);
 
             if (part == null)
             {
@@ -205,7 +198,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public string Subject { get; set; }
 
-        public List<MessageEntitySummary> Parts { get; set; }
+        public List<MessageEntitySummary> Parts { get; set; } 
 
         public List<Header> Headers { get; set; }
 

@@ -1,14 +1,17 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Server
 {
-    internal class TaskQueue
+    public interface ITaskQueue
     {
+        Task QueueTask(Action action, bool priority);
+        void Start();
+    }
 
+    public class TaskQueue : ITaskQueue
+    {
         private BlockingCollection<Action> processingQueue = new BlockingCollection<Action>();
 
         private BlockingCollection<Action> priorityProcessingQueue = new BlockingCollection<Action>();
@@ -30,7 +33,6 @@ namespace Rnwood.Smtp4dev.Server
 
                     tcs.SetException(e);
                 }
-
             };
 
 
@@ -53,7 +55,7 @@ namespace Rnwood.Smtp4dev.Server
                 Action nextItem;
                 try
                 {
-                    BlockingCollection<Action>.TakeFromAny(new[] { priorityProcessingQueue, processingQueue }, out nextItem);
+                    BlockingCollection<Action>.TakeFromAny(new[] {priorityProcessingQueue, processingQueue}, out nextItem);
                 }
                 catch (InvalidOperationException)
                 {
@@ -71,7 +73,7 @@ namespace Rnwood.Smtp4dev.Server
             return Task.CompletedTask;
         }
 
-        internal void Start()
+        public void Start()
         {
             Task.Run(ProcessingTaskWork);
         }

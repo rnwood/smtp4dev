@@ -16,6 +16,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.AspNetCore.SpaServices;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Rewrite;
+using Rnwood.Smtp4dev.Data;
 
 namespace Rnwood.Smtp4dev
 {
@@ -54,11 +55,12 @@ namespace Rnwood.Smtp4dev
                     Console.WriteLine("Using Sqlite database at " + Path.GetFullPath(serverOptions.Database));
                     opt.UseSqlite($"Data Source='{serverOptions.Database}'");
                 }
-            }, ServiceLifetime.Transient, ServiceLifetime.Singleton);
+            }, ServiceLifetime.Scoped, ServiceLifetime.Singleton);
 
             services.AddSingleton<Smtp4devServer>();
             services.AddSingleton<ImapServer>();
-            services.AddSingleton<IMessagesRepository>(sp => sp.GetService<Smtp4devServer>());
+            services.AddScoped<IMessagesRepository, MessagesRepository>();
+            services.AddSingleton<ITaskQueue, TaskQueue>();
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>((relayOptions) =>
             {

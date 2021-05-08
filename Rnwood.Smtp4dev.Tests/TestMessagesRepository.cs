@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.DbModel;
 
 namespace Rnwood.Smtp4dev.Tests
@@ -28,7 +29,7 @@ namespace Rnwood.Smtp4dev.Tests
 			return Task.CompletedTask;
 		}
 
-		public IQueryable<Message> GetMessages()
+		public IQueryable<Message> GetMessages(bool unTracked = true)
 		{
 			return Messages.AsQueryable();
 		}

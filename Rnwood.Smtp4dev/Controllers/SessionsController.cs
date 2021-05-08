@@ -10,6 +10,7 @@ using Newtonsoft.Json;
 using System.IO;
 using MimeKit;
 using HtmlAgilityPack;
+using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.Server;
 
 namespace Rnwood.Smtp4dev.Controllers
