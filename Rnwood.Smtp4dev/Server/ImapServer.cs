@@ -15,6 +15,7 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
 using System.Net.NetworkInformation;
+using Serilog;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -61,7 +62,7 @@ namespace Rnwood.Smtp4dev.Server
         {
             if (!serverOptions.CurrentValue.ImapPort.HasValue)
             {
-                Console.WriteLine($"IMAP server disabled");
+                log.Information("IMAP server disabled");
                 return;
             }
 
@@ -101,7 +102,7 @@ namespace Rnwood.Smtp4dev.Server
             else
             {
                 int port = ((IPEndPoint)imapServer.ListeningPoints[0].Socket.LocalEndPoint).Port;
-                Console.WriteLine($"IMAP Server is listening on port {port}");
+                log.Information("IMAP Server is listening on {port}", port);
             }
         }
 
@@ -114,10 +115,11 @@ namespace Rnwood.Smtp4dev.Server
         private IMAP_Server imapServer;
         private IOptionsMonitor<ServerOptions> serverOptions;
         private readonly IServiceScopeFactory serviceScopeFactory;
+        private readonly ILogger log = Log.ForContext<ImapServer>();
 
         private void Logger_WriteLog(object sender, LumiSoft.Net.Log.WriteLogEventArgs e)
         {
-            Console.WriteLine(e.LogEntry.Text);
+            log.Information(e.LogEntry.Text);
         }
 
         class SessionHandler

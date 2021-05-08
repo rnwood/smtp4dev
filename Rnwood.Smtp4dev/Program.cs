@@ -15,33 +15,49 @@ using Mono.Options;
 using Newtonsoft.Json.Linq;
 using Rnwood.Smtp4dev.Server;
 using Rnwood.Smtp4dev.Service;
+using Serilog;
 
 namespace Rnwood.Smtp4dev
 {
     public class Program
     {
         public static bool IsService { get; private set; }
+        private static ILogger log;
 
         public static void Main(string[] args)
         {
-            string version = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
-            Console.WriteLine($"smtp4dev version {version}");
-            Console.WriteLine("https://github.com/rnwood/smtp4dev\n");
-            Console.WriteLine($".NET Core runtime version: {Directory.GetParent(typeof(object).Assembly.Location).Name}\n");
+            SetupStaticLogger();
+            log = Log.ForContext<Program>();
 
-
-            if (!Debugger.IsAttached && args.Contains("--service"))
-                IsService = true;
-
-            var host = BuildWebHost(args.Where(arg => arg != "--service").ToArray());
-
-            if (IsService)
+            try
             {
-                host.RunAsSmtp4devService();
+                string version = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
+                log.Information("smtp4dev version {version}",version);
+                log.Information("https://github.com/rnwood/smtp4dev");
+                log.Information(".NET Core runtime version: {netcoreruntime}",Directory.GetParent(typeof(object).Assembly.Location).Name);
+
+
+                if (!Debugger.IsAttached && args.Contains("--service"))
+                    IsService = true;
+
+                var host = BuildWebHost(args.Where(arg => arg != "--service").ToArray());
+
+                if (IsService)
+                {
+                    host.RunAsSmtp4devService();
+                }
+                else
+                {
+                    host.Run();
+                }
             }
-            else
+            catch (Exception ex)
             {
-                host.Run();
+                Log.Fatal(ex, "A unhandled exception occurred.");
+            }
+            finally
+            {
+                Log.CloseAndFlush();
             }
         }
 
@@ -97,6 +113,7 @@ namespace Rnwood.Smtp4dev
 
             IWebHostBuilder builder = WebHost
                 .CreateDefaultBuilder(args)
+                .UseSerilog()
                 .UseContentRoot(contentRoot)
                 .ConfigureAppConfiguration(
                     (hostingContext, configBuilder) =>
@@ -211,6 +228,17 @@ namespace Rnwood.Smtp4dev
             }
 
             return map;
+        }
+
+        private static void SetupStaticLogger()
+        {
+            var configuration = new ConfigurationBuilder()
+                .AddJsonFile("appsettings.json")
+                .Build();
+
+            Log.Logger = new LoggerConfiguration()
+                .ReadFrom.Configuration(configuration)
+                .CreateLogger();
         }
     }
 
