@@ -166,7 +166,6 @@ stages:
         displayName: Build image
         inputs:
           script: |
-            docker buildx build create --use
             docker buildx build --platform linux/arm64 \
               --build-arg version=$(tag) \
               -t $(docker_repo):linux-arm64-$(tag) \
