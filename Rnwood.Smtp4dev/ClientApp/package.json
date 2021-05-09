@@ -32,7 +32,6 @@
     "eslint-plugin-vue": "^7.9.0",
     "locale-index-of": "^2.0.0",
     "moment": "^2.29.1",
-    "node-sass": "^5.0.0",
     "sass": "^1.32.11",
     "sass-loader": "^10.1.0",
     "srcdoc-polyfill": "^1.0.0",
