@@ -334,8 +334,14 @@ stages:
           docker pull $(docker_repo):linux-amd64-$(tag)
 
           ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
-            docker tag $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-amd64-$_ $(docker_repo):linux-arm64-$_
+            docker tag $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-amd64-$_
             docker push $(docker_repo):linux-amd64-$_
+          }
+
+          docker pull $(docker_repo):linux-arm64-$(tag)
+
+          ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
+            docker tag $(docker_repo):linux-arm64-$(tag) $(docker_repo):linux-arm64-$_
             docker push $(docker_repo):linux-arm64-$_
           }
 
