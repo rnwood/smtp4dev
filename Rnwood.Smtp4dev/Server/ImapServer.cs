@@ -19,9 +19,8 @@ namespace Rnwood.Smtp4dev.Server
 {
     public class ImapServer
     {
-        public ImapServer(IMessagesRepository messagesRepository, IOptionsMonitor<ServerOptions> serverOptions, IServiceScopeFactory serviceScopeFactory)
+        public ImapServer(IOptionsMonitor<ServerOptions> serverOptions, IServiceScopeFactory serviceScopeFactory)
         {
-            this.messagesRepository = messagesRepository;
             this.serverOptions = serverOptions;
             this.serviceScopeFactory = serviceScopeFactory;
 
@@ -70,7 +69,7 @@ namespace Rnwood.Smtp4dev.Server
                 Bindings = new[] { new IPBindInfo(Dns.GetHostName(), BindInfoProtocol.TCP, serverOptions.CurrentValue.AllowRemoteConnections ? IPAddress.Any : IPAddress.Loopback, serverOptions.CurrentValue.ImapPort.Value) },
                 GreetingText = "smtp4dev"
             };
-            imapServer.SessionCreated += (o, ea) => new SessionHandler(ea.Session, this.messagesRepository);
+            imapServer.SessionCreated += (o, ea) => new SessionHandler(ea.Session, this.serviceScopeFactory);
 
             imapServer.Start();
             Console.WriteLine($"IMAP Server listening on port {imapServer.Bindings[0].Port}");
@@ -82,7 +81,6 @@ namespace Rnwood.Smtp4dev.Server
             imapServer = null;
         }
 
-        private IMessagesRepository messagesRepository;
         private IMAP_Server imapServer;
         private IOptionsMonitor<ServerOptions> serverOptions;
         private readonly IServiceScopeFactory serviceScopeFactory;
@@ -94,7 +92,7 @@ namespace Rnwood.Smtp4dev.Server
 
         class SessionHandler
         {
-            public SessionHandler(IMAP_Session session, IMessagesRepository messagesRepository)
+            public SessionHandler(IMAP_Session session, IServiceScopeFactory serviceScopeFactory)
             {
                 this.session = session;
                 session.List += Session_List;
@@ -105,7 +103,7 @@ namespace Rnwood.Smtp4dev.Server
                 session.Capabilities.Remove("NAMESPACE");
                 session.Store += Session_Store;
                 session.Select += Session_Select;
-                this.messagesRepository = messagesRepository;
+                this.serviceScopeFactory = serviceScopeFactory;
             }
 
 
@@ -124,52 +122,66 @@ namespace Rnwood.Smtp4dev.Server
 
             private void Session_Store(object sender, IMAP_e_Store e)
             {
-                if (e.FlagsSetType == IMAP_Flags_SetType.Add || e.FlagsSetType == IMAP_Flags_SetType.Replace)
+                using (var scope = this.serviceScopeFactory.CreateScope())
                 {
-                    if (e.Flags.Contains("Seen", StringComparer.OrdinalIgnoreCase))
-                    {
-                        messagesRepository.MarkMessageRead(new Guid(e.MessageInfo.ID));
-                    }
+                    var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
 
-                    if (e.Flags.Contains("Deleted", StringComparer.OrdinalIgnoreCase))
+                    if (e.FlagsSetType == IMAP_Flags_SetType.Add || e.FlagsSetType == IMAP_Flags_SetType.Replace)
                     {
-                        messagesRepository.DeleteMessage(new Guid(e.MessageInfo.ID));
+                        if (e.Flags.Contains("Seen", StringComparer.OrdinalIgnoreCase))
+                        {
+                            messagesRepository.MarkMessageRead(new Guid(e.MessageInfo.ID));
+                        }
+
+                        if (e.Flags.Contains("Deleted", StringComparer.OrdinalIgnoreCase))
+                        {
+                            messagesRepository.DeleteMessage(new Guid(e.MessageInfo.ID));
+                        }
                     }
                 }
             }
 
-
-            private IMessagesRepository messagesRepository;
-            private IMAP_Session session;
+            private readonly IServiceScopeFactory serviceScopeFactory;
+            private readonly IMAP_Session session;
 
             private void Session_GetMessagesInfo(object sender, IMAP_e_MessagesInfo e)
             {
-                if (e.Folder == "INBOX")
+                using (var scope = this.serviceScopeFactory.CreateScope())
                 {
-                    foreach (var message in messagesRepository.GetMessages())
-                    {
-                        List<string> flags = new List<string>();
-                        if (!message.IsUnread)
-                        {
-                            flags.Add("Seen");
-                        }
+                    var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
 
-                        e.MessagesInfo.Add(new IMAP_MessageInfo(message.Id.ToString(), message.ImapUid, flags.ToArray(), message.Data.Length, message.ReceivedDate));
+                    if (e.Folder == "INBOX")
+                    {
+                        foreach (var message in messagesRepository.GetMessages())
+                        {
+                            List<string> flags = new List<string>();
+                            if (!message.IsUnread)
+                            {
+                                flags.Add("Seen");
+                            }
+
+                            e.MessagesInfo.Add(new IMAP_MessageInfo(message.Id.ToString(), message.ImapUid, flags.ToArray(), message.Data.Length, message.ReceivedDate));
+                        }
                     }
                 }
             }
 
             private void Session_Fetch(object sender, IMAP_e_Fetch e)
             {
-                foreach (var msgInfo in e.MessagesInfo)
+                using (var scope = this.serviceScopeFactory.CreateScope())
                 {
-                    var dbMessage = this.messagesRepository.GetMessages().SingleOrDefault(m => m.Id == new Guid(msgInfo.ID));
+                    var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
 
-                    if (dbMessage != null)
+                    foreach (var msgInfo in e.MessagesInfo)
                     {
-                        ApiModel.Message apiMessage = new ApiModel.Message(dbMessage);
-                        Mail_Message message = Mail_Message.ParseFromByte(apiMessage.Data);
-                        e.AddData(msgInfo, message);
+                        var dbMessage = messagesRepository.GetMessages().SingleOrDefault(m => m.Id == new Guid(msgInfo.ID));
+
+                        if (dbMessage != null)
+                        {
+                            ApiModel.Message apiMessage = new ApiModel.Message(dbMessage);
+                            Mail_Message message = Mail_Message.ParseFromByte(apiMessage.Data);
+                            e.AddData(msgInfo, message);
+                        }
                     }
                 }
 

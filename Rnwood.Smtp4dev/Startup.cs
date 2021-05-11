@@ -129,11 +129,15 @@ namespace Rnwood.Smtp4dev
 
 
 
-
-                Smtp4devDbContext context = subdir.ApplicationServices.GetService<Smtp4devDbContext>();
-                if (!context.Database.IsInMemory())
+                using (IServiceScope scope = subdir.ApplicationServices.CreateScope())
                 {
-                    context.Database.Migrate();
+                    using (Smtp4devDbContext context = scope.ServiceProvider.GetService<Smtp4devDbContext>())
+                    {
+                        if (!context.Database.IsInMemory())
+                        {
+                            context.Database.Migrate();
+                        }
+                    }
                 }
 
                 subdir.ApplicationServices.GetService<Smtp4devServer>().TryStart();

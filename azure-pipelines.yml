@@ -133,7 +133,7 @@ stages:
         command: publish
         projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
         arguments: '-c Release -r linux-arm -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/linux-arm"'
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev-arm-$(tag).zip
+    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev-linux-arm-$(tag).zip
       displayName: Rename artifact
     - publish: $(Build.ArtifactStagingDirectory)/linux-arm
       artifact: linux-arm
