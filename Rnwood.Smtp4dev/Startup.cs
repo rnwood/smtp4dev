@@ -59,7 +59,6 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<Smtp4devServer>();
             services.AddSingleton<ImapServer>();
             services.AddSingleton<IMessagesRepository>(sp => sp.GetService<Smtp4devServer>());
-            services.AddSingleton<Func<Smtp4devDbContext>>(sp => (() => sp.GetService<Smtp4devDbContext>()));
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>((relayOptions) =>
             {
