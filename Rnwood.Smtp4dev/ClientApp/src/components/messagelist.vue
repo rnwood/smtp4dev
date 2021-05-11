@@ -141,6 +141,8 @@
                 return;
             }
 
+            var msg = this.selectedmessage;
+
 
             let emails: string[];
 

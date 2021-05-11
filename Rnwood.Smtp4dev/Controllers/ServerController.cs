@@ -12,6 +12,7 @@ using HtmlAgilityPack;
 using Rnwood.Smtp4dev.Server;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
+using MailKit.Security;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -49,6 +50,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 RelayOptions = new ApiModel.ServerRelayOptions
                 {
                     SmtpServer = relayOptions.CurrentValue.SmtpServer,
+                    TlsMode = relayOptions.CurrentValue.TlsMode.ToString(),
                     SmtpPort = relayOptions.CurrentValue.SmtpPort,
                     Login = relayOptions.CurrentValue.Login,
                     Password = relayOptions.CurrentValue.Password,
@@ -73,6 +75,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
             newRelaySettings.SmtpServer = serverUpdate.RelayOptions.SmtpServer;
             newRelaySettings.SmtpPort = serverUpdate.RelayOptions.SmtpPort;
+            newRelaySettings.TlsMode = Enum.Parse<SecureSocketOptions>(serverUpdate.RelayOptions.TlsMode);
             newRelaySettings.SenderAddress = serverUpdate.RelayOptions.SenderAddress;
             newRelaySettings.Login = serverUpdate.RelayOptions.Login;
             newRelaySettings.Password = serverUpdate.RelayOptions.Password;

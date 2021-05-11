@@ -1,4 +1,5 @@
-﻿using System;
+﻿using MailKit.Security;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -18,5 +19,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string Login { get; set; }
 
         public string Password { get; set; }
+
+        public string TlsMode { get; set;}
     }
 }

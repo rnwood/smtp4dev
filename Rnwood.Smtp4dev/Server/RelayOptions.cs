@@ -1,4 +1,6 @@
-﻿namespace Rnwood.Smtp4dev.Server
+﻿using MailKit.Security;
+
+namespace Rnwood.Smtp4dev.Server
 {
     public class RelayOptions
     {
@@ -7,6 +9,8 @@
         public string SmtpServer { get; set; } = string.Empty;
 
         public int SmtpPort { get; set; } = 25;
+
+        public SecureSocketOptions TlsMode { get; set; } = SecureSocketOptions.Auto;
 
         public string[] AutomaticEmails { get; set; } = new string[0];
 

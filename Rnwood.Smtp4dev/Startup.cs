@@ -68,7 +68,7 @@ namespace Rnwood.Smtp4dev
                 }
 
                 SmtpClient result = new SmtpClient();
-                result.Connect(relayOptions.SmtpServer, relayOptions.SmtpPort);
+                result.Connect(relayOptions.SmtpServer, relayOptions.SmtpPort, relayOptions.TlsMode);
 
                 if (!string.IsNullOrEmpty(relayOptions.Login))
                 {

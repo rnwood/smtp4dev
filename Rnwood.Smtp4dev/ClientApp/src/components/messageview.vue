@@ -11,6 +11,8 @@
             <div class="toolbar">
                 <el-button icon="el-icon-download"
                            v-on:click="download">Download</el-button>
+
+                <el-button v-on:click="relay" icon="el-icon-d-arrow-right" :disabled="!messageSummary || !isRelayAvailable" :loading="isRelayInProgress" title="Relay">Relay</el-button>
             </div>
 
             <div class="pad">
@@ -145,6 +147,8 @@
     import MessagePartsSource from "@/components/messagepartsource.vue";
     import MessageSource from "@/components/messagesource.vue";
     import { Tree } from "element-ui";
+    import { MessageBoxInputData } from 'element-ui/types/message-box';
+    import ServerController from '../ApiClient/ServerController';
 
     @Component({
         components: {
@@ -168,6 +172,10 @@
 
         error: Error | null = null;
         loading = false;
+
+
+        isRelayInProgress: boolean = false;
+        isRelayAvailable: boolean = false;
 
         @Watch("messageSummary")
         async onMessageSummaryChange(
@@ -251,6 +259,42 @@
             this.selectedPart = part;
         }
 
+        async relay() {
+            if (this.messageSummary == null) {
+                return;
+            }
+
+            let emails: string[];
+
+            try {
+
+                let dialogResult = <MessageBoxInputData>await this.$prompt('Email address(es) to relay to (separate multiple with ,)', 'Relay Message', {
+                    confirmButtonText: 'OK',
+                    inputValue: this.messageSummary.to,
+                    cancelButtonText: 'Cancel',
+                    inputPattern: /[^, ]+(, *[^, ]+)*/,
+                    inputErrorMessage: 'Invalid email addresses'
+                });
+
+                emails = (<string>dialogResult.value).split(",").map(e => e.trim());
+            } catch {
+                return;
+            }
+
+            try {
+                this.isRelayInProgress = true;
+                await new MessagesController().relayMessage(this.messageSummary.id, { overrideRecipientAddresses: emails });
+
+                this.$notify.success({ title: "Relay Message Success", message: "Completed OK" });
+            } catch (e) {
+                var message = e.response?.data?.detail ?? e.sessage;
+
+                this.$notify.error({ title: "Relay Message Failed", message: message });
+            } finally {
+                this.isRelayInProgress = false;
+            }
+        }
+
         async download() {
             if (this.messageSummary == null) {
                 return;
@@ -262,6 +306,7 @@
 
         async mounted() {
             await this.loadMessage();
+            this.isRelayAvailable = !!await (await new ServerController().getServer()).relayOptions.smtpServer;
         }
 
         async destroyed() { }

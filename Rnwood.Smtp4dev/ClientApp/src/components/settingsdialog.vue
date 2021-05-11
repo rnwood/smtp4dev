@@ -51,6 +51,16 @@
                             <el-input-number :min=1 :max=65535 controls-position="right" v-model="server.relayOptions.smtpPort" />
                         </el-form-item>
 
+                        <el-form-item label="Tls mode" prop="server.relayOptions.tlsMode" v-show="isRelayEnabled">
+                            <el-select v-model="server.relayOptions.tlsMode">
+                                <el-option key="None" label="None" value="None"></el-option>
+                                <el-option key="Auto" label="Auto" value="Auto"></el-option>
+                                <el-option key="SslOnConnect" label="SslOnConnect" value="SslOnConnect"></el-option>
+                                <el-option key="StartTls" label="StartTls" value="StartTls"></el-option>
+                                <el-option key="StartTlsWhenAvailable" label="StartTlsWhenAvailable" value="StartTlsWhenAvailable"></el-option>
+                            </el-select>
+                        </el-form-item>
+
                         <el-form-item label="Login" prop="server.relayOptions.login" v-show="isRelayEnabled">
                             <el-input v-model="server.relayOptions.login" />
                         </el-form-item>
