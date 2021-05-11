@@ -18,6 +18,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Versioning;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -153,7 +154,16 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
             if (string.IsNullOrEmpty(mainModule))
             {
-                mainModule = Path.GetFullPath("../../../../Rnwood.Smtp4dev/bin/Debug/netcoreapp3.1/Rnwood.Smtp4dev.dll");
+                //.NETCoreapp,Version=v3.1
+                string framework = typeof(Program)
+    .Assembly
+    .GetCustomAttribute<TargetFrameworkAttribute>()?
+    .FrameworkName;
+                
+                //netcoreapp3.1
+                string folder = framework.TrimStart('.').Replace(",Version=v", "").ToLower();
+
+                mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/Debug/{folder}/Rnwood.Smtp4dev.dll");
             }
 
             CancellationToken timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
