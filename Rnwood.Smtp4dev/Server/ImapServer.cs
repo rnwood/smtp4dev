@@ -14,6 +14,7 @@ using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
+using System.Net.NetworkInformation;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -71,8 +72,37 @@ namespace Rnwood.Smtp4dev.Server
             };
             imapServer.SessionCreated += (o, ea) => new SessionHandler(ea.Session, this.serviceScopeFactory);
 
+
+            var errorTcs = new TaskCompletionSource<Error_EventArgs>();
+            imapServer.Error += (s, ea) => errorTcs.SetResult(ea);
+            var startedTcs = new TaskCompletionSource<EventArgs>();
+            imapServer.Started += (s, ea) => startedTcs.SetResult(ea);
+
             imapServer.Start();
-            Console.WriteLine($"IMAP Server listening on port {imapServer.Bindings[0].Port}");
+
+            var errorTask = errorTcs.Task;
+            var startedTask = startedTcs.Task;
+
+            int index = Task.WaitAny(startedTask, errorTask, Task.Delay(TimeSpan.FromSeconds(30)));
+
+            if (index == 1)
+            {
+                Console.WriteLine("The IMAP server failed to start: " + errorTask.Result.Exception.ToString());
+            } else if (index == 2)
+            {
+                Console.WriteLine("The IMAP server failed to start: Timeout");
+
+                try
+                {
+                    imapServer.Stop();
+                }
+                catch { }
+            }
+            else
+            {
+                int port = ((IPEndPoint)imapServer.ListeningPoints[0].Socket.LocalEndPoint).Port;
+                Console.WriteLine($"IMAP Server is listening on port {port}");
+            }
         }
 
         public void Stop()

@@ -4,6 +4,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using CommandLiners;
 using CommandLiners.Options;
 using Microsoft.AspNetCore;
@@ -11,6 +12,7 @@ using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Mono.Options;
+using Newtonsoft.Json.Linq;
 using Rnwood.Smtp4dev.Server;
 using Rnwood.Smtp4dev.Service;
 
@@ -93,7 +95,7 @@ namespace Rnwood.Smtp4dev
 
             Directory.SetCurrentDirectory(dataDir);
 
-            return WebHost
+            IWebHostBuilder builder = WebHost
                 .CreateDefaultBuilder(args)
                 .UseContentRoot(contentRoot)
                 .ConfigureAppConfiguration(
@@ -111,17 +113,38 @@ namespace Rnwood.Smtp4dev
                             cb = cb.AddJsonFile(Path.Join(dataDir, "appsettings.json"), optional: true, reloadOnChange: true);
                         }
 
-                        IConfigurationRoot config =
-                            cb
-                            .AddEnvironmentVariables()
-                            .AddCommandLineOptions(commandLineOptions)
+                        cb
+.AddEnvironmentVariables()
+.AddCommandLineOptions(commandLineOptions);
+
+                        IConfigurationRoot config = cb
                             .Build();
 
                         hostingContext.HostingEnvironment.EnvironmentName = config["Environment"];
+
+                        if (cmdLineOptions.DebugSettings)
+                        {
+                            JsonSerializerOptions jsonSettings = new JsonSerializerOptions { WriteIndented = true };
+                            Console.WriteLine(JsonSerializer.Serialize(new
+                            {
+                                CmdLineArgs = Environment.GetCommandLineArgs(),
+                                CmdLineOptions = cmdLineOptions,
+                                ServerOptions = config.GetSection("ServerOptions").Get<ServerOptions>(),
+                                RelayOption = config.GetSection("RelayOptions").Get<RelayOptions>()
+                            }, jsonSettings));
+                        }
+
                     })
-                .UseStartup<Startup>()
-                .Build();
+                .UseStartup<Startup>();
+
+            if (!string.IsNullOrEmpty(cmdLineOptions.Urls))
+            {
+                builder.UseUrls(cmdLineOptions.Urls);
+            }
+
+            return builder.Build();
         }
+
 
         private static MapOptions<CommandLineOptions> TryParseCommandLine(string[] args)
         {
@@ -133,7 +156,7 @@ namespace Rnwood.Smtp4dev
             {
                 { "h|help|?", "Shows this message and exits", _ =>  help = true},
                 { "service", "Required to run when registered as a Windows service. To register service: sc.exe create Smtp4dev binPath= \"{PathToExe} --service\"", _ => { } },
-                { "urls=", "The URLs the web interface should listen on. For example, http://localhost:123. Use `*` in place of hostname to listen for requests on any IP address or hostname using the specified port and protocol (for example, http://*:5000)", _ => { } },
+                { "urls=", "The URLs the web interface should listen on. For example, http://localhost:123. Use `*` in place of hostname to listen for requests on any IP address or hostname using the specified port and protocol (for example, http://*:5000)", data => map.Add(data, x => x.Urls) },
                 { "hostname=", "Specifies the server hostname. Used in auto-generated TLS certificate if enabled.", data => map.Add(data, x => x.ServerOptions.HostName) },
                 { "allowremoteconnections", "Specifies if remote connections will be allowed to the SMTP and IMAP servers. Use -allowremoteconnections+ to enable or -allowremoteconnections- to disable", data => map.Add((data !=null).ToString(), x => x.ServerOptions.AllowRemoteConnections) },
                 { "smtpport=", "Set the port the SMTP server listens on. Specify 0 to assign automatically", data => map.Add(data, x => x.ServerOptions.Port) },
@@ -152,6 +175,7 @@ namespace Rnwood.Smtp4dev
                 { "relaytlsmode=",  "Sets the TLS mode when connecting to relay SMTP server. See: http://www.mimekit.net/docs/html/T_MailKit_Security_SecureSocketOptions.htm", data => map.Add(data, x=> x.RelayOptions.TlsMode) },
                 { "imapport=", "Specifies the port the IMAP server will listen on - allows standard email clients to view/retrieve messages", data => map.Add(data, x=> x.ServerOptions.ImapPort) },
                 { "nousersettings", "Skip loading of appsetttings.json file in %APPDATA%", data => map.Add((data !=null).ToString(), x=> x.NoUserSettings) },
+                { "debugsettings", "Prints out most settings values on startup", data => map.Add((data !=null).ToString(), x=> x.DebugSettings) },
                 { "recreatedb", "Recreates the DB on startup if it already exists", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.RecreateDb) }
             };
 
@@ -195,7 +219,9 @@ namespace Rnwood.Smtp4dev
         public ServerOptions ServerOptions { get; set; }
         public RelayOptions RelayOptions { get; set; }
 
-        public bool NoUserSettings { get; set; }
+        public string Urls { get; set; }
 
+        public bool NoUserSettings { get; set; }
+        public bool DebugSettings { get; set; }
     }
 }
