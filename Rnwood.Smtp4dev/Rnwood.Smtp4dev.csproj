@@ -39,7 +39,7 @@
 		<PackageReference Include="Rnwood.LumiSoft.Net" Version="1.0.0" />
 		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0648" />
 		<PackageReference Include="Portable.BouncyCastle" Version="1.8.10" />
-		<PackageReference Include="System.Data.SQLite" Version="1.0.113.7" />
+		<PackageReference Include="System.Data.SQLite" Version="1.0.114.2" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.9" />
 		<PackageReference Include="System.Reactive" Version="4.4.1" />
 		<PackageReference Include="VueCliMiddleware" Version="3.1.2" />
