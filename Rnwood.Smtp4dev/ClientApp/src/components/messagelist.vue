@@ -252,9 +252,9 @@
 
       private searchTermPredicate(m: MessageSummary) {
         return !this.searchTerm ||
-            m.subject.localeIndexOf(this.searchTerm, undefined, {
+            (m.subject ? (m.subject.localeIndexOf(this.searchTerm, undefined, {
               sensitivity: "base"
-            }) != -1 ||
+            }) != -1 ) : false) ||
             m.to.localeIndexOf(this.searchTerm, undefined, {
               sensitivity: "base"
             }) != -1 ||
