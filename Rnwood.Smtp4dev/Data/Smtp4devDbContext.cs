@@ -6,8 +6,14 @@ namespace Rnwood.Smtp4dev.Data
     public class Smtp4devDbContext : DbContext
     {
         public Smtp4devDbContext(DbContextOptions<Smtp4devDbContext> options)
-        : base(options)
+            : base(options)
         {
+        }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            UtcDateTimeValueConverter.Apply(modelBuilder);
+            base.OnModelCreating(modelBuilder);
         }
 
         public DbSet<Message> Messages { get; set; }
@@ -15,6 +21,4 @@ namespace Rnwood.Smtp4dev.Data
 
         public DbSet<ImapState> ImapState { get; set; }
     }
-
 }
-
