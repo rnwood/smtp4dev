@@ -56,7 +56,7 @@ SET ReceivedDate = DATETIME('{testDate:yyyy-MM-dd HH:mm:ss}');
             var timeZone = GetTestTimezone();
             var testDate = new DateTime(2021, 1, 4, 10, 0, 0, DateTimeKind.Utc);
 
-            using (new FakeLocalTimeZone(TimeZoneInfo.FindSystemTimeZoneById(timeZone.Id)))
+            using (new FakeLocalTimeZone(GetTimeZoneInfo(timeZone)))
             {
                 using var context = new Smtp4devDbContext(_sqlLiteForTesting.ContextOptions);
                 context.Messages.Add(new Message {From = "test"});
