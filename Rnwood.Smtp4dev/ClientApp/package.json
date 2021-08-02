@@ -9,7 +9,7 @@
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
-    "splitpanes": "^2.3.6"
+    "splitpanes": "^2.3.8"
   },
   "devDependencies": {
     "@aspnet/signalr": "^1.0.27",
