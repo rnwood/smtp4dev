@@ -2,16 +2,17 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rnwood.Smtp4dev.Data;
-using Rnwood.Smtp4dev.DbModel;
 
 namespace Rnwood.Smtp4dev.Migrations
 {
     [DbContext(typeof(Smtp4devDbContext))]
-    partial class Smtp4devDbContextModelSnapshot : ModelSnapshot
+    [Migration("20210731045851_UTCTimeMigration")]
+    partial class UTCTimeMigration
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -120,6 +121,8 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.HasOne("Rnwood.Smtp4dev.DbModel.Session", "Session")
                         .WithMany()
                         .HasForeignKey("SessionId");
+
+                    b.Navigation("Session");
                 });
 #pragma warning restore 612, 618
         }
