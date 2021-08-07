@@ -21,6 +21,8 @@ namespace Rnwood.Smtp4dev.Data
             this.dbContext = dbContext;
         }
 
+        public Smtp4devDbContext DbContext => this.dbContext;
+
         public Task MarkMessageRead(Guid id)
         {
             return taskQueue.QueueTask(() =>
