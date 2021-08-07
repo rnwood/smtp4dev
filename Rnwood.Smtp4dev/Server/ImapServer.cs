@@ -60,9 +60,15 @@ namespace Rnwood.Smtp4dev.Server
 
         public void TryStart()
         {
+            if (!serverOptions.CurrentValue.ImapServerEnabled)
+            {
+                log.Information("IMAP Server disabled");
+                return;
+            }
+
             if (!serverOptions.CurrentValue.ImapPort.HasValue)
             {
-                log.Information("IMAP server disabled");
+                log.Information("IMAP server disabled, no ImapPort specified");
                 return;
             }
 
