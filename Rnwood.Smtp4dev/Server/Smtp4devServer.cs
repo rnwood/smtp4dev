@@ -11,13 +11,12 @@ using System.Threading.Tasks;
 using MimeKit;
 using MailKit.Net.Smtp;
 using System.Reactive.Linq;
-using Microsoft.AspNetCore.Mvc.TagHelpers;
 using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
 
 namespace Rnwood.Smtp4dev.Server
 {
-    public class Smtp4devServer
+    public class Smtp4devServer : ISmtp4devServer
     {
         public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<ServerOptions> serverOptions,
             IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory, ITaskQueue taskQueue)
@@ -50,8 +49,6 @@ namespace Rnwood.Smtp4dev.Server
             {
                 Console.WriteLine("ServerOptions changed.");
             }
-
-
         }
 
         private void CreateSmtpServer()

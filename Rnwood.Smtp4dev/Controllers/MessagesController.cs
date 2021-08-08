@@ -21,14 +21,14 @@ namespace Rnwood.Smtp4dev.Controllers
     [UseEtagFilterAttribute]
     public class MessagesController : Controller
     {
-        public MessagesController(IMessagesRepository messagesRepository, Smtp4devServer server)
+        public MessagesController(IMessagesRepository messagesRepository, ISmtp4devServer server)
         {
             this.messagesRepository = messagesRepository;
             this.server = server;
         }
 
         private readonly IMessagesRepository messagesRepository;
-        private readonly Smtp4devServer server;
+        private readonly ISmtp4devServer server;
 
         [HttpGet]
         public IEnumerable<MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true)
@@ -67,7 +67,7 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpPost("{id}/relay")]
         public IActionResult RelayMessage(Guid id, [FromBody] MessageRelayOptions options)
         {
-            Message message = GetDbMessage(id);
+            var message = GetDbMessage(id);
             var relayResult = server.TryRelayMessage(message,
                 options?.OverrideRecipientAddresses?.Length > 0
                     ? options?.OverrideRecipientAddresses.Select(a => MailboxAddress.Parse(a)).ToArray()
@@ -75,7 +75,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
             if (relayResult.Exceptions.Any())
             {
-                string relayErrorSummary = string.Join(". ", relayResult.Exceptions.Select(e => e.Key.Address + ": " + e.Value.Message));
+                var relayErrorSummary = string.Join(". ", relayResult.Exceptions.Select(e => e.Key.Address + ": " + e.Value.Message));
                 return Problem("Failed to relay to recipients: " + relayErrorSummary);
             }
             if (relayResult.WasRelayed)
