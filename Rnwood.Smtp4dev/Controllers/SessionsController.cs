@@ -20,7 +20,7 @@ namespace Rnwood.Smtp4dev.Controllers
     [UseEtagFilterAttribute]
     public class SessionsController : Controller
     {
-        public SessionsController(Smtp4devDbContext dbContext, Smtp4devServer server)
+        public SessionsController(Smtp4devDbContext dbContext, ISmtp4devServer server)
         {
             this.dbContext = dbContext;
             this.server = server;
@@ -28,7 +28,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
 
         private Smtp4devDbContext dbContext;
-        private Smtp4devServer server;
+        private ISmtp4devServer server;
 
         [HttpGet]
         public IEnumerable<ApiModel.SessionSummary> GetSummaries()

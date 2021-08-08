@@ -74,7 +74,7 @@ namespace Rnwood.Smtp4dev.Server
             });
         }
 
-        internal void Stop()
+        public void Stop()
         {
             Console.WriteLine("SMTP server stopping...");
             this.smtpServer.Stop(true);
@@ -223,7 +223,7 @@ namespace Rnwood.Smtp4dev.Server
         }
 
 
-        internal Task DeleteSession(Guid id)
+        public Task DeleteSession(Guid id)
         {
             return taskQueue.QueueTask(() =>
             {
@@ -239,7 +239,7 @@ namespace Rnwood.Smtp4dev.Server
             }, true);
         }
 
-        internal Task DeleteAllSessions()
+        public Task DeleteAllSessions()
         {
             return taskQueue.QueueTask(() =>
             {

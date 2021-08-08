@@ -140,7 +140,7 @@ namespace Rnwood.Smtp4dev
                     }
                 }
 
-                subdir.ApplicationServices.GetService<Smtp4devServer>().TryStart();
+                subdir.ApplicationServices.GetService<ISmtp4devServer>().TryStart();
                 subdir.ApplicationServices.GetService<ImapServer>().TryStart();
             };
 
