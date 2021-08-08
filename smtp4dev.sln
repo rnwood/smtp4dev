@@ -7,6 +7,11 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rnwood.Smtp4dev", "Rnwood.S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rnwood.Smtp4dev.Tests", "Rnwood.Smtp4dev.Tests\Rnwood.Smtp4dev.Tests.csproj", "{214D26BF-5CCB-45A4-BC67-97CAE22158FA}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{82B0ADD8-181C-4259-98CD-4C85614F19B4}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
