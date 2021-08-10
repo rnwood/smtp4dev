@@ -29,7 +29,7 @@
     "core-js": "^3.16.1",
     "element-ui": "^2.15.5",
     "eslint": "^7.32.0",
-    "eslint-plugin-vue": "^7.15.0",
+    "eslint-plugin-vue": "^7.16.0",
     "locale-index-of": "^2.0.0",
     "moment": "^2.29.1",
     "sass": "^1.37.0",
