@@ -1,9 +1,4 @@
-﻿using MimeKit;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
@@ -18,7 +13,10 @@ namespace Rnwood.Smtp4dev.ApiModel
             Subject = dbMessage.Subject;
             AttachmentCount = dbMessage.AttachmentCount;
             IsUnread = dbMessage.IsUnread;
+            IsRelayed = dbMessage.Relays.Count > 0;
         }
+
+        public bool IsRelayed { get; set; }
 
         public Guid Id { get; set; }
 
@@ -32,6 +30,6 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public bool IsUnread { get; set; }
 
-        string ICacheByKey.CacheKey => Id.ToString() + IsUnread.ToString();
+        string ICacheByKey.CacheKey => Id.ToString() + IsUnread + IsRelayed;
     }
 }

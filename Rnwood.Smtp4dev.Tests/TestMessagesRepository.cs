@@ -23,7 +23,9 @@ namespace Rnwood.Smtp4dev.Tests
 			return Task.CompletedTask;
 		}
 
-		public Task DeleteMessage(Guid id)
+        public Smtp4devDbContext DbContext => throw new NotImplementedException();
+
+        public Task DeleteMessage(Guid id)
 		{
 			Messages.RemoveAll(m => m.Id == id);
 			return Task.CompletedTask;

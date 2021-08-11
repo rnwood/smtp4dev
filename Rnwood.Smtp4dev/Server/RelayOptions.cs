@@ -12,7 +12,7 @@ namespace Rnwood.Smtp4dev.Server
 
         public SecureSocketOptions TlsMode { get; set; } = SecureSocketOptions.Auto;
 
-        public string[] AutomaticEmails { get; set; } = new string[0];
+        public string[] AutomaticEmails { get; set; } = System.Array.Empty<string>();
 
         public string SenderAddress { get; set; } = "";
 
@@ -24,14 +24,8 @@ namespace Rnwood.Smtp4dev.Server
         [System.Text.Json.Serialization.JsonIgnore]
         public string AutomaticEmailsString
         {
-            get
-            {
-                return string.Join(",", AutomaticEmails);
-            }
-            set
-            {
-                this.AutomaticEmails = value.Split(',');
-            }
+            get => string.Join(",", AutomaticEmails);
+            set => this.AutomaticEmails = value.Split(',');
         }
     }
 }
