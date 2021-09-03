@@ -13,9 +13,17 @@ namespace Rnwood.Smtp4dev.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             UtcDateTimeValueConverter.Apply(modelBuilder);
+
+            modelBuilder.Entity<MessageRelay>()
+                .HasOne(r => r.Message)
+                .WithMany(x => x.Relays)
+                .HasForeignKey(x => x.MessageId)
+                .IsRequired();
+
             base.OnModelCreating(modelBuilder);
         }
 
+        public DbSet<MessageRelay> MessageRelays { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Session> Sessions { get; set; }
 

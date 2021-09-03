@@ -21,19 +21,19 @@
 
 	<ItemGroup>
 		<PackageReference Include="CommandLiners.MonoOptions" Version="1.0.36" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.35" />
+		<PackageReference Include="HtmlAgilityPack" Version="1.11.36" />
 		<PackageReference Include="MailKit" Version="2.13.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.1.17" />
+		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.1.18" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="5.0.9" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.5">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.8">
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		  <PrivateAssets>all</PrivateAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.5" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.5" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.8" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
 		<PackageReference Include="MimeKit" Version="2.13.0" />
 		<PackageReference Include="Mono.Options" Version="6.6.0.161" />
 		<PackageReference Include="Rnwood.LumiSoft.Net" Version="1.0.0" />
@@ -43,7 +43,6 @@
 		<PackageReference Include="Serilog.AspNetCore" Version="4.1.0" />
 		<PackageReference Include="Serilog.Settings.Configuration" Version="3.1.0" />
 		<PackageReference Include="Serilog.Sinks.Console" Version="3.1.1" />
-		<PackageReference Include="System.Data.SQLite" Version="1.0.114.4" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.12" />
 		<PackageReference Include="System.Reactive" Version="4.4.1" />
 		<PackageReference Include="VueCliMiddleware" Version="3.1.2" />

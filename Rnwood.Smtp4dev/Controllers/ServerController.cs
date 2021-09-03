@@ -20,7 +20,7 @@ namespace Rnwood.Smtp4dev.Controllers
     [ApiController]
     public class ServerController : Controller
     {
-        public ServerController(Smtp4devServer server, ImapServer imapServer, IOptionsMonitor<ServerOptions> serverOptions, IOptionsMonitor<RelayOptions> relayOptions)
+        public ServerController(ISmtp4devServer server, ImapServer imapServer, IOptionsMonitor<ServerOptions> serverOptions, IOptionsMonitor<RelayOptions> relayOptions)
         {
             this.server = server;
             this.imapServer = imapServer;
@@ -29,7 +29,7 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
 
-        private Smtp4devServer server;
+        private ISmtp4devServer server;
         private ImapServer imapServer;
         private IOptionsMonitor<ServerOptions> serverOptions;
         private IOptionsMonitor<RelayOptions> relayOptions;

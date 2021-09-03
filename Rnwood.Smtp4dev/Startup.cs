@@ -58,7 +58,7 @@ namespace Rnwood.Smtp4dev
                 }
             }, ServiceLifetime.Scoped, ServiceLifetime.Singleton);
 
-            services.AddSingleton<Smtp4devServer>();
+            services.AddSingleton<ISmtp4devServer, Smtp4devServer>();
             services.AddSingleton<ImapServer>();
             services.AddScoped<IMessagesRepository, MessagesRepository>();
             services.AddSingleton<ITaskQueue, TaskQueue>();
@@ -141,7 +141,7 @@ namespace Rnwood.Smtp4dev
                     }
                 }
 
-                subdir.ApplicationServices.GetService<Smtp4devServer>().TryStart();
+                subdir.ApplicationServices.GetService<ISmtp4devServer>().TryStart();
                 subdir.ApplicationServices.GetService<ImapServer>().TryStart();
             };
 

@@ -17,7 +17,7 @@ using Serilog;
 
 namespace Rnwood.Smtp4dev.Server
 {
-    public class Smtp4devServer
+    public class Smtp4devServer : ISmtp4devServer
     {
         private readonly ILogger log = Log.ForContext<Smtp4devServer>();
 
@@ -52,8 +52,6 @@ namespace Rnwood.Smtp4dev.Server
             {
                 log.Information("ServerOptions changed.");
             }
-
-
         }
 
         private void CreateSmtpServer()
@@ -79,7 +77,7 @@ namespace Rnwood.Smtp4dev.Server
             });
         }
 
-        internal void Stop()
+        public void Stop()
         {
             log.Information("SMTP server stopping...");
             this.smtpServer.Stop(true);
@@ -93,12 +91,11 @@ namespace Rnwood.Smtp4dev.Server
 
             if (serverOptions.CurrentValue.TlsMode != TlsMode.None)
             {
-
                 if (!string.IsNullOrEmpty(serverOptions.CurrentValue.TlsCertificate))
                 {
                     log.Information("Using certificate from {certificateLocation}",serverOptions.CurrentValue.TlsCertificate);
-                    cert = new X509Certificate2(File.ReadAllBytes(serverOptions.CurrentValue.TlsCertificate), "", X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
-
+                    cert = new X509Certificate2(File.ReadAllBytes(serverOptions.CurrentValue.TlsCertificate), "",
+                        X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
                 }
                 else
                 {
@@ -107,15 +104,19 @@ namespace Rnwood.Smtp4dev.Server
 
                     if (File.Exists(pfxPath))
                     {
-                        cert = new X509Certificate2(File.ReadAllBytes(pfxPath), "", X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+                        cert = new X509Certificate2(File.ReadAllBytes(pfxPath), "",
+                            X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
 
-                        if (cert.Subject != $"CN={serverOptions.CurrentValue.HostName}" || DateTime.Parse(cert.GetExpirationDateString()) < DateTime.Now.AddDays(30))
+                        if (cert.Subject != $"CN={serverOptions.CurrentValue.HostName}" ||
+                            DateTime.Parse(cert.GetExpirationDateString()) < DateTime.Now.AddDays(30))
                         {
                             cert = null;
                         }
                         else
                         {
-                            log.Information("Using existing self-signed certificate with subject name '{certificateSubject}' and expiry date {certificateExpiryDate}",serverOptions.CurrentValue.HostName,
+                            log.Information(
+                                "Using existing self-signed certificate with subject name {Hostname} and expiry date {ExpirationDate}",
+                                serverOptions.CurrentValue.HostName,
                                 cert.GetExpirationDateString());
                         }
                     }
@@ -125,13 +126,16 @@ namespace Rnwood.Smtp4dev.Server
                         cert = SSCertGenerator.CreateSelfSignedCertificate(serverOptions.CurrentValue.HostName);
                         File.WriteAllBytes(pfxPath, cert.Export(X509ContentType.Pkcs12));
                         File.WriteAllBytes(cerPath, cert.Export(X509ContentType.Cert));
-                        log.Information("Generated new self-signed certificate with subject name '{certificateHostName}' and expiry date {certificateExpiryDate}", serverOptions.CurrentValue.HostName, cert.GetExpirationDateString());
+                        log.Information("Generated new self-signed certificate with subject name '{Hostname} and expiry date {ExpirationDate}", 
+                            serverOptions.CurrentValue.HostName, 
+                            cert.GetExpirationDateString());
                     }
 
-                    log.Information($"Ensure that the hostname you enter into clients and '{serverOptions.CurrentValue.HostName}' from ServerOptions:HostName configuration match exactly");
-                    log.Information($"and trust the issuer certificate at {cerPath} in your client/OS to avoid certificate validation errors.");
+                    log.Information("Ensure that the hostname you enter into clients and '{Hostname}' from ServerOptions:HostName configuration match exactly and trust the issuer certificate at {cerPath} in your client/OS to avoid certificate validation errors.", 
+                        serverOptions.CurrentValue.HostName, cerPath);
                 }
             }
+
             return cert;
         }
 
@@ -144,6 +148,7 @@ namespace Rnwood.Smtp4dev.Server
             {
                 unfinishedSession.EndDate = DateTime.Now;
             }
+
             dbContext.SaveChanges();
 
             TrimMessages(dbContext);
@@ -193,7 +198,6 @@ namespace Rnwood.Smtp4dev.Server
                 dbContext.SaveChanges();
 
                 activeSessionsToDbId[e.Session] = dbSession.Id;
-
             }, false).ConfigureAwait(false);
         }
 
@@ -218,13 +222,11 @@ namespace Rnwood.Smtp4dev.Server
                 activeSessionsToDbId.Remove(e.Session);
 
                 notificationsHub.OnSessionsChanged().Wait();
-
             }, false).ConfigureAwait(false);
         }
 
 
-
-        internal Task DeleteSession(Guid id)
+        public Task DeleteSession(Guid id)
         {
             return taskQueue.QueueTask(() =>
             {
@@ -240,7 +242,7 @@ namespace Rnwood.Smtp4dev.Server
             }, true);
         }
 
-        internal Task DeleteAllSessions()
+        public Task DeleteAllSessions()
         {
             return taskQueue.QueueTask(() =>
             {
@@ -265,14 +267,21 @@ namespace Rnwood.Smtp4dev.Server
                 using var scope = serviceScopeFactory.CreateScope();
                 Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
 
-                Dictionary<MailboxAddress, Exception> relayErrors = TryRelayMessage(message, null);
-                message.RelayError = string.Join("\n", relayErrors.Select(e => e.Key.ToString() + ": " + e.Value.Message));
+                var relayResult = TryRelayMessage(message, null);
+                message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
 
                 ImapState imapState = dbContext.ImapState.Single();
                 imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
                 message.ImapUid = imapState.LastUid;
-
                 message.Session = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
+                if (relayResult.WasRelayed)
+                {
+                    foreach (var relay in relayResult.RelayRecipients)
+                    {
+                        message.AddRelay(new MessageRelay { SendDate = DateTime.UtcNow, To = relay.Email });
+                    }
+                }
+
                 dbContext.Messages.Add(message);
 
                 dbContext.SaveChanges();
@@ -281,13 +290,12 @@ namespace Rnwood.Smtp4dev.Server
                 dbContext.SaveChanges();
                 notificationsHub.OnMessagesChanged().Wait();
                 log.Information("Processing received message DONE");
-
             }, false).ConfigureAwait(false);
         }
 
-        public Dictionary<MailboxAddress, Exception> TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
+        public RelayResult TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
         {
-            Dictionary<MailboxAddress, Exception> result = new Dictionary<MailboxAddress, Exception>();
+            var result = new RelayResult(message);
 
             if (!relayOptions.CurrentValue.IsEnabled)
             {
@@ -313,26 +321,22 @@ namespace Rnwood.Smtp4dev.Server
             {
                 try
                 {
-
                     log.Information("Relaying message to {recipient}", recipient);
 
-                    using (SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue))
-                    {
-                        var apiMsg = new ApiModel.Message(message);
-                        MimeMessage newEmail = apiMsg.MimeMessage;
-                        MailboxAddress sender = MailboxAddress.Parse(
-                            !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)
+                    using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
+                    var apiMsg = new ApiModel.Message(message);
+                    MimeMessage newEmail = apiMsg.MimeMessage;
+                    MailboxAddress sender = MailboxAddress.Parse(
+                        !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)
                             ? relayOptions.CurrentValue.SenderAddress
                             : apiMsg.From);
-                        relaySmtpClient.Send(newEmail, sender, new[] { recipient });
-                    }
-
-
+                    relaySmtpClient.Send(newEmail, sender, new[] { recipient });
+                    result.RelayRecipients.Add(new RelayRecipientResult(){Email = recipient.Address, RelayDate = DateTime.UtcNow});
                 }
                 catch (Exception e)
                 {
                     log.Error(e, "Can not relay message to {recipient}: {errorMessage}", recipient, e.ToString());
-                    result[recipient] = e;
+                    result.Exceptions[recipient] = e;
                 }
             }
 
@@ -341,12 +345,14 @@ namespace Rnwood.Smtp4dev.Server
 
         private void TrimMessages(Smtp4devDbContext dbContext)
         {
-            dbContext.Messages.RemoveRange(dbContext.Messages.OrderByDescending(m => m.ReceivedDate).Skip(serverOptions.CurrentValue.NumberOfMessagesToKeep));
+            dbContext.Messages.RemoveRange(dbContext.Messages.OrderByDescending(m => m.ReceivedDate)
+                .Skip(serverOptions.CurrentValue.NumberOfMessagesToKeep));
         }
 
         private void TrimSessions(Smtp4devDbContext dbContext)
         {
-            dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue).OrderByDescending(m => m.EndDate).Skip(serverOptions.CurrentValue.NumberOfSessionsToKeep));
+            dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue).OrderByDescending(m => m.EndDate)
+                .Skip(serverOptions.CurrentValue.NumberOfSessionsToKeep));
         }
 
 
@@ -360,18 +366,12 @@ namespace Rnwood.Smtp4dev.Server
 
         public bool IsRunning
         {
-            get
-            {
-                return this.smtpServer.IsRunning;
-            }
+            get { return this.smtpServer.IsRunning; }
         }
 
         public int PortNumber
         {
-            get
-            {
-                return this.smtpServer.PortNumber;
-            }
+            get { return this.smtpServer.PortNumber; }
         }
 
         public void TryStart()
