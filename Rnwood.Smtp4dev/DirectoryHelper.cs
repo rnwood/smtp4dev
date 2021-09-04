@@ -7,9 +7,9 @@ namespace Rnwood.Smtp4dev
     {
         public static string GetDataDir(CommandLineOptions options)
         {
-            return string.IsNullOrEmpty(options.BaseAppData)
+            return string.IsNullOrEmpty(options.BaseAppDataPath)
                 ? Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "smtp4dev")
-                : options.BaseAppData;
+                : options.BaseAppDataPath;
         }
     }
 }

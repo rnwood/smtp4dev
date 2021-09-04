@@ -20,7 +20,7 @@ namespace Rnwood.Smtp4dev.Tests
         {
             var dir = DirectoryHelper.GetDataDir(new CommandLineOptions()
             {
-                BaseAppData = OverridePath
+                BaseAppDataPath = OverridePath
             });
 
             dir.Should().Be(OverridePath);
