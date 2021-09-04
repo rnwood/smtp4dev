@@ -81,22 +81,6 @@ namespace Rnwood.Smtp4dev
 
         private static IWebHost BuildWebHost(string[] args)
         {
-            string contentRoot = GetContentRoot();
-
-            string dataDir = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "smtp4dev");
-            if (!Directory.Exists(dataDir))
-            {
-                Directory.CreateDirectory(dataDir);
-            }
-
-            //Migrate to new location
-            if (File.Exists(Path.Join(contentRoot, "database.db")) && !File.Exists(Path.Join(dataDir, "database.db")))
-            {
-                File.Move(
-                    Path.Join(contentRoot, "database.db"),
-                    Path.Join(dataDir, "database.db")
-                );
-            }
 
             MapOptions<CommandLineOptions> commandLineOptions = TryParseCommandLine(args);
             if (commandLineOptions == null)
@@ -108,7 +92,9 @@ namespace Rnwood.Smtp4dev
             CommandLineOptions cmdLineOptions = new CommandLineOptions();
             new ConfigurationBuilder().AddCommandLineOptions(commandLineOptions).Build().Bind(cmdLineOptions);
 
-
+            var contentRoot = GetContentRoot();
+            var dataDir = GetOrCreateDataDir(cmdLineOptions);
+            Console.WriteLine($"DataDir: {dataDir}");
             Directory.SetCurrentDirectory(dataDir);
 
             IWebHostBuilder builder = WebHost
@@ -230,6 +216,16 @@ namespace Rnwood.Smtp4dev
             return map;
         }
 
+        private static string GetOrCreateDataDir(CommandLineOptions cmdLineOptions)
+        {
+            var dataDir = DirectoryHelper.GetDataDir(cmdLineOptions);
+            if (!Directory.Exists(dataDir))
+            {
+                Directory.CreateDirectory(dataDir);
+            }
+            return dataDir;
+        }
+
         private static void SetupStaticLogger()
         {
             var configuration = new ConfigurationBuilder()
@@ -240,16 +236,5 @@ namespace Rnwood.Smtp4dev
                 .ReadFrom.Configuration(configuration)
                 .CreateLogger();
         }
-    }
-
-    class CommandLineOptions
-    {
-        public ServerOptions ServerOptions { get; set; }
-        public RelayOptions RelayOptions { get; set; }
-
-        public string Urls { get; set; }
-
-        public bool NoUserSettings { get; set; }
-        public bool DebugSettings { get; set; }
     }
 }
