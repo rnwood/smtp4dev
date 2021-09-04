@@ -8,18 +8,18 @@ using Org.BouncyCastle.Security;
 using Org.BouncyCastle.Utilities;
 using Org.BouncyCastle.X509;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
-using System.Threading.Tasks;
+using Org.BouncyCastle.Crypto.Operators;
 
+[assembly: InternalsVisibleTo("Rnwood.Smtp4dev.Tests")]
 namespace Rnwood.Smtp4dev.Server
 {
-    internal class SSCertGenerator
+    internal static class SSCertGenerator
     {
         
-        public static System.Security.Cryptography.X509Certificates.X509Certificate2 CreateSelfSignedCertificate(string hostname)
+        public static X509Certificate2 CreateSelfSignedCertificate(string hostname)
         {
             CryptoApiRandomGenerator randomGenerator = new CryptoApiRandomGenerator();
             SecureRandom random = new SecureRandom(randomGenerator);
@@ -30,7 +30,6 @@ namespace Rnwood.Smtp4dev.Server
 
             BigInteger serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
             certGenerator.SetSerialNumber(serialNumber);
-            certGenerator.SetSignatureAlgorithm("SHA256WithRSA");
 
             certGenerator.SetNotBefore(DateTime.UtcNow.Date);
             certGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(10));
@@ -39,16 +38,17 @@ namespace Rnwood.Smtp4dev.Server
 
             RsaKeyPairGenerator keyPairGenerator = new RsaKeyPairGenerator();
             keyPairGenerator.Init(keyGenerationParameters);
-            AsymmetricCipherKeyPair keypair = keyPairGenerator.GenerateKeyPair();
-            certGenerator.SetPublicKey(keypair.Public);
+            AsymmetricCipherKeyPair keyPair = keyPairGenerator.GenerateKeyPair();
+            certGenerator.SetPublicKey(keyPair.Public);
 
-            var cert = certGenerator.Generate(keypair.Private, random);
+            var signatureFactory = new Asn1SignatureFactory("SHA256WithRSA", keyPair.Private, random);
+            var cert = certGenerator.Generate(signatureFactory);
 
 
             Pkcs12Store store = new Pkcs12Store();
             var certificateEntry = new X509CertificateEntry(cert);
             store.SetCertificateEntry("cert", certificateEntry);
-            store.SetKeyEntry("cert", new AsymmetricKeyEntry(keypair.Private), new[] { certificateEntry });
+            store.SetKeyEntry("cert", new AsymmetricKeyEntry(keyPair.Private), new[] { certificateEntry });
             var stream = new MemoryStream();
             store.Save(stream, "".ToCharArray(), random);
 
