@@ -1,14 +1,11 @@
 using System;
 using System.IO;
-using System.Net;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
-using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Server;
 using VueCliMiddleware;
@@ -17,6 +14,7 @@ using Microsoft.AspNetCore.SpaServices;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Rewrite;
 using Rnwood.Smtp4dev.Data;
+using Rnwood.Smtp4dev.RulesEngine;
 
 namespace Rnwood.Smtp4dev
 {
@@ -34,6 +32,7 @@ namespace Rnwood.Smtp4dev
         {
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
             services.Configure<RelayOptions>(Configuration.GetSection("RelayOptions"));
+            services.Configure<RulesOptions>(Configuration.GetSection("Rules"));
 
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
 
@@ -60,24 +59,27 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<ISmtp4devServer, Smtp4devServer>();
             services.AddSingleton<ImapServer>();
             services.AddScoped<IMessagesRepository, MessagesRepository>();
+            services.AddScoped<IRelayMessageRulesEngine, RelayMessageRulesEngine>();
+            services.AddScoped<IRelayMessageService, RelayMessageService>();
+            services.AddScoped<IRulesRepository, RulesRepository>();
             services.AddSingleton<ITaskQueue, TaskQueue>();
 
-            services.AddSingleton<Func<RelayOptions, SmtpClient>>((relayOptions) =>
+            services.AddSingleton<Func<RelayOptions, SmtpClient>>(relayOptions =>
             {
                 if (!relayOptions.IsEnabled)
                 {
                     return null;
                 }
 
-                SmtpClient result = new SmtpClient();
-                result.Connect(relayOptions.SmtpServer, relayOptions.SmtpPort, relayOptions.TlsMode);
+                var smtpClient = new SmtpClient();
+                smtpClient.Connect(relayOptions.SmtpServer, relayOptions.SmtpPort, relayOptions.TlsMode);
 
-                if (!string.IsNullOrEmpty(relayOptions.Login))
+                if (relayOptions.UseAuthentication)
                 {
-                    result.Authenticate(relayOptions.Login, relayOptions.Password);
+                    smtpClient.Authenticate(relayOptions.Login, relayOptions.Password);
                 }
 
-                return result;
+                return smtpClient;
             });
 
 

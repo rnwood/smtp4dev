@@ -8,8 +8,6 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
-using MimeKit;
-using MailKit.Net.Smtp;
 using System.Reactive.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
@@ -19,14 +17,14 @@ namespace Rnwood.Smtp4dev.Server
     public class Smtp4devServer : ISmtp4devServer
     {
         public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<ServerOptions> serverOptions,
-            IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory, ITaskQueue taskQueue)
+            NotificationsHub notificationsHub, ITaskQueue taskQueue,
+            IRelayMessageService relayMessageService)
         {
             this.notificationsHub = notificationsHub;
             this.serverOptions = serverOptions;
-            this.relayOptions = relayOptions;
             this.serviceScopeFactory = serviceScopeFactory;
-            this.relaySmtpClientFactory = relaySmtpClientFactory;
             this.taskQueue = taskQueue;
+            this.relayMessageService = relayMessageService;
 
             DoCleanup();
 
@@ -82,7 +80,7 @@ namespace Rnwood.Smtp4dev.Server
 
         private X509Certificate2 GetTlsCertificate()
         {
-            System.Security.Cryptography.X509Certificates.X509Certificate2 cert = null;
+            X509Certificate2 cert = null;
 
             Console.WriteLine($"\nTLS mode: {serverOptions.CurrentValue.TlsMode}");
 
@@ -166,7 +164,6 @@ namespace Rnwood.Smtp4dev.Server
 
 
         private readonly IOptionsMonitor<ServerOptions> serverOptions;
-        private readonly IOptionsMonitor<RelayOptions> relayOptions;
         private readonly IDictionary<ISession, Guid> activeSessionsToDbId = new Dictionary<ISession, Guid>();
 
         private static async Task UpdateDbSession(ISession session, Session dbSession)
@@ -264,7 +261,7 @@ namespace Rnwood.Smtp4dev.Server
                 using var scope = serviceScopeFactory.CreateScope();
                 Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
 
-                var relayResult = TryRelayMessage(message, null);
+                var relayResult = Task.Run(() => relayMessageService.TryRelayMessage(message)).Result;
                 message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
 
                 ImapState imapState = dbContext.ImapState.Single();
@@ -290,56 +287,6 @@ namespace Rnwood.Smtp4dev.Server
             }, false).ConfigureAwait(false);
         }
 
-        public RelayResult TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
-        {
-            var result = new RelayResult(message);
-
-            if (!relayOptions.CurrentValue.IsEnabled)
-            {
-                return result;
-            }
-
-            MailboxAddress[] recipients;
-
-            if (overrideRecipients == null)
-            {
-                recipients = message.To
-                    .Split(",")
-                    .Select(r => MailboxAddress.Parse(r))
-                    .Where(r => relayOptions.CurrentValue.AutomaticEmails.Contains(r.Address, StringComparer.OrdinalIgnoreCase))
-                    .ToArray();
-            }
-            else
-            {
-                recipients = overrideRecipients;
-            }
-
-            foreach (MailboxAddress recipient in recipients)
-            {
-                try
-                {
-                    Console.WriteLine($"Relaying message to {recipient}");
-
-                    using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
-                    var apiMsg = new ApiModel.Message(message);
-                    MimeMessage newEmail = apiMsg.MimeMessage;
-                    MailboxAddress sender = MailboxAddress.Parse(
-                        !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)
-                            ? relayOptions.CurrentValue.SenderAddress
-                            : apiMsg.From);
-                    relaySmtpClient.Send(newEmail, sender, new[] { recipient });
-                    result.RelayRecipients.Add(new RelayRecipientResult(){Email = recipient.Address, RelayDate = DateTime.UtcNow});
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Can not relay message to {recipient}: {e.ToString()}");
-                    result.Exceptions[recipient] = e;
-                }
-            }
-
-            return result;
-        }
-
         private void TrimMessages(Smtp4devDbContext dbContext)
         {
             dbContext.Messages.RemoveRange(dbContext.Messages.OrderByDescending(m => m.ReceivedDate)
@@ -355,9 +302,9 @@ namespace Rnwood.Smtp4dev.Server
 
         private readonly ITaskQueue taskQueue;
         private DefaultServer smtpServer;
-        private Func<RelayOptions, SmtpClient> relaySmtpClientFactory;
         private NotificationsHub notificationsHub;
         private readonly IServiceScopeFactory serviceScopeFactory;
+        private readonly IRelayMessageService relayMessageService;
 
         public Exception Exception { get; private set; }
 

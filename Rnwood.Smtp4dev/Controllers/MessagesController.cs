@@ -18,17 +18,17 @@ namespace Rnwood.Smtp4dev.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [UseEtagFilterAttribute]
+    [UseEtagFilter]
     public class MessagesController : Controller
     {
-        public MessagesController(IMessagesRepository messagesRepository, ISmtp4devServer server)
+        public MessagesController(IMessagesRepository messagesRepository, IRelayMessageService relayMessageService)
         {
             this.messagesRepository = messagesRepository;
-            this.server = server;
+            this.relayMessageService = relayMessageService;
         }
 
         private readonly IMessagesRepository messagesRepository;
-        private readonly ISmtp4devServer server;
+        private readonly IRelayMessageService relayMessageService;
 
         [HttpGet]
         public IEnumerable<MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true)
@@ -65,12 +65,12 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         [HttpPost("{id}/relay")]
-        public IActionResult RelayMessage(Guid id, [FromBody] MessageRelayOptions options)
+        public async Task<IActionResult> RelayMessage(Guid id, [FromBody] MessageRelayOptions options)
         {
             var message = GetDbMessage(id);
-            var relayResult = server.TryRelayMessage(message,
+            var relayResult = await relayMessageService.TryRelayMessage(message,
                 options?.OverrideRecipientAddresses?.Length > 0
-                    ? options?.OverrideRecipientAddresses.Select(a => MailboxAddress.Parse(a)).ToArray()
+                    ? options?.OverrideRecipientAddresses.Select(MailboxAddress.Parse).ToArray()
                     : null);
 
             if (relayResult.Exceptions.Any())
@@ -84,7 +84,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 {
                     message.AddRelay(new MessageRelay { SendDate = relay.RelayDate, To = relay.Email });
                 }
-                messagesRepository.DbContext.SaveChanges();
+                await messagesRepository.DbContext.SaveChangesAsync();
             }
             return Ok();
         }

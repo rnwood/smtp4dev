@@ -14,7 +14,14 @@ namespace Rnwood.Smtp4dev.Server
 
         public string[] AutomaticEmails { get; set; } = System.Array.Empty<string>();
 
+        /// <summary>
+        /// Use the Rules engine for Relay decisions or false -> use AutomaticEmails for Relay match
+        /// </summary>
+        public bool UseRulesEngine { get; set; } = false;
+
         public string SenderAddress { get; set; } = "";
+
+        public bool UseAuthentication => !string.IsNullOrEmpty(Login);
 
         public string Login { get; set; } = "";
 

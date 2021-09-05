@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using MimeKit;
@@ -18,15 +19,13 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
     public class MessagesControllerTests : IDisposable
     {
         private readonly MessagesController controller;
-        private readonly IMessagesRepository messagesRepository;
-        private readonly ISmtp4devServer server;
+        private readonly IMessagesRepository messagesRepository = Substitute.For<IMessagesRepository>();
+        private readonly IRelayMessageService relayMessageService = Substitute.For<IRelayMessageService>();
         private readonly Smtp4devDbContext context;
 
         public MessagesControllerTests()
         {
-            messagesRepository = Substitute.For<IMessagesRepository>();
-            server = Substitute.For<ISmtp4devServer>();
-            controller = new MessagesController(messagesRepository, server);
+            controller = new MessagesController(messagesRepository, relayMessageService);
             var sqlLiteForTesting = new SqliteInMemory();
             context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
             InitRepo();
@@ -36,20 +35,21 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         }
 
         [Fact]
-        public void CanRelayMessageAndPersistResult()
+        public async Task CanRelayMessageAndPersistResult()
         {
             // setup
             var messageId = GetData().First().Id;
 
-            server.TryRelayMessage(Arg.Any<DbModel.Message>(), Arg.Any<MailboxAddress[]>()).Returns(new RelayResult(GetData().First())
-            {
-                RelayRecipients = new List<RelayRecipientResult>()
-                    { new RelayRecipientResult { Email = "relay@blah.com", RelayDate = DateTime.UtcNow } }
-            });
+            relayMessageService.TryRelayMessage(Arg.Any<Message>(), Arg.Any<MailboxAddress[]>()).Returns(await Task.FromResult(
+                new RelayResult(GetData().First())
+                {
+                    RelayRecipients = new List<RelayRecipientResult>
+                        { new RelayRecipientResult { Email = "relay@blah.com", RelayDate = DateTime.UtcNow } }
+                }));
 
             // act
-            var result = controller.RelayMessage(messageId,
-                new MessageRelayOptions() { OverrideRecipientAddresses = new[] { "test@foo.bar" } });
+            var result = await controller.RelayMessage(messageId,
+                new MessageRelayOptions { OverrideRecipientAddresses = new[] { "test@foo.bar" } });
 
             // expect ok result
             result.Should().BeOfType<OkResult>();
@@ -61,7 +61,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
         private IEnumerable<Message> GetData()
         {
-            return new List<Message>() { new Message() { Id = new Guid("7476cf62-03e4-4d58-93ac-1cd143ba8653") } };
+            return new List<Message> { new Message { Id = new Guid("7476cf62-03e4-4d58-93ac-1cd143ba8653") } };
         }
 
         private void InitRepo()

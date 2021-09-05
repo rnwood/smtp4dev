@@ -7,12 +7,20 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using NSubstitute;
 using Xunit;
 
 namespace Rnwood.Smtp4dev.Tests
 {
     public class MessagesControllerTests
     {
+        private IRelayMessageService relayMessageService;
+
+        public MessagesControllerTests()
+        {
+            relayMessageService = Substitute.For<IRelayMessageService>();
+        }
+
         [Fact]
         public async Task GetMessage_ValidMime()
         {
@@ -20,7 +28,7 @@ namespace Rnwood.Smtp4dev.Tests
             DbModel.Message testMessage1 = await GetTestMessage1();
 
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
-            MessagesController messagesController = new MessagesController(messagesRepository, null);
+            MessagesController messagesController = new MessagesController(messagesRepository, relayMessageService);
 
             ApiModel.Message result = messagesController.GetMessage(testMessage1.Id);
 
@@ -46,7 +54,6 @@ namespace Rnwood.Smtp4dev.Tests
 
             //All parts have a unique Id
             Assert.Equal(allParts.Count, allParts.Select(p => p.Id).Distinct().Count());
-
         }
 
         private static readonly string testMessage1File1Content = "111";
@@ -63,8 +70,10 @@ namespace Rnwood.Smtp4dev.Tests
             BodyBuilder bodyBuilder = new BodyBuilder();
             bodyBuilder.HtmlBody = "<html>Hi</html>";
             bodyBuilder.TextBody = "Hi";
-            bodyBuilder.Attachments.Add("file1", new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testMessage1File1Content)), new ContentType("text", "plain")).ContentId = "file1";
-            bodyBuilder.Attachments.Add("file2", new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testMessage1File2Content)), new ContentType("text", "plain"));
+            bodyBuilder.Attachments.Add("file1", new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testMessage1File1Content)),
+                new ContentType("text", "plain")).ContentId = "file1";
+            bodyBuilder.Attachments.Add("file2", new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testMessage1File2Content)),
+                new ContentType("text", "plain"));
 
             mimeMessage.Body = bodyBuilder.ToMessageBody();
 
@@ -75,6 +84,7 @@ namespace Rnwood.Smtp4dev.Tests
             {
                 messageData.Write(Encoding.UTF8.GetBytes(mimeMessage.ToString()));
             }
+
             IMessage message = await memoryMessageBuilder.ToMessage();
 
             var dbMessage = await new MessageConverter().ConvertAsync(message);
@@ -86,7 +96,7 @@ namespace Rnwood.Smtp4dev.Tests
         {
             DbModel.Message testMessage1 = await GetTestMessage1();
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
-            MessagesController messagesController = new MessagesController(messagesRepository, null);
+            MessagesController messagesController = new MessagesController(messagesRepository, relayMessageService);
 
             var parts = messagesController.GetMessage(testMessage1.Id).Parts.Flatten(p => p.ChildParts).SelectMany(p => p.Attachments);
 
@@ -98,5 +108,4 @@ namespace Rnwood.Smtp4dev.Tests
             Assert.Equal(testMessage1File2Content, stringResult);
         }
     }
-
 }

@@ -1,0 +1,21 @@
+﻿{
+  "WorkflowName": "RelayMessages",
+  "Rules": [
+    {
+      "RuleName": "RelayMessage",
+      "Properties": {
+        "RelayMessageProps": {
+          "RelayAdditionalAddress": ["alternativeEmail@mailinator.com"],
+          "RelayToOriginalAddress": false,
+          "RelayToAdditionalAddress": true
+        }
+      },
+      "ErrorMessage": "Error",
+      "Enabled": true,
+      "ErrorType": "Warning",
+      "RuleExpressionType": "LambdaExpression",
+      "Expression": "Helpers.RegexMatch(input1.From,\".*gmail.com\")",
+      "SuccessEvent": "Success"
+    }
+  ]
+}
