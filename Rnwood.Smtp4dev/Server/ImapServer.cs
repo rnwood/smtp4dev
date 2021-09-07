@@ -102,7 +102,7 @@ namespace Rnwood.Smtp4dev.Server
             else
             {
                 int port = ((IPEndPoint)imapServer.ListeningPoints[0].Socket.LocalEndPoint).Port;
-                log.Information("IMAP Server is listening on {port}", port);
+                log.Information("IMAP Server is listening on port {port}", port);
             }
         }
 
