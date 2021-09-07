@@ -127,9 +127,6 @@ namespace Rnwood.Smtp4dev
                     }
                 });
 
-
-
-
                 using (IServiceScope scope = subdir.ApplicationServices.CreateScope())
                 {
                     using (Smtp4devDbContext context = scope.ServiceProvider.GetService<Smtp4devDbContext>())
