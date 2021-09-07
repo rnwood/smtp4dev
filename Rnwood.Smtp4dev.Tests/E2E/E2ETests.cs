@@ -107,6 +107,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         {
                             imapPortNumber = int.Parse(Regex.Replace(newLine, @"IMAP Server is listening on port (\d+).*", "$1"));
                         }
+
+                        if (newLine.StartsWith("Application started. Press Ctrl+C to shut down."))
+                        {
+                            throw new Exception($@"Startup completed but did not catch variables from startup output:
+                            baseUrl:{baseUrl}
+                            smtpPortNumber: {smtpPortNumber}
+                            imapPortNumber: {imapPortNumber}");
+                        }
                     }
 
                     Assert.False(serverProcess.Process.HasExited, "Server process failed");
