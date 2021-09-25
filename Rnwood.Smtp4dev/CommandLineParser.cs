@@ -37,6 +37,7 @@ namespace Rnwood.Smtp4dev
                 { "relaypassword=", "The password for the SMTP server used to relay messages", data => map.Add(data, x=> x.RelayOptions.Password) },
                 { "relaytlsmode=",  "Sets the TLS mode when connecting to relay SMTP server. See: http://www.mimekit.net/docs/html/T_MailKit_Security_SecureSocketOptions.htm", data => map.Add(data, x=> x.RelayOptions.TlsMode) },
                 { "imapport=", "Specifies the port the IMAP server will listen on - allows standard email clients to view/retrieve messages", data => map.Add(data, x=> x.ServerOptions.ImapPort) },
+                { "imapserverenabled=", "Boolean to determine if IMAP server should start, default is true", data => map.Add(data, x=>x.ServerOptions.ImapServerEnabled)},
                 { "nousersettings", "Skip loading of appsetttings.json file in %APPDATA%", data => map.Add((data !=null).ToString(), x=> x.NoUserSettings) },
                 { "debugsettings", "Prints out most settings values on startup", data => map.Add((data !=null).ToString(), x=> x.DebugSettings) },
                 { "recreatedb", "Recreates the DB on startup if it already exists", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.RecreateDb) }
