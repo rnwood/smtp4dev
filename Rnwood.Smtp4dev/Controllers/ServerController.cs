@@ -1,18 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Rnwood.Smtp4dev.DbModel;
-using Rnwood.Smtp4dev.Hubs;
-using Microsoft.EntityFrameworkCore;
-using System.IO;
-using MimeKit;
-using HtmlAgilityPack;
 using Rnwood.Smtp4dev.Server;
 using Microsoft.Extensions.Options;
 using System.Text.Json;
 using MailKit.Security;
+using Microsoft.Extensions.Hosting;
+using Rnwood.Smtp4dev.Service;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -20,12 +13,14 @@ namespace Rnwood.Smtp4dev.Controllers
     [ApiController]
     public class ServerController : Controller
     {
-        public ServerController(ISmtp4devServer server, ImapServer imapServer, IOptionsMonitor<ServerOptions> serverOptions, IOptionsMonitor<RelayOptions> relayOptions)
+        public ServerController(ISmtp4devServer server, ImapServer imapServer, IOptionsMonitor<ServerOptions> serverOptions,
+            IOptionsMonitor<RelayOptions> relayOptions, IHostingEnvironmentHelper hostingEnvironmentHelper)
         {
             this.server = server;
             this.imapServer = imapServer;
             this.serverOptions = serverOptions;
             this.relayOptions = relayOptions;
+            this.hostingEnvironmentHelper = hostingEnvironmentHelper;
         }
 
 
@@ -33,6 +28,7 @@ namespace Rnwood.Smtp4dev.Controllers
         private ImapServer imapServer;
         private IOptionsMonitor<ServerOptions> serverOptions;
         private IOptionsMonitor<RelayOptions> relayOptions;
+        private readonly IHostingEnvironmentHelper hostingEnvironmentHelper;
 
         [HttpGet]
         public ApiModel.Server GetServer()
@@ -99,10 +95,9 @@ namespace Rnwood.Smtp4dev.Controllers
                 this.imapServer.TryStart();
             }
 
-            string dataDir = Path.Join(Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData), "smtp4dev");
-            string settingsFile = Path.Join(dataDir, "appsettings.json");
-            System.IO.File.WriteAllText(settingsFile, JsonSerializer.Serialize(new { ServerOptions = newSettings, RelayOptions = newRelaySettings }, new JsonSerializerOptions { WriteIndented = true }));
+            System.IO.File.WriteAllText(hostingEnvironmentHelper.GetSettingsFilePath(),
+                JsonSerializer.Serialize(new { ServerOptions = newSettings, RelayOptions = newRelaySettings },
+                    new JsonSerializerOptions { WriteIndented = true }));
         }
-
     }
 }
