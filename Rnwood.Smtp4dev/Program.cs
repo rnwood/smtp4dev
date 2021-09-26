@@ -93,7 +93,7 @@ namespace Rnwood.Smtp4dev
 
             var contentRoot = GetContentRoot();
             var dataDir = GetOrCreateDataDir(cmdLineOptions);
-            Console.WriteLine($"DataDir: {dataDir}");
+            log.Information("DataDir: {dataDir}", dataDir);
             Directory.SetCurrentDirectory(dataDir);
 
             IWebHostBuilder builder = WebHost
