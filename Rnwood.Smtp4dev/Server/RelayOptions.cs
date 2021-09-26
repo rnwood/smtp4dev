@@ -1,14 +1,24 @@
-﻿using MailKit.Security;
+﻿using Ardalis.GuardClauses;
+using MailKit.Security;
 
 namespace Rnwood.Smtp4dev.Server
 {
     public class RelayOptions
     {
+        private int smtpPort = 25;
         public bool IsEnabled => SmtpServer != string.Empty;
 
         public string SmtpServer { get; set; } = string.Empty;
 
-        public int SmtpPort { get; set; } = 25;
+        public int SmtpPort
+        {
+            get => smtpPort;
+            set
+            {
+                Guard.Against.OutOfRange(value, nameof(SmtpPort), 1, 65535);
+                smtpPort = value;
+            }
+        }
 
         public SecureSocketOptions TlsMode { get; set; } = SecureSocketOptions.Auto;
 

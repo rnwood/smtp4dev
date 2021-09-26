@@ -20,14 +20,12 @@ namespace Rnwood.Smtp4dev.Server
         private readonly ILogger log = Log.ForContext<Smtp4devServer>();
 
         public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<ServerOptions> serverOptions,
-            NotificationsHub notificationsHub, ITaskQueue taskQueue,
-            IRelayMessageService relayMessageService)
+            NotificationsHub notificationsHub, ITaskQueue taskQueue)
         {
             this.notificationsHub = notificationsHub;
             this.serverOptions = serverOptions;
             this.serviceScopeFactory = serviceScopeFactory;
             this.taskQueue = taskQueue;
-            this.relayMessageService = relayMessageService;
 
             DoCleanup();
 
@@ -83,7 +81,7 @@ namespace Rnwood.Smtp4dev.Server
 
         private X509Certificate2 GetTlsCertificate()
         {
-            System.Security.Cryptography.X509Certificates.X509Certificate2 cert = null;
+            X509Certificate2 cert = null;
 
             log.Information("TLS mode: {TLSMode}",serverOptions.CurrentValue.TlsMode);
 
@@ -257,13 +255,13 @@ namespace Rnwood.Smtp4dev.Server
             log.Information("Message received. Client address {clientAddress}. From {messageFrom}. To {messageTo}.", e.Message.Session.ClientAddress, e.Message.From, message.To);
             message.IsUnread = true;
 
-
             await taskQueue.QueueTask(() =>
             {
                 log.Information("Processing received message");
                 using var scope = serviceScopeFactory.CreateScope();
                 Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
 
+                IRelayMessageService relayMessageService = scope.ServiceProvider.GetService<IRelayMessageService>();
                 var relayResult = Task.Run(() => relayMessageService.TryRelayMessage(message)).Result;
                 message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
 
@@ -302,12 +300,10 @@ namespace Rnwood.Smtp4dev.Server
                 .Skip(serverOptions.CurrentValue.NumberOfSessionsToKeep));
         }
 
-
         private readonly ITaskQueue taskQueue;
         private DefaultServer smtpServer;
-        private NotificationsHub notificationsHub;
+        private readonly NotificationsHub notificationsHub;
         private readonly IServiceScopeFactory serviceScopeFactory;
-        private readonly IRelayMessageService relayMessageService;
 
         public Exception Exception { get; private set; }
 

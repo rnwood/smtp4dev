@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MailKit.Net.Smtp;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using MimeKit;
 using Newtonsoft.Json.Linq;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.RulesEngine;
+using Serilog;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -17,15 +17,14 @@ namespace Rnwood.Smtp4dev.Server
         private readonly Func<RelayOptions, SmtpClient> relaySmtpClientFactory;
         private readonly IOptionsMonitor<RelayOptions> relayOptionsMonitor;
         private readonly IRelayMessageRulesEngine relayMessageRulesEngine;
-        private readonly ILogger<RelayMessageService> logger;
+        private readonly ILogger logger = Log.Logger.ForContext<RelayMessageService>();
 
         public RelayMessageService(Func<RelayOptions, SmtpClient> relaySmtpClientFactory, IOptionsMonitor<RelayOptions> relayOptionsMonitor,
-            IRelayMessageRulesEngine relayMessageRulesEngine, ILogger<RelayMessageService> logger)
+            IRelayMessageRulesEngine relayMessageRulesEngine)
         {
             this.relaySmtpClientFactory = relaySmtpClientFactory;
             this.relayOptionsMonitor = relayOptionsMonitor;
             this.relayMessageRulesEngine = relayMessageRulesEngine;
-            this.logger = logger;
         }
 
         private RelayOptions RelayOptions => relayOptionsMonitor.CurrentValue;
@@ -55,21 +54,21 @@ namespace Rnwood.Smtp4dev.Server
 
         private List<MailboxAddress> GetRecipientsUsingRulesEngine(Message message)
         {
-            var resultList = new List<MailboxAddress>();
+            var resultList = new HashSet<MailboxAddress>();
             var ruleResults = Task.Run(() => relayMessageRulesEngine.Execute(message)).Result;
             foreach (var result in ruleResults.Where(r => r.IsSuccess))
             {
                 var jObject = result.Rule.Properties[nameof(RelayMessageProps)] as JObject;
                 if (jObject is null)
                 {
-                    logger.LogWarning("Unable to parse RelayMessageProps for Rule, no relay will occur");
+                    logger.Warning("Unable to parse RelayMessageProps for Rule, no relay will occur");
                     continue;
                 }
 
                 var relayMessageProps = jObject.ToObject<RelayMessageProps>();
                 if (relayMessageProps == null)
                 {
-                    logger.LogWarning("Unable to deserialize {PropType}, no relay will occur", nameof(RelayMessageProps));
+                    logger.Warning("Unable to deserialize {PropType}, no relay will occur", nameof(RelayMessageProps));
                     continue;
                 }
 
@@ -84,8 +83,8 @@ namespace Rnwood.Smtp4dev.Server
                 }
             }
 
-            logger.LogDebug("Relaying Message to {RelayAddress}", string.Join(',', resultList.Select(x => x.Address)));
-            return resultList;
+            logger.Debug("Relaying message to {RelayAddress}", string.Join(',', resultList.Select(x => x.Address)));
+            return resultList.ToList();
         }
 
         private List<MailboxAddress> GetRecipientsViaAutomaticEmails(Message message)
@@ -100,15 +99,14 @@ namespace Rnwood.Smtp4dev.Server
         private async Task<RelayResult> DispatchEmail(Message message, IEnumerable<MailboxAddress> recipients)
         {
             var result = new RelayResult(message);
-            
+
             using var relaySmtpClient = relaySmtpClientFactory(RelayOptions);
+
             foreach (var recipient in recipients)
             {
                 try
                 {
-                    Console.WriteLine($"Relaying message to {recipient}");
-
-                    
+                    logger.Information("Relaying message to {recipient}", recipient);
                     var apiMsg = new ApiModel.Message(message);
                     var newEmail = apiMsg.MimeMessage;
                     var sender = MailboxAddress.Parse(
@@ -120,10 +118,11 @@ namespace Rnwood.Smtp4dev.Server
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine($"Can not relay message to {recipient}: {e}");
+                    logger.Error(e, "Error relaying message to {recipient}", recipient);
                     result.Exceptions[recipient] = e;
                 }
             }
+
             if (relaySmtpClient.IsConnected)
                 await relaySmtpClient.DisconnectAsync(true);
 
