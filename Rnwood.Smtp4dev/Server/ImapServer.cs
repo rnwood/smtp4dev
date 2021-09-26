@@ -75,7 +75,13 @@ namespace Rnwood.Smtp4dev.Server
 
 
             var errorTcs = new TaskCompletionSource<Error_EventArgs>();
-            imapServer.Error += (s, ea) => errorTcs.SetResult(ea);
+            imapServer.Error += (s, ea) =>
+            {
+                if (!errorTcs.Task.IsCompleted)
+                {
+                    errorTcs.SetResult(ea);
+                }
+            };
             var startedTcs = new TaskCompletionSource<EventArgs>();
             imapServer.Started += (s, ea) => startedTcs.SetResult(ea);
 
