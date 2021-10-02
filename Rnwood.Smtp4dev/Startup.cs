@@ -36,6 +36,7 @@ namespace Rnwood.Smtp4dev
         {
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
             services.Configure<RelayOptions>(Configuration.GetSection("RelayOptions"));
+            services.Configure<ClientOptions>(Configuration.GetSection("ClientOptions"));
 
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
 
