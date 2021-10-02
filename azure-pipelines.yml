@@ -26,7 +26,7 @@ variables:
 
   docker_repo: 'rnwood/smtp4dev'
   docker_registry: 'dockerhub-rnwood'
-  netcoresdk_version: '3.1.102'
+  netcoresdk_version: '3.1.413'
 
 stages:
 - stage: Init
