@@ -8,16 +8,20 @@
     "moduleResolution": "node",
     "experimentalDecorators": true,
     "esModuleInterop": true,
+    "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "baseUrl": ".",
     "types": [
-      "webpack-env"
+      "webpack-env",
+      "jest",
+      "@types/node"
     ],
     "paths": {
       "@/*": [
         "src/*"
-      ]
+      ],
+      "~/*": ["./*"]
     },
     "lib": [
       "esnext",
@@ -36,6 +40,6 @@
     "src/babel.config.js"
   ],
   "exclude": [
-    "node_modules",
+    "node_modules"
   ]
 }

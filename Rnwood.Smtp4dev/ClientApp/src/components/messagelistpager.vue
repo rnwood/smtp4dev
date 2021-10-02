@@ -2,15 +2,15 @@
   <el-row>
     <el-col :span="16">
       <el-pagination
-          background
-          layout="prev, pager, next"
-          :page-size="pageSize"
-          :page-count="pageCount"
-          :pager-count="5"
-          :current-page="page"
-          v-on:current-change="onCurrentPageChange"
-          v-on:size-change="onPageSizeChange"
-          :total="totalItems"
+        background
+        layout="prev, pager, next"
+        :page-size="pageSize"
+        :page-count="pageCount"
+        :pager-count="5"
+        :current-page="page"
+        v-on:current-change="onCurrentPageChange"
+        v-on:size-change="onPageSizeChange"
+        :total="totalItems"
       >
       </el-pagination>
     </el-col>
@@ -19,23 +19,23 @@
     </el-col>
     <el-col :span="4">
       <el-input
-          placeholder="Page size"
-          v-model.number="pageSize"
-          min="1"
-          type="number"
-          @change="onPageSizeChange"
-          size="small"
+        placeholder="Page size"
+        v-model.number="pageSize"
+        min="1"
+        type="number"
+        @change="onPageSizeChange"
+        size="small"
       ></el-input>
     </el-col>
   </el-row>
 </template>
 
 <script lang="ts">
-
-import {Component, Emit, Prop, Watch} from "vue-property-decorator";
+import { Component, Emit, Prop, Watch } from "vue-property-decorator";
 import Vue from "vue";
 import PagedResult from "@/ApiClient/PagedResult";
 import ClientController from "@/ApiClient/ClientController";
+
 
 @Component({})
 export default class MessageListPager extends Vue {
@@ -57,8 +57,8 @@ export default class MessageListPager extends Vue {
 
   @Watch("pagedData")
   async onPagedDataChange(
-      value: PagedResult<any> | null,
-      oldValue: PagedResult<any> | null
+    value: PagedResult<any> | null,
+    oldValue: PagedResult<any> | null
   ) {
     if (value) {
       await this.updatePagination(value);
