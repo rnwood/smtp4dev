@@ -28,6 +28,7 @@ namespace Rnwood.Smtp4dev
                 { "sessionstokeep=", "Specifies the number of sessions to keep", data => map.Add(data, x=> x.ServerOptions.NumberOfSessionsToKeep) },
                 { "tlsmode=", "Specifies the TLS mode to use. None=Off. StartTls=On demand if client supports STARTTLS. ImplicitTls=TLS as soon as connection is established.", data => map.Add(data, x=> x.ServerOptions.TlsMode) },
                 { "tlscertificate=", "Specifies the TLS certificate to use if TLS is enabled/requested. Specify \"\" to use an auto-generated self-signed certificate (then see console output on first startup)", data => map.Add(data, x=> x.ServerOptions.TlsCertificate) },
+                { "tlscertificateprivatekey=", "Specifies the TLS certificate private key. Ignored if tlscertificate is blank", data => map.Add(data, x=> x.ServerOptions.TlsCertificatePrivateKey) },
                 { "basepath=", "Specifies the virtual path from web server root where SMTP4DEV web interface will be hosted. e.g. \"/\" or \"/smtp4dev\"", data => map.Add(data, x => x.ServerOptions.BasePath) },
                 { "relaysmtpserver=", "Sets the name of the SMTP server that will be used to relay messages or \"\" if messages relay should not be allowed", data => map.Add(data, x=> x.RelayOptions.SmtpServer) },
                 { "relaysmtpport=", "Sets the port number for the SMTP server used to relay messages", data => map.Add(data, x=> x.RelayOptions.SmtpPort) },
