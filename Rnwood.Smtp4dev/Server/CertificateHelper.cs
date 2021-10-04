@@ -40,6 +40,7 @@ namespace Rnwood.Smtp4dev.Server
         {
             const string dashes = "-----";
             const string newLine = "\r\n";
+            pem = NormalizeLineEndings(pem);
             var index0 = pem.IndexOf(dashes, StringComparison.Ordinal);
             var index1 = pem.IndexOf(newLine, index0 + dashes.Length, StringComparison.Ordinal) + newLine.Length;
             var index2 = pem.IndexOf(dashes, index1, StringComparison.Ordinal) - newLine.Length; //TODO: /n
