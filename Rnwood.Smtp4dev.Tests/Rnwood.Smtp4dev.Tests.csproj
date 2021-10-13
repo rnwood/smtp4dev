@@ -16,7 +16,7 @@
     <PackageReference Include="NSubstitute" Version="4.2.2" />
     <PackageReference Include="ReflectionMagic" Version="4.1.0" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-    <PackageReference Include="Selenium.Support" Version="3.141.0" />
+    <PackageReference Include="Selenium.Support" Version="4.0.0" />
     <PackageReference Include="Selenium.WebDriver" Version="3.141.0" />
     <PackageReference Include="Selenium.WebDriver.ChromeDriver" Version="92.0.4515.10700" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="5.0.0" />
