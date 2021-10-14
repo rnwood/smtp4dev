@@ -22,6 +22,8 @@ namespace Rnwood.Smtp4dev.Server
 
         public int? ImapPort { get; set; } = 143;
 
+        public bool ImapServerEnabled { get; set; } = true;
+
         public bool RecreateDb { get; set; }
     }
 }
