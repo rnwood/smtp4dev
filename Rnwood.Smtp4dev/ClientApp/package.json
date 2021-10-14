@@ -16,7 +16,7 @@
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@typescript-eslint/eslint-plugin": "^4.31.2",
     "@typescript-eslint/parser": "^4.29.3",
-    "@vue/cli-plugin-babel": "^4.5.13",
+    "@vue/cli-plugin-babel": "^4.5.14",
     "@vue/cli-plugin-eslint": "^4.5.13",
     "@vue/cli-plugin-typescript": "^4.5.13",
     "@vue/cli-service": "^4.5.13",
