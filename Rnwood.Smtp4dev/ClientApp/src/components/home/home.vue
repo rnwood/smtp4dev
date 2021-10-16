@@ -6,6 +6,9 @@
                     <img height="35" src="logo.png" alt="smtp4dev" />
                 </a>
             </h1>
+            <div style="padding-left:10px; padding-top:5px; margin-left:10px; width:30em;display:inline-block">
+                <VersionInfo></VersionInfo>
+            </div>
             <el-button style="float:right; font-size: 1.7em; padding: 6px; margin: 0 3px" circle icon="el-icon-setting" title="Settings" @click="settingsVisible = true"></el-button>&nbsp;
             <hubconnstatus style="float:right" :connection="connection"></hubconnstatus>
             <serverstatus style="float:right" v-show="connection && connection.connected" :connection="connection"></serverstatus>
@@ -60,6 +63,7 @@
     import MessageView from "@/components/messageview.vue";
     import SessionList from "@/components/sessionlist.vue";
     import SessionView from "@/components/sessionview.vue";
+    import VersionInfo from "@/components/versionInfo.vue";
     import HubConnectionManager from "@/HubConnectionManager";
     import ServerStatus from "@/components/serverstatus.vue";
     import SettingsDialog from "@/components/settingsdialog.vue";
@@ -77,7 +81,8 @@
             serverstatus: ServerStatus,
             settingsdialog: SettingsDialog,
             splitpanes: Splitpanes,
-            pane: Pane
+            pane: Pane,
+            VersionInfo
         }
     })
     export default class Home extends Vue {
