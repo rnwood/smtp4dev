@@ -63,20 +63,20 @@
       <el-table-column
         property="receivedDate"
         label="Received"
-        width="180"
+        width="160"
         sortable="custom"
         :formatter="formatDate"
       ></el-table-column>
       <el-table-column
         property="from"
         label="From"
-        width="120"
+        width="140"
         sortable="custom"
       ></el-table-column>
       <el-table-column
         property="to"
         label="To"
-        width="120"
+        width="180"
         sortable="custom"
       ></el-table-column>
       <el-table-column

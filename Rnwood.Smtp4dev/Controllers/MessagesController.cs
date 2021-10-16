@@ -33,12 +33,10 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpGet]
         public ApiModel.PagedResult<MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true, int page = 1, int pageSize=5)
         {
-            var skip = (page - 1) * pageSize;
-            var x = messagesRepository.GetMessages(false).Include(m => m.Relays)
+            return messagesRepository.GetMessages(false).Include(m => m.Relays)
                 .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""))
                 .Select(m => new MessageSummary(m))
                 .GetPaged(page, pageSize);
-            return x;
         }
 
         private Message GetDbMessage(Guid id)
