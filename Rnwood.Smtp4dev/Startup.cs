@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.SpaServices;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Rewrite;
 using Rnwood.Smtp4dev.Data;
+using Rnwood.Smtp4dev.Service;
 using Serilog;
 
 namespace Rnwood.Smtp4dev
@@ -61,6 +62,7 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<ISmtp4devServer, Smtp4devServer>();
             services.AddSingleton<ImapServer>();
             services.AddScoped<IMessagesRepository, MessagesRepository>();
+            services.AddScoped<IHostingEnvironmentHelper, HostingEnvironmentHelper>();
             services.AddSingleton<ITaskQueue, TaskQueue>();
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>((relayOptions) =>

@@ -34,7 +34,7 @@ namespace Rnwood.Smtp4dev
                 string version = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
                 log.Information("smtp4dev version {version}",version);
                 log.Information("https://github.com/rnwood/smtp4dev");
-                log.Information(".NET Core runtime version: {netcoreruntime}",Directory.GetParent(typeof(object).Assembly.Location).Name);
+                log.Information(".NET Core runtime version: {netcoreruntime}", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
 
 
                 if (!Debugger.IsAttached && args.Contains("--service"))
