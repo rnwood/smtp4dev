@@ -17,6 +17,7 @@ namespace Rnwood.Smtp4dev.Server
         public TlsMode TlsMode { get; set; } = TlsMode.None;
 
         public string TlsCertificate { get; set; }
+        public string TlsCertificatePrivateKey { get; set; }
 
         public string HostName { get; set; } = Dns.GetHostName();
 

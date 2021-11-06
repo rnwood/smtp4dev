@@ -6,6 +6,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Resources\smtp4dev.crt" />
+    <None Remove="Resources\smtp4dev.key" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Resources\smtp4dev.crt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\smtp4dev.key">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\Rnwood.Smtp4dev\Rnwood.Smtp4dev.csproj" />
   </ItemGroup>
 
