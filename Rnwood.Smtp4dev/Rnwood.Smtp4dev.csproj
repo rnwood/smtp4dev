@@ -20,7 +20,7 @@
 	</PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Ardalis.GuardClauses" Version="3.2.0" />
+		<PackageReference Include="Ardalis.GuardClauses" Version="3.3.0" />
 		<PackageReference Include="CommandLiners.MonoOptions" Version="1.0.36" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.37" />
 		<PackageReference Include="MailKit" Version="2.13.0" />
@@ -35,7 +35,7 @@
 		</PackageReference>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.8" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.8" />
-		<PackageReference Include="MimeKit" Version="2.13.0" />
+		<PackageReference Include="MimeKit" Version="2.15.1" />
 		<PackageReference Include="Mono.Options" Version="6.12.0.148" />
 		<PackageReference Include="Rnwood.LumiSoft.Net" Version="1.0.0" />
 		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0648" />
