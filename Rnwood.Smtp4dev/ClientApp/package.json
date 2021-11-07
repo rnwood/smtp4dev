@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
+    "postinstall": "patch-package",
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "build:dev": "vue-cli-service build --mode development",
@@ -32,6 +33,7 @@
     "eslint-plugin-vue": "^7.17.0",
     "locale-index-of": "^2.0.0",
     "moment": "^2.29.1",
+    "patch-package": "^6.4.7",
     "sass": "^1.43.4",
     "sass-loader": "^10.1.0",
     "srcdoc-polyfill": "^1.0.0",
