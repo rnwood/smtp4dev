@@ -34,7 +34,7 @@
     "locale-index-of": "^2.0.0",
     "moment": "^2.29.3",
     "patch-package": "^6.4.7",
-    "sass": "^1.43.5",
+    "sass": "^1.50.1",
     "sass-loader": "^10.1.0",
     "srcdoc-polyfill": "^1.0.0",
     "ts-debounce": "^3.0.0",
