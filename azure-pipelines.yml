@@ -18,15 +18,15 @@ variables:
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
     isreleasebuild: ${{ true }}
     tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
-    docker_tags: 'v3 v3.1 latest'
+    docker_tags: 'v3 v3.2 latest'
 
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
-    civersion: '3.1.4'
+    civersion: '3.2.0'
     tag: $[ format('$(civersion)-ci{0:yyyyMMdd}{1}', pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
 
   docker_repo: 'rnwood/smtp4dev'
   docker_registry: 'dockerhub-rnwood'
-  netcoresdk_version: '3.1.413'
+  netcoresdk_version: '6.0.300'
 
 stages:
 - stage: Init
