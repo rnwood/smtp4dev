@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/core/sdk:3.1.102 AS build
+FROM mcr.microsoft.com/dotnet/core/sdk:6.0 AS build
 WORKDIR /app
 
 # replace shell with bash so we can source files
@@ -43,7 +43,7 @@ FROM build AS publish
 WORKDIR /app/Rnwood.Smtp4dev
 RUN dotnet publish --no-restore -c Release -o out -p:Version=$VERSION
 
-FROM --platform=linux/arm64 mcr.microsoft.com/dotnet/core/aspnet:3.1.2 AS runtime
+FROM --platform=linux/arm64 mcr.microsoft.com/dotnet/core/aspnet:6.0.5 AS runtime
 COPY --from=publish /app/Rnwood.Smtp4dev/out /app
 VOLUME ["/smtp4dev"]
 WORKDIR /
