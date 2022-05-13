@@ -21,7 +21,7 @@ variables:
     docker_tags: 'v3 v3.1 latest'
 
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
-    civersion: '3.1.3'
+    civersion: '3.1.4'
     tag: $[ format('$(civersion)-ci{0:yyyyMMdd}{1}', pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
 
   docker_repo: 'rnwood/smtp4dev'
