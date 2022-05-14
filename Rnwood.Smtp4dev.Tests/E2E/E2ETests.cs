@@ -2,12 +2,10 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -39,7 +37,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
         protected void RunE2ETest(Action<E2ETestContext> test, E2ETestOptions options = null)
         {
-            options = options ?? new E2ETestOptions();
+            options ??= new E2ETestOptions();
 
             string workingDir = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_WORKINGDIR");
             string mainModule = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_BINARY");
@@ -53,9 +51,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             {
                 //.NETCoreapp,Version=v3.1
                 string framework = typeof(Program)
-    .Assembly
-    .GetCustomAttribute<TargetFrameworkAttribute>()?
-    .FrameworkName;
+                    .Assembly
+                    .GetCustomAttribute<TargetFrameworkAttribute>()?
+                    .FrameworkName;
 
                 //netcoreapp3.1
                 string folder = framework.TrimStart('.').Replace("CoreApp,Version=v", "").ToLower();
@@ -70,13 +68,18 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             File.Delete(dbPath);
 
 
-            List<string> args = new List<string> { mainModule, "--debugsettings", options.InMemoryDB ? "--db=" : $"--db={dbPath}", "--nousersettings", "--urls=http://*:0", "--imapport=0", "--smtpport=0", "--tlsmode=StartTls" };
+            List<string> args = new List<string>
+            {
+                mainModule, "--debugsettings", options.InMemoryDB ? "--db=" : $"--db={dbPath}", "--nousersettings", "--urls=http://*:0",
+                "--imapport=0", "--smtpport=0", "--tlsmode=StartTls"
+            };
             if (!string.IsNullOrEmpty(options.BasePath))
             {
                 args.Add($"--basepath={options.BasePath}");
             }
 
-            using (Command serverProcess = Command.Run("dotnet", args, o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
+            using (Command serverProcess = Command.Run("dotnet", args,
+                       o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
             {
                 try
                 {
@@ -130,14 +133,12 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     outputThread.Start();
 
 
-
                     test(new E2ETestContext
                     {
                         BaseUrl = baseUrl,
                         SmtpPortNumber = smtpPortNumber.Value,
                         ImapPortNumber = imapPortNumber.Value
-                    }) ;
-
+                    });
                 }
                 finally
                 {
@@ -150,13 +151,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                             outputThread.Abort();
                         }
                     }
-
-
                 }
             }
-
         }
-
     }
 }
-
