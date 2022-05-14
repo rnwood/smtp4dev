@@ -20,7 +20,7 @@
     "@testing-library/jest-dom": "^5.15.0",
     "@testing-library/vue": "^5.8.2",
     "@types/jest": "^27.0.2",
-    "@typescript-eslint/eslint-plugin": "^4.31.2",
+    "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.31.2",
     "@vue/cli-plugin-babel": "^4.5.15",
     "@vue/cli-plugin-eslint": "^4.5.15",
