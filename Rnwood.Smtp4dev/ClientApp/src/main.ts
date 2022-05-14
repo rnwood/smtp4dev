@@ -34,8 +34,6 @@ if (!supportedBrowser) {
         render: h => h(App)
     });
 
-
-
     axios.interceptors.response.use(response => {
 
         fixDates(response.data);

@@ -5,22 +5,20 @@ import Message from './Message';
 import FileStreamResult from './FileStreamResult';
 import MessageRelayOptions from './MessageRelayOptions';
 import axios from "axios";
+import PagedResult from './PagedResult';
 
 export default class MessagesController {
                
     constructor(){
     }
-        
     
-    
-    // get: api/Messages?sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}  
-    public getSummaries_url(sortColumn: string, sortIsDescending: boolean): string {
-        return `api/Messages?sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}`;
+    public getSummaries_url(sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): string {
+        return `api/Messages?sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}&page=${page}&pageSize=${pageSize}`;
     }
 
-    public async getSummaries(sortColumn: string, sortIsDescending: boolean): Promise<MessageSummary[]> {
+    public async getSummaries(sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): Promise<PagedResult<MessageSummary>> {
 
-        return (await axios.get(this.getSummaries_url(sortColumn, sortIsDescending), null || undefined)).data as MessageSummary[];
+        return (await axios.get(this.getSummaries_url(sortColumn, sortIsDescending, page,pageSize), null || undefined)).data as PagedResult<MessageSummary>;
     }
     
     // get: api/Messages/${encodeURIComponent(id)}  

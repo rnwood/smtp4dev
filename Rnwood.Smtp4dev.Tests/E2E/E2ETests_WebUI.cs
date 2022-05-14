@@ -8,7 +8,6 @@ using Microsoft.Extensions.Configuration;
 using MimeKit;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
-using OpenQA.Selenium.Support.PageObjects;
 using Rnwood.Smtp4dev.Tests.E2E.PageModel;
 using System;
 using System.Collections.Concurrent;

@@ -31,11 +31,12 @@ namespace Rnwood.Smtp4dev.Controllers
         private readonly ISmtp4devServer server;
 
         [HttpGet]
-        public IEnumerable<MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true)
+        public ApiModel.PagedResult<MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true, int page = 1, int pageSize=5)
         {
             return messagesRepository.GetMessages(false).Include(m => m.Relays)
                 .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""))
-                .Select(m => new MessageSummary(m));
+                .Select(m => new MessageSummary(m))
+                .GetPaged(page, pageSize);
         }
 
         private Message GetDbMessage(Guid id)
