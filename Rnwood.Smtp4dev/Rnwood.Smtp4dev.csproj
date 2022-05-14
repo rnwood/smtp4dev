@@ -2,7 +2,7 @@
 
 	<PropertyGroup>
 		<TargetFramework>net6.0</TargetFramework>
-		<VersionPrefix>3.1.0-dev</VersionPrefix>
+		<VersionPrefix>3.2.0-dev</VersionPrefix>
 		<TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
 		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
 		<TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
