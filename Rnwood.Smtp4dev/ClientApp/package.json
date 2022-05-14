@@ -43,7 +43,7 @@
     "jest-canvas-mock": "^2.3.1",
     "jest-environment-jsdom": "^28.1.0",
     "jsdom-global": "^3.0.2",
-    "locale-index-of": "^2.0.0",
+    "locale-index-of": "^3.1.0",
     "moment": "^2.29.3",
     "patch-package": "^6.4.7",
     "sass": "^1.51.0",
