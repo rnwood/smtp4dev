@@ -6,6 +6,7 @@ using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
 using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -13,7 +14,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 {
     public class E2ETests
     {
-        protected readonly ITestOutputHelper output;
+        private readonly ITestOutputHelper output;
 
         public E2ETests(ITestOutputHelper output)
         {
@@ -22,8 +23,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
         public class E2ETestOptions
         {
-            public bool InMemoryDB { get; set; } = false;
-            public string BasePath { get; set; } = null;
+            public bool InMemoryDB { get; set; }
+            public string BasePath { get; set; }
         }
 
         public class E2ETestContext
@@ -61,9 +62,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/Debug/{folder}/Rnwood.Smtp4dev.dll");
             }
 
-            CancellationToken timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
-            Thread outputThread = null;
-
+            var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
             string dbPath = Path.GetTempFileName();
             File.Delete(dbPath);
 
@@ -81,6 +80,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             using (Command serverProcess = Command.Run("dotnet", args,
                        o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
             {
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                CancellationToken token = cancellationTokenSource.Token;
+
                 try
                 {
                     IEnumerator<string> serverOutput = serverProcess.GetOutputAndErrorLines().GetEnumerator();
@@ -122,16 +124,16 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                     Assert.False(serverProcess.Process.HasExited, "Server process failed");
 
-                    outputThread = new Thread(() =>
+                    var task = Task.Run(() =>
                     {
                         while (serverOutput.MoveNext())
                         {
-                            string newLine = serverOutput.Current;
+                            var newLine = serverOutput.Current;
                             output.WriteLine(newLine);
                         }
-                    });
-                    outputThread.Start();
 
+                        return Task.CompletedTask;
+                    }, token);
 
                     test(new E2ETestContext
                     {
@@ -143,14 +145,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 finally
                 {
                     serverProcess.Kill();
-
-                    if (outputThread != null)
-                    {
-                        if (!outputThread.Join(TimeSpan.FromSeconds(5)))
-                        {
-                            outputThread.Abort();
-                        }
-                    }
+                    cancellationTokenSource.Cancel();
                 }
             }
         }
