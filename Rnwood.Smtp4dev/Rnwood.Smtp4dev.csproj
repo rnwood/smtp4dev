@@ -34,7 +34,7 @@
 		  <PrivateAssets>all</PrivateAssets>
 		</PackageReference>
 		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="5.0.11" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="5.0.11" />
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="6.0.5" />
 		<PackageReference Include="MimeKit" Version="2.15.1" />
 		<PackageReference Include="Mono.Options" Version="6.12.0.148" />
 		<PackageReference Include="Rnwood.LumiSoft.Net" Version="1.0.0" />
