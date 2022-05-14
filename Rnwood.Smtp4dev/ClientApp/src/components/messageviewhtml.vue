@@ -66,7 +66,7 @@
 
                     this.html = await new MessagesController().getMessageHtml(this.message.id);
                 }
-            } catch (e) {
+            } catch (e: any) {
                 this.error = e;
             } finally {
                 this.loading = false;

@@ -21,6 +21,12 @@
         :disabled="loading"
         title="Refresh"
       ></el-button>
+      <el-button
+        v-on:click="markAllMessageRead"
+        :disabled="loading"
+        title="Mark all as read"
+        ><font-awesome-icon :icon="['fa-regular','envelope-open']" />
+      </el-button>
 
       <el-button
         v-on:click="relaySelected"
@@ -85,7 +91,7 @@
         width="28"
         :formatter="cellValueRenderer"
       >
-        <template slot-scope="scope">
+        <template v-slot:default="scope">
           <div v-if="scope.row.isRelayed">
             <el-tooltip
               effect="light"
@@ -98,7 +104,7 @@
         </template>
       </el-table-column>
       <el-table-column property="subject" label="Subject" sortable="custom">
-        <template slot-scope="scope">
+        <template v-slot:default="scope">
           {{ scope.row.subject }}
           <i
             class="el-icon-paperclip"
@@ -109,9 +115,9 @@
       </el-table-column>
     </el-table>
     <messagelistpager
-        :paged-data="pagedServerMessages"
-        @on-current-page-change="handlePaginationCurrentChange"
-        @on-page-size-change="handlePaginationPageSizeChange"
+      :paged-data="pagedServerMessages"
+      @on-current-page-change="handlePaginationCurrentChange"
+      @on-page-size-change="handlePaginationPageSizeChange"
     ></messagelistpager>
   </div>
 </template>
@@ -134,8 +140,9 @@ import ServerController from "../ApiClient/ServerController";
 import ClientController from "../ApiClient/ClientController";
 
 import { mapOrder } from "@/components/utils/mapOrder";
-import PagedResult from "@/ApiClient/PagedResult";
+import PagedResult, { EmptyPagedResult } from "@/ApiClient/PagedResult";
 import Messagelistpager from "@/components/messagelistpager.vue";
+
 
 @Component({
   components: {
@@ -146,6 +153,7 @@ import Messagelistpager from "@/components/messagelistpager.vue";
 export default class MessageList extends Vue {
   constructor() {
     super();
+    this.pagedServerMessages = EmptyPagedResult<MessageSummary>();
   }
 
   private selectedSortDescending: boolean = true;
@@ -154,7 +162,7 @@ export default class MessageList extends Vue {
   page: number = 1;
   pageSize: number = 25;
 
-  pagedServerMessages: PagedResult<MessageSummary>|undefined = undefined;
+  pagedServerMessages: PagedResult<MessageSummary> | undefined = undefined;
 
   @Prop({ default: null })
   connection: HubConnectionManager | null = null;
@@ -169,7 +177,8 @@ export default class MessageList extends Vue {
   error: Error | null = null;
   selectedmessage: MessageSummary | null = null;
   searchTerm: string = "";
-  private loading: boolean = true;
+  loading: boolean = true;
+
   private messageNotificationManager = new MessageNotificationManager(
     (message) => {
       this.selectMessage(message);
@@ -253,7 +262,7 @@ export default class MessageList extends Vue {
         title: "Relay Message Success",
         message: "Completed OK",
       });
-    } catch (e) {
+    } catch (e: any) {
       const message = e.response?.data?.detail ?? e.sessage;
 
       this.$notify.error({ title: "Relay Message Failed", message: message });
@@ -279,7 +288,7 @@ export default class MessageList extends Vue {
     try {
       await new MessagesController().delete(messageToDelete.id);
       await this.refresh();
-    } catch (e) {
+    } catch (e: any) {
       this.$notify.error({
         title: "Delete Message Failed",
         message: e.message,
@@ -294,7 +303,7 @@ export default class MessageList extends Vue {
       this.loading = true;
       await new MessagesController().deleteAll();
       await this.refresh();
-    } catch (e) {
+    } catch (e: any) {
       this.$notify.error({
         title: "Clear Messages Failed",
         message: e.message,
@@ -372,6 +381,10 @@ export default class MessageList extends Vue {
 
   initialLoadDone = false;
 
+  async markAllMessageRead() {
+    await new MessagesController().markAllMessageRead();
+  }
+
   async refresh(silent: boolean = false) {
     let unlock = await this.mutex.acquire();
 
@@ -394,7 +407,7 @@ export default class MessageList extends Vue {
         !this.lastSort ||
         this.lastSort != sortColumn ||
         this.lastSortDescending != sortDescending ||
-          this.pagedServerMessages.results.length == 0
+        this.pagedServerMessages.results.length == 0
       ) {
         this.messages.splice(
           0,
@@ -403,7 +416,7 @@ export default class MessageList extends Vue {
         );
       } else {
         sortedArraySync(
-            this.pagedServerMessages.results,
+          this.pagedServerMessages.results,
           this.messages,
           (a: MessageSummary, b: MessageSummary) => a.id == b.id,
           (sourceItem: MessageSummary, targetItem: MessageSummary) => {
@@ -427,7 +440,7 @@ export default class MessageList extends Vue {
 
       this.isRelayAvailable = !!(await new ServerController().getServer())
         .relayOptions.smtpServer;
-    } catch (e) {
+    } catch (e: any) {
       this.error = e;
     } finally {
       this.loading = false;

@@ -72,7 +72,7 @@ export default class MessagePartSource extends Vue {
 
             }
         }
-        } catch (e) {
+        } catch (e: any) {
                     this.error = e;
         } finally {
                     this.loading = false;

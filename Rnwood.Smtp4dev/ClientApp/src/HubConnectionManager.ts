@@ -42,7 +42,7 @@ export default class HubConnectionManager {
             for (const connectedCallback of this.connectedCallbacks) {
                 connectedCallback();
             }
-        } catch (e) {
+        } catch (e : any) {
             this.error = e;
         }
     }

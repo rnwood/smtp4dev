@@ -23,6 +23,22 @@ namespace Rnwood.Smtp4dev.Data
 
         public Smtp4devDbContext DbContext => this.dbContext;
 
+        public Task MarkAllMessagesRead()
+        {
+            return taskQueue.QueueTask(() =>
+            {
+                // More performant to bulk update but will need to test platform compat of SQLitePCLRaw.bundle_e_sqlite3 https://github.com/borisdj/EFCore.BulkExtensions
+                var unReadMessages = dbContext.Messages.Where(m => m.IsUnread);
+                foreach (var msg in unReadMessages)
+                {
+                    msg.IsUnread = false;
+                }
+
+                dbContext.SaveChanges();
+                notificationsHub.OnMessagesChanged().Wait();
+            }, true);
+        }
+
         public Task MarkMessageRead(Guid id)
         {
             return taskQueue.QueueTask(() =>

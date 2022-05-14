@@ -57,6 +57,12 @@ namespace Rnwood.Smtp4dev.Controllers
             return messagesRepository.MarkMessageRead(id);
         }
 
+        [HttpPost("markAllRead")]
+        public Task MarkAllRead()
+        {
+            return messagesRepository.MarkAllMessagesRead();
+        }
+
         [HttpGet("{id}/download")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
         public FileStreamResult DownloadMessage(Guid id)

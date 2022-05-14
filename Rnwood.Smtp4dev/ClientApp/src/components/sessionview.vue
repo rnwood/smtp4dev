@@ -68,6 +68,10 @@ export default class SessionView extends Vue {
   ) {
     await this.loadSession();
   }
+  
+  async loadMessage() {
+    console.warn('not implemented');
+  }
 
   download() {
     if (this.sessionSummary) {
@@ -92,7 +96,7 @@ export default class SessionView extends Vue {
           this.sessionSummary.id
         );
       }
-    } catch (e) {
+    } catch (e: any) {
       this.error = e;
     } finally {
       this.loading = false;
