@@ -46,7 +46,7 @@
 		<PackageReference Include="Serilog.Sinks.Console" Version="4.0.1" />
 		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.2.18" />
 		<PackageReference Include="System.Reactive" Version="4.4.1" />
-		<PackageReference Include="VueCliMiddleware" Version="3.1.2" />
+		<PackageReference Include="VueCliMiddleware" Version="6.0.0" />
 	</ItemGroup>
 
 	<ItemGroup>
