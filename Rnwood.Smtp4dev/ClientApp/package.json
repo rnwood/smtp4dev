@@ -56,7 +56,7 @@
     "vue-class-component": "^7.2.6",
     "vue-jest": "^3.0.7",
     "vue-property-decorator": "^9.1.2",
-    "vue-router": "^3.5.3",
+    "vue-router": "^3.5.4",
     "vue-template-compiler": "^2.6.14",
     "vue2-ace-editor": "0.0.15"
   },
