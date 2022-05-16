@@ -47,7 +47,7 @@
     "moment": "^2.29.3",
     "patch-package": "^6.4.7",
     "sass": "^1.51.0",
-    "sass-loader": "^10.1.0",
+    "sass-loader": "^12.6.0",
     "srcdoc-polyfill": "^1.0.0",
     "ts-debounce": "^4.0.0",
     "ts-jest": "^28.0.2",
