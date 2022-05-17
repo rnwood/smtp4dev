@@ -14,18 +14,19 @@ namespace Rnwood.Smtp4dev.Server
         /// <param name="certificatePath"></param>
         /// <param name="certificateKeyPath"></param>
         /// <returns>Exported x509 Certificate</returns>
-        public static X509Certificate2 LoadCertificateWithKey(string certificatePath, string certificateKeyPath)
+        public static X509Certificate2 LoadCertificateWithKey(string certificatePath, string certificateKeyPath, string password)
         {
             using var rsa = RSA.Create();
             var keyPem = File.ReadAllText(certificateKeyPath);
             var keyDer = CertificateHelper.UnPem(keyPem);
             rsa.ImportPkcs8PrivateKey(keyDer, out _);
             var certNoKey = new X509Certificate2(certificatePath);
-            return new X509Certificate2(certNoKey.CopyWithPrivateKey(rsa).Export(X509ContentType
-                .Pfx));
+            var pfxData = certNoKey.CopyWithPrivateKey(rsa).Export(X509ContentType
+                            .Pfx);
+            return new X509Certificate2(pfxData, password);
         }
 
-        public static X509Certificate2 LoadCertificate(string certificatePath, string password="")
+        public static X509Certificate2 LoadCertificate(string certificatePath, string password)
         {
             return new X509Certificate2(certificatePath, password);
         }
