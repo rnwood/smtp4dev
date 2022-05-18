@@ -12,7 +12,7 @@ namespace Rnwood.Smtp4dev.Tests.Server.CertificateHelper
             var certificatePath = ResourceHelper.GetResourcePath("smtp4dev.crt");
             var certificateKeyPath = ResourceHelper.GetResourcePath("smtp4dev.key");
 
-            var cert = Rnwood.Smtp4dev.Server.CertificateHelper.LoadCertificateWithKey(certificatePath, certificateKeyPath);
+            var cert = Rnwood.Smtp4dev.Server.CertificateHelper.LoadCertificateWithKey(certificatePath, certificateKeyPath, "");
 
             cert.Should().NotBeNull();
             cert.HasPrivateKey.Should().BeTrue();
