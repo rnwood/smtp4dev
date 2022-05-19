@@ -23,12 +23,27 @@ namespace Rnwood.Smtp4dev.Server
             var certNoKey = new X509Certificate2(certificatePath);
             var pfxData = certNoKey.CopyWithPrivateKey(rsa).Export(X509ContentType
                             .Pfx);
-            return new X509Certificate2(pfxData, password);
+
+            if (string.IsNullOrEmpty(password))
+            {
+                return new X509Certificate2(pfxData);
+            }
+            else
+            {
+                return new X509Certificate2(pfxData, password);
+            }
         }
 
         public static X509Certificate2 LoadCertificate(string certificatePath, string password)
         {
-            return new X509Certificate2(certificatePath, password);
+            if (string.IsNullOrEmpty(password))
+            {
+                return new X509Certificate2(certificatePath);
+            } else
+            {
+
+                return new X509Certificate2(certificatePath, password);
+            }
         }
 
         /// <summary>
