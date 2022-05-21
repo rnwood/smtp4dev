@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
@@ -15,7 +14,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 {
     public class E2ETests
     {
-        protected readonly ITestOutputHelper output;
+        private readonly ITestOutputHelper output;
 
         public E2ETests(ITestOutputHelper output)
         {
@@ -24,8 +23,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
         public class E2ETestOptions
         {
-            public bool InMemoryDB { get; set; } = false;
-            public string BasePath { get; set; } = null;
+            public bool InMemoryDB { get; set; }
+            public string BasePath { get; set; }
         }
 
         public class E2ETestContext
@@ -39,7 +38,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
         protected void RunE2ETest(Action<E2ETestContext> test, E2ETestOptions options = null)
         {
-            options = options ?? new E2ETestOptions();
+            options ??= new E2ETestOptions();
 
             string workingDir = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_WORKINGDIR");
             string mainModule = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_BINARY");
@@ -53,9 +52,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             {
                 //.NETCoreapp,Version=v3.1
                 string framework = typeof(Program)
-    .Assembly
-    .GetCustomAttribute<TargetFrameworkAttribute>()?
-    .FrameworkName;
+                    .Assembly
+                    .GetCustomAttribute<TargetFrameworkAttribute>()?
+                    .FrameworkName;
 
                 //netcoreapp3.1
                 string folder = framework.TrimStart('.').Replace("CoreApp,Version=v", "").ToLower();
@@ -63,21 +62,27 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/Debug/{folder}/Rnwood.Smtp4dev.dll");
             }
 
-            CancellationToken timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
-            Thread outputThread = null;
-
+            var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
             string dbPath = Path.GetTempFileName();
             File.Delete(dbPath);
 
 
-            List<string> args = new List<string> { mainModule, "--debugsettings", options.InMemoryDB ? "--db=" : $"--db={dbPath}", "--nousersettings", "--urls=http://*:0", "--imapport=0", "--smtpport=0", "--tlsmode=StartTls" };
+            List<string> args = new List<string>
+            {
+                mainModule, "--debugsettings", options.InMemoryDB ? "--db=" : $"--db={dbPath}", "--nousersettings", "--urls=http://*:0",
+                "--imapport=0", "--smtpport=0", "--tlsmode=StartTls"
+            };
             if (!string.IsNullOrEmpty(options.BasePath))
             {
                 args.Add($"--basepath={options.BasePath}");
             }
 
-            using (Command serverProcess = Command.Run("dotnet", args, o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
+            using (Command serverProcess = Command.Run("dotnet", args,
+                       o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
             {
+                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+                CancellationToken token = cancellationTokenSource.Token;
+
                 try
                 {
                     IEnumerator<string> serverOutput = serverProcess.GetOutputAndErrorLines().GetEnumerator();
@@ -119,44 +124,30 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                     Assert.False(serverProcess.Process.HasExited, "Server process failed");
 
-                    outputThread = new Thread(() =>
+                    var task = Task.Run(() =>
                     {
                         while (serverOutput.MoveNext())
                         {
-                            string newLine = serverOutput.Current;
+                            var newLine = serverOutput.Current;
                             output.WriteLine(newLine);
                         }
-                    });
-                    outputThread.Start();
 
-
+                        return Task.CompletedTask;
+                    }, token);
 
                     test(new E2ETestContext
                     {
                         BaseUrl = baseUrl,
                         SmtpPortNumber = smtpPortNumber.Value,
                         ImapPortNumber = imapPortNumber.Value
-                    }) ;
-
+                    });
                 }
                 finally
                 {
                     serverProcess.Kill();
-
-                    if (outputThread != null)
-                    {
-                        if (!outputThread.Join(TimeSpan.FromSeconds(5)))
-                        {
-                            outputThread.Abort();
-                        }
-                    }
-
-
+                    cancellationTokenSource.Cancel();
                 }
             }
-
         }
-
     }
 }
-
