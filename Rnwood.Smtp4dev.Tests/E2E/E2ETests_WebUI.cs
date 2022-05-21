@@ -6,9 +6,7 @@ using OpenQA.Selenium.Chrome;
 using Rnwood.Smtp4dev.Tests.E2E.PageModel;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 using System.Threading;
 using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
@@ -148,7 +146,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         chromeOptions.AddArgument("--headless");
                     }
 
-                    using var browser = new ChromeDriver(Path.GetDirectoryName(Assembly.GetExecutingAssembly().Location), chromeOptions);
+                    using var browser = new ChromeDriver(chromeOptions);
                     try
                     {
                         uitest(browser, context.BaseUrl, context.SmtpPortNumber);
