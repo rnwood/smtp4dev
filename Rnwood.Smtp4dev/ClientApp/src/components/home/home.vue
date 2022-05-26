@@ -9,9 +9,8 @@
             <div style="padding-left:10px; padding-top:5px; margin-left:10px; width:30em;display:inline-block">
                 <VersionInfo></VersionInfo>
             </div>
-            <el-button style="float:right; font-size: 1.7em; padding: 6px; margin: 0 3px" circle icon="el-icon-setting" title="Settings" @click="settingsVisible = true"></el-button>&nbsp;
-            <hubconnstatus style="float:right" :connection="connection"></hubconnstatus>
-            <serverstatus style="float:right" v-show="connection && connection.connected" :connection="connection"></serverstatus>
+             <hubconnstatus style="float:right" :connection="connection"></hubconnstatus>
+            <serverstatus style="float:right" :connection="connection" v-on:showsettings="settingsVisible = true"></serverstatus>
         </el-header>
         <settingsdialog :visible="settingsVisible" :connection="connection" v-on:closed="settingsVisible = false" />
         <el-main class="fill vfillpanel">

@@ -7,9 +7,11 @@ namespace Rnwood.Smtp4dev.ApiModel
 {
     public class Server
     {
+        public bool SettingsAreEditable { get; internal set; }
+
         public bool IsRunning { get; set; }
 
-        public string Exception { get; set; }
+        public string Exception { get; internal set; }
 
         public int PortNumber { get; set; }
 

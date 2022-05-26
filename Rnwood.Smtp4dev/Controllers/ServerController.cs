@@ -52,13 +52,19 @@ namespace Rnwood.Smtp4dev.Controllers
                     Password = relayOptions.CurrentValue.Password,
                     AutomaticEmails = relayOptions.CurrentValue.AutomaticEmails,
                     SenderAddress = relayOptions.CurrentValue.SenderAddress
-                }
+                },
+                SettingsAreEditable  = hostingEnvironmentHelper.SettingsAreEditable
+            
             };
         }
 
         [HttpPost]
-        public void UpdateServer(ApiModel.Server serverUpdate)
+        public ActionResult UpdateServer(ApiModel.Server serverUpdate)
         {
+            if (!hostingEnvironmentHelper.SettingsAreEditable)
+            {
+                return Forbid();
+            }
             ServerOptions newSettings = serverOptions.CurrentValue;
             RelayOptions newRelaySettings = relayOptions.CurrentValue;
 
@@ -95,9 +101,11 @@ namespace Rnwood.Smtp4dev.Controllers
                 this.imapServer.TryStart();
             }
 
-            System.IO.File.WriteAllText(hostingEnvironmentHelper.GetSettingsFilePath(),
+            System.IO.File.WriteAllText(hostingEnvironmentHelper.GetEditableSettingsFilePath(),
                 JsonSerializer.Serialize(new { ServerOptions = newSettings, RelayOptions = newRelaySettings },
                     new JsonSerializerOptions { WriteIndented = true }));
+
+            return Ok();
         }
     }
 }
