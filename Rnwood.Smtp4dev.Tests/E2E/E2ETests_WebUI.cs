@@ -10,6 +10,7 @@ using System.Linq;
 using System.Threading;
 using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
+using WebDriverManager.Helpers;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -19,7 +20,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
     {
         public E2ETests_WebUI(ITestOutputHelper output) : base(output)
         {
-            new DriverManager().SetUpDriver(new ChromeConfig());
+            new DriverManager().SetUpDriver(new ChromeConfig(), VersionResolveStrategy.MatchingBrowser);
         }
 
         [Theory]
