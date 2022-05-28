@@ -1,9 +1,11 @@
 ﻿<template>
     <div v-loading="loading">
-        <el-button v-if="server && server.isRunning" @click="stop" icon="el-icon-circle-check" type="text"> SMTP server listening on port {{server.portNumber}}</el-button>
-        <el-button v-if="server && !server.isRunning && !server.exception" @click="start" icon="el-icon-circle-close" type="danger"> SMTP server stopped</el-button>
-        <el-button v-if="server && !server.isRunning && server.exception" @click="start" icon="el-icon-circle-close" type="danger"> SMTP server error:<br/>{{server.exception}}</el-button>
+        <el-button v-if="server && server.isRunning" :disabled="!server || !server.settingsAreEditable" @click="stop" icon="el-icon-circle-check" type="text" :title="'Stop'+ ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')"> SMTP server listening on port {{server.portNumber}}</el-button>
+        <el-button v-if="server && !server.isRunning && !server.exception" :disabled="!server || !server.settingsAreEditable" @click="start" icon="el-icon-circle-close" type="danger" :title="'Start'+ ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')"> SMTP server stopped</el-button>
+        <el-button v-if="server && !server.isRunning && server.exception" :disabled="!server || !server.settingsAreEditable" @click="start" icon="el-icon-circle-close" type="danger" :title="'Start'+ ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')"> SMTP server error:<br />{{server.exception}}</el-button>
+        <el-button style="float:right; font-size: 1.7em; padding: 6px; margin: 0 3px" circle icon="el-icon-setting" :title="'Settings' + ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')" :disabled="!server || !server.settingsAreEditable" @click="showSettings"></el-button>&nbsp;
     </div>
+
 </template>
 
 <script lang="ts">
@@ -71,6 +73,10 @@
 
                 this.connection.addOnConnectedCallback(() => this.refresh());
             }
+        }
+
+        showSettings() {
+            this.$emit('showsettings');
         }
     }
 </script>

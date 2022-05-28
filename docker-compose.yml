@@ -23,6 +23,9 @@ services:
       #Specifies the server hostname. Used in auto-generated TLS certificate if enabled.
       - ServerOptions__HostName=smtp4dev
 
+      #Locks settings from being changed by user via web interface
+      #- ServerOptions__LockSettings=true
+
       #Specifies the path where the database will be stored relative to APPDATA env var on Windows or XDG_CONFIG_HOME on non-Windows. Specify "" to use an in memory database.
       #- ServerOptions__Database=database.db
 
@@ -57,7 +60,7 @@ services:
       #- RelayOptions__Password=
 
       #Specifies the port the IMAP server will listen on - allows standard email clients to view/retrieve messages
-      #"ServerOptions__ImapPort":  143
+      #"ServerOptions__ImapPort"=143
 
 volumes:
   smtp4dev-data:
