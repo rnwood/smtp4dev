@@ -33,16 +33,18 @@
     <ProjectReference Include="..\Rnwood.Smtp4dev\Rnwood.Smtp4dev.csproj" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Include="$(MSBuildProjectDirectory)\server\**\*">
-      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
-    </Content>
-  </ItemGroup>
+
 
   <Target Name="CopyMainApp" BeforeTargets="BeforeBuild">
     <Message Importance="high" Text="Publishing Rnwood.Smtp4dev to $(MSBuildProjectDirectory)\server" />
     <MSBuild Projects="../Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj" Targets="Publish" Properties="Configuration=$(Configuration);Platform=$(Platform);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);PublishDir=$(MSBuildProjectDirectory)\server"></MSBuild>
 
+    <ItemGroup>
+      <Content Include="$(MSBuildProjectDirectory)\server\**">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+    
   </Target>
   
   
