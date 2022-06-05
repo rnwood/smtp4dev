@@ -95,7 +95,7 @@ stages:
         projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
         publishWebProjects: false
         zipAfterPublish: true
-        arguments: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj -c Release -r win-x64 -p:version=$(tag) --self-contained -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
+        arguments: '-c Release -r win-x64 -p:version=$(tag) --self-contained -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
     - powershell: move-item $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev,Desktop.zip $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Destop-win-x64-$(tag).zip
       displayName: Rename artifact
     - publish: $(Build.ArtifactStagingDirectory)/win-x64-desktop
