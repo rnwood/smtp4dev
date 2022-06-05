@@ -35,6 +35,7 @@ namespace Rnwood.Smtp4dev
             {
                 var host = await StartApp(args);
                 await host.WaitForShutdownAsync();
+                Log.Information("Exiting");
             }
             catch (Exception ex)
             {
@@ -70,6 +71,15 @@ namespace Rnwood.Smtp4dev
             else
             {
                 await host.StartAsync();
+
+                var addressesFeature = host.ServerFeatures.Get<IServerAddressesFeature>();
+                var urls = addressesFeature.Addresses;
+
+                foreach (var url in urls)
+                {
+                    log.Information("Now listening on: {url}", url);
+                }
+
                 return host;
             }
 
