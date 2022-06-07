@@ -4,6 +4,7 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -52,7 +53,7 @@ namespace Rnwood.Smtp4dev
             SetupStaticLogger();
             log = Log.ForContext<Program>();
 
-            string version = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
+            string version = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyFileVersionAttribute>().Version;
             log.Information("smtp4dev version {version}", version);
             log.Information("https://github.com/rnwood/smtp4dev");
             log.Information(".NET Core runtime version: {netcoreruntime}", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
@@ -87,7 +88,7 @@ namespace Rnwood.Smtp4dev
 
         private static string GetContentRoot()
         {
-            string installLocation = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+            string installLocation = AppContext.BaseDirectory;
 
             if (Directory.Exists(Path.Join(installLocation, "wwwroot")))
             {

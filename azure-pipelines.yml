@@ -95,7 +95,7 @@ stages:
         projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
         publishWebProjects: false
         zipAfterPublish: true
-        arguments: '-c Release -r win-x64 -p:version=$(tag) --self-contained -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
+        arguments: '-c Release -r win-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
     - powershell: move-item $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip
       displayName: Rename artifact
     - publish: $(Build.ArtifactStagingDirectory)/win-x64-desktop
@@ -112,6 +112,19 @@ stages:
       displayName: Rename artifact
     - publish: $(Build.ArtifactStagingDirectory)/linux-x64
       artifact: linux-x64
+
+    - task: DotNetCoreCLI@2
+      displayName: Build .NET Core - linux-x64-desktop
+      inputs:
+        command: publish
+        projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
+        publishWebProjects: false
+        zipAfterPublish: true
+        arguments: '-c Release -r linux-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
+    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop-linux-x64-$(tag).zip
+      displayName: Rename artifact
+    - publish: $(Build.ArtifactStagingDirectory)/linux-x64-desktop
+      artifact: linux-x64-desktop
 
     - task: DotNetCoreCLI@2
       displayName: Build .NET Core - linux-musl-x64
