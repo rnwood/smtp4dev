@@ -23,37 +23,43 @@ namespace Rnwood.Smtp4dev.Desktop
         {
             Console.Write("smtp4dev Desktop");
 
-            StaTaskScheduler scheduler = new StaTaskScheduler(1);
-            await Task.Factory.StartNew(async () =>
+
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-
-                try
-                {
-                    string origWorkingDir = AppContext.BaseDirectory;
-
-                    Environment.CurrentDirectory = Path.Join(origWorkingDir, "server");
-                    var host = await
-                         Rnwood.Smtp4dev.Program.StartApp(new string[] { "--urls=http://127.0.0.1:0" }).ConfigureAwait(true);
-
-                    var addressesFeature = host.ServerFeatures.Get<IServerAddressesFeature>();
-                    var urls = addressesFeature.Addresses;
-                    var appUrl = new Uri(urls.First());
-
-
-                    DesktopApp.Run(args, origWorkingDir, appUrl);
-
-                    await host.StopAsync().ConfigureAwait(true);
-
-                }
-                finally
-                {
-
-                    DesktopApp.Exit();
-                }
-            }, CancellationToken.None, TaskCreationOptions.None, scheduler);
+                StaTaskScheduler scheduler = new StaTaskScheduler(1);
+                await Task.Factory.StartNew(Run, CancellationToken.None, TaskCreationOptions.None, scheduler);
+            } else
+            {
+                await Run();
+            }
         }
 
+        private static async Task Run()
+        {
+            try
+            {
+                string origWorkingDir = AppContext.BaseDirectory;
 
+                Environment.CurrentDirectory = Path.Join(origWorkingDir, "server");
+                var host = await
+                     Rnwood.Smtp4dev.Program.StartApp(new string[] { "--urls=http://127.0.0.1:0" }).ConfigureAwait(true);
+
+                var addressesFeature = host.ServerFeatures.Get<IServerAddressesFeature>();
+                var urls = addressesFeature.Addresses;
+                var appUrl = new Uri(urls.First());
+
+
+                DesktopApp.Run(args, origWorkingDir, appUrl);
+
+                await host.StopAsync().ConfigureAwait(true);
+
+            }
+            finally
+            {
+
+                DesktopApp.Exit();
+            }
+        }
 
         private static void ShowFatalError(string title, string details)
         {
