@@ -27,14 +27,14 @@ namespace Rnwood.Smtp4dev.Desktop
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 StaTaskScheduler scheduler = new StaTaskScheduler(1);
-                await Task.Factory.StartNew(Run, CancellationToken.None, TaskCreationOptions.None, scheduler);
+                await Task.Factory.StartNew(() => Run(args), CancellationToken.None, TaskCreationOptions.None, scheduler);
             } else
             {
-                await Run();
+                await Run(args);
             }
         }
 
-        private static async Task Run()
+        private static async Task Run(string[] args)
         {
             try
             {
