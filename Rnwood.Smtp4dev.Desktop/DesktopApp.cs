@@ -35,7 +35,7 @@ namespace Rnwood.Smtp4dev.Desktop
 
         internal static void Exit()
         {
-            _mainWindow.Close();
+            _mainWindow?.Close();
         }
     }
 }

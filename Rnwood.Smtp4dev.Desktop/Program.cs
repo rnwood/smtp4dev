@@ -21,7 +21,7 @@ namespace Rnwood.Smtp4dev.Desktop
         [STAThread]
         static async Task Main(string[] args)
         {
-            Console.Write("smtp4dev Desktop");
+            Console.WriteLine("smtp4dev Desktop");
 
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
@@ -40,7 +40,7 @@ namespace Rnwood.Smtp4dev.Desktop
             {
                 string origWorkingDir = AppContext.BaseDirectory;
 
-                Environment.CurrentDirectory = Path.Join(origWorkingDir, "server");
+                //Environment.CurrentDirectory = Path.Join(origWorkingDir, "server");
                 var host = await
                      Rnwood.Smtp4dev.Program.StartApp(new string[] { "--urls=http://127.0.0.1:0" }).ConfigureAwait(true);
 

@@ -36,11 +36,15 @@
 
 
   <Target Name="CopyMainApp" BeforeTargets="BeforeBuild">
-    <Message Importance="high" Text="Publishing Rnwood.Smtp4dev to $(MSBuildProjectDirectory)\server" />
-    <MSBuild Projects="../Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj" Targets="Publish" Properties="Configuration=$(Configuration);Platform=$(Platform);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);PublishDir=$(MSBuildProjectDirectory)\server"></MSBuild>
+    <Message Importance="high" Text="Publishing Rnwood.Smtp4dev to $(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)\server" />
+    <MSBuild Projects="../Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj" Targets="Publish" Properties="Configuration=$(Configuration);Platform=$(Platform);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);PublishDir=$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)\server"></MSBuild>
 
     <ItemGroup>
-      <Content Include="$(MSBuildProjectDirectory)\server\**">
+      <Smtp4DevRuntimeFiles Include="$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)\server\wwwroot\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(Smtp4DevRuntimeFiles)" DestinationFolder="$(MSBuildProjectDirectory)\wwwroot\%(RecursiveDir)" />
+    <ItemGroup>
+      <Content Include="$(MSBuildProjectDirectory)\wwwroot\**">
         <CopyToOutputDirectory>Always</CopyToOutputDirectory>
       </Content>
     </ItemGroup>
