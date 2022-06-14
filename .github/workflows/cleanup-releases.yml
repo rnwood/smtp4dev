@@ -1,4 +1,4 @@
-name: Cleanup CI Releases
+name: Cleanup Releases
 
 on:
   release:
