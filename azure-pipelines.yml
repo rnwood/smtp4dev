@@ -94,7 +94,6 @@ stages:
         command: publish
         projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
         publishWebProjects: false
-        zipAfterPublish: true
         arguments: '-c Release -r win-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
     - powershell: move-item $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip
       displayName: Rename artifact
@@ -119,7 +118,6 @@ stages:
         command: publish
         projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
         publishWebProjects: false
-        zipAfterPublish: true
         arguments: '-c Release -r linux-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
     - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop-linux-x64-$(tag).zip
       displayName: Rename artifact
