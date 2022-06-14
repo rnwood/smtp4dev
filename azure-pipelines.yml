@@ -112,17 +112,17 @@ stages:
     - publish: $(Build.ArtifactStagingDirectory)/linux-x64
       artifact: linux-x64
 
-    - task: DotNetCoreCLI@2
-      displayName: Build .NET Core - linux-x64-desktop
-      inputs:
-        command: publish
-        projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
-        publishWebProjects: false
-        arguments: '-c Release -r linux-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop-linux-x64-$(tag).zip
-      displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/linux-x64-desktop
-      artifact: linux-x64-desktop
+    # - task: DotNetCoreCLI@2
+    #   displayName: Build .NET Core - linux-x64-desktop
+    #   inputs:
+    #     command: publish
+    #     projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
+    #     publishWebProjects: false
+    #     arguments: '-c Release -r linux-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
+    # - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop-linux-x64-$(tag).zip
+    #   displayName: Rename artifact
+    # - publish: $(Build.ArtifactStagingDirectory)/linux-x64-desktop
+    #   artifact: linux-x64-desktop
 
     - task: DotNetCoreCLI@2
       displayName: Build .NET Core - linux-musl-x64
@@ -331,6 +331,16 @@ stages:
         tag: $(tag)
         tagSource: userSpecifiedTag
         isDraft: false
+        releaseNotes: |
+          Prefix | Description
+          -- | --
+          [Rnwood.Smtp4dev-win-x64-$(tag).zip](../download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip) | Windows x64 binary standalone - Server edition
+          [Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip](../download/$(tag)/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip) | Windows x64 binary standalone - Desktop app edition.
+          [Rnwood.Smtp4dev-win-arm-$(tag).zip](../download/$(tag)/Rnwood.Smtp4dev-win-arm-$(tag).zip) | Windows ARM 32-bit binary standalone
+          [Rnwood.Smtp4dev-win-arm64-$(tag).zip](../download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip) | Windows ARM 62-bit binary standalone
+          [Rnwood.Smtp4dev-linux-x64-$(tag).zip](../download/$(tag)/Rnwood.Smtp4dev-linux-x64-$(tag).zip) | Linux x64 (Intel 64 bit) binary standalone
+          [Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip](../download/$(tag)/Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip) | Linux MUSL x64 binary standalone for Linux distros using MUSL libc
+          [Rnwood.Smtp4dev-noruntime-$(tag).zip](../download/$(tag)/Rnwood.Smtp4dev-noruntime-$(tag).zip) | Architecture independent version. Should run on any platform where the .NET Core 6.0 (or greater) runtime is installed
 
         ${{ if variables['isreleasebuild'] }}:
           isPreRelease: false
