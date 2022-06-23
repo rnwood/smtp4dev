@@ -331,7 +331,9 @@ stages:
         tag: $(tag)
         tagSource: userSpecifiedTag
         isDraft: false
-        releaseNotes: |
+        releaseNotesSource: inline
+        addChangeLog: true
+        releaseNotesInline: |
           Prefix | Description
           -- | --
           [Rnwood.Smtp4dev-win-x64-$(tag).zip](../download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip) | Windows x64 binary standalone - Server edition
