@@ -83,6 +83,10 @@ namespace Rnwood.Smtp4dev.Controllers
             newRelaySettings.Password = serverUpdate.RelayOptions.Password;
             newRelaySettings.AutomaticEmails = serverUpdate.RelayOptions.AutomaticEmails;
 
+            System.IO.File.WriteAllText(hostingEnvironmentHelper.GetEditableSettingsFilePath(),
+                JsonSerializer.Serialize(new { ServerOptions = newSettings, RelayOptions = newRelaySettings },
+                    new JsonSerializerOptions { WriteIndented = true }));
+
             if (!serverUpdate.IsRunning && this.server.IsRunning)
             {
                 this.server.Stop();
@@ -101,9 +105,6 @@ namespace Rnwood.Smtp4dev.Controllers
                 this.imapServer.TryStart();
             }
 
-            System.IO.File.WriteAllText(hostingEnvironmentHelper.GetEditableSettingsFilePath(),
-                JsonSerializer.Serialize(new { ServerOptions = newSettings, RelayOptions = newRelaySettings },
-                    new JsonSerializerOptions { WriteIndented = true }));
 
             return Ok();
         }

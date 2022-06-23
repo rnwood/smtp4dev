@@ -122,7 +122,6 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         }
                     }
 
-                    Assert.False(serverProcess.Process.HasExited, "Server process failed");
 
                     var task = Task.Run(() =>
                     {
@@ -134,6 +133,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                         return Task.CompletedTask;
                     }, token);
+
+                    Assert.False(serverProcess.Process.HasExited, "Server process failed");
+
 
                     test(new E2ETestContext
                     {

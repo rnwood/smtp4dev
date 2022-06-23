@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <EnvironmentVariables>
+      <SMTP4DEV_E2E_CHROMEEXE>C:\Users\Rob\Downloads\Chrome-bin\chrome.exe</SMTP4DEV_E2E_CHROMEEXE>
+    </EnvironmentVariables>
+  </RunConfiguration>
+</RunSettings>

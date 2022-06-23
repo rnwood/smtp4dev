@@ -4,13 +4,18 @@ using System.ComponentModel.Design;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reflection;
 using System.Text.Json;
+using System.Threading;
+using System.Threading.Tasks;
 using CommandLiners;
 using CommandLiners.Options;
 using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
 using Mono.Options;
 using Newtonsoft.Json.Linq;
 using Rnwood.Smtp4dev.Server;
@@ -22,34 +27,27 @@ namespace Rnwood.Smtp4dev
     public class Program
     {
         public static bool IsService { get; private set; }
-        private static ILogger log;
+        private static ILogger _log;
 
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
-            SetupStaticLogger();
-            log = Log.ForContext<Program>();
 
             try
             {
-                string version = FileVersionInfo.GetVersionInfo(typeof(Program).Assembly.Location).ProductVersion;
-                log.Information("smtp4dev version {version}",version);
-                log.Information("https://github.com/rnwood/smtp4dev");
-                log.Information(".NET Core runtime version: {netcoreruntime}", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
+                var host = await StartApp(args, false, null);
 
-
-                if (!Debugger.IsAttached && args.Contains("--service"))
-                    IsService = true;
-
-                var host = BuildWebHost(args.Where(arg => arg != "--service").ToArray());
-
-                if (IsService)
+                if (host == null)
                 {
-                    host.RunAsSmtp4devService();
+                    Environment.Exit(1);
                 }
                 else
                 {
-                    host.Run();
+                    await host.WaitForShutdownAsync();
                 }
+                Log.Information("Exiting");
+            } catch (CommandLineOptionsException ex)
+            {
+                Console.Error.WriteLine(ex.Message);
             }
             catch (Exception ex)
             {
@@ -61,9 +59,53 @@ namespace Rnwood.Smtp4dev
             }
         }
 
+        public static async Task<IWebHost> StartApp(IEnumerable<string> args, bool isDesktopApp, Action<CommandLineOptions> fixedOptions)
+        {
+            SetupStaticLogger();
+            _log = Log.ForContext<Program>();
+
+            string version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+            _log.Information("smtp4dev version {version}", version);
+            _log.Information("https://github.com/rnwood/smtp4dev");
+            _log.Information(".NET Core runtime version: {netcoreruntime}", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
+
+
+            if (!Debugger.IsAttached && args.Contains("--service"))
+                IsService = true;
+
+            MapOptions<CommandLineOptions> commandLineOptions = CommandLineParser.TryParseCommandLine(args, isDesktopApp);
+
+            CommandLineOptions cmdLineOptions = new CommandLineOptions();
+            new ConfigurationBuilder().AddCommandLineOptions(commandLineOptions).Build().Bind(cmdLineOptions);
+            fixedOptions?.Invoke(cmdLineOptions);
+
+            var host = BuildWebHost(args.Where(arg => arg != "--service").ToArray(), cmdLineOptions, commandLineOptions);
+
+            if (IsService)
+            {
+                host.RunAsSmtp4devService();
+                return null;
+            }
+            else
+            {
+                await host.StartAsync();
+
+                var addressesFeature = host.ServerFeatures.Get<IServerAddressesFeature>();
+                var urls = addressesFeature.Addresses;
+
+                foreach (var url in urls)
+                {
+                    _log.Information("Now listening on: {url}", url);
+                }
+
+                return host;
+            }
+
+        }
+
         private static string GetContentRoot()
         {
-            string installLocation = Path.GetDirectoryName(typeof(Program).Assembly.Location);
+            string installLocation = AppContext.BaseDirectory;
 
             if (Directory.Exists(Path.Join(installLocation, "wwwroot")))
             {
@@ -79,25 +121,18 @@ namespace Rnwood.Smtp4dev
             throw new ApplicationException($"Unable to find wwwroot in either '{installLocation}' or the CWD '{cwd}'");
         }
 
-        private static IWebHost BuildWebHost(string[] args)
+        private static IWebHost BuildWebHost(string[] args, CommandLineOptions cmdLineOptions, MapOptions<CommandLineOptions> commandLineOptions)
         {
-            MapOptions<CommandLineOptions> commandLineOptions = CommandLineParser.TryParseCommandLine(args);
-            if (commandLineOptions == null)
-            {
-                Environment.Exit(1);
-                return null;
-            }
 
-            CommandLineOptions cmdLineOptions = new CommandLineOptions();
-            new ConfigurationBuilder().AddCommandLineOptions(commandLineOptions).Build().Bind(cmdLineOptions);
 
             var contentRoot = GetContentRoot();
             var dataDir = GetOrCreateDataDir(cmdLineOptions);
-            log.Information("DataDir: {dataDir}", dataDir);
+            _log.Information("DataDir: {dataDir}", dataDir);
             Directory.SetCurrentDirectory(dataDir);
 
             IWebHostBuilder builder = WebHost
                 .CreateDefaultBuilder(args)
+                .UseShutdownTimeout(TimeSpan.FromSeconds(10))
                 .UseSerilog()
                 .UseContentRoot(contentRoot)
                 .ConfigureAppConfiguration(
@@ -115,9 +150,8 @@ namespace Rnwood.Smtp4dev
                             cb = cb.AddJsonFile(Path.Join(dataDir, "appsettings.json"), optional: true, reloadOnChange: true);
                         }
 
-                        cb
-.AddEnvironmentVariables()
-.AddCommandLineOptions(commandLineOptions);
+                        cb.AddEnvironmentVariables()
+                            .AddCommandLineOptions(commandLineOptions);
 
                         IConfigurationRoot config = cb
                             .Build();
@@ -147,7 +181,6 @@ namespace Rnwood.Smtp4dev
             return builder.Build();
         }
 
-
         private static string GetOrCreateDataDir(CommandLineOptions cmdLineOptions)
         {
             var dataDir = DirectoryHelper.GetDataDir(cmdLineOptions);
@@ -158,7 +191,7 @@ namespace Rnwood.Smtp4dev
             return dataDir;
         }
 
-        private static void SetupStaticLogger()
+        public static void SetupStaticLogger()
         {
             var configuration = new ConfigurationBuilder()
                 .AddJsonFile("appsettings.json")
