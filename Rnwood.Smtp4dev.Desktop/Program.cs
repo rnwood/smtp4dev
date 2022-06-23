@@ -13,46 +13,57 @@ using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using System.Reflection;
 using System.Threading.Tasks.Schedulers;
+using Serilog;
+using Serilog.Core;
+using Serilog.Events;
 
 namespace Rnwood.Smtp4dev.Desktop
 {
     class Program
     {
+
         [STAThread]
         static async Task Main(string[] args)
         {
-            Console.WriteLine("smtp4dev Desktop");
-
-
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
-                StaTaskScheduler scheduler = new StaTaskScheduler(1);
+                StaTaskScheduler scheduler = new StaTaskScheduler(64);
                 await Task.Factory.StartNew(() => Run(args), CancellationToken.None, TaskCreationOptions.None, scheduler);
-            } else
+            }
+            else
             {
-                await Run(args);
+                Run(args);
             }
         }
 
         private static async Task Run(string[] args)
         {
+            Rnwood.Smtp4dev.Program.SetupStaticLogger();
+            string origWorkingDir = AppContext.BaseDirectory;
+
             try
             {
-                string origWorkingDir = AppContext.BaseDirectory;
 
-                //Environment.CurrentDirectory = Path.Join(origWorkingDir, "server");
-                var host = await
-                     Rnwood.Smtp4dev.Program.StartApp(new string[] { "--urls=http://127.0.0.1:0" }).ConfigureAwait(true);
+
+                var host =
+                       await Rnwood.Smtp4dev.Program.StartApp(args, true, o => o.Urls = "http://127.0.0.1:0");
+
 
                 var addressesFeature = host.ServerFeatures.Get<IServerAddressesFeature>();
                 var urls = addressesFeature.Addresses;
                 var appUrl = new Uri(urls.First());
 
+                DesktopApp.Run(origWorkingDir, appUrl);
 
-                DesktopApp.Run(args, origWorkingDir, appUrl);
+                await host.StopAsync();
 
-                await host.StopAsync().ConfigureAwait(true);
 
+            }
+            catch (CommandLineOptionsException ex)
+            {
+                DesktopApp.ShowFatalError(origWorkingDir, "Command Line " + (ex.IsHelpRequest ? "Help" : "Error"), ex.Message);
+                Environment.Exit(1);
+                return;
             }
             finally
             {
@@ -60,14 +71,6 @@ namespace Rnwood.Smtp4dev.Desktop
                 DesktopApp.Exit();
             }
         }
-
-        private static void ShowFatalError(string title, string details)
-        {
-            Console.Error.WriteLine(title);
-            Console.Error.WriteLine(details);
-            Environment.Exit(1);
-        }
-
 
     }
 

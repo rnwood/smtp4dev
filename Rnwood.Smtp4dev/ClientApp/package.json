@@ -14,7 +14,7 @@
     "splitpanes": "^2.3.8"
   },
   "devDependencies": {
-    "@aspnet/signalr": "^1.0.27",
+    "@microsoft/signalr": "^6.0.6",
     "@babel/preset-typescript": "^7.16.0",
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@testing-library/jest-dom": "^5.15.0",

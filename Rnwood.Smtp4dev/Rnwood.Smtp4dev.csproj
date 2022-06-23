@@ -26,8 +26,6 @@
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.42" />
 		<PackageReference Include="MailKit" Version="2.15.0" />
 		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="3.1.20" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR" Version="1.1.0" />
-		<PackageReference Include="Microsoft.AspNetCore.SignalR.Core" Version="1.1.0" />
 		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="6.0.5" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="5.0.11">
