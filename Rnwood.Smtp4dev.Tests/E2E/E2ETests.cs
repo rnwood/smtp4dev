@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Reflection;
 using System.Runtime.Versioning;
 using System.Text.RegularExpressions;
@@ -41,18 +42,23 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             options ??= new E2ETestOptions();
 
             string workingDir = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_WORKINGDIR");
-            string mainModule = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_BINARY");
+            string binary = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_BINARY");
+            List<string> args = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_ARGS")?.Split("\n", StringSplitOptions.RemoveEmptyEntries)
+                ?.ToList() ?? new List<string>();
 
             if (string.IsNullOrEmpty(workingDir))
             {
                 workingDir = Path.GetFullPath("../../../../Rnwood.Smtp4dev");
-            } else
+            }
+            else
             {
                 workingDir = Path.GetFullPath(workingDir);
             }
 
-            if (string.IsNullOrEmpty(mainModule))
+            if (string.IsNullOrEmpty(binary))
             {
+                binary = "dotnet";
+
                 //.NETCoreapp,Version=v3.1
                 string framework = typeof(Program)
                     .Assembly
@@ -62,28 +68,30 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 //netcoreapp3.1
                 string folder = framework.TrimStart('.').Replace("CoreApp,Version=v", "").ToLower();
 
-                mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/Debug/{folder}/Rnwood.Smtp4dev.dll");
-            } else
+                string mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/Debug/{folder}/Rnwood.Smtp4dev.dll");
+                args.Insert(0, mainModule);
+
+            }
+            else
             {
-                mainModule = Path.GetFullPath(mainModule);
+                workingDir = Path.GetFullPath(binary, workingDir);
             }
 
             var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
             string dbPath = Path.GetTempFileName();
             File.Delete(dbPath);
 
-
-            List<string> args = new List<string>
-            {
-                mainModule, "--debugsettings", options.InMemoryDB ? "--db=" : $"--db={dbPath}", "--nousersettings", "--urls=http://*:0",
+            args.AddRange(new[] {
+                "--debugsettings", options.InMemoryDB ? "--db=" : $"--db={dbPath}", "--nousersettings", "--urls=http://*:0",
                 "--imapport=0", "--smtpport=0", "--tlsmode=StartTls"
-            };
+            });
+
             if (!string.IsNullOrEmpty(options.BasePath))
             {
                 args.Add($"--basepath={options.BasePath}");
             }
 
-            using (Command serverProcess = Command.Run("dotnet", args,
+            using (Command serverProcess = Command.Run(binary, args,
                        o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
             {
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
