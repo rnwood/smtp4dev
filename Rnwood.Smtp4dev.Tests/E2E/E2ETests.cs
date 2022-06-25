@@ -74,7 +74,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             }
             else
             {
-                workingDir = Path.GetFullPath(binary, workingDir);
+                binary = Path.GetFullPath(binary, workingDir);
             }
 
             var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
