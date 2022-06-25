@@ -72,32 +72,32 @@ stages:
               runTests: ${{ false }}
             win-x64:
               platformName: win-x64
-              buildArgs: "-r win-x64"
+              buildArgs: "-r win-x64 --self-contained"
               vmImage: "windows-2019"
               runTests: ${{ true }}
             linux-x64:
               platformName: linux-x64
-              buildArgs: "-r linux-x64"
+              buildArgs: "-r linux-x64 --self-contained"
               vmImage: "ubuntu-18.04"
               runTests: ${{ true }}
             osx-x64:
               platformName: osx-x64
-              buildArgs: "-r osx-x64"
+              buildArgs: "-r osx-x64 --self-contained"
               vmImage: "macOS-10.15"
               runTests: ${{ true }}
             linux-musl-x64:
               platformName: linux-musl-x64
-              buildArgs: "-r linux-musl-x64"
+              buildArgs: "-r linux-musl-x64 --self-contained"
               vmImage: ubuntu-18.04
               runTests: ${{ false }}
             win-arm:
               platformName: win-arm
-              buildArgs: "-r win-arm"
+              buildArgs: "-r win-arm --self-contained"
               vmImage: windows-2019
               runTests: ${{ false }}
             linux-arm:
               platformName: linux-arm
-              buildArgs: "-r linux-arm"
+              buildArgs: "-r linux-arm --self-contained"
               vmImage: ubuntu-18.04
               runTests: ${{ false }}
         steps:

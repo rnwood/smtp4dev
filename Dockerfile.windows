@@ -1,6 +1,6 @@
 # escape=`
 FROM mcr.microsoft.com/dotnet/aspnet:6.0.5 AS final
-COPY Rnwood.Smtp4dev/out /app
+COPY out/Rnwood.Smtp4dev /app
 EXPOSE 80
 EXPOSE 25
 EXPOSE 143
