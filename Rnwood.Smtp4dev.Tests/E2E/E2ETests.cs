@@ -46,6 +46,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             if (string.IsNullOrEmpty(workingDir))
             {
                 workingDir = Path.GetFullPath("../../../../Rnwood.Smtp4dev");
+            } else
+            {
+                workingDir = Path.GetFullPath(workingDir);
             }
 
             if (string.IsNullOrEmpty(mainModule))
@@ -60,6 +63,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 string folder = framework.TrimStart('.').Replace("CoreApp,Version=v", "").ToLower();
 
                 mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/Debug/{folder}/Rnwood.Smtp4dev.dll");
+            } else
+            {
+                mainModule = Path.GetFullPath(mainModule);
             }
 
             var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
