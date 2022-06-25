@@ -249,6 +249,8 @@ stages:
               command: publish
               projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
               publishWebProjects: false
+              zipAfterPublish: false
+              modifyOutputPath: false
               arguments: '-c Release -p:version=$(tag) -o out'
           - task: Docker@2
             displayName: Build image
