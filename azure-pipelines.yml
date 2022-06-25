@@ -54,9 +54,9 @@ stages:
               $dockertags = 'latest v($version.Major) v($version.Major).$($version.Minor)'
               write-host "##vso[task.setvariable variable=docker_tags]$dockertags"
             displayName: Release build - Parse version from release tag
-            condition: variables('isreleasebuild')
+            condition: variables['isreleasebuild']
   - stage: Build
-    displayName: Build - Server
+    displayName: Build
     condition: succeeded()
     jobs:
       - job: BuildMatrix
@@ -116,7 +116,7 @@ stages:
           - powershell: move-item $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev-$(platformName)-$(tag).zip
             displayName: Rename artifact
           - task: DotNetCoreCLI@2
-            condition: variables('runTests')
+            condition: variables['runTests']
             displayName: Run Tests
             inputs:
               command: test
