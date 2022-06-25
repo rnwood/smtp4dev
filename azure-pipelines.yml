@@ -238,15 +238,30 @@ stages:
         pool:
           vmImage: "windows-2019"
         steps:
-          - task: PowerShell@2
-            displayName: Pull cache images
+          - task: Docker@2
+            displayName: Pull cache images downloadnodejs
+            continueOnError: true
             inputs:
-              targetType: inline
-              script: |
-                docker pull $(docker_repo):windows-amd64-cache-downloadnodejs 2>&1
-                docker pull $(docker_repo):windows-amd64-cache-build 2>&1
-                docker pull $(docker_repo):windows-amd64-cache-publish 2>&1               
-                docker pull $(docker_repo):windows-amd64-cache-final 2>&1
+              command: pull
+              arguments: $(docker_repo):windows-amd64-cache-downloadnodejs
+          - task: Docker@2
+            displayName: Pull cache images build
+            continueOnError: true
+            inputs:
+              command: pull
+              arguments: $(docker_repo):windows-amd64-cache-build
+          - task: Docker@2
+            displayName: Pull cache images publish
+            continueOnError: true
+            inputs:
+              command: pull
+              arguments: $(docker_repo):windows-amd64-cache-publish
+          - task: Docker@2
+            displayName: Pull cache images final
+            continueOnError: true
+            inputs:
+              command: pull
+              arguments: $(docker_repo):windows-amd64-cache-final
           - task: Docker@2
             displayName: Build image - downloadnodejs
             inputs:
