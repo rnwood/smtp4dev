@@ -238,12 +238,39 @@ stages:
         pool:
           vmImage: "windows-2019"
         steps:
+          - task: PowerShell@2
+            displayName: Pull cache images
+            inputs:
+              targetType: inline
+              script: |
+                docker pull $(docker_repo):windows-amd64-cache-downloadnodejs 2>&1
+                docker pull $(docker_repo):windows-amd64-cache-build 2>&1
+                docker pull $(docker_repo):windows-amd64-cache-publish 2>&1               
+                docker pull $(docker_repo):windows-amd64-cache-final 2>&1
           - task: Docker@2
-            displayName: Build image
+            displayName: Build image - downloadnodejs
             inputs:
               command: build
               dockerfile: "**/Dockerfile.windows"
-              arguments: "--build-arg version=$(tag) -t $(docker_repo):windows-amd64-$(tag)"
+              arguments: "--target downloadnodejs --build-arg version=$(tag) --cache-from $(docker_repo):windows-amd64-cache-downloadnodejs -t $(docker_repo):windows-amd64-cache-downloadnodejs"
+          - task: Docker@2
+            displayName: Build image - build
+            inputs:
+              command: build
+              dockerfile: "**/Dockerfile.windows"
+              arguments: "--target build --build-arg version=$(tag) --cache-from $(docker_repo):windows-amd64-cache-downloadnodejs --cache-from $(docker_repo):windows-amd64-cache-build -t $(docker_repo):windows-amd64-cache-build"
+          - task: Docker@2
+            displayName: Build image - publish
+            inputs:
+              command: build
+              dockerfile: "**/Dockerfile.windows"
+              arguments: "--target publish --build-arg version=$(tag) --cache-from $(docker_repo):windows-amd64-cache-downloadnodejs --cache-from $(docker_repo):windows-amd64-cache-build --cache-from $(docker_repo):windows-amd64-cache-publish -t $(docker_repo):windows-amd64-cache-publish"
+          - task: Docker@2
+            displayName: Build image - final
+            inputs:
+              command: build
+              dockerfile: "**/Dockerfile.windows"
+              arguments: "--target final --build-arg version=$(tag) --cache-from $(docker_repo):windows-amd64-cache-downloadnodejs --cache-from $(docker_repo):windows-amd64-cache-build --cache-from $(docker_repo):windows-amd64-cache-publish --cache-from $(docker_repo):windows-amd64-cache-final -t $(docker_repo):windows-amd64-cache-final -t $(docker_repo):windows-amd64-$(tag)"
           - task: Docker@2
             displayName: Push image
             condition: or(variables['isreleasebuild'], variables['iscibuild'])
@@ -253,6 +280,10 @@ stages:
               command: push
               tags: |
                 windows-amd64-$(tag)
+                windows-amd64-cache-downloadnodejs
+                windows-amd64-cache-build
+                windows-amd64-cache-publish
+                windows-amd64-cache-final
       - job: DockerManifest
         displayName: Docker Create Manifest
         condition: or(variables['isreleasebuild'], variables['iscibuild'])
