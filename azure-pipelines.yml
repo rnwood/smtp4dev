@@ -114,7 +114,7 @@ stages:
               publishWebProjects: false
               arguments: '-c Release $(buildArgs) -p:version=$(tag)'
           - task: DotNetCoreCLI@2
-            condition: equals(variables['runTests'], true)
+            condition: eq(variables['runTests'], true)
             displayName: Run Tests
             env:
               SMTP4DEV_E2E_WORKINGDIR: Rnwood.Smtp4dev
