@@ -8,417 +8,374 @@ trigger:
       - refs/tags/*-ci*
 
 resources:
-- repo: self
+  - repo: self
 
 variables:
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
     iscibuild: ${{ true }}
-    docker_tags: 'prerelease'
+    docker_tags: "prerelease"
 
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
     isreleasebuild: ${{ true }}
     tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
-    docker_tags: 'v3 v3.2 latest'
+    docker_tags: #Set by init script
+    version_major: "" #Set by init script
+    version_minor: "" #Set by init script
+    version_build: "" #Set by init script
+    version_revision: "" #Set by init script
 
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
-    civersion: '3.2.0'
-    tag: $[ format('$(civersion)-ci{0:yyyyMMdd}{1}', pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
+    tag: $[ format('3.2.0-ci{0:yyyyMMdd}{1}', pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
 
-  docker_repo: 'rnwood/smtp4dev'
-  docker_registry: 'dockerhub-rnwood'
-  netcoresdk_version: '6.0.300'
+  docker_repo: "rnwood/smtp4dev"
+  docker_registry: "dockerhub-rnwood"
+  netcoresdk_version: "6.0.300"
 
 stages:
-- stage: Init
-  displayName: Init
-  jobs:
-  - job: Init
-    pool:
-      vmImage: 'ubuntu-18.04'
-    steps:
-    - checkout: none
-    - powershell: Write-Host "$(tag) $(Build.BuildNumber)"
-      displayName: Display build number
-    - powershell: Write-Host "##vso[build.updatebuildnumber]$(tag) $(Build.BuildNumber)"
-      displayName: Update build number
+  - stage: Init
+    displayName: Init
+    jobs:
+      - job: Init
+        pool:
+          vmImage: "ubuntu-18.04"
+        steps:
+          - checkout: none
+          - powershell: Write-Host "$(tag) $(Build.BuildNumber)"
+            displayName: Display build number
+          - powershell: Write-Host "##vso[build.updatebuildnumber]$(tag) $(Build.BuildNumber)"
+            displayName: Update build number
+          - powershell: |
+              $version = [version] "$($tag)"
+              write-host "##vso[task.setvariable variable=version_major]$($version.Major)"
+              write-host "##vso[task.setvariable variable=version_minor]$(if ($version.Minor -ne -1) { $version.Minor })"
+              write-host "##vso[task.setvariable variable=version_build]$(if ($version.Build -ne -1) {$version.Build)"
+              write-host "##vso[task.setvariable variable=version_revision]$(if ($version.Revision -ne -1) {$version.Revision)"
 
-- stage: Build
-  displayName: Build
-  condition: succeeded()
-  jobs:
+              $dockertags = 'latest v($version.Major) v($version.Major).$($version.Minor)'
+              write-host "##vso[task.setvariable variable=docker_tags]$dockertags"
+            displayName: Release build - Parse version from release tag
+            condition: variables('isreleasebuild')
+  - stage: Build
+    displayName: Build - Server
+    condition: succeeded()
+    jobs:
+      - job: BuildMatrix
+        displayName: Build and test $(platformName)
+        pool:
+          vmImage: $(vmImage)
+        strategy:
+          matrix:
+            noruntime:
+              platformName: noruntime
+              buildArgs: ""
+              vmImage: "windows-2019"
+              runTests: ${{ false }}
+            win-x64:
+              platformName: win-x64
+              buildArgs: "-r win-x64"
+              vmImage: "windows-2019"
+              runTests: ${{ true }}
+            linux-x64:
+              platformName: linux-x64
+              buildArgs: "-r linux-x64"
+              vmImage: "ubuntu-18.04"
+              runTests: ${{ true }}
+            osx-x64:
+              platformName: osx-x64
+              buildArgs: "-r osx-x64"
+              vmImage: "macOS-10.15"
+              runTests: ${{ true }}
+            linux-musl-x64:
+              platformName: linux-musl-x64
+              buildArgs: "-r linux-musl-x64"
+              vmImage: windows-2019
+              runTests: ${{ false }}
+            win-arm:
+              platformName: win-arm
+              buildArgs: "-r win-arm"
+              vmImage: windows-2019
+              runTests: ${{ false }}
+            linux-arm:
+              platformName: linux-arm
+              buildArgs: "-r linux-arm"
+              vmImage: windows-2019
+              runTests: ${{ false }}
+        steps:
+          - task: UseDotNet@2
+            displayName: Install .NET Core SDK v$(netcoresdk_version)
+            inputs:
+              packageType: sdk
+              version: $(netcoresdk_version)
+          - task: DotNetCoreCLI@2
+            displayName: Build $(platformName)
+            inputs:
+              command: publish
+              projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+              publishWebProjects: false
+              arguments: '-c Release $(buildArgs) -p:version=$(tag) -o "$(Build.ArtifactStagingDirectory)/$(platformName)"'
+          - powershell: move-item $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev-$(platformName)-$(tag).zip
+            displayName: Rename artifact
+          - task: DotNetCoreCLI@2
+            condition: variables('runTests')
+            displayName: Run Tests
+            inputs:
+              command: test
+          - publish: $(Build.ArtifactStagingDirectory)/$(platformName)
+            artifact: $(platformName)
+          
+            
+      - job: BuildGlobalTool
+        displayName: Build - .NET Global Tool
+        pool:
+          vmImage: "windows-2019"
+        steps:
+          - task: UseDotNet@2
+            displayName: Install .NET Core SDK v$(netcoresdk_version)
+            inputs:
+              packageType: sdk
+              version: $(netcoresdk_version)
+          - task: DotNetCoreCLI@2
+            displayName: Build .NET Core Global Tool
+            inputs:
+              command: custom
+              custom: pack
+              arguments: '-c Release -p:PackAsTool=true -p:version=$(tag) -o "$(Build.ArtifactStagingDirectory)/dotnetglobaltool" Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj'
+          - publish: $(Build.ArtifactStagingDirectory)/dotnetglobaltool
+            artifact: dotnetglobaltool
 
-  - job: Build
-    displayName: Build
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-    - task: UseDotNet@2
-      displayName: Install .NET Core SDK v$(netcoresdk_version)
-      inputs:
-        packageType: sdk
-        version: $(netcoresdk_version)
-    - task: DotNetCoreCLI@2
-      displayName: Build .NET Core Global Tool
-      inputs:
-        command: custom
-        custom: pack
-        arguments: '-c Release -p:PackAsTool=true -p:version=$(tag) -o "$(Build.ArtifactStagingDirectory)/dotnetglobaltool" Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj'
-    - publish: $(Build.ArtifactStagingDirectory)/dotnetglobaltool
-      artifact: dotnetglobaltool
-    - task: DotNetCoreCLI@2
-      displayName: Build .NET Core - no runtime
-      inputs:
-        command: publish
-        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        publishWebProjects: false
-        arguments: '-c Release -p:version=$(tag) -o "$(Build.ArtifactStagingDirectory)/noruntime"'
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/noruntime/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/noruntime/Rnwood.Smtp4dev-noruntime-$(tag).zip
-      displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/noruntime
-      artifact: noruntime
-    - task: DotNetCoreCLI@2
-      displayName: Build .NET Core - win-x64
-      inputs:
-        command: publish
-        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        publishWebProjects: false
-        arguments: '-c Release -r win-x64 -p:version=$(tag) -o "$(Build.ArtifactStagingDirectory)/win-x64"'
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/win-x64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/win-x64/Rnwood.Smtp4dev-win-x64-$(tag).zip
-      displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/win-x64
-      artifact: win-x64
+      - job: BuildGlobalTool
+        displayName: Build - Desktop
+        pool:
+          vmImage: "windows-2019"
+        steps:
+          - task: UseDotNet@2
+            displayName: Install .NET Core SDK v$(netcoresdk_version)
+            inputs:
+              packageType: sdk
+              version: $(netcoresdk_version)
+          - task: DotNetCoreCLI@2
+            displayName: Build .NET Core - win-x64-desktop
+            inputs:
+              command: publish
+              projects: "Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj"
+              publishWebProjects: false
+              arguments: '-c Release -r win-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
+          - powershell: move-item $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip
+            displayName: Rename artifact
+          - publish: $(Build.ArtifactStagingDirectory)/win-x64-desktop
+            artifact: win-x64-desktop
 
-    - task: DotNetCoreCLI@2
-      displayName: Build .NET Core - win-x64-desktop
-      inputs:
-        command: publish
-        projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
-        publishWebProjects: false
-        arguments: '-c Release -r win-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip
-      displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/win-x64-desktop
-      artifact: win-x64-desktop
-
-    - task: DotNetCoreCLI@2
-      displayName: Build .NET Core - linux-x64
-      inputs:
-        command: publish
-        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        publishWebProjects: false
-        arguments: '-c Release -r linux-x64 -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/linux-x64"'
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-x64/Rnwood.Smtp4dev-linux-x64-$(tag).zip
-      displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/linux-x64
-      artifact: linux-x64
-
-    # - task: DotNetCoreCLI@2
-    #   displayName: Build .NET Core - linux-x64-desktop
-    #   inputs:
-    #     command: publish
-    #     projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
-    #     publishWebProjects: false
-    #     arguments: '-c Release -r linux-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
-    # - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop-linux-x64-$(tag).zip
-    #   displayName: Rename artifact
-    # - publish: $(Build.ArtifactStagingDirectory)/linux-x64-desktop
-    #   artifact: linux-x64-desktop
-
-    - task: DotNetCoreCLI@2
-      displayName: Build .NET Core - linux-musl-x64
-      inputs:
-        command: publish
-        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        publishWebProjects: false
-        arguments: '-c Release -r linux-musl-x64 -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/linux-musl-x64"'
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-musl-x64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-musl-x64/Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip
-      displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/linux-musl-x64
-      artifact: linux-musl-x64
-
-    # - task: DotNetCoreCLI@2
-    #   displayName: Build .NET Core - osx-x64
-    #   inputs:
-    #     command: publish
-    #     projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-    #     publishWebProjects: false
-    #     arguments: '-c Release -r osx-x64 -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/osx-x64"'
-    # - powershell: move-item $(Build.ArtifactStagingDirectory)/osx-x64/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/osx-x64/Rnwood.Smtp4dev-osx-x64-$(tag).zip
-    #   displayName: Rename artifact
-    # - publish: $(Build.ArtifactStagingDirectory)/osx-x64
-    #   artifact: osx-x64
-    - task: DotNetCoreCLI@2
-      displayName: Build .NET Core - win-arm
-      inputs:
-        command: publish
-        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        publishWebProjects: false
-        arguments: '-c Release -r win-arm -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/win-arm"'
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/win-arm/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/win-arm/Rnwood.Smtp4dev-win-arm-$(tag).zip
-      displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/win-arm
-      artifact: win-arm
-    - task: DotNetCoreCLI@2
-      displayName: Build .NET Core - linux-arm
-      inputs:
-        command: publish
-        projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
-        publishWebProjects: false
-        arguments: '-c Release -r linux-arm -p:version=$(tag)  -o "$(Build.ArtifactStagingDirectory)/linux-arm"'
-    - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/linux-arm/Rnwood.Smtp4dev-linux-arm-$(tag).zip
-      displayName: Rename artifact
-    - publish: $(Build.ArtifactStagingDirectory)/linux-arm
-      artifact: linux-arm
-  - job: DockerBuildLinux
-    displayName: DockerBuild - Linux
-    pool:
-      vmImage: 'ubuntu-18.04'
-    steps:
-    - task: Docker@2
-      displayName: Build image
-      inputs:
-        command: build
-        dockerfile: '**/Dockerfile.linux'
-        arguments: '--build-arg version=$(tag) -t $(docker_repo):linux-amd64-$(tag)'
-    - task: Docker@2
-      displayName: Push image
-      condition: or(variables['isreleasebuild'], variables['iscibuild'])
-      inputs:
-        containerRegistry: $(docker_registry)
-        repository: $(docker_repo)
-        command: push
-        tags: |
-          linux-amd64-$(tag)
-  - job: DockerBuildLinuxArm64
-    displayName: DockerBuild - Linux - ARM64
-    pool:
-      vmImage: 'ubuntu-18.04'
-    steps:
-      - task: Docker@2
-        displayName: Build image
-        inputs:
-          command: build
-          dockerfile: '**/Dockerfile.linux.arm64'
-          arguments: '--build-arg version=$(tag) -t $(docker_repo):linux-arm64-$(tag)'
-      - task: Docker@2
-        displayName: Push image
+          # - task: DotNetCoreCLI@2
+          #   displayName: Build .NET Core - linux-x64-desktop
+          #   inputs:
+          #     command: publish
+          #     projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
+          #     publishWebProjects: false
+          #     arguments: '-c Release -r linux-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
+          # - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop-linux-x64-$(tag).zip
+          #   displayName: Rename artifact
+          # - publish: $(Build.ArtifactStagingDirectory)/linux-x64-desktop
+          #   artifact: linux-x64-desktop
+      - job: DockerBuildLinux
+        displayName: DockerBuild - Linux
+        pool:
+          vmImage: "ubuntu-18.04"
+        steps:
+          - task: Docker@2
+            displayName: Build image
+            inputs:
+              command: build
+              dockerfile: "**/Dockerfile.linux"
+              arguments: "--build-arg version=$(tag) -t $(docker_repo):linux-amd64-$(tag)"
+          - task: Docker@2
+            displayName: Push image
+            condition: or(variables['isreleasebuild'], variables['iscibuild'])
+            inputs:
+              containerRegistry: $(docker_registry)
+              repository: $(docker_repo)
+              command: push
+              tags: |
+                linux-amd64-$(tag)
+      - job: DockerBuildLinuxArm64
+        displayName: DockerBuild - Linux - ARM64
+        pool:
+          vmImage: "ubuntu-18.04"
+        steps:
+          - task: Docker@2
+            displayName: Build image
+            inputs:
+              command: build
+              dockerfile: "**/Dockerfile.linux.arm64"
+              arguments: "--build-arg version=$(tag) -t $(docker_repo):linux-arm64-$(tag)"
+          - task: Docker@2
+            displayName: Push image
+            condition: or(variables['isreleasebuild'], variables['iscibuild'])
+            inputs:
+              containerRegistry: $(docker_registry)
+              repository: $(docker_repo)
+              command: push
+              tags: |
+                linux-arm64-$(tag)
+      - job: DockerBuildWindows
+        displayName: DockerBuild - Windows
+        pool:
+          vmImage: "windows-2019"
+        steps:
+          - task: Docker@2
+            displayName: Build image
+            inputs:
+              command: build
+              dockerfile: "**/Dockerfile.windows"
+              arguments: "--build-arg version=$(tag) -t $(docker_repo):windows-amd64-$(tag)"
+          - task: Docker@2
+            displayName: Push image
+            condition: or(variables['isreleasebuild'], variables['iscibuild'])
+            inputs:
+              containerRegistry: $(docker_registry)
+              repository: $(docker_repo)
+              command: push
+              tags: |
+                windows-amd64-$(tag)
+      - job: DockerManifest
+        displayName: Docker Create Manifest
         condition: or(variables['isreleasebuild'], variables['iscibuild'])
-        inputs:
-          containerRegistry: $(docker_registry)
-          repository: $(docker_repo)
-          command: push
-          tags: |
-            linux-arm64-$(tag)
-  - job: DockerBuildWindows
-    displayName: DockerBuild - Windows
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-    - task: Docker@2
-      displayName: Build image
-      inputs:
-        command: build
-        dockerfile: '**/Dockerfile.windows'
-        arguments: '--build-arg version=$(tag) -t $(docker_repo):windows-amd64-$(tag)'
-    - task: Docker@2
-      displayName: Push image
-      condition: or(variables['isreleasebuild'], variables['iscibuild'])
-      inputs:
-        containerRegistry: $(docker_registry)
-        repository: $(docker_repo)
-        command: push
-        tags: |
-          windows-amd64-$(tag)
-  - job: DockerManifest
-    displayName: Docker Create Manifest
-    condition: or(variables['isreleasebuild'], variables['iscibuild'])
-    dependsOn:
-    - DockerBuildLinux
-    - DockerBuildLinuxArm64
-    - DockerBuildWindows
-    variables:
-      DOCKER_CLI_EXPERIMENTAL: enabled
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-    - task: Docker@2
-      displayName: Login.
-      inputs:
-        containerRegistry: $(docker_registry)
-        repository: $(docker_repo)
-        command: login
-    - task: PowerShell@2
-      displayName: Create cross platform manifest
-      inputs:
-        targetType: inline
-        script: |
-          docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
-          docker manifest push $(docker_repo):$(tag)
+        dependsOn:
+          - DockerBuildLinux
+          - DockerBuildLinuxArm64
+          - DockerBuildWindows
+        variables:
+          DOCKER_CLI_EXPERIMENTAL: enabled
+        pool:
+          vmImage: "windows-2019"
+        steps:
+          - task: Docker@2
+            displayName: Login.
+            inputs:
+              containerRegistry: $(docker_registry)
+              repository: $(docker_repo)
+              command: login
+          - task: PowerShell@2
+            displayName: Create cross platform manifest
+            inputs:
+              targetType: inline
+              script: |
+                docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
+                docker manifest push $(docker_repo):$(tag)
 
-- stage: Test
-  displayName: Test
-  condition:  succeeded()
-  jobs:
-  - job: TestOnWindows
-    displayName: Test - Windows
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-    - task: UseDotNet@2
-      displayName: Install .NET Core SDK v$(netcoresdk_version)
-      inputs:
-        packageType: sdk
-        version: $(netcoresdk_version)
-    - task: DotNetCoreCLI@2
-      displayName: Run Tests
-      inputs:
-        command: test
-  - job: TestOnLinux
-    displayName: Test - Linux
-    pool:
-      vmImage: 'ubuntu-18.04'
-    steps:
-    - task: UseDotNet@2
-      displayName: Install .NET Core SDK v$(netcoresdk_version)
-      inputs:
-        packageType: sdk
-        version: $(netcoresdk_version)
-    - task: DotNetCoreCLI@2
-      displayName: Run Tests
-      inputs:
-        command: test
-  - job: TestOnMacOSX
-    displayName: Test - MacOSX
-    pool:
-      vmImage: 'macOS-10.15'
-    steps:
-    - task: UseDotNet@2
-      displayName: Install .NET Core SDK v$(netcoresdk_version)
-      inputs:
-        packageType: sdk
-        version: $(netcoresdk_version)
-    - task: DotNetCoreCLI@2
-      displayName: Run Tests
-      inputs:
-        command: test
+  - stage: Release
+    condition: and(succeeded(), or(variables['isreleasebuild'], variables['iscibuild']))
+    displayName: Release
+    jobs:
+      - job: Release
+        pool:
+          vmImage: "ubuntu-18.04"
+        steps:
+          - checkout: none
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              path: $(Build.ArtifactStagingDirectory)
+          - task: NuGetCommand@2
+            inputs:
+              command: "push"
+              packagesToPush: "$(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg"
+              nuGetFeedType: "external"
+              publishFeedCredentials: "nuget_rnwood"
 
-- stage: Release
-  condition:  and(succeeded(), or(variables['isreleasebuild'], variables['iscibuild']))
-  displayName: Release
-  jobs:
-  - job: Release
-    pool:
-      vmImage: 'ubuntu-18.04'
-    steps:
-    - checkout: none
-    - task: DownloadPipelineArtifact@2
-      inputs:
-        path: $(Build.ArtifactStagingDirectory)
-    - task: NuGetCommand@2
-      inputs:
-        command: 'push'
-        packagesToPush: '$(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg'
-        nuGetFeedType: 'external'
-        publishFeedCredentials: 'nuget_rnwood'
+          - task: GitHubRelease@1
+            inputs:
+              gitHubConnection: github.com_rnwood
+              repositoryName: rnwood/smtp4dev
+              action: create
+              title: $(tag)
+              tag: $(tag)
+              tagSource: userSpecifiedTag
+              isDraft: false
+              releaseNotesSource: inline
+              addChangeLog: true
+              releaseNotesInline: |
+                File Name | Description
+                -- | --
+                [Rnwood.Smtp4dev-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip) | Windows x64 binary standalone - Server edition
+                [Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip) | Windows x64 binary standalone - Desktop app edition.
+                [Rnwood.Smtp4dev-win-arm-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-arm-$(tag).zip) | Windows ARM 32-bit binary standalone
+                [Rnwood.Smtp4dev-win-arm64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip) | Windows ARM 62-bit binary standalone
+                [Rnwood.Smtp4dev-linux-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-linux-x64-$(tag).zip) | Linux x64 (Intel 64 bit) binary standalone
+                [Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip) | Linux MUSL x64 binary standalone for Linux distros using MUSL libc
+                [Rnwood.Smtp4dev-noruntime-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-noruntime-$(tag).zip) | Architecture independent version. Should run on any platform where the .NET Core 6.0 (or greater) runtime is installed
 
+              ${{ if variables['isreleasebuild'] }}:
+                isPreRelease: false
+                changeLogCompareToRelease: lastFullRelease
+              ${{ if not(variables['isreleasebuild']) }}:
+                isPreRelease: true
+                changeLogCompareToRelease: lastNonDraftRelease
 
-    - task: GitHubRelease@1
-      inputs:
-        gitHubConnection: github.com_rnwood
-        repositoryName: rnwood/smtp4dev
-        action: create
-        title: $(tag)
-        tag: $(tag)
-        tagSource: userSpecifiedTag
-        isDraft: false
-        releaseNotesSource: inline
-        addChangeLog: true
-        releaseNotesInline: |
-          File Name | Description
-          -- | --
-          [Rnwood.Smtp4dev-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip) | Windows x64 binary standalone - Server edition
-          [Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip) | Windows x64 binary standalone - Desktop app edition.
-          [Rnwood.Smtp4dev-win-arm-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-arm-$(tag).zip) | Windows ARM 32-bit binary standalone
-          [Rnwood.Smtp4dev-win-arm64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip) | Windows ARM 62-bit binary standalone
-          [Rnwood.Smtp4dev-linux-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-linux-x64-$(tag).zip) | Linux x64 (Intel 64 bit) binary standalone
-          [Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip) | Linux MUSL x64 binary standalone for Linux distros using MUSL libc
-          [Rnwood.Smtp4dev-noruntime-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-noruntime-$(tag).zip) | Architecture independent version. Should run on any platform where the .NET Core 6.0 (or greater) runtime is installed
+              assets: $(Build.ArtifactStagingDirectory)/**/*.zip
 
-        ${{ if variables['isreleasebuild'] }}:
-          isPreRelease: false
-          changeLogCompareToRelease: lastFullRelease
-        ${{ if not(variables['isreleasebuild']) }}:
-          isPreRelease: true
-          changeLogCompareToRelease: lastNonDraftRelease
+      - job: DockerReleaseTagLinux
+        displayName: Docker Release Tag - Linux
+        variables:
+          DOCKER_CLI_EXPERIMENTAL: enabled
+        pool:
+          vmImage: "ubuntu-18.04"
+        steps:
+          - checkout: none
+          - task: Docker@2
+            displayName: Login.
+            inputs:
+              containerRegistry: $(docker_registry)
+              repository: $(docker_repo)
+              command: login
+          - task: PowerShell@2
+            displayName: Tag release
+            inputs:
+              targetType: inline
+              script: |
+                docker pull $(docker_repo):linux-amd64-$(tag)
 
-        assets: $(Build.ArtifactStagingDirectory)/**/*.zip
+                ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
+                  docker tag $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-amd64-$_
+                  docker push $(docker_repo):linux-amd64-$_
+                }
 
-  - job: DockerReleaseTagLinux
-    displayName: Docker Release Tag - Linux
-    variables:
-      DOCKER_CLI_EXPERIMENTAL: enabled
-    pool:
-      vmImage: 'ubuntu-18.04'
-    steps:
-    - checkout: none
-    - task: Docker@2
-      displayName: Login.
-      inputs:
-        containerRegistry: $(docker_registry)
-        repository: $(docker_repo)
-        command: login
-    - task: PowerShell@2
-      displayName: Tag release
-      inputs:
-        targetType: inline
-        script: |
-          docker pull $(docker_repo):linux-amd64-$(tag)
+                docker pull $(docker_repo):linux-arm64-$(tag)
 
-          ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
-            docker tag $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-amd64-$_
-            docker push $(docker_repo):linux-amd64-$_
-          }
+                ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
+                  docker tag $(docker_repo):linux-arm64-$(tag) $(docker_repo):linux-arm64-$_
+                  docker push $(docker_repo):linux-arm64-$_
+                }
 
-          docker pull $(docker_repo):linux-arm64-$(tag)
+      - job: DockerRelease
+        displayName: Docker Release
+        dependsOn: DockerReleaseTagLinux
+        variables:
+          DOCKER_CLI_EXPERIMENTAL: enabled
+        pool:
+          vmImage: "windows-2019"
+        steps:
+          - checkout: none
+          - task: Docker@2
+            displayName: Login
+            inputs:
+              containerRegistry: $(docker_registry)
+              repository: $(docker_repo)
+              command: login
+          - task: PowerShell@2
+            displayName: Tag release
+            inputs:
+              targetType: inline
+              script: |
+                docker pull $(docker_repo):windows-amd64-$(tag)
 
-          ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
-            docker tag $(docker_repo):linux-arm64-$(tag) $(docker_repo):linux-arm64-$_
-            docker push $(docker_repo):linux-arm64-$_
-          }
+                ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
+                  docker tag $(docker_repo):windows-amd64-$(tag) $(docker_repo):windows-amd64-$_
+                  docker push $(docker_repo):windows-amd64-$_
+                }
 
-  - job: DockerRelease
-    displayName: Docker Release
-    dependsOn: DockerReleaseTagLinux
-    variables:
-      DOCKER_CLI_EXPERIMENTAL: enabled
-    pool:
-      vmImage: 'windows-2019'
-    steps:
-    - checkout: none
-    - task: Docker@2
-      displayName: Login
-      inputs:
-        containerRegistry: $(docker_registry)
-        repository: $(docker_repo)
-        command: login
-    - task: PowerShell@2
-      displayName: Tag release
-      inputs:
-        targetType: inline
-        script: |
-          docker pull $(docker_repo):windows-amd64-$(tag)
+                docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
+                docker manifest push $(docker_repo):$(tag)
 
-          ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
-            docker tag $(docker_repo):windows-amd64-$(tag) $(docker_repo):windows-amd64-$_
-            docker push $(docker_repo):windows-amd64-$_
-          }
-
-          docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
-          docker manifest push $(docker_repo):$(tag)
-
-          ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
-            docker manifest create $(docker_repo):$_ $(docker_repo):windows-amd64-$_ $(docker_repo):linux-amd64-$_ $(docker_repo):linux-arm64-$_
-            docker manifest push $(docker_repo):$_
-          }
-
-
+                ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
+                  docker manifest create $(docker_repo):$_ $(docker_repo):windows-amd64-$_ $(docker_repo):linux-amd64-$_ $(docker_repo):linux-arm64-$_
+                  docker manifest push $(docker_repo):$_
+                }
