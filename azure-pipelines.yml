@@ -238,6 +238,18 @@ stages:
         pool:
           vmImage: "windows-2019"
         steps:
+          - task: UseDotNet@2
+            displayName: Install .NET Core SDK v$(netcoresdk_version)
+            inputs:
+              packageType: sdk
+              version: $(netcoresdk_version)
+          - task: DotNetCoreCLI@2
+            displayName: Publish
+            inputs:
+              command: publish
+              projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+              publishWebProjects: false
+              arguments: '-c Release -p:version=$(tag) -o out'
           - task: Docker@2
             displayName: Build image
             inputs:
