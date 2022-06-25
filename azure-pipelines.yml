@@ -134,7 +134,7 @@ stages:
               SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev
             inputs:
               command: test
-              arguments: '-c Release $(buildArgs)'
+              configuration: release
           - powershell: move-item $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev-$(platformName)-$(tag).zip
             displayName: Rename artifact
           - publish: $(Build.ArtifactStagingDirectory)/$(platformName)
