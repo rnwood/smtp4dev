@@ -16,10 +16,13 @@ WORKDIR /app
 RUN node -v
 RUN npm -v
 
-# copy csproj and restore as distinct layers
+# copy npm/csproj and restore as distinct layers
+COPY /Rnwood.Smtp4dev/ClientApp/package.json /app/Rnwood.Smtp4dev/ClientApp
+COPY /Rnwood.Smtp4dev/ClientApp/package-lock.json /app/Rnwood.Smtp4dev/ClientApp
 COPY *.sln .
 COPY Rnwood.Smtp4dev/*.csproj ./Rnwood.Smtp4dev/
 RUN dotnet restore Rnwood.Smtp4dev
+RUN dotnet msbuild -p:Configuration=Release -t:NpmInstall
 
 # copy everything else and build app
 COPY /Rnwood.Smtp4dev/ClientApp /app/Rnwood.Smtp4dev/ClientApp

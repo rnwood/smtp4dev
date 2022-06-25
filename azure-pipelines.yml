@@ -287,6 +287,17 @@ stages:
               dockerfile: "**/Dockerfile.windows"
               arguments: "--target final --build-arg version=$(tag) --cache-from $(docker_repo):windows-amd64-cache-downloadnodejs --cache-from $(docker_repo):windows-amd64-cache-build --cache-from $(docker_repo):windows-amd64-cache-publish --cache-from $(docker_repo):windows-amd64-cache-final -t $(docker_repo):windows-amd64-cache-final -t $(docker_repo):windows-amd64-$(tag)"
           - task: Docker@2
+            displayName: Push cache images
+            inputs:
+              containerRegistry: $(docker_registry)
+              repository: $(docker_repo)
+              command: push
+              tags: |
+                windows-amd64-cache-downloadnodejs
+                windows-amd64-cache-build
+                windows-amd64-cache-publish
+                windows-amd64-cache-final
+          - task: Docker@2
             displayName: Push image
             condition: or(variables['isreleasebuild'], variables['iscibuild'])
             inputs:
@@ -295,10 +306,6 @@ stages:
               command: push
               tags: |
                 windows-amd64-$(tag)
-                windows-amd64-cache-downloadnodejs
-                windows-amd64-cache-build
-                windows-amd64-cache-publish
-                windows-amd64-cache-final
       - job: DockerManifest
         displayName: Docker Create Manifest
         condition: or(variables['isreleasebuild'], variables['iscibuild'])
