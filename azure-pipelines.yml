@@ -117,8 +117,8 @@ stages:
             condition: eq(variables['runTests'], true)
             displayName: Run Tests
             env:
-              SMTP4DEV_E2E_WORKINGDIR: Rnwood.Smtp4dev
-              SMTP4DEV_E2E_BINARY: Rnwood.Smtp4dev/bin/Release/net6.0/Rnwood.Smtp4dev
+              SMTP4DEV_E2E_WORKINGDIR: ../Rnwood.Smtp4dev
+              SMTP4DEV_E2E_BINARY: ../Rnwood.Smtp4dev/bin/Release/net6.0/Rnwood.Smtp4dev
             inputs:
               command: test
           - task: DotNetCoreCLI@2
