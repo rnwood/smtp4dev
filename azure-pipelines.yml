@@ -72,32 +72,32 @@ stages:
               runTests: ${{ false }}
             win-x64:
               platformName: win-x64
-              buildArgs: "-r win-x64"
+              buildArgs: "-r win-x64 --self-contained"
               vmImage: "windows-2019"
               runTests: ${{ true }}
             linux-x64:
               platformName: linux-x64
-              buildArgs: "-r linux-x64"
+              buildArgs: "-r linux-x64 --self-contained"
               vmImage: "ubuntu-18.04"
               runTests: ${{ true }}
             osx-x64:
               platformName: osx-x64
-              buildArgs: "-r osx-x64"
+              buildArgs: "-r osx-x64 --self-contained"
               vmImage: "macOS-10.15"
               runTests: ${{ true }}
             linux-musl-x64:
               platformName: linux-musl-x64
-              buildArgs: "-r linux-musl-x64"
+              buildArgs: "-r linux-musl-x64 --self-contained"
               vmImage: ubuntu-18.04
               runTests: ${{ false }}
             win-arm:
               platformName: win-arm
-              buildArgs: "-r win-arm"
+              buildArgs: "-r win-arm --self-contained"
               vmImage: windows-2019
               runTests: ${{ false }}
             linux-arm:
               platformName: linux-arm
-              buildArgs: "-r linux-arm"
+              buildArgs: "-r linux-arm --self-contained"
               vmImage: ubuntu-18.04
               runTests: ${{ false }}
         steps:
@@ -198,12 +198,45 @@ stages:
         pool:
           vmImage: "ubuntu-18.04"
         steps:
+          - task: UseDotNet@2
+            displayName: Install .NET Core SDK v$(netcoresdk_version)
+            inputs:
+              packageType: sdk
+              version: $(netcoresdk_version)
+          - task: DotNetCoreCLI@2
+            displayName: Publish
+            inputs:
+              command: publish
+              projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+              publishWebProjects: false
+              zipAfterPublish: false
+              modifyOutputPath: false
+              arguments: '-c Release -p:version=$(tag) -o out'
           - task: Docker@2
             displayName: Build image
             inputs:
               command: build
               dockerfile: "**/Dockerfile.linux"
               arguments: "--build-arg version=$(tag) -t $(docker_repo):linux-amd64-$(tag)"
+          # - task: DotNetCoreCLI@2
+          #   displayName: Run Tests
+          #   env:
+          #     SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
+          #     SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
+          #     SMTP4DEV_E2E_BINARY: docker
+          #     SMTP4DEV_E2E_ARGS: |
+          #       run
+          #       -i
+          #       -p
+          #       25:25
+          #       -p
+          #       80:80
+          #       -p
+          #       110:110
+          #       $(docker_repo):linux-amd64-$(tag)
+          #       --urls=http://*:80
+          #       --smtpport=25
+          #       --imapport=110
           - task: Docker@2
             displayName: Push image
             condition: or(variables['isreleasebuild'], variables['iscibuild'])
@@ -218,6 +251,20 @@ stages:
         pool:
           vmImage: "ubuntu-18.04"
         steps:
+          - task: UseDotNet@2
+            displayName: Install .NET Core SDK v$(netcoresdk_version)
+            inputs:
+              packageType: sdk
+              version: $(netcoresdk_version)
+          - task: DotNetCoreCLI@2
+            displayName: Publish
+            inputs:
+              command: publish
+              projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+              publishWebProjects: false
+              zipAfterPublish: false
+              modifyOutputPath: false
+              arguments: '-c Release -p:version=$(tag) -o out'
           - task: Docker@2
             displayName: Build image
             inputs:
@@ -238,6 +285,20 @@ stages:
         pool:
           vmImage: "windows-2019"
         steps:
+          - task: UseDotNet@2
+            displayName: Install .NET Core SDK v$(netcoresdk_version)
+            inputs:
+              packageType: sdk
+              version: $(netcoresdk_version)
+          - task: DotNetCoreCLI@2
+            displayName: Publish
+            inputs:
+              command: publish
+              projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
+              publishWebProjects: false
+              zipAfterPublish: false
+              modifyOutputPath: false
+              arguments: '-c Release -p:version=$(tag) -o out'
           - task: Docker@2
             displayName: Build image
             inputs:
