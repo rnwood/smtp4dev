@@ -13,6 +13,7 @@ using Xunit.Abstractions;
 
 namespace Rnwood.Smtp4dev.Tests.E2E
 {
+    [Collection("E2E")]
     public class E2ETests
     {
         private readonly ITestOutputHelper output;
@@ -43,6 +44,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
             string workingDir = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_WORKINGDIR");
             string binary = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_BINARY");
+            bool useDefaultDBPath = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_USEDEFAULTDBPATH") == "1";
             List<string> args = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_ARGS")?.Split("\n", StringSplitOptions.RemoveEmptyEntries)
                 ?.ToList() ?? new List<string>();
 
@@ -72,24 +74,44 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 args.Insert(0, mainModule);
 
             }
-            else
-            {
-                binary = Path.GetFullPath(binary, workingDir);
-            }
 
             var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
             string dbPath = Path.GetTempFileName();
             File.Delete(dbPath);
 
             args.AddRange(new[] {
-                "--debugsettings", options.InMemoryDB ? "--db=" : $"--db={dbPath}", "--nousersettings", "--urls=http://*:0",
-                "--imapport=0", "--smtpport=0", "--tlsmode=StartTls"
-            });
+                "--debugsettings", options.InMemoryDB ? "--db=" : useDefaultDBPath ? "" : $"--db={dbPath}", "--nousersettings",
+                "--tlsmode=StartTls"
+            }.Where(a => a != ""));
+
+            if (!args.Any(a => a.StartsWith("--urls")))
+            {
+                args.Add("--urls=http://*:0");
+            }
+
+            if (!args.Any(a => a.StartsWith("--imapport")))
+            {
+                args.Add("--imapport=0");
+            }
+
+            if (!args.Any(a => a.StartsWith("--smtpport")))
+            {
+                args.Add("--smtpport=0");
+            }
+
+            if (!args.Any(a => a.StartsWith("--smtpport")))
+            {
+                args.Add("--smtpport=0");
+            }
+
+
 
             if (!string.IsNullOrEmpty(options.BasePath))
             {
                 args.Add($"--basepath={options.BasePath}");
             }
+
+            output.WriteLine("Args: " + string.Join(" ", args.Select(a => $"\"{a}\"")));
 
             using (Command serverProcess = Command.Run(binary, args,
                        o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
@@ -160,7 +182,15 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 }
                 finally
                 {
-                    serverProcess.Kill();
+                    serverProcess.TrySignalAsync(CommandSignal.ControlC).Wait();
+                    serverProcess.StandardInput.Close();
+                    if (!serverProcess.Process.WaitForExit(5000))
+                    {
+                        throw new Exception("DIDNT EXIT");
+                        output.WriteLine("E2E process didn't exit");
+                        serverProcess.Kill();
+                    }
+  
                     cancellationTokenSource.Cancel();
                 }
             }

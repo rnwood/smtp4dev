@@ -218,6 +218,25 @@ stages:
               command: build
               dockerfile: "**/Dockerfile.linux"
               arguments: "--build-arg version=$(tag) -t $(docker_repo):linux-amd64-$(tag)"
+          # - task: DotNetCoreCLI@2
+          #   displayName: Run Tests
+          #   env:
+          #     SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
+          #     SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
+          #     SMTP4DEV_E2E_BINARY: docker
+          #     SMTP4DEV_E2E_ARGS: |
+          #       run
+          #       -i
+          #       -p
+          #       25:25
+          #       -p
+          #       80:80
+          #       -p
+          #       110:110
+          #       $(docker_repo):linux-amd64-$(tag)
+          #       --urls=http://*:80
+          #       --smtpport=25
+          #       --imapport=110
           - task: Docker@2
             displayName: Push image
             condition: or(variables['isreleasebuild'], variables['iscibuild'])
