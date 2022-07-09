@@ -30,7 +30,7 @@
     "@vue/test-utils": "^1.2.2",
     "aspnet-webpack": "^3.0.0",
     "async-mutex": "^0.3.2",
-    "axios": "^0.24.0",
+    "axios": "^0.27.2",
     "babel-core": "^7.0.0-bridge.0",
     "babel-eslint": "^10.0.3",
     "babel-jest": "^28.1.0",
