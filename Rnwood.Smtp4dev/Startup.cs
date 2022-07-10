@@ -11,15 +11,14 @@ using Microsoft.Extensions.Logging;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Server;
-using VueCliMiddleware;
 using Microsoft.Extensions.Hosting;
-using Microsoft.AspNetCore.SpaServices;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Rewrite;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.Service;
 using Serilog;
 using System.Linq;
+using System.Reflection;
 
 namespace Rnwood.Smtp4dev
 {
@@ -70,6 +69,7 @@ namespace Rnwood.Smtp4dev
             services.AddScoped<IHostingEnvironmentHelper, HostingEnvironmentHelper>();
             services.AddSingleton<ITaskQueue, TaskQueue>();
 
+
             services.AddSingleton<Func<RelayOptions, SmtpClient>>((relayOptions) =>
             {
                 if (!relayOptions.IsEnabled)
@@ -91,10 +91,14 @@ namespace Rnwood.Smtp4dev
 
             services.AddSignalR();
             services.AddSingleton<NotificationsHub>();
+            services.AddOpenApiDocument(d => d.Title = "smtp4dev");
+
 
             services.AddControllers();
-
-            services.AddSpaStaticFiles(o => o.RootPath = "ClientApp");
+            services.AddOpenApiDocument(c =>
+            {
+                c.Title = "smtp4dev";
+            });
 
         }
 
@@ -105,33 +109,34 @@ namespace Rnwood.Smtp4dev
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
 
             app.UseRouting();
+            app.UseOpenApi();
+            app.UseSwaggerUi();
+
 
             Action<IApplicationBuilder> configure = subdir =>
             {
+                if (env.IsDevelopment())
+                {
+                    app.UseWebAssemblyDebugging();
+                }
+
+                subdir.UseOpenApi();
+                subdir.UseSwaggerUi();
+
                 subdir.UseRouting();
                 subdir.UseDeveloperExceptionPage();
                 subdir.UseDefaultFiles();
+                subdir.UseBlazorFrameworkFiles();
                 subdir.UseStaticFiles();
-                subdir.UseSpaStaticFiles();
 
                 subdir.UseWebSockets();
 
                 subdir.UseEndpoints(e =>
                 {
                     e.MapHub<NotificationsHub>("/hubs/notifications");
-
                     e.MapControllers();
-                    if (env.IsDevelopment())
-                    {
-                        e.MapToVueCliProxy(
-                        "{*path}",
-                        new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp") },
-                        npmScript: "serve",
-                        regex: "Compiled successfully",
-                        forceKill: true,
-                        port: 8123
-                        );
-                    }
+                    e.MapFallbackToFile("index.html");
+
                 });
 
                 using (var scope = subdir.ApplicationServices.CreateScope())

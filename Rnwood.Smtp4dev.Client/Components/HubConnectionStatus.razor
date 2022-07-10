@@ -1,0 +1,66 @@
+﻿
+
+                <AntDesign.Tooltip Title="@ButtonTitle" Placement="@Placement.Bottom" >
+                    <Unbound>
+                        <span class="action">
+                            <Icon Type="@ButtonIcon" Theme="outline" OnClick="ButtonClick" Style="@ButtonStyle"/>
+                        </span>
+                    </Unbound>
+                </AntDesign.Tooltip>
+
+
+@code {
+
+    [Inject]
+    HubConnectionManager HubConnectionManager { get; set; }
+
+    protected override Task OnInitializedAsync()
+    {
+        HubConnectionManager.StatusChanged += HubConnectionManagerOnStatusChanged;
+        return base.OnInitializedAsync();
+    }
+    
+    private Task HubConnectionManagerOnStatusChanged()
+    {
+        StateHasChanged();
+        return Task.CompletedTask;
+    }
+
+    string ButtonType => this.HubConnectionManager != null && this.HubConnectionManager.Connected ? "success" : this.HubConnectionManager != null && this.HubConnectionManager.Started ? "warning" : "danger";
+
+
+    string ButtonText
+    {
+        get
+        {
+            var errorText = this.HubConnectionManager != null && this.HubConnectionManager.Error != null ? "\nError: " + this.HubConnectionManager.Error.Message : "";
+            return (this.HubConnectionManager != null && this.HubConnectionManager.Connected ? "Auto refresh enabled" : this.HubConnectionManager != null && this.HubConnectionManager.Started ? "Connecting..." : "Auto refresh disabled") + errorText;
+        }
+    }
+
+    string ButtonTitle
+    {
+        get
+        {
+            var errorText = this.HubConnectionManager != null && this.HubConnectionManager.Error != null ? "\nError: " + this.HubConnectionManager.Error.Message : "";
+            return (this.HubConnectionManager != null && this.HubConnectionManager.Connected ? "Auto refresh enabled - Click to disconnect" : this.HubConnectionManager != null && this.HubConnectionManager.Started ? "Auto refresh re-connecting..." : "Auto refresh disabled - click to enable") + errorText;
+        }
+    }
+
+    string ButtonIcon => this.HubConnectionManager != null && this.HubConnectionManager.Connected ? "check-circle" : this.HubConnectionManager != null && this.HubConnectionManager.Started ? "refresh" : "exclamation-circle";
+
+    string ButtonStyle => "color:" + ( this.HubConnectionManager != null && this.HubConnectionManager.Connected ? "green" : this.HubConnectionManager != null && this.HubConnectionManager.Started ? "red" : "red");
+
+
+    public async Task ButtonClick()
+    {
+        if (!this.HubConnectionManager.Started)
+        {
+            await this.HubConnectionManager.StartAsync();
+        }
+        else
+        {
+            await this.HubConnectionManager.StopAsync();
+        }
+    }
+}

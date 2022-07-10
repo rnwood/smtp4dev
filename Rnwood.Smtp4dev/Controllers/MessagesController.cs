@@ -31,12 +31,12 @@ namespace Rnwood.Smtp4dev.Controllers
         private readonly ISmtp4devServer server;
 
         [HttpGet]
-        public ApiModel.PagedResult<MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true, int page = 1, int pageSize=5)
+        public PagedResultOfMessageSummary GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true, int page = 1, int pageSize=5)
         {
             return messagesRepository.GetMessages(false).Include(m => m.Relays)
                 .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""))
-                .Select(m => new MessageSummary(m))
-                .GetPaged(page, pageSize);
+                .Select(m => (MessageSummary) new ServerMessageSummary(m))
+                .GetPaged<MessageSummary, PagedResultOfMessageSummary>(page, pageSize);
         }
 
         private Message GetDbMessage(Guid id)
@@ -48,7 +48,12 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpGet("{id}")]
         public ApiModel.Message GetMessage(Guid id)
         {
-            return new ApiModel.Message(GetDbMessage(id));
+            return GetServerMessage(id);
+        }
+
+        private ServerMessage GetServerMessage(Guid id)
+        {
+            return new ServerMessage(GetDbMessage(id));
         }
 
         [HttpPost("{id}")]
@@ -100,28 +105,28 @@ namespace Rnwood.Smtp4dev.Controllers
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
         public FileStreamResult GetPartContent(Guid id, string partid)
         {
-            return ApiModel.Message.GetPartContent(GetMessage(id), partid);
+            return ServerMessage.GetPartContent(GetServerMessage(id), partid);
         }
 
         [HttpGet("{id}/part/{partid}/source")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
         public string GetPartSource(Guid id, string partid)
         {
-            return ApiModel.Message.GetPartContentAsText(GetMessage(id), partid);
+            return ServerMessage.GetPartContentAsText(GetServerMessage(id), partid);
         }
 
         [HttpGet("{id}/part/{partid}/raw")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
         public string GetPartSourceRaw(Guid id, string partid)
         {
-            return ApiModel.Message.GetPartSource(GetMessage(id), partid);
+            return ServerMessage.GetPartSource(GetServerMessage(id), partid);
         }
 
         [HttpGet("{id}/raw")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
         public string GetMessageSourceRaw(Guid id)
         {
-            ApiModel.Message message = GetMessage(id);
+            var message = GetServerMessage(id);
             return System.Text.Encoding.UTF8.GetString(message.Data);
         }
 
@@ -129,7 +134,7 @@ namespace Rnwood.Smtp4dev.Controllers
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
         public string GetMessageSource(Guid id)
         {
-            ApiModel.Message message = GetMessage(id);
+            var message = GetServerMessage(id);
             return message.MimeMessage.ToString();
         }
 
@@ -137,7 +142,7 @@ namespace Rnwood.Smtp4dev.Controllers
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
         public string GetMessageHtml(Guid id)
         {
-            ApiModel.Message message = GetMessage(id);
+            var message = GetServerMessage(id);
 
             string html = message.MimeMessage?.HtmlBody;
 

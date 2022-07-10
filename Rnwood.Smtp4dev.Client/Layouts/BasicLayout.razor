@@ -1,0 +1,89 @@
+﻿@namespace Rnwood.Smtp4dev.Client
+@inherits LayoutComponentBase
+
+
+<AntDesign.ProLayout.BasicLayout Logo="@("logo-light.png")" Title=""
+                                 MenuData="_menuData" ContentStyle="height: 100%" >
+    <RightContentRender>
+
+        <Space Class="@("right")" Size="@("24")">
+            <SpaceItem>
+                <Rnwood.Smtp4dev.Client.Components.HubConnectionStatus/>
+            </SpaceItem>
+            <SpaceItem>
+   
+                <AntDesign.Tooltip Title="@("Settings")" Placement="@Placement.Bottom">
+                    <Unbound>
+                        <span class="action">
+                            <Icon Type="setting" Theme="outline"/>
+                        </span>
+                    </Unbound>
+                </AntDesign.Tooltip>
+            </SpaceItem>
+        </Space>
+    </RightContentRender>
+    <ChildContent>
+
+        @Body
+    </ChildContent>
+    <FooterRender>
+        <div class="ant-pro-global-footer">
+            <div class="ant-pro-global-footer-copyright">
+                <Rnwood.Smtp4dev.Client.Components.VersionInfo/>
+            </div>
+        </div>
+    </FooterRender>
+</AntDesign.ProLayout.BasicLayout>
+
+@code
+{
+    private readonly MenuDataItem[] _menuData =
+    {
+        new MenuDataItem
+        {
+            Path = "/",
+            Name = "Messages",
+            Key = "messages",
+            Icon = "inbox",
+        },
+        new MenuDataItem
+        {
+            Path = "/sessions",
+            Name = "Sessions",
+            Key = "sessions",
+            Icon = "file-text",
+        },
+        new MenuDataItem
+        {
+            Path = "/settings",
+            Name = "Settings",
+            Key = "settings",
+            Icon = "setting",
+        }
+    };
+
+    public LinkItem[] Links { get; set; } =
+        {
+            new LinkItem
+            {
+                Key = "Ant Design Blazor",
+                Title = "Ant Design Blazor",
+                Href = "https://antblazor.com",
+                BlankTarget = true,
+            },
+            new LinkItem
+            {
+                Key = "github",
+                Title = (RenderFragment)(@<Icon Type="github"/>),
+                Href = "https://github.com/ant-design-blazor/ant-design-pro-blazor",
+                BlankTarget = true,
+            },
+            new LinkItem
+            {
+                Key = "Blazor",
+                Title = "Blazor",
+                Href = "https://dotnet.microsoft.com/apps/aspnet/web-apps/blazor?WT.mc_id=DT-MVP-5003987",
+                BlankTarget = true,
+            }
+        };
+}

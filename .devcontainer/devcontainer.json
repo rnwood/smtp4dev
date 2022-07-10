@@ -1,4 +1,35 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
 {
-    "appPort": [2525, 8080],
-    "extensions": ["ms-vscode.csharp", "formulahendry.dotnet-test-explorer", "msjsdiag.debugger-for-chrome", "ms-azuretools.vscode-docker", "dbaeumer.vscode-eslint", "octref.vetur", "ms-azure-devops.azure-pipelines"]
+	"name": "C# (.NET)",
+	// Or use a Dockerfile or Docker Compose file. More info: https://containers.dev/guide/dockerfile
+	"image": "mcr.microsoft.com/devcontainers/dotnet:0-6.0",
+
+	// Features to add to the dev container. More info: https://containers.dev/features.
+	// "features": {},
+
+	// Use 'forwardPorts' to make a list of ports inside the container available locally.
+	"forwardPorts": [5000, 1125, 1143],
+	"portsAttributes": {
+			"5000": {
+				"label": "Web Interface",
+				"protocol": "http",
+				"onAutoForward": "openBrowser"
+			},
+			"1125": {
+				"label": "Smtp"
+			},
+			"1143": {
+				"label": "Imap"
+			}
+	},
+
+	// Use 'postCreateCommand' to run commands after the container is created.
+	"postCreateCommand": "dotnet restore",
+
+	// Configure tool-specific properties.
+	// "customizations": {},
+
+	// Uncomment to connect as root instead. More info: https://aka.ms/dev-containers-non-root.
+	"remoteUser": "root"
 }

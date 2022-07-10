@@ -39,7 +39,9 @@ namespace Rnwood.Smtp4dev.Desktop
 
         private static async Task RunAsync(string[] args)
         {
-            Rnwood.Smtp4dev.Program.SetupStaticLogger(args);
+            //Rnwood.Smtp4dev.Program.SetupStaticLogger(args);
+            Log.Logger = new LoggerConfiguration().WriteTo.Console().CreateLogger();
+
             string origWorkingDir = AppContext.BaseDirectory;
 
             try
@@ -47,7 +49,10 @@ namespace Rnwood.Smtp4dev.Desktop
 
 
                 var host =
-                       await Rnwood.Smtp4dev.Program.StartApp(args, true, o => o.Urls = "http://127.0.0.1:0");
+                       await Rnwood.Smtp4dev.Program.StartApp(args, true, o => {
+                           o.Urls = "http://127.0.0.1:0";
+                           o.InstallPath = AppContext.BaseDirectory;
+                           });
 
 
                 var addressesFeature = host.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>();

@@ -2,20 +2,20 @@
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
 <svg
-   xmlns:dc="http://purl.org/dc/elements/1.1/"
-   xmlns:cc="http://creativecommons.org/ns#"
-   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
    width="210mm"
    height="297mm"
    viewBox="0 0 210 297"
    version="1.1"
    id="svg8"
-   inkscape:version="0.92.4 (5da689c313, 2019-01-14)"
-   sodipodi:docname="logo.svg">
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20)"
+   sodipodi:docname="logo.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
   <defs
      id="defs2">
     <inkscape:perspective
@@ -33,18 +33,19 @@
      borderopacity="1.0"
      inkscape:pageopacity="0.0"
      inkscape:pageshadow="2"
-     inkscape:zoom="2.8284271"
-     inkscape:cx="173.67011"
-     inkscape:cy="954.9743"
+     inkscape:zoom="0.17677669"
+     inkscape:cx="613.76869"
+     inkscape:cy="1866.7619"
      inkscape:document-units="mm"
      inkscape:current-layer="layer1"
      showgrid="false"
-     inkscape:window-width="2560"
-     inkscape:window-height="1377"
-     inkscape:window-x="-8"
-     inkscape:window-y="-8"
+     inkscape:window-width="1500"
+     inkscape:window-height="930"
+     inkscape:window-x="-6"
+     inkscape:window-y="-6"
      inkscape:window-maximized="1"
-     showguides="false" />
+     showguides="false"
+     inkscape:pagecheckerboard="0" />
   <metadata
      id="metadata5">
     <rdf:RDF>
@@ -53,7 +54,6 @@
         <dc:format>image/svg+xml</dc:format>
         <dc:type
            rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
-        <dc:title />
       </cc:Work>
     </rdf:RDF>
   </metadata>
@@ -67,7 +67,7 @@
        inkscape:export-xdpi="121.36221"
        inkscape:export-ydpi="121.36221"
        style="fill:#000047;fill-opacity:1"
-       inkscape:export-filename="C:\src\smtp4dev\Rnwood.Smtp4dev\ClientApp\public\logo.png">
+       inkscape:export-filename="C:\src\smtp4dev\Rnwood.Smtp4dev.Client\wwwroot\logo.png">
       <g
          inkscape:corner7="1.3678731 : 0.11462621 : 75.998211 : 1"
          inkscape:corner0="3.1510884 : 0.15320263 : 0 : 1"
@@ -128,13 +128,13 @@
     <flowRoot
        xml:space="preserve"
        id="flowRoot815"
-       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#8686bf;fill-opacity:1;stroke:none;"
+       style="font-style:normal;font-weight:normal;font-size:40px;line-height:1.25;font-family:sans-serif;letter-spacing:0px;word-spacing:0px;fill:#8686bf;fill-opacity:1;stroke:none"
        transform="scale(0.26458333)"
        inkscape:export-xdpi="121.36221"
        inkscape:export-ydpi="121.36221"
-       inkscape:export-filename="C:\src\smtp4dev\Rnwood.Smtp4dev\ClientApp\public\logo.png"><flowRegion
+       inkscape:export-filename="C:\src\smtp4dev\Rnwood.Smtp4dev.Client\wwwroot\logo.png"><flowRegion
          id="flowRegion817"
-         style="fill:#8686bf;fill-opacity:1;"><rect
+         style="fill:#8686bf;fill-opacity:1"><rect
            id="rect819"
            width="303"
            height="116"
@@ -143,14 +143,15 @@
            style="fill:#8686bf;fill-opacity:1;" /></flowRegion><flowPara
          id="flowPara821"
          style="fill:#000080"><flowSpan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Rockwell;-inkscape-font-specification:Rockwell;letter-spacing:-1.53999972px;fill:#000080;fill-opacity:1"
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:Rockwell;-inkscape-font-specification:Rockwell;letter-spacing:-1.54px;fill:#000080;fill-opacity:1"
            id="flowSpan825"><flowSpan
              style="fill:#ffffff"
              id="flowSpan895">smt<flowSpan
-   style="letter-spacing:-3.55000004px"
+   style="letter-spacing:-3.55px"
    id="flowSpan899">p</flowSpan></flowSpan><flowSpan
-             style="fill:#000000;letter-spacing:-2.40000003px"
+             style="letter-spacing:-2.4px;fill:#000000"
              id="flowSpan897">4</flowSpan></flowSpan><flowSpan
-           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Courier New';-inkscape-font-specification:'Courier New';letter-spacing:-4.46000187px;fill:#000000;fill-opacity:1"
-           id="flowSpan823">dev</flowSpan></flowPara></flowRoot>  </g>
+           style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-family:'Courier New';-inkscape-font-specification:'Courier New';letter-spacing:-4.46px;fill:#000000;fill-opacity:1"
+           id="flowSpan823">dev</flowSpan></flowPara></flowRoot>
+  </g>
 </svg>

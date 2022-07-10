@@ -24,17 +24,17 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         [HttpGet]
-        public PagedResult<SessionSummary> GetSummaries(int page = 1, int pageSize = 5)
+        public PagedResultOfSessionSummary GetSummaries(int page = 1, int pageSize = 5)
         {
             return dbContext.Sessions.Where(s => s.EndDate.HasValue).OrderByDescending(x=>x.StartDate)
-                .Select(m => new SessionSummary(m)).GetPaged(page, pageSize);
+                .Select(m => (SessionSummary) new ServerSessionSummary(m)).GetPaged<SessionSummary, PagedResultOfSessionSummary>(page, pageSize);
         }
 
         [HttpGet("{id}")]
         public ApiModel.Session GetSession(Guid id)
         {
             Session result = dbContext.Sessions.SingleOrDefault(m => m.Id == id);
-            return new ApiModel.Session(result);
+            return new ServerSession(result);
         }
 
         [HttpGet("{id}/log")]

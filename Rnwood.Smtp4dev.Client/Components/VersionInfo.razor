@@ -1,0 +1,17 @@
+﻿@using Rnwood.Smtp4dev.ApiModel
+<div>Version: <span>@Version</span></div>
+
+@inject InfoClient InfoClient;
+
+@code {
+    private Info info;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await base.OnInitializedAsync();
+        info = await InfoClient.GetAsync();
+    }
+
+    string Version =>  this.info?.InfoVersion ?? "";
+
+}

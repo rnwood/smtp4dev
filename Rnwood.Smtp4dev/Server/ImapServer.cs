@@ -16,6 +16,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
 using System.Net.NetworkInformation;
 using Serilog;
+using Rnwood.Smtp4dev.ApiModel;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -94,7 +95,7 @@ namespace Rnwood.Smtp4dev.Server
 
             if (index == 1)
             {
-                log.Warning("The IMAP server failed to start: {Exception}" + errorTask.Result.Exception.ToString());
+                log.Warning("The IMAP server failed to start: {Exception}", errorTask.Result.Exception.ToString());
             } else if (index == 2)
             {
                 log.Warning("The IMAP server failed to start: Timeout");
@@ -216,7 +217,7 @@ namespace Rnwood.Smtp4dev.Server
 
                         if (dbMessage != null)
                         {
-                            ApiModel.Message apiMessage = new ApiModel.Message(dbMessage);
+                            ServerMessage apiMessage = new ServerMessage(dbMessage);
                             Mail_Message message = Mail_Message.ParseFromByte(apiMessage.Data);
                             e.AddData(msgInfo, message);
                         }

@@ -8,11 +8,12 @@
             "type": "coreclr",
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/netcoreapp3.1/Rnwood.Smtp4dev.dll",
+            "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/net6.0/Rnwood.Smtp4dev.dll",
             "cwd": "${workspaceFolder}/Rnwood.Smtp4dev",
-            "args": "--urls http://localhost:5000",
+            "args": "--urls http://localhost:5000 --smtpport 1125 --imapport 1143",
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
+            "preLaunchTask": "build"
         },
         {
             "type": "chrome",
@@ -32,7 +33,6 @@
         "configurations": [
             ".NET Core Launch (web)",
             "Chrome"
-        ],
-        "preLaunchTask": "build"
+        ]
     }]
 }

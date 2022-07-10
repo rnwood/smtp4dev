@@ -30,7 +30,11 @@ namespace Rnwood.Smtp4dev.Controllers
         private IOptionsMonitor<ServerOptions> serverOptions;
         private IOptionsMonitor<RelayOptions> relayOptions;
         private readonly IHostingEnvironmentHelper hostingEnvironmentHelper;
-
+        
+        /// <summary>
+        /// Get current status of the server including currently applied settings.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public ApiModel.Server GetServer()
         {

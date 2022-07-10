@@ -185,7 +185,7 @@ namespace Rnwood.Smtp4dev.Server
         private readonly IOptionsMonitor<RelayOptions> relayOptions;
         private readonly IDictionary<ISession, Guid> activeSessionsToDbId = new Dictionary<ISession, Guid>();
 
-        private static async Task UpdateDbSession(ISession session, Session dbSession)
+        private static async Task UpdateDbSession(ISession session, DbModel.Session dbSession)
         {
             dbSession.StartDate = session.StartDate;
             dbSession.EndDate = session.EndDate;
@@ -307,7 +307,7 @@ namespace Rnwood.Smtp4dev.Server
             }, false).ConfigureAwait(false);
         }
 
-        public RelayResult TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
+        public RelayResult TryRelayMessage(DbModel.Message message, MailboxAddress[] overrideRecipients)
         {
             var result = new RelayResult(message);
 
@@ -338,7 +338,7 @@ namespace Rnwood.Smtp4dev.Server
                     log.Information("Relaying message to {recipient}", recipient);
 
                     using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
-                    var apiMsg = new ApiModel.Message(message);
+                    var apiMsg = new ApiModel.ServerMessage(message);
                     MimeMessage newEmail = apiMsg.MimeMessage;
                     MailboxAddress sender = MailboxAddress.Parse(
                         !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)

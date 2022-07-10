@@ -83,7 +83,9 @@ namespace Rnwood.Smtp4dev
 
             if (!Debugger.IsAttached && args.Contains("--service"))
                 IsService = true;
-
+            if (args.Any(a => a.StartsWith("--applicationName", StringComparison.Ordinal))) {
+                args = new string[0];
+            }
             MapOptions<CommandLineOptions> commandLineOptions = CommandLineParser.TryParseCommandLine(args, isDesktopApp);
 
             CommandLineOptions cmdLineOptions = new CommandLineOptions();
@@ -103,7 +105,7 @@ namespace Rnwood.Smtp4dev
 
 
             var addressesFeature = host.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>();
-            var urls = addressesFeature.Addresses;
+            var urls = addressesFeature?.Addresses ?? new string[0];
 
             foreach (var url in urls)
             {
@@ -119,18 +121,18 @@ namespace Rnwood.Smtp4dev
         {
             string installLocation = AppContext.BaseDirectory;
 
-            if (Directory.Exists(Path.Join(installLocation, "wwwroot")))
+            if (File.Exists(Path.Join(installLocation, "web.config")))
             {
                 return installLocation;
             }
 
             string cwd = Directory.GetCurrentDirectory();
-            if (Directory.Exists(Path.Join(cwd, "wwwroot")))
+            if (File.Exists(Path.Join(cwd, "web.config")))
             {
                 return cwd;
             }
 
-            throw new ApplicationException($"Unable to find wwwroot in either '{installLocation}' or the CWD '{cwd}'");
+            throw new ApplicationException($"Unable to find web.config in either '{installLocation}' or the CWD '{cwd}'");
         }
 
         private static IHost BuildWebHost(string[] args, CommandLineOptions cmdLineOptions, MapOptions<CommandLineOptions> commandLineOptions)
@@ -138,6 +140,7 @@ namespace Rnwood.Smtp4dev
 
 
             var contentRoot = GetContentRoot();
+            _log.Information("Web Content Root: {contentRoot}", contentRoot);
             var dataDir = GetOrCreateDataDir(cmdLineOptions);
             _log.Information("DataDir: {dataDir}", dataDir);
             Directory.SetCurrentDirectory(dataDir);
@@ -149,6 +152,11 @@ namespace Rnwood.Smtp4dev
                     (hostingContext, configBuilder) =>
                     {
                         IHostEnvironment env = hostingContext.HostingEnvironment;
+
+                        if (!string.IsNullOrEmpty(cmdLineOptions.InstallPath))
+                        {
+                            env.ContentRootPath = cmdLineOptions.InstallPath;
+                        }
 
                         IConfigurationBuilder cb = configBuilder
                             .SetBasePath(env.ContentRootPath)

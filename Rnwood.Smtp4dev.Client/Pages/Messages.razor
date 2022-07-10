@@ -1,0 +1,54 @@
+﻿@page "/"
+@using Microsoft.AspNetCore.SignalR.Client
+@using Rnwood.Smtp4dev.ApiModel
+
+@inject MessagesClient MessagesClient
+@inject NavigationManager NavigationManager;
+
+
+<PageContainer Title="Messages" Style="height:100%">
+
+    <GridRow Gutter="(16,16)" Style="height: 100%" >
+        <GridCol Span="12">
+            @if (Data != null)
+            {
+
+                <Table Style="height: 100%" DataSource="@Data.Results" TItem="@MessageSummary" >
+                    <PropertyColumn Property="i => i.From" Sortable />
+                    <PropertyColumn Property="i => i.Subject" Sortable />
+                </Table>
+            }
+            else
+            {
+                <PageLoading />
+            }
+        </GridCol>
+        <GridCol Span="12">Message details</GridCol>
+    </GridRow>
+</PageContainer>
+
+@code {
+    PagedResultOfMessageSummary? Data;
+    private HubConnection hubConnection;
+
+    protected async override Task OnInitializedAsync()
+    {
+        hubConnection = new HubConnectionBuilder()
+            .WithUrl(NavigationManager.ToAbsoluteUri("hubs/notifications"))
+            .Build();
+
+        await hubConnection.StartAsync();
+
+        hubConnection.On("messageschanged", async () => await RefreshMessages());
+
+        await RefreshMessages();
+    }
+
+    private async Task RefreshMessages()
+    {
+        this.Data = await this.MessagesClient.GetSummariesAsync("ReceivedDate", false, 1, 100);
+        StateHasChanged();
+    }
+
+
+}

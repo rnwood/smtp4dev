@@ -45,7 +45,6 @@ namespace Rnwood.Smtp4dev
                 { "installpath=", "Sets path to folder containing wwwroot and other files", data => map.Add(data, x=> x.InstallPath) },
                 { "disablemessagesanitisation", "Disables message HTML sanitisation.", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.DisableMessageSanitisation) }
 
-
             };
 
             if (!isDesktopApp)

@@ -1,0 +1,75 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.BlazorWebAssembly">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <BlazorEnableCompression>true</BlazorEnableCompression>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Content Remove="wwwroot\Components\confirmationdialog.vue" />
+    <Content Remove="wwwroot\Components\headers.vue" />
+    <Content Remove="wwwroot\Components\hubconnectionstatus.vue" />
+    <Content Remove="wwwroot\Components\messagelist.vue" />
+    <Content Remove="wwwroot\Components\messagelistpager.vue" />
+    <Content Remove="wwwroot\Components\messagepartsource.vue" />
+    <Content Remove="wwwroot\Components\messagesource.vue" />
+    <Content Remove="wwwroot\Components\messageview.vue" />
+    <Content Remove="wwwroot\Components\messageviewattachments.vue" />
+    <Content Remove="wwwroot\Components\messageviewhtml.vue" />
+    <Content Remove="wwwroot\Components\serverstatus.vue" />
+    <Content Remove="wwwroot\Components\sessionlist.vue" />
+    <Content Remove="wwwroot\Components\sessionview.vue" />
+    <Content Remove="wwwroot\Components\settingsdialog.vue" />
+    <Content Remove="wwwroot\Components\textview.vue" />
+    <Content Update="Components\HubConnectionStatus.razor">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+    <Content Update="Components\VersionInfo.razor">
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="HubConnectionManager.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AntDesign.Charts" Version="0.2.3" />
+    <PackageReference Include="AntDesign.ProLayout" Version="0.12.4" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="8.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="8.0.2" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.SignalR.Client" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Options.ConfigurationExtensions" Version="8.0.0" />
+    <PackageReference Include="newtonsoft.json" Version="13.0.3" />
+    <PackageReference Include="System.Net.Http.Json" Version="8.0.0" />
+    <PackageReference Include="NSwag.MSBuild" Version="14.0.3">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Shared\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rnwood.Smtp4dev.Shared\Rnwood.Smtp4dev.Shared.csproj" />
+  </ItemGroup>
+
+
+  <PropertyGroup>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <NSwagInputs Include="nswag.nswag" />
+    <NSwagInputs Include="..\Rnwood.Smtp4dev\swagger.json" />
+  </ItemGroup>
+
+  <Target Name="NSwag" AfterTargets="PostBuildEvent" Inputs="@(NSwagInputs)" Outputs="ApiClient.g.cs">
+    <Exec WorkingDirectory="$(ProjectDir)" EnvironmentVariables="ASPNETCORE_ENVIRONMENT=Development" Command="$(NSwagExe_Net80) run /variables:Configuration=$(Configuration)" />
+  </Target>
+
+</Project>

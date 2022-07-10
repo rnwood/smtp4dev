@@ -84,7 +84,7 @@ namespace Rnwood.Smtp4dev.Server
                 SecureConnection = message.SecureConnection
             };
 
-            var parts = new Message(result).Parts;
+            var parts = new ServerMessage(result).Parts;
             foreach (var part in parts)
             {
                 result.AttachmentCount += CountAttachments(part);
