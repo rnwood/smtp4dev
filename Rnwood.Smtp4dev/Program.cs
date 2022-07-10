@@ -17,7 +17,6 @@ using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Mono.Options;
-using Newtonsoft.Json.Linq;
 using Rnwood.Smtp4dev.Server;
 using Rnwood.Smtp4dev.Service;
 using Serilog;
