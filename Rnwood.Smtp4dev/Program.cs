@@ -49,7 +49,14 @@ namespace Rnwood.Smtp4dev
             }
             catch (CommandLineOptionsException ex)
             {
-                Console.Error.WriteLine(ex.Message);
+                if (ex.IsHelpRequest)
+                {
+                    Log.Information(ex.Message);
+                }
+                else
+                {
+                    Log.Fatal(ex.Message);
+                }
             }
             catch (Exception ex)
             {
@@ -173,11 +180,8 @@ namespace Rnwood.Smtp4dev
 
                     });
 
-            if (IsService)
-            {
-                builder.UseWindowsService(s => s.ServiceName = "smtp4dev");
-            }
 
+            builder.UseWindowsService(s => s.ServiceName = "smtp4dev");
             builder.ConfigureWebHostDefaults(c =>
             {
                 c.UseStartup<Startup>();
