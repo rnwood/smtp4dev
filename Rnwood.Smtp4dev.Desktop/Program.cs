@@ -5,7 +5,6 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
-using System.Runtime.InteropServices;
 using System.Diagnostics;
 using System.Text;
 using PhotinoNET;
@@ -16,6 +15,8 @@ using System.Threading.Tasks.Schedulers;
 using Serilog;
 using Serilog.Core;
 using Serilog.Events;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.AspNetCore.Hosting.Server;
 
 namespace Rnwood.Smtp4dev.Desktop
 {
@@ -28,17 +29,17 @@ namespace Rnwood.Smtp4dev.Desktop
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
                 StaTaskScheduler scheduler = new StaTaskScheduler(64);
-                await Task.Factory.StartNew(() => Run(args), CancellationToken.None, TaskCreationOptions.None, scheduler);
+                await Task.Factory.StartNew(() => RunAsync(args), CancellationToken.None, TaskCreationOptions.None, scheduler);
             }
             else
             {
-                Run(args);
+                await RunAsync(args);
             }
         }
 
-        private static async Task Run(string[] args)
+        private static async Task RunAsync(string[] args)
         {
-            Rnwood.Smtp4dev.Program.SetupStaticLogger();
+            Rnwood.Smtp4dev.Program.SetupStaticLogger(args);
             string origWorkingDir = AppContext.BaseDirectory;
 
             try
@@ -49,7 +50,7 @@ namespace Rnwood.Smtp4dev.Desktop
                        await Rnwood.Smtp4dev.Program.StartApp(args, true, o => o.Urls = "http://127.0.0.1:0");
 
 
-                var addressesFeature = host.ServerFeatures.Get<IServerAddressesFeature>();
+                var addressesFeature = host.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>();
                 var urls = addressesFeature.Addresses;
                 var appUrl = new Uri(urls.First());
 

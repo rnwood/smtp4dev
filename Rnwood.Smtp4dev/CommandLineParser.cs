@@ -41,13 +41,14 @@ namespace Rnwood.Smtp4dev
                 { "nousersettings", "Skip loading of appsetttings.json file in %APPDATA%", data => map.Add((data !=null).ToString(), x=> x.NoUserSettings) },
                 { "debugsettings", "Prints out most settings values on startup", data => map.Add((data !=null).ToString(), x=> x.DebugSettings) },
                 { "recreatedb", "Recreates the DB on startup if it already exists", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.RecreateDb) },
-                { "locksettings", "Locks settings from being changed by user via web interface", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.LockSettings) }
+                { "locksettings", "Locks settings from being changed by user via web interface", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.LockSettings) },
+                {"installpath=", "Sets path to folder containing wwwroot and other files", data => map.Add(data, x=> x.InstallPath) }
             };
 
             if (!isDesktopApp)
             {
                 options.Add("service", "Required to run when registered as a Windows service. To register service: sc.exe create Smtp4dev binPath= \"{PathToExe} --service\"", _ => { });
-        
+
                 options.Add(
                  "urls=", "The URLs the web interface should listen on. For example, http://localhost:123. Use `*` in place of hostname to listen for requests on any IP address or hostname using the specified port and protocol (for example, http://*:5000)", data => map.Add(data, x => x.Urls));
 
@@ -55,7 +56,7 @@ namespace Rnwood.Smtp4dev
                  "basepath=", "Specifies the virtual path from web server root where SMTP4DEV web interface will be hosted. e.g. \"/\" or \"/smtp4dev\"", data => map.Add(data, x => x.ServerOptions.BasePath));
 
             }
-                
+
 
             try
             {
