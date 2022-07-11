@@ -186,9 +186,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     serverProcess.StandardInput.Close();
                     if (!serverProcess.Process.WaitForExit(5000))
                     {
-                        throw new Exception("DIDNT EXIT");
-                        output.WriteLine("E2E process didn't exit");
                         serverProcess.Kill();
+                        output.WriteLine("E2E process didn't exit!");
                     }
   
                     cancellationTokenSource.Cancel();
