@@ -83,7 +83,7 @@ stages:
             osx-x64:
               platformName: osx-x64
               buildArgs: "-r osx-x64 --self-contained"
-              vmImage: "macOS-10.15"
+              vmImage: "macOS-11"
               runTests: ${{ true }}
             linux-musl-x64:
               platformName: linux-musl-x64
