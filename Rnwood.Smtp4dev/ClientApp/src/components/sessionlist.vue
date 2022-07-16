@@ -58,7 +58,7 @@
         width="120"
         sortable
       >
-        <template slot-scope="scope">
+        <template v-slot:default="scope">
           <i
             class="el-icon-warning"
             v-if="scope.row.terminatedWithError"
@@ -86,7 +86,7 @@ import sortedArraySync from "../sortedArraySync";
 import { Mutex } from "async-mutex";
 import ConfirmationDialog from "@/components/confirmationdialog.vue";
 import { ElTable } from "element-ui/types/table";
-import PagedResult from "@/ApiClient/PagedResult";
+import PagedResult, { EmptyPagedResult } from "@/ApiClient/PagedResult";
 import Messagelistpager from "@/components/messagelistpager.vue";
 import ClientController from "@/ApiClient/ClientController";
 
@@ -99,11 +99,12 @@ import ClientController from "@/ApiClient/ClientController";
 export default class SessionList extends Vue {
   constructor() {
     super();
+    this.pagedServerMessages = EmptyPagedResult<SessionSummary>();
   }
 
   page: number = 1;
   pageSize: number = 25;
-  pagedServerMessages: PagedResult<SessionSummary>|undefined = undefined;
+  public pagedServerMessages: PagedResult<SessionSummary>|undefined = undefined;
 
   @Prop({ default: null })
   connection: HubConnectionManager | null = null;
@@ -159,7 +160,7 @@ export default class SessionList extends Vue {
     try {
       await new SessionsController().delete(sessionToDelete.id);
       this.refresh();
-    } catch (e) {
+    } catch (e: any) {
       this.$notify.error({
         title: "Delete Session Failed",
         message: e.message,
@@ -174,7 +175,7 @@ export default class SessionList extends Vue {
     try {
       await new SessionsController().deleteAll();
       this.refresh();
-    } catch (e) {
+    } catch (e: any) {
       this.$notify.error({
         title: "Clear Sessions Failed",
         message: e.message,
@@ -207,7 +208,7 @@ export default class SessionList extends Vue {
       ) {
         this.handleCurrentChange(null);
       }
-    } catch (e) {
+    } catch (e: any) {
       this.error = e;
     } finally {
       this.loading = false;
@@ -239,4 +240,5 @@ export default class SessionList extends Vue {
     }
   }
 }
+
 </script>

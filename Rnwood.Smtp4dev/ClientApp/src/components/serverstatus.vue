@@ -39,7 +39,7 @@
                 this.loading = !silent;
 
                 this.server = await new ServerController().getServer();
-            } catch (e) {
+            } catch (e: any) {
                 this.error = e;
             } finally {
                 this.loading = false;

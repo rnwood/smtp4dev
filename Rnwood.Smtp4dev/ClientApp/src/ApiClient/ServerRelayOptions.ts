@@ -12,7 +12,7 @@ export default class ServerRelayOptions {
         this.password = password;
     }
 
-     
+    tlsMode: string | undefined;
     smtpServer: string; 
     smtpPort: number; 
     automaticEmails: string[]; 

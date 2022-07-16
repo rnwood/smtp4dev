@@ -189,7 +189,7 @@
                     await new ServerController().updateServer(this.server!);
                     this.handleClose();
                 }
-            } catch (e) {
+            } catch (e: any) {
                 this.error = e;
             } finally {
                 this.saving = false;
@@ -205,7 +205,7 @@
 
                 this.server = await new ServerController().getServer();
                 this.isRelayEnabled = !!this.server.relayOptions.smtpServer;
-            } catch (e) {
+            } catch (e: any) {
                 this.error = e;
             } finally {
                 this.loading = false;

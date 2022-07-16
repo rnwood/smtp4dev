@@ -91,10 +91,13 @@
                              accordion
                              node-key="id"
                              :default-expanded-keys="['0']">
-                        <span class="custom-tree-node" slot-scope="{ node, data }">
-                            <i :class="{'el-icon-document-copy': data.childParts.length, 'el-icon-document': data.childParts.length == 0 && !data.isAttachment, 'el-icon-paperclip': data.childParts.length == 0 && data.isAttachment}"></i>
-                            {{ node.label }}
-                        </span>
+                        <template v-slot="{node, data}">
+                            <span class="custom-tree-node">
+                                <i :class="{'el-icon-document-copy': data.childParts.length, 'el-icon-document': data.childParts.length == 0 && !data.isAttachment, 'el-icon-paperclip': data.childParts.length == 0 && data.isAttachment}">
+                                </i>
+                                {{ node.label }}
+                            </span>
+                        </template>
                     </el-tree>
 
                     <div v-show="selectedPart" class="fill vfillpanel">
@@ -221,7 +224,7 @@
                         }, 2000);
                     }
                 }
-            } catch (e) {
+            } catch (e: any) {
                 this.error = e;
             } finally {
                 this.loading = false;
@@ -286,7 +289,7 @@
                 await new MessagesController().relayMessage(this.messageSummary.id, { overrideRecipientAddresses: emails });
 
                 this.$notify.success({ title: "Relay Message Success", message: "Completed OK" });
-            } catch (e) {
+            } catch (e: any) {
                 var message = e.response?.data?.detail ?? e.sessage;
 
                 this.$notify.error({ title: "Relay Message Failed", message: message });
