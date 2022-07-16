@@ -1,10 +1,10 @@
-﻿using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using MimeKit;
 using System.Collections;
+using System.Text.Json.Serialization;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {

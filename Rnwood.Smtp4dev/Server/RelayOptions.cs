@@ -1,5 +1,6 @@
 ﻿using Ardalis.GuardClauses;
 using MailKit.Security;
+using System.Text.Json.Serialization;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -37,8 +38,7 @@ namespace Rnwood.Smtp4dev.Server
 
         public string Password { get; set; } = "";
 
-        [Newtonsoft.Json.JsonIgnore]
-        [System.Text.Json.Serialization.JsonIgnore]
+        [JsonIgnore]
         public string AutomaticEmailsString
         {
             get => string.Join(",", AutomaticEmails);

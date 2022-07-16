@@ -94,10 +94,10 @@ namespace Rnwood.Smtp4dev.Server
 
             if (index == 1)
             {
-                Console.WriteLine("The IMAP server failed to start: " + errorTask.Result.Exception.ToString());
+                log.Warning("The IMAP server failed to start: {Exception}" + errorTask.Result.Exception.ToString());
             } else if (index == 2)
             {
-                Console.WriteLine("The IMAP server failed to start: Timeout");
+                log.Warning("The IMAP server failed to start: Timeout");
 
                 try
                 {

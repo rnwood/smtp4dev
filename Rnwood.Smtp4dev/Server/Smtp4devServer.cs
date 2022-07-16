@@ -8,7 +8,10 @@ using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
+using MimeKit;
+using MailKit.Net.Smtp;
 using System.Reactive.Linq;
+using System.Security.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
 using Serilog;
@@ -65,11 +68,9 @@ namespace Rnwood.Smtp4dev.Server
             this.smtpServer.AuthenticationCredentialsValidationRequiredEventHandler += OnAuthenticationCredentialsValidationRequired;
             this.smtpServer.IsRunningChanged += ((_, __) =>
             {
-                if (!this.smtpServer.IsRunning)
-                {
-                    log.Information("SMTP server stopped");
+                if (this.smtpServer.IsRunning) return;
+                log.Information("SMTP server stopped.");
                     this.notificationsHub.OnServerChanged().Wait();
-                }
             });
         }
 
@@ -83,15 +84,26 @@ namespace Rnwood.Smtp4dev.Server
         {
             X509Certificate2 cert = null;
 
-            log.Information("TLS mode: {TLSMode}",serverOptions.CurrentValue.TlsMode);
+            log.Information("TLS mode: {TLSMode}", serverOptions.CurrentValue.TlsMode);
 
             if (serverOptions.CurrentValue.TlsMode != TlsMode.None)
             {
                 if (!string.IsNullOrEmpty(serverOptions.CurrentValue.TlsCertificate))
                 {
-                    log.Information("Using certificate from {certificateLocation}",serverOptions.CurrentValue.TlsCertificate);
-                    cert = new X509Certificate2(File.ReadAllBytes(serverOptions.CurrentValue.TlsCertificate), "",
-                        X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
+                     var pfxPassword = serverOptions.CurrentValue.TlsCertificatePassword ?? "";
+           
+                    if (string.IsNullOrEmpty(serverOptions.CurrentValue.TlsCertificatePrivateKey))
+                    {
+                        cert = CertificateHelper.LoadCertificate(serverOptions.CurrentValue.TlsCertificate, pfxPassword);
+                    }
+                    else
+                    {
+                        cert = CertificateHelper.LoadCertificateWithKey(serverOptions.CurrentValue.TlsCertificate,
+                            serverOptions.CurrentValue.TlsCertificatePrivateKey, pfxPassword);
+                    }
+
+                    log.Information("Using provided certificate with Subject {SubjectName}, expiry {ExpiryDate}", cert.SubjectName.Name,
+                        cert.GetExpirationDateString());
                 }
                 else
                 {
@@ -122,12 +134,14 @@ namespace Rnwood.Smtp4dev.Server
                         cert = SSCertGenerator.CreateSelfSignedCertificate(serverOptions.CurrentValue.HostName);
                         File.WriteAllBytes(pfxPath, cert.Export(X509ContentType.Pkcs12));
                         File.WriteAllBytes(cerPath, cert.Export(X509ContentType.Cert));
-                        log.Information("Generated new self-signed certificate with subject name '{Hostname} and expiry date {ExpirationDate}", 
-                            serverOptions.CurrentValue.HostName, 
+                        log.Information("Generated new self-signed certificate with subject name '{Hostname} and expiry date {ExpirationDate}",
+                            serverOptions.CurrentValue.HostName,
                             cert.GetExpirationDateString());
                     }
 
-                    log.Information("Ensure that the hostname you enter into clients and '{Hostname}' from ServerOptions:HostName configuration match exactly and trust the issuer certificate at {cerPath} in your client/OS to avoid certificate validation errors.", 
+
+                    log.Information(
+                        "Ensure that the hostname you enter into clients and '{Hostname}' from ServerOptions:HostName configuration match exactly and trust the issuer certificate at {cerPath} in your client/OS to avoid certificate validation errors.",
                         serverOptions.CurrentValue.HostName, cerPath);
                 }
             }
@@ -199,7 +213,8 @@ namespace Rnwood.Smtp4dev.Server
         private async Task OnSessionCompleted(object sender, SessionEventArgs e)
         {
             int messageCount = (await e.Session.GetMessages()).Count;
-            log.Information("Session completed. Client address {clientAddress}. Number of messages {messageCount}.", e.Session.ClientAddress, messageCount);
+            log.Information("Session completed. Client address {clientAddress}. Number of messages {messageCount}.", e.Session.ClientAddress,
+                messageCount);
 
 
             await taskQueue.QueueTask(() =>
@@ -252,11 +267,12 @@ namespace Rnwood.Smtp4dev.Server
         private async Task OnMessageReceived(object sender, MessageEventArgs e)
         {
             Message message = new MessageConverter().ConvertAsync(e.Message).Result;
-            log.Information("Message received. Client address {clientAddress}. From {messageFrom}. To {messageTo}.", e.Message.Session.ClientAddress, e.Message.From, message.To);
-            message.IsUnread = true;
+            log.Information("Message received. Client address {clientAddress}, From {messageFrom}, To {messageTo}, SecureConnection: {secure}.",
+                e.Message.Session.ClientAddress, e.Message.From, message.To, e.Message.SecureConnection);
+                message.IsUnread = true;
 
-            await taskQueue.QueueTask(() =>
-            {
+                await taskQueue.QueueTask(() =>
+                {
                 log.Information("Processing received message");
                 using var scope = serviceScopeFactory.CreateScope();
                 Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
@@ -265,9 +281,9 @@ namespace Rnwood.Smtp4dev.Server
                 var relayResult = Task.Run(() => relayMessageService.TryRelayMessage(message)).Result;
                 message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
 
-                ImapState imapState = dbContext.ImapState.Single();
+                    ImapState imapState = dbContext.ImapState.Single();
                 imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
-                message.ImapUid = imapState.LastUid;
+                    message.ImapUid = imapState.LastUid;
                 message.Session = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
                 if (relayResult.WasRelayed)
                 {
@@ -277,16 +293,16 @@ namespace Rnwood.Smtp4dev.Server
                     }
                 }
 
-                dbContext.Messages.Add(message);
+                    dbContext.Messages.Add(message);
 
-                dbContext.SaveChanges();
+                    dbContext.SaveChanges();
 
-                TrimMessages(dbContext);
-                dbContext.SaveChanges();
-                notificationsHub.OnMessagesChanged().Wait();
-                log.Information("Processing received message DONE");
-            }, false).ConfigureAwait(false);
-        }
+                    TrimMessages(dbContext);
+                    dbContext.SaveChanges();
+                    notificationsHub.OnMessagesChanged().Wait();
+                    log.Information("Processing received message DONE");
+                }, false).ConfigureAwait(false);
+            }
 
         private void TrimMessages(Smtp4devDbContext dbContext)
         {
@@ -310,12 +326,12 @@ namespace Rnwood.Smtp4dev.Server
         public bool IsRunning
         {
             get { return this.smtpServer.IsRunning; }
-        }
+            }
 
         public int PortNumber
         {
             get { return this.smtpServer.PortNumber; }
-        }
+            }
 
         public void TryStart()
         {
@@ -326,13 +342,14 @@ namespace Rnwood.Smtp4dev.Server
                 CreateSmtpServer();
                 smtpServer.Start();
 
-                log.Information("SMTP Server is listening on port {smtpPortNumber}.", 
+                log.Information("SMTP Server is listening on port {smtpPortNumber}.",
                     smtpServer.PortNumber);
-                log.Information("Keeping last {messagesToKeep} messages and {sessionsToKeep} sessions.", serverOptions.CurrentValue.NumberOfMessagesToKeep, serverOptions.CurrentValue.NumberOfSessionsToKeep);
+                log.Information("Keeping last {messagesToKeep} messages and {sessionsToKeep} sessions.",
+                    serverOptions.CurrentValue.NumberOfMessagesToKeep, serverOptions.CurrentValue.NumberOfSessionsToKeep);
             }
             catch (Exception e)
             {
-                log.Fatal(e, "The SMTP server failed to start: {failureReason}",e.ToString());
+                log.Fatal(e, "The SMTP server failed to start: {failureReason}", e.ToString());
                 this.Exception = e;
             }
             finally

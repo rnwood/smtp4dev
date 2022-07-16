@@ -14,6 +14,7 @@ using Microsoft.AspNetCore.SpaServices;
 using MailKit.Net.Smtp;
 using Microsoft.AspNetCore.Rewrite;
 using Rnwood.Smtp4dev.Data;
+using Rnwood.Smtp4dev.Service;
 using Serilog;
 using Rnwood.Smtp4dev.RulesEngine;
 
@@ -33,6 +34,7 @@ namespace Rnwood.Smtp4dev
         {
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
             services.Configure<RelayOptions>(Configuration.GetSection("RelayOptions"));
+            services.Configure<ClientOptions>(Configuration.GetSection("ClientOptions"));
             services.Configure<RulesOptions>(Configuration.GetSection("Rules"));
 
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
@@ -63,6 +65,7 @@ namespace Rnwood.Smtp4dev
             services.AddScoped<IRelayMessageRulesEngine, RelayMessageRulesEngine>();
             services.AddScoped<IRelayMessageService, RelayMessageService>();
             services.AddScoped<IRulesRepository, RulesRepository>();
+            services.AddScoped<IHostingEnvironmentHelper, HostingEnvironmentHelper>();
             services.AddSingleton<ITaskQueue, TaskQueue>();
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>(relayOptions =>

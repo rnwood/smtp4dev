@@ -1,17 +1,11 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
-using Rnwood.Smtp4dev.DbModel;
-using Rnwood.Smtp4dev.Hubs;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using System.IO;
-using MimeKit;
-using HtmlAgilityPack;
+using Rnwood.Smtp4dev.ApiModel;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.Server;
+using Session = Rnwood.Smtp4dev.DbModel.Session;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -20,21 +14,20 @@ namespace Rnwood.Smtp4dev.Controllers
     [UseEtagFilterAttribute]
     public class SessionsController : Controller
     {
+        private readonly Smtp4devDbContext dbContext;
+        private readonly ISmtp4devServer server;
+
         public SessionsController(Smtp4devDbContext dbContext, ISmtp4devServer server)
         {
             this.dbContext = dbContext;
             this.server = server;
         }
 
-
-        private Smtp4devDbContext dbContext;
-        private ISmtp4devServer server;
-
         [HttpGet]
-        public IEnumerable<ApiModel.SessionSummary> GetSummaries()
+        public PagedResult<SessionSummary> GetSummaries(int page = 1, int pageSize = 5)
         {
-            return dbContext.Sessions.Where(s => s.EndDate.HasValue)
-                .Select(m => new ApiModel.SessionSummary(m));
+            return dbContext.Sessions.Where(s => s.EndDate.HasValue).OrderByDescending(x=>x.StartDate)
+                .Select(m => new SessionSummary(m)).GetPaged(page, pageSize);
         }
 
         [HttpGet("{id}")]
@@ -51,7 +44,6 @@ namespace Rnwood.Smtp4dev.Controllers
             return result.Log;
         }
 
-
         [HttpDelete("{id}")]
         public async Task Delete(Guid id)
         {
@@ -63,7 +55,5 @@ namespace Rnwood.Smtp4dev.Controllers
         {
             await server.DeleteAllSessions();
         }
-
-
     }
 }

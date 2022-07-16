@@ -63,20 +63,20 @@
       <el-table-column
         property="receivedDate"
         label="Received"
-        width="180"
+        width="160"
         sortable="custom"
         :formatter="formatDate"
       ></el-table-column>
       <el-table-column
         property="from"
         label="From"
-        width="120"
+        width="140"
         sortable="custom"
       ></el-table-column>
       <el-table-column
         property="to"
         label="To"
-        width="120"
+        width="180"
         sortable="custom"
       ></el-table-column>
       <el-table-column
@@ -108,6 +108,11 @@
         </template>
       </el-table-column>
     </el-table>
+    <messagelistpager
+        :paged-data="pagedServerMessages"
+        @on-current-page-change="handlePaginationCurrentChange"
+        @on-page-size-change="handlePaginationPageSizeChange"
+    ></messagelistpager>
   </div>
 </template>
 <script lang="ts">
@@ -126,10 +131,15 @@ import { debounce } from "ts-debounce";
 import ConfirmationDialog from "@/components/confirmationdialog.vue";
 import { MessageBoxInputData } from "element-ui/types/message-box";
 import ServerController from "../ApiClient/ServerController";
+import ClientController from "../ApiClient/ClientController";
+
 import { mapOrder } from "@/components/utils/mapOrder";
+import PagedResult from "@/ApiClient/PagedResult";
+import Messagelistpager from "@/components/messagelistpager.vue";
 
 @Component({
   components: {
+    Messagelistpager,
     confirmationdialog: ConfirmationDialog,
   },
 })
@@ -140,6 +150,11 @@ export default class MessageList extends Vue {
 
   private selectedSortDescending: boolean = true;
   private selectedSortColumn: string = "receivedDate";
+
+  page: number = 1;
+  pageSize: number = 25;
+
+  pagedServerMessages: PagedResult<MessageSummary>|undefined = undefined;
 
   @Prop({ default: null })
   connection: HubConnectionManager | null = null;
@@ -172,6 +187,16 @@ export default class MessageList extends Vue {
     this.$emit("selected-message-changed", message);
   }
 
+  async handlePaginationCurrentChange(page: number) {
+    this.page = page;
+    await this.refresh();
+  }
+
+  async handlePaginationPageSizeChange(pageSize: number) {
+    this.pageSize = pageSize;
+    await this.refresh();
+  }
+
   cellValueRenderer(
     row: { [x: string]: any },
     column: { property: string | number },
@@ -197,8 +222,6 @@ export default class MessageList extends Vue {
     if (this.selectedmessage == null) {
       return;
     }
-
-    var msg = this.selectedmessage;
 
     let emails: string[];
 
@@ -231,7 +254,7 @@ export default class MessageList extends Vue {
         message: "Completed OK",
       });
     } catch (e) {
-      var message = e.response?.data?.detail ?? e.sessage;
+      const message = e.response?.data?.detail ?? e.sessage;
 
       this.$notify.error({ title: "Relay Message Failed", message: message });
     } finally {
@@ -350,31 +373,37 @@ export default class MessageList extends Vue {
   initialLoadDone = false;
 
   async refresh(silent: boolean = false) {
-    var unlock = await this.mutex.acquire();
+    let unlock = await this.mutex.acquire();
 
     try {
       this.error = null;
       this.loading = !silent;
 
-      //Copy in case they are mutated during the async load below
+      // Copy in case they are mutated during the async load below
       let sortColumn = this.selectedSortColumn;
       let sortDescending = this.selectedSortDescending;
 
-      let serverMessages = await new MessagesController().getSummaries(
+      this.pagedServerMessages = await new MessagesController().getSummaries(
         sortColumn,
-        sortDescending
+        sortDescending,
+        this.page,
+        this.pageSize
       );
 
       if (
         !this.lastSort ||
         this.lastSort != sortColumn ||
         this.lastSortDescending != sortDescending ||
-        serverMessages.length == 0
+          this.pagedServerMessages.results.length == 0
       ) {
-        this.messages.splice(0, this.messages.length, ...serverMessages);
+        this.messages.splice(
+          0,
+          this.messages.length,
+          ...this.pagedServerMessages.results
+        );
       } else {
         sortedArraySync(
-          serverMessages,
+            this.pagedServerMessages.results,
           this.messages,
           (a: MessageSummary, b: MessageSummary) => a.id == b.id,
           (sourceItem: MessageSummary, targetItem: MessageSummary) => {
@@ -396,9 +425,8 @@ export default class MessageList extends Vue {
       this.lastSort = sortColumn;
       this.lastSortDescending = this.selectedSortDescending;
 
-      this.isRelayAvailable = !!(await (
-        await new ServerController().getServer()
-      ).relayOptions.smtpServer);
+      this.isRelayAvailable = !!(await new ServerController().getServer())
+        .relayOptions.smtpServer;
     } catch (e) {
       this.error = e;
     } finally {
@@ -426,6 +454,16 @@ export default class MessageList extends Vue {
 
   async mounted() {
     await this.refresh(false);
+  }
+
+  async created() {
+    await this.initPageSizeProps();
+  }
+
+  private async initPageSizeProps() {
+    const defaultPageSize = 25;
+    let client = await new ClientController().getClient();
+    this.pageSize = client.pageSize || defaultPageSize;
   }
 
   @Watch("connection")

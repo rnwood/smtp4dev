@@ -1,4 +1,4 @@
-import { HubConnection, HubConnectionBuilder, LogLevel } from '@aspnet/signalr';
+import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
 
 export default class HubConnectionManager {
 
@@ -9,9 +9,13 @@ export default class HubConnectionManager {
     error: Error|null = null;
 
     constructor(url: string) {
-        this._connection = new HubConnectionBuilder().withUrl(url).configureLogging(LogLevel.Trace).build();
+        this._connection = new HubConnectionBuilder().withUrl(url, { logMessageContent: true }).configureLogging(LogLevel.Trace).build();
         this._connection.onclose(this.onConnectionClosed.bind(this));
-        //this._connection.serverTimeoutInMilliseconds = 5000;
+        this._connection.onreconnected(() => {
+            for (const connectedCallback of this.connectedCallbacks) {
+                connectedCallback();
+            }
+        });
     }
 
     async addOnConnectedCallback(connectedCallback: () => void) {

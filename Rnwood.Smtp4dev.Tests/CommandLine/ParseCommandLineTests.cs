@@ -15,7 +15,7 @@ namespace Rnwood.Smtp4dev.Tests.CommandLine
         [InlineData(500)]
         public void CanParseRelaySmtpPort(int portNumber)
         {
-            var commandLineOptions = CommandLineParser.TryParseCommandLine(new[] { $"{RelaySmtpPortParam}={portNumber}" });
+            var commandLineOptions = CommandLineParser.TryParseCommandLine(new[] { $"{RelaySmtpPortParam}={portNumber}" }, false);
             var cmdLineOptions = new CommandLineOptions();
             new ConfigurationBuilder().AddCommandLineOptions(commandLineOptions).Build().Bind(cmdLineOptions);
             cmdLineOptions.RelayOptions.SmtpPort.Should().Be(portNumber);
@@ -27,7 +27,7 @@ namespace Rnwood.Smtp4dev.Tests.CommandLine
         public void SmtpPortMustBeValidTcpPort(int portNumber)
         {
             // TCP port range 1-65535 is valid
-            var commandLineOptions = CommandLineParser.TryParseCommandLine(new[] { $"{RelaySmtpPortParam}={portNumber}" });
+            var commandLineOptions = CommandLineParser.TryParseCommandLine(new[] { $"{RelaySmtpPortParam}={portNumber}" }, false);
             var cmdLineOptions = new CommandLineOptions();
             Action act = () => new ConfigurationBuilder().AddCommandLineOptions(commandLineOptions).Build().Bind(cmdLineOptions);
             act.Should().Throw<TargetInvocationException>().WithInnerException<ArgumentOutOfRangeException>();

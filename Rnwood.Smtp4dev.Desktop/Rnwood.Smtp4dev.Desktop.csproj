@@ -1,0 +1,56 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0</TargetFramework>
+    <ApplicationIcon>app\icon.ico</ApplicationIcon>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <None Remove="icon.ico" />
+    <None Remove="icon.svg" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="app\icon.ico">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="app\icon.svg">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="ParallelExtensionsExtras.NetFxStandard" Version="1.4.0" />
+    <PackageReference Include="Photino.NET" Version="2.1.11" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Properties\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rnwood.Smtp4dev\Rnwood.Smtp4dev.csproj" />
+  </ItemGroup>
+
+
+
+  <Target Name="CopyMainApp" BeforeTargets="BeforeBuild">
+    <Message Importance="high" Text="Publishing Rnwood.Smtp4dev to $(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)\server" />
+    <MSBuild Projects="../Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj" Targets="Publish" Properties="Configuration=$(Configuration);Platform=$(Platform);RuntimeIdentifier=$(RuntimeIdentifier);SelfContained=$(SelfContained);PublishDir=$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)\server"></MSBuild>
+
+    <ItemGroup>
+      <Smtp4DevRuntimeFiles Include="$(MSBuildProjectDirectory)\$(BaseIntermediateOutputPath)\server\wwwroot\**\*" />
+    </ItemGroup>
+    <Copy SourceFiles="@(Smtp4DevRuntimeFiles)" DestinationFolder="$(MSBuildProjectDirectory)\wwwroot\%(RecursiveDir)" />
+    <ItemGroup>
+      <Content Include="$(MSBuildProjectDirectory)\wwwroot\**">
+        <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+      </Content>
+    </ItemGroup>
+    
+  </Target>
+  
+  
+
+</Project>

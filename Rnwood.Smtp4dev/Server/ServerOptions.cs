@@ -17,11 +17,16 @@ namespace Rnwood.Smtp4dev.Server
         public TlsMode TlsMode { get; set; } = TlsMode.None;
 
         public string TlsCertificate { get; set; }
+        public string TlsCertificatePrivateKey { get; set; }
+
+        public string TlsCertificatePassword { get; set; } = "";
 
         public string HostName { get; set; } = Dns.GetHostName();
 
         public int? ImapPort { get; set; } = 143;
 
         public bool RecreateDb { get; set; }
+
+        public bool LockSettings { get; set; } = false;
     }
 }
