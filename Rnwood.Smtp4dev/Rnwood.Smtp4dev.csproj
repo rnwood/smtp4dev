@@ -28,7 +28,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="6.0.8" />
 		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="6.0.7" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.7">
+		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="6.0.8">
 		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		  <PrivateAssets>all</PrivateAssets>
 		</PackageReference>
