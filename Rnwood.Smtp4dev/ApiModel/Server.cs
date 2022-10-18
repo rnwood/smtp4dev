@@ -25,6 +25,8 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public ServerRelayOptions RelayOptions { get; set; }
         public int? ImapPortNumber { get; set; }
+
+        public bool DisableMessageSanitisation { get; set; }
     }
 
 }

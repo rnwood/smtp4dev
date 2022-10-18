@@ -53,7 +53,8 @@ namespace Rnwood.Smtp4dev.Controllers
                     AutomaticEmails = relayOptions.CurrentValue.AutomaticEmails,
                     SenderAddress = relayOptions.CurrentValue.SenderAddress
                 },
-                SettingsAreEditable  = hostingEnvironmentHelper.SettingsAreEditable
+                SettingsAreEditable = hostingEnvironmentHelper.SettingsAreEditable,
+                DisableMessageSanitisation = serverOptions.CurrentValue.DisableMessageSanitisation
             
             };
         }
@@ -74,6 +75,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.NumberOfMessagesToKeep = serverUpdate.NumberOfMessagesToKeep;
             newSettings.NumberOfSessionsToKeep = serverUpdate.NumberOfSessionsToKeep;
             newSettings.ImapPort = serverUpdate.ImapPortNumber;
+            newSettings.DisableMessageSanitisation = serverUpdate.DisableMessageSanitisation;
 
             newRelaySettings.SmtpServer = serverUpdate.RelayOptions.SmtpServer;
             newRelaySettings.SmtpPort = serverUpdate.RelayOptions.SmtpPort;

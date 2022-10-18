@@ -211,18 +211,38 @@ namespace Rnwood.Smtp4dev
 
         public static void SetupStaticLogger(IEnumerable<string> args)
         {
-            var configuration = new ConfigurationBuilder()
-                .AddJsonFile("appsettings.json")
-                .Build();
-
-            var logConfigBuilder = new LoggerConfiguration()
-                .ReadFrom.Configuration(configuration);
-            if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
+            try
             {
-                logConfigBuilder.WriteTo.EventLog("smtp4dev");
+                IConfigurationRoot configuration =
+                   new ConfigurationBuilder()
+                       .AddJsonFile("appsettings.json")
+                       .Build();
+
+                var logConfigBuilder = new LoggerConfiguration()
+    .ReadFrom.Configuration(configuration);
+                if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
+                {
+                    logConfigBuilder.WriteTo.EventLog("smtp4dev");
+                }
+                Log.Logger = logConfigBuilder
+                    .CreateLogger();
             }
-            Log.Logger = logConfigBuilder
-                .CreateLogger();
+            catch
+            {
+                //Ensure output goes somewhere if there's a config error.
+                var logConfigBuilder = new LoggerConfiguration();
+                if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
+                {
+                    logConfigBuilder.WriteTo.EventLog("smtp4dev");
+                }else
+                {
+                    logConfigBuilder.WriteTo.Console();
+                }
+                Log.Logger = logConfigBuilder.CreateLogger();
+                throw;
+            }
+
+
         }
     }
 }

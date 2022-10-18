@@ -28,5 +28,7 @@ namespace Rnwood.Smtp4dev.Server
         public bool RecreateDb { get; set; }
 
         public bool LockSettings { get; set; } = false;
+
+        public bool DisableMessageSanitisation { get; set; } = false;
     }
 }
