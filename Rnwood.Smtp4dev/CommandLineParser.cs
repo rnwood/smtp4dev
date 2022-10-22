@@ -42,7 +42,10 @@ namespace Rnwood.Smtp4dev
                 { "debugsettings", "Prints out most settings values on startup", data => map.Add((data !=null).ToString(), x=> x.DebugSettings) },
                 { "recreatedb", "Recreates the DB on startup if it already exists", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.RecreateDb) },
                 { "locksettings", "Locks settings from being changed by user via web interface", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.LockSettings) },
-                {"installpath=", "Sets path to folder containing wwwroot and other files", data => map.Add(data, x=> x.InstallPath) }
+                { "installpath=", "Sets path to folder containing wwwroot and other files", data => map.Add(data, x=> x.InstallPath) },
+                { "disablemessagesanitisation", "Disables message HTML sanitisation.", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.DisableMessageSanitisation) }
+
+
             };
 
             if (!isDesktopApp)

@@ -84,6 +84,11 @@
                             <el-button size="small" @click="server.relayOptions.automaticEmails.push('')">New Auto-Relay Recipient</el-button>
                         </el-form-item>
                     </el-tab-pane>
+                    <el-tab-pane label="User Interface">
+                        <el-form-item label="Disable message sanitisation (DANGER!)" prop="server.disableMessageSanitisation">
+                            <el-switch v-model="server.disableMessageSanitisation" />
+                        </el-form-item>
+                    </el-tab-pane>
                 </el-tabs>
             </el-form>
         </div>
@@ -146,7 +151,7 @@
         visible: boolean = false;
 
         handleClose() {
-           this.$emit('closed');
+            this.$emit('closed');
         }
 
 
@@ -162,7 +167,7 @@
                 this.server.relayOptions.automaticEmails.splice(0, this.server.relayOptions.automaticEmails.length);
             }
         }
-             
+
         relayOptionsAutomaticEmails: any[] = [];
 
         @Watch("server.relayOptions.automaticEmails")
@@ -182,7 +187,7 @@
             this.saving = true;
             this.error = null;
             try {
-                let valid =  await (<Form>this.$refs["form"]).validate()
+                let valid = await (<Form>this.$refs["form"]).validate()
 
                 if (valid) {
 

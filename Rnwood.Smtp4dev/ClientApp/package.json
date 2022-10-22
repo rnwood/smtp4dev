@@ -59,7 +59,10 @@
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.5.4",
     "vue-template-compiler": "^2.6.14",
-    "vue2-ace-editor": "0.0.15"
+    "vue2-ace-editor": "^0.0.15",
+    "sanitize-html": "^2.7.1",
+    "@types/sanitize-html": "^2.6.2"
+
   },
   "eslintConfig": {
     "root": true,
