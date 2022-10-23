@@ -3,6 +3,8 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
+using Org.BouncyCastle.Crypto.Operators;
+
 namespace Rnwood.SmtpServer.Tests
 {
 	using System;
@@ -250,7 +252,7 @@ namespace Rnwood.SmtpServer.Tests
 			}
 		}
 
-		private System.Security.Cryptography.X509Certificates.X509Certificate2 CreateSelfSignedCertificate()
+		private X509Certificate2 CreateSelfSignedCertificate()
 		{
 			CryptoApiRandomGenerator randomGenerator = new CryptoApiRandomGenerator();
 			SecureRandom random = new SecureRandom(randomGenerator);
@@ -261,7 +263,6 @@ namespace Rnwood.SmtpServer.Tests
 
 			BigInteger serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
 			certGenerator.SetSerialNumber(serialNumber);
-			certGenerator.SetSignatureAlgorithm("SHA256WithRSA");
 
 			certGenerator.SetNotBefore(DateTime.UtcNow.Date);
 			certGenerator.SetNotAfter(DateTime.UtcNow.Date.AddYears(10));
@@ -270,15 +271,16 @@ namespace Rnwood.SmtpServer.Tests
 
 			RsaKeyPairGenerator keyPairGenerator = new RsaKeyPairGenerator();
 			keyPairGenerator.Init(keyGenerationParameters);
-			AsymmetricCipherKeyPair keypair = keyPairGenerator.GenerateKeyPair();
-			certGenerator.SetPublicKey(keypair.Public);
+			AsymmetricCipherKeyPair keyPair = keyPairGenerator.GenerateKeyPair();
+			certGenerator.SetPublicKey(keyPair.Public);
 
-			Org.BouncyCastle.X509.X509Certificate cert = certGenerator.Generate(keypair.Private, random);
+			var signatureFactory = new Asn1SignatureFactory("SHA256WithRSA", keyPair.Private, random);
+			var cert = certGenerator.Generate(signatureFactory);
 
 			Pkcs12Store store = new Pkcs12Store();
 			var certificateEntry = new X509CertificateEntry(cert);
 			store.SetCertificateEntry("cert", certificateEntry);
-			store.SetKeyEntry("cert", new AsymmetricKeyEntry(keypair.Private), new[] { certificateEntry });
+			store.SetKeyEntry("cert", new AsymmetricKeyEntry(keyPair.Private), new[] { certificateEntry });
 			var stream = new MemoryStream();
 			store.Save(stream, "".ToCharArray(), random);
 

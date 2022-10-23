@@ -362,6 +362,13 @@
             <param name="verbMap">The verb map.</param>
             <returns>An <see cref="T:System.Threading.Tasks.Task`1"/> representing the async operation.</returns>
         </member>
+        <member name="M:Rnwood.SmtpServer.Connection.StartImplicitTls(System.IO.Stream)">
+            <summary>
+            Start the Tls stream.
+            </summary>
+            <param name="s">stream.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1"/> representing the result of the asynchronous operation.</returns>
+        </member>
         <member name="M:Rnwood.SmtpServer.Connection.ProcessAsync">
             <summary>
             Starts processing of this connection.
@@ -482,7 +489,7 @@
             
              <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
              <param name="portNumber">The port number.</param>
-             <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+             <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
         </member>
         <member name="M:Rnwood.SmtpServer.DefaultServer.#ctor(System.Boolean,System.String,System.Int32,System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Certificate)">
              <summary>
@@ -492,9 +499,9 @@
              </summary>
             
              <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
-             <param name="domainName">The domain name the server will send in greeting</param>
+             <param name="domainName">The domain name the server will send in greeting.</param>
              <param name="portNumber">The port number.</param>
-             <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+             <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
              <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
         </member>
         <member name="M:Rnwood.SmtpServer.DefaultServer.#ctor(System.Boolean,Rnwood.SmtpServer.StandardSmtpPort)">
@@ -512,12 +519,12 @@
         </member>
         <member name="E:Rnwood.SmtpServer.DefaultServer.MessageCompletedEventHandler">
             <summary>
-            Occurs when a mesage has been fully received but not yet acknlowledged by the server.
+            Occurs when a message has been fully received but not yet acknowledged by the server.
             </summary>
         </member>
         <member name="E:Rnwood.SmtpServer.DefaultServer.MessageReceivedEventHandler">
             <summary>
-            Occurs when a message has been receieved and acknlowledged by the server.
+            Occurs when a message has been received and acknowledged by the server.
             </summary>
         </member>
         <member name="E:Rnwood.SmtpServer.DefaultServer.SessionCompletedEventHandler">
@@ -560,7 +567,7 @@
             </summary>
             <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
             <param name="portNumber">The port number.</param>
-            <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+            <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
         </member>
         <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.#ctor(System.Boolean,System.Int32,System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Certificate)">
             <summary>
@@ -568,18 +575,18 @@
             </summary>
             <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
             <param name="portNumber">The port number.</param>
-            <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-            <param name="startTlsCertificate">The TLS certificate to use for STARTTLS</param>
+            <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+            <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
         </member>
         <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.#ctor(System.Boolean,System.String,System.Int32,System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Certificate)">
             <summary>
             Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.DefaultServerBehaviour"/> class.
             </summary>
             <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-            <param name="domainName">The domain name the server will send in greeting</param>
+            <param name="domainName">The domain name the server will send in greeting.</param>
             <param name="portNumber">The port number.</param>
             <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-            <param name="startTlsCertificate">The TLS certificate to use for STARTTLS</param>
+            <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
         </member>
         <member name="M:Rnwood.SmtpServer.DefaultServerBehaviour.#ctor(System.Boolean,System.Security.Cryptography.X509Certificates.X509Certificate)">
             <summary>
@@ -616,6 +623,11 @@
         <member name="E:Rnwood.SmtpServer.DefaultServerBehaviour.SessionStartedEventHandler">
             <summary>
             Occurs when a new session is created, when a client connects to the server.
+            </summary>
+        </member>
+        <member name="P:Rnwood.SmtpServer.DefaultServerBehaviour.EnabledAuthMechanisms">
+            <summary>
+            Gets or sets a List of active Auth Mechanism Identifiers.
             </summary>
         </member>
         <member name="P:Rnwood.SmtpServer.DefaultServerBehaviour.DomainName">
@@ -711,6 +723,12 @@
         <member name="M:Rnwood.SmtpServer.Extensions.Auth.AnonymousMechanism.CreateAuthMechanismProcessor(Rnwood.SmtpServer.IConnection)">
             <inheritdoc/>
         </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.Auth.AnonymousMechanism.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.Auth.AnonymousMechanism.GetHashCode">
+            <inheritdoc />
+        </member>
         <member name="T:Rnwood.SmtpServer.Extensions.Auth.AnonymousMechanismProcessor">
             <summary>
             Defines the <see cref="T:Rnwood.SmtpServer.Extensions.Auth.AnonymousMechanismProcessor" />.
@@ -763,7 +781,7 @@
         </member>
         <member name="P:Rnwood.SmtpServer.Extensions.Auth.AuthExtensionProcessor.MechanismMap">
             <summary>
-            Gets the mechanism map which manages the list of available auth mechasims.
+            Gets the mechanism map which manages the list of available auth mechanisms.
             </summary>
             <value>
             The mechanism map.
@@ -867,6 +885,17 @@
             Defines the Success
             </summary>
         </member>
+        <member name="T:Rnwood.SmtpServer.Extensions.Auth.AuthMechanisms">
+            <summary>
+            Authentication Mechanisms.
+            </summary>
+        </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.Auth.AuthMechanisms.All">
+            <summary>
+            Return enumerable of all valid Auth Mechanisms.
+            </summary>
+            <returns>Enumerable collection of AuthMechanisms.</returns>
+        </member>
         <member name="T:Rnwood.SmtpServer.Extensions.Auth.AuthVerb">
             <summary>
             Defines the <see cref="T:Rnwood.SmtpServer.Extensions.Auth.AuthVerb" />.
@@ -963,6 +992,12 @@
             <inheritdoc/>
         </member>
         <member name="M:Rnwood.SmtpServer.Extensions.Auth.CramMd5Mechanism.CreateAuthMechanismProcessor(Rnwood.SmtpServer.IConnection)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.Auth.CramMd5Mechanism.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.Auth.CramMd5Mechanism.GetHashCode">
             <inheritdoc/>
         </member>
         <member name="T:Rnwood.SmtpServer.Extensions.Auth.CramMd5MechanismProcessor">
@@ -1094,6 +1129,12 @@
         <member name="M:Rnwood.SmtpServer.Extensions.Auth.LoginMechanism.CreateAuthMechanismProcessor(Rnwood.SmtpServer.IConnection)">
             <inheritdoc/>
         </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.Auth.LoginMechanism.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.Auth.LoginMechanism.GetHashCode">
+            <inheritdoc/>
+        </member>
         <member name="T:Rnwood.SmtpServer.Extensions.Auth.LoginMechanismProcessor">
             <summary>
             Defines the <see cref="T:Rnwood.SmtpServer.Extensions.Auth.LoginMechanismProcessor" />.
@@ -1152,7 +1193,7 @@
         </member>
         <member name="T:Rnwood.SmtpServer.Extensions.Auth.PlainMechanism">
             <summary>
-            Defines the <see cref="T:Rnwood.SmtpServer.Extensions.Auth.PlainMechanism" /> which implements the PLAIN auth mechnism.
+            Defines the <see cref="T:Rnwood.SmtpServer.Extensions.Auth.PlainMechanism" /> which implements the PLAIN auth mechanism.
             </summary>
         </member>
         <member name="P:Rnwood.SmtpServer.Extensions.Auth.PlainMechanism.Identifier">
@@ -1162,6 +1203,12 @@
             <inheritdoc/>
         </member>
         <member name="M:Rnwood.SmtpServer.Extensions.Auth.PlainMechanism.CreateAuthMechanismProcessor(Rnwood.SmtpServer.IConnection)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.Auth.PlainMechanism.Equals(System.Object)">
+            <inheritdoc/>
+        </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.Auth.PlainMechanism.GetHashCode">
             <inheritdoc/>
         </member>
         <member name="T:Rnwood.SmtpServer.Extensions.Auth.PlainMechanismProcessor">
@@ -1984,6 +2031,11 @@
             Gets an encoding which will be used if bytes received from the client cannot be decoded as ASCII/UTF-8.
             </summary>
         </member>
+        <member name="P:Rnwood.SmtpServer.IServerBehaviour.EnabledAuthMechanisms">
+            <summary>
+            Gets or sets the list of Supported Auth Mechanism Identifiers.
+            </summary>
+        </member>
         <member name="M:Rnwood.SmtpServer.IServerBehaviour.GetExtensions(Rnwood.SmtpServer.IConnectionChannel)">
             <summary>
             Gets the extensions that should be enabled for the specified connection.
@@ -2021,7 +2073,7 @@
         </member>
         <member name="M:Rnwood.SmtpServer.IServerBehaviour.IsAuthMechanismEnabled(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.Extensions.Auth.IAuthMechanism)">
             <summary>
-            Determines whether the speficied auth mechanism should be enabled for the specified connecton.
+            Determines whether the specified auth mechanism should be enabled for the specified connection.
             </summary>
             <param name="connection">The connection.</param>
             <param name="authMechanism">The auth mechanism.</param>

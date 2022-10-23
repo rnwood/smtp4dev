@@ -150,6 +150,11 @@ namespace Rnwood.SmtpServer
 			return result;
 		}
 
+		/// <summary>
+		/// Start the Tls stream.
+		/// </summary>
+		/// <param name="s">stream.</param>
+		/// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
 		internal async Task<Stream> StartImplicitTls(Stream s)
 		{
 			SslStream sslStream = new SslStream(s);
@@ -166,7 +171,7 @@ namespace Rnwood.SmtpServer
 				sslProtos = SslProtocols.None;
 			}
 
-			System.Security.Cryptography.X509Certificates.X509Certificate cert = 
+			System.Security.Cryptography.X509Certificates.X509Certificate cert =
 				await this.Server.Behaviour.GetSSLCertificate(this).ConfigureAwait(false);
 
 			await sslStream.AuthenticateAsServerAsync(cert, false, sslProtos, false).ConfigureAwait(false);
@@ -185,7 +190,6 @@ namespace Rnwood.SmtpServer
 
 				if (await this.Server.Behaviour.IsSSLEnabled(this).ConfigureAwait(false))
 				{
-
 					await this.ConnectionChannel.ApplyStreamFilter(this.StartImplicitTls).ConfigureAwait(false);
 
 					this.Session.SecureConnection = true;

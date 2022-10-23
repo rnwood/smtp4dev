@@ -207,7 +207,7 @@ namespace Rnwood.SmtpServer
 
 			this.reader = new SmtpStreamReader(this.stream, this.fallbackEncoding, true);
 
-			if(this.writer != null)
+			if (this.writer != null)
 			{
 				this.writer.Dispose();
 			}

@@ -5,10 +5,8 @@
 
 namespace Rnwood.SmtpServer
 {
-	using System;
 	using System.Net;
 	using System.Security.Cryptography.X509Certificates;
-	using System.Threading.Tasks;
 
 	/// <summary>
 	/// A default subclass of <see cref="SmtpServer"/> which provides a default behaviour which is suitable for many simple
@@ -59,9 +57,9 @@ namespace Rnwood.SmtpServer
 		///
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
 		/// <param name="portNumber">The port number.</param>
-		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-		public DefaultServer(bool allowRemoteConnections, int portNumber, X509Certificate implcitTlsCertificate)
-			: this(allowRemoteConnections, Dns.GetHostName(), portNumber, implcitTlsCertificate, null)
+		/// <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+		public DefaultServer(bool allowRemoteConnections, int portNumber, X509Certificate implicitTlsCertificate)
+			: this(allowRemoteConnections, Dns.GetHostName(), portNumber, implicitTlsCertificate, null)
 		{
 		}
 
@@ -72,12 +70,12 @@ namespace Rnwood.SmtpServer
 		/// </summary>
 		///
 		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections are allowed.</param>
-		/// <param name="domainName">The domain name the server will send in greeting</param>
+		/// <param name="domainName">The domain name the server will send in greeting.</param>
 		/// <param name="portNumber">The port number.</param>
-		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+		/// <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
 		/// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
-		public DefaultServer(bool allowRemoteConnections, string domainName, int portNumber, X509Certificate implcitTlsCertificate, X509Certificate startTlsCertificate)
-			: this(new DefaultServerBehaviour(allowRemoteConnections, domainName, portNumber, implcitTlsCertificate, startTlsCertificate))
+		public DefaultServer(bool allowRemoteConnections, string domainName, int portNumber, X509Certificate implicitTlsCertificate, X509Certificate startTlsCertificate)
+			: this(new DefaultServerBehaviour(allowRemoteConnections, domainName, portNumber, implicitTlsCertificate, startTlsCertificate))
 		{
 		}
 
@@ -107,7 +105,7 @@ namespace Rnwood.SmtpServer
 		}
 
 		/// <summary>
-		/// Occurs when a mesage has been fully received but not yet acknlowledged by the server.
+		/// Occurs when a message has been fully received but not yet acknowledged by the server.
 		/// </summary>
 		public event AsyncEventHandler<ConnectionEventArgs> MessageCompletedEventHandler
 		{
@@ -116,7 +114,7 @@ namespace Rnwood.SmtpServer
 		}
 
 		/// <summary>
-		/// Occurs when a message has been receieved and acknlowledged by the server.
+		/// Occurs when a message has been received and acknowledged by the server.
 		/// </summary>
 		public event AsyncEventHandler<MessageEventArgs> MessageReceivedEventHandler
 		{

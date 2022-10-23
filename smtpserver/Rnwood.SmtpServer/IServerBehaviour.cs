@@ -46,6 +46,11 @@ namespace Rnwood.SmtpServer
 		Encoding FallbackEncoding { get; }
 
 		/// <summary>
+		/// Gets or sets the list of Supported Auth Mechanism Identifiers.
+		/// </summary>
+		HashSet<IAuthMechanism> EnabledAuthMechanisms { get; set; }
+
+		/// <summary>
 		/// Gets the extensions that should be enabled for the specified connection.
 		/// </summary>
 		/// <param name="connectionChannel">The connectionChannel<see cref="IConnectionChannel" />.</param>
@@ -81,7 +86,7 @@ namespace Rnwood.SmtpServer
 		Task<X509Certificate> GetSSLCertificate(IConnection connection);
 
 		/// <summary>
-		/// Determines whether the speficied auth mechanism should be enabled for the specified connecton.
+		/// Determines whether the specified auth mechanism should be enabled for the specified connection.
 		/// </summary>
 		/// <param name="connection">The connection.</param>
 		/// <param name="authMechanism">The auth mechanism.</param>

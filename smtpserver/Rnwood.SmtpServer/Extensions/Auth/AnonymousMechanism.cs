@@ -21,5 +21,18 @@ namespace Rnwood.SmtpServer.Extensions.Auth
 		{
 			return new AnonymousMechanismProcessor(connection);
 		}
+
+		/// <inheritdoc/>
+		public override bool Equals(object obj)
+		{
+			return obj is AnonymousMechanism mechanism &&
+				   this.Identifier == mechanism.Identifier;
+		}
+
+		/// <inheritdoc />
+		public override int GetHashCode()
+		{
+			return this.Identifier.GetHashCode();
+		}
 	}
 }
