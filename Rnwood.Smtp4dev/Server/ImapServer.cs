@@ -168,12 +168,12 @@ namespace Rnwood.Smtp4dev.Server
                     {
                         if (e.Flags.Contains("Seen", StringComparer.OrdinalIgnoreCase))
                         {
-                            messagesRepository.MarkMessageRead(new Guid(e.MessageInfo.ID));
+                            messagesRepository.MarkMessageRead(new Guid(e.MessageInfo.ID)).Wait();
                         }
 
                         if (e.Flags.Contains("Deleted", StringComparer.OrdinalIgnoreCase))
                         {
-                            messagesRepository.DeleteMessage(new Guid(e.MessageInfo.ID));
+                            messagesRepository.DeleteMessage(new Guid(e.MessageInfo.ID)).Wait();
                         }
                     }
                 }
