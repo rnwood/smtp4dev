@@ -1,4 +1,5 @@
 ﻿using LumiSoft.Net.Mime;
+using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Net.Smtp;
 using MailKit.Security;
@@ -54,10 +55,27 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 {
                     imapClient.Connect("localhost", context.ImapPortNumber);
                     imapClient.Authenticate("user", "password");
-                    imapClient.Inbox.Open(MailKit.FolderAccess.ReadOnly);
-                    var imapMessage = imapClient.Inbox.FirstOrDefault();
+                    imapClient.Inbox.Open(MailKit.FolderAccess.ReadWrite);
+
+                    var imapMessageSummary = imapClient.Inbox.Fetch(0, 0, MessageSummaryItems.UniqueId|MessageSummaryItems.Full);
+                    Assert.Equal(messageSubject, imapMessageSummary[0].NormalizedSubject);
+                    var imapMessage = imapClient.Inbox.GetMessage(imapMessageSummary[0].UniqueId);
                     Assert.NotNull(imapMessage);
                     Assert.Equal(messageSubject, imapMessage.Subject);
+
+                    imapClient.Inbox.AddFlags(imapMessageSummary[0].UniqueId, MessageFlags.Seen, true);
+                    imapClient.Inbox.Close();
+                }
+
+                using (ImapClient imapClient = new ImapClient())
+                {
+                    imapClient.Connect("localhost", context.ImapPortNumber);
+                    imapClient.Authenticate("user", "password");
+                    imapClient.Inbox.Open(MailKit.FolderAccess.ReadWrite);
+
+                    var imapMessageSummary = imapClient.Inbox.Fetch(0, 0, MessageSummaryItems.All);
+                    Assert.True(imapMessageSummary[0].Flags.Value.HasFlag(MessageFlags.Seen));
+                    imapClient.Inbox.Close();
                 }
 
             });
