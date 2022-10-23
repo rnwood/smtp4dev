@@ -37,7 +37,7 @@ stages:
     jobs:
       - job: Init
         pool:
-          vmImage: "ubuntu-18.04"
+          vmImage: "ubuntu-22.04"
         steps:
           - checkout: none
           - powershell: Write-Host "$(tag) $(Build.BuildNumber)"
@@ -88,7 +88,7 @@ stages:
             linux-musl-x64:
               platformName: linux-musl-x64
               buildArgs: "-r linux-musl-x64 --self-contained"
-              vmImage: ubuntu-18.04
+              vmImage: ubuntu-22.04
               runTests: ${{ false }}
             win-arm:
               platformName: win-arm
@@ -98,7 +98,7 @@ stages:
             linux-arm:
               platformName: linux-arm
               buildArgs: "-r linux-arm --self-contained"
-              vmImage: ubuntu-18.04
+              vmImage: ubuntu-22.04
               runTests: ${{ false }}
         steps:
           - task: UseDotNet@2
@@ -196,7 +196,7 @@ stages:
       - job: DockerBuildLinux
         displayName: DockerBuild - Linux
         pool:
-          vmImage: "ubuntu-18.04"
+          vmImage: "ubuntu-22.04"
         steps:
           - task: UseDotNet@2
             displayName: Install .NET Core SDK v$(netcoresdk_version)
@@ -249,7 +249,7 @@ stages:
       - job: DockerBuildLinuxArm64
         displayName: DockerBuild - Linux - ARM64
         pool:
-          vmImage: "ubuntu-18.04"
+          vmImage: "ubuntu-22.04"
         steps:
           - task: UseDotNet@2
             displayName: Install .NET Core SDK v$(netcoresdk_version)
@@ -346,7 +346,7 @@ stages:
     jobs:
       - job: Release
         pool:
-          vmImage: "ubuntu-18.04"
+          vmImage: "ubuntu-22.04"
         steps:
           - checkout: none
           - task: DownloadPipelineArtifact@2
@@ -395,7 +395,7 @@ stages:
         variables:
           DOCKER_CLI_EXPERIMENTAL: enabled
         pool:
-          vmImage: "ubuntu-18.04"
+          vmImage: "ubuntu-22.04"
         steps:
           - checkout: none
           - task: Docker@2
