@@ -1,0 +1,22 @@
+version: 2
+updates:
+- package-ecosystem: nuget
+  directory: "/"
+  schedule:
+    interval: daily
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: MailKit
+    versions:
+    - 2.10.1
+    - 2.11.0
+  - dependency-name: Microsoft.NET.Test.Sdk
+    versions:
+    - 16.8.3
+    - 16.9.1
+  - dependency-name: Moq
+    versions:
+    - 4.16.0
+  - dependency-name: Microsoft.CodeAnalysis.CSharp
+    versions:
+    - 3.8.0
