@@ -13,7 +13,7 @@
   "devDependencies": {
     "@microsoft/signalr": "^6.0.6",
     "@babel/preset-typescript": "^7.18.6",
-    "@fortawesome/fontawesome-free": "^5.15.4",
+    "@fortawesome/fontawesome-free": "^6.2.1",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/vue-fontawesome": "^2.0.8",
