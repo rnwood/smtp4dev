@@ -24,7 +24,7 @@
 		<PackageReference Include="Ardalis.GuardClauses" Version="4.0.1" />
 		<PackageReference Include="CommandLiners.MonoOptions" Version="1.0.36" />
 		<PackageReference Include="HtmlAgilityPack" Version="1.11.45" />
-		<PackageReference Include="MailKit" Version="3.3.0" />
+		<PackageReference Include="MailKit" Version="3.4.3" />
 		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="6.0.10" />
 		<PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
 		<PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="6.0.10" />
