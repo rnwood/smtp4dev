@@ -29,7 +29,7 @@
     <PackageReference Include="MedallionShell" Version="1.6.2" />
     <PackageReference Include="NSubstitute" Version="4.4.0" />
     <PackageReference Include="ReflectionMagic" Version="4.1.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.4.1" />
     <PackageReference Include="Selenium.Support" Version="4.2.0" />
     <PackageReference Include="Selenium.WebDriver" Version="4.2.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="6.0.0" />
