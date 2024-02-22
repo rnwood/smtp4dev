@@ -4,22 +4,23 @@
   "private": true,
   "scripts": {
     "postinstall": "patch-package",
-    "serve": "vue-cli-service serve",
-    "build": "vue-cli-service build",
-    "build:dev": "vue-cli-service build --mode development",
+    "serve": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service serve",
+    "build": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service build",
+    "build:dev": "cross-env NODE_OPTIONS=--openssl-legacy-provider vue-cli-service build --mode development",
     "lint": "vue-cli-service lint",
     "test": "jest"
   },
   "devDependencies": {
-    "@microsoft/signalr": "^6.0.6",
     "@babel/preset-typescript": "^7.18.6",
     "@fortawesome/fontawesome-free": "^5.15.4",
     "@fortawesome/fontawesome-svg-core": "^6.1.1",
     "@fortawesome/free-solid-svg-icons": "^6.1.1",
     "@fortawesome/vue-fontawesome": "^2.0.8",
+    "@microsoft/signalr": "^6.0.6",
     "@testing-library/jest-dom": "^5.15.0",
     "@testing-library/vue": "^5.8.2",
     "@types/jest": "^27.0.2",
+    "@types/sanitize-html": "^2.6.2",
     "@typescript-eslint/eslint-plugin": "^4.33.0",
     "@typescript-eslint/parser": "^4.31.2",
     "@vue/cli-plugin-babel": "^4.5.15",
@@ -46,6 +47,7 @@
     "locale-index-of": "^3.1.0",
     "moment": "^2.29.3",
     "patch-package": "^6.4.7",
+    "sanitize-html": "^2.7.1",
     "sass": "^1.51.0",
     "sass-loader": "^10.2.1",
     "splitpanes": "^2.4.1",
@@ -59,10 +61,7 @@
     "vue-property-decorator": "^9.1.2",
     "vue-router": "^3.5.4",
     "vue-template-compiler": "^2.6.14",
-    "vue2-ace-editor": "^0.0.15",
-    "sanitize-html": "^2.7.1",
-    "@types/sanitize-html": "^2.6.2"
-
+    "vue2-ace-editor": "^0.0.15"
   },
   "eslintConfig": {
     "root": true,
@@ -90,5 +89,8 @@
   "browserslist": [
     "> 1%",
     "last 2 versions"
-  ]
+  ],
+  "dependencies": {
+    "cross-env": "^7.0.3"
+  }
 }

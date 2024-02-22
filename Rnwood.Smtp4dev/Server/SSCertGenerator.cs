@@ -45,7 +45,7 @@ namespace Rnwood.Smtp4dev.Server
             var cert = certGenerator.Generate(signatureFactory);
 
 
-            Pkcs12Store store = new Pkcs12Store();
+            Pkcs12Store store = new Pkcs12StoreBuilder().Build();
             var certificateEntry = new X509CertificateEntry(cert);
             store.SetCertificateEntry("cert", certificateEntry);
             store.SetKeyEntry("cert", new AsymmetricKeyEntry(keyPair.Private), new[] { certificateEntry });

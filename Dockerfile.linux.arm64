@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 mcr.microsoft.com/dotnet/aspnet:6.0.5 AS runtime
+FROM --platform=linux/arm64 mcr.microsoft.com/dotnet/aspnet:8.0.0 AS runtime
 COPY out /app
 VOLUME ["/smtp4dev"]
 WORKDIR /

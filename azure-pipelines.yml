@@ -25,11 +25,11 @@ variables:
     version_revision: "" #Set by init script
 
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
-    tag: $[ format('3.2.0-ci{0:yyyyMMdd}{1}', pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
+    tag: $[ format('3.3.0-ci{0:yyyyMMdd}{1}', pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
 
   docker_repo: "rnwood/smtp4dev"
   docker_registry: "dockerhub-rnwood"
-  netcoresdk_version: "6.0.300"
+  netcoresdk_version: "8.0.100"
 
 stages:
   - stage: Init
