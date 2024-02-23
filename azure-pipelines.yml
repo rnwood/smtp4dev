@@ -90,9 +90,9 @@ stages:
               buildArgs: "-r linux-musl-x64 --self-contained"
               vmImage: ubuntu-22.04
               runTests: ${{ false }}
-            win-arm:
-              platformName: win-arm
-              buildArgs: "-r win-arm --self-contained"
+            win-arm64:
+              platformName: win-arm64
+              buildArgs: "-r win-arm64 --self-contained"
               vmImage: windows-2022
               runTests: ${{ false }}
             linux-arm:
@@ -375,7 +375,6 @@ stages:
                 -- | --
                 [Rnwood.Smtp4dev-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip) | Windows x64 binary standalone - Server edition
                 [Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip) | Windows x64 binary standalone - Desktop app edition.
-                [Rnwood.Smtp4dev-win-arm-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-arm-$(tag).zip) | Windows ARM 32-bit binary standalone
                 [Rnwood.Smtp4dev-win-arm64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip) | Windows ARM 62-bit binary standalone
                 [Rnwood.Smtp4dev-linux-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-linux-x64-$(tag).zip) | Linux x64 (Intel 64 bit) binary standalone
                 [Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip) | Linux MUSL x64 binary standalone for Linux distros using MUSL libc
