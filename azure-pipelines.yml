@@ -29,7 +29,7 @@ variables:
 
   docker_repo: "rnwood/smtp4dev"
   docker_registry: "dockerhub-rnwood"
-  netcoresdk_version: "8.0.100"
+  netcoresdk_version: "8.0.201"
 
 stages:
   - stage: Init
@@ -73,7 +73,7 @@ stages:
             win-x64:
               platformName: win-x64
               buildArgs: "-r win-x64 --self-contained"
-              vmImage: "windows-2019"
+              vmImage: "windows-2022"
               runTests: ${{ true }}
             linux-x64:
               platformName: linux-x64
@@ -93,7 +93,7 @@ stages:
             win-arm:
               platformName: win-arm
               buildArgs: "-r win-arm --self-contained"
-              vmImage: windows-2019
+              vmImage: windows-2022
               runTests: ${{ false }}
             linux-arm:
               platformName: linux-arm
@@ -144,7 +144,7 @@ stages:
       - job: BuildGlobalTool
         displayName: Build - .NET Global Tool
         pool:
-          vmImage: "windows-2019"
+          vmImage: "windows-2022"
         steps:
           - task: UseDotNet@2
             displayName: Install .NET Core SDK v$(netcoresdk_version)
@@ -163,7 +163,7 @@ stages:
       - job: BuildDesktop
         displayName: Build - Desktop
         pool:
-          vmImage: "windows-2019"
+          vmImage: "windows-2022"
         steps:
           - task: UseDotNet@2
             displayName: Install .NET Core SDK v$(netcoresdk_version)
@@ -283,7 +283,7 @@ stages:
       - job: DockerBuildWindows
         displayName: DockerBuild - Windows
         pool:
-          vmImage: "windows-2019"
+          vmImage: "windows-2022"
         steps:
           - task: UseDotNet@2
             displayName: Install .NET Core SDK v$(netcoresdk_version)
@@ -324,7 +324,7 @@ stages:
         variables:
           DOCKER_CLI_EXPERIMENTAL: enabled
         pool:
-          vmImage: "windows-2019"
+          vmImage: "windows-2022"
         steps:
           - task: Docker@2
             displayName: Login.
@@ -429,7 +429,7 @@ stages:
         variables:
           DOCKER_CLI_EXPERIMENTAL: enabled
         pool:
-          vmImage: "windows-2019"
+          vmImage: "windows-2022"
         steps:
           - checkout: none
           - task: Docker@2

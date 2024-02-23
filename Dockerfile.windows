@@ -1,5 +1,5 @@
 # escape=`
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.0-windowsservercore-ltsc2019 AS final
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.2-windowsservercore-ltsc2019 AS final
 COPY out /app
 EXPOSE 80
 EXPOSE 25
