@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ParallelExtensionsExtras.NetFxStandard" Version="2.0.0" />
-    <PackageReference Include="Photino.NET" Version="2.5.2" />
+    <PackageReference Include="ParallelExtensionsExtras.NetFxStandard" Version="2.1.0" />
+    <PackageReference Include="Photino.NET" Version="2.6.0" />
   </ItemGroup>
 
   <ItemGroup>
