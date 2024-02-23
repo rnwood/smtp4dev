@@ -19,9 +19,5 @@ namespace Rnwood.Smtp4dev
         public CommandLineOptionsException(string message, Exception innerException) : base(message, innerException)
         {
         }
-
-        protected CommandLineOptionsException(SerializationInfo info, StreamingContext context) : base(info, context)
-        {
-        }
     }
 }

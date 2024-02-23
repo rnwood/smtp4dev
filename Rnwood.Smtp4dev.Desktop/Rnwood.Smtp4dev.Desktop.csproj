@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net6.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <ApplicationIcon>app\icon.ico</ApplicationIcon>
   </PropertyGroup>
 
@@ -21,8 +21,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="ParallelExtensionsExtras.NetFxStandard" Version="1.4.0" />
-    <PackageReference Include="Photino.NET" Version="2.1.11" />
+    <PackageReference Include="ParallelExtensionsExtras.NetFxStandard" Version="2.1.0" />
+    <PackageReference Include="Photino.NET" Version="2.6.0" />
   </ItemGroup>
 
   <ItemGroup>

@@ -1,11 +1,14 @@
 ﻿using MailKit.Net.Smtp;
 using MailKit.Security;
+using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MimeKit;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
+using OpenQA.Selenium.Support.Extensions;
 using Rnwood.Smtp4dev.Tests.E2E.PageModel;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading;
 using WebDriverManager;
@@ -29,7 +32,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         [InlineData("/smtp4dev", true)]
         public void CheckMessageIsReceivedAndDisplayed(string basePath, bool inMemoryDb)
         {
-            RunUITest((browser, baseUrl, smtpPortNumber) =>
+            RunUITest($"{nameof(CheckMessageIsReceivedAndDisplayed)}-{basePath}-{inMemoryDb}", (browser, baseUrl, smtpPortNumber) =>
             {
                 browser.Navigate().GoToUrl(baseUrl);
                 HomePage homePage = new HomePage(browser);
@@ -73,7 +76,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         [Fact]
         public void CheckUTF8MessageIsReceivedAndDisplayed()
         {
-            RunUITest((browser, baseUrl, smtpPortNumber) =>
+            RunUITest(nameof(CheckUTF8MessageIsReceivedAndDisplayed), (browser, baseUrl, smtpPortNumber) =>
             {
                 browser.Navigate().GoToUrl(baseUrl);
                 HomePage homePage = new HomePage(browser);
@@ -135,7 +138,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         {
         }
 
-        private void RunUITest(Action<IWebDriver, Uri, int> uitest, UITestOptions options = null)
+        private void RunUITest(string testName, Action<IWebDriver, Uri, int> uitest, UITestOptions options = null)
         {
             options ??= new UITestOptions();
 
@@ -151,6 +154,18 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     try
                     {
                         uitest(browser, context.BaseUrl, context.SmtpPortNumber);
+                    }
+                    catch
+                    {
+                        string screenshotFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".png");
+                        string consoleFileName = Path.Combine(Path.GetTempPath(), Guid.NewGuid().ToString() + ".txt");
+                        browser.TakeScreenshot().SaveAsFile(screenshotFileName);
+                        File.WriteAllLines(consoleFileName, browser.Manage().Logs.GetLog(LogType.Browser).Select(m => $"{m.Timestamp} - {m.Level}: {m.Message}"));
+
+                        Console.WriteLine($"##vso[artifact.upload containerfolder=e2eerror;artifactname={testName}.png]{screenshotFileName}");
+
+                        Console.WriteLine($"##vso[artifact.upload containerfolder=e2eerror;artifactname={testName}.txt]{consoleFileName}");
+                        throw;
                     }
                     finally
                     {

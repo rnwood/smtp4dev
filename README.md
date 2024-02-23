@@ -3,7 +3,7 @@
 
 A dummy SMTP server for Windows, Linux, Mac OS-X (and maybe elsewhere where .NET Core is available). Lets you test your application without spamming your real customers and without needing to set up a complicated real email server with a special configuration. Messages received in smtp4dev can be viewed and inspected.
 
-*If you're looking for the older v2 Windows GUI version. [Grab it here](https://github.com/rnwood/smtp4dev/releases/tag/v2.0.10).*
+*If you're looking for the older v2 Windows only GUI version. [Grab it here](https://github.com/rnwood/smtp4dev/releases/tag/v2.0.10).*
 
 > <a style="float: right" href="https://www.patreon.com/bePatron?u=38204828" data-patreon-widget-type="become-patron-button"><img alt='Become a Patreon' src='https://c5.patreon.com/external/logo/become_a_patron_button.png' height="30px"></a> <a  style="float: right" href='https://www.paypal.me/rnwood'><img alt='Donate' src='https://www.paypalobjects.com/webstatic/en_US/btn/btn_donate_pp_142x27.png'/></a> *If you find smtp4dev useful, please consider supporting further development by making a donation*
 > .
