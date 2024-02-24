@@ -25,7 +25,7 @@ variables:
     version_revision: "" #Set by init script
 
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
-    tag: $[ format('3.3.0-ci{0:yyyyMMdd}{1}', pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
+    tag: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
 
   docker_repo: "rnwood/smtp4dev"
   docker_registry: "dockerhub-rnwood"
@@ -48,8 +48,8 @@ stages:
               $version = [version] "$($tag)"
               write-host "##vso[task.setvariable variable=version_major]$($version.Major)"
               write-host "##vso[task.setvariable variable=version_minor]$(if ($version.Minor -ne -1) { $version.Minor })"
-              write-host "##vso[task.setvariable variable=version_build]$(if ($version.Build -ne -1) {$version.Build)"
-              write-host "##vso[task.setvariable variable=version_revision]$(if ($version.Revision -ne -1) {$version.Revision)"
+              write-host "##vso[task.setvariable variable=version_build]$(if ($version.Build -ne -1) {$version.Build })"
+              write-host "##vso[task.setvariable variable=version_revision]$(if ($version.Revision -ne -1) {$version.Revision})"
 
               $dockertags = 'latest v($version.Major) v($version.Major).$($version.Minor)'
               write-host "##vso[task.setvariable variable=docker_tags]$dockertags"
