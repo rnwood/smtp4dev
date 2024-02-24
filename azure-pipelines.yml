@@ -45,7 +45,7 @@ stages:
           - powershell: Write-Host "##vso[build.updatebuildnumber]$(tag) $(Build.BuildNumber)"
             displayName: Update build number
           - powershell: |
-              $version = [version] "$($tag)"
+              $version = [version] "$(tag)"
               write-host "##vso[task.setvariable variable=version_major]$($version.Major)"
               write-host "##vso[task.setvariable variable=version_minor]$(if ($version.Minor -ne -1) { $version.Minor })"
               write-host "##vso[task.setvariable variable=version_build]$(if ($version.Build -ne -1) {$version.Build })"
