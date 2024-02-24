@@ -42,7 +42,7 @@
     "eslint-plugin-vue": "^7.20.0",
     "jest": "^28.1.0",
     "jest-canvas-mock": "^2.3.1",
-    "jest-environment-jsdom": "^28.1.0",
+    "jest-environment-jsdom": "^29.7.0",
     "jsdom-global": "^3.0.2",
     "locale-index-of": "^3.1.0",
     "moment": "^2.29.3",
