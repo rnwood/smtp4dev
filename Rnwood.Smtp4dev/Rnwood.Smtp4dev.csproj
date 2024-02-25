@@ -1,199 +1,200 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
-	<PropertyGroup>
-		<TargetFramework>net8.0</TargetFramework>
-		<VersionPrefix>3.3.0-dev</VersionPrefix>
-		<TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
-		<TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
-		<TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <VersionPrefix>3.3.0-dev</VersionPrefix>
+    <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
+    <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
+    <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <RollForward>Major</RollForward>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(PackAsTool)'=='true'">
-		<IsPackable>true</IsPackable>
-		<PackAsTool>true</PackAsTool>
-		<ToolCommandName>smtp4dev</ToolCommandName>
-		<PackageOutputPath>./bin/pkg</PackageOutputPath>
-		<PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
-	</PropertyGroup>
-	<PropertyGroup Condition="'$(Configuration)'==''">
-		<Configuration>Debug</Configuration>
-	</PropertyGroup>
+    <IsPackable>true</IsPackable>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(PackAsTool)'=='true'">
+    <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>smtp4dev</ToolCommandName>
+    <PackageOutputPath>./bin/pkg</PackageOutputPath>
+    <PackageLicenseExpression>BSD-3-Clause</PackageLicenseExpression>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)'==''">
+    <Configuration>Debug</Configuration>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<PackageReference Include="Ardalis.GuardClauses" Version="4.4.0" />
-		<PackageReference Include="CommandLiners.MonoOptions" Version="1.0.36" />
-		<PackageReference Include="HtmlAgilityPack" Version="1.11.59" />
-		<PackageReference Include="MailKit" Version="4.3.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="8.0.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="8.0.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
-		  <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-		  <PrivateAssets>all</PrivateAssets>
-		</PackageReference>
-		<PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.2" />
-		<PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
-		<PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
-		<PackageReference Include="MimeKit" Version="4.3.0" />
-		<PackageReference Include="Mono.Options" Version="6.12.0.148" />
-		<PackageReference Include="Rnwood.LumiSoft.Net" Version="1.0.0" />
-		<PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0648" />
-		<PackageReference Include="Serilog" Version="3.1.1" />
-		<PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
-		<PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
-		<PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
-		<PackageReference Include="Serilog.Sinks.EventLog" Version="3.1.0" />
-		<PackageReference Include="System.Linq.Dynamic.Core" Version="1.3.8" />
-		<PackageReference Include="System.Reactive" Version="6.0.0" />
-		<PackageReference Include="VueCliMiddleware" Version="6.0.0" />
-	</ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Ardalis.GuardClauses" Version="4.4.0" />
+    <PackageReference Include="CommandLiners.MonoOptions" Version="1.0.36" />
+    <PackageReference Include="HtmlAgilityPack" Version="1.11.59" />
+    <PackageReference Include="MailKit" Version="4.3.0" />
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
+    <PackageReference Include="MimeKit" Version="4.3.0" />
+    <PackageReference Include="Mono.Options" Version="6.12.0.148" />
+    <PackageReference Include="Rnwood.LumiSoft.Net" Version="1.0.0" />
+    <PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0648" />
+    <PackageReference Include="Serilog" Version="3.1.1" />
+    <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
+    <PackageReference Include="Serilog.Settings.Configuration" Version="8.0.0" />
+    <PackageReference Include="Serilog.Sinks.Console" Version="5.0.1" />
+    <PackageReference Include="Serilog.Sinks.EventLog" Version="3.1.0" />
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.3.8" />
+    <PackageReference Include="System.Reactive" Version="6.0.0" />
+    <PackageReference Include="VueCliMiddleware" Version="6.0.0" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.1.0-preview1-final" />
-	</ItemGroup>
+  <ItemGroup>
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.1.0-preview1-final" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<None Update="ClientApp\ApiClient\AttachmentSummary.ts">
-		  <CustomToolNamespace>ApiModel\AttachmentSummary.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\ApiClient\HomeController.ts">
-			<CustomToolNamespace>Controllers\HomeController.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\ApiClient\Message.ts">
-			<CustomToolNamespace>ApiModel\Message.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\ApiClient\MessageEntitySummary.ts">
-			<CustomToolNamespace>ApiModel\MessageEntitySummary.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\ApiClient\MessagesController.ts">
-			<CustomToolNamespace>Controllers\MessagesController.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\ApiClient\MessageSummary.ts">
-		  <CustomToolNamespace>ApiModel\MessageSummary.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\ApiClient\Session.ts">
-			<CustomToolNamespace>ApiModel\Session.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\ApiClient\SessionsController.ts">
-			<CustomToolNamespace>Controllers\SessionsController.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\ApiClient\SessionSummary.ts">
-			<CustomToolNamespace>ApiModel\SessionSummary.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\AttachmentSummary.ts">
-		  <CustomToolNamespace>ApiModel\AttachmentSummary.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\Header.ts">
-		  <CustomToolNamespace>ApiModel\Header.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\HomeController.ts">
-		  <CustomToolNamespace>Controllers\HomeController.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\Message.ts">
-		  <CustomToolNamespace>ApiModel\Message.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\MessageEntitySummary.ts">
-		  <CustomToolNamespace>ApiModel\MessageEntitySummary.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\MessagesController.ts">
-		  <CustomToolNamespace>Controllers\MessagesController.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\MessageSummary.ts">
-		  <CustomToolNamespace>ApiModel\MessageSummary.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\MessageWarning.ts">
-		  <CustomToolNamespace>ApiModel\MessageWarning.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\MimeEntityVisitor.ts">
-		  <CustomToolNamespace>ApiModel\MimeEntityVisitor.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\Session.ts">
-		  <CustomToolNamespace>ApiModel\Session.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\SessionsController.ts">
-		  <CustomToolNamespace>Controllers\SessionsController.cs</CustomToolNamespace>
-		</None>
-		<None Update="ClientApp\src\ApiClient\SessionSummary.ts">
-		  <CustomToolNamespace>ApiModel\SessionSummary.cs</CustomToolNamespace>
-		</None>
-	</ItemGroup>
+  <ItemGroup>
+    <None Update="ClientApp\ApiClient\AttachmentSummary.ts">
+      <CustomToolNamespace>ApiModel\AttachmentSummary.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\ApiClient\HomeController.ts">
+      <CustomToolNamespace>Controllers\HomeController.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\ApiClient\Message.ts">
+      <CustomToolNamespace>ApiModel\Message.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\ApiClient\MessageEntitySummary.ts">
+      <CustomToolNamespace>ApiModel\MessageEntitySummary.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\ApiClient\MessagesController.ts">
+      <CustomToolNamespace>Controllers\MessagesController.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\ApiClient\MessageSummary.ts">
+      <CustomToolNamespace>ApiModel\MessageSummary.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\ApiClient\Session.ts">
+      <CustomToolNamespace>ApiModel\Session.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\ApiClient\SessionsController.ts">
+      <CustomToolNamespace>Controllers\SessionsController.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\ApiClient\SessionSummary.ts">
+      <CustomToolNamespace>ApiModel\SessionSummary.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\AttachmentSummary.ts">
+      <CustomToolNamespace>ApiModel\AttachmentSummary.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\Header.ts">
+      <CustomToolNamespace>ApiModel\Header.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\HomeController.ts">
+      <CustomToolNamespace>Controllers\HomeController.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\Message.ts">
+      <CustomToolNamespace>ApiModel\Message.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\MessageEntitySummary.ts">
+      <CustomToolNamespace>ApiModel\MessageEntitySummary.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\MessagesController.ts">
+      <CustomToolNamespace>Controllers\MessagesController.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\MessageSummary.ts">
+      <CustomToolNamespace>ApiModel\MessageSummary.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\MessageWarning.ts">
+      <CustomToolNamespace>ApiModel\MessageWarning.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\MimeEntityVisitor.ts">
+      <CustomToolNamespace>ApiModel\MimeEntityVisitor.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\Session.ts">
+      <CustomToolNamespace>ApiModel\Session.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\SessionsController.ts">
+      <CustomToolNamespace>Controllers\SessionsController.cs</CustomToolNamespace>
+    </None>
+    <None Update="ClientApp\src\ApiClient\SessionSummary.ts">
+      <CustomToolNamespace>ApiModel\SessionSummary.cs</CustomToolNamespace>
+    </None>
+  </ItemGroup>
 
-	<ItemGroup>
-	  <Content Remove="appsettings.Development.json" />
-	</ItemGroup>
+  <ItemGroup>
+    <Content Remove="appsettings.Development.json" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <None Include="appsettings.Development.json" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Include="appsettings.Development.json" />
+  </ItemGroup>
 
-	<ItemGroup>
-		<NpmInputs Include="ClientApp\package.json" />
-	</ItemGroup>
+  <ItemGroup>
+    <NpmInputs Include="ClientApp\package.json" />
+  </ItemGroup>
 
-	<Target Name="NpmInstall" AfterTargets="Build" Inputs="@(NpmInputs)" Outputs="ClientApp\node_modules\.installedtimestamp" Condition="'$(SkipClientApp)'!='true'">
-		<Message Importance="high" Text="Performing npm install..." />
-		<Exec Command="npm install --no-progress" WorkingDirectory="ClientApp" CustomErrorRegularExpression="^npm ERR!.*" />
-		<Touch Files="ClientApp\node_modules\.installedtimestamp" AlwaysCreate="true" />
-	</Target>
+  <Target Name="NpmInstall" AfterTargets="Build" Inputs="@(NpmInputs)" Outputs="ClientApp\node_modules\.installedtimestamp" Condition="'$(SkipClientApp)'!='true'">
+    <Message Importance="high" Text="Performing npm install..." />
+    <Exec Command="npm install --no-progress" WorkingDirectory="ClientApp" CustomErrorRegularExpression="^npm ERR!.*" />
+    <Touch Files="ClientApp\node_modules\.installedtimestamp" AlwaysCreate="true" />
+  </Target>
 
-	<PropertyGroup> 
-		<DisableFastUpToDateCheck>true</DisableFastUpToDateCheck> 
-		<UserSecretsId>166ca2db-ad20-40b7-95ab-1634e9dd4404</UserSecretsId> 
-	</PropertyGroup>
+  <PropertyGroup>
+    <DisableFastUpToDateCheck>true</DisableFastUpToDateCheck>
+    <UserSecretsId>166ca2db-ad20-40b7-95ab-1634e9dd4404</UserSecretsId>
+  </PropertyGroup>
 
-	<ItemGroup>
-		<ClientApp Include="ClientApp/**" />
-	</ItemGroup>
+  <ItemGroup>
+    <ClientApp Include="ClientApp/**" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <ClientApp Remove="ClientApp\src\ApiClient\MessageRelayOptions.cs" />
-	  <ClientApp Remove="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
-	  <ClientApp Remove="ClientApp\src\ApiClient\Server.ts" />
-	  <ClientApp Remove="ClientApp\src\ApiClient\ServerController.ts" />
-	  <ClientApp Remove="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
-	  <ClientApp Remove="ClientApp\src\components\messagesource.vue" />
-	  <ClientApp Remove="ClientApp\src\components\settingsdialog.vue" />
-	</ItemGroup>
+  <ItemGroup>
+    <ClientApp Remove="ClientApp\src\ApiClient\MessageRelayOptions.cs" />
+    <ClientApp Remove="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
+    <ClientApp Remove="ClientApp\src\ApiClient\Server.ts" />
+    <ClientApp Remove="ClientApp\src\ApiClient\ServerController.ts" />
+    <ClientApp Remove="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
+    <ClientApp Remove="ClientApp\src\components\messagesource.vue" />
+    <ClientApp Remove="ClientApp\src\components\settingsdialog.vue" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <None Remove="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
-	  <None Remove="ClientApp\src\ApiClient\Server.ts" />
-	  <None Remove="ClientApp\src\ApiClient\ServerController.ts" />
-	  <None Remove="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
-	</ItemGroup>
+  <ItemGroup>
+    <None Remove="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
+    <None Remove="ClientApp\src\ApiClient\Server.ts" />
+    <None Remove="ClientApp\src\ApiClient\ServerController.ts" />
+    <None Remove="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
+  </ItemGroup>
 
-	<ItemGroup>
-	  <TypeScriptCompile Include="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
-	  <TypeScriptCompile Include="ClientApp\src\ApiClient\Server.ts" />
-	  <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerController.ts" />
-	  <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
-	</ItemGroup>
+  <ItemGroup>
+    <TypeScriptCompile Include="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
+    <TypeScriptCompile Include="ClientApp\src\ApiClient\Server.ts" />
+    <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerController.ts" />
+    <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
+  </ItemGroup>
 
-	<Target Name="DebugRunNpm" AfterTargets="Build" Inputs="@(ClientApp)" Outputs="wwwroot\.buildtimestamp" Condition="'$(SkipClientApp)'!='true'">
+  <Target Name="DebugRunNpm" AfterTargets="Build" Inputs="@(ClientApp)" Outputs="wwwroot\.buildtimestamp" Condition="'$(SkipClientApp)'!='true'">
 
-		<!-- Ensure Node.js is installed -->
-		<Exec Command="node --version" ContinueOnError="true">
-			<Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
-		</Exec>
-		<Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+    <!-- Ensure Node.js is installed -->
+    <Exec Command="node --version" ContinueOnError="true">
+      <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
+    </Exec>
+    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
 
-		<Message Importance="high" Text="Performing NPM build..." />
+    <Message Importance="high" Text="Performing NPM build..." />
 
-		<Exec Condition=" '$(Configuration)' != 'Release' " Command="npm --prefix ClientApp run-script build:dev" CustomErrorRegularExpression="^ERROR in" />
-		<Exec Condition=" '$(Configuration)' == 'Release' " Command="npm --prefix ClientApp run-script build" CustomErrorRegularExpression="^ERROR in" />
+    <Exec Condition=" '$(Configuration)' != 'Release' " Command="npm --prefix ClientApp run-script build:dev" CustomErrorRegularExpression="^ERROR in" />
+    <Exec Condition=" '$(Configuration)' == 'Release' " Command="npm --prefix ClientApp run-script build" CustomErrorRegularExpression="^ERROR in" />
 
-		<Touch Files="wwwroot\.buildtimestamp" AlwaysCreate="true" />
-	</Target>
+    <Touch Files="wwwroot\.buildtimestamp" AlwaysCreate="true" />
+  </Target>
 
-	<Target Name="PublishRunNpm" AfterTargets="ComputeFilesToPublish">
-		<!-- Include the newly-built files in the publish output -->
-		<ItemGroup>
-			<DistFiles Include="wwwroot\**" />
-			<ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
-				<RelativePath>%(DistFiles.Identity)</RelativePath>
-				<CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
-			</ResolvedFileToPublish>
-		</ItemGroup>
-	</Target>
+  <Target Name="PublishRunNpm" AfterTargets="ComputeFilesToPublish">
+    <!-- Include the newly-built files in the publish output -->
+    <ItemGroup>
+      <DistFiles Include="wwwroot\**" />
+      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+        <RelativePath>%(DistFiles.Identity)</RelativePath>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </ResolvedFileToPublish>
+    </ItemGroup>
+  </Target>
 
 </Project>
