@@ -73,7 +73,7 @@ namespace Rnwood.Smtp4dev.Server
             {
                 if (this.smtpServer.IsRunning) return;
                 log.Information("SMTP server stopped.");
-                    this.notificationsHub.OnServerChanged().Wait();
+                this.notificationsHub.OnServerChanged().Wait();
             });
         }
 
@@ -93,8 +93,8 @@ namespace Rnwood.Smtp4dev.Server
             {
                 if (!string.IsNullOrEmpty(serverOptions.CurrentValue.TlsCertificate))
                 {
-                     var pfxPassword = serverOptions.CurrentValue.TlsCertificatePassword ?? "";
-           
+                    var pfxPassword = serverOptions.CurrentValue.TlsCertificatePassword ?? "";
+
                     if (string.IsNullOrEmpty(serverOptions.CurrentValue.TlsCertificatePrivateKey))
                     {
                         cert = CertificateHelper.LoadCertificate(serverOptions.CurrentValue.TlsCertificate, pfxPassword);
@@ -273,10 +273,10 @@ namespace Rnwood.Smtp4dev.Server
             Message message = new MessageConverter().ConvertAsync(e.Message).Result;
             log.Information("Message received. Client address {clientAddress}, From {messageFrom}, To {messageTo}, SecureConnection: {secure}.",
                 e.Message.Session.ClientAddress, e.Message.From, message.To, e.Message.SecureConnection);
-                message.IsUnread = true;
+            message.IsUnread = true;
 
-                await taskQueue.QueueTask(() =>
-                {
+            await taskQueue.QueueTask(() =>
+            {
                 log.Information("Processing received message");
                 using var scope = serviceScopeFactory.CreateScope();
                 Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
@@ -284,9 +284,9 @@ namespace Rnwood.Smtp4dev.Server
                 var relayResult = TryRelayMessage(message, null);
                 message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
 
-                    ImapState imapState = dbContext.ImapState.Single();
+                ImapState imapState = dbContext.ImapState.Single();
                 imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
-                    message.ImapUid = imapState.LastUid;
+                message.ImapUid = imapState.LastUid;
                 message.Session = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
                 if (relayResult.WasRelayed)
                 {
@@ -296,16 +296,16 @@ namespace Rnwood.Smtp4dev.Server
                     }
                 }
 
-                    dbContext.Messages.Add(message);
+                dbContext.Messages.Add(message);
 
-                    dbContext.SaveChanges();
+                dbContext.SaveChanges();
 
-                    TrimMessages(dbContext);
-                    dbContext.SaveChanges();
-                    notificationsHub.OnMessagesChanged().Wait();
+                TrimMessages(dbContext);
+                dbContext.SaveChanges();
+                notificationsHub.OnMessagesChanged().Wait();
                 log.Information("Processing received message DONE");
-                }, false).ConfigureAwait(false);
-            }
+            }, false).ConfigureAwait(false);
+        }
 
         public RelayResult TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
         {
@@ -338,15 +338,15 @@ namespace Rnwood.Smtp4dev.Server
                     log.Information("Relaying message to {recipient}", recipient);
 
                     using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
-                            var apiMsg = new ApiModel.Message(message);
-                            MimeMessage newEmail = apiMsg.MimeMessage;
-                            MailboxAddress sender = MailboxAddress.Parse(
-                                !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)
-                                ? relayOptions.CurrentValue.SenderAddress
-                                : apiMsg.From);
-                            relaySmtpClient.Send(newEmail, sender, new[] { recipient });
+                    var apiMsg = new ApiModel.Message(message);
+                    MimeMessage newEmail = apiMsg.MimeMessage;
+                    MailboxAddress sender = MailboxAddress.Parse(
+                        !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)
+                        ? relayOptions.CurrentValue.SenderAddress
+                        : apiMsg.From);
+                    relaySmtpClient.Send(newEmail, sender, new[] { recipient });
                     result.RelayRecipients.Add(new RelayRecipientResult() { Email = recipient.Address, RelayDate = DateTime.UtcNow });
-                        }
+                }
                 catch (Exception e)
                 {
                     log.Error(e, "Can not relay message to {recipient}: {errorMessage}", recipient, e.ToString());
@@ -381,12 +381,12 @@ namespace Rnwood.Smtp4dev.Server
         public bool IsRunning
         {
             get { return this.smtpServer.IsRunning; }
-            }
+        }
 
         public int PortNumber
         {
             get { return this.smtpServer.PortNumber; }
-            }
+        }
 
         public void TryStart()
         {

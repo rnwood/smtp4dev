@@ -190,7 +190,7 @@ namespace Rnwood.Smtp4dev
                 if (!string.IsNullOrEmpty(cmdLineOptions.Urls))
                 {
 
-                    c.UseUrls(cmdLineOptions.Urls);
+                    c.UseUrls(cmdLineOptions.Urls.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).ToArray());
                 }
             });
 
