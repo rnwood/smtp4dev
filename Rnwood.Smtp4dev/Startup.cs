@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Rewrite;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.Service;
 using Serilog;
+using System.Linq;
 
 namespace Rnwood.Smtp4dev
 {
@@ -49,14 +50,17 @@ namespace Rnwood.Smtp4dev
                 }
                 else
                 {
-                    if (serverOptions.RecreateDb && File.Exists(serverOptions.Database))
+
+
+                    var dbLocation = Path.GetFullPath(serverOptions.Database);
+                    if (serverOptions.RecreateDb && File.Exists(dbLocation))
                     {
                         Log.Logger.Information("Deleting Sqlite database.");
-                        File.Delete(serverOptions.Database);
+                        File.Delete(dbLocation);
                     }
 
-                    Log.Logger.Information("Using Sqlite database at {dbLocation}" ,Path.GetFullPath(serverOptions.Database));
-                    opt.UseSqlite($"Data Source='{serverOptions.Database}'");
+                    Log.Logger.Information("Using Sqlite database at {dbLocation}" , dbLocation);
+                    opt.UseSqlite($"Data Source='{dbLocation}'");
                 }
             }, ServiceLifetime.Scoped, ServiceLifetime.Singleton);
 
@@ -130,13 +134,20 @@ namespace Rnwood.Smtp4dev
                     }
                 });
 
-                using (IServiceScope scope = subdir.ApplicationServices.CreateScope())
+                using (var scope = subdir.ApplicationServices.CreateScope())
                 {
-                    using (Smtp4devDbContext context = scope.ServiceProvider.GetService<Smtp4devDbContext>())
+                    using (var context = scope.ServiceProvider.GetService<Smtp4devDbContext>())
                     {
                         if (!context.Database.IsInMemory())
                         {
-                            context.Database.Migrate();
+
+                            var pendingMigrations = context.Database.GetPendingMigrations();
+                            if (pendingMigrations.Any())
+                            {
+                                Log.Logger.Information("Updating DB schema with migrations: {migrations}", string.Join(", ", pendingMigrations));
+                                context.Database.Migrate();
+                            }
+
                         }
                     }
                 }
