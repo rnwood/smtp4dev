@@ -15,10 +15,12 @@ using System.Security.Cryptography;
 using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
 using Serilog;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
 
 namespace Rnwood.Smtp4dev.Server
 {
-    public class Smtp4devServer : ISmtp4devServer
+    public class Smtp4devServer : ISmtp4devServer, IHostedService
     {
         private readonly ILogger log = Log.ForContext<Smtp4devServer>();
 
@@ -411,6 +413,16 @@ namespace Rnwood.Smtp4dev.Server
             {
                 this.notificationsHub.OnServerChanged().Wait();
             }
+        }
+
+        Task IHostedService.StartAsync(CancellationToken cancellationToken)
+        {
+            return Task.Run(() => this.TryStart());
+        }
+
+        Task IHostedService.StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.Run(() => this.Stop());
         }
     }
 }
