@@ -26,7 +26,7 @@ using SmtpResponse = Rnwood.SmtpServer.SmtpResponse;
 
 namespace Rnwood.Smtp4dev.Server
 {
-    internal class Smtp4devServer : ISmtp4devServer
+    internal class Smtp4devServer : ISmtp4devServer, IHostedService
     {
         private readonly ILogger log = Log.ForContext<Smtp4devServer>();
 
@@ -437,6 +437,16 @@ namespace Rnwood.Smtp4dev.Server
             {
                 this.notificationsHub.OnServerChanged().Wait();
             }
+        }
+
+        Task IHostedService.StartAsync(CancellationToken cancellationToken)
+        {
+            return Task.Run(() => this.TryStart());
+        }
+
+        Task IHostedService.StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.Run(() => this.Stop());
         }
     }
 }
