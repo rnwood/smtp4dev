@@ -6,6 +6,7 @@ using System.Text.Json;
 using MailKit.Security;
 using Microsoft.Extensions.Hosting;
 using Rnwood.Smtp4dev.Service;
+using System.Text.Json.Serialization;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -86,8 +87,9 @@ namespace Rnwood.Smtp4dev.Controllers
             newRelaySettings.AutomaticEmails = serverUpdate.RelayOptions.AutomaticEmails;
 
             System.IO.File.WriteAllText(hostingEnvironmentHelper.GetEditableSettingsFilePath(),
-                JsonSerializer.Serialize(new { ServerOptions = newSettings, RelayOptions = newRelaySettings },
-                    new JsonSerializerOptions { WriteIndented = true }));
+                JsonSerializer.Serialize(new SettingsFile{ ServerOptions = newSettings, RelayOptions = newRelaySettings },
+                    SettingsFileSerializationContext.Default.SettingsFile)
+            );
 
             if (!serverUpdate.IsRunning && this.server.IsRunning)
             {
@@ -110,5 +112,18 @@ namespace Rnwood.Smtp4dev.Controllers
 
             return Ok();
         }
+    }
+
+    internal class SettingsFile
+    {
+        public ServerOptions ServerOptions { get; set; }
+        public RelayOptions RelayOptions { get; set; }
+    }
+
+
+    [JsonSourceGenerationOptions(WriteIndented = true)]
+    [JsonSerializable(typeof(SettingsFile))]
+    internal partial class SettingsFileSerializationContext : JsonSerializerContext {
+
     }
 }

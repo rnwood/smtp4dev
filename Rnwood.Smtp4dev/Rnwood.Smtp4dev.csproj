@@ -9,6 +9,8 @@
     <RollForward>Major</RollForward>
     <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
     <IsPackable>true</IsPackable>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
   </PropertyGroup>
   <PropertyGroup Condition="'$(PackAsTool)'=='true'">
     <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>

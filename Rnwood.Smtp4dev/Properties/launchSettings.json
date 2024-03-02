@@ -18,7 +18,7 @@
     },
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "--imapport=0 --urls=http://localhost:5000;http://localhost:5001",
+      "commandLineArgs": "--imapport=0 --db=c:/temp/smtp4dev.db",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
