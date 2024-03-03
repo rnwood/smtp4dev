@@ -9,7 +9,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - uses: dev-drprasad/delete-older-releases@v0.2.0
+      - uses: dev-drprasad/delete-older-releases@v0.3.2
         with:
           keep_latest: 10
           delete_tag_pattern: -ci
