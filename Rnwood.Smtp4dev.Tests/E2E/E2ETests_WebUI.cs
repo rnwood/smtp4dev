@@ -26,7 +26,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
     {
         public E2ETests_WebUI(ITestOutputHelper output) : base(output)
         {
-            new DriverManager().SetUpDriver(new ChromeConfig(), VersionResolveStrategy.MatchingBrowser);
+            //new DriverManager().SetUpDriver(new ChromeConfig(), VersionResolveStrategy.MatchingBrowser);
         }
 
         [Fact]
@@ -47,7 +47,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         [InlineData("/smtp4dev", true)]
         public void CheckMessageIsReceivedAndDisplayed(string basePath, bool inMemoryDb)
         {
-            RunUITest($"{nameof(CheckMessageIsReceivedAndDisplayed)}-{basePath}-{inMemoryDb}", (browser, baseUrl, smtpPortNumber) =>
+            RunUITest($"{nameof(CheckMessageIsReceivedAndDisplayed)}-{basePath}-{inMemoryDb}", (browser, baseUrl, hostname, smtpPortNumber) =>
             {
                 browser.Navigate().GoToUrl(baseUrl);
                 var homePage = new HomePage(browser);
@@ -71,7 +71,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         Text = "Body of end to end test"
                     };
 
-                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.StartTls,
+                    smtpClient.Connect(hostname, smtpPortNumber, SecureSocketOptions.StartTls,
                         new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
                     smtpClient.Send(message);
                     smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -96,7 +96,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         [Fact]
         public void CheckUTF8MessageIsReceivedAndDisplayed()
         {
-            RunUITest(nameof(CheckUTF8MessageIsReceivedAndDisplayed), (browser, baseUrl, smtpPortNumber) =>
+            RunUITest(nameof(CheckUTF8MessageIsReceivedAndDisplayed), (browser, baseUrl, hostname, smtpPortNumber) =>
             {
                 browser.Navigate().GoToUrl(baseUrl);
                 HomePage homePage = new HomePage(browser);
@@ -121,7 +121,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         Text = "Body of end to end test"
                     };
 
-                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.StartTls,
+                    smtpClient.Connect(hostname, smtpPortNumber, SecureSocketOptions.StartTls,
                         new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
 
                     FormatOptions formatOptions = FormatOptions.Default.Clone();
@@ -158,7 +158,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
     {
         }
 
-        private void RunUITest(string testName, Action<IWebDriver, Uri, int> uitest, UITestOptions options = null)
+        private void RunUITest(string testName, Action<IWebDriver, Uri, string, int> uitest, UITestOptions options = null)
         {
             options ??= new UITestOptions();
 
@@ -173,7 +173,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     using var browser = new ChromeDriver(chromeOptions);
                     try
                     {
-                        uitest(browser, context.BaseUrl, context.SmtpPortNumber);
+                        uitest(browser, context.BaseUrl, context.Hostname, context.SmtpPortNumber);
                     }
                     catch
                     {

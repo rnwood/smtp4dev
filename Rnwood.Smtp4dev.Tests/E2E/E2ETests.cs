@@ -36,6 +36,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             public int SmtpPortNumber { get; set; }
 
             public int ImapPortNumber { get; set; }
+            public string Hostname { get; internal set; }
         }
 
 
@@ -85,6 +86,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 "--tlsmode=StartTls"
             }.Where(a => a != ""));
 
+            if (binary.StartsWith("docker:"))
+            {
             if (!args.Any(a => a.StartsWith("--urls")) && (!options?.EnvironmentVariables.ContainsKey("SERVEROPTIONS__URLS") ?? true))
             {
                 args.Add("--urls=http://*:0");
@@ -105,10 +108,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 args.Add("--hostname=localhost");
             }
 
-            if (!args.Any(a => a.StartsWith("--smtpport")))
-            {
-                args.Add("--smtpport=0");
-            }
+			}
 
 
 
@@ -116,8 +116,31 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             {
                 args.Add($"--basepath={options.BasePath}");
             }
+            else
+            {
+                if (!args.Any(a => a.StartsWith("--urls")))
+                {
+                    args.Add("--urls=http://*:80");
+                }
+            }
 
             output.WriteLine("Args: " + string.Join(" ", args.Select(a => $"\"{a}\"")));
+
+            if (binary.StartsWith("docker:"))
+            {
+                args.Add($"--basepath={options.BasePath}");
+                RunWithDocker(test, options, binary, args);
+            }
+            else
+            {
+                RunWithNormalBinary(test, options, workingDir, binary, args, timeout);
+            }
+}
+       private void RunWithNormalBinary(Action<E2ETestContext> test, E2ETestOptions options, string workingDir, string binary, List<string> args, CancellationToken timeout)
+        {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken token = cancellationTokenSource.Token;
+
 
             using (Command serverProcess = Command.Run(binary, args,
                        o => o.DisposeOnExit(false).WorkingDirectory(workingDir).EnvironmentVariables(options?.EnvironmentVariables ?? new Dictionary<string, string>()).CancellationToken(timeout)))
@@ -182,12 +205,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     test(new E2ETestContext
                     {
                         BaseUrl = baseUrl,
+                        Hostname = "localhost",
                         SmtpPortNumber = smtpPortNumber.Value,
                         ImapPortNumber = imapPortNumber.Value
                     });
                 }
                 finally
                 {
+
                     serverProcess.TrySignalAsync(CommandSignal.ControlC).Wait();
                     serverProcess.StandardInput.Close();
                     if (!serverProcess.Process.WaitForExit(5000))
@@ -199,6 +224,46 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     cancellationTokenSource.Cancel();
                 }
             }
+        }
+
+        private void RunWithDocker(Action<E2ETestContext> test, E2ETestOptions options, string binary, List<string> args)
+        {
+            string dockerImage = binary.Split(':', 2)[1];
+
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            CancellationToken token = cancellationTokenSource.Token;
+
+           
+                IContainer container = new ContainerBuilder()
+                .WithPortBinding(80, true)
+                .WithPortBinding(143, true)
+                .WithPortBinding(25, true)
+                .WithAutoRemove(true)
+                .WithImage(dockerImage)
+                .WithCommand(args.ToArray())
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(80))
+                .Build();
+
+                container.StartAsync(token).Wait();
+
+
+
+                test(new E2ETestContext
+                {
+                    BaseUrl = new Uri($"http://{container.Hostname}:{container.GetMappedPublicPort(80)}{options.BasePath ?? ""}"),
+                    Hostname = container.Hostname,
+                    SmtpPortNumber = container.GetMappedPublicPort(25),
+                    ImapPortNumber = container.GetMappedPublicPort(143)
+                });
+
+output.WriteLine("");
+output.WriteLine("Exit code: "+ container.GetExitCodeAsync().Result);
+output.WriteLine(container.GetLogsAsync().Result.Stdout);
+output.WriteLine(container.GetLogsAsync().Result.Stderr);
+
+
+            
         }
     }
 }

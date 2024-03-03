@@ -37,6 +37,7 @@
     <PackageReference Include="WebDriverManager" Version="2.17.5" />
     <PackageReference Include="xunit" Version="2.9.3" />
     <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
+  <PackageReference Include="Testcontainers" Version="3.7.0" />
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

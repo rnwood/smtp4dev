@@ -124,6 +124,7 @@ stages:
             env:
               SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
               SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev
+              SMTP4DEV_E2E_ARGS:
             inputs:
               command: test
               projects: Rnwood.Smtp4dev.Tests
@@ -180,6 +181,7 @@ stages:
             env:
               SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
               SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev.Desktop
+              SMTP4DEV_E2E_ARGS:
             inputs:
               command: test
               projects: Rnwood.Smtp4dev.Desktop.Tests
@@ -225,25 +227,17 @@ stages:
               command: build
               dockerfile: "**/Dockerfile.linux"
               arguments: "--build-arg version=$(tag) -t $(docker_repo):linux-amd64-$(tag)"
-          # - task: DotNetCoreCLI@2
-          #   displayName: Run Tests
-          #   env:
-          #     SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
-          #     SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
-          #     SMTP4DEV_E2E_BINARY: docker
-          #     SMTP4DEV_E2E_ARGS: |
-          #       run
-          #       -i
-          #       -p
-          #       25:25
-          #       -p
-          #       80:80
-          #       -p
-          #       110:110
-          #       $(docker_repo):linux-amd64-$(tag)
-          #       --urls=http://*:80
-          #       --smtpport=25
-          #       --imapport=110
+          - task: DotNetCoreCLI@2
+            displayName: Run Tests
+            inputs:
+              command: test
+              projects: Rnwood.Smtp4dev.Tests
+              configuration: release
+            env:
+              SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
+              SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
+              SMTP4DEV_E2E_BINARY: docker:$(docker_repo):linux-amd64-$(tag)
+              SMTP4DEV_E2E_ARGS:
           - task: Docker@2
             displayName: Push image
             condition: or(variables['isreleasebuild'], variables['iscibuild'])
@@ -290,7 +284,7 @@ stages:
       - job: DockerBuildWindows
         displayName: DockerBuild - Windows
         pool:
-          vmImage: "windows-2022"
+          vmImage: "windows-2019"
         steps:
           - task: UseDotNet@2
             displayName: Install .NET Core SDK v$(netcoresdk_version)
@@ -312,6 +306,16 @@ stages:
               command: build
               dockerfile: "**/Dockerfile.windows"
               arguments: "--build-arg version=$(tag) -t $(docker_repo):windows-amd64-$(tag)"
+          - task: DotNetCoreCLI@2
+            displayName: Run Tests
+            inputs:
+              command: test
+              projects: Rnwood.Smtp4dev.Tests
+              configuration: release
+            env:
+              SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
+              SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
+              SMTP4DEV_E2E_BINARY: docker:$(docker_repo):windows-amd64-$(tag)
           - task: Docker@2
             displayName: Push image
             condition: or(variables['isreleasebuild'], variables['iscibuild'])
