@@ -46,7 +46,7 @@
     "jsdom-global": "^3.0.2",
     "locale-index-of": "^3.1.0",
     "moment": "^2.29.3",
-    "patch-package": "^6.4.7",
+    "patch-package": "^8.0.0",
     "sanitize-html": "^2.7.1",
     "sass": "^1.51.0",
     "sass-loader": "^10.2.1",
