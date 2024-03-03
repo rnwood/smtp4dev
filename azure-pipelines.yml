@@ -309,7 +309,7 @@ stages:
                 1280:1280
                 -p
                 12110:12110
-                $(docker_repo):windows-arm64-$(tag)
+                $(docker_repo):linux-arm64-$(tag)
                 --urls=http://*:1280
                 --smtpport=1225
                 --imapport=12110
