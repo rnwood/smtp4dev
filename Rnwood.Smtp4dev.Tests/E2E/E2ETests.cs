@@ -1,4 +1,6 @@
-﻿using Medallion.Shell;
+﻿using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
+using Medallion.Shell;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -84,40 +86,54 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 "--tlsmode=StartTls"
             }.Where(a => a != ""));
 
-            if (!args.Any(a => a.StartsWith("--urls")))
+            if (binary.StartsWith("docker:"))
             {
-                args.Add("--urls=http://*:0");
-            }
 
-            if (!args.Any(a => a.StartsWith("--imapport")))
-            {
-                args.Add("--imapport=0");
-            }
+                if (!args.Any(a => a.StartsWith("--urls")))
+                {
+                    args.Add("--urls=http://*:0");
+                }
 
-            if (!args.Any(a => a.StartsWith("--smtpport")))
-            {
-                args.Add("--smtpport=0");
-            }
+                if (!args.Any(a => a.StartsWith("--imapport")))
+                {
+                    args.Add("--imapport=0");
+                }
 
-            if (!args.Any(a => a.StartsWith("--smtpport")))
-            {
-                args.Add("--smtpport=0");
-            }
+                if (!args.Any(a => a.StartsWith("--smtpport")))
+                {
+                    args.Add("--smtpport=0");
+                }
 
 
-
-            if (!string.IsNullOrEmpty(options.BasePath))
-            {
-                args.Add($"--basepath={options.BasePath}");
+                if (!string.IsNullOrEmpty(options.BasePath))
+                {
+                    args.Add($"--basepath={options.BasePath}");
+                }
             }
 
             output.WriteLine("Args: " + string.Join(" ", args.Select(a => $"\"{a}\"")));
 
+
+
+            if (binary.StartsWith("docker:"))
+            {
+                RunWithDocker(test, options, binary, args);
+            }
+            else
+            {
+                RunWithNormalBinary(test, options, workingDir, binary, args, timeout);
+            }
+        }
+
+        private void RunWithNormalBinary(Action<E2ETestContext> test, E2ETestOptions options, string workingDir, string binary, List<string> args, CancellationToken timeout)
+        {
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+            CancellationToken token = cancellationTokenSource.Token;
+
             using (Command serverProcess = Command.Run(binary, args,
                        o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
             {
-                CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-                CancellationToken token = cancellationTokenSource.Token;
+
 
                 try
                 {
@@ -189,9 +205,66 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         serverProcess.Kill();
                         output.WriteLine("E2E process didn't exit!");
                     }
-  
+
                     cancellationTokenSource.Cancel();
                 }
+            }
+        }
+
+        private void RunWithDocker(Action<E2ETestContext> test, E2ETestOptions options, string binary, List<string> args)
+        {
+            string dockerImage = binary.Split(':', 2)[1];
+
+            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
+
+            CancellationToken token = cancellationTokenSource.Token;
+
+            using (DotNet.Testcontainers.Configurations.IOutputConsumer consumer = Consume.RedirectStdoutAndStderrToStream(new MemoryStream(), new MemoryStream()))
+            {
+                IContainer container = new ContainerBuilder()
+                .WithExposedPort(80)
+                .WithExposedPort(110)
+                .WithExposedPort(24)
+                .WithAutoRemove(true)
+                .WithImage(dockerImage)
+                .WithCommand(args.ToArray())
+                .WithOutputConsumer(consumer)
+                .Build();
+
+                container.StartAsync(token).Wait();
+
+                var stdErr = new StreamReader(consumer.Stderr);
+                var stdOut = new StreamReader(consumer.Stdout);
+
+                while (container.State != TestcontainersStates.Exited && !token.IsCancellationRequested)
+                {
+                    Task<string> completeTask = Task.WhenAny(stdErr.ReadLineAsync(),
+                     stdOut.ReadLineAsync(), Task.Delay(Timeout.Infinite, token)).Result as Task<string>;
+
+                    if (token.IsCancellationRequested)
+                    {
+                        return;
+                    }
+
+                    string newLine = completeTask.Result;
+                    output.WriteLine(newLine);
+
+                    if (newLine.StartsWith("Application started. Press Ctrl+C to shut down."))
+                    {
+                        break;
+                    }
+                }
+
+                test(new E2ETestContext
+                {
+                    BaseUrl = new Uri($"http://localhost:{container.GetMappedPublicPort(80)}{options.BasePath ?? ""}"),
+                    SmtpPortNumber = container.GetMappedPublicPort(25),
+                    ImapPortNumber = container.GetMappedPublicPort(110)
+                });
+
+                output.WriteLine(stdErr.ReadToEnd());
+                output.WriteLine(stdOut.ReadToEnd());
+
             }
         }
     }
