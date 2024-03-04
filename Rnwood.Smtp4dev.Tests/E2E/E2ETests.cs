@@ -257,7 +257,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                 test(new E2ETestContext
                 {
-                    BaseUrl = new Uri($"http://localhost:{container.GetMappedPublicPort(80)}{options.BasePath ?? ""}"),
+                    BaseUrl = new Uri($"http://{container.Hostname}:{container.GetMappedPublicPort(80)}{options.BasePath ?? ""}"),
                     SmtpPortNumber = container.GetMappedPublicPort(25),
                     ImapPortNumber = container.GetMappedPublicPort(110)
                 });
