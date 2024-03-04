@@ -109,6 +109,13 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     args.Add($"--basepath={options.BasePath}");
                 }
             }
+            else
+            {
+                if (!args.Any(a => a.StartsWith("--urls")))
+                {
+                    args.Add("--urls=http://*:80");
+                }
+            }
 
             output.WriteLine("Args: " + string.Join(" ", args.Select(a => $"\"{a}\"")));
 
@@ -247,6 +254,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     }
 
                     string newLine = completeTask.Result;
+                    Console.WriteLine(newLine);
                     output.WriteLine(newLine);
 
                     if (newLine.StartsWith("Application started. Press Ctrl+C to shut down."))
