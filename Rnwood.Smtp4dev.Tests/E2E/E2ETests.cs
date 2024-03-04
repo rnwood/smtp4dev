@@ -243,7 +243,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 var stdErr = new StreamReader(consumer.Stderr);
                 var stdOut = new StreamReader(consumer.Stdout);
 
-                while (container.State != TestcontainersStates.Exited && !token.IsCancellationRequested)
+                while (container.State == TestcontainersStates.Running && !token.IsCancellationRequested)
                 {
                     Task<string> completeTask = Task.WhenAny(stdErr.ReadLineAsync(),
                      stdOut.ReadLineAsync(), Task.Delay(Timeout.Infinite, token)).Result as Task<string>;
@@ -269,8 +269,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     ImapPortNumber = container.GetMappedPublicPort(110)
                 });
 
-                output.WriteLine(stdErr.ReadToEnd());
+                                output.WriteLine(stdErr.ReadToEnd());
                 output.WriteLine(stdOut.ReadToEnd());
+
+output.WriteLine("");
+output.WriteLine("Exit code: "+ container.GetExitCodeAsync().Result);
+output.WriteLine(container.GetLogsAsync().Result.Stdout);
+output.WriteLine(container.GetLogsAsync().Result.Stderr);
+
 
             }
         }
