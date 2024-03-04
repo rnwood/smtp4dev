@@ -223,8 +223,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             {
                 IContainer container = new ContainerBuilder()
                 .WithPortBinding(80, true)
-                .WithPortBinding(110)
-                .WithPortBinding(25)
+                .WithPortBinding(110, true)
+                .WithPortBinding(25, true)
                 .WithAutoRemove(true)
                 .WithImage(dockerImage)
                 .WithCommand(args.ToArray())
