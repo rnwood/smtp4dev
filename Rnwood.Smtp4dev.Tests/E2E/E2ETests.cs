@@ -42,6 +42,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
         protected void RunE2ETest(Action<E2ETestContext> test, E2ETestOptions options = null)
         {
+            Environment.SetEnvironmentVariable("SMTP4DEV_E2E_BINARY","docker:rnwood/smtp4dev");
+            Environment.SetEnvironmentVariable("SMTP4DEV_E2E_USEDEFAULTDBPATH", "1");
+
             options ??= new E2ETestOptions();
 
             string workingDir = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_WORKINGDIR");
@@ -226,8 +229,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
             CancellationToken token = cancellationTokenSource.Token;
 
-            using (DotNet.Testcontainers.Configurations.IOutputConsumer consumer = Consume.RedirectStdoutAndStderrToStream(new MemoryStream(), new MemoryStream()))
-            {
+           
                 IContainer container = new ContainerBuilder()
                 .WithPortBinding(80, true)
                 .WithPortBinding(110, true)
@@ -235,32 +237,12 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 .WithAutoRemove(true)
                 .WithImage(dockerImage)
                 .WithCommand(args.ToArray())
-                .WithOutputConsumer(consumer)
+                .WithWaitStrategy(Wait.ForUnixContainer().UntilPortIsAvailable(80))
                 .Build();
 
                 container.StartAsync(token).Wait();
 
-                var stdErr = new StreamReader(consumer.Stderr);
-                var stdOut = new StreamReader(consumer.Stdout);
 
-                while (container.State == TestcontainersStates.Running && !token.IsCancellationRequested)
-                {
-                    Task<string> completeTask = Task.WhenAny(stdErr.ReadLineAsync(),
-                     stdOut.ReadLineAsync(), Task.Delay(Timeout.Infinite, token)).Result as Task<string>;
-
-                    if (token.IsCancellationRequested)
-                    {
-                        return;
-                    }
-
-                    string newLine = completeTask.Result ?? "";
-                    output.WriteLine(newLine);
-
-                    if (newLine.StartsWith("Application started. Press Ctrl+C to shut down."))
-                    {
-                        break;
-                    }
-                }
 
                 test(new E2ETestContext
                 {
@@ -269,16 +251,13 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     ImapPortNumber = container.GetMappedPublicPort(110)
                 });
 
-                                output.WriteLine(stdErr.ReadToEnd());
-                output.WriteLine(stdOut.ReadToEnd());
-
 output.WriteLine("");
 output.WriteLine("Exit code: "+ container.GetExitCodeAsync().Result);
 output.WriteLine(container.GetLogsAsync().Result.Stdout);
 output.WriteLine(container.GetLogsAsync().Result.Stderr);
 
 
-            }
+            
         }
     }
 }

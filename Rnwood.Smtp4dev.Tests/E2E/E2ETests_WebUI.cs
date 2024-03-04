@@ -23,7 +23,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
     {
         public E2ETests_WebUI(ITestOutputHelper output) : base(output)
         {
-            new DriverManager().SetUpDriver(new ChromeConfig(), VersionResolveStrategy.MatchingBrowser);
+            //new DriverManager().SetUpDriver(new ChromeConfig(), VersionResolveStrategy.MatchingBrowser);
         }
 
         [Theory]
