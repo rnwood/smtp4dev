@@ -222,9 +222,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             using (DotNet.Testcontainers.Configurations.IOutputConsumer consumer = Consume.RedirectStdoutAndStderrToStream(new MemoryStream(), new MemoryStream()))
             {
                 IContainer container = new ContainerBuilder()
-                .WithExposedPort(80)
-                .WithExposedPort(110)
-                .WithExposedPort(24)
+                .WithPortBinding(80, true)
+                .WithPortBinding(110)
+                .WithPortBinding(25)
                 .WithAutoRemove(true)
                 .WithImage(dockerImage)
                 .WithCommand(args.ToArray())
