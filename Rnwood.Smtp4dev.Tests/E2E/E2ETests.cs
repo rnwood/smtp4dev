@@ -86,9 +86,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 "--tlsmode=StartTls"
             }.Where(a => a != ""));
 
-            if (binary.StartsWith("docker:"))
+            if (!binary.StartsWith("docker:"))
             {
-
                 if (!args.Any(a => a.StartsWith("--urls")))
                 {
                     args.Add("--urls=http://*:0");
