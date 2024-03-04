@@ -253,8 +253,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         return;
                     }
 
-                    string newLine = completeTask.Result;
-                    Console.WriteLine(newLine);
+                    string newLine = completeTask.Result ?? "";
                     output.WriteLine(newLine);
 
                     if (newLine.StartsWith("Application started. Press Ctrl+C to shut down."))
