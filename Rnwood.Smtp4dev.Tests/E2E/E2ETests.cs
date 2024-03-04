@@ -198,6 +198,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 }
                 finally
                 {
+
                     serverProcess.TrySignalAsync(CommandSignal.ControlC).Wait();
                     serverProcess.StandardInput.Close();
                     if (!serverProcess.Process.WaitForExit(5000))
