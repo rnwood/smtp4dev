@@ -231,7 +231,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
            
                 IContainer container = new ContainerBuilder()
                 .WithPortBinding(80, true)
-                .WithPortBinding(110, true)
+                .WithPortBinding(143, true)
                 .WithPortBinding(25, true)
                 .WithAutoRemove(true)
                 .WithImage(dockerImage)
@@ -248,7 +248,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     BaseUrl = new Uri($"http://{container.Hostname}:{container.GetMappedPublicPort(80)}{options.BasePath ?? ""}"),
                     Hostname = container.Hostname,
                     SmtpPortNumber = container.GetMappedPublicPort(25),
-                    ImapPortNumber = container.GetMappedPublicPort(110)
+                    ImapPortNumber = container.GetMappedPublicPort(143)
                 });
 
 output.WriteLine("");
