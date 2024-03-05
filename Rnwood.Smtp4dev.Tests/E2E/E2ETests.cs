@@ -37,6 +37,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             public int SmtpPortNumber { get; set; }
 
             public int ImapPortNumber { get; set; }
+            public string Hostname { get; internal set; }
         }
 
 
@@ -201,6 +202,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     test(new E2ETestContext
                     {
                         BaseUrl = baseUrl,
+                        Hostname = "localhost",
                         SmtpPortNumber = smtpPortNumber.Value,
                         ImapPortNumber = imapPortNumber.Value
                     });
@@ -247,6 +249,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 test(new E2ETestContext
                 {
                     BaseUrl = new Uri($"http://{container.Hostname}:{container.GetMappedPublicPort(80)}{options.BasePath ?? ""}"),
+                    Hostname = container.Hostname,
                     SmtpPortNumber = container.GetMappedPublicPort(25),
                     ImapPortNumber = container.GetMappedPublicPort(110)
                 });

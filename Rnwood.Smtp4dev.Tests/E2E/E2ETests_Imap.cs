@@ -45,7 +45,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         Text = "Body of end to end test"
                     };
 
-                    smtpClient.Connect("localhost", context.SmtpPortNumber, SecureSocketOptions.StartTls, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                    smtpClient.Connect(context.Hostname, context.SmtpPortNumber, SecureSocketOptions.StartTls, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
                     smtpClient.Send(message);
                     smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
                 }
@@ -53,7 +53,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                 using (ImapClient imapClient = new ImapClient())
                 {
-                    imapClient.Connect("localhost", context.ImapPortNumber);
+                    imapClient.Connect(context.Hostname, context.ImapPortNumber);
                     imapClient.Authenticate("user", "password");
                     imapClient.Inbox.Open(MailKit.FolderAccess.ReadWrite);
 
@@ -69,7 +69,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                 using (ImapClient imapClient = new ImapClient())
                 {
-                    imapClient.Connect("localhost", context.ImapPortNumber);
+                    imapClient.Connect(context.Hostname, context.ImapPortNumber);
                     imapClient.Authenticate("user", "password");
                     imapClient.Inbox.Open(MailKit.FolderAccess.ReadWrite);
 
