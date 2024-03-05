@@ -153,7 +153,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     using var browser = new ChromeDriver(chromeOptions);
                     try
                     {
-                        uitest(browser, context.Hostname, context.BaseUrl, context.SmtpPortNumber);
+                        uitest(browser, context.BaseUrl, context.Hostname, context.SmtpPortNumber);
                     }
                     catch
                     {

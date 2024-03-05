@@ -43,9 +43,6 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
         protected void RunE2ETest(Action<E2ETestContext> test, E2ETestOptions options = null)
         {
-            Environment.SetEnvironmentVariable("SMTP4DEV_E2E_BINARY","docker:rnwood/smtp4dev");
-            Environment.SetEnvironmentVariable("SMTP4DEV_E2E_USEDEFAULTDBPATH", "1");
-
             options ??= new E2ETestOptions();
 
             string workingDir = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_WORKINGDIR");
