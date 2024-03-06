@@ -18,7 +18,7 @@
     },
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "--imapport=0 --db=c:/temp/smtp4dev.db",
+      "commandLineArgs": "--imapport=0",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

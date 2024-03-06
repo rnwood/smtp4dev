@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Rnwood.Smtp4dev.ApiModel
@@ -157,7 +158,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
             if (contentEntity is MimePart part)
             {
-                using var reader = new StreamReader(part.Content.Open());
+                using var reader = new StreamReader(part.Content.Open(), Encoding.UTF8);
                 return reader.ReadToEnd();
             }
 
@@ -169,8 +170,15 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         internal static string GetPartSource(Message message, string id)
         {
-            var contentEntity = GetPart(message, id);
-            return contentEntity.ToString();
+            MimeEntity contentEntity = GetPart(message, id);
+
+            using (var m = new MemoryStream())
+            {
+                contentEntity.WriteTo(m);
+
+                return Encoding.UTF8.GetString(m.GetBuffer());
+            }
+            
         }
 
 

@@ -66,7 +66,7 @@
                         <i class="el-icon-view"></i> View
                     </span>
                     <messageviewattachments :message="message"></messageviewattachments>
-                    <messageview-html :message="message" class="fill"></messageview-html>
+                    <messageview-html :message="message" class="fill messagepreview"></messageview-html>
                 </el-tab-pane>
 
                 <el-tab-pane name="headers" class="hfillpanel">

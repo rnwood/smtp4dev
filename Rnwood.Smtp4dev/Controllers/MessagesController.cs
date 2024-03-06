@@ -7,10 +7,12 @@ using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using Rnwood.Smtp4dev.ApiModel;
 using System.Linq.Dynamic.Core;
+using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Message = Rnwood.Smtp4dev.DbModel.Message;
 using Rnwood.Smtp4dev.Server;
 using MimeKit;
+using MimeKit.Text;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.DbModel;
 
@@ -31,7 +33,8 @@ namespace Rnwood.Smtp4dev.Controllers
         private readonly ISmtp4devServer server;
 
         [HttpGet]
-        public ApiModel.PagedResult<MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true, int page = 1, int pageSize=5)
+        public ApiModel.PagedResult<MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true, int page = 1,
+            int pageSize = 5)
         {
             return messagesRepository.GetMessages(false).Include(m => m.Relays)
                 .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""))
@@ -85,14 +88,17 @@ namespace Rnwood.Smtp4dev.Controllers
                 var relayErrorSummary = string.Join(". ", relayResult.Exceptions.Select(e => e.Key.Address + ": " + e.Value.Message));
                 return Problem("Failed to relay to recipients: " + relayErrorSummary);
             }
+
             if (relayResult.WasRelayed)
             {
                 foreach (var relay in relayResult.RelayRecipients)
                 {
                     message.AddRelay(new MessageRelay { SendDate = relay.RelayDate, To = relay.Email });
                 }
+
                 messagesRepository.DbContext.SaveChanges();
             }
+
             return Ok();
         }
 
@@ -130,7 +136,12 @@ namespace Rnwood.Smtp4dev.Controllers
         public string GetMessageSource(Guid id)
         {
             ApiModel.Message message = GetMessage(id);
-            return message.MimeMessage.ToString();
+
+            using (var s = new MemoryStream())
+            {
+                message.MimeMessage.WriteTo(s);
+                return Encoding.UTF8.GetString(s.GetBuffer());
+            }
         }
 
         [HttpGet("{id}/html")]
@@ -139,7 +150,18 @@ namespace Rnwood.Smtp4dev.Controllers
         {
             ApiModel.Message message = GetMessage(id);
 
-            string html = message.MimeMessage?.HtmlBody;
+            string html = null;
+
+            if (message.MimeMessage?.Body is TextPart textPart)
+            {
+                html = textPart.GetText(Encoding.UTF8);
+            }
+
+            if (html == null)
+            {
+                html = message.MimeMessage?.HtmlBody;
+            }
+
 
             if (html == null)
             {
