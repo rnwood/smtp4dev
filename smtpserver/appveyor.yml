@@ -80,7 +80,7 @@ deploy:
 - provider: GitHub
   artifact: /.*\..*/
   auth_token:
-    secure: gHxP7s5Hq9mDjsSk6a3659ChiBVlfB48Lt8FlL0r0xFaua6VLxvcqad0n02NamDo
+    secure: q9mrB+CEIeAH869LUdn55G70dDqFx2QlpE3reH7MR6Ys3lu/FqZSMgN7ykYuaKfs
   prerelease: $(PRERELEASE)
   tag: $(APPVEYOR_REPO_TAG_NAME)
   on:
@@ -88,14 +88,14 @@ deploy:
 - provider: GitHub
   artifact: /.*\..*/
   auth_token:
-    secure: gHxP7s5Hq9mDjsSk6a3659ChiBVlfB48Lt8FlL0r0xFaua6VLxvcqad0n02NamDo
+    secure: q9mrB+CEIeAH869LUdn55G70dDqFx2QlpE3reH7MR6Ys3lu/FqZSMgN7ykYuaKfs
   prerelease: $(PRERELEASE)
   on:
     branch: master
     appveyor_repo_tag: false
 - provider: NuGet
   api_key:
-    secure: EHwXSKQaWvI3oYlA0LIVX/MeuXR4KL9CMFaEDuSTvubDzWzSUOqC4iv/dJ1IwR6X
+    secure: eKfQ9Opi9SCUWrmxYOGm9xGMKx2+KXnAjAvqCWnYbSDN37CWzGehvH74kY4iH/B1
   skip_symbols: false
   artifact: /.*\.s?nupkg/
   on:
