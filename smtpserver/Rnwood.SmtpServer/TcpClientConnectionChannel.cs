@@ -169,6 +169,29 @@ namespace Rnwood.SmtpServer
 			}
 		}
 
+		public async Task<byte[]> ReadLineBytes()
+		{
+			try
+			{
+				using (CancellationTokenSource cts = new CancellationTokenSource(TimeSpan.FromSeconds(30)))
+				{
+					byte[] data = await this.reader.ReadLineBytesAsync(cts.Token).ConfigureAwait(false);
+
+					if (data == null)
+					{
+						throw new IOException("Reader returned null bytes");
+					}
+
+					return data;
+				}
+			}
+			catch (IOException e)
+			{
+				await this.Close().ConfigureAwait(false);
+				throw new ConnectionUnexpectedlyClosedException("Read failed", e);
+			}
+		}
+
 		/// <summary>
 		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
 		/// </summary>

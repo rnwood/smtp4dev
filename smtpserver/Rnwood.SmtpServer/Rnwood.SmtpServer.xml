@@ -2922,6 +2922,10 @@
             <param name="fallbackEncoding">The character encoding to use to fallback to should a line not be decodable as UTF8.</param>
             <param name="leaveOpen">True if stream should be left open when the reader is disposed.</param>
         </member>
+        <member name="M:Rnwood.SmtpServer.SmtpStreamReader.ReadLineBytesAsync(System.Threading.CancellationToken)">
+            <param name="cancellationToken">The cancellation token.</param>
+            <returns>A Task representing the asynchronous operation.</returns>
+        </member>
         <member name="M:Rnwood.SmtpServer.SmtpStreamReader.ReadLineAsync(System.Threading.CancellationToken)">
             <summary>Reads the a line from the stream which is terminated with a \n. The string will be decoded using UTF8 and falling back to the provided encoding if decoding fails.</summary>
             <param name="cancellationToken">The cancellation token.</param>
@@ -3168,11 +3172,11 @@
         <member name="M:Rnwood.SmtpServer.DataVerb.Process(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.SmtpCommand)">
             <inheritdoc/>
         </member>
-        <member name="M:Rnwood.SmtpServer.DataVerb.ProcessLine(System.String)">
+        <member name="M:Rnwood.SmtpServer.DataVerb.ProcessLine(System.Byte[])">
             <summary>
             Processes a line of data from the client removing the escaping of the special end of message character.
             </summary>
-            <param name="line">The line.</param>
+            <param name="data">The line.</param>
             <returns>The line of data without escaping of the . character.</returns>
         </member>
         <member name="T:Rnwood.SmtpServer.EhloVerb">

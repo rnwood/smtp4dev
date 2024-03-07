@@ -134,6 +134,11 @@ namespace Rnwood.SmtpServer
 			await this.WriteLineAndFlush(response.ToString().TrimEnd()).ConfigureAwait(false);
 		}
 
+		public Task<byte[]> ReadLineBytes()
+		{
+			return this.ConnectionChannel.ReadLineBytes();
+		}
+
 		/// <summary>
 		/// Creates the a connection for the specified server and channel..
 		/// </summary>

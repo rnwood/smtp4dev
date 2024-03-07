@@ -42,7 +42,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
             string[] messageData = new string[] { new string('x', 11), "." };
             int messageLine = 0;
-            mocks.Connection.Setup(c => c.ReadLine()).Returns(() => Task.FromResult(messageData[messageLine++]));
+            mocks.Connection.Setup(c => c.ReadLineBytes()).Returns(() => Task.FromResult(Encoding.ASCII.GetBytes(messageData[messageLine++])));
 
             DataVerb verb = new DataVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
@@ -88,7 +88,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
             string[] messageData = new string[] { new string('x', 10), "." };
             int messageLine = 0;
-            mocks.Connection.Setup(c => c.ReadLine()).Returns(() => Task.FromResult(messageData[messageLine++]));
+            mocks.Connection.Setup(c => c.ReadLineBytes()).Returns(() => Task.FromResult(Encoding.UTF8.GetBytes(messageData[messageLine++])));
 
             DataVerb verb = new DataVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
@@ -127,7 +127,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
 
             string[] messageData = new string[] { new string('x', 9), "." };
             int messageLine = 0;
-            mocks.Connection.Setup(c => c.ReadLine()).Returns(() => Task.FromResult(messageData[messageLine++]));
+            mocks.Connection.Setup(c => c.ReadLineBytes()).Returns(() => Task.FromResult(Encoding.UTF8.GetBytes(messageData[messageLine++])));
 
             DataVerb verb = new DataVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
@@ -151,7 +151,7 @@ namespace Rnwood.SmtpServer.Tests.Verbs
             mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).ReturnsAsync((long?)null);
 
             int messageLine = 0;
-            mocks.Connection.Setup(c => c.ReadLine()).Returns(() => Task.FromResult(messageData[messageLine++]));
+            mocks.Connection.Setup(c => c.ReadLineBytes()).Returns(() => Task.FromResult(Encoding.UTF8.GetBytes( messageData[messageLine++])));
 
             DataVerb verb = new DataVerb();
             await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);

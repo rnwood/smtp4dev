@@ -5,7 +5,6 @@
     <Copyright>Robert N. Wood</Copyright>
     <VersionPrefix>3.0</VersionPrefix>
     <Authors>Robert N. Wood &lt;rob@rnwood.co.uk&gt;</Authors>
-    <TargetFrameworks>netstandard2.0</TargetFrameworks>
     <AssemblyName>Rnwood.SmtpServer</AssemblyName>
     <OutputType>Library</OutputType>
     <PackageId>Rnwood.SmtpServer</PackageId>
@@ -17,6 +16,8 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateFullPaths>true</GenerateFullPaths>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+    <TargetFramework>netstandard2.0</TargetFramework>
+    <LangVersion>default</LangVersion>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(TargetFramework)|$(Platform)'=='Debug|netstandard2.0|AnyCPU'">

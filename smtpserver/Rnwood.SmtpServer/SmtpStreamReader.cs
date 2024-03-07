@@ -34,13 +34,13 @@ namespace Rnwood.SmtpServer
 		{
 			this.stream = stream;
 			this.leaveOpen = leaveOpen;
-			this.fallbackEncoding = Encoding.GetEncoding(fallbackEncoding.CodePage, new EncoderExceptionFallback(), new DecoderExceptionFallback());
+			this.fallbackEncoding = Encoding.GetEncoding(fallbackEncoding.CodePage, new EncoderExceptionFallback(),
+				new DecoderExceptionFallback());
 		}
 
-		/// <summary>Reads the a line from the stream which is terminated with a \n. The string will be decoded using UTF8 and falling back to the provided encoding if decoding fails.</summary>
 		/// <param name="cancellationToken">The cancellation token.</param>
 		/// <returns>A Task representing the asynchronous operation.</returns>
-		public async Task<string> ReadLineAsync(CancellationToken cancellationToken)
+		public async Task<byte[]> ReadLineBytesAsync(CancellationToken cancellationToken)
 		{
 			this.lineBytes.Clear();
 
@@ -52,7 +52,7 @@ namespace Rnwood.SmtpServer
 
 					if (bufferByte == '\n')
 					{
-						return this.Decode(this.lineBytes.ToArray());
+						return this.lineBytes.ToArray();
 					}
 
 					if (bufferByte != '\r')
@@ -62,13 +62,22 @@ namespace Rnwood.SmtpServer
 				}
 
 				this.bufferPos = 0;
-				this.bufferLen = await this.stream.ReadAsync(this.buffer, 0, this.buffer.Length, cancellationToken).ConfigureAwait(false);
+				this.bufferLen = await this.stream.ReadAsync(this.buffer, 0, this.buffer.Length, cancellationToken)
+					.ConfigureAwait(false);
 
 				if (this.bufferLen < 1)
 				{
 					return null;
 				}
 			}
+		}
+
+		/// <summary>Reads the a line from the stream which is terminated with a \n. The string will be decoded using UTF8 and falling back to the provided encoding if decoding fails.</summary>
+		/// <param name="cancellationToken">The cancellation token.</param>
+		/// <returns>A Task representing the asynchronous operation.</returns>
+		public async Task<string> ReadLineAsync(CancellationToken cancellationToken)
+		{
+			return this.Decode(await ReadLineBytesAsync(cancellationToken).ConfigureAwait(false));
 		}
 
 		/// <summary>Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.</summary>
@@ -99,6 +108,11 @@ namespace Rnwood.SmtpServer
 
 		private string Decode(byte[] lineBytes)
 		{
+			if (lineBytes == null)
+			{
+				return null;
+			}
+			
 			try
 			{
 				return this.utf8Encoding.GetString(lineBytes);

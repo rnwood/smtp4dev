@@ -97,5 +97,7 @@ namespace Rnwood.SmtpServer
 		/// <param name="response">The response<see cref="SmtpResponse"/>.</param>
 		/// <returns>A <see cref="Task{T}"/> representing the async operation.</returns>
 		Task WriteResponse(SmtpResponse response);
+
+		Task<byte[]> ReadLineBytes();
 	}
 }

@@ -85,5 +85,7 @@ namespace Rnwood.SmtpServer
 		/// <param name="text">The text<see cref="string"/>.</param>
 		/// <returns>A <see cref="Task{T}"/> representing the async operation.</returns>
 		Task WriteLine(string text);
+
+		Task<byte[]> ReadLineBytes();
 	}
 }

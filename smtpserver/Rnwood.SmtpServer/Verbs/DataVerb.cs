@@ -3,6 +3,8 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
+using System.Linq;
+
 namespace Rnwood.SmtpServer
 {
 	using System;
@@ -16,6 +18,8 @@ namespace Rnwood.SmtpServer
 	/// </summary>
 	public class DataVerb : IVerb
 	{
+		private readonly byte[] CRLF_BYTES = Encoding.ASCII.GetBytes("\r\n");
+		
 		/// <inheritdoc/>
 		public virtual async Task Process(IConnection connection, SmtpCommand command)
 		{
@@ -33,24 +37,27 @@ namespace Rnwood.SmtpServer
 				StandardSmtpResponseCode.StartMailInputEndWithDot,
 				"End message with period")).ConfigureAwait(false);
 
-			using (SmtpStreamWriter writer = new SmtpStreamWriter(await connection.CurrentMessage.WriteData().ConfigureAwait(false), false))
+			using (Stream messageStream = await connection.CurrentMessage.WriteData().ConfigureAwait(false))
 			{
 				bool firstLine = true;
+				long messageSize = 0;
 
 				do
 				{
-					string line = await connection.ReadLine().ConfigureAwait(false);
+					byte[] data = await connection.ReadLineBytes().ConfigureAwait(false);
 
-					if (line != ".")
+					if (!Encoding.ASCII.GetBytes(".").SequenceEqual(data))
 					{
-						line = this.ProcessLine(line);
+						data = this.ProcessLine(data);
 
 						if (!firstLine)
 						{
-							writer.Write("\r\n");
+							messageSize += CRLF_BYTES.Length;
+							messageStream.Write(CRLF_BYTES, 0, CRLF_BYTES.Length);
 						}
 
-						writer.Write(line);
+						messageSize += data.Length;
+						messageStream.Write(data, 0, data.Length);
 					}
 					else
 					{
@@ -61,11 +68,11 @@ namespace Rnwood.SmtpServer
 				}
 				while (true);
 
-				writer.Flush();
+				await messageStream.FlushAsync().ConfigureAwait(false);
 				long? maxMessageSize =
 					await connection.Server.Behaviour.GetMaximumMessageSize(connection).ConfigureAwait(false);
 
-				if (maxMessageSize.HasValue && writer.BaseStream.Length > maxMessageSize.Value)
+				if (maxMessageSize.HasValue && messageSize > maxMessageSize.Value)
 				{
 					await connection.WriteResponse(
 						new SmtpResponse(
@@ -74,7 +81,7 @@ namespace Rnwood.SmtpServer
 				}
 				else
 				{
-					writer.Dispose();
+					messageStream.Dispose();
 					await connection.Server.Behaviour.OnMessageCompleted(connection).ConfigureAwait(false);
 					await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted")).ConfigureAwait(false);
 					await connection.CommitMessage().ConfigureAwait(false);
@@ -85,17 +92,17 @@ namespace Rnwood.SmtpServer
 		/// <summary>
 		/// Processes a line of data from the client removing the escaping of the special end of message character.
 		/// </summary>
-		/// <param name="line">The line.</param>
+		/// <param name="data">The line.</param>
 		/// <returns>The line of data without escaping of the . character.</returns>
-		protected virtual string ProcessLine(string line)
+		protected virtual byte[] ProcessLine(byte[] data)
 		{
 			// Remove escaping of end of message character
-			if (line.StartsWith(".", StringComparison.Ordinal))
+			if (data.Length > 0 && data[0] == '.')
 			{
-				line = line.Remove(0, 1);
+				return data.Skip(1).ToArray();
 			}
 
-			return line;
+			return data;
 		}
 	}
 }
