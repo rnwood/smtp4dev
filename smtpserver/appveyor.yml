@@ -2,10 +2,10 @@ version: 3.1.0-ci@{build}
 image: Visual Studio 2019
 environment:
   matrix:
-     - TESTFRAMEWORK: net8.0
+     - TESTFRAMEWORK: net6.0
        APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
        PUBLISH: 1
-     - TESTFRAMEWORK: net8.0
+     - TESTFRAMEWORK: net6.0
        APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
        PUBLISH: 0
      - TESTFRAMEWORK: net462
