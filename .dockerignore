@@ -4,6 +4,7 @@
 .gitignore
 .vs
 .vscode
+.idea
 **/bin
 **/obj
 Rnwood.Smtp4dev/ClientApp/node_modules
