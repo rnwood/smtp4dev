@@ -52,12 +52,9 @@
     <PackageReference Include="System.Reactive" Version="6.0.0" />
     <PackageReference Include="VueCliMiddleware" Version="6.0.0" />
   </ItemGroup>
-
-  <ItemGroup Condition="Exists('..\..\smtpserver\Rnwood.SmtpServer.csproj')">
-    <ProjectReference Include="..\..\smtpserver\Rnwood.SmtpServer.csproj" />
-  </ItemGroup>
-  <ItemGroup Condition="!Exists('..\..\smtpserver\Rnwood.SmtpServer.csproj')">
-    <PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0648" />
+  
+  <ItemGroup>
+    <PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0770" />
   </ItemGroup>
   
   <ItemGroup>
