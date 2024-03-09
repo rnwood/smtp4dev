@@ -3,6 +3,7 @@ using Rnwood.Smtp4dev.ApiModel;
 using System;
 using System.IO;
 using System.Linq;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Rnwood.SmtpServer;
@@ -81,7 +82,8 @@ namespace Rnwood.Smtp4dev.Server
                 Data = data,
                 MimeParseError = mimeParseError,
                 AttachmentCount = 0,
-                SecureConnection = message.SecureConnection
+                SecureConnection = message.SecureConnection,
+                SessionEncoding = message.EightBitTransport ? Encoding.UTF8.WebName : Encoding.Latin1.WebName
             };
 
             var parts = new Message(result).Parts;
