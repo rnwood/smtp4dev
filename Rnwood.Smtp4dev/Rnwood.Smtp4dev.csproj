@@ -54,7 +54,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0770" />
+    <PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0831" />
   </ItemGroup>
   
   <ItemGroup>
