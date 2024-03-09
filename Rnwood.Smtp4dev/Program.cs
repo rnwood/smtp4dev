@@ -6,6 +6,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading;
 using System.Threading.Tasks;
 using CommandLiners;
@@ -28,6 +29,7 @@ namespace Rnwood.Smtp4dev
     public class Program
     {
         public static bool IsService { get; private set; }
+
         private static ILogger _log;
 
         public static async Task Main(string[] args)
@@ -168,14 +170,13 @@ namespace Rnwood.Smtp4dev
 
                         if (cmdLineOptions.DebugSettings)
                         {
-                            JsonSerializerOptions jsonSettings = new JsonSerializerOptions { WriteIndented = true };
-                            Console.WriteLine(JsonSerializer.Serialize(new
+                            Console.WriteLine(JsonSerializer.Serialize(new SettingsDebugInfo
                             {
                                 CmdLineArgs = Environment.GetCommandLineArgs(),
                                 CmdLineOptions = cmdLineOptions,
                                 ServerOptions = config.GetSection("ServerOptions").Get<ServerOptions>(),
                                 RelayOption = config.GetSection("RelayOptions").Get<RelayOptions>()
-                            }, jsonSettings));
+                            }, SettingsDebugInfoSerializationContext.Default.SettingsDebugInfo));
                         }
 
                     });
@@ -243,5 +244,19 @@ namespace Rnwood.Smtp4dev
 
 
         }
+    }
+
+    internal class SettingsDebugInfo
+    {
+        public string[] CmdLineArgs { get; set; }
+        public CommandLineOptions CmdLineOptions { get; set; }
+        public ServerOptions ServerOptions { get; set; }
+        public RelayOptions RelayOption { get; set; }
+    }
+
+    [JsonSourceGenerationOptions(WriteIndented = true)]
+    [JsonSerializable(typeof(SettingsDebugInfo))]
+    internal partial class SettingsDebugInfoSerializationContext : JsonSerializerContext {
+
     }
 }

@@ -40,6 +40,9 @@ namespace Rnwood.Smtp4dev.Desktop
                 .SetIconFile(Path.Combine(workingDir, iconFile))
                 .SetTitle(title)
                 .SetDevToolsEnabled(true)
+                .SetUseOsDefaultLocation(true)
+                .SetMinSize(800,600)
+                .SetUseOsDefaultSize(true)
                 .SetContextMenuEnabled(false);
 
             result.RegisterWebMessageReceivedHandler((s, m) =>

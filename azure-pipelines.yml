@@ -72,32 +72,32 @@ stages:
               runTests: ${{ false }}
             win-x64:
               platformName: win-x64
-              buildArgs: "-r win-x64 --self-contained"
+              buildArgs: "-r win-x64 --self-contained -p:PublishSingleFile=true"
               vmImage: "windows-2022"
               runTests: ${{ true }}
             linux-x64:
               platformName: linux-x64
-              buildArgs: "-r linux-x64 --self-contained"
+              buildArgs: "-r linux-x64 --self-contained -p:PublishSingleFile=true"
               vmImage: "ubuntu-22.04"
               runTests: ${{ true }}
             # osx-x64:
             #   platformName: osx-x64
-            #   buildArgs: "-r osx-x64 --self-contained"
+            #   buildArgs: "-r osx-x64 --self-contained -p:PublishSingleFile=true"
             #   vmImage: "macOS-11"
             #   runTests: ${{ true }}
             linux-musl-x64:
               platformName: linux-musl-x64
-              buildArgs: "-r linux-musl-x64 --self-contained"
+              buildArgs: "-r linux-musl-x64 --self-contained -p:PublishSingleFile=true"
               vmImage: ubuntu-22.04
               runTests: ${{ false }}
             win-arm64:
               platformName: win-arm64
-              buildArgs: "-r win-arm64 --self-contained"
+              buildArgs: "-r win-arm64 --self-contained -p:PublishSingleFile=true"
               vmImage: windows-2022
               runTests: ${{ false }}
             linux-arm:
               platformName: linux-arm
-              buildArgs: "-r linux-arm --self-contained"
+              buildArgs: "-r linux-arm --self-contained -p:PublishSingleFile=true"
               vmImage: ubuntu-22.04
               runTests: ${{ false }}
         steps:
@@ -134,6 +134,7 @@ stages:
               SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev
             inputs:
               command: test
+              projects: Rnwood.Smtp4dev.Tests
               configuration: release
           - powershell: move-item $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev-$(platformName)-$(tag).zip
             displayName: Rename artifact
@@ -176,19 +177,33 @@ stages:
               command: publish
               projects: "Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj"
               publishWebProjects: false
-              arguments: '-c Release -r win-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
+              arguments: '-c Release -r win-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
+          - task: ExtractFiles@1
+            displayName: Extract files for E2E tests
+            inputs:
+              archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip'
+              destinationFolder: $(Agent.TempDirectory)/e2e
+          - task: DotNetCoreCLI@2
+            displayName: Run Tests
+            env:
+              SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
+              SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev.Desktop
+            inputs:
+              command: test
+              projects: Rnwood.Smtp4dev.Desktop.Tests
+              configuration: release
           - powershell: move-item $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip
             displayName: Rename artifact
           - publish: $(Build.ArtifactStagingDirectory)/win-x64-desktop
             artifact: win-x64-desktop
 
-          # - task: DotNetCoreCLI@2
+          # - task: DotNetCoreCLI@2run
           #   displayName: Build .NET Core - linux-x64-desktop
           #   inputs:
           #     command: publish
           #     projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
           #     publishWebProjects: false
-          #     arguments: '-c Release -r linux-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
+          #     arguments: '-c Release -r linux-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
           # - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop-linux-x64-$(tag).zip
           #   displayName: Rename artifact
           # - publish: $(Build.ArtifactStagingDirectory)/linux-x64-desktop
