@@ -134,11 +134,13 @@ namespace Rnwood.SmtpServer
 			await this.WriteLineAndFlush(response.ToString().TrimEnd()).ConfigureAwait(false);
 		}
 
-		public Task<byte[]> ReadLineBytes()
+		public async Task<byte[]> ReadLineBytes()
 		{
-			byte[] data = this.ConnectionChannel.ReadLineBytes();
+			byte[] data = await this.ConnectionChannel.ReadLineBytes();
 			
-			await this.Session.AppendLineToSessionLog().ConfigureAwait(false);
+			await this.Session.AppendLineToSessionLog(Encoding.GetEncoding("ISO-8859-1").GetString(data)).ConfigureAwait(false);
+
+			return data;
 		}
 
 		/// <summary>
