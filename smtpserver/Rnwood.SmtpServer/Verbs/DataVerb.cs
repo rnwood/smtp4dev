@@ -45,7 +45,8 @@ namespace Rnwood.SmtpServer
 				do
 				{
 					byte[] data = await connection.ReadLineBytes().ConfigureAwait(false);
-
+					
+					
 					if (!Encoding.ASCII.GetBytes(".").SequenceEqual(data))
 					{
 						data = this.ProcessLine(data);

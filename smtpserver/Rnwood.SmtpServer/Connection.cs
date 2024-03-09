@@ -136,7 +136,9 @@ namespace Rnwood.SmtpServer
 
 		public Task<byte[]> ReadLineBytes()
 		{
-			return this.ConnectionChannel.ReadLineBytes();
+			byte[] data = this.ConnectionChannel.ReadLineBytes();
+			
+			await this.Session.AppendLineToSessionLog().ConfigureAwait(false);
 		}
 
 		/// <summary>
