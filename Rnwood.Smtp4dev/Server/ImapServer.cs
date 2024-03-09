@@ -16,10 +16,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
 using System.Net.NetworkInformation;
 using Serilog;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
 
 namespace Rnwood.Smtp4dev.Server
 {
-    public class ImapServer
+    public class ImapServer : IHostedService
     {
         public ImapServer(IOptionsMonitor<ServerOptions> serverOptions, IServiceScopeFactory serviceScopeFactory)
         {
@@ -126,6 +128,16 @@ namespace Rnwood.Smtp4dev.Server
         private void Logger_WriteLog(object sender, LumiSoft.Net.Log.WriteLogEventArgs e)
         {
             log.Information(e.LogEntry.Text);
+        }
+
+        Task IHostedService.StartAsync(CancellationToken cancellationToken)
+        {
+            return Task.Run(() => this.TryStart());
+        }
+
+        Task IHostedService.StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.Run(() => this.Stop());
         }
 
         class SessionHandler
