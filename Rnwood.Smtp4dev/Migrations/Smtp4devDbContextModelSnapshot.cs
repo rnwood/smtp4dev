@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rnwood.Smtp4dev.Data;
 
+#nullable disable
+
 namespace Rnwood.Smtp4dev.Migrations
 {
     [DbContext(typeof(Smtp4devDbContext))]
@@ -13,8 +15,7 @@ namespace Rnwood.Smtp4dev.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder
-                .HasAnnotation("ProductVersion", "5.0.8");
+            modelBuilder.HasAnnotation("ProductVersion", "8.0.2");
 
             modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.ImapState", b =>
                 {
@@ -42,6 +43,9 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.Property<byte[]>("Data")
                         .HasColumnType("BLOB");
 
+                    b.Property<bool?>("EightBitTransport")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("From")
                         .HasColumnType("TEXT");
 
@@ -62,6 +66,9 @@ namespace Rnwood.Smtp4dev.Migrations
 
                     b.Property<bool>("SecureConnection")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("SessionEncoding")
+                        .HasColumnType("TEXT");
 
                     b.Property<Guid?>("SessionId")
                         .HasColumnType("TEXT");

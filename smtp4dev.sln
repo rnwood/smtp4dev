@@ -16,8 +16,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rnwood.Smtp4dev.Desktop", "
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rnwood.Smtp4dev.Desktop.Tests", "Rnwood.Smtp4dev.Desktop.Tests\Rnwood.Smtp4dev.Desktop.Tests.csproj", "{44686E8D-112A-4506-BD48-432E99D2D0DC}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Rnwood.SmtpServer", "..\smtpserver\Rnwood.SmtpServer\Rnwood.SmtpServer.csproj", "{0B2EE9DF-C2BC-43DE-A425-7A544CA7B958}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -40,10 +38,6 @@ Global
 		{44686E8D-112A-4506-BD48-432E99D2D0DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{44686E8D-112A-4506-BD48-432E99D2D0DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{44686E8D-112A-4506-BD48-432E99D2D0DC}.Release|Any CPU.Build.0 = Release|Any CPU
-		{0B2EE9DF-C2BC-43DE-A425-7A544CA7B958}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{0B2EE9DF-C2BC-43DE-A425-7A544CA7B958}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{0B2EE9DF-C2BC-43DE-A425-7A544CA7B958}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{0B2EE9DF-C2BC-43DE-A425-7A544CA7B958}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

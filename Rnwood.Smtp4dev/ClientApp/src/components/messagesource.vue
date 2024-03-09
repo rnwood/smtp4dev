@@ -68,7 +68,7 @@
 
                     } else {
                         this.sourceurl = new MessagesController().getMessageSource_url(this.message.id);
-                        this.source = await new MessagesController().getMessageSourceRaw(this.message.id);
+                        this.source = await new MessagesController().getMessageSource(this.message.id);
 
                     }
                 }

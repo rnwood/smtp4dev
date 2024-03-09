@@ -21,6 +21,8 @@ namespace Rnwood.Smtp4dev.ApiModel
             ReceivedDate = dbMessage.ReceivedDate;
             Subject = dbMessage.Subject;
             SecureConnection = dbMessage.SecureConnection;
+            SessionEncoding = dbMessage.SessionEncoding;
+            EightBitTransport = dbMessage.EightBitTransport;
 
             Parts = new List<MessageEntitySummary>(1);
             RelayError = dbMessage.RelayError;
@@ -72,6 +74,10 @@ namespace Rnwood.Smtp4dev.ApiModel
                 Parts.Add(HandleMimeEntity(MimeMessage.Body));
             }
         }
+
+        public string SessionEncoding { get; set; }
+
+        public bool? EightBitTransport { get; set; }
 
 
         private MessageEntitySummary HandleMimeEntity(MimeEntity entity)
@@ -155,10 +161,11 @@ namespace Rnwood.Smtp4dev.ApiModel
         internal static string GetPartContentAsText(Message result, string id)
         {
             var contentEntity = GetPart(result, id);
-
+            
             if (contentEntity is MimePart part)
             {
-                using var reader = new StreamReader(part.Content.Open(), Encoding.UTF8);
+                var encoding = part.ContentType.CharsetEncoding ?? ApiModel.Message.GetSessionEncodingOrAssumed(result);
+                using var reader = new StreamReader(part.Content.Open(), encoding);
                 return reader.ReadToEnd();
             }
 
@@ -166,19 +173,22 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         }
 
+        internal static Encoding GetSessionEncodingOrAssumed(Message result)
+        {
+            return !string.IsNullOrEmpty(result.SessionEncoding) ? Encoding.GetEncoding(result.SessionEncoding) : Encoding.Latin1;
+        }
 
 
         internal static string GetPartSource(Message message, string id)
         {
-            MimeEntity contentEntity = GetPart(message, id);
-
-            using (var m = new MemoryStream())
+            var contentEntity = GetPart(message, id);
+            using (MemoryStream ms = new MemoryStream())
             {
-                contentEntity.WriteTo(m);
-
-                return Encoding.UTF8.GetString(m.GetBuffer());
+                contentEntity.WriteTo(ms, false);
+                var encoding = contentEntity.ContentType.CharsetEncoding ??ApiModel.Message.GetSessionEncodingOrAssumed(message);
+                return encoding.GetString(ms.GetBuffer());
             }
-            
+
         }
 
 

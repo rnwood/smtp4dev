@@ -13,5 +13,6 @@ namespace Rnwood.Smtp4dev
         public bool DebugSettings { get; set; }
         public string BaseAppDataPath { get; set; }
         public string InstallPath { get; set; }
+        public string ApplicationName { get; set; }
     }
 }

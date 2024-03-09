@@ -7,12 +7,10 @@ using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using Rnwood.Smtp4dev.ApiModel;
 using System.Linq.Dynamic.Core;
-using System.Text;
 using Microsoft.EntityFrameworkCore;
 using Message = Rnwood.Smtp4dev.DbModel.Message;
 using Rnwood.Smtp4dev.Server;
 using MimeKit;
-using MimeKit.Text;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.DbModel;
 
@@ -128,7 +126,8 @@ namespace Rnwood.Smtp4dev.Controllers
         public string GetMessageSourceRaw(Guid id)
         {
             ApiModel.Message message = GetMessage(id);
-            return System.Text.Encoding.UTF8.GetString(message.Data);
+            var encoding = message.MimeMessage?.Body?.ContentType.CharsetEncoding ?? ApiModel.Message.GetSessionEncodingOrAssumed(message);
+            return encoding.GetString(message.Data);
         }
 
         [HttpGet("{id}/source")]
@@ -137,11 +136,7 @@ namespace Rnwood.Smtp4dev.Controllers
         {
             ApiModel.Message message = GetMessage(id);
 
-            using (var s = new MemoryStream())
-            {
-                message.MimeMessage.WriteTo(s);
-                return Encoding.UTF8.GetString(s.GetBuffer());
-            }
+            return message.MimeMessage?.HtmlBody ?? message.MimeMessage?.TextBody ?? "";
         }
 
         [HttpGet("{id}/html")]
@@ -150,25 +145,13 @@ namespace Rnwood.Smtp4dev.Controllers
         {
             ApiModel.Message message = GetMessage(id);
 
-            string html = null;
-
-            if (message.MimeMessage?.Body is TextPart textPart)
-            {
-                html = textPart.GetText(Encoding.UTF8);
-            }
-
-            if (html == null)
-            {
-                html = message.MimeMessage?.HtmlBody;
-            }
-
+            string html = message.MimeMessage?.HtmlBody;
 
             if (html == null)
             {
                 html = "<pre>" + HtmlAgilityPack.HtmlDocument.HtmlEncode(message.MimeMessage?.TextBody ?? "") + "</pre>";
             }
-
-
+            
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(html);
 
