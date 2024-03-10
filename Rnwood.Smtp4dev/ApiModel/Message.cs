@@ -31,6 +31,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             {
                 MimeParseError = dbMessage.MimeParseError;
                 Headers = new List<Header>(0);
+                HasPlainTextBody = true;
             }
             else
             {
@@ -72,6 +73,8 @@ namespace Rnwood.Smtp4dev.ApiModel
 
                 Headers = MimeMessage.Headers.Select(h => new Header { Name = h.Field, Value = PunyCodeReplacer.DecodePunycode(h.Value) }).ToList();
                 Parts.Add(HandleMimeEntity(MimeMessage.Body));
+                HasHtmlBody = MimeMessage.HtmlBody != null;
+                HasPlainTextBody = MimeMessage.TextBody != null;
             }
         }
 
@@ -145,7 +148,8 @@ namespace Rnwood.Smtp4dev.ApiModel
             {
                 return new FileStreamResult(mimePart.Content.Open(), contentEntity.ContentType?.MimeType ?? "application/text")
                 {
-                    FileDownloadName = mimePart.FileName
+                    FileDownloadName = mimePart.FileName ?? 
+                                       ((contentEntity.ContentId  ?? "content") + (MimeTypes.TryGetExtension(mimePart.ContentType.MimeType, out string extn) ? extn : ""))
                 };
             }
             else
@@ -157,6 +161,10 @@ namespace Rnwood.Smtp4dev.ApiModel
                 return new FileStreamResult(outputStream, contentEntity.ContentType?.MimeType ?? "application/text");
             }
         }
+
+        public bool HasHtmlBody { get; set; }
+
+        public bool HasPlainTextBody { get; set; }
 
         internal static string GetPartContentAsText(Message result, string id)
         {
