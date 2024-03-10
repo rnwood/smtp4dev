@@ -29,7 +29,7 @@
         }
 
         @Prop({ default: null })
-        message: Message | null = null;
+        message: Message | null | undefined;
         html: string | null = null;
         enableSanitization = true;
         sanitizedHtml: string | null = null;

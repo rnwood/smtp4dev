@@ -140,9 +140,29 @@ namespace Rnwood.Smtp4dev.Controllers
             return message.MimeMessage?.HtmlBody ?? message.MimeMessage?.TextBody ?? "";
         }
 
+        [HttpGet("{id}/plaintext")]
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
+        public async Task<IActionResult> GetMessagePlainText(Guid id)
+        {
+            ApiModel.Message message = await GetMessage(id);
+
+            if (message.MimeMessage == null)
+            {
+                return Content(ApiModel.Message.GetSessionEncodingOrAssumed(message).GetString(message.Data));
+            }
+
+            string plaintext = message.MimeMessage?.HtmlBody;
+            if (plaintext == null)
+            {
+                return NotFound("MIME message does not have a plain text body");
+            }
+
+            return Content(plaintext);
+        }
+
         [HttpGet("{id}/html")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
-        public async Task<string> GetMessageHtml(Guid id)
+        public async Task<IActionResult> GetMessageHtml(Guid id)
         {
             ApiModel.Message message = await GetMessage(id);
 
@@ -150,7 +170,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
             if (html == null)
             {
-                html = "<pre>" + HtmlAgilityPack.HtmlDocument.HtmlEncode(message.MimeMessage?.TextBody ?? "") + "</pre>";
+                return NotFound("Message does not have a HTML body");
             }
             
             HtmlDocument doc = new HtmlDocument();
@@ -171,7 +191,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 }
             }
 
-            return doc.DocumentNode.OuterHtml;
+            return Content(doc.DocumentNode.OuterHtml);
         }
 
         [HttpDelete("{id}")]

@@ -126,6 +126,16 @@ export default class MessagesController {
 
         return (await axios.get(this.getMessageHtml_url(id), null || undefined)).data as string;
     }
+
+    // get: api/Messages/${encodeURIComponent(id)}/plaintext  
+    public getMessagePlainText_url(id: string): string {
+        return `${this.apiBaseUrl}/${encodeURIComponent(id)}/plaintext`;
+    }
+
+    public async getMessagePlainText(id: string): Promise<string> {
+
+        return (await axios.get(this.getMessagePlainText_url(id), null || undefined)).data as string;
+    }
     
     // delete: api/Messages/${encodeURIComponent(id)}  
     public delete_url(id: string): string {

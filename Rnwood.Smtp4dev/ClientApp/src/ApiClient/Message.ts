@@ -16,6 +16,8 @@ export default class Message {
     mimeParseError: string,
     relayError: string,
     secureConnection: boolean,
+    hasHtmlBody: boolean,
+    hasPlainTextBody: boolean
   ) {
     this.id = id;
     this.from = from;
@@ -29,6 +31,8 @@ export default class Message {
     this.mimeParseError = mimeParseError;
     this.relayError = relayError;
     this.secureConnection = secureConnection;
+    this.hasHtmlBody = hasHtmlBody;
+    this.hasPlainTextBody = hasPlainTextBody;
   }
 
   id: string;
@@ -43,4 +47,6 @@ export default class Message {
   mimeParseError: string;
   relayError: string;
   secureConnection: boolean;
+  hasHtmlBody: boolean;
+  hasPlainTextBody: boolean;
 }
