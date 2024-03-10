@@ -50,5 +50,10 @@ namespace Rnwood.Smtp4dev.Tests
             Messages.FirstOrDefault(m => m.Id == id).IsUnread = false;
             return Task.CompletedTask;
         }
+
+        public Task<Message> TryGetMessageById(Guid id, bool tracked)
+        {
+            return Task.FromResult( Messages.SingleOrDefault(m => m.Id == id));
+        }
     }
 }

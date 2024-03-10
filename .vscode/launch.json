@@ -13,6 +13,7 @@
             "args": "--urls http://localhost:5000",
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
+            
         },
         {
             "type": "chrome",

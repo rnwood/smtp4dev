@@ -75,5 +75,11 @@ namespace Rnwood.Smtp4dev.Data
                 notificationsHub.OnMessagesChanged().Wait();
             }, true);
         }
+
+        public Task<Message> TryGetMessageById(Guid id, bool tracked)
+        {
+            return this.GetMessages(!tracked).SingleOrDefaultAsync(m => m.Id == id);
+        }
+        
     }
 }

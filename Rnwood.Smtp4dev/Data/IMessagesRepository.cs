@@ -14,6 +14,9 @@ namespace Rnwood.Smtp4dev.Data
         Task DeleteMessage(Guid id);
 
         Task DeleteAllMessages();
+
+        Task<DbModel.Message> TryGetMessageById(Guid id, bool tracked);
+
         Smtp4devDbContext DbContext { get; }
     }
 }
