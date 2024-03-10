@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using MimeKit;
 using NSubstitute;
 using Rnwood.Smtp4dev.ApiModel;
@@ -15,14 +17,14 @@ using Message = Rnwood.Smtp4dev.DbModel.Message;
 
 namespace Rnwood.Smtp4dev.Tests.Controllers
 {
-    public class MessagesControllerTests : IDisposable
+    public class RelayMessagesTests : IDisposable
     {
         private readonly MessagesController controller;
         private readonly IMessagesRepository messagesRepository;
         private readonly ISmtp4devServer server;
         private readonly Smtp4devDbContext context;
 
-        public MessagesControllerTests()
+        public RelayMessagesTests()
         {
             messagesRepository = Substitute.For<IMessagesRepository>();
             server = Substitute.For<ISmtp4devServer>();
@@ -32,11 +34,14 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             InitRepo();
             messagesRepository.GetMessages(Arg.Any<bool>())
                 .Returns(context.Messages);
+                            messagesRepository.TryGetMessageById(Arg.Any<Guid>(), Arg.Any<bool>())
+  
+                .ReturnsForAnyArgs((call) => context.Messages.SingleOrDefaultAsync(m => m.Id == call.Arg<Guid>()));
             messagesRepository.DbContext.Returns(context);
         }
 
         [Fact]
-        public void CanRelayMessageAndPersistResult()
+        public async Task CanRelayMessageAndPersistResult()
         {
             // setup
             var messageId = GetData().First().Id;
@@ -48,7 +53,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             });
 
             // act
-            var result = controller.RelayMessage(messageId,
+            var result = await controller.RelayMessage(messageId,
                 new MessageRelayOptions() { OverrideRecipientAddresses = new[] { "test@foo.bar" } });
 
             // expect ok result

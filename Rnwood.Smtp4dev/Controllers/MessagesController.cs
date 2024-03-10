@@ -27,6 +27,7 @@ namespace Rnwood.Smtp4dev.Controllers
             this.server = server;
         }
 
+        private const int CACHE_DURATION = 31556926;
         private readonly IMessagesRepository messagesRepository;
         private readonly ISmtp4devServer server;
 
@@ -40,16 +41,16 @@ namespace Rnwood.Smtp4dev.Controllers
                 .GetPaged(page, pageSize);
         }
 
-        private Message GetDbMessage(Guid id)
+        private async Task<Message> GetDbMessage(Guid id, bool tracked)
         {
-            return messagesRepository.GetMessages(false).SingleOrDefault(m => m.Id == id) ??
+            return (await this.messagesRepository.TryGetMessageById(id, tracked)) ??
                    throw new FileNotFoundException($"Message with id {id} was not found.");
         }
 
         [HttpGet("{id}")]
-        public ApiModel.Message GetMessage(Guid id)
+        public async Task<ApiModel.Message> GetMessage(Guid id)
         {
-            return new ApiModel.Message(GetDbMessage(id));
+            return new ApiModel.Message(await GetDbMessage(id, false));
         }
 
         [HttpPost("{id}")]
@@ -65,17 +66,17 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         [HttpGet("{id}/download")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
-        public FileStreamResult DownloadMessage(Guid id)
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
+        public async Task<FileStreamResult> DownloadMessage(Guid id)
         {
-            Message result = GetDbMessage(id);
+            Message result = await GetDbMessage(id, false);
             return new FileStreamResult(new MemoryStream(result.Data), "message/rfc822") { FileDownloadName = $"{id}.eml" };
         }
 
         [HttpPost("{id}/relay")]
-        public IActionResult RelayMessage(Guid id, [FromBody] MessageRelayOptions options)
+        public async Task<IActionResult> RelayMessage(Guid id, [FromBody] MessageRelayOptions options)
         {
-            var message = GetDbMessage(id);
+            var message = await GetDbMessage(id, true);
             var relayResult = server.TryRelayMessage(message,
                 options?.OverrideRecipientAddresses?.Length > 0
                     ? options?.OverrideRecipientAddresses.Select(a => MailboxAddress.Parse(a)).ToArray()
@@ -101,49 +102,49 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         [HttpGet("{id}/part/{partid}/content")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
-        public FileStreamResult GetPartContent(Guid id, string partid)
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
+        public async Task<FileStreamResult> GetPartContent(Guid id, string partid)
         {
-            return ApiModel.Message.GetPartContent(GetMessage(id), partid);
+            return ApiModel.Message.GetPartContent(await GetMessage(id), partid);
         }
 
         [HttpGet("{id}/part/{partid}/source")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
-        public string GetPartSource(Guid id, string partid)
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
+        public async Task<string> GetPartSource(Guid id, string partid)
         {
-            return ApiModel.Message.GetPartContentAsText(GetMessage(id), partid);
+            return ApiModel.Message.GetPartContentAsText(await GetMessage(id), partid);
         }
 
         [HttpGet("{id}/part/{partid}/raw")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
-        public string GetPartSourceRaw(Guid id, string partid)
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
+        public async Task<string> GetPartSourceRaw(Guid id, string partid)
         {
-            return ApiModel.Message.GetPartSource(GetMessage(id), partid);
+            return ApiModel.Message.GetPartSource(await GetMessage(id), partid);
         }
 
         [HttpGet("{id}/raw")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
-        public string GetMessageSourceRaw(Guid id)
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
+        public async Task<string> GetMessageSourceRaw(Guid id)
         {
-            ApiModel.Message message = GetMessage(id);
+            ApiModel.Message message = await GetMessage(id);
             var encoding = message.MimeMessage?.Body?.ContentType.CharsetEncoding ?? ApiModel.Message.GetSessionEncodingOrAssumed(message);
             return encoding.GetString(message.Data);
         }
 
         [HttpGet("{id}/source")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
-        public string GetMessageSource(Guid id)
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
+        public async Task<string> GetMessageSource(Guid id)
         {
-            ApiModel.Message message = GetMessage(id);
+            ApiModel.Message message = await GetMessage(id);
 
             return message.MimeMessage?.HtmlBody ?? message.MimeMessage?.TextBody ?? "";
         }
 
         [HttpGet("{id}/html")]
-        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = 31556926)]
-        public string GetMessageHtml(Guid id)
+        [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
+        public async Task<string> GetMessageHtml(Guid id)
         {
-            ApiModel.Message message = GetMessage(id);
+            ApiModel.Message message = await GetMessage(id);
 
             string html = message.MimeMessage?.HtmlBody;
 
