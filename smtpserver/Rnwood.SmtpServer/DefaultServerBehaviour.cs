@@ -115,6 +115,11 @@ namespace Rnwood.SmtpServer
 		public event AsyncEventHandler<CommandEventArgs> CommandReceivedEventHandler;
 
 		/// <summary>
+		/// Occurs when a message has been requested for a message.
+		/// </summary>
+		public event AsyncEventHandler<RecipientAddingEventArgs> MessageRecipientAddingEventHandler;
+		
+		/// <summary>
 		/// Occurs when a message is received but not yet committed.
 		/// </summary>
 		public event AsyncEventHandler<ConnectionEventArgs> MessageCompletedEventHandler;
@@ -133,6 +138,11 @@ namespace Rnwood.SmtpServer
 		/// Occurs when a new session is created, when a client connects to the server.
 		/// </summary>
 		public event AsyncEventHandler<SessionEventArgs> SessionStartedEventHandler;
+		
+		/// <summary>
+		/// Occurs when a new message is started.
+		/// </summary>
+		public event AsyncEventHandler<MessageStartEventArgs> MessageStartEventHandler;
 
 		/// <summary>
 		/// Gets or sets a List of active Auth Mechanism Identifiers.
@@ -204,7 +214,7 @@ namespace Rnwood.SmtpServer
 		public virtual Task<bool> IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism)
 		{
 			return Task.FromResult(
-				this.EnabledAuthMechanisms.Any(x => x.Equals(authMechanism)));
+				this.EnabledAuthMechanisms.Contains(authMechanism));
 		}
 
 		/// <inheritdoc/>
@@ -222,9 +232,7 @@ namespace Rnwood.SmtpServer
 		/// <inheritdoc/>
 		public virtual Task OnCommandReceived(IConnection connection, SmtpCommand command)
 		{
-			this.CommandReceivedEventHandler?.Invoke(this, new CommandEventArgs(command));
-
-			return Task.CompletedTask;
+			return this.CommandReceivedEventHandler?.Invoke(this, new CommandEventArgs(command)) ?? Task.CompletedTask;
 		}
 
 		/// <inheritdoc/>
@@ -234,9 +242,9 @@ namespace Rnwood.SmtpServer
 		}
 
 		/// <inheritdoc/>
-		public Task<IEditableSession> OnCreateNewSession(IConnectionChannel connection)
+		public Task<IEditableSession> OnCreateNewSession(IConnectionChannel connectionChannel)
 		{
-			return Task.FromResult<IEditableSession>(new MemorySession(connection.ClientIPAddress, DateTime.Now));
+			return Task.FromResult<IEditableSession>(new MemorySession(connectionChannel.ClientIPAddress, DateTime.Now));
 		}
 
 		/// <inheritdoc/>
@@ -254,12 +262,14 @@ namespace Rnwood.SmtpServer
 		/// <inheritdoc/>
 		public virtual Task OnMessageRecipientAdding(IConnection connection, IMessageBuilder message, string recipient)
 		{
+			return this.MessageRecipientAddingEventHandler?.Invoke(this, new RecipientAddingEventArgs(message, recipient)) ?? Task.CompletedTask;
 			return Task.CompletedTask;
 		}
 
 		/// <inheritdoc/>
 		public virtual Task OnMessageStart(IConnection connection, string from)
 		{
+			return this.MessageStartEventHandler?.Invoke(this, new MessageStartEventArgs(connection.Session, from)) ?? Task.CompletedTask;
 			return Task.CompletedTask;
 		}
 
@@ -278,7 +288,7 @@ namespace Rnwood.SmtpServer
 		/// <inheritdoc/>
 		public virtual async Task<AuthenticationResult> ValidateAuthenticationCredentials(
 			IConnection connection,
-			IAuthenticationCredentials request)
+			IAuthenticationCredentials authenticationRequest)
 		{
 			var handlers = this.AuthenticationCredentialsValidationRequiredEventHandler;
 
@@ -288,17 +298,17 @@ namespace Rnwood.SmtpServer
 					.Cast<AsyncEventHandler<AuthenticationCredentialsValidationEventArgs>>()
 					.Select(h =>
 					{
-						AuthenticationCredentialsValidationEventArgs args = new AuthenticationCredentialsValidationEventArgs(request);
+						AuthenticationCredentialsValidationEventArgs args = new AuthenticationCredentialsValidationEventArgs(authenticationRequest);
 						return new { Args = args, Task = h(this, args) };
 					});
 
 				await Task.WhenAll(tasks.Select(t => t.Task).ToArray()).ConfigureAwait(false);
 
-				AuthenticationResult? failureResult = tasks.Select(t => t.Args.AuthenticationResult)
-					.Where(r => r != AuthenticationResult.Success)
-					.FirstOrDefault();
+				AuthenticationResult? failureResult = tasks
+					.Select(t => t.Args.AuthenticationResult)
+					.FirstOrDefault(r => r != AuthenticationResult.Success);
 
-				return failureResult ?? AuthenticationResult.Success;
+				return failureResult.GetValueOrDefault(AuthenticationResult.Success);
 			}
 
 			return AuthenticationResult.Failure;

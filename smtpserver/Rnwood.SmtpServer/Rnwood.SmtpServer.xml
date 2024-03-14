@@ -605,6 +605,11 @@
             Occurs when a command is received from a client.
             </summary>
         </member>
+        <member name="E:Rnwood.SmtpServer.DefaultServerBehaviour.MessageRecipientAddingEventHandler">
+            <summary>
+            Occurs when a message has been requested for a message.
+            </summary>
+        </member>
         <member name="E:Rnwood.SmtpServer.DefaultServerBehaviour.MessageCompletedEventHandler">
             <summary>
             Occurs when a message is received but not yet committed.
@@ -623,6 +628,11 @@
         <member name="E:Rnwood.SmtpServer.DefaultServerBehaviour.SessionStartedEventHandler">
             <summary>
             Occurs when a new session is created, when a client connects to the server.
+            </summary>
+        </member>
+        <member name="E:Rnwood.SmtpServer.DefaultServerBehaviour.MessageStartEventHandler">
+            <summary>
+            Occurs when a new message is started.
             </summary>
         </member>
         <member name="P:Rnwood.SmtpServer.DefaultServerBehaviour.EnabledAuthMechanisms">
@@ -2442,6 +2452,28 @@
             Gets the Message.
             </summary>
         </member>
+        <member name="T:Rnwood.SmtpServer.MessageStartEventArgs">
+            <summary>
+            Defines the <see cref="T:Rnwood.SmtpServer.MessageStartEventArgs" />.
+            </summary>
+        </member>
+        <member name="M:Rnwood.SmtpServer.MessageStartEventArgs.#ctor(Rnwood.SmtpServer.ISession,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.MessageStartEventArgs"/> class.
+            </summary>
+            <param name="session">The session<see cref="T:Rnwood.SmtpServer.ISession"/>.</param>
+            <param name="from">The from address.</param>
+        </member>
+        <member name="P:Rnwood.SmtpServer.MessageStartEventArgs.Session">
+            <summary>
+            Gets the Session.
+            </summary>
+        </member>
+        <member name="P:Rnwood.SmtpServer.MessageStartEventArgs.From">
+            <summary>
+            Gets the from address.
+            </summary>
+        </member>
         <member name="T:Rnwood.SmtpServer.Parameter">
             <summary>
             Defines the <see cref="T:Rnwood.SmtpServer.Parameter" />.
@@ -2552,6 +2584,28 @@
         </member>
         <member name="M:Rnwood.SmtpServer.RandomIntegerGenerator.GenerateRandomInteger(System.Int32,System.Int32)">
             <inheritdoc/>
+        </member>
+        <member name="T:Rnwood.SmtpServer.RecipientAddingEventArgs">
+            <summary>
+            Defines the <see cref="T:Rnwood.SmtpServer.RecipientAddingEventArgs" />.
+            </summary>
+        </member>
+        <member name="M:Rnwood.SmtpServer.RecipientAddingEventArgs.#ctor(Rnwood.SmtpServer.IMessageBuilder,System.String)">
+            <summary>
+            Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.RecipientAddingEventArgs"/> class.
+            </summary>
+            <param name="message">The message<see cref="T:Rnwood.SmtpServer.IMessage"/>.</param>
+            <param name="recipient">The recipient being added.</param>
+        </member>
+        <member name="P:Rnwood.SmtpServer.RecipientAddingEventArgs.Message">
+            <summary>
+            Gets the Message.
+            </summary>
+        </member>
+        <member name="P:Rnwood.SmtpServer.RecipientAddingEventArgs.Recipient">
+            <summary>
+            Gets the Recipient.
+            </summary>
         </member>
         <member name="T:Rnwood.SmtpServer.ServerStopBehaviour">
             <summary>
