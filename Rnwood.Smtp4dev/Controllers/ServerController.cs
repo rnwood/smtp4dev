@@ -57,8 +57,12 @@ namespace Rnwood.Smtp4dev.Controllers
                     AutomaticRelayExpression = relayOptions.CurrentValue.AutomaticRelayExpression
                 },
                 SettingsAreEditable = hostingEnvironmentHelper.SettingsAreEditable,
-                DisableMessageSanitisation = serverOptions.CurrentValue.DisableMessageSanitisation
-            
+                DisableMessageSanitisation = serverOptions.CurrentValue.DisableMessageSanitisation,
+                TlsMode = serverOptions.CurrentValue.TlsMode.ToString(),
+                AuthenticationRequired = serverOptions.CurrentValue.AuthenticationRequired,
+                SecureConnectionRequired = serverOptions.CurrentValue.SecureConnectionRequired,
+                CredentialsValidationExpression = serverOptions.CurrentValue.CredentialsValidationExpression,
+                RecipientValidationExpression = serverOptions.CurrentValue.RecipientValidationExpression
             };
         }
 
@@ -79,6 +83,11 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.NumberOfSessionsToKeep = serverUpdate.NumberOfSessionsToKeep;
             newSettings.ImapPort = serverUpdate.ImapPortNumber;
             newSettings.DisableMessageSanitisation = serverUpdate.DisableMessageSanitisation;
+            newSettings.TlsMode = Enum.Parse<TlsMode>(serverUpdate.TlsMode);
+            newSettings.AuthenticationRequired = serverUpdate.AuthenticationRequired;
+            newSettings.SecureConnectionRequired = serverUpdate.SecureConnectionRequired;
+            newSettings.CredentialsValidationExpression = serverUpdate.CredentialsValidationExpression;
+            newSettings.RecipientValidationExpression = serverUpdate.RecipientValidationExpression;
 
             newRelaySettings.SmtpServer = serverUpdate.RelayOptions.SmtpServer;
             newRelaySettings.SmtpPort = serverUpdate.RelayOptions.SmtpPort;

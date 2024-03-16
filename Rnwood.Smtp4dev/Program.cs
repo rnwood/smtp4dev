@@ -153,7 +153,7 @@ namespace Rnwood.Smtp4dev
                         IConfigurationBuilder cb = configBuilder
                             .SetBasePath(env.ContentRootPath)
                             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
+                        
                         if (!cmdLineOptions.NoUserSettings)
                         {
                             cb = cb.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);

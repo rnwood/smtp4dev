@@ -1,11 +1,17 @@
-﻿using System.Net.Mail;
+﻿using System.Net;
+using System.Net.Mail;
 using System.Net.Mime;
 using System.Text;
 
-var smtpClient = new SmtpClient("localhost")
+
+var smtpClient = new SmtpClient(Dns.GetHostName())
             {
                 Port = 2525,
+                EnableSsl = true,
+                 Credentials = new NetworkCredential("blah", "blah")
             };
+
+ServicePointManager.ServerCertificateValidationCallback = (_,_,_,_) => true;
 
             var mailMessage = new MailMessage
             {
@@ -64,10 +70,7 @@ var smtpClient = new SmtpClient("localhost")
             };           
             mailMessage.To.Add("latin.test@mailinator.com");
 
-            smtpClient = new SmtpClient("localhost")
-            {
-                Port = 2525,
-                DeliveryFormat = SmtpDeliveryFormat.International
-            };
+            smtpClient.
+                DeliveryFormat = SmtpDeliveryFormat.International;
             
             smtpClient.Send(mailMessage);

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using Esprima.Ast;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -30,5 +31,9 @@ namespace Rnwood.Smtp4dev.Server
         public bool LockSettings { get; set; } = false;
 
         public bool DisableMessageSanitisation { get; set; } = false;
+        public string CredentialsValidationExpression { get; set; }
+        public bool AuthenticationRequired { get; set; } = false;
+        public bool SecureConnectionRequired { get; set; } = false;
+        public string RecipientValidationExpression { get; set; }
     }
 }
