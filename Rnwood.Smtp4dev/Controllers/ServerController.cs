@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Rnwood.Smtp4dev.Server;
 using Microsoft.Extensions.Options;
@@ -51,8 +52,9 @@ namespace Rnwood.Smtp4dev.Controllers
                     SmtpPort = relayOptions.CurrentValue.SmtpPort,
                     Login = relayOptions.CurrentValue.Login,
                     Password = relayOptions.CurrentValue.Password,
-                    AutomaticEmails = relayOptions.CurrentValue.AutomaticEmails,
-                    SenderAddress = relayOptions.CurrentValue.SenderAddress
+                    AutomaticEmails = relayOptions.CurrentValue.AutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray(),
+                    SenderAddress = relayOptions.CurrentValue.SenderAddress,
+                    AutomaticRelayExpression = relayOptions.CurrentValue.AutomaticRelayExpression
                 },
                 SettingsAreEditable = hostingEnvironmentHelper.SettingsAreEditable,
                 DisableMessageSanitisation = serverOptions.CurrentValue.DisableMessageSanitisation
@@ -84,7 +86,8 @@ namespace Rnwood.Smtp4dev.Controllers
             newRelaySettings.SenderAddress = serverUpdate.RelayOptions.SenderAddress;
             newRelaySettings.Login = serverUpdate.RelayOptions.Login;
             newRelaySettings.Password = serverUpdate.RelayOptions.Password;
-            newRelaySettings.AutomaticEmails = serverUpdate.RelayOptions.AutomaticEmails;
+            newRelaySettings.AutomaticEmails = serverUpdate.RelayOptions.AutomaticEmails.Where(s=> !String.IsNullOrWhiteSpace(s)).ToArray();
+            newRelaySettings.AutomaticRelayExpression = serverUpdate.RelayOptions.AutomaticRelayExpression;
 
             System.IO.File.WriteAllText(hostingEnvironmentHelper.GetEditableSettingsFilePath(),
                 JsonSerializer.Serialize(new SettingsFile{ ServerOptions = newSettings, RelayOptions = newRelaySettings },

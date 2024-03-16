@@ -69,6 +69,7 @@ namespace Rnwood.Smtp4dev
             services.AddScoped<IMessagesRepository, MessagesRepository>();
             services.AddScoped<IHostingEnvironmentHelper, HostingEnvironmentHelper>();
             services.AddSingleton<ITaskQueue, TaskQueue>();
+            services.AddSingleton<ScriptingHost>();
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>((relayOptions) =>
             {

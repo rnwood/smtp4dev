@@ -79,7 +79,7 @@ namespace Rnwood.Smtp4dev.Server
             {
                 if (!errorTcs.Task.IsCompleted)
                 {
-                    errorTcs.SetResult(ea);
+                    errorTcs.TrySetResult(ea);
                 }
             };
             var startedTcs = new TaskCompletionSource<EventArgs>();

@@ -27,6 +27,7 @@
     <PackageReference Include="Ardalis.GuardClauses" Version="4.5.0" />
     <PackageReference Include="CommandLiners.MonoOptions" Version="1.0.36" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.59" />
+    <PackageReference Include="Jint" Version="3.0.1" />
     <PackageReference Include="MailKit" Version="4.4.0" />
     <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="8.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="8.0.2" />
@@ -54,7 +55,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0831" />
+    <PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0837" />
   </ItemGroup>
   
   <ItemGroup>

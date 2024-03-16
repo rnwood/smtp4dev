@@ -24,6 +24,8 @@ namespace Rnwood.Smtp4dev.Server
         public SecureSocketOptions TlsMode { get; set; } = SecureSocketOptions.Auto;
 
         public string[] AutomaticEmails { get; set; } = System.Array.Empty<string>();
+        
+        public string AutomaticRelayExpression { get; set; }
 
         public string SenderAddress { get; set; } = "";
 
