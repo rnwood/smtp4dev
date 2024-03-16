@@ -3,26 +3,25 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer
+namespace Rnwood.SmtpServer;
+
+/// <summary>
+///     Defines the AuthenticationResult.
+/// </summary>
+public enum AuthenticationResult
 {
-	/// <summary>
-	/// Defines the AuthenticationResult.
-	/// </summary>
-	public enum AuthenticationResult
-	{
-		/// <summary>
-		/// Defines the Success
-		/// </summary>
-		Success,
+    /// <summary>
+    ///     Defines the Success
+    /// </summary>
+    Success,
 
-		/// <summary>
-		/// Defines the Failure
-		/// </summary>
-		Failure,
+    /// <summary>
+    ///     Defines the Failure
+    /// </summary>
+    Failure,
 
-		/// <summary>
-		/// Defines the TemporaryFailure
-		/// </summary>
-		TemporaryFailure,
-	}
+    /// <summary>
+    ///     Defines the TemporaryFailure
+    /// </summary>
+    TemporaryFailure
 }

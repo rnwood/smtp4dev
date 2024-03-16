@@ -3,112 +3,109 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Extensions.Auth
+using System;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Rnwood.SmtpServer.Extensions.Auth;
+
+/// <summary>
+///     Defines the <see cref="LoginMechanismProcessor" />.
+/// </summary>
+public class LoginMechanismProcessor : AuthMechanismProcessor
 {
-	using System;
-	using System.Text;
-	using System.Threading.Tasks;
+    /// <summary>
+    ///     Defines the username.
+    /// </summary>
+    private string username;
 
-	/// <summary>
-	/// Defines the <see cref="LoginMechanismProcessor" />.
-	/// </summary>
-	public class LoginMechanismProcessor : AuthMechanismProcessor
-	{
-		/// <summary>
-		/// Defines the username.
-		/// </summary>
-		private string username;
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="LoginMechanismProcessor" /> class.
+    /// </summary>
+    /// <param name="connection">The connection<see cref="IConnection" />.</param>
+    public LoginMechanismProcessor(IConnection connection)
+        : base(connection) =>
+        State = States.Initial;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="LoginMechanismProcessor"/> class.
-		/// </summary>
-		/// <param name="connection">The connection<see cref="IConnection"/>.</param>
-		public LoginMechanismProcessor(IConnection connection)
-			: base(connection)
-		{
-			this.State = States.Initial;
-		}
+    private States State { get; set; }
 
-		/// <summary>
-		/// Defines the States.
-		/// </summary>
-		private enum States
-		{
-			/// <summary>
-			/// Defines the Initial
-			/// </summary>
-			Initial,
+    /// <inheritdoc />
+    public override async Task<AuthMechanismProcessorStatus> ProcessResponse(string data)
+    {
+        if (State == States.Initial && data != null)
+        {
+            State = States.WaitingForUsername;
+        }
 
-			/// <summary>
-			/// Defines the WaitingForUsername
-			/// </summary>
-			WaitingForUsername,
+        switch (State)
+        {
+            case States.Initial:
+                await Connection.WriteResponse(new SmtpResponse(
+                    StandardSmtpResponseCode.AuthenticationContinue,
+                    Convert.ToBase64String(
+                        Encoding.ASCII.GetBytes("Username:")))).ConfigureAwait(false);
+                State = States.WaitingForUsername;
+                return AuthMechanismProcessorStatus.Continue;
 
-			/// <summary>
-			/// Defines the WaitingForPassword
-			/// </summary>
-			WaitingForPassword,
+            case States.WaitingForUsername:
 
-			/// <summary>
-			/// Defines the Completed
-			/// </summary>
-			Completed,
-		}
+                username = DecodeBase64(data);
 
-		private States State { get; set; }
+                await Connection.WriteResponse(new SmtpResponse(
+                    StandardSmtpResponseCode.AuthenticationContinue,
+                    Convert.ToBase64String(
+                        Encoding.ASCII.GetBytes("Password:")))).ConfigureAwait(false);
+                State = States.WaitingForPassword;
+                return AuthMechanismProcessorStatus.Continue;
 
-		/// <inheritdoc/>
-		public override async Task<AuthMechanismProcessorStatus> ProcessResponse(string data)
-		{
-			if (this.State == States.Initial && data != null)
-			{
-				this.State = States.WaitingForUsername;
-			}
+            case States.WaitingForPassword:
+                string password = DecodeBase64(data);
+                State = States.Completed;
 
-			switch (this.State)
-			{
-				case States.Initial:
-					await this.Connection.WriteResponse(new SmtpResponse(
-						StandardSmtpResponseCode.AuthenticationContinue,
-						Convert.ToBase64String(
-																  Encoding.ASCII.GetBytes("Username:")))).ConfigureAwait(false);
-					this.State = States.WaitingForUsername;
-					return AuthMechanismProcessorStatus.Continue;
+                Credentials = new LoginAuthenticationCredentials(username, password);
 
-				case States.WaitingForUsername:
+                AuthenticationResult result =
+                    await Connection.Server.Behaviour.ValidateAuthenticationCredentials(
+                        Connection,
+                        Credentials).ConfigureAwait(false);
 
-					this.username = DecodeBase64(data);
+                switch (result)
+                {
+                    case AuthenticationResult.Success:
+                        return AuthMechanismProcessorStatus.Success;
 
-					await this.Connection.WriteResponse(new SmtpResponse(
-						StandardSmtpResponseCode.AuthenticationContinue,
-						Convert.ToBase64String(
-																  Encoding.ASCII.GetBytes("Password:")))).ConfigureAwait(false);
-					this.State = States.WaitingForPassword;
-					return AuthMechanismProcessorStatus.Continue;
+                    default:
+                        return AuthMechanismProcessorStatus.Failed;
+                }
 
-				case States.WaitingForPassword:
-					string password = DecodeBase64(data);
-					this.State = States.Completed;
+            default:
+                throw new NotImplementedException();
+        }
+    }
 
-					this.Credentials = new LoginAuthenticationCredentials(this.username, password);
+    /// <summary>
+    ///     Defines the States.
+    /// </summary>
+    private enum States
+    {
+        /// <summary>
+        ///     Defines the Initial
+        /// </summary>
+        Initial,
 
-					AuthenticationResult result =
-						await this.Connection.Server.Behaviour.ValidateAuthenticationCredentials(
-							this.Connection,
-							this.Credentials).ConfigureAwait(false);
+        /// <summary>
+        ///     Defines the WaitingForUsername
+        /// </summary>
+        WaitingForUsername,
 
-					switch (result)
-					{
-						case AuthenticationResult.Success:
-							return AuthMechanismProcessorStatus.Success;
+        /// <summary>
+        ///     Defines the WaitingForPassword
+        /// </summary>
+        WaitingForPassword,
 
-						default:
-							return AuthMechanismProcessorStatus.Failed;
-					}
-
-				default:
-					throw new NotImplementedException();
-			}
-		}
-	}
+        /// <summary>
+        ///     Defines the Completed
+        /// </summary>
+        Completed
+    }
 }

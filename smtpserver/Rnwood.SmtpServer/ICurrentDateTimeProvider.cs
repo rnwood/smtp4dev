@@ -3,19 +3,18 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer
-{
-	using System;
+using System;
 
-	/// <summary>
-	/// Defines the <see cref="ICurrentDateTimeProvider" />.
-	/// </summary>
-	public interface ICurrentDateTimeProvider
-	{
-		/// <summary>
-		/// Returns the current date and time.
-		/// </summary>
-		/// <returns>The <see cref="DateTime"/>.</returns>
-		DateTime GetCurrentDateTime();
-	}
+namespace Rnwood.SmtpServer;
+
+/// <summary>
+///     Defines the <see cref="ICurrentDateTimeProvider" />.
+/// </summary>
+public interface ICurrentDateTimeProvider
+{
+    /// <summary>
+    ///     Returns the current date and time.
+    /// </summary>
+    /// <returns>The <see cref="DateTime" />.</returns>
+    DateTime GetCurrentDateTime();
 }

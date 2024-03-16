@@ -3,118 +3,112 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests.Verbs
+using System.Threading.Tasks;
+using Moq;
+using Rnwood.SmtpServer.Extensions;
+using Xunit;
+
+namespace Rnwood.SmtpServer.Tests.Verbs;
+
+/// <summary>
+///     Defines the <see cref="EhloVerbTests" />
+/// </summary>
+public class EhloVerbTests
 {
-    using System.Threading.Tasks;
-    using Moq;
-    using Rnwood.SmtpServer.Extensions;
-    using Xunit;
+    /// <summary>
+    ///     The Process_NoArguments_Accepted
+    /// </summary>
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    [Fact]
+    public async Task Process_NoArguments_Accepted()
+    {
+        TestMocks mocks = new TestMocks();
+        EhloVerb ehloVerb = new EhloVerb();
+        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO")).ConfigureAwait(false);
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+
+        mocks.Session.VerifySet(s => s.ClientName = "");
+    }
 
     /// <summary>
-    /// Defines the <see cref="EhloVerbTests" />
+    ///     The Process_RecordsClientName
     /// </summary>
-    public class EhloVerbTests
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    [Fact]
+    public async Task Process_RecordsClientName()
     {
-        /// <summary>
-        /// The Process_NoArguments_Accepted
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        [Fact]
-        public async Task Process_NoArguments_Accepted()
+        TestMocks mocks = new TestMocks();
+        EhloVerb ehloVerb = new EhloVerb();
+        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar")).ConfigureAwait(false);
+
+        mocks.Session.VerifySet(s => s.ClientName = "foobar");
+    }
+
+    /// <summary>
+    ///     The Process_RespondsWith250
+    /// </summary>
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    [Fact]
+    public async Task Process_RespondsWith250()
+    {
+        TestMocks mocks = new TestMocks();
+        Mock<IExtensionProcessor> mockExtensionProcessor1 = new Mock<IExtensionProcessor>();
+        mockExtensionProcessor1.Setup(ep => ep.GetEHLOKeywords()).ReturnsAsync(new[] { "EXTN1" });
+        Mock<IExtensionProcessor> mockExtensionProcessor2 = new Mock<IExtensionProcessor>();
+        mockExtensionProcessor2.Setup(ep => ep.GetEHLOKeywords()).ReturnsAsync(new[] { "EXTN2A", "EXTN2B" });
+
+        mocks.Connection.SetupGet(c => c.ExtensionProcessors).Returns(new[]
         {
-            TestMocks mocks = new TestMocks();
-            EhloVerb ehloVerb = new EhloVerb();
-            await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO")).ConfigureAwait(false);
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+            mockExtensionProcessor1.Object, mockExtensionProcessor2.Object
+        });
 
-            mocks.Session.VerifySet(s => s.ClientName = "");
-        }
+        EhloVerb ehloVerb = new EhloVerb();
+        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar")).ConfigureAwait(false);
 
-        /// <summary>
-        /// The Process_RecordsClientName
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        [Fact]
-        public async Task Process_RecordsClientName()
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+    }
+
+    /// <summary>
+    ///     The Process_RespondsWithExtensionKeywords
+    /// </summary>
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    [Fact]
+    public async Task Process_RespondsWithExtensionKeywords()
+    {
+        TestMocks mocks = new TestMocks();
+        Mock<IExtensionProcessor> mockExtensionProcessor1 = new Mock<IExtensionProcessor>();
+        mockExtensionProcessor1.Setup(ep => ep.GetEHLOKeywords()).ReturnsAsync(new[] { "EXTN1" });
+        Mock<IExtensionProcessor> mockExtensionProcessor2 = new Mock<IExtensionProcessor>();
+        mockExtensionProcessor2.Setup(ep => ep.GetEHLOKeywords()).ReturnsAsync(new[] { "EXTN2A", "EXTN2B" });
+
+        mocks.Connection.SetupGet(c => c.ExtensionProcessors).Returns(new[]
         {
-            TestMocks mocks = new TestMocks();
-            EhloVerb ehloVerb = new EhloVerb();
-            await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar")).ConfigureAwait(false);
+            mockExtensionProcessor1.Object, mockExtensionProcessor2.Object
+        });
 
-            mocks.Session.VerifySet(s => s.ClientName = "foobar");
-        }
+        EhloVerb ehloVerb = new EhloVerb();
+        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar")).ConfigureAwait(false);
 
-        /// <summary>
-        /// The Process_RespondsWith250
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        [Fact]
-        public async Task Process_RespondsWith250()
-        {
-            TestMocks mocks = new TestMocks();
-            Mock<IExtensionProcessor> mockExtensionProcessor1 = new Mock<IExtensionProcessor>();
-            mockExtensionProcessor1.Setup(ep => ep.GetEHLOKeywords()).ReturnsAsync(new[] { "EXTN1" });
-            Mock<IExtensionProcessor> mockExtensionProcessor2 = new Mock<IExtensionProcessor>();
-            mockExtensionProcessor2.Setup(ep => ep.GetEHLOKeywords()).ReturnsAsync(new[] { "EXTN2A", "EXTN2B" });
+        mocks.Connection.Verify(c => c.WriteResponse(It.Is<SmtpResponse>(r =>
+            r.Message.Contains("EXTN1") &&
+            r.Message.Contains("EXTN2A") &&
+            r.Message.Contains("EXTN2B")
+        )));
+    }
 
-            mocks.Connection.SetupGet(c => c.ExtensionProcessors).Returns(new[]
-                                                                              {
-                                                                                  mockExtensionProcessor1.Object,
-                                                                                  mockExtensionProcessor2.Object
-                                                                              });
-
-            EhloVerb ehloVerb = new EhloVerb();
-            await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar")).ConfigureAwait(false);
-
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
-        }
-
-        /// <summary>
-        /// The Process_RespondsWithExtensionKeywords
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        [Fact]
-        public async Task Process_RespondsWithExtensionKeywords()
-        {
-            TestMocks mocks = new TestMocks();
-            Mock<IExtensionProcessor> mockExtensionProcessor1 = new Mock<IExtensionProcessor>();
-            mockExtensionProcessor1.Setup(ep => ep.GetEHLOKeywords()).ReturnsAsync(new[] { "EXTN1" });
-            Mock<IExtensionProcessor> mockExtensionProcessor2 = new Mock<IExtensionProcessor>();
-            mockExtensionProcessor2.Setup(ep => ep.GetEHLOKeywords()).ReturnsAsync(new[] { "EXTN2A", "EXTN2B" });
-
-            mocks.Connection.SetupGet(c => c.ExtensionProcessors).Returns(new[]
-                                                                              {
-                                                                                  mockExtensionProcessor1.Object,
-                                                                                  mockExtensionProcessor2.Object
-                                                                              });
-
-            EhloVerb ehloVerb = new EhloVerb();
-            await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar")).ConfigureAwait(false);
-
-            mocks.Connection.Verify(c => c.WriteResponse(It.Is<SmtpResponse>(r =>
-
-                r.Message.Contains("EXTN1") &&
-                r.Message.Contains("EXTN2A") &&
-                    r.Message.Contains("EXTN2B")
-                )));
-        }
-
-        /// <summary>
-        /// The Process_SaidHeloAlready_Allowed
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        [Fact]
-        public async Task Process_SaidHeloAlready_Allowed()
-        {
-            TestMocks mocks = new TestMocks();
-			
-
-            EhloVerb verb = new EhloVerb();
-            await verb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foo.blah")).ConfigureAwait(false);
-			await verb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foo.blah")).ConfigureAwait(false);
-			mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK, Times.Exactly(2));
+    /// <summary>
+    ///     The Process_SaidHeloAlready_Allowed
+    /// </summary>
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    [Fact]
+    public async Task Process_SaidHeloAlready_Allowed()
+    {
+        TestMocks mocks = new TestMocks();
 
 
-		}
+        EhloVerb verb = new EhloVerb();
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foo.blah")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foo.blah")).ConfigureAwait(false);
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK, Times.Exactly(2));
     }
 }

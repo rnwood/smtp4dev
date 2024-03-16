@@ -3,25 +3,23 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests
+using System.IO;
+
+namespace Rnwood.SmtpServer.Tests;
+
+/// <summary>
+///     Defines the <see cref="FileMessageBuilderTests" />
+/// </summary>
+public class FileMessageBuilderTests : MessageBuilderTests
 {
-    using System.IO;
-
     /// <summary>
-    /// Defines the <see cref="FileMessageBuilderTests" />
     /// </summary>
-    public class FileMessageBuilderTests : MessageBuilderTests
+    /// <returns>The <see cref="IMessageBuilder" /></returns>
+    protected override IMessageBuilder GetInstance()
     {
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns>The <see cref="IMessageBuilder"/></returns>
-        protected override IMessageBuilder GetInstance()
-        {
-            FileInfo tempFile = new FileInfo(Path.GetTempFileName());
+        FileInfo tempFile = new FileInfo(Path.GetTempFileName());
 
-            TestMocks mocks = new TestMocks();
-            return new FileMessageBuilder(tempFile, false);
-        }
+        TestMocks mocks = new TestMocks();
+        return new FileMessageBuilder(tempFile, false);
     }
 }

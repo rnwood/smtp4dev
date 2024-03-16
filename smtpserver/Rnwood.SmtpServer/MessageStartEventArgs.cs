@@ -3,34 +3,33 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer
+using System;
+
+namespace Rnwood.SmtpServer;
+
+/// <summary>
+///     Defines the <see cref="MessageStartEventArgs" />.
+/// </summary>
+public class MessageStartEventArgs : EventArgs
 {
-	using System;
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="MessageStartEventArgs" /> class.
+    /// </summary>
+    /// <param name="session">The session<see cref="ISession" />.</param>
+    /// <param name="from">The from address.</param>
+    public MessageStartEventArgs(ISession session, string from)
+    {
+        Session = session;
+        From = from;
+    }
 
-	/// <summary>
-	/// Defines the <see cref="MessageStartEventArgs" />.
-	/// </summary>
-	public class MessageStartEventArgs : EventArgs
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MessageStartEventArgs"/> class.
-		/// </summary>
-		/// <param name="session">The session<see cref="ISession"/>.</param>
-		/// <param name="from">The from address.</param>
-		public MessageStartEventArgs(ISession session, string from)
-		{
-			this.Session = session;
-			this.From = from;
-		}
-		
-		/// <summary>
-		/// Gets the Session.
-		/// </summary>
-		public ISession Session { get; private set; }
+    /// <summary>
+    ///     Gets the Session.
+    /// </summary>
+    public ISession Session { get; private set; }
 
-		/// <summary>
-		/// Gets the from address.
-		/// </summary>
-		public string From { get; private set; }
-	}
+    /// <summary>
+    ///     Gets the from address.
+    /// </summary>
+    public string From { get; private set; }
 }

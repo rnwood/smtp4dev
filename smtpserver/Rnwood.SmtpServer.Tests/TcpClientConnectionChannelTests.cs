@@ -3,51 +3,51 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests
+using System.Net;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+using Xunit;
+
+namespace Rnwood.SmtpServer.Tests;
+
+/// <summary>
+///     Defines the <see cref="TcpClientConnectionChannelTests" />
+/// </summary>
+public class TcpClientConnectionChannelTests
 {
-    using System.Net;
-    using System.Net.Sockets;
-    using System.Text;
-    using System.Threading.Tasks;
-    using Xunit;
-
     /// <summary>
-    /// Defines the <see cref="TcpClientConnectionChannelTests" />
+    ///     The ReadLineAsync_ThrowsOnConnectionClose
     /// </summary>
-    public class TcpClientConnectionChannelTests
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    [Fact]
+    public async Task ReadLineAsync_ThrowsOnConnectionClose()
     {
-        /// <summary>
-        /// The ReadLineAsync_ThrowsOnConnectionClose
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        [Fact]
-        public async Task ReadLineAsync_ThrowsOnConnectionClose()
+        TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
+
+        try
         {
-            TcpListener listener = new TcpListener(IPAddress.Loopback, 0);
+            listener.Start();
+            Task<TcpClient> acceptTask = listener.AcceptTcpClientAsync();
 
-            try
+            TcpClient client = new TcpClient();
+            await client.ConnectAsync(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndpoint).Port)
+                .ConfigureAwait(false);
+
+            using (TcpClient serverTcpClient = await acceptTask.ConfigureAwait(false))
             {
-                listener.Start();
-                Task<TcpClient> acceptTask = listener.AcceptTcpClientAsync();
+                TcpClientConnectionChannel channel = new TcpClientConnectionChannel(serverTcpClient, Encoding.Default);
+                client.Dispose();
 
-                TcpClient client = new TcpClient();
-                await client.ConnectAsync(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndpoint).Port).ConfigureAwait(false);
-
-                using (TcpClient serverTcpClient = await acceptTask.ConfigureAwait(false))
+                await Assert.ThrowsAsync<ConnectionUnexpectedlyClosedException>(async () =>
                 {
-                    TcpClientConnectionChannel channel = new TcpClientConnectionChannel(serverTcpClient, Encoding.Default);
-                    client.Dispose();
-
-                    await Assert.ThrowsAsync<ConnectionUnexpectedlyClosedException>(async () =>
-                    {
-                        await channel.ReadLine().ConfigureAwait(false);
-                    }).ConfigureAwait(false);
-                }
+                    await channel.ReadLine().ConfigureAwait(false);
+                }).ConfigureAwait(false);
             }
-            finally
-            {
-                listener.Stop();
-            }
+        }
+        finally
+        {
+            listener.Stop();
         }
     }
 }

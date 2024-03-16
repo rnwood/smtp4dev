@@ -3,51 +3,47 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests
+using System.Linq;
+using Xunit;
+
+namespace Rnwood.SmtpServer.Tests;
+
+/// <summary>
+///     Defines the <see cref="ParameterParserTests" />
+/// </summary>
+public class ParameterParserTests
 {
-    using System.Linq;
-    using Xunit;
+    /// <summary>
+    /// </summary>
+    [Fact]
+    public void MultipleParameters()
+    {
+        ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA", "KEYB=VALUEB", "KEYC");
+
+        Assert.Equal(3, parameterParser.Parameters.Count);
+        Assert.Equal(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters.First());
+        Assert.Equal(new Parameter("KEYB", "VALUEB"), parameterParser.Parameters.ElementAt(1));
+        Assert.Equal(new Parameter("KEYC", null), parameterParser.Parameters.ElementAt(2));
+    }
 
     /// <summary>
-    /// Defines the <see cref="ParameterParserTests" />
     /// </summary>
-    public class ParameterParserTests
+    [Fact]
+    public void NoParameters()
     {
-        /// <summary>
-        ///
-        /// </summary>
-        [Fact]
-        public void MultipleParameters()
-        {
-            ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA", "KEYB=VALUEB", "KEYC");
+        ParameterParser parameterParser = new ParameterParser();
 
-            Assert.Equal(3, parameterParser.Parameters.Count);
-            Assert.Equal(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters.First());
-            Assert.Equal(new Parameter("KEYB", "VALUEB"), parameterParser.Parameters.ElementAt(1));
-            Assert.Equal(new Parameter("KEYC", null), parameterParser.Parameters.ElementAt(2));
-        }
+        Assert.Empty(parameterParser.Parameters);
+    }
 
-        /// <summary>
-        ///
-        /// </summary>
-        [Fact]
-        public void NoParameters()
-        {
-            ParameterParser parameterParser = new ParameterParser(new string[0]);
+    /// <summary>
+    /// </summary>
+    [Fact]
+    public void SingleParameter()
+    {
+        ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA");
 
-            Assert.Empty(parameterParser.Parameters);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [Fact]
-        public void SingleParameter()
-        {
-            ParameterParser parameterParser = new ParameterParser("KEYA=VALUEA");
-
-            Assert.Single(parameterParser.Parameters);
-            Assert.Equal(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters.First());
-        }
+        Assert.Single(parameterParser.Parameters);
+        Assert.Equal(new Parameter("KEYA", "VALUEA"), parameterParser.Parameters.First());
     }
 }

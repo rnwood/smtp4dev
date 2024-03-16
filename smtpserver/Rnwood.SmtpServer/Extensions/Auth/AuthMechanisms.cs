@@ -3,25 +3,24 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Extensions.Auth
-{
-	using System.Collections.Generic;
+using System.Collections.Generic;
 
-	/// <summary>
-	/// Authentication Mechanisms.
-	/// </summary>
-	public static class AuthMechanisms
-	{
-		/// <summary>
-		/// Return enumerable of all valid Auth Mechanisms.
-		/// </summary>
-		/// <returns>Enumerable collection of AuthMechanisms.</returns>
-		public static IEnumerable<IAuthMechanism> All()
-		{
-			yield return new CramMd5Mechanism();
-			yield return new PlainMechanism();
-			yield return new LoginMechanism();
-			yield return new AnonymousMechanism();
-		}
-	}
+namespace Rnwood.SmtpServer.Extensions.Auth;
+
+/// <summary>
+///     Authentication Mechanisms.
+/// </summary>
+public static class AuthMechanisms
+{
+    /// <summary>
+    ///     Return enumerable of all valid Auth Mechanisms.
+    /// </summary>
+    /// <returns>Enumerable collection of AuthMechanisms.</returns>
+    public static IEnumerable<IAuthMechanism> All()
+    {
+        yield return new CramMd5Mechanism();
+        yield return new PlainMechanism();
+        yield return new LoginMechanism();
+        yield return new AnonymousMechanism();
+    }
 }

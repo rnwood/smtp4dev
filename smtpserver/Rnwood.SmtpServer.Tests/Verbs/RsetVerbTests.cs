@@ -3,34 +3,32 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests.Verbs
+using System.Threading.Tasks;
+using Rnwood.SmtpServer.Verbs;
+using Xunit;
+
+namespace Rnwood.SmtpServer.Tests.Verbs;
+
+/// <summary>
+///     Defines the <see cref="RsetVerbTests" />
+/// </summary>
+public class RsetVerbTests
 {
-    using System.Threading.Tasks;
-    using Rnwood.SmtpServer.Verbs;
-    using Xunit;
-
     /// <summary>
-    /// Defines the <see cref="RsetVerbTests" />
     /// </summary>
-    public class RsetVerbTests
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    [Fact]
+    public async Task ProcessAsync()
     {
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        [Fact]
-        public async Task ProcessAsync()
-        {
-            TestMocks mocks = new TestMocks();
+        TestMocks mocks = new TestMocks();
 
-			mocks.Connection.Setup(c => c.AbortMessage()).Returns(Task.CompletedTask).Verifiable();
+        mocks.Connection.Setup(c => c.AbortMessage()).Returns(Task.CompletedTask).Verifiable();
 
-			RsetVerb verb = new RsetVerb();
-            await verb.Process(mocks.Connection.Object, new SmtpCommand("RSET")).ConfigureAwait(false);
+        RsetVerb verb = new RsetVerb();
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("RSET")).ConfigureAwait(false);
 
 
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
-			mocks.Connection.Verify();
-        }
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+        mocks.Connection.Verify();
     }
 }

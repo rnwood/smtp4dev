@@ -3,25 +3,23 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests
+using Xunit;
+
+namespace Rnwood.SmtpServer.Tests;
+
+/// <summary>
+///     Defines the <see cref="CommandEventArgsTests" />
+/// </summary>
+public class CommandEventArgsTests
 {
-    using Xunit;
-
     /// <summary>
-    /// Defines the <see cref="CommandEventArgsTests" />
     /// </summary>
-    public class CommandEventArgsTests
+    [Fact]
+    public void Command()
     {
-        /// <summary>
-        ///
-        /// </summary>
-        [Fact]
-        public void Command()
-        {
-            SmtpCommand command = new SmtpCommand("BLAH");
-            CommandEventArgs args = new CommandEventArgs(command);
+        SmtpCommand command = new SmtpCommand("BLAH");
+        CommandEventArgs args = new CommandEventArgs(command);
 
-            Assert.Same(command, args.Command);
-        }
+        Assert.Same(command, args.Command);
     }
 }

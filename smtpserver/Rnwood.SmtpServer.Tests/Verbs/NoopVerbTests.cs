@@ -3,30 +3,28 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests.Verbs
+using System.Threading.Tasks;
+using Rnwood.SmtpServer.Verbs;
+using Xunit;
+
+namespace Rnwood.SmtpServer.Tests.Verbs;
+
+/// <summary>
+///     Defines the <see cref="NoopVerbTests" />
+/// </summary>
+public class NoopVerbTests
 {
-    using System.Threading.Tasks;
-    using Rnwood.SmtpServer.Verbs;
-    using Xunit;
-
     /// <summary>
-    /// Defines the <see cref="NoopVerbTests" />
     /// </summary>
-    public class NoopVerbTests
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    [Fact]
+    public async Task Noop()
     {
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        [Fact]
-        public async Task Noop()
-        {
-            TestMocks mocks = new TestMocks();
+        TestMocks mocks = new TestMocks();
 
-            NoopVerb verb = new NoopVerb();
-            await verb.Process(mocks.Connection.Object, new SmtpCommand("NOOP")).ConfigureAwait(false);
+        NoopVerb verb = new NoopVerb();
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("NOOP")).ConfigureAwait(false);
 
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
-        }
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
     }
 }

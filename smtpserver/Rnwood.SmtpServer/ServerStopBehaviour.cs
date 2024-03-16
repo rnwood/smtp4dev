@@ -3,21 +3,20 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer
-{
-	/// <summary>
-	/// Defines the ServerStopBehaviour.
-	/// </summary>
-	public enum ServerStopBehaviour
-	{
-		/// <summary>
-		/// Defines the WaitForExistingConnections
-		/// </summary>
-		WaitForExistingConnections,
+namespace Rnwood.SmtpServer;
 
-		/// <summary>
-		/// Defines the KillExistingConnections
-		/// </summary>
-		KillExistingConnections,
-	}
+/// <summary>
+///     Defines the ServerStopBehaviour.
+/// </summary>
+public enum ServerStopBehaviour
+{
+    /// <summary>
+    ///     Defines the WaitForExistingConnections
+    /// </summary>
+    WaitForExistingConnections,
+
+    /// <summary>
+    ///     Defines the KillExistingConnections
+    /// </summary>
+    KillExistingConnections
 }

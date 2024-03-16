@@ -3,33 +3,33 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests.Verbs
+using System.Security.Cryptography.X509Certificates;
+using System.Threading.Tasks;
+using Moq;
+using Rnwood.SmtpServer.Extensions;
+using Xunit;
+
+namespace Rnwood.SmtpServer.Tests.Verbs;
+
+/// <summary>
+///     Defines the <see cref="StartTlsVerbTests" />
+/// </summary>
+public class StartTlsVerbTests
 {
-    using System.Security.Cryptography.X509Certificates;
-    using System.Threading.Tasks;
-    using Moq;
-    using Rnwood.SmtpServer.Extensions;
-    using Xunit;
-
     /// <summary>
-    /// Defines the <see cref="StartTlsVerbTests" />
+    ///     The NoCertificateAvailable_ReturnsErrorResponse
     /// </summary>
-    public class StartTlsVerbTests
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    [Fact]
+    public async Task NoCertificateAvailable_ReturnsErrorResponse()
     {
-        /// <summary>
-        /// The NoCertificateAvailable_ReturnsErrorResponse
-        /// </summary>
-        /// <returns>A <see cref="Task{T}"/> representing the async operation</returns>
-        [Fact]
-        public async Task NoCertificateAvailable_ReturnsErrorResponse()
-        {
-            TestMocks mocks = new TestMocks();
-            mocks.ServerBehaviour.Setup(b => b.GetSSLCertificate(It.IsAny<IConnection>())).ReturnsAsync((X509Certificate)null);
+        TestMocks mocks = new TestMocks();
+        mocks.ServerBehaviour.Setup(b => b.GetSSLCertificate(It.IsAny<IConnection>()))
+            .ReturnsAsync((X509Certificate)null);
 
-            StartTlsVerb verb = new StartTlsVerb();
-            await verb.Process(mocks.Connection.Object, new SmtpCommand("STARTTLS")).ConfigureAwait(false);
+        StartTlsVerb verb = new StartTlsVerb();
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("STARTTLS")).ConfigureAwait(false);
 
-            mocks.VerifyWriteResponse(StandardSmtpResponseCode.CommandNotImplemented);
-        }
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.CommandNotImplemented);
     }
 }

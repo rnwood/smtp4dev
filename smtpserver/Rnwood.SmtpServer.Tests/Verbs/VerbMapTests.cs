@@ -3,100 +3,99 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests.Verbs
+using Moq;
+using Rnwood.SmtpServer.Verbs;
+using Xunit;
+
+namespace Rnwood.SmtpServer.Tests.Verbs;
+
+/// <summary>
+///     Defines the <see cref="VerbMapTests" />
+/// </summary>
+public class VerbMapTests
 {
-    using Moq;
-    using Rnwood.SmtpServer.Verbs;
-    using Xunit;
+    /// <summary>
+    ///     The GetVerbProcessor_NoRegisteredVerb_ReturnsNull
+    /// </summary>
+    [Fact]
+    public void GetVerbProcessor_NoRegisteredVerb_ReturnsNull()
+    {
+        VerbMap verbMap = new VerbMap();
+
+        Assert.Null(verbMap.GetVerbProcessor("VERB"));
+    }
 
     /// <summary>
-    /// Defines the <see cref="VerbMapTests" />
+    ///     The GetVerbProcessor_RegisteredVerb_ReturnsVerb
     /// </summary>
-    public class VerbMapTests
+    [Fact]
+    public void GetVerbProcessor_RegisteredVerb_ReturnsVerb()
     {
-        /// <summary>
-        /// The GetVerbProcessor_NoRegisteredVerb_ReturnsNull
-        /// </summary>
-        [Fact]
-        public void GetVerbProcessor_NoRegisteredVerb_ReturnsNull()
-        {
-            VerbMap verbMap = new VerbMap();
+        VerbMap verbMap = new VerbMap();
+        Mock<IVerb> verbMock = new Mock<IVerb>();
 
-            Assert.Null(verbMap.GetVerbProcessor("VERB"));
-        }
+        verbMap.SetVerbProcessor("verb", verbMock.Object);
 
-        /// <summary>
-        /// The GetVerbProcessor_RegisteredVerb_ReturnsVerb
-        /// </summary>
-        [Fact]
-        public void GetVerbProcessor_RegisteredVerb_ReturnsVerb()
-        {
-            VerbMap verbMap = new VerbMap();
-            Mock<IVerb> verbMock = new Mock<IVerb>();
+        Assert.Same(verbMock.Object, verbMap.GetVerbProcessor("verb"));
+    }
 
-            verbMap.SetVerbProcessor("verb", verbMock.Object);
+    /// <summary>
+    ///     The GetVerbProcessor_RegisteredVerbWithDifferentCase_ReturnsVerb
+    /// </summary>
+    [Fact]
+    public void GetVerbProcessor_RegisteredVerbWithDifferentCase_ReturnsVerb()
+    {
+        VerbMap verbMap = new VerbMap();
+        Mock<IVerb> verbMock = new Mock<IVerb>();
 
-            Assert.Same(verbMock.Object, verbMap.GetVerbProcessor("verb"));
-        }
+        verbMap.SetVerbProcessor("vErB", verbMock.Object);
 
-        /// <summary>
-        /// The GetVerbProcessor_RegisteredVerbWithDifferentCase_ReturnsVerb
-        /// </summary>
-        [Fact]
-        public void GetVerbProcessor_RegisteredVerbWithDifferentCase_ReturnsVerb()
-        {
-            VerbMap verbMap = new VerbMap();
-            Mock<IVerb> verbMock = new Mock<IVerb>();
+        Assert.Same(verbMock.Object, verbMap.GetVerbProcessor("VERB"));
+    }
 
-            verbMap.SetVerbProcessor("vErB", verbMock.Object);
+    /// <summary>
+    ///     The SetVerbProcessor_RegisteredVerbAgain_UpdatesRegistration
+    /// </summary>
+    [Fact]
+    public void SetVerbProcessor_RegisteredVerbAgain_UpdatesRegistration()
+    {
+        VerbMap verbMap = new VerbMap();
+        Mock<IVerb> verbMock1 = new Mock<IVerb>();
+        Mock<IVerb> verbMock2 = new Mock<IVerb>();
+        verbMap.SetVerbProcessor("verb", verbMock1.Object);
 
-            Assert.Same(verbMock.Object, verbMap.GetVerbProcessor("VERB"));
-        }
+        verbMap.SetVerbProcessor("veRb", verbMock2.Object);
 
-        /// <summary>
-        /// The SetVerbProcessor_RegisteredVerbAgain_UpdatesRegistration
-        /// </summary>
-        [Fact]
-        public void SetVerbProcessor_RegisteredVerbAgain_UpdatesRegistration()
-        {
-            VerbMap verbMap = new VerbMap();
-            Mock<IVerb> verbMock1 = new Mock<IVerb>();
-            Mock<IVerb> verbMock2 = new Mock<IVerb>();
-            verbMap.SetVerbProcessor("verb", verbMock1.Object);
+        Assert.Same(verbMock2.Object, verbMap.GetVerbProcessor("verb"));
+    }
 
-            verbMap.SetVerbProcessor("veRb", verbMock2.Object);
+    /// <summary>
+    ///     The SetVerbProcessor_RegisteredVerbAgainDifferentCaseWithNull_ClearsRegistration
+    /// </summary>
+    [Fact]
+    public void SetVerbProcessor_RegisteredVerbAgainDifferentCaseWithNull_ClearsRegistration()
+    {
+        VerbMap verbMap = new VerbMap();
+        Mock<IVerb> verbMock = new Mock<IVerb>();
+        verbMap.SetVerbProcessor("verb", verbMock.Object);
 
-            Assert.Same(verbMock2.Object, verbMap.GetVerbProcessor("verb"));
-        }
+        verbMap.SetVerbProcessor("vErb", null);
 
-        /// <summary>
-        /// The SetVerbProcessor_RegisteredVerbAgainDifferentCaseWithNull_ClearsRegistration
-        /// </summary>
-        [Fact]
-        public void SetVerbProcessor_RegisteredVerbAgainDifferentCaseWithNull_ClearsRegistration()
-        {
-            VerbMap verbMap = new VerbMap();
-            Mock<IVerb> verbMock = new Mock<IVerb>();
-            verbMap.SetVerbProcessor("verb", verbMock.Object);
+        Assert.Null(verbMap.GetVerbProcessor("verb"));
+    }
 
-            verbMap.SetVerbProcessor("vErb", null);
+    /// <summary>
+    ///     The SetVerbProcessor_RegisteredVerbAgainWithNull_ClearsRegistration
+    /// </summary>
+    [Fact]
+    public void SetVerbProcessor_RegisteredVerbAgainWithNull_ClearsRegistration()
+    {
+        VerbMap verbMap = new VerbMap();
+        Mock<IVerb> verbMock = new Mock<IVerb>();
+        verbMap.SetVerbProcessor("verb", verbMock.Object);
 
-            Assert.Null(verbMap.GetVerbProcessor("verb"));
-        }
+        verbMap.SetVerbProcessor("verb", null);
 
-        /// <summary>
-        /// The SetVerbProcessor_RegisteredVerbAgainWithNull_ClearsRegistration
-        /// </summary>
-        [Fact]
-        public void SetVerbProcessor_RegisteredVerbAgainWithNull_ClearsRegistration()
-        {
-            VerbMap verbMap = new VerbMap();
-            Mock<IVerb> verbMock = new Mock<IVerb>();
-            verbMap.SetVerbProcessor("verb", verbMock.Object);
-
-            verbMap.SetVerbProcessor("verb", null);
-
-            Assert.Null(verbMap.GetVerbProcessor("verb"));
-        }
+        Assert.Null(verbMap.GetVerbProcessor("verb"));
     }
 }

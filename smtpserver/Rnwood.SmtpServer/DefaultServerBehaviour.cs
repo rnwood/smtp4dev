@@ -3,315 +3,282 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
+using Rnwood.SmtpServer.Extensions;
+using Rnwood.SmtpServer.Extensions.Auth;
+
+namespace Rnwood.SmtpServer;
+
+/// <summary>
+///     Implements a default <see cref="IServerBehaviour" /> which is suitable for many basic uses.
+/// </summary>
+/// <seealso cref="Rnwood.SmtpServer.IServerBehaviour" />
+public class DefaultServerBehaviour : IServerBehaviour
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Linq;
-	using System.Net;
-	using System.Security.Cryptography.X509Certificates;
-	using System.Text;
-	using System.Threading.Tasks;
-	using Rnwood.SmtpServer.Extensions;
-	using Rnwood.SmtpServer.Extensions.Auth;
+    private readonly bool allowRemoteConnections;
 
-	/// <summary>
-	/// Implements a default <see cref="IServerBehaviour"/> which is suitable for many basic uses.
-	/// </summary>
-	/// <seealso cref="Rnwood.SmtpServer.IServerBehaviour" />
-	public class DefaultServerBehaviour : IServerBehaviour
-	{
-		private readonly bool allowRemoteConnections;
+    private readonly X509Certificate implcitTlsCertificate;
+    private readonly X509Certificate startTlsCertificate;
 
-		private readonly X509Certificate implcitTlsCertificate;
-		private readonly X509Certificate startTlsCertificate;
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    /// </summary>
+    /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+    public DefaultServerBehaviour(bool allowRemoteConnections)
+        : this(allowRemoteConnections, 25, null, null)
+    {
+    }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DefaultServerBehaviour"/> class.
-		/// </summary>
-		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-		public DefaultServerBehaviour(bool allowRemoteConnections)
-			: this(allowRemoteConnections, 25, null, null)
-		{
-		}
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    /// </summary>
+    /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+    /// <param name="portNumber">The port number.</param>
+    public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber)
+        : this(allowRemoteConnections, portNumber, null, null)
+    {
+    }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DefaultServerBehaviour"/> class.
-		/// </summary>
-		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-		/// <param name="portNumber">The port number.</param>
-		public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber)
-			: this(allowRemoteConnections, portNumber, null, null)
-		{
-		}
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    /// </summary>
+    /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+    /// <param name="portNumber">The port number.</param>
+    /// <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+    public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber, X509Certificate implicitTlsCertificate)
+        : this(allowRemoteConnections, portNumber, implicitTlsCertificate, null)
+    {
+    }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DefaultServerBehaviour"/> class.
-		/// </summary>
-		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-		/// <param name="portNumber">The port number.</param>
-		/// <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-		public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber, X509Certificate implicitTlsCertificate)
-			: this(allowRemoteConnections, portNumber, implicitTlsCertificate, null)
-		{
-		}
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    /// </summary>
+    /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+    /// <param name="portNumber">The port number.</param>
+    /// <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+    /// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
+    public DefaultServerBehaviour(
+        bool allowRemoteConnections,
+        int portNumber,
+        X509Certificate implicitTlsCertificate,
+        X509Certificate startTlsCertificate)
+        : this(allowRemoteConnections, Dns.GetHostName(), portNumber, implicitTlsCertificate, startTlsCertificate)
+    {
+    }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DefaultServerBehaviour"/> class.
-		/// </summary>
-		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-		/// <param name="portNumber">The port number.</param>
-		/// <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-		/// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
-		public DefaultServerBehaviour(
-			bool allowRemoteConnections,
-			int portNumber,
-			X509Certificate implicitTlsCertificate,
-			X509Certificate startTlsCertificate)
-			: this(allowRemoteConnections, Dns.GetHostName(), portNumber, implicitTlsCertificate, startTlsCertificate)
-		{
-		}
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    /// </summary>
+    /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+    /// <param name="domainName">The domain name the server will send in greeting.</param>
+    /// <param name="portNumber">The port number.</param>
+    /// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+    /// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
+    public DefaultServerBehaviour(
+        bool allowRemoteConnections,
+        string domainName,
+        int portNumber,
+        X509Certificate implcitTlsCertificate,
+        X509Certificate startTlsCertificate)
+    {
+        DomainName = domainName;
+        PortNumber = portNumber;
+        this.implcitTlsCertificate = implcitTlsCertificate;
+        this.startTlsCertificate = startTlsCertificate;
+        this.allowRemoteConnections = allowRemoteConnections;
+    }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DefaultServerBehaviour"/> class.
-		/// </summary>
-		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-		/// <param name="domainName">The domain name the server will send in greeting.</param>
-		/// <param name="portNumber">The port number.</param>
-		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-		/// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
-		public DefaultServerBehaviour(
-			bool allowRemoteConnections,
-			string domainName,
-			int portNumber,
-			X509Certificate implcitTlsCertificate,
-			X509Certificate startTlsCertificate)
-		{
-			this.DomainName = domainName;
-			this.PortNumber = portNumber;
-			this.implcitTlsCertificate = implcitTlsCertificate;
-			this.startTlsCertificate = startTlsCertificate;
-			this.allowRemoteConnections = allowRemoteConnections;
-		}
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    /// </summary>
+    /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+    /// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+    public DefaultServerBehaviour(bool allowRemoteConnections, X509Certificate implcitTlsCertificate)
+        : this(allowRemoteConnections, 587, implcitTlsCertificate, null)
+    {
+    }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="DefaultServerBehaviour"/> class.
-		/// </summary>
-		/// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-		/// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-		public DefaultServerBehaviour(bool allowRemoteConnections, X509Certificate implcitTlsCertificate)
-			: this(allowRemoteConnections, 587, implcitTlsCertificate, null)
-		{
-		}
+    /// <summary>
+    ///     Gets or sets a List of active Auth Mechanism Identifiers.
+    /// </summary>
+    public HashSet<IAuthMechanism> EnabledAuthMechanisms { get; set; } =
+        new(AuthMechanisms.All());
 
-		/// <summary>
-		/// Occurs when authentication credential provided by the client need to be validated.
-		/// </summary>
-		public event AsyncEventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequiredEventHandler;
+    /// <inheritdoc />
+    public virtual string DomainName { get; }
 
-		/// <summary>
-		/// Occurs when a command is received from a client.
-		/// </summary>
-		public event AsyncEventHandler<CommandEventArgs> CommandReceivedEventHandler;
+    /// <inheritdoc />
+    public virtual IPAddress IpAddress => allowRemoteConnections ? IPAddress.Any : IPAddress.Loopback;
 
-		/// <summary>
-		/// Occurs when a message has been requested for a message.
-		/// </summary>
-		public event AsyncEventHandler<RecipientAddingEventArgs> MessageRecipientAddingEventHandler;
-		
-		/// <summary>
-		/// Occurs when a message is received but not yet committed.
-		/// </summary>
-		public event AsyncEventHandler<ConnectionEventArgs> MessageCompletedEventHandler;
+    /// <inheritdoc />
+    public int MaximumNumberOfSequentialBadCommands => 10;
 
-		/// <summary>
-		/// Occurs when a message is received and committed.
-		/// </summary>
-		public event AsyncEventHandler<MessageEventArgs> MessageReceivedEventHandler;
+    /// <inheritdoc />
+    public virtual int PortNumber { get; }
 
-		/// <summary>
-		/// Occurs when a client session is closed.
-		/// </summary>
-		public event AsyncEventHandler<SessionEventArgs> SessionCompletedEventHandler;
+    /// <inheritdoc />
+    public virtual Encoding FallbackEncoding => Encoding.GetEncoding("iso-8859-1");
 
-		/// <summary>
-		/// Occurs when a new session is created, when a client connects to the server.
-		/// </summary>
-		public event AsyncEventHandler<SessionEventArgs> SessionStartedEventHandler;
-		
-		/// <summary>
-		/// Occurs when a new message is started.
-		/// </summary>
-		public event AsyncEventHandler<MessageStartEventArgs> MessageStartEventHandler;
+    /// <inheritdoc />
+    public virtual Task<IEnumerable<IExtension>> GetExtensions(IConnectionChannel connectionChannel)
+    {
+        List<IExtension> extensions = new List<IExtension>(new IExtension[]
+        {
+            new EightBitMimeExtension(), new SizeExtension(), new SmtpUtfEightExtension()
+        });
 
-		/// <summary>
-		/// Gets or sets a List of active Auth Mechanism Identifiers.
-		/// </summary>
-		public HashSet<IAuthMechanism> EnabledAuthMechanisms { get; set; } =
-			new HashSet<IAuthMechanism>(AuthMechanisms.All());
+        if (startTlsCertificate != null)
+        {
+            extensions.Add(new StartTlsExtension());
+        }
 
-		/// <inheritdoc/>
-		public virtual string DomainName { get; private set; }
+        if (AuthenticationCredentialsValidationRequiredEventHandler != null)
+        {
+            extensions.Add(new AuthExtension());
+        }
 
-		/// <inheritdoc/>
-		public virtual IPAddress IpAddress => this.allowRemoteConnections ? IPAddress.Any : IPAddress.Loopback;
+        return Task.FromResult<IEnumerable<IExtension>>(extensions);
+    }
 
-		/// <inheritdoc/>
-		public int MaximumNumberOfSequentialBadCommands => 10;
+    /// <inheritdoc />
+    public virtual Task<long?> GetMaximumMessageSize(IConnection connection) => Task.FromResult<long?>(null);
 
-		/// <inheritdoc/>
-		public virtual int PortNumber { get; private set; }
+    /// <inheritdoc />
+    public virtual Task<TimeSpan> GetReceiveTimeout(IConnectionChannel connectionChannel) =>
+        Task.FromResult(new TimeSpan(0, 0, 30));
 
-		/// <inheritdoc/>
-		public virtual Encoding FallbackEncoding => Encoding.GetEncoding("iso-8859-1");
+    /// <inheritdoc />
+    public virtual Task<TimeSpan> GetSendTimeout(IConnectionChannel connectionChannel) =>
+        Task.FromResult(new TimeSpan(0, 0, 30));
 
-		/// <inheritdoc/>
-		public virtual Task<IEnumerable<IExtension>> GetExtensions(IConnectionChannel connectionChannel)
-		{
-			List<IExtension> extensions = new List<IExtension>(new IExtension[]
-			{
-				new EightBitMimeExtension(), new SizeExtension(), new SmtpUtfEightExtension(),
-			});
+    /// <inheritdoc />
+    public virtual Task<X509Certificate> GetSSLCertificate(IConnection connection) =>
+        Task.FromResult(implcitTlsCertificate ?? startTlsCertificate);
 
-			if (this.startTlsCertificate != null)
-			{
-				extensions.Add(new StartTlsExtension());
-			}
+    /// <inheritdoc />
+    public virtual Task<bool> IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism) =>
+        Task.FromResult(
+            EnabledAuthMechanisms.Contains(authMechanism));
 
-			if (this.AuthenticationCredentialsValidationRequiredEventHandler != null)
-			{
-				extensions.Add(new AuthExtension());
-			}
+    /// <inheritdoc />
+    public Task<bool> IsSessionLoggingEnabled(IConnection connection) => Task.FromResult(false);
 
-			return Task.FromResult<IEnumerable<IExtension>>(extensions);
-		}
+    /// <inheritdoc />
+    public Task<bool> IsSSLEnabled(IConnection connection) => Task.FromResult(implcitTlsCertificate != null);
 
-		/// <inheritdoc/>
-		public virtual Task<long?> GetMaximumMessageSize(IConnection connection)
-		{
-			return Task.FromResult<long?>(null);
-		}
+    /// <inheritdoc />
+    public virtual Task OnCommandReceived(IConnection connection, SmtpCommand command) =>
+        CommandReceivedEventHandler?.Invoke(this, new CommandEventArgs(command)) ?? Task.CompletedTask;
 
-		/// <inheritdoc/>
-		public virtual Task<TimeSpan> GetReceiveTimeout(IConnectionChannel connectionChannel)
-		{
-			return Task.FromResult(new TimeSpan(0, 0, 30));
-		}
+    /// <inheritdoc />
+    public virtual Task<IMessageBuilder> OnCreateNewMessage(IConnection connection) =>
+        Task.FromResult<IMessageBuilder>(new MemoryMessageBuilder());
 
-		/// <inheritdoc/>
-		public virtual Task<TimeSpan> GetSendTimeout(IConnectionChannel connectionChannel)
-		{
-			return Task.FromResult(new TimeSpan(0, 0, 30));
-		}
+    /// <inheritdoc />
+    public virtual Task<IEditableSession> OnCreateNewSession(IConnectionChannel connectionChannel) =>
+        Task.FromResult<IEditableSession>(new MemorySession(connectionChannel.ClientIPAddress, DateTime.Now));
 
-		/// <inheritdoc/>
-		public virtual Task<X509Certificate> GetSSLCertificate(IConnection connection)
-		{
-			return Task.FromResult(this.implcitTlsCertificate ?? this.startTlsCertificate);
-		}
+    /// <inheritdoc />
+    public virtual Task OnMessageCompleted(IConnection connection) =>
+        MessageCompletedEventHandler?.Invoke(this, new ConnectionEventArgs(connection)) ?? Task.CompletedTask;
 
-		/// <inheritdoc/>
-		public virtual Task<bool> IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism)
-		{
-			return Task.FromResult(
-				this.EnabledAuthMechanisms.Contains(authMechanism));
-		}
+    /// <inheritdoc />
+    public virtual Task OnMessageReceived(IConnection connection, IMessage message) =>
+        MessageReceivedEventHandler?.Invoke(this, new MessageEventArgs(message)) ?? Task.CompletedTask;
 
-		/// <inheritdoc/>
-		public Task<bool> IsSessionLoggingEnabled(IConnection connection)
-		{
-			return Task.FromResult(false);
-		}
+    /// <inheritdoc />
+    public virtual Task OnMessageRecipientAdding(IConnection connection, IMessageBuilder message, string recipient) =>
+        MessageRecipientAddingEventHandler?.Invoke(this, new RecipientAddingEventArgs(message, recipient)) ??
+        Task.CompletedTask;
 
-		/// <inheritdoc/>
-		public Task<bool> IsSSLEnabled(IConnection connection)
-		{
-			return Task.FromResult(this.implcitTlsCertificate != null);
-		}
+    /// <inheritdoc />
+    public virtual Task OnMessageStart(IConnection connection, string from) =>
+        MessageStartEventHandler?.Invoke(this, new MessageStartEventArgs(connection.Session, from)) ??
+        Task.CompletedTask;
 
-		/// <inheritdoc/>
-		public virtual Task OnCommandReceived(IConnection connection, SmtpCommand command)
-		{
-			return this.CommandReceivedEventHandler?.Invoke(this, new CommandEventArgs(command)) ?? Task.CompletedTask;
-		}
+    /// <inheritdoc />
+    public virtual Task OnSessionCompleted(IConnection connection, ISession session) =>
+        SessionCompletedEventHandler?.Invoke(this, new SessionEventArgs(session)) ?? Task.CompletedTask;
 
-		/// <inheritdoc/>
-		public virtual Task<IMessageBuilder> OnCreateNewMessage(IConnection connection)
-		{
-			return Task.FromResult<IMessageBuilder>(new MemoryMessageBuilder());
-		}
+    /// <inheritdoc />
+    public virtual Task OnSessionStarted(IConnection connection, ISession session) =>
+        SessionStartedEventHandler?.Invoke(this, new SessionEventArgs(session)) ?? Task.CompletedTask;
 
-		/// <inheritdoc/>
-		public Task<IEditableSession> OnCreateNewSession(IConnectionChannel connectionChannel)
-		{
-			return Task.FromResult<IEditableSession>(new MemorySession(connectionChannel.ClientIPAddress, DateTime.Now));
-		}
+    /// <inheritdoc />
+    public virtual async Task<AuthenticationResult> ValidateAuthenticationCredentials(
+        IConnection connection,
+        IAuthenticationCredentials authenticationRequest)
+    {
+        AsyncEventHandler<AuthenticationCredentialsValidationEventArgs> handlers =
+            AuthenticationCredentialsValidationRequiredEventHandler;
 
-		/// <inheritdoc/>
-		public virtual Task OnMessageCompleted(IConnection connection)
-		{
-			return this.MessageCompletedEventHandler?.Invoke(this, new ConnectionEventArgs(connection)) ?? Task.CompletedTask;
-		}
+        if (handlers != null)
+        {
+            var tasks = handlers.GetInvocationList()
+                .Cast<AsyncEventHandler<AuthenticationCredentialsValidationEventArgs>>()
+                .Select(h =>
+                {
+                    AuthenticationCredentialsValidationEventArgs args =
+                        new AuthenticationCredentialsValidationEventArgs(connection.Session, authenticationRequest);
+                    return new { Args = args, Task = h(this, args) };
+                });
 
-		/// <inheritdoc/>
-		public virtual Task OnMessageReceived(IConnection connection, IMessage message)
-		{
-			return this.MessageReceivedEventHandler?.Invoke(this, new MessageEventArgs(message)) ?? Task.CompletedTask;
-		}
+            await Task.WhenAll(tasks.Select(t => t.Task).ToArray()).ConfigureAwait(false);
 
-		/// <inheritdoc/>
-		public virtual Task OnMessageRecipientAdding(IConnection connection, IMessageBuilder message, string recipient)
-		{
-			return this.MessageRecipientAddingEventHandler?.Invoke(this, new RecipientAddingEventArgs(message, recipient)) ?? Task.CompletedTask;
-			return Task.CompletedTask;
-		}
+            AuthenticationResult? failureResult = tasks
+                .Select(t => t.Args.AuthenticationResult)
+                .FirstOrDefault(r => r != AuthenticationResult.Success);
 
-		/// <inheritdoc/>
-		public virtual Task OnMessageStart(IConnection connection, string from)
-		{
-			return this.MessageStartEventHandler?.Invoke(this, new MessageStartEventArgs(connection.Session, from)) ?? Task.CompletedTask;
-			return Task.CompletedTask;
-		}
+            return failureResult.GetValueOrDefault(AuthenticationResult.Success);
+        }
 
-		/// <inheritdoc/>
-		public virtual Task OnSessionCompleted(IConnection connection, ISession session)
-		{
-			return this.SessionCompletedEventHandler?.Invoke(this, new SessionEventArgs(session)) ?? Task.CompletedTask;
-		}
+        return AuthenticationResult.Failure;
+    }
 
-		/// <inheritdoc/>
-		public virtual Task OnSessionStarted(IConnection connection, ISession session)
-		{
-			return this.SessionStartedEventHandler?.Invoke(this, new SessionEventArgs(session)) ?? Task.CompletedTask;
-		}
+    /// <summary>
+    ///     Occurs when authentication credential provided by the client need to be validated.
+    /// </summary>
+    public event AsyncEventHandler<AuthenticationCredentialsValidationEventArgs>
+        AuthenticationCredentialsValidationRequiredEventHandler;
 
-		/// <inheritdoc/>
-		public virtual async Task<AuthenticationResult> ValidateAuthenticationCredentials(
-			IConnection connection,
-			IAuthenticationCredentials authenticationRequest)
-		{
-			var handlers = this.AuthenticationCredentialsValidationRequiredEventHandler;
+    /// <summary>
+    ///     Occurs when a command is received from a client.
+    /// </summary>
+    public event AsyncEventHandler<CommandEventArgs> CommandReceivedEventHandler;
 
-			if (handlers != null)
-			{
-				var tasks = handlers.GetInvocationList()
-					.Cast<AsyncEventHandler<AuthenticationCredentialsValidationEventArgs>>()
-					.Select(h =>
-					{
-						AuthenticationCredentialsValidationEventArgs args = new AuthenticationCredentialsValidationEventArgs(authenticationRequest);
-						return new { Args = args, Task = h(this, args) };
-					});
+    /// <summary>
+    ///     Occurs when a message has been requested for a message.
+    /// </summary>
+    public event AsyncEventHandler<RecipientAddingEventArgs> MessageRecipientAddingEventHandler;
 
-				await Task.WhenAll(tasks.Select(t => t.Task).ToArray()).ConfigureAwait(false);
+    /// <summary>
+    ///     Occurs when a message is received but not yet committed.
+    /// </summary>
+    public event AsyncEventHandler<ConnectionEventArgs> MessageCompletedEventHandler;
 
-				AuthenticationResult? failureResult = tasks
-					.Select(t => t.Args.AuthenticationResult)
-					.FirstOrDefault(r => r != AuthenticationResult.Success);
+    /// <summary>
+    ///     Occurs when a message is received and committed.
+    /// </summary>
+    public event AsyncEventHandler<MessageEventArgs> MessageReceivedEventHandler;
 
-				return failureResult.GetValueOrDefault(AuthenticationResult.Success);
-			}
+    /// <summary>
+    ///     Occurs when a client session is closed.
+    /// </summary>
+    public event AsyncEventHandler<SessionEventArgs> SessionCompletedEventHandler;
 
-			return AuthenticationResult.Failure;
-		}
-	}
+    /// <summary>
+    ///     Occurs when a new session is created, when a client connects to the server.
+    /// </summary>
+    public event AsyncEventHandler<SessionEventArgs> SessionStartedEventHandler;
+
+    /// <summary>
+    ///     Occurs when a new message is started.
+    /// </summary>
+    public event AsyncEventHandler<MessageStartEventArgs> MessageStartEventHandler;
 }

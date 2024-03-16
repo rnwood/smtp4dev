@@ -3,117 +3,111 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Threading.Tasks;
+
+namespace Rnwood.SmtpServer;
+
+/// <summary>
+///     Defines the <see cref="MemoryMessage" />.
+/// </summary>
+public class MemoryMessage : IMessage
 {
-	using System;
-	using System.Collections.Generic;
-	using System.IO;
-	using System.Threading.Tasks;
+    private bool disposedValue; // To detect redundant calls
 
-	/// <summary>
-	/// Defines the <see cref="MemoryMessage" />.
-	/// </summary>
-	public class MemoryMessage : IMessage
-	{
-		private readonly List<string> recipients = new List<string>();
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="MemoryMessage" /> class.
+    /// </summary>
+    public MemoryMessage()
+    {
+    }
 
-		private bool disposedValue = false; // To detect redundant calls
+    /// <summary>
+    ///     Gets or sets the message data.
+    /// </summary>
+    /// <value>
+    ///     The data.
+    /// </value>
+    internal byte[] Data { get; set; }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="MemoryMessage"/> class.
-		/// </summary>
-		public MemoryMessage()
-		{
-		}
+    /// <summary>
+    ///     Gets the recipients list.
+    /// </summary>
+    /// <value>
+    ///     The recipients list.
+    /// </value>
+    internal List<string> RecipientsList { get; } = new();
 
-		/// <summary>
-		/// Gets the DeclaredMessageSize.
-		/// </summary>
-		public long? DeclaredMessageSize { get; internal set; }
+    /// <summary>
+    ///     Gets the DeclaredMessageSize.
+    /// </summary>
+    public long? DeclaredMessageSize { get; internal set; }
 
-		/// <summary>
-		/// Gets a value indicating whether EightBitTransport.
-		/// </summary>
-		public bool EightBitTransport { get; internal set; }
+    /// <summary>
+    ///     Gets a value indicating whether EightBitTransport.
+    /// </summary>
+    public bool EightBitTransport { get; internal set; }
 
-		/// <summary>
-		/// Gets the From.
-		/// </summary>
-		public string From { get; internal set; }
+    /// <summary>
+    ///     Gets the From.
+    /// </summary>
+    public string From { get; internal set; }
 
-		/// <summary>
-		/// Gets the ReceivedDate.
-		/// </summary>
-		public DateTime ReceivedDate { get; internal set; }
+    /// <summary>
+    ///     Gets the ReceivedDate.
+    /// </summary>
+    public DateTime ReceivedDate { get; internal set; }
 
-		/// <summary>
-		/// Gets a value indicating whether if message was received over a secure connection.
-		/// </summary>
-		public bool SecureConnection { get; internal set; }
+    /// <summary>
+    ///     Gets a value indicating whether if message was received over a secure connection.
+    /// </summary>
+    public bool SecureConnection { get; internal set; }
 
-		/// <summary>
-		/// Gets the Session message was received on.
-		/// </summary>
-		public ISession Session { get; internal set; }
+    /// <summary>
+    ///     Gets the Session message was received on.
+    /// </summary>
+    public ISession Session { get; internal set; }
 
-		/// <summary>
-		/// Gets the recipient of the message as specified by the client when sending RCPT TO command.
-		/// </summary>
-		public IReadOnlyCollection<string> Recipients => this.RecipientsList.AsReadOnly();
+    /// <summary>
+    ///     Gets the recipient of the message as specified by the client when sending RCPT TO command.
+    /// </summary>
+    public IReadOnlyCollection<string> Recipients => RecipientsList.AsReadOnly();
 
-		/// <summary>
-		/// Gets or sets the message data.
-		/// </summary>
-		/// <value>
-		/// The data.
-		/// </value>
-		internal byte[] Data { get; set; }
+    /// <summary>
+    ///     Gets a stream which returns the message data.
+    /// </summary>
+    /// <returns>
+    ///     A <see cref="Task{T}" /> representing the async operation.
+    /// </returns>
+    public Task<Stream> GetData() =>
+        Task.FromResult<Stream>(
+            new MemoryStream(
+                Data ?? Array.Empty<byte>(),
+                false));
 
-		/// <summary>
-		/// Gets the recipients list.
-		/// </summary>
-		/// <value>
-		/// The recipients list.
-		/// </value>
-		internal List<string> RecipientsList => this.recipients;
+    /// <summary>
+    ///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
+    /// </summary>
+    public void Dispose()
+    {
+        Dispose(true);
+        GC.SuppressFinalize(this);
+    }
 
-		/// <summary>
-		/// Gets a stream which returns the message data.
-		/// </summary>
-		/// <returns>
-		/// A <see cref="Task{T}" /> representing the async operation.
-		/// </returns>
-		public Task<Stream> GetData()
-		{
-			return Task.FromResult<Stream>(
-				new MemoryStream(
-					this.Data ?? Array.Empty<byte>(),
-					false));
-		}
-
-		/// <summary>
-		/// Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
-		/// </summary>
-		public void Dispose()
-		{
-			this.Dispose(true);
-			GC.SuppressFinalize(this);
-		}
-
-		/// <summary>
-		/// Releases unmanaged and - optionally - managed resources.
-		/// </summary>
-		/// <param name="disposing"><c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only unmanaged resources.</param>
-		protected virtual void Dispose(bool disposing)
-		{
-			if (!this.disposedValue)
-			{
-				if (disposing)
-				{
-				}
-
-				this.disposedValue = true;
-			}
-		}
-	}
+    /// <summary>
+    ///     Releases unmanaged and - optionally - managed resources.
+    /// </summary>
+    /// <param name="disposing">
+    ///     <c>true</c> to release both managed and unmanaged resources; <c>false</c> to release only
+    ///     unmanaged resources.
+    /// </param>
+    protected virtual void Dispose(bool disposing)
+    {
+        if (!disposedValue)
+        {
+            disposedValue = true;
+        }
+    }
 }

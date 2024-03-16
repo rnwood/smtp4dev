@@ -3,123 +3,105 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Extensions.Auth
+using System;
+using System.Globalization;
+using System.Text;
+using System.Threading.Tasks;
+
+namespace Rnwood.SmtpServer.Extensions.Auth;
+
+/// <summary>
+///     Defines the <see cref="CramMd5MechanismProcessor" />.
+/// </summary>
+public class CramMd5MechanismProcessor : AuthMechanismProcessor
 {
-	using System;
-	using System.Globalization;
-	using System.Text;
-	using System.Threading.Tasks;
+    /// <summary>
+    ///     Defines the dateTimeProvider.
+    /// </summary>
+    private readonly ICurrentDateTimeProvider dateTimeProvider;
 
-	/// <summary>
-	/// Defines the <see cref="CramMd5MechanismProcessor" />.
-	/// </summary>
-	public class CramMd5MechanismProcessor : AuthMechanismProcessor
-	{
-		/// <summary>
-		/// Defines the dateTimeProvider.
-		/// </summary>
-		private readonly ICurrentDateTimeProvider dateTimeProvider;
+    /// <summary>
+    ///     Defines the random.
+    /// </summary>
+    private readonly IRandomIntegerGenerator random;
 
-		/// <summary>
-		/// Defines the random.
-		/// </summary>
-		private readonly IRandomIntegerGenerator random;
+    /// <summary>
+    ///     Defines the challenge.
+    /// </summary>
+    private string challenge;
 
-		/// <summary>
-		/// Defines the challenge.
-		/// </summary>
-		private string challenge;
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="CramMd5MechanismProcessor" /> class.
+    /// </summary>
+    /// <param name="connection">The connection<see cref="IConnection" />.</param>
+    /// <param name="random">The random<see cref="IRandomIntegerGenerator" />.</param>
+    /// <param name="dateTimeProvider">The dateTimeProvider<see cref="ICurrentDateTimeProvider" />.</param>
+    public CramMd5MechanismProcessor(IConnection connection, IRandomIntegerGenerator random,
+        ICurrentDateTimeProvider dateTimeProvider)
+        : base(connection)
+    {
+        this.random = random;
+        this.dateTimeProvider = dateTimeProvider;
+    }
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CramMd5MechanismProcessor"/> class.
-		/// </summary>
-		/// <param name="connection">The connection<see cref="IConnection"/>.</param>
-		/// <param name="random">The random<see cref="IRandomIntegerGenerator"/>.</param>
-		/// <param name="dateTimeProvider">The dateTimeProvider<see cref="ICurrentDateTimeProvider"/>.</param>
-		public CramMd5MechanismProcessor(IConnection connection, IRandomIntegerGenerator random, ICurrentDateTimeProvider dateTimeProvider)
-			: base(connection)
-		{
-			this.random = random;
-			this.dateTimeProvider = dateTimeProvider;
-		}
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="CramMd5MechanismProcessor" /> class.
+    /// </summary>
+    /// <param name="connection">The connection<see cref="IConnection" />.</param>
+    /// <param name="random">The random<see cref="IRandomIntegerGenerator" />.</param>
+    /// <param name="dateTimeProvider">The dateTimeProvider<see cref="ICurrentDateTimeProvider" />.</param>
+    /// <param name="challenge">The challenge<see cref="string" />.</param>
+    public CramMd5MechanismProcessor(IConnection connection, IRandomIntegerGenerator random,
+        ICurrentDateTimeProvider dateTimeProvider, string challenge)
+        : this(connection, random, dateTimeProvider) =>
+        this.challenge = challenge;
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CramMd5MechanismProcessor"/> class.
-		/// </summary>
-		/// <param name="connection">The connection<see cref="IConnection"/>.</param>
-		/// <param name="random">The random<see cref="IRandomIntegerGenerator"/>.</param>
-		/// <param name="dateTimeProvider">The dateTimeProvider<see cref="ICurrentDateTimeProvider"/>.</param>
-		/// <param name="challenge">The challenge<see cref="string"/>.</param>
-		public CramMd5MechanismProcessor(IConnection connection, IRandomIntegerGenerator random, ICurrentDateTimeProvider dateTimeProvider, string challenge)
-			: this(connection, random, dateTimeProvider)
-		{
-			this.challenge = challenge;
-		}
+    /// <inheritdoc />
+    public override async Task<AuthMechanismProcessorStatus> ProcessResponse(string data)
+    {
+        if (this.challenge == null)
+        {
+            StringBuilder challengeStringBuilder = new StringBuilder();
+            challengeStringBuilder.Append(random.GenerateRandomInteger(0, short.MaxValue));
+            challengeStringBuilder.Append(".");
+            challengeStringBuilder.Append(dateTimeProvider.GetCurrentDateTime().Ticks.ToString(CultureInfo.InvariantCulture));
+            challengeStringBuilder.Append("@");
+            challengeStringBuilder.Append(Connection.Server.Behaviour.DomainName);
+            this.challenge = challengeStringBuilder.ToString();
 
-		/// <summary>
-		/// Defines the States.
-		/// </summary>
-		private enum States
-		{
-			/// <summary>
-			/// Defines the Initial
-			/// </summary>
-			Initial,
+            string base64Challenge = Convert.ToBase64String(Encoding.ASCII.GetBytes(challengeStringBuilder.ToString()));
+            await Connection.WriteResponse(new SmtpResponse(
+                StandardSmtpResponseCode.AuthenticationContinue,
+                base64Challenge)).ConfigureAwait(false);
+            return AuthMechanismProcessorStatus.Continue;
+        }
 
-			/// <summary>
-			/// Defines the AwaitingResponse
-			/// </summary>
-			AwaitingResponse,
-		}
+        string response = DecodeBase64(data);
+        string[] responseparts = response.Split(' ');
 
-		/// <inheritdoc/>
-		public override async Task<AuthMechanismProcessorStatus> ProcessResponse(string data)
-		{
-			if (this.challenge == null)
-			{
-				StringBuilder challenge = new StringBuilder();
-				challenge.Append(this.random.GenerateRandomInteger(0, short.MaxValue));
-				challenge.Append(".");
-				challenge.Append(this.dateTimeProvider.GetCurrentDateTime().Ticks.ToString(CultureInfo.InvariantCulture));
-				challenge.Append("@");
-				challenge.Append(this.Connection.Server.Behaviour.DomainName);
-				this.challenge = challenge.ToString();
+        if (responseparts.Length != 2)
+        {
+            throw new SmtpServerException(new SmtpResponse(
+                StandardSmtpResponseCode.AuthenticationFailure,
+                "Response in incorrect format - should be USERNAME RESPONSE"));
+        }
 
-				string base64Challenge = Convert.ToBase64String(Encoding.ASCII.GetBytes(challenge.ToString()));
-				await this.Connection.WriteResponse(new SmtpResponse(
-					StandardSmtpResponseCode.AuthenticationContinue,
-					base64Challenge)).ConfigureAwait(false);
-				return AuthMechanismProcessorStatus.Continue;
-			}
-			else
-			{
-				string response = DecodeBase64(data);
-				string[] responseparts = response.Split(' ');
+        string username = responseparts[0];
+        string hash = responseparts[1];
 
-				if (responseparts.Length != 2)
-				{
-					throw new SmtpServerException(new SmtpResponse(
-						StandardSmtpResponseCode.AuthenticationFailure,
-						"Response in incorrect format - should be USERNAME RESPONSE"));
-				}
+        Credentials = new CramMd5AuthenticationCredentials(username, challenge, hash);
 
-				string username = responseparts[0];
-				string hash = responseparts[1];
+        AuthenticationResult result =
+            await Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials)
+                .ConfigureAwait(false);
 
-				this.Credentials = new CramMd5AuthenticationCredentials(username, this.challenge, hash);
+        switch (result)
+        {
+            case AuthenticationResult.Success:
+                return AuthMechanismProcessorStatus.Success;
 
-				AuthenticationResult result =
-					await this.Connection.Server.Behaviour.ValidateAuthenticationCredentials(this.Connection, this.Credentials).ConfigureAwait(false);
-
-				switch (result)
-				{
-					case AuthenticationResult.Success:
-						return AuthMechanismProcessorStatus.Success;
-
-					default:
-						return AuthMechanismProcessorStatus.Failed;
-				}
-			}
-		}
-	}
+            default:
+                return AuthMechanismProcessorStatus.Failed;
+        }
+    }
 }

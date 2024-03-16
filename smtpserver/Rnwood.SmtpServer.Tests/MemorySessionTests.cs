@@ -3,23 +3,18 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests
-{
-    using System;
-    using System.Net;
+using System;
+using System.Net;
 
+namespace Rnwood.SmtpServer.Tests;
+
+/// <summary>
+///     Defines the <see cref="MemorySessionTests" />
+/// </summary>
+public class MemorySessionTests : AbstractSessionTests
+{
     /// <summary>
-    /// Defines the <see cref="MemorySessionTests" />
     /// </summary>
-    public class MemorySessionTests : AbstractSessionTests
-    {
-        /// <summary>
-        ///
-        /// </summary>
-        /// <returns>The <see cref="IEditableSession"/></returns>
-        protected override IEditableSession GetSession()
-        {
-            return new MemorySession(IPAddress.Loopback, DateTime.Now);
-        }
-    }
+    /// <returns>The <see cref="IEditableSession" /></returns>
+    protected override IEditableSession GetSession() => new MemorySession(IPAddress.Loopback, DateTime.Now);
 }

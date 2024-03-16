@@ -3,12 +3,16 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Extensions.Auth
+namespace Rnwood.SmtpServer.Extensions.Auth;
+
+/// <summary>
+///     Defines the <see cref="AnonymousAuthenticationCredentials" />.
+/// </summary>
+public class AnonymousAuthenticationCredentials : IAuthenticationCredentials
 {
-	/// <summary>
-	/// Defines the <see cref="AnonymousAuthenticationCredentials" />.
-	/// </summary>
-	public class AnonymousAuthenticationCredentials : IAuthenticationCredentials
-	{
-	}
+    /// <inheritdoc />
+    public string Type
+    {
+        get => "NONE";
+    }
 }

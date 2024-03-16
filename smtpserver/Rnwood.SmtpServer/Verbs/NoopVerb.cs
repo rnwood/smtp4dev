@@ -3,19 +3,17 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Verbs
-{
-	using System.Threading.Tasks;
+using System.Threading.Tasks;
 
-	/// <summary>
-	/// Defines the <see cref="NoopVerb" />.
-	/// </summary>
-	public class NoopVerb : IVerb
-	{
-		/// <inheritdoc/>
-		public async Task Process(IConnection connection, SmtpCommand command)
-		{
-			await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Successfully did nothing")).ConfigureAwait(false);
-		}
-	}
+namespace Rnwood.SmtpServer.Verbs;
+
+/// <summary>
+///     Defines the <see cref="NoopVerb" />.
+/// </summary>
+public class NoopVerb : IVerb
+{
+    /// <inheritdoc />
+    public async Task Process(IConnection connection, SmtpCommand command) =>
+        await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Successfully did nothing"))
+            .ConfigureAwait(false);
 }

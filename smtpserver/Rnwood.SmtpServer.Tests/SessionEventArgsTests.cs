@@ -3,26 +3,24 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests
+using Xunit;
+
+namespace Rnwood.SmtpServer.Tests;
+
+/// <summary>
+///     Defines the <see cref="SessionEventArgsTests" />
+/// </summary>
+public class SessionEventArgsTests
 {
-    using Xunit;
-
     /// <summary>
-    /// Defines the <see cref="SessionEventArgsTests" />
     /// </summary>
-    public class SessionEventArgsTests
+    [Fact]
+    public void Session()
     {
-        /// <summary>
-        ///
-        /// </summary>
-        [Fact]
-        public void Session()
-        {
-            TestMocks mocks = new TestMocks();
+        TestMocks mocks = new TestMocks();
 
-            SessionEventArgs s = new SessionEventArgs(mocks.Session.Object);
+        SessionEventArgs s = new SessionEventArgs(mocks.Session.Object);
 
-            Assert.Equal(s.Session, mocks.Session.Object);
-        }
+        Assert.Equal(s.Session, mocks.Session.Object);
     }
 }

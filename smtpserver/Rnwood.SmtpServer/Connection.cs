@@ -3,309 +3,323 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Net.Security;
+using System.Reflection;
+using System.Runtime.Versioning;
+using System.Security.Authentication;
+using System.Security.Cryptography.X509Certificates;
+using System.Text;
+using System.Threading.Tasks;
+using Rnwood.SmtpServer.Extensions;
+using Rnwood.SmtpServer.Verbs;
+
+namespace Rnwood.SmtpServer;
+
+/// <summary>
+///     Represents a single SMTP server from a client to the server.
+/// </summary>
+public class Connection : IConnection
 {
-	using System;
-	using System.Collections.Generic;
-	using System.Globalization;
-	using System.IO;
-	using System.Linq;
-	using System.Net.Security;
-	using System.Reflection;
-	using System.Runtime.Versioning;
-	using System.Security.Authentication;
-	using System.Text;
-	using System.Threading.Tasks;
-	using Rnwood.SmtpServer.Extensions;
-	using Rnwood.SmtpServer.Verbs;
+    private readonly string id;
 
-	/// <summary>
-	/// Represents a single SMTP server from a client to the server.
-	/// </summary>
-	public class Connection : IConnection
-	{
-		private readonly string id;
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="Connection" /> class.
+    /// </summary>
+    /// <param name="server">The server.</param>
+    /// <param name="session">The session.</param>
+    /// <param name="connectionChannel">The connection channel.</param>
+    /// <param name="verbMap">The verb map.</param>
+    /// <param name="extensionProcessors">The extension processors.</param>
+    internal Connection(ISmtpServer server, IEditableSession session, IConnectionChannel connectionChannel,
+        IVerbMap verbMap, Func<IConnection, IExtensionProcessor[]> extensionProcessors)
+    {
+        id = $"[RemoteIP={connectionChannel.ClientIPAddress}]";
 
-		/// <summary>
-		/// Initializes a new instance of the <see cref="Connection"/> class.
-		/// </summary>
-		/// <param name="server">The server.</param>
-		/// <param name="session">The session.</param>
-		/// <param name="connectionChannel">The connection channel.</param>
-		/// <param name="verbMap">The verb map.</param>
-		/// <param name="extensionProcessors">The extension processors.</param>
-		internal Connection(ISmtpServer server, IEditableSession session, IConnectionChannel connectionChannel, IVerbMap verbMap, Func<IConnection, IExtensionProcessor[]> extensionProcessors)
-		{
-			this.id = $"[RemoteIP={connectionChannel.ClientIPAddress}]";
+        ConnectionChannel = connectionChannel;
+        ConnectionChannel.ClosedEventHandler += OnConnectionChannelClosed;
 
-			this.ConnectionChannel = connectionChannel;
-			this.ConnectionChannel.ClosedEventHandler += this.OnConnectionChannelClosed;
+        VerbMap = verbMap;
+        Session = session;
+        Server = server;
+        ExtensionProcessors = extensionProcessors(this).ToArray();
+    }
 
-			this.VerbMap = verbMap;
-			this.Session = session;
-			this.Server = server;
-			this.ExtensionProcessors = extensionProcessors(this).ToArray();
-		}
+    private IConnectionChannel ConnectionChannel { get; }
 
-		/// <inheritdoc/>
-		public event AsyncEventHandler<ConnectionEventArgs> ConnectionClosedEventHandler;
+    /// <inheritdoc />
+    public event AsyncEventHandler<ConnectionEventArgs> ConnectionClosedEventHandler;
 
-		/// <inheritdoc/>
-		public IMessageBuilder CurrentMessage { get; private set; }
+    /// <inheritdoc />
+    public IMessageBuilder CurrentMessage { get; private set; }
 
-		/// <inheritdoc/>
-		public MailVerb MailVerb => (MailVerb)this.VerbMap.GetVerbProcessor("MAIL");
+    /// <inheritdoc />
+    public MailVerb MailVerb => (MailVerb)VerbMap.GetVerbProcessor("MAIL");
 
-		/// <inheritdoc/>
-		public ISmtpServer Server { get; private set; }
+    /// <inheritdoc />
+    public ISmtpServer Server { get; }
 
-		/// <inheritdoc/>
-		public IEditableSession Session { get; private set; }
+    /// <inheritdoc />
+    public IEditableSession Session { get; }
 
-		/// <inheritdoc/>
-		public IVerbMap VerbMap { get; private set; }
+    /// <inheritdoc />
+    public IVerbMap VerbMap { get; }
 
-		/// <summary>
-		/// Gets a list of extensions which are available for this connection.
-		/// </summary>
-		public IReadOnlyCollection<IExtensionProcessor> ExtensionProcessors { get; private set; }
+    /// <summary>
+    ///     Gets a list of extensions which are available for this connection.
+    /// </summary>
+    public IReadOnlyCollection<IExtensionProcessor> ExtensionProcessors { get; }
 
-		private IConnectionChannel ConnectionChannel { get; set; }
+    /// <inheritdoc />
+    public Task AbortMessage()
+    {
+        CurrentMessage = null;
+        return Task.CompletedTask;
+    }
 
-		/// <inheritdoc/>
-		public Task AbortMessage()
-		{
-			this.CurrentMessage = null;
-			return Task.CompletedTask;
-		}
+    /// <inheritdoc />
+    public async Task ApplyStreamFilter(Func<Stream, Task<Stream>> filter) =>
+        await ConnectionChannel.ApplyStreamFilter(filter).ConfigureAwait(false);
 
-		/// <inheritdoc/>
-		public async Task ApplyStreamFilter(Func<Stream, Task<Stream>> filter)
-		{
-			await this.ConnectionChannel.ApplyStreamFilter(filter).ConfigureAwait(false);
-		}
+    /// <inheritdoc />
+    public async Task CloseConnection() => await ConnectionChannel.Close().ConfigureAwait(false);
 
-		/// <inheritdoc/>
-		public async Task CloseConnection()
-		{
-			await this.ConnectionChannel.Close().ConfigureAwait(false);
-		}
+    /// <inheritdoc />
+    public async Task CommitMessage()
+    {
+        IMessage message = await CurrentMessage.ToMessage().ConfigureAwait(false);
+        await Session.AddMessage(message).ConfigureAwait(false);
+        CurrentMessage = null;
 
-		/// <inheritdoc/>
-		public async Task CommitMessage()
-		{
-			IMessage message = await this.CurrentMessage.ToMessage().ConfigureAwait(false);
-			this.Session.AddMessage(message);
-			this.CurrentMessage = null;
+        await Server.Behaviour.OnMessageReceived(this, message).ConfigureAwait(false);
+    }
 
-			await this.Server.Behaviour.OnMessageReceived(this, message).ConfigureAwait(false);
-		}
+    /// <inheritdoc />
+    public async Task<IMessageBuilder> NewMessage()
+    {
+        CurrentMessage = await Server.Behaviour.OnCreateNewMessage(this).ConfigureAwait(false);
+        CurrentMessage.Session = Session;
+        return CurrentMessage;
+    }
 
-		/// <inheritdoc/>
-		public async Task<IMessageBuilder> NewMessage()
-		{
-			this.CurrentMessage = await this.Server.Behaviour.OnCreateNewMessage(this).ConfigureAwait(false);
-			this.CurrentMessage.Session = this.Session;
-			return this.CurrentMessage;
-		}
+    /// <inheritdoc />
+    public async Task<string> ReadLine()
+    {
+        string text = await ConnectionChannel.ReadLine().ConfigureAwait(false);
+        await Session.AppendLineToSessionLog(text).ConfigureAwait(false);
+        return text;
+    }
 
-		/// <inheritdoc/>
-		public async Task<string> ReadLine()
-		{
-			string text = await this.ConnectionChannel.ReadLine().ConfigureAwait(false);
-			await this.Session.AppendLineToSessionLog(text).ConfigureAwait(false);
-			return text;
-		}
+    /// <inheritdoc />
+    public async Task WriteResponse(SmtpResponse response) =>
+        await WriteLineAndFlush(response.ToString().TrimEnd()).ConfigureAwait(false);
 
-		/// <summary>
-		/// Returns a <see cref="string" /> that represents this instance.
-		/// </summary>
-		/// <returns>
-		/// A <see cref="string" /> that represents this instance.
-		/// </returns>
-		public override string ToString()
-		{
-			return this.id;
-		}
+    /// <inheritdoc />
+    public async Task<byte[]> ReadLineBytes()
+    {
+        byte[] data = await ConnectionChannel.ReadLineBytes();
 
-		/// <inheritdoc/>
-		public async Task WriteResponse(SmtpResponse response)
-		{
-			await this.WriteLineAndFlush(response.ToString().TrimEnd()).ConfigureAwait(false);
-		}
+        await Session.AppendLineToSessionLog(Encoding.GetEncoding("ISO-8859-1").GetString(data)).ConfigureAwait(false);
 
-		public async Task<byte[]> ReadLineBytes()
-		{
-			byte[] data = await this.ConnectionChannel.ReadLineBytes();
-			
-			await this.Session.AppendLineToSessionLog(Encoding.GetEncoding("ISO-8859-1").GetString(data)).ConfigureAwait(false);
+        return data;
+    }
 
-			return data;
-		}
+    /// <summary>
+    ///     Returns a <see cref="string" /> that represents this instance.
+    /// </summary>
+    /// <returns>
+    ///     A <see cref="string" /> that represents this instance.
+    /// </returns>
+    public override string ToString() => id;
 
-		/// <summary>
-		/// Creates the a connection for the specified server and channel..
-		/// </summary>
-		/// <param name="server">The server.</param>
-		/// <param name="connectionChannel">The connection channel.</param>
-		/// <param name="verbMap">The verb map.</param>
-		/// <returns>An <see cref="Task{T}"/> representing the async operation.</returns>
-		internal static async Task<Connection> Create(ISmtpServer server, IConnectionChannel connectionChannel, IVerbMap verbMap)
-		{
-			IEditableSession session = await server.Behaviour.OnCreateNewSession(connectionChannel).ConfigureAwait(false);
-			var extensions = await server.Behaviour.GetExtensions(connectionChannel).ConfigureAwait(false);
-			IExtensionProcessor[] CreateConnectionExtensions(IConnection c) => extensions.Select(e => e.CreateExtensionProcessor(c)).ToArray();
-			Connection result = new Connection(server, session, connectionChannel, verbMap, CreateConnectionExtensions);
-			return result;
-		}
+    /// <summary>
+    ///     Creates the a connection for the specified server and channel..
+    /// </summary>
+    /// <param name="server">The server.</param>
+    /// <param name="connectionChannel">The connection channel.</param>
+    /// <param name="verbMap">The verb map.</param>
+    /// <returns>An <see cref="Task{T}" /> representing the async operation.</returns>
+    internal static async Task<Connection> Create(ISmtpServer server, IConnectionChannel connectionChannel,
+        IVerbMap verbMap)
+    {
+        IEditableSession session = await server.Behaviour.OnCreateNewSession(connectionChannel).ConfigureAwait(false);
+        IEnumerable<IExtension> extensions =
+            await server.Behaviour.GetExtensions(connectionChannel).ConfigureAwait(false);
 
-		/// <summary>
-		/// Start the Tls stream.
-		/// </summary>
-		/// <param name="s">stream.</param>
-		/// <returns>A <see cref="Task{TResult}"/> representing the result of the asynchronous operation.</returns>
-		internal async Task<Stream> StartImplicitTls(Stream s)
-		{
-			SslStream sslStream = new SslStream(s);
+        IExtensionProcessor[] CreateConnectionExtensions(IConnection c)
+        {
+            return extensions.Select(e => e.CreateExtensionProcessor(c)).ToArray();
+        }
 
-			SslProtocols sslProtos;
+        Connection result = new Connection(server, session, connectionChannel, verbMap, CreateConnectionExtensions);
+        return result;
+    }
 
-			string ver = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
-			if (ver == null || !ver.StartsWith(".NETCoreApp,"))
-			{
-				sslProtos = SslProtocols.Tls12 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Ssl3 | SslProtocols.Ssl2;
-			}
-			else
-			{
-				sslProtos = SslProtocols.None;
-			}
+    /// <summary>
+    ///     Start the Tls stream.
+    /// </summary>
+    /// <param name="s">stream.</param>
+    /// <returns>A <see cref="Task{TResult}" /> representing the result of the asynchronous operation.</returns>
+    internal async Task<Stream> StartImplicitTls(Stream s)
+    {
+        SslStream sslStream = new SslStream(s);
 
-			System.Security.Cryptography.X509Certificates.X509Certificate cert =
-				await this.Server.Behaviour.GetSSLCertificate(this).ConfigureAwait(false);
+        SslProtocols sslProtos;
 
-			await sslStream.AuthenticateAsServerAsync(cert, false, sslProtos, false).ConfigureAwait(false);
-			return sslStream;
-		}
+        string ver = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+        if (ver == null || !ver.StartsWith(".NETCoreApp,"))
+        {
+            sslProtos = SslProtocols.Tls12 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Ssl3 |
+                        SslProtocols.Ssl2;
+        }
+        else
+        {
+            sslProtos = SslProtocols.None;
+        }
 
-		/// <summary>
-		/// Starts processing of this connection.
-		/// </summary>
-		/// <returns>A <see cref="Task{T}"/> representing the async operation.</returns>
-		internal async Task ProcessAsync()
-		{
-			try
-			{
-				await this.Server.Behaviour.OnSessionStarted(this, this.Session).ConfigureAwait(false);
+        X509Certificate cert =
+            await Server.Behaviour.GetSSLCertificate(this).ConfigureAwait(false);
 
-				if (await this.Server.Behaviour.IsSSLEnabled(this).ConfigureAwait(false))
-				{
-					await this.ConnectionChannel.ApplyStreamFilter(this.StartImplicitTls).ConfigureAwait(false);
+        await sslStream.AuthenticateAsServerAsync(cert, false, sslProtos, false).ConfigureAwait(false);
+        return sslStream;
+    }
 
-					this.Session.SecureConnection = true;
-				}
+    /// <summary>
+    ///     Starts processing of this connection.
+    /// </summary>
+    /// <returns>A <see cref="Task{T}" /> representing the async operation.</returns>
+    internal async Task ProcessAsync()
+    {
+        try
+        {
+            await Server.Behaviour.OnSessionStarted(this, Session).ConfigureAwait(false);
 
-				await this.WriteResponse(new SmtpResponse(
-					StandardSmtpResponseCode.ServiceReady,
-					this.Server.Behaviour.DomainName + " smtp4dev ready")).ConfigureAwait(false);
+            if (await Server.Behaviour.IsSSLEnabled(this).ConfigureAwait(false))
+            {
+                await ConnectionChannel.ApplyStreamFilter(StartImplicitTls).ConfigureAwait(false);
 
-				int numberOfInvalidCommands = 0;
-				while (this.ConnectionChannel.IsConnected)
-				{
-					bool badCommand = false;
-					SmtpCommand command = new SmtpCommand(await this.ReadLine().ConfigureAwait(false));
-					await this.Server.Behaviour.OnCommandReceived(this, command).ConfigureAwait(false);
+                Session.SecureConnection = true;
+            }
 
-					if (command.IsValid)
-					{
-						IVerb verbProcessor = this.VerbMap.GetVerbProcessor(command.Verb);
+            await WriteResponse(new SmtpResponse(
+                StandardSmtpResponseCode.ServiceReady,
+                Server.Behaviour.DomainName + " smtp4dev ready")).ConfigureAwait(false);
 
-						if (verbProcessor != null)
-						{
-							try
-							{
-								await verbProcessor.Process(this, command).ConfigureAwait(false);
-							}
-							catch (SmtpServerException exception)
-							{
-								await this.WriteResponse(exception.SmtpResponse).ConfigureAwait(false);
-							}
-						}
-						else
-						{
-							badCommand = true;
-						}
-					}
-					else if (command.IsEmpty)
-					{
-					}
-					else
-					{
-						badCommand = true;
-					}
-
-					if (badCommand)
-					{
-						numberOfInvalidCommands++;
-
-						if (this.Server.Behaviour.MaximumNumberOfSequentialBadCommands > 0 &&
-						numberOfInvalidCommands >= this.Server.Behaviour.MaximumNumberOfSequentialBadCommands)
-						{
-							await this.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel, "Too many bad commands. Bye!")).ConfigureAwait(false);
-							await this.CloseConnection().ConfigureAwait(false);
-						}
-						else
-						{
-							await this.WriteResponse(new SmtpResponse(
-								StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
-								"Command unrecognised")).ConfigureAwait(false);
-						}
-					}
-				}
-			}
-			catch (IOException ioException)
-			{
-				this.Session.SessionError = ioException;
-				this.Session.SessionErrorType = SessionErrorType.NetworkError;
-			}
+            while (ConnectionChannel.IsConnected)
+            {
+                await ReadAndProcessNextCommand().ConfigureAwait(false);
+            }
+        }
+        catch (IOException ioException)
+        {
+            Session.SessionError = ioException;
+            Session.SessionErrorType = SessionErrorType.NetworkError;
+        }
 #pragma warning disable CA1031 // Do not catch general exception types
-			catch (Exception exception)
-			{
-				this.Session.SessionError = exception;
-				this.Session.SessionErrorType = SessionErrorType.UnexpectedException;
-			}
+        catch (Exception exception)
+        {
+            Session.SessionError = exception;
+            Session.SessionErrorType = SessionErrorType.UnexpectedException;
+        }
 #pragma warning restore CA1031 // Do not catch general exception types
 
-			await this.CloseConnection().ConfigureAwait(false);
+        await CloseConnection().ConfigureAwait(false);
 
-			this.Session.EndDate = DateTime.Now;
-			await this.Server.Behaviour.OnSessionCompleted(this, this.Session).ConfigureAwait(false);
-		}
+        Session.EndDate = DateTime.Now;
+        await Server.Behaviour.OnSessionCompleted(this, Session).ConfigureAwait(false);
+    }
 
-		/// <summary>
-		/// Writes a line of text to the client.
-		/// </summary>
-		/// <param name="text">The text<see cref="string" /> optionally containing placeholders into which <paramref name="args" /> are subtituted using <see cref="string.Format(string, object[])" />.</param>
-		/// <param name="args">The arguments which are formatted into <paramref name="text"/>.</param>
-		/// <returns>
-		/// The <see cref="Task" />.
-		/// </returns>
-		protected async Task WriteLineAndFlush(string text, params object[] args)
-		{
-			string formattedText = string.Format(CultureInfo.InvariantCulture, text, args);
-			await this.Session.AppendLineToSessionLog(formattedText).ConfigureAwait(false);
-			await this.ConnectionChannel.WriteLine(formattedText).ConfigureAwait(false);
-			await this.ConnectionChannel.Flush().ConfigureAwait(false);
-		}
+    private async Task ReadAndProcessNextCommand()
+    {
+        bool badCommand = false;
+        SmtpCommand command = new SmtpCommand(await ReadLine().ConfigureAwait(false));
+        await Server.Behaviour.OnCommandReceived(this, command).ConfigureAwait(false);
 
-		private async Task OnConnectionChannelClosed(object sender, EventArgs eventArgs)
-		{
-			ConnectionEventArgs connEventArgs = new ConnectionEventArgs(this);
+        if (command.IsValid)
+        {
+            badCommand = !await TryProcessCommand(command).ConfigureAwait(false);
+        }
+        else if (!command.IsEmpty)
+        {
+            badCommand = true;
+        }
 
-			foreach (Delegate handler
-				in this.ConnectionClosedEventHandler?.GetInvocationList() ?? Enumerable.Empty<Delegate>())
-			{
-				await ((Task)handler.DynamicInvoke(this, connEventArgs)).ConfigureAwait(false);
-			}
-		}
-	}
+        if (badCommand)
+        {
+            await Session.IncrementBadCommandCounter().ConfigureAwait(false);
+
+            if (Server.Behaviour.MaximumNumberOfSequentialBadCommands > 0 &&
+                Session.NumberOfBadCommandsInARow >= Server.Behaviour.MaximumNumberOfSequentialBadCommands)
+            {
+                await WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel,
+                    "Too many bad commands. Bye!")).ConfigureAwait(false);
+                await CloseConnection().ConfigureAwait(false);
+            }
+            else
+            {
+                await WriteResponse(new SmtpResponse(
+                    StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
+                    "Command unrecognised")).ConfigureAwait(false);
+            }
+        }
+        else
+        {
+            await Session.ResetBadCommandCounter().ConfigureAwait(false);
+        }
+    }
+
+    private async Task<bool> TryProcessCommand(SmtpCommand command)
+    {
+        IVerb verbProcessor = VerbMap.GetVerbProcessor(command.Verb);
+
+        if (verbProcessor != null)
+        {
+            try
+            {
+                await verbProcessor.Process(this, command).ConfigureAwait(false);
+            }
+            catch (SmtpServerException exception)
+            {
+                await WriteResponse(exception.SmtpResponse).ConfigureAwait(false);
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>
+    ///     Writes a line of text to the client.
+    /// </summary>
+    /// <param name="text">
+    ///     The text<see cref="string" /> optionally containing placeholders into which <paramref name="args" />
+    ///     are subtituted using <see cref="string.Format(string, object[])" />.
+    /// </param>
+    /// <param name="args">The arguments which are formatted into <paramref name="text" />.</param>
+    /// <returns>
+    ///     The <see cref="Task" />.
+    /// </returns>
+    protected async Task WriteLineAndFlush(string text, params object[] args)
+    {
+        string formattedText = string.Format(CultureInfo.InvariantCulture, text, args);
+        await Session.AppendLineToSessionLog(formattedText).ConfigureAwait(false);
+        await ConnectionChannel.WriteLine(formattedText).ConfigureAwait(false);
+        await ConnectionChannel.Flush().ConfigureAwait(false);
+    }
+
+    private async Task OnConnectionChannelClosed(object sender, EventArgs eventArgs)
+    {
+        ConnectionEventArgs connEventArgs = new ConnectionEventArgs(this);
+
+        foreach (Delegate handler
+                 in ConnectionClosedEventHandler?.GetInvocationList() ?? Enumerable.Empty<Delegate>())
+        {
+            await ((Task)handler.DynamicInvoke(this, connEventArgs)).ConfigureAwait(false);
+        }
+    }
 }

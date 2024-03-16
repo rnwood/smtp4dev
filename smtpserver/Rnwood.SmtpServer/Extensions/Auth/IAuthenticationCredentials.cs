@@ -3,14 +3,14 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Extensions.Auth
+namespace Rnwood.SmtpServer.Extensions.Auth;
+/// <summary>
+///     Represents credentials supplied by the client.
+/// </summary>
+public interface IAuthenticationCredentials
 {
-#pragma warning disable CA1040 // Avoid empty interfaces
-	/// <summary>
-	/// Represents credentials supplied by the client.
-	/// </summary>
-	public interface IAuthenticationCredentials
-	{
-	}
-#pragma warning restore CA1040 // Avoid empty interfaces
+    /// <summary>
+    /// Gets a string representing the type of this credential.
+    /// </summary>
+    string Type { get;  }
 }

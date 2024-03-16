@@ -3,39 +3,37 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests
+using System;
+using Xunit;
+
+namespace Rnwood.SmtpServer.Tests;
+
+/// <summary>
+///     Defines the <see cref="SmtpServerExceptionTests" />
+/// </summary>
+public class SmtpServerExceptionTests
 {
-    using System;
-    using Xunit;
+    /// <summary>
+    /// </summary>
+    [Fact]
+    public void InnerException()
+    {
+        Exception innerException = new Exception();
+
+        SmtpServerException e = new SmtpServerException(
+            new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Blah"), innerException);
+
+        Assert.Same(innerException, e.InnerException);
+    }
 
     /// <summary>
-    /// Defines the <see cref="SmtpServerExceptionTests" />
     /// </summary>
-    public class SmtpServerExceptionTests
+    [Fact]
+    public void SmtpResponse()
     {
-        /// <summary>
-        ///
-        /// </summary>
-        [Fact]
-        public void InnerException()
-        {
-            Exception innerException = new Exception();
+        SmtpResponse smtpResponse = new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Blah");
+        SmtpServerException e = new SmtpServerException(smtpResponse);
 
-            SmtpServerException e = new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Blah"), innerException);
-
-            Assert.Same(innerException, e.InnerException);
-        }
-
-        /// <summary>
-        ///
-        /// </summary>
-        [Fact]
-        public void SmtpResponse()
-        {
-            SmtpResponse smtpResponse = new SmtpResponse(StandardSmtpResponseCode.ExceededStorageAllocation, "Blah");
-            SmtpServerException e = new SmtpServerException(smtpResponse);
-
-            Assert.Same(smtpResponse, e.SmtpResponse);
-        }
+        Assert.Same(smtpResponse, e.SmtpResponse);
     }
 }

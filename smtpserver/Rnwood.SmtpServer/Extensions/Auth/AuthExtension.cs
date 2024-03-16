@@ -3,17 +3,14 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Extensions.Auth
+namespace Rnwood.SmtpServer.Extensions.Auth;
+
+/// <summary>
+///     Defines the <see cref="AuthExtension" />.
+/// </summary>
+public class AuthExtension : IExtension
 {
-	/// <summary>
-	/// Defines the <see cref="AuthExtension" />.
-	/// </summary>
-	public class AuthExtension : IExtension
-	{
-		/// <inheritdoc />
-		public IExtensionProcessor CreateExtensionProcessor(IConnection connection)
-		{
-			return new AuthExtensionProcessor(connection);
-		}
-	}
+    /// <inheritdoc />
+    public IExtensionProcessor CreateExtensionProcessor(IConnection connection) =>
+        new AuthExtensionProcessor(connection);
 }

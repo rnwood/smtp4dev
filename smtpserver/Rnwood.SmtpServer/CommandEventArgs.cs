@@ -3,27 +3,23 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer
+using System;
+
+namespace Rnwood.SmtpServer;
+
+/// <summary>
+///     Defines the <see cref="CommandEventArgs" />.
+/// </summary>
+public class CommandEventArgs : EventArgs
 {
-	using System;
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="CommandEventArgs" /> class.
+    /// </summary>
+    /// <param name="command">The command<see cref="SmtpCommand" />.</param>
+    public CommandEventArgs(SmtpCommand command) => Command = command;
 
-	/// <summary>
-	/// Defines the <see cref="CommandEventArgs" />.
-	/// </summary>
-	public class CommandEventArgs : EventArgs
-	{
-		/// <summary>
-		/// Initializes a new instance of the <see cref="CommandEventArgs"/> class.
-		/// </summary>
-		/// <param name="command">The command<see cref="SmtpCommand"/>.</param>
-		public CommandEventArgs(SmtpCommand command)
-		{
-			this.Command = command;
-		}
-
-		/// <summary>
-		/// Gets the Command.
-		/// </summary>
-		public SmtpCommand Command { get; private set; }
-	}
+    /// <summary>
+    ///     Gets the Command.
+    /// </summary>
+    public SmtpCommand Command { get; private set; }
 }

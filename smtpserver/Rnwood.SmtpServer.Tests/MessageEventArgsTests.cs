@@ -3,25 +3,23 @@
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
 
-namespace Rnwood.SmtpServer.Tests
+using Xunit;
+
+namespace Rnwood.SmtpServer.Tests;
+
+/// <summary>
+///     Defines the <see cref="MessageEventArgsTests" />
+/// </summary>
+public class MessageEventArgsTests
 {
-    using Xunit;
-
     /// <summary>
-    /// Defines the <see cref="MessageEventArgsTests" />
     /// </summary>
-    public class MessageEventArgsTests
+    [Fact]
+    public void Message()
     {
-        /// <summary>
-        ///
-        /// </summary>
-        [Fact]
-        public void Message()
-        {
-            IMessage message = new MemoryMessage();
-            MessageEventArgs messageEventArgs = new MessageEventArgs(message);
+        IMessage message = new MemoryMessage();
+        MessageEventArgs messageEventArgs = new MessageEventArgs(message);
 
-            Assert.Same(message, messageEventArgs.Message);
-        }
+        Assert.Same(message, messageEventArgs.Message);
     }
 }

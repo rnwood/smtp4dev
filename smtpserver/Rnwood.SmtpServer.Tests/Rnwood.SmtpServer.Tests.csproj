@@ -5,7 +5,8 @@
     <TargetFrameworks>net6.0;net462</TargetFrameworks>
     <AssemblyName>Rnwood.SmtpServer.Tests</AssemblyName>
     <OutputType>Library</OutputType>
-   
+    <LangVersion>latest</LangVersion>
+
     <PackageId>Rnwood.SmtpServer.Tests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
     <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'net6.0' ">6.0.0</RuntimeFrameworkVersion>
@@ -16,24 +17,24 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Rnwood.SmtpServer\Rnwood.SmtpServer.csproj" />
+    <ProjectReference Include="..\Rnwood.SmtpServer\Rnwood.SmtpServer.csproj"/>
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="6.12.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0" />
-    <PackageReference Include="NETStandard.Library" Version="2.0.3" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5" />
-    <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
-    <PackageReference Include="System.Net.Security" Version="4.3.2" />
-    <PackageReference Include="xunit" Version="2.4.2" />
-    <PackageReference Include="Moq" Version="4.20.70" />
-    <PackageReference Include="MailKit" Version="2.5.2" />
-    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13" />
+    <PackageReference Include="FluentAssertions" Version="6.12.0"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.11.0"/>
+    <PackageReference Include="NETStandard.Library" Version="2.0.3"/>
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.4.5"/>
+    <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0"/>
+    <PackageReference Include="System.Net.Security" Version="4.3.2"/>
+    <PackageReference Include="xunit" Version="2.4.2"/>
+    <PackageReference Include="Moq" Version="4.20.70"/>
+    <PackageReference Include="MailKit" Version="2.5.2"/>
+    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13"/>
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="../stylecop.json" />
+    <AdditionalFiles Include="../stylecop.json"/>
   </ItemGroup>
 
   <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
