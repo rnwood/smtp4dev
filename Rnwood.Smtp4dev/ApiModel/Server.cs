@@ -27,6 +27,11 @@ namespace Rnwood.Smtp4dev.ApiModel
         public int? ImapPortNumber { get; set; }
 
         public bool DisableMessageSanitisation { get; set; }
+        public string TlsMode { get; set; }
+        public bool AuthenticationRequired { get; set; }
+        public string CredentialsValidationExpression { get; set; }
+        public bool SecureConnectionRequired { get; set; }
+        public string RecipientValidationExpression { get; set; }
     }
 
 }

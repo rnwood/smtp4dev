@@ -44,9 +44,9 @@ namespace Rnwood.Smtp4dev
                 { "locksettings", "Locks settings from being changed by user via web interface", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.LockSettings) },
                 { "installpath=", "Sets path to folder containing wwwroot and other files", data => map.Add(data, x=> x.InstallPath) },
                 { "disablemessagesanitisation", "Disables message HTML sanitisation.", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.DisableMessageSanitisation) },
-                {"applicationName=","",  data => map.Add(data, x => x.ApplicationName)}
-            
-
+                { "applicationName=","",  data => map.Add(data, x => x.ApplicationName), true},
+                { "authenticationrequired", "Requires that SMTP clients authenticate", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.AuthenticationRequired) },
+                { "secureconnectionrequired", "Requires that SMTP clients use SSL/TLS", data => map.Add((data !=null).ToString(), x=> x.ServerOptions.SecureConnectionRequired) }
             };
 
             if (!isDesktopApp)

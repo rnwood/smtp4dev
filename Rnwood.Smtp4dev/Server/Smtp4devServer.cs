@@ -19,6 +19,7 @@ using Jint.Native.Json;
 using Jint.Runtime;
 using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
+using Rnwood.SmtpServer.Extensions.Auth;
 using Serilog;
 using SmtpResponse = Rnwood.SmtpServer.SmtpResponse;
 
@@ -81,6 +82,39 @@ namespace Rnwood.Smtp4dev.Server
             this.smtpServer.SessionStartedHandler += OnSessionStarted;
             this.smtpServer.AuthenticationCredentialsValidationRequiredEventHandler += OnAuthenticationCredentialsValidationRequired;
             this.smtpServer.IsRunningChanged += OnIsRunningChanged;
+            ((DefaultServerBehaviour)this.smtpServer.Behaviour).MessageStartEventHandler += OnMessageStart;
+            
+            ((DefaultServerBehaviour)this.smtpServer.Behaviour).MessageRecipientAddingEventHandler += OnMessageRecipientAddingEventHandler;
+        }
+
+        private Task OnMessageRecipientAddingEventHandler(object sender, RecipientAddingEventArgs e)
+        {
+            var sessionId = activeSessionsToDbId[e.Message.Session];
+            using var scope = serviceScopeFactory.CreateScope();
+            Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+            var session = dbContext.Sessions.Single(s => s.Id == sessionId);
+
+            if (!this.scriptingHost.ValidateRecipient(session, e.Recipient))
+            {
+                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.RecipientRejected, "Recipient rejected"));
+            }
+            
+            return Task.CompletedTask;
+        }
+
+        private Task OnMessageStart(object sender, MessageStartEventArgs e)
+        {
+            if (this.serverOptions.CurrentValue.SecureConnectionRequired && !e.Session.SecureConnection)
+            {
+                throw new SmtpServerException(new SmtpResponse(451, "Secure connection required"));
+            }
+            
+            if (this.serverOptions.CurrentValue.AuthenticationRequired && !e.Session.Authenticated)
+            {
+                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationRequired, "Authentication is required"));
+            }
+            
+            return Task.CompletedTask;
         }
 
         private void OnIsRunningChanged(object sender, EventArgs e)
@@ -130,7 +164,14 @@ namespace Rnwood.Smtp4dev.Server
 
         private Task OnAuthenticationCredentialsValidationRequired(object sender, AuthenticationCredentialsValidationEventArgs e)
         {
-            e.AuthenticationResult = AuthenticationResult.Success;
+            var sessionId = activeSessionsToDbId[e.Session];
+            using var scope = serviceScopeFactory.CreateScope();
+            Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+            var session = dbContext.Sessions.Single(s => s.Id == sessionId);
+
+            AuthenticationResult result = scriptingHost.ValidateCredentials(session, e.Credentials);
+
+            e.AuthenticationResult = result;
             return Task.CompletedTask;
         }
 

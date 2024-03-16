@@ -16,6 +16,8 @@ services:
         - smtp4dev-data:/smtp4dev
     environment:
       # Uncomment to customise these settings
+      # This is not a complete list of the available settings.
+      # See the documentation in appsettings.json for a full list.
 
       #Specifies the virtual path from web server root where SMTP4DEV web interface will be hosted. e.g. "/" or "/smtp4dev"
       #- ServerOptions__BasePath=/smtp4dev

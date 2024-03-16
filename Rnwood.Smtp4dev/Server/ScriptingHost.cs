@@ -8,7 +8,9 @@ using Jint;
 using Jint.Native;
 using Jint.Runtime;
 using Microsoft.Extensions.Options;
+using Rnwood.Smtp4dev.DbModel;
 using Rnwood.SmtpServer;
+using Rnwood.SmtpServer.Extensions.Auth;
 using Serilog;
 
 namespace Rnwood.Smtp4dev.Server;
@@ -19,39 +21,56 @@ internal class ScriptingHost
 
     
 
-    private IOptionsMonitor<RelayOptions> _relayOptions;
+    private IOptionsMonitor<RelayOptions> relayOptions;
+    private IOptionsMonitor<ServerOptions> serverOptions;
 
-    public ScriptingHost(IOptionsMonitor<RelayOptions> relayOptions)
+    public ScriptingHost(IOptionsMonitor<RelayOptions> relayOptions, IOptionsMonitor<ServerOptions> serverOptions)
     {
-        _relayOptions = relayOptions;
-        _relayOptions.OnChange(o => ParseScripts(o));
-        ParseScripts(relayOptions.CurrentValue);
+        this.relayOptions = relayOptions;
+        this.serverOptions = serverOptions;
+        this.relayOptions.OnChange(_ => ParseScripts(relayOptions.CurrentValue, serverOptions.CurrentValue));
+        this.serverOptions.OnChange(_ => ParseScripts(relayOptions.CurrentValue, serverOptions.CurrentValue));
+        ParseScripts(relayOptions.CurrentValue, serverOptions.CurrentValue);
     }
 
-    private void ParseScripts(RelayOptions relayOptionsCurrentValue)
+    private void ParseScript(string type, string expression, ref Script script, ref string source)
     {
-        if (shouldRelaySource != relayOptionsCurrentValue.AutomaticRelayExpression)
+        if (source != expression)
         {
-            var autoRelayExpression = relayOptionsCurrentValue.AutomaticRelayExpression ?? "";
-            log.Information("Parsing AutomaticRelayExpression {autoRelayExpression}", autoRelayExpression);
+            expression = expression ?? "";
+            log.Information("Parsing {type} {expression}", type, expression);
 
-            if (string.IsNullOrWhiteSpace(autoRelayExpression))
+            if (string.IsNullOrWhiteSpace(expression))
             {
-                shouldRelayScript = null;
+                script = null;
             }
             else
             {
                 var parser = new JavaScriptParser();
-                shouldRelayScript = parser.ParseScript(autoRelayExpression);
+                script = parser.ParseScript(expression);
             }
 
-            shouldRelaySource = autoRelayExpression;
+            source = expression;
         }
+    }
+
+    private void ParseScripts(RelayOptions relayOptionsCurrentValue, ServerOptions serverOptionsCurrentValue)
+    {
+        ParseScript("AutomaticRelayExpression", relayOptionsCurrentValue.AutomaticRelayExpression, ref shouldRelayScript, ref shouldRelaySource);
+        ParseScript("CredentialsValidationExpression", serverOptionsCurrentValue.CredentialsValidationExpression, ref credValidationScript,
+            ref credValidationSource);
+        ParseScript("RecipientValidationExpression", serverOptionsCurrentValue.RecipientValidationExpression, ref recipValidationScript,
+            ref recipValidationSource);
     }
 
     private string shouldRelaySource;
     private Script shouldRelayScript;
-
+    private string credValidationSource;
+    private Script credValidationScript;
+    private string recipValidationSource;
+    private Script recipValidationScript;
+    
+    
     public IReadOnlyCollection<string> GetAutoRelayRecipients(ApiModel.Message message, string recipient, ApiModel.Session session)
     {
         if (shouldRelayScript == null)
@@ -103,5 +122,77 @@ internal class ScriptingHost
             return Array.Empty<string>();
         }
 
+    }
+
+    public AuthenticationResult ValidateCredentials(Session session, IAuthenticationCredentials credentials)
+    {
+        if (credValidationScript == null)
+        {
+            return AuthenticationResult.Success;
+        }
+        
+        Engine jsEngine = new Engine();
+        
+        jsEngine.SetValue("credentials", credentials);
+        jsEngine.SetValue("session", session);
+
+        try
+        {
+            JsValue result = jsEngine.Evaluate(credValidationScript);
+
+            bool success = result.AsBoolean();
+            
+            log.Information("CredentialValidationExpression: (credentials: {credentials}, session: {session.Id}) => {result} => {success}", credentials,
+                session.Id, result, success);
+
+            return success ? AuthenticationResult.Success : AuthenticationResult.Failure;
+
+        }
+        catch (JavaScriptException ex)
+        {
+            log.Error("Error executing CredentialValidationExpression : {error}", ex.Error);
+            return AuthenticationResult.TemporaryFailure;
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error executing CredentialValidationExpression : {error}", ex.ToString());
+            return AuthenticationResult.TemporaryFailure;
+        }
+    }
+    
+    public bool ValidateRecipient(Session session, string recipient)
+    {
+        if (recipValidationScript == null)
+        {
+            return true;
+        }
+        
+        Engine jsEngine = new Engine();
+        
+        jsEngine.SetValue("recipient", recipient);
+        jsEngine.SetValue("session", session);
+
+        try
+        {
+            JsValue result = jsEngine.Evaluate(recipValidationScript);
+
+            bool success = result.AsBoolean();
+            
+            log.Information("RecipientValidationExpression: (recipient: {recipient}, session: {session.Id}) => {result} => {success}", recipient,
+                session.Id, result, success);
+
+            return success;
+
+        }
+        catch (JavaScriptException ex)
+        {
+            log.Error("Error executing RecipientValidationExpression : {error}", ex.Error);
+            return false;
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error executing RecipientValidationExpression : {error}", ex.ToString());
+            return false;
+        }
     }
 }

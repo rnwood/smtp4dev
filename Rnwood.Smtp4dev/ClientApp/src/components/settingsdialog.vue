@@ -19,6 +19,30 @@
                         <el-form-item label="Allow Remote Connections" prop="server.allowRemoteConnections">
                             <el-switch v-model="server.allowRemoteConnections" />
                         </el-form-item>
+
+                      <el-form-item label="TLS mode" prop="server.tlsMode">
+                        <el-select v-model="server.tlsMode" style="width: 100%;">
+                          <el-option key="None" label="None" value="None"></el-option>
+                          <el-option key="StartTls" label="STARTTLS (client requests TLS after session starts)" value="StartTls"></el-option>
+                          <el-option key="ImplicitTls" label="Implicit TLS (TLS immediately)" value="ImplicitTls"></el-option>
+                        </el-select>
+                      </el-form-item>
+
+                      <el-form-item label="Require Secure Connection" prop="server.secureConnectionRequired">
+                        <el-switch v-model="server.secureConnectionRequired" />
+                      </el-form-item>
+
+                      <el-form-item label="Require Authentication" prop="server.authenticationRequired">
+                        <el-switch v-model="server.authenticationRequired" />
+                      </el-form-item>
+
+                      <el-form-item label="Credentials validation expression (see comments in appsettings.json)" prop="server.credentialsValidationExpression">
+                        <el-input v-model="server.credentialsValidationExpression" />
+                      </el-form-item>
+
+                      <el-form-item label="Recipient validation expression (see comments in appsettings.json)" prop="server.recipientValidationExpression">
+                        <el-input v-model="server.recipientValidationExpression" />
+                      </el-form-item>
                     </el-tab-pane>
 
 
@@ -51,13 +75,13 @@
                             <el-input-number :min=1 :max=65535 controls-position="right" v-model="server.relayOptions.smtpPort" />
                         </el-form-item>
 
-                        <el-form-item label="Tls mode" prop="server.relayOptions.tlsMode" v-show="isRelayEnabled">
+                        <el-form-item label="TLS mode" prop="server.relayOptions.tlsMode" v-show="isRelayEnabled">
                             <el-select v-model="server.relayOptions.tlsMode">
                                 <el-option key="None" label="None" value="None"></el-option>
                                 <el-option key="Auto" label="Auto" value="Auto"></el-option>
-                                <el-option key="SslOnConnect" label="SslOnConnect" value="SslOnConnect"></el-option>
-                                <el-option key="StartTls" label="StartTls" value="StartTls"></el-option>
-                                <el-option key="StartTlsWhenAvailable" label="StartTlsWhenAvailable" value="StartTlsWhenAvailable"></el-option>
+                                <el-option key="SslOnConnect" label="TLS on connect" value="SslOnConnect"></el-option>
+                                <el-option key="StartTls" label="STARTTLS" value="StartTls"></el-option>
+                                <el-option key="StartTlsWhenAvailable" label="STARTTLS if available" value="StartTlsWhenAvailable"></el-option>
                             </el-select>
                         </el-form-item>
 
