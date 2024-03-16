@@ -73,6 +73,10 @@
                             <el-input v-model="server.relayOptions.senderAddress" />
                         </el-form-item>
 
+                      <el-form-item label="Auto relay expression (see comments in appsettings.json)" prop="server.relayOptions.automaticRelayExpression" v-show="isRelayEnabled">
+                        <el-input v-model="server.relayOptions.automaticRelayExpression" />
+                      </el-form-item>
+
                         <el-form-item label="Auto-Relay Recipients" v-show="isRelayEnabled" prop="isRelayEnabled">
                             <div v-for="(email, index) in server.relayOptions.automaticEmails" :key="index">
                                 <el-form-item :prop="'relayOptionsAutomaticEmails[' + index + '].value'" :rules="{required: true, message: 'Required'}">

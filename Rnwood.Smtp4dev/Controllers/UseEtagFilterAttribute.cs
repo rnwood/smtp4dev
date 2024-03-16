@@ -62,7 +62,7 @@ namespace Rnwood.Smtp4dev.Controllers
                             {
                                 context.Result = new StatusCodeResult(304);
                             }
-                            context.HttpContext.Response.Headers.Add("ETag", new[] { etag });
+                            context.HttpContext.Response.Headers["ETag"] = new[] { etag };
                         }
                     }
                 }

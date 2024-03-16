@@ -21,5 +21,6 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string Password { get; set; }
 
         public string TlsMode { get; set;}
+        public string AutomaticRelayExpression { get; set; }
     }
 }
