@@ -50,7 +50,7 @@
     "sanitize-html": "^2.7.1",
     "sass": "^1.51.0",
     "sass-loader": "^10.2.1",
-    "splitpanes": "^2.4.1",
+    "splitpanes": "^3.0.0",
     "srcdoc-polyfill": "^1.0.0",
     "ts-debounce": "^4.0.0",
     "ts-jest": "^29.0.0",
