@@ -8,6 +8,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using AngleSharp.Io;
+using Microsoft.AspNetCore.Mvc;
 using MimeKit.Encodings;
 using Xunit;
 
@@ -54,8 +55,10 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         private const string QPMESSAGE_BODY = "Homines in indicaverunt nam purus quáestionem sentiri unum.";
         private static readonly string testMessage1File1Content = "111";
         private static readonly string testMessage1File2Content = "222";
+        private static readonly string message1HtmlBody = "<html>Hi</html>";
+        private static readonly string message1TextBody = "Hi";
 
-        private static async Task<DbModel.Message> GetTestMessage1()
+        private static async Task<DbModel.Message> GetTestMessage1(bool includeTextBody=true, bool includeHtmlBody=true)
         {
             MimeMessage mimeMessage = new MimeMessage();
             mimeMessage.From.Add(InternetAddress.Parse("from@message.com"));
@@ -64,8 +67,16 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
             mimeMessage.Subject = "subject";
             BodyBuilder bodyBuilder = new BodyBuilder();
-            bodyBuilder.HtmlBody = "<html>Hi</html>";
-            bodyBuilder.TextBody = "Hi";
+            if (includeHtmlBody)
+            {
+                bodyBuilder.HtmlBody = message1HtmlBody;
+            }
+
+            if (includeTextBody)
+            {
+                bodyBuilder.TextBody = message1TextBody;
+            }
+
             bodyBuilder.Attachments.Add("file1", new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testMessage1File1Content)), new ContentType("text", "plain")).ContentId = "file1";
             bodyBuilder.Attachments.Add("file2", new MemoryStream(System.Text.Encoding.UTF8.GetBytes(testMessage1File2Content)), new ContentType("text", "plain"));
 
@@ -113,6 +124,49 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         }
 
 
+        [Fact]
+        public async Task GetHtmlBody()
+        {
+            DbModel.Message testMessage1 = await GetTestMessage1();
+            TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+
+            var result = await messagesController.GetMessageHtml(testMessage1.Id);
+            Assert.Equal(message1HtmlBody, result.Value);
+        }
+        
+        [Fact]
+        public async Task GetTextBody()
+        {
+            DbModel.Message testMessage1 = await GetTestMessage1();
+            TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+
+            string text = (await messagesController.GetMessagePlainText(testMessage1.Id)).Value;
+            Assert.Equal(message1TextBody, text);
+        }
+        
+        [Fact]
+        public async Task GetHtmlBody_WhenThereIsntOne_ReturnsNotFound()
+        {
+            DbModel.Message testMessage1 = await GetTestMessage1(includeHtmlBody:false);
+            TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+
+            var result = await messagesController.GetMessageHtml(testMessage1.Id);
+            Assert.IsType<NotFoundObjectResult>(result.Result);
+        }
+        
+        [Fact]
+        public async Task GetTextBody_WhenThereIsntOne_ReturnsNotFound()
+        {
+            DbModel.Message testMessage1 = await GetTestMessage1(includeTextBody:false);
+            TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+
+            var result= await messagesController.GetMessagePlainText(testMessage1.Id);
+            Assert.IsType<NotFoundObjectResult>(result.Result);
+        }
 
         [Fact]
         public async Task GetPartContent()

@@ -142,7 +142,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
         [HttpGet("{id}/plaintext")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
-        public async Task<IActionResult> GetMessagePlainText(Guid id)
+        public async Task<ActionResult<string>> GetMessagePlainText(Guid id)
         {
             ApiModel.Message message = await GetMessage(id);
 
@@ -151,18 +151,18 @@ namespace Rnwood.Smtp4dev.Controllers
                 return Content(ApiModel.Message.GetSessionEncodingOrAssumed(message).GetString(message.Data));
             }
 
-            string plaintext = message.MimeMessage?.HtmlBody;
+            string plaintext = message.MimeMessage?.TextBody;
             if (plaintext == null)
             {
                 return NotFound("MIME message does not have a plain text body");
             }
 
-            return Content(plaintext);
+            return plaintext;
         }
 
         [HttpGet("{id}/html")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
-        public async Task<IActionResult> GetMessageHtml(Guid id)
+        public async Task<ActionResult<string>> GetMessageHtml(Guid id)
         {
             ApiModel.Message message = await GetMessage(id);
 
@@ -191,7 +191,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 }
             }
 
-            return Content(doc.DocumentNode.OuterHtml);
+            return doc.DocumentNode.OuterHtml;
         }
 
         [HttpDelete("{id}")]
