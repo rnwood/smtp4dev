@@ -1,5 +1,6 @@
 ﻿import MessageSummary from "./ApiClient/MessageSummary";
 import { debounce } from 'ts-debounce';
+import MessagesController from "./ApiClient/MessagesController";
 
 export default class MessageNotificationManager {
     constructor(onClick: (message: MessageSummary) => void) {
@@ -13,44 +14,20 @@ export default class MessageNotificationManager {
     private onClick: (message: MessageSummary) => void;
     private visibleNotificationCloseTimeout: any | null = null;
     private currentNotification: Notification | null = null;
-
-    setInitialMessages(messages: MessageSummary[]) {
-        const messagesByDate = this.sortMessages(messages);
-        this.lastNotifiedMessage = messagesByDate[messagesByDate.length - 1];
-    }
-
-    notifyMessages(messages: MessageSummary[]) {
-
-        this.updateNotificationsDebounced(messages);
-    }
-
-    private updateNotificationsDebounced = debounce(this.updateNotifications, 500);
-
-    private updateNotifications(messages: MessageSummary[]) {
-        //Sort by something stable. Multiple messages may be received at same instant so use id as secondary
-        const messagesByDate = this.sortMessages(messages);
-        let unnotifiedMessages: MessageSummary[];
-        if (!this.lastNotifiedMessage) {
-            unnotifiedMessages = messagesByDate;
-        }
-        else {
-            const indexOfLastNotifiedMessage = messagesByDate.indexOf(this.lastNotifiedMessage);
-            if (indexOfLastNotifiedMessage != -1) {
-                unnotifiedMessages = messagesByDate.slice(indexOfLastNotifiedMessage + 1);
-            }
-            else {
-                unnotifiedMessages = messagesByDate;
-            }
-        }
+    
+    refresh = debounce(this.refreshInternal, 500);
+    
+    async refreshInternal(suppressNotifications: boolean) {
+        
+        const messagesByDate = await new MessagesController().getNewSummaries(this.lastNotifiedMessage?.id ?? "");
+        const unnotifiedMessages = messagesByDate;
+        
         if (unnotifiedMessages.length) {
 
+            this.lastNotifiedMessage = unnotifiedMessages[0];
             unnotifiedMessages.reverse();
 
-            if (Notification.permission != "granted") {
-                //Ensure that if notification permission is granted later on, existing messages are treated as already notified.
-                this.lastNotifiedMessage = unnotifiedMessages[0];
-            }
-            else {
+            if (!suppressNotifications && Notification.permission == "granted") {
                 if (this.visibleNotificationCloseTimeout) {
                     clearTimeout(this.visibleNotificationCloseTimeout);
                 }
@@ -68,7 +45,6 @@ export default class MessageNotificationManager {
                 notification.onclose = () => {
                     if (notification === this.currentNotification) {
                         this.currentNotification = null;
-                        this.lastNotifiedMessage = unnotifiedMessages[0];
                     }
                 };
                 this.visibleNotificationCloseTimeout = setTimeout(() => {
@@ -78,26 +54,5 @@ export default class MessageNotificationManager {
                 }, 10000);
             }
         }
-    }
-
-    private sortMessages(messages: MessageSummary[]) {
-        const messagesByDate = messages.slice(0, messages.length);
-        messagesByDate.sort((m1, m2) => {
-            if (m1.receivedDate == m2.receivedDate) {
-                if (m1.id > m2.id) {
-                    return 1;
-                }
-                else {
-                    return -1;
-                }
-            }
-            else if (m1.receivedDate > m2.receivedDate) {
-                return 1;
-            }
-            else {
-                return -1;
-            }
-        });
-        return messagesByDate;
     }
 }

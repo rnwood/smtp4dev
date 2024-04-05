@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using Microsoft.AspNetCore.Builder;
@@ -94,6 +95,7 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<NotificationsHub>();
 
             services.AddControllers();
+            services.AddRequestLocalization(options => { options.SupportedCultures = CultureInfo.GetCultures(CultureTypes.AllCultures); });
 
             services.AddSpaStaticFiles(o => o.RootPath = "ClientApp");
 
@@ -114,6 +116,7 @@ namespace Rnwood.Smtp4dev
                 subdir.UseDefaultFiles();
                 subdir.UseStaticFiles();
                 subdir.UseSpaStaticFiles();
+                subdir.UseRequestLocalization();
 
                 subdir.UseWebSockets();
 
