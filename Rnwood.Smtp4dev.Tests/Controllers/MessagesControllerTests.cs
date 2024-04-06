@@ -64,7 +64,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         private static readonly string message1HtmlBody = "<html>Hi</html>";
         private static readonly string message1TextBody = "Hi";
 
-        private static async Task<DbModel.Message> GetTestMessage1()
+        private static async Task<DbModel.Message> GetTestMessage1(bool includeHtmlBody=true, bool includeTextBody=true)
         {
             MimeMessage mimeMessage = new MimeMessage();
             mimeMessage.From.Add(InternetAddress.Parse("from@message.com"));
