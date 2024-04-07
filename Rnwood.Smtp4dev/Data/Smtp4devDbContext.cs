@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using System.Globalization;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore;
 using Rnwood.Smtp4dev.DbModel;
 
 namespace Rnwood.Smtp4dev.Data
@@ -9,7 +11,7 @@ namespace Rnwood.Smtp4dev.Data
             : base(options)
         {
         }
-
+        
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             UtcDateTimeValueConverter.Apply(modelBuilder);

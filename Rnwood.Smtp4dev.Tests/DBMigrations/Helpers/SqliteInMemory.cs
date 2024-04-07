@@ -14,7 +14,7 @@ namespace Rnwood.Smtp4dev.Tests.DBMigrations.Helpers
         public SqliteInMemory()
         {
             this.ContextOptions = new DbContextOptionsBuilder<Smtp4devDbContext>()
-                .UseSqlite(CreateInMemoryDatabase())
+                .UseSqlite(Smtp4devDbContext.GetSqliteConnection(":memory:"))
                 .Options;
             _connection = RelationalOptionsExtension.Extract(ContextOptions).Connection;
             using var context = new Smtp4devDbContext(ContextOptions);
@@ -25,12 +25,7 @@ namespace Rnwood.Smtp4dev.Tests.DBMigrations.Helpers
 
         protected internal DbContextOptions<Smtp4devDbContext> ContextOptions { get; }
 
-        private DbConnection CreateInMemoryDatabase()
-        {
-            var connection = new SqliteConnection("Filename=:memory:");
-            connection.Open();
-            return connection;
-        }
+  
 
         public void Dispose() => _connection.Dispose();
     }

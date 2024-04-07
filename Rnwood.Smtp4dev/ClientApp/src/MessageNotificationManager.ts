@@ -14,37 +14,43 @@ export default class MessageNotificationManager {
     private onClick: (message: MessageSummary) => void;
     private visibleNotificationCloseTimeout: any | null = null;
     private currentNotification: Notification | null = null;
+    private unnotifiedMessages: MessageSummary[] = [];
+    private currentNotificationMessages: MessageSummary[] = [];
     
     refresh = debounce(this.refreshInternal, 500);
     
     async refreshInternal(suppressNotifications: boolean) {
         
         const messagesByDate = await new MessagesController().getNewSummaries(this.lastNotifiedMessage?.id ?? "");
-        const unnotifiedMessages = messagesByDate;
-        
-        if (unnotifiedMessages.length) {
+        const messagesToAdd = messagesByDate.filter(m => !this.unnotifiedMessages.find(um => um.id=== m.id));
 
-            this.lastNotifiedMessage = unnotifiedMessages[0];
-            unnotifiedMessages.reverse();
+        
+        if (messagesToAdd.length) {
+
+            this.unnotifiedMessages = messagesToAdd.concat(this.unnotifiedMessages);
+            this.lastNotifiedMessage = this.unnotifiedMessages[0];
 
             if (!suppressNotifications && Notification.permission == "granted") {
                 if (this.visibleNotificationCloseTimeout) {
                     clearTimeout(this.visibleNotificationCloseTimeout);
                 }
 
-                const notification = this.currentNotification = new Notification("smtp4dev: " + unnotifiedMessages.length + " new message(s) received.", {
-                    body: unnotifiedMessages.slice(0, 5).map(m => "From: " + m.from + " - " + m.subject).join("\n") + (unnotifiedMessages.length > 5 ? "..." : ""),
+                const notification = this.currentNotification = new Notification("smtp4dev: " + this.unnotifiedMessages.length + " new message(s) received.", {
+                    body: this.unnotifiedMessages.slice(0, 5).map(m => "From: " + m.from + " - " + m.subject).join("\n") + (this.unnotifiedMessages.length > 5 ? "..." : ""),
                     tag: "newmessages",
-                    renotify: true,
+                    renotify: false,
                     silent: (!!this.currentNotification),
                     requireInteraction: false
                 });
+                this.currentNotificationMessages = this.unnotifiedMessages;
                 notification.onclick = () => {
-                    this.onClick(unnotifiedMessages[0]);
+                    this.onClick(this.unnotifiedMessages[0]);
                 };
                 notification.onclose = () => {
                     if (notification === this.currentNotification) {
                         this.currentNotification = null;
+                        this.unnotifiedMessages =[];
+                        this.currentNotificationMessages = [];
                     }
                 };
                 this.visibleNotificationCloseTimeout = setTimeout(() => {
@@ -52,6 +58,8 @@ export default class MessageNotificationManager {
                         this.currentNotification.close();
                     }
                 }, 10000);
+            } else {
+                this.unnotifiedMessages =[];
             }
         }
     }

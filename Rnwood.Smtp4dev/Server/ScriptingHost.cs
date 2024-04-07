@@ -89,7 +89,11 @@ internal class ScriptingHost
             JsValue result = jsEngine.Evaluate(shouldRelayScript);
 
             List<string> recpients = new List<string>();
-            if (result.IsString())
+            if (result.IsNull())
+            {
+                
+            }
+            else if (result.IsString())
             {
                 if (result.AsString() != String.Empty)
                 {

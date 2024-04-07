@@ -203,12 +203,12 @@ export default class MessageList extends Vue {
 
   async handlePaginationCurrentChange(page: number) {
     this.page = page;
-    await this.refresh();
+    await this.refresh(false);
   }
 
   async handlePaginationPageSizeChange(pageSize: number) {
     this.pageSize = pageSize;
-    await this.refresh();
+    await this.refresh(false);
   }
 
   cellValueRenderer(
@@ -292,7 +292,7 @@ export default class MessageList extends Vue {
 
     try {
       await new MessagesController().delete(messageToDelete.id);
-      await this.refresh();
+      await this.refresh(false);
     } catch (e: any) {
       this.$notify.error({
         title: "Delete Message Failed",
@@ -307,7 +307,7 @@ export default class MessageList extends Vue {
     try {
       this.loading = true;
       await new MessagesController().deleteAll();
-      await this.refresh();
+      await this.refresh(true);
     } catch (e: any) {
       this.$notify.error({
         title: "Clear Messages Failed",
@@ -319,7 +319,7 @@ export default class MessageList extends Vue {
   }
 
   @Watch("searchTerm")
-  doSearch = debounce(this.refresh, 200);
+  doSearch = debounce(() => this.refresh(false), 200);
 
   private lastSort: string | null = null;
   private lastSortDescending: boolean = false;
@@ -331,7 +331,7 @@ export default class MessageList extends Vue {
     await new MessagesController().markAllMessageRead();
   }
 
-  async refresh(silent: boolean = false) {
+  async refresh(includeNotifications: boolean, silent: boolean = false) {
     this.loading = !silent;
     let unlock = await this.mutex.acquire();
 
@@ -375,7 +375,9 @@ export default class MessageList extends Vue {
         );
       }
 
-      await this.messageNotificationManager.refresh(!this.initialLoadDone);
+      if (includeNotifications) {
+        await this.messageNotificationManager.refresh(!this.initialLoadDone);
+      }
 
       this.initialLoadDone = true;
       this.lastSort = sortColumn;
@@ -404,12 +406,12 @@ export default class MessageList extends Vue {
       this.selectedSortColumn = sortOptions.prop || "receivedDate";
       this.selectedSortDescending = descending;
 
-      await this.refresh();
+      await this.refresh(false);
     }
   }
 
   async mounted() {
-    await this.refresh(false);
+    await this.refresh(true,false);
   }
 
   async created() {
@@ -426,13 +428,13 @@ export default class MessageList extends Vue {
   async onConnectionChanged() {
     if (this.connection) {
       this.connection.on("messageschanged", async () => {
-        await this.refresh(true);
+        await this.refresh(true,true);
       });
       this.connection.on("serverchanged", async () => {
-        await this.refresh(true);
+        await this.refresh(true,true);
       });
       this.connection.addOnConnectedCallback(() => {
-        this.refresh(true);
+        this.refresh(true, true);
       });
     }
   }

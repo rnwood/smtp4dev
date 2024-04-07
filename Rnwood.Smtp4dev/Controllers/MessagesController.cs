@@ -49,21 +49,20 @@ namespace Rnwood.Smtp4dev.Controllers
             bool sortIsDescending = true, int page = 1,
             int pageSize = 5)
         {
-            var query = messagesRepository.GetMessages(false);
+            IEnumerable<DbModel.Message> query = messagesRepository.GetMessages(true)
+                .Include(m => m.Relays)
+                .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""));
 
             if (!string.IsNullOrEmpty(searchTerms))
             {
-                searchTerms = "%" + searchTerms.Replace("%", "\\%").Replace("_", "\\_") + "%";
-                
-                query = query.Where(m => EF.Functions.Like(m.Subject, searchTerms, "\\")
-                                         || EF.Functions.Like(m.From, searchTerms, "\\")
-                                         || EF.Functions.Like(m.To, searchTerms, "\\")
+               
+                query = query.ToList().Where(m => m.Subject.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
+                                         || m.From.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
+                                         || m.To.Contains( searchTerms, StringComparison.CurrentCultureIgnoreCase)
                 );
             }
 
             return query
-                .Include(m => m.Relays)
-                .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""))
                 .Select(m => new MessageSummary(m))
                 .GetPaged(page, pageSize);
         }
