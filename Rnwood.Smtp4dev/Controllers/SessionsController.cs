@@ -2,6 +2,7 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using Rnwood.Smtp4dev.ApiModel;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.Server;
@@ -26,21 +27,21 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpGet]
         public PagedResult<SessionSummary> GetSummaries(int page = 1, int pageSize = 5)
         {
-            return dbContext.Sessions.Where(s => s.EndDate.HasValue).OrderByDescending(x=>x.StartDate)
+            return dbContext.Sessions.AsNoTracking().Where(s => s.EndDate.HasValue).OrderByDescending(x=>x.StartDate)
                 .Select(m => new SessionSummary(m)).GetPaged(page, pageSize);
         }
 
         [HttpGet("{id}")]
         public ApiModel.Session GetSession(Guid id)
         {
-            Session result = dbContext.Sessions.SingleOrDefault(m => m.Id == id);
+            Session result = dbContext.Sessions.AsNoTracking().SingleOrDefault(m => m.Id == id);
             return new ApiModel.Session(result);
         }
 
         [HttpGet("{id}/log")]
         public string GetSessionLog(Guid id)
         {
-            Session result = dbContext.Sessions.SingleOrDefault(m => m.Id == id);
+            Session result = dbContext.Sessions.AsNoTracking().SingleOrDefault(m => m.Id == id);
             return result.Log;
         }
 

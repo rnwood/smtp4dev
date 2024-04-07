@@ -1,11 +1,13 @@
 ﻿using System;
+using System.Collections;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
     public static class QueryableExtensions
     {
-        public static PagedResult<T> GetPaged<T>(this IQueryable<T> query,
+        public static PagedResult<T> GetPaged<T>(this IEnumerable<T> query,
             int page, int pageSize) where T : class
         {
             var result = new PagedResult<T>

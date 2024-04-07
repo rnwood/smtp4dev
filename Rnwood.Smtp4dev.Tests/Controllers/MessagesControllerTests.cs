@@ -9,7 +9,13 @@ using System.Text;
 using System.Threading.Tasks;
 using AngleSharp.Io;
 using Microsoft.AspNetCore.Mvc;
+using FluentAssertions;
+using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
+using NSubstitute;
+using Rnwood.Smtp4dev.Data;
+using Rnwood.Smtp4dev.Hubs;
+using Rnwood.Smtp4dev.Tests.DBMigrations.Helpers;
 using Xunit;
 
 namespace Rnwood.Smtp4dev.Tests.Controllers
@@ -58,7 +64,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         private static readonly string message1HtmlBody = "<html>Hi</html>";
         private static readonly string message1TextBody = "Hi";
 
-        private static async Task<DbModel.Message> GetTestMessage1(bool includeTextBody=true, bool includeHtmlBody=true)
+        private static async Task<DbModel.Message> GetTestMessage1(bool includeHtmlBody=true, bool includeTextBody=true)
         {
             MimeMessage mimeMessage = new MimeMessage();
             mimeMessage.From.Add(InternetAddress.Parse("from@message.com"));
@@ -85,10 +91,40 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             MemoryMessageBuilder memoryMessageBuilder = new MemoryMessageBuilder();
             memoryMessageBuilder.Recipients.Add("to@envelope.com");
             memoryMessageBuilder.From = "from@envelope.com";
+            memoryMessageBuilder.ReceivedDate = DateTime.Now;
             using (var messageData = await memoryMessageBuilder.WriteData())
             {
                 mimeMessage.WriteTo(messageData);
             }
+
+            IMessage message = await memoryMessageBuilder.ToMessage();
+
+            var dbMessage = await new MessageConverter().ConvertAsync(message);
+            return dbMessage;
+        }
+
+        private static async Task<DbModel.Message> GetTestMessage(string subject, string from = "from@from.com", string to = "to@to.com")
+        {
+            MimeMessage mimeMessage = new MimeMessage();
+            mimeMessage.From.Add(InternetAddress.Parse(from));
+            mimeMessage.To.Add(InternetAddress.Parse(to));
+
+            mimeMessage.Subject = subject;
+            BodyBuilder bodyBuilder = new BodyBuilder();
+            bodyBuilder.HtmlBody = "<html>Hi</html>";
+            bodyBuilder.TextBody = "Hi";
+
+            mimeMessage.Body = bodyBuilder.ToMessageBody();
+
+            MemoryMessageBuilder memoryMessageBuilder = new MemoryMessageBuilder();
+            memoryMessageBuilder.Recipients.Add(to);
+            memoryMessageBuilder.From = from;
+            memoryMessageBuilder.ReceivedDate = DateTime.Now;
+            using (var messageData = await memoryMessageBuilder.WriteData())
+            {
+                mimeMessage.WriteTo(messageData);
+            }
+
             IMessage message = await memoryMessageBuilder.ToMessage();
 
             var dbMessage = await new MessageConverter().ConvertAsync(message);
@@ -117,12 +153,43 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
                 mimeMessage.Prepare(EncodingConstraint.SevenBit);
                 mimeMessage.WriteTo(messageData);
             }
+
             IMessage message = await memoryMessageBuilder.ToMessage();
 
             var dbMessage = await new MessageConverter().ConvertAsync(message);
             return dbMessage;
         }
 
+        [Fact]
+        public async Task GetSummaries_NoSearch_AllMessagesReturned()
+        {
+            DbModel.Message testMessage1 = await GetTestMessage("Message subject1");
+            DbModel.Message testMessage2 = await GetTestMessage("Message subject2");
+            DbModel.Message testMessage3 = await GetTestMessage("Message subject3");
+            TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1, testMessage2, testMessage3);
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+
+            var result = messagesController.GetSummaries(null);
+            result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage1.Id, testMessage2.Id, testMessage3.Id });
+        }
+
+        [Fact]
+        public async Task GetSummaries_Search_MatchingMessagesReturned()
+        {
+            DbModel.Message testMessage1 = await GetTestMessage("Message subject1");
+            DbModel.Message testMessage2 = await GetTestMessage("Message subject2");
+            DbModel.Message testMessage3 = await GetTestMessage("Message subject3");
+            var sqlLiteForTesting = new SqliteInMemory();
+            var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
+            MessagesRepository messagesRepository =
+                new MessagesRepository(Substitute.For<ITaskQueue>(), Substitute.For<NotificationsHub>(), context);
+            messagesRepository.DbContext.Messages.AddRange(testMessage1, testMessage2, testMessage3);
+            await messagesRepository.DbContext.SaveChangesAsync();
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+
+            var result = messagesController.GetSummaries("sUbJect2");
+            result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage2.Id });
+        }
 
         [Fact]
         public async Task GetHtmlBody()
@@ -166,6 +233,32 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
             var result= await messagesController.GetMessagePlainText(testMessage1.Id);
             Assert.IsType<NotFoundObjectResult>(result.Result);
+        }
+        [Fact]
+        public async Task GetNewSummaries_NoBookmark_AllMessagesReturned()
+        {
+            DbModel.Message testMessage1 = await GetTestMessage1();
+            DbModel.Message testMessage2 = await GetTestMessage1();
+            DbModel.Message testMessage3 = await GetTestMessage1();
+            TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1, testMessage2, testMessage3);
+            
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+
+            var result = messagesController.GetNewSummaries(null);
+            result.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage1.Id, testMessage2.Id, testMessage3.Id });
+        }
+
+        [Fact]
+        public async Task GetNewSummaries_NoBookmark_NewerMessagesReturned()
+        {
+            DbModel.Message testMessage1 = await GetTestMessage1();
+            DbModel.Message testMessage2 = await GetTestMessage1();
+            DbModel.Message testMessage3 = await GetTestMessage1();
+            TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1, testMessage2, testMessage3);
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+
+            var result = messagesController.GetNewSummaries(testMessage2.Id);
+            result.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage3.Id });
         }
 
         [Fact]

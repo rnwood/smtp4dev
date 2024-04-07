@@ -1,5 +1,6 @@
 ﻿import MessageSummary from "./ApiClient/MessageSummary";
 import { debounce } from 'ts-debounce';
+import MessagesController from "./ApiClient/MessagesController";
 
 export default class MessageNotificationManager {
     constructor(onClick: (message: MessageSummary) => void) {
@@ -13,62 +14,43 @@ export default class MessageNotificationManager {
     private onClick: (message: MessageSummary) => void;
     private visibleNotificationCloseTimeout: any | null = null;
     private currentNotification: Notification | null = null;
+    private unnotifiedMessages: MessageSummary[] = [];
+    private currentNotificationMessages: MessageSummary[] = [];
+    
+    refresh = debounce(this.refreshInternal, 500);
+    
+    async refreshInternal(suppressNotifications: boolean) {
+        
+        const messagesByDate = await new MessagesController().getNewSummaries(this.lastNotifiedMessage?.id ?? "");
+        const messagesToAdd = messagesByDate.filter(m => !this.unnotifiedMessages.find(um => um.id=== m.id));
 
-    setInitialMessages(messages: MessageSummary[]) {
-        const messagesByDate = this.sortMessages(messages);
-        this.lastNotifiedMessage = messagesByDate[messagesByDate.length - 1];
-    }
+        
+        if (messagesToAdd.length) {
 
-    notifyMessages(messages: MessageSummary[]) {
+            this.unnotifiedMessages = messagesToAdd.concat(this.unnotifiedMessages);
+            this.lastNotifiedMessage = this.unnotifiedMessages[0];
 
-        this.updateNotificationsDebounced(messages);
-    }
-
-    private updateNotificationsDebounced = debounce(this.updateNotifications, 500);
-
-    private updateNotifications(messages: MessageSummary[]) {
-        //Sort by something stable. Multiple messages may be received at same instant so use id as secondary
-        const messagesByDate = this.sortMessages(messages);
-        let unnotifiedMessages: MessageSummary[];
-        if (!this.lastNotifiedMessage) {
-            unnotifiedMessages = messagesByDate;
-        }
-        else {
-            const indexOfLastNotifiedMessage = messagesByDate.indexOf(this.lastNotifiedMessage);
-            if (indexOfLastNotifiedMessage != -1) {
-                unnotifiedMessages = messagesByDate.slice(indexOfLastNotifiedMessage + 1);
-            }
-            else {
-                unnotifiedMessages = messagesByDate;
-            }
-        }
-        if (unnotifiedMessages.length) {
-
-            unnotifiedMessages.reverse();
-
-            if (Notification.permission != "granted") {
-                //Ensure that if notification permission is granted later on, existing messages are treated as already notified.
-                this.lastNotifiedMessage = unnotifiedMessages[0];
-            }
-            else {
+            if (!suppressNotifications && Notification.permission == "granted") {
                 if (this.visibleNotificationCloseTimeout) {
                     clearTimeout(this.visibleNotificationCloseTimeout);
                 }
 
-                const notification = this.currentNotification = new Notification("smtp4dev: " + unnotifiedMessages.length + " new message(s) received.", {
-                    body: unnotifiedMessages.slice(0, 5).map(m => "From: " + m.from + " - " + m.subject).join("\n") + (unnotifiedMessages.length > 5 ? "..." : ""),
+                const notification = this.currentNotification = new Notification("smtp4dev: " + this.unnotifiedMessages.length + " new message(s) received.", {
+                    body: this.unnotifiedMessages.slice(0, 5).map(m => "From: " + m.from + " - " + m.subject).join("\n") + (this.unnotifiedMessages.length > 5 ? "..." : ""),
                     tag: "newmessages",
-                    renotify: true,
+                    renotify: false,
                     silent: (!!this.currentNotification),
                     requireInteraction: false
                 });
+                this.currentNotificationMessages = this.unnotifiedMessages;
                 notification.onclick = () => {
-                    this.onClick(unnotifiedMessages[0]);
+                    this.onClick(this.unnotifiedMessages[0]);
                 };
                 notification.onclose = () => {
                     if (notification === this.currentNotification) {
                         this.currentNotification = null;
-                        this.lastNotifiedMessage = unnotifiedMessages[0];
+                        this.unnotifiedMessages =[];
+                        this.currentNotificationMessages = [];
                     }
                 };
                 this.visibleNotificationCloseTimeout = setTimeout(() => {
@@ -76,28 +58,9 @@ export default class MessageNotificationManager {
                         this.currentNotification.close();
                     }
                 }, 10000);
+            } else {
+                this.unnotifiedMessages =[];
             }
         }
-    }
-
-    private sortMessages(messages: MessageSummary[]) {
-        const messagesByDate = messages.slice(0, messages.length);
-        messagesByDate.sort((m1, m2) => {
-            if (m1.receivedDate == m2.receivedDate) {
-                if (m1.id > m2.id) {
-                    return 1;
-                }
-                else {
-                    return -1;
-                }
-            }
-            else if (m1.receivedDate > m2.receivedDate) {
-                return 1;
-            }
-            else {
-                return -1;
-            }
-        });
-        return messagesByDate;
     }
 }

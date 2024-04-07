@@ -1,6 +1,4 @@
-﻿
-
-import MessageSummary from './MessageSummary';
+﻿import MessageSummary from './MessageSummary';
 import Message from './Message';
 import FileStreamResult from './FileStreamResult';
 import MessageRelayOptions from './MessageRelayOptions';
@@ -8,21 +6,30 @@ import axios from "axios";
 import PagedResult from './PagedResult';
 
 export default class MessagesController {
-               
-    constructor(){
+
+    constructor() {
     }
-    
+
     private apiBaseUrl = `api/Messages`;
 
-    public getSummaries_url(sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): string {
-        return `${this.apiBaseUrl}?sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}&page=${page}&pageSize=${pageSize}`;
+    public getNewSummaries_url(lastSeenMessageId: string|null, pageSize: number = 50): string {
+        return `${this.apiBaseUrl}/new?lastSeenMessageId=${encodeURIComponent(lastSeenMessageId ?? "")}&pageSize=${pageSize}`;
     }
 
-    public async getSummaries(sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): Promise<PagedResult<MessageSummary>> {
+    public async getNewSummaries(lastSeenMessageId: string|null, pageSize: number = 50): Promise<MessageSummary[]> {
 
-        return (await axios.get(this.getSummaries_url(sortColumn, sortIsDescending, page,pageSize), null || undefined)).data as PagedResult<MessageSummary>;
+        return (await axios.get(this.getNewSummaries_url(lastSeenMessageId, pageSize), null || undefined)).data as MessageSummary[];
     }
-    
+
+    public getSummaries_url(searchTerms: string, sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): string {
+        return `${this.apiBaseUrl}?searchTerms=${encodeURIComponent(searchTerms)}&sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}&page=${page}&pageSize=${pageSize}`;
+    }
+
+    public async getSummaries(searchTerms: string, sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): Promise<PagedResult<MessageSummary>> {
+
+        return (await axios.get(this.getSummaries_url(searchTerms, sortColumn, sortIsDescending, page, pageSize), null || undefined)).data as PagedResult<MessageSummary>;
+    }
+
     // get: api/Messages/${encodeURIComponent(id)}  
     public getMessage_url(id: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}`;
@@ -32,7 +39,7 @@ export default class MessagesController {
 
         return (await axios.get(this.getMessage_url(id), null || undefined)).data as Message;
     }
-    
+
     // post: api/Messages/${encodeURIComponent(id)}  
     public markMessageRead_url(id: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}`;
@@ -46,7 +53,7 @@ export default class MessagesController {
     public async markAllMessageRead(): Promise<void> {
         return await axios.post(`${this.apiBaseUrl}/markAllRead`);
     }
-    
+
     // get: api/Messages/${encodeURIComponent(id)}/download  
     public downloadMessage_url(id: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}/download`;
@@ -56,7 +63,7 @@ export default class MessagesController {
 
         return (await axios.get(this.downloadMessage_url(id), null || undefined)).data as FileStreamResult;
     }
-    
+
     // post: api/Messages/${encodeURIComponent(id)}/relay  
     public relayMessage_url(id: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}/relay`;
@@ -66,7 +73,7 @@ export default class MessagesController {
 
         return (await axios.post(this.relayMessage_url(id), options || undefined)).data as void;
     }
-    
+
     // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content  
     public getPartContent_url(id: string, partid: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content`;
@@ -76,7 +83,7 @@ export default class MessagesController {
 
         return (await axios.get(this.getPartContent_url(id, partid), null || undefined)).data as FileStreamResult;
     }
-    
+
     // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/source  
     public getPartSource_url(id: string, partid: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/source`;
@@ -86,7 +93,7 @@ export default class MessagesController {
 
         return (await axios.get(this.getPartSource_url(id, partid), null || undefined)).data as string;
     }
-    
+
     // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/raw  
     public getPartSourceRaw_url(id: string, partid: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/raw`;
@@ -96,7 +103,7 @@ export default class MessagesController {
 
         return (await axios.get(this.getPartSourceRaw_url(id, partid), null || undefined)).data as string;
     }
-    
+
     // get: api/Messages/${encodeURIComponent(id)}/raw  
     public getMessageSourceRaw_url(id: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}/raw`;
@@ -106,7 +113,7 @@ export default class MessagesController {
 
         return (await axios.get(this.getMessageSourceRaw_url(id), null || undefined)).data as string;
     }
-    
+
     // get: api/Messages/${encodeURIComponent(id)}/source  
     public getMessageSource_url(id: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}/source`;
@@ -116,7 +123,7 @@ export default class MessagesController {
 
         return (await axios.get(this.getMessageSource_url(id), null || undefined)).data as string;
     }
-    
+
     // get: api/Messages/${encodeURIComponent(id)}/html  
     public getMessageHtml_url(id: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}/html`;
@@ -136,7 +143,7 @@ export default class MessagesController {
 
         return (await axios.get(this.getMessagePlainText_url(id), null || undefined)).data as string;
     }
-    
+
     // delete: api/Messages/${encodeURIComponent(id)}  
     public delete_url(id: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}`;
@@ -146,7 +153,7 @@ export default class MessagesController {
 
         return (await axios.delete(this.delete_url(id), null || undefined)).data as void;
     }
-    
+
     // delete: api/Messages/*  
     public deleteAll_url(): string {
         return `${this.apiBaseUrl}/*`;

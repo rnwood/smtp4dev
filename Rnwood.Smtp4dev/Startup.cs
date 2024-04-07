@@ -1,4 +1,5 @@
 using System;
+using System.Globalization;
 using System.IO;
 using System.Net;
 using Microsoft.AspNetCore.Builder;
@@ -7,7 +8,6 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
-
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Server;
@@ -20,6 +20,8 @@ using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.Service;
 using Serilog;
 using System.Linq;
+using Microsoft.Data.Sqlite;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace Rnwood.Smtp4dev
 {
@@ -46,12 +48,10 @@ namespace Rnwood.Smtp4dev
                 if (string.IsNullOrEmpty(serverOptions.Database))
                 {
                     Log.Logger.Information("Using in memory database.");
-                    opt.UseInMemoryDatabase("main");
+                    opt.UseSqlite("Data Source=file:cachedb?mode=memory&cache=shared");
                 }
                 else
                 {
-
-
                     var dbLocation = Path.GetFullPath(serverOptions.Database);
                     if (serverOptions.RecreateDb && File.Exists(dbLocation))
                     {
@@ -59,8 +59,9 @@ namespace Rnwood.Smtp4dev
                         File.Delete(dbLocation);
                     }
 
-                    Log.Logger.Information("Using Sqlite database at {dbLocation}" , dbLocation);
-                    opt.UseSqlite($"Data Source='{dbLocation}'");
+                    Log.Logger.Information("Using Sqlite database at {dbLocation}", dbLocation);
+
+                    opt.UseSqlite($"Data Source={dbLocation}");
                 }
             }, ServiceLifetime.Scoped, ServiceLifetime.Singleton);
 
@@ -94,10 +95,11 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<NotificationsHub>();
 
             services.AddControllers();
+            services.AddRequestLocalization(options => { options.SupportedCultures = CultureInfo.GetCultures(CultureTypes.AllCultures); });
 
             services.AddSpaStaticFiles(o => o.RootPath = "ClientApp");
-
         }
+
 
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -114,6 +116,7 @@ namespace Rnwood.Smtp4dev
                 subdir.UseDefaultFiles();
                 subdir.UseStaticFiles();
                 subdir.UseSpaStaticFiles();
+                subdir.UseRequestLocalization();
 
                 subdir.UseWebSockets();
 
@@ -125,12 +128,12 @@ namespace Rnwood.Smtp4dev
                     if (env.IsDevelopment())
                     {
                         e.MapToVueCliProxy(
-                        "{*path}",
-                        new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp") },
-                        npmScript: "serve",
-                        regex: "Compiled successfully",
-                        forceKill: true,
-                        port: 8123
+                            "{*path}",
+                            new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp") },
+                            npmScript: "serve",
+                            regex: "Compiled successfully",
+                            forceKill: true,
+                            port: 8123
                         );
                     }
                 });
@@ -139,7 +142,12 @@ namespace Rnwood.Smtp4dev
                 {
                     using (var context = scope.ServiceProvider.GetService<Smtp4devDbContext>())
                     {
-                        if (!context.Database.IsInMemory())
+                        if (string.IsNullOrEmpty(serverOptions.Database))
+                        {
+                            context.Database.Migrate();
+                            context.SaveChanges();
+                        }
+                        else
                         {
 
                             var pendingMigrations = context.Database.GetPendingMigrations();
@@ -147,9 +155,15 @@ namespace Rnwood.Smtp4dev
                             {
                                 Log.Logger.Information("Updating DB schema with migrations: {migrations}", string.Join(", ", pendingMigrations));
                                 context.Database.Migrate();
+                                context.SaveChanges();
                             }
-
                         }
+
+                        context.Messages.ToList();
+                        context.Sessions.ToList();
+                        context.ImapState.ToList();
+                        context.MessageRelays.ToList();
+
                     }
                 }
 
@@ -160,8 +174,10 @@ namespace Rnwood.Smtp4dev
             if (!string.IsNullOrEmpty(serverOptions.BasePath) && serverOptions.BasePath != "/")
             {
                 RewriteOptions rewrites = new RewriteOptions();
-                rewrites.AddRedirect("^" + serverOptions.BasePath.TrimEnd('/') + "$", serverOptions.BasePath.TrimEnd('/') + "/"); ;
-                rewrites.AddRedirect("^(/)?$", serverOptions.BasePath.TrimEnd('/') + "/"); ;
+                rewrites.AddRedirect("^" + serverOptions.BasePath.TrimEnd('/') + "$", serverOptions.BasePath.TrimEnd('/') + "/");
+                ;
+                rewrites.AddRedirect("^(/)?$", serverOptions.BasePath.TrimEnd('/') + "/");
+                ;
                 app.UseRewriter(rewrites);
 
                 app.Map(serverOptions.BasePath, configure);

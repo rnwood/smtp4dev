@@ -31,12 +31,38 @@ namespace Rnwood.Smtp4dev.Controllers
         private readonly IMessagesRepository messagesRepository;
         private readonly ISmtp4devServer server;
 
+        [HttpGet("new")]
+        public MessageSummary[] GetNewSummaries(Guid? lastSeenMessageId, int pageSize = 50)
+        {
+            return messagesRepository.GetMessages(true)
+                .OrderByDescending(m => m.ReceivedDate)
+                .ThenByDescending(m => m.Id)
+                .AsEnumerable()
+                .TakeWhile(m => m.Id != lastSeenMessageId)
+                .Select(m => new MessageSummary(m))
+                .Take(pageSize)
+                .ToArray();
+        }
+
         [HttpGet]
-        public ApiModel.PagedResult<MessageSummary> GetSummaries(string sortColumn = "receivedDate", bool sortIsDescending = true, int page = 1,
+        public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string sortColumn = "receivedDate",
+            bool sortIsDescending = true, int page = 1,
             int pageSize = 5)
         {
-            return messagesRepository.GetMessages(false).Include(m => m.Relays)
-                .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""))
+            IEnumerable<DbModel.Message> query = messagesRepository.GetMessages(true)
+                .Include(m => m.Relays)
+                .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""));
+
+            if (!string.IsNullOrEmpty(searchTerms))
+            {
+               
+                query = query.ToList().Where(m => m.Subject.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
+                                         || m.From.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
+                                         || m.To.Contains( searchTerms, StringComparison.CurrentCultureIgnoreCase)
+                );
+            }
+
+            return query
                 .Select(m => new MessageSummary(m))
                 .GetPaged(page, pageSize);
         }
@@ -172,7 +198,7 @@ namespace Rnwood.Smtp4dev.Controllers
             {
                 return NotFound("Message does not have a HTML body");
             }
-            
+
             HtmlDocument doc = new HtmlDocument();
             doc.LoadHtml(html);
 

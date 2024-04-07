@@ -17,6 +17,7 @@ using Jint;
 using Jint.Native;
 using Jint.Native.Json;
 using Jint.Runtime;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.SmtpServer.Extensions.Auth;
@@ -92,7 +93,7 @@ namespace Rnwood.Smtp4dev.Server
             var sessionId = activeSessionsToDbId[e.Message.Session];
             using var scope = serviceScopeFactory.CreateScope();
             Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-            var session = dbContext.Sessions.Single(s => s.Id == sessionId);
+            var session = dbContext.Sessions.AsNoTracking().Single(s => s.Id == sessionId);
 
             if (!this.scriptingHost.ValidateRecipient(session, e.Recipient))
             {
