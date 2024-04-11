@@ -138,7 +138,7 @@ import {debounce} from "ts-debounce";
 import ConfirmationDialog from "@/components/confirmationdialog.vue";
 import {MessageBoxInputData} from "element-ui/types/message-box";
 import ServerController from "../ApiClient/ServerController";
-import ClientController from "../ApiClient/ClientController";
+import ClientSettingsController from "../ApiClient/ClientSettingsController";
 
 import {mapOrder} from "@/components/utils/mapOrder";
 import PagedResult, {EmptyPagedResult} from "@/ApiClient/PagedResult";
@@ -420,7 +420,7 @@ export default class MessageList extends Vue {
 
   private async initPageSizeProps() {
     const defaultPageSize = 25;
-    let client = await new ClientController().getClient();
+    let client = await new ClientSettingsController().getClientSettings();
     this.pageSize = client.pageSize || defaultPageSize;
   }
 

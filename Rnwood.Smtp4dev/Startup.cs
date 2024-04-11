@@ -37,6 +37,13 @@ namespace Rnwood.Smtp4dev
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOpenApiDocument(config =>
+            {
+                config.DocumentName = "v0";
+                config.Title = "smtp4dev";
+                config.Version = "v0";
+            });
+
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
             services.Configure<RelayOptions>(Configuration.GetSection("RelayOptions"));
             services.Configure<ClientOptions>(Configuration.GetSection("ClientOptions"));
@@ -101,7 +108,6 @@ namespace Rnwood.Smtp4dev
         }
 
 
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -111,6 +117,13 @@ namespace Rnwood.Smtp4dev
 
             Action<IApplicationBuilder> configure = subdir =>
             {
+                subdir.UseOpenApi(c => c.Path = "/api/{documentName}/swagger.json");
+                subdir.UseSwaggerUi(c =>
+                {
+                    c.Path = "/api";
+                    c.DocumentPath = "/api/{documentName}/swagger.json";
+                    c.DocumentTitle = "smtp4dev API";
+                });
                 subdir.UseRouting();
                 subdir.UseDeveloperExceptionPage();
                 subdir.UseDefaultFiles();
@@ -137,6 +150,8 @@ namespace Rnwood.Smtp4dev
                         );
                     }
                 });
+
+
 
                 using (var scope = subdir.ApplicationServices.CreateScope())
                 {

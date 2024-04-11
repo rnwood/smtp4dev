@@ -34,7 +34,7 @@
 import { Component, Emit, Prop, Watch } from "vue-property-decorator";
 import Vue from "vue";
 import PagedResult from "@/ApiClient/PagedResult";
-import ClientController from "@/ApiClient/ClientController";
+import ClientSettingsController from "@/ApiClient/ClientSettingsController";
 
 
 @Component({})
@@ -79,7 +79,7 @@ export default class MessageListPager extends Vue {
 
   private async initPageSizeProps() {
     const defaultPageSize = 25;
-    let client = await new ClientController().getClient();
+    let client = await new ClientSettingsController().getClientSettings();
     this.pageSize = client.pageSize || defaultPageSize;
   }
 

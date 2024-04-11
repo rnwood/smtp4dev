@@ -1,4 +1,4 @@
-export default class Client {
+export default class ClientSettings {
     constructor(pageSize: number) {
         this.pageSize = pageSize;
     }

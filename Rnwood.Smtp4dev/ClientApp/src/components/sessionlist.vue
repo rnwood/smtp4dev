@@ -88,7 +88,7 @@ import ConfirmationDialog from "@/components/confirmationdialog.vue";
 import { ElTable } from "element-ui/types/table";
 import PagedResult, { EmptyPagedResult } from "@/ApiClient/PagedResult";
 import Messagelistpager from "@/components/messagelistpager.vue";
-import ClientController from "@/ApiClient/ClientController";
+import ClientSettingsController from "@/ApiClient/ClientSettingsController";
 
 @Component({
   components: {
@@ -226,7 +226,7 @@ export default class SessionList extends Vue {
 
   private async initPageSizeProps() {
     const defaultPageSize = 25;
-    let client = await new ClientController().getClient();
+    let client = await new ClientSettingsController().getClientSettings();
     this.pageSize = client.pageSize || defaultPageSize;
   }
 

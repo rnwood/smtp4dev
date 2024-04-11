@@ -6,20 +6,24 @@ namespace Rnwood.Smtp4dev.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ClientController : Controller
+    public class ClientSettingsController : Controller
     {
         private readonly IOptions<ClientOptions> clientOptions;
 
-        public ClientController(IOptions<ClientOptions> clientOptions)
+        public ClientSettingsController(IOptions<ClientOptions> clientOptions)
         {
             this.clientOptions = clientOptions;
         }
 
+        /// <summary>
+        /// Gets client settings for the smtp4dev UI.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
-        public ApiModel.Client Get()
+        public ApiModel.ClientSettings Get()
         {
             var clientProps = clientOptions.Value;
-            return new ApiModel.Client
+            return new ApiModel.ClientSettings
             {
                 PageSize = clientProps.PageSize
             };

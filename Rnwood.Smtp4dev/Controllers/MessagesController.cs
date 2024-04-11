@@ -31,6 +31,12 @@ namespace Rnwood.Smtp4dev.Controllers
         private readonly IMessagesRepository messagesRepository;
         private readonly ISmtp4devServer server;
 
+        /// <summary>
+        /// Returns all new messages since the provided message ID. Returns only the summary without message content.
+        /// </summary>
+        /// <param name="lastSeenMessageId">If not specified all recently received messages will be returned up to the page limit.</param>
+        /// <param name="pageSize">Max number of messages to retrieve. The most recent X are returned.</param>
+        /// <returns></returns>
         [HttpGet("new")]
         public MessageSummary[] GetNewSummaries(Guid? lastSeenMessageId, int pageSize = 50)
         {
@@ -44,6 +50,15 @@ namespace Rnwood.Smtp4dev.Controllers
                 .ToArray();
         }
 
+        /// <summary>
+        /// Returns a list of message summaries including basic details but not the content.
+        /// </summary>
+        /// <param name="searchTerms">Case insensitive term to search for in subject,from,to</param>
+        /// <param name="sortColumn"></param>
+        /// <param name="sortIsDescending">True if sort should be descending</param>
+        /// <param name="page">Page number to retrieve</param>
+        /// <param name="pageSize">Max number of items to retrieve</param>
+        /// <returns></returns>
         [HttpGet]
         public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string sortColumn = "receivedDate",
             bool sortIsDescending = true, int page = 1,
@@ -55,10 +70,10 @@ namespace Rnwood.Smtp4dev.Controllers
 
             if (!string.IsNullOrEmpty(searchTerms))
             {
-               
+
                 query = query.ToList().Where(m => m.Subject.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
                                          || m.From.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
-                                         || m.To.Contains( searchTerms, StringComparison.CurrentCultureIgnoreCase)
+                                         || m.To.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
                 );
             }
 
@@ -73,24 +88,43 @@ namespace Rnwood.Smtp4dev.Controllers
                    throw new FileNotFoundException($"Message with id {id} was not found.");
         }
 
+        /// <summary>
+        /// Returns the full message details for a message.
+        /// </summary>
+        /// <param name="id">The message ID to get.</param>
+        /// <returns></returns>
         [HttpGet("{id}")]
         public async Task<ApiModel.Message> GetMessage(Guid id)
         {
             return new ApiModel.Message(await GetDbMessage(id, false));
         }
 
-        [HttpPost("{id}")]
+        /// <summary>
+        /// Marks a single message as read
+        /// </summary>
+        /// <param name="id">The ID of the message to mark read.</param>
+        /// <returns></returns>
+        [HttpPost("{id}/markRead")]
         public Task MarkMessageRead(Guid id)
         {
             return messagesRepository.MarkMessageRead(id);
         }
 
+        /// <summary>
+        /// Marks all messages as read.
+        /// </summary>
+        /// <returns></returns>
         [HttpPost("markAllRead")]
         public Task MarkAllRead()
         {
             return messagesRepository.MarkAllMessagesRead();
         }
 
+        /// <summary>
+        /// Downloads message in .eml (message/rfc822) format.
+        /// </summary>
+        /// <param name="id">The ID of the message to download</param>
+        /// <returns></returns>
         [HttpGet("{id}/download")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
         public async Task<FileStreamResult> DownloadMessage(Guid id)
@@ -98,7 +132,12 @@ namespace Rnwood.Smtp4dev.Controllers
             Message result = await GetDbMessage(id, false);
             return new FileStreamResult(new MemoryStream(result.Data), "message/rfc822") { FileDownloadName = $"{id}.eml" };
         }
-
+        /// <summary>
+        /// Relays the specified message either to the original recipients or to those specified.
+        /// </summary>
+        /// <param name="id">The ID of the message to relay.</param>
+        /// <param name="options"></param>
+        /// <returns></returns>
         [HttpPost("{id}/relay")]
         public async Task<IActionResult> RelayMessage(Guid id, [FromBody] MessageRelayOptions options)
         {
@@ -166,6 +205,11 @@ namespace Rnwood.Smtp4dev.Controllers
             return message.MimeMessage?.HtmlBody ?? message.MimeMessage?.TextBody ?? "";
         }
 
+        /// <summary>
+        /// Returns the plain text body of the specified message if one exists.
+        /// </summary>
+        /// <param name="id">The ID of the message to get body of.</param>
+        /// <returns></returns>
         [HttpGet("{id}/plaintext")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
         public async Task<ActionResult<string>> GetMessagePlainText(Guid id)
@@ -185,6 +229,12 @@ namespace Rnwood.Smtp4dev.Controllers
 
             return plaintext;
         }
+
+        /// <summary>
+        /// Returns the HTML text body of the specified message if one exists.
+        /// </summary>
+        /// <param name="id">The ID of the message to get body of.</param>
+        /// <returns></returns>
 
         [HttpGet("{id}/html")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
