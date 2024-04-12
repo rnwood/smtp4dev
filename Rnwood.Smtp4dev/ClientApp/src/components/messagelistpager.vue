@@ -1,33 +1,16 @@
 <template>
-  <el-row>
-    <el-col :span="16">
-      <el-pagination
-        background
-        layout="prev, pager, next"
-        :page-size="pageSize"
-        :page-count="pageCount"
-        :pager-count="5"
-        :current-page="page"
-        v-on:current-change="onCurrentPageChange"
-        v-on:size-change="onPageSizeChange"
-        :total="totalItems"
-      >
-      </el-pagination>
-    </el-col>
-    <el-col :span="4">
-      <span>Page size:</span>
-    </el-col>
-    <el-col :span="4">
-      <el-input
-        placeholder="Page size"
-        v-model.number="pageSize"
-        min="1"
-        type="number"
-        @change="onPageSizeChange"
-        size="small"
-      ></el-input>
-    </el-col>
-  </el-row>
+  <div style="display: flex; align-items: stretch; column-gap: 12px;">
+
+    <el-pagination style="flex: 1 1 auto" background layout="prev, pager, next" :page-size="pageSize"
+      :page-count="pageCount" :pager-count="5" :current-page="page" v-on:current-change="onCurrentPageChange"
+      v-on:size-change="onPageSizeChange" :total="totalItems">
+    </el-pagination>
+    <div style="flex: 0 0 content; align-self: center;">Page size:</div>
+
+
+    <el-input style="flex: 0 0 85px;" placeholder="Page size" v-model.number="pageSize" min="1" type="number" @change="onPageSizeChange"
+      size="small"></el-input>
+  </div>
 </template>
 
 <script lang="ts">
