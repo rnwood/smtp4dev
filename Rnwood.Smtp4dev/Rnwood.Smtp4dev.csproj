@@ -29,14 +29,14 @@
     <PackageReference Include="HtmlAgilityPack" Version="1.11.59" />
     <PackageReference Include="Jint" Version="3.0.1" />
     <PackageReference Include="MailKit" Version="4.4.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="8.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="8.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.2">
+    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="8.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="8.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.4">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.2" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.4" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.4" />
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
     <PackageReference Include="MimeKit" Version="4.4.0" />
     <PackageReference Include="Mono.Options" Version="6.12.0.148" />

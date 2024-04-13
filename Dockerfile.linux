@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.2 AS runtime
+FROM mcr.microsoft.com/dotnet/aspnet:8.0.4 AS runtime
 COPY out /app
 VOLUME ["/smtp4dev"]
 WORKDIR /
