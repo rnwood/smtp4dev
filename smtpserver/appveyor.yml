@@ -80,7 +80,7 @@ deploy:
 - provider: GitHub
   artifact: /.*\..*/
   auth_token:
-    secure: q9mrB+CEIeAH869LUdn55G70dDqFx2QlpE3reH7MR6Ys3lu/FqZSMgN7ykYuaKfs
+    secure: kwKatdFixHGt6H2kF/Tcvg1Uds+I077wvItDbYz0uxrb9+9r8HIb1w50vgpZbpIq
   prerelease: $(PRERELEASE)
   tag: $(APPVEYOR_REPO_TAG_NAME)
   on:
@@ -88,7 +88,7 @@ deploy:
 - provider: GitHub
   artifact: /.*\..*/
   auth_token:
-    secure: q9mrB+CEIeAH869LUdn55G70dDqFx2QlpE3reH7MR6Ys3lu/FqZSMgN7ykYuaKfs
+    secure: kwKatdFixHGt6H2kF/Tcvg1Uds+I077wvItDbYz0uxrb9+9r8HIb1w50vgpZbpIq
   prerelease: $(PRERELEASE)
   on:
     branch: master
