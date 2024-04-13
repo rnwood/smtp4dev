@@ -13,6 +13,7 @@ using Rnwood.Smtp4dev.Server;
 using MimeKit;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.DbModel;
+using NSwag.Annotations;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -38,6 +39,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <param name="pageSize">Max number of messages to retrieve. The most recent X are returned.</param>
         /// <returns></returns>
         [HttpGet("new")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(MessageSummary[]), Description = "")]
         public MessageSummary[] GetNewSummaries(Guid? lastSeenMessageId, int pageSize = 50)
         {
             return messagesRepository.GetMessages(true)
@@ -60,6 +62,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <param name="pageSize">Max number of items to retrieve</param>
         /// <returns></returns>
         [HttpGet]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.PagedResult<MessageSummary>), Description = "")]
         public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string sortColumn = "receivedDate",
             bool sortIsDescending = true, int page = 1,
             int pageSize = 5)
@@ -94,6 +97,8 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <param name="id">The message ID to get.</param>
         /// <returns></returns>
         [HttpGet("{id}")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.Message), Description ="")]
+                [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description ="If the message does not exist")]
         public async Task<ApiModel.Message> GetMessage(Guid id)
         {
             return new ApiModel.Message(await GetDbMessage(id, false));

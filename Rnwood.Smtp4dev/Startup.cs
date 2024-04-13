@@ -117,7 +117,10 @@ namespace Rnwood.Smtp4dev
 
             Action<IApplicationBuilder> configure = subdir =>
             {
-                subdir.UseOpenApi(c => c.Path = "/api/{documentName}/swagger.json");
+                subdir.UseOpenApi(c =>
+                {
+                    c.Path = "/api/{documentName}/swagger.json";
+                });
                 subdir.UseSwaggerUi(c =>
                 {
                     c.Path = "/api";

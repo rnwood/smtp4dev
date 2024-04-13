@@ -4,11 +4,18 @@ using Rnwood.Smtp4dev.ApiModel;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
+    /// <summary>
+    /// Returns information about the version of smtp4dev
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [UseEtagFilter]
     public class VersionController : Controller
     {
+        /// <summary>
+        /// Gets the version infomation.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public ActionResult<VersionInfo> Get()
         {

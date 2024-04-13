@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
@@ -53,7 +54,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
                     foreach (var internetAddress in MimeMessage.To.Where(t => t is MailboxAddress))
                     {
-                        var to = (MailboxAddress) internetAddress;
+                        var to = (MailboxAddress)internetAddress;
                         recipients.Remove(PunyCodeReplacer.DecodePunycode(to.Address));
                     }
                 }
@@ -64,7 +65,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
                     foreach (var internetAddress in MimeMessage.Cc.Where(t => t is MailboxAddress))
                     {
-                        var cc = (MailboxAddress) internetAddress;
+                        var cc = (MailboxAddress)internetAddress;
                         recipients.Remove(PunyCodeReplacer.DecodePunycode(cc.Address));
                     }
                 }
@@ -148,8 +149,8 @@ namespace Rnwood.Smtp4dev.ApiModel
             {
                 return new FileStreamResult(mimePart.Content.Open(), contentEntity.ContentType?.MimeType ?? "application/text")
                 {
-                    FileDownloadName = mimePart.FileName ?? 
-                                       ((contentEntity.ContentId  ?? "content") + (MimeTypes.TryGetExtension(mimePart.ContentType.MimeType, out string extn) ? extn : ""))
+                    FileDownloadName = mimePart.FileName ??
+                                       ((contentEntity.ContentId ?? "content") + (MimeTypes.TryGetExtension(mimePart.ContentType.MimeType, out string extn) ? extn : ""))
                 };
             }
             else
@@ -169,7 +170,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         internal static string GetPartContentAsText(Message result, string id)
         {
             var contentEntity = GetPart(result, id);
-            
+
             if (contentEntity is MimePart part)
             {
                 var encoding = part.ContentType.CharsetEncoding ?? ApiModel.Message.GetSessionEncodingOrAssumed(result);
@@ -193,7 +194,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             using (MemoryStream ms = new MemoryStream())
             {
                 contentEntity.WriteTo(ms, false);
-                var encoding = contentEntity.ContentType.CharsetEncoding ??ApiModel.Message.GetSessionEncodingOrAssumed(message);
+                var encoding = contentEntity.ContentType.CharsetEncoding ?? ApiModel.Message.GetSessionEncodingOrAssumed(message);
                 return encoding.GetString(ms.GetBuffer());
             }
 
@@ -219,12 +220,12 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string Cc { get; set; }
         public string Bcc { get; set; }
         public DateTime ReceivedDate { get; set; }
-        
+
         public bool SecureConnection { get; set; }
 
         public string Subject { get; set; }
 
-        public List<MessageEntitySummary> Parts { get; set; } 
+        public List<MessageEntitySummary> Parts { get; set; }
 
         public List<Header> Headers { get; set; }
 
@@ -232,6 +233,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public string RelayError { get; set; }
 
+        [JsonIgnore]
         internal MimeMessage MimeMessage { get; set; }
 
         internal byte[] Data { get; set; }
