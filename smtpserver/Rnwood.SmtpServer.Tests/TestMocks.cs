@@ -70,6 +70,7 @@ public class TestMocks
         Connection.SetupGet(c => c.VerbMap).Returns(VerbMap.Object);
         Connection.Setup(c => c.WriteResponse(It.IsAny<SmtpResponse>())).Returns(Task.CompletedTask);
         Connection.Setup(c => c.CommitMessage()).Returns(Task.CompletedTask);
+        Connection.Setup(c => c.AbortMessage()).Returns(Task.CompletedTask);
 
         Server.SetupGet(s => s.Behaviour).Returns(ServerBehaviour.Object);
 

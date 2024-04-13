@@ -110,18 +110,18 @@
                 Gets the Text which was parsed.
             </summary>
         </member>
-        <member name="T:Rnwood.SmtpServer.ASCIISevenBitTruncatingEncoding">
+        <member name="T:Rnwood.SmtpServer.AsciiSevenBitTruncatingEncoding">
             <summary>
                 An ASCII encoding where the highest order bit is zeroed.
             </summary>
             <seealso cref="T:System.Text.Encoding" />
         </member>
-        <member name="M:Rnwood.SmtpServer.ASCIISevenBitTruncatingEncoding.#ctor">
+        <member name="M:Rnwood.SmtpServer.AsciiSevenBitTruncatingEncoding.#ctor">
             <summary>
-                Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.ASCIISevenBitTruncatingEncoding" /> class.
+                Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.AsciiSevenBitTruncatingEncoding" /> class.
             </summary>
         </member>
-        <member name="M:Rnwood.SmtpServer.ASCIISevenBitTruncatingEncoding.GetByteCount(System.Char[],System.Int32,System.Int32)">
+        <member name="M:Rnwood.SmtpServer.AsciiSevenBitTruncatingEncoding.GetByteCount(System.Char[],System.Int32,System.Int32)">
             <summary>
                 When overridden in a derived class, calculates the number of bytes produced by encoding a set of characters from
                 the specified character array.
@@ -133,7 +133,7 @@
                 The number of bytes produced by encoding the specified characters.
             </returns>
         </member>
-        <member name="M:Rnwood.SmtpServer.ASCIISevenBitTruncatingEncoding.GetBytes(System.Char[],System.Int32,System.Int32,System.Byte[],System.Int32)">
+        <member name="M:Rnwood.SmtpServer.AsciiSevenBitTruncatingEncoding.GetBytes(System.Char[],System.Int32,System.Int32,System.Byte[],System.Int32)">
             <summary>
                 When overridden in a derived class, encodes a set of characters from the specified character array into the
                 specified byte array.
@@ -147,7 +147,7 @@
                 The actual number of bytes written into <paramref name="bytes">bytes</paramref>.
             </returns>
         </member>
-        <member name="M:Rnwood.SmtpServer.ASCIISevenBitTruncatingEncoding.GetCharCount(System.Byte[],System.Int32,System.Int32)">
+        <member name="M:Rnwood.SmtpServer.AsciiSevenBitTruncatingEncoding.GetCharCount(System.Byte[],System.Int32,System.Int32)">
             <summary>
                 When overridden in a derived class, calculates the number of characters produced by decoding a sequence of bytes
                 from the specified byte array.
@@ -159,7 +159,7 @@
                 The number of characters produced by decoding the specified sequence of bytes.
             </returns>
         </member>
-        <member name="M:Rnwood.SmtpServer.ASCIISevenBitTruncatingEncoding.GetChars(System.Byte[],System.Int32,System.Int32,System.Char[],System.Int32)">
+        <member name="M:Rnwood.SmtpServer.AsciiSevenBitTruncatingEncoding.GetChars(System.Byte[],System.Int32,System.Int32,System.Char[],System.Int32)">
             <summary>
                 When overridden in a derived class, decodes a sequence of bytes from the specified byte array into the specified
                 character array.
@@ -173,7 +173,7 @@
                 The actual number of characters written into <paramref name="chars">chars</paramref>.
             </returns>
         </member>
-        <member name="M:Rnwood.SmtpServer.ASCIISevenBitTruncatingEncoding.GetMaxByteCount(System.Int32)">
+        <member name="M:Rnwood.SmtpServer.AsciiSevenBitTruncatingEncoding.GetMaxByteCount(System.Int32)">
             <summary>
                 When overridden in a derived class, calculates the maximum number of bytes produced by encoding the specified
                 number of characters.
@@ -183,7 +183,7 @@
                 The maximum number of bytes produced by encoding the specified number of characters.
             </returns>
         </member>
-        <member name="M:Rnwood.SmtpServer.ASCIISevenBitTruncatingEncoding.GetMaxCharCount(System.Int32)">
+        <member name="M:Rnwood.SmtpServer.AsciiSevenBitTruncatingEncoding.GetMaxCharCount(System.Int32)">
             <summary>
                 When overridden in a derived class, calculates the maximum number of characters produced by decoding the specified
                 number of bytes.
@@ -193,12 +193,12 @@
                 The maximum number of characters produced by decoding the specified number of bytes.
             </returns>
         </member>
-        <member name="P:Rnwood.SmtpServer.ASCIISevenBitTruncatingEncoding.DecodingFallback.MaxCharCount">
+        <member name="P:Rnwood.SmtpServer.AsciiSevenBitTruncatingEncoding.DecodingFallback.MaxCharCount">
             <summary>
                 Gets the maximum number of characters the current <see cref="T:System.Text.DecoderFallback"></see> object can return.
             </summary>
         </member>
-        <member name="M:Rnwood.SmtpServer.ASCIISevenBitTruncatingEncoding.DecodingFallback.CreateFallbackBuffer">
+        <member name="M:Rnwood.SmtpServer.AsciiSevenBitTruncatingEncoding.DecodingFallback.CreateFallbackBuffer">
             <summary>
                 Initializes a new instance of the <see cref="T:System.Text.DecoderFallbackBuffer"></see> class.
             </summary>
@@ -1055,21 +1055,6 @@
         </member>
         <member name="M:Rnwood.SmtpServer.Extensions.Auth.CramMd5MechanismProcessor.ProcessResponse(System.String)">
             <inheritdoc />
-        </member>
-        <member name="T:Rnwood.SmtpServer.Extensions.Auth.CramMd5MechanismProcessor.States">
-            <summary>
-                Defines the States.
-            </summary>
-        </member>
-        <member name="F:Rnwood.SmtpServer.Extensions.Auth.CramMd5MechanismProcessor.States.Initial">
-            <summary>
-                Defines the Initial
-            </summary>
-        </member>
-        <member name="F:Rnwood.SmtpServer.Extensions.Auth.CramMd5MechanismProcessor.States.AwaitingResponse">
-            <summary>
-                Defines the AwaitingResponse
-            </summary>
         </member>
         <member name="T:Rnwood.SmtpServer.Extensions.Auth.IAuthenticationCredentials">
             <summary>

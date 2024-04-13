@@ -50,6 +50,8 @@ public class DataVerbTests
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.ExceededStorageAllocation);
+
+        mocks.Connection.Verify(c=>c.AbortMessage());
     }
 
     /// <summary>
@@ -92,6 +94,33 @@ public class DataVerbTests
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+
+
+        mocks.Connection.Verify(c=>c.CommitMessage());
+    }
+
+      [Fact]
+    public async Task Data_BehaviourThrowsErrorOnCompletedMessage_Rejected()
+    {
+        TestMocks mocks = new TestMocks();
+
+        MemoryMessageBuilder messageBuilder = new MemoryMessageBuilder();
+        mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
+        mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).ReturnsAsync(10);
+        mocks.ServerBehaviour.Setup(b => b.OnMessageCompleted(It.IsAny<IConnection>())).ThrowsAsync(new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.TransactionFailed, "No thanks!")));
+
+        string[] messageData = { new('x', 10), "." };
+        int messageLine = 0;
+        mocks.Connection.Setup(c => c.ReadLineBytes())
+            .Returns(() => Task.FromResult(Encoding.UTF8.GetBytes(messageData[messageLine++])));
+
+        DataVerb verb = new DataVerb();
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
+
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.TransactionFailed);
+
+        mocks.Connection.Verify(c=>c.AbortMessage());
     }
 
     /// <summary>
@@ -132,6 +161,8 @@ public class DataVerbTests
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+
+        mocks.Connection.Verify(c=>c.CommitMessage());
     }
 
     /// <summary>
@@ -157,6 +188,9 @@ public class DataVerbTests
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+
+
+        mocks.Connection.Verify(c=>c.CommitMessage());
 
         using StreamReader dataReader =
             new StreamReader(await messageBuilder.GetData().ConfigureAwait(false), Encoding.UTF8);

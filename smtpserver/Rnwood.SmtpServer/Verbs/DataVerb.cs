@@ -34,10 +34,11 @@ public class DataVerb : IVerb
             StandardSmtpResponseCode.StartMailInputEndWithDot,
             "End message with period")).ConfigureAwait(false);
 
+        long messageSize = 0;
+
         using (Stream messageStream = await connection.CurrentMessage.WriteData().ConfigureAwait(false))
         {
             bool firstLine = true;
-            long messageSize = 0;
 
             do
             {
@@ -66,25 +67,43 @@ public class DataVerb : IVerb
             } while (true);
 
             await messageStream.FlushAsync().ConfigureAwait(false);
-            long? maxMessageSize =
-                await connection.Server.Behaviour.GetMaximumMessageSize(connection).ConfigureAwait(false);
-
-            if (maxMessageSize.HasValue && messageSize > maxMessageSize.Value)
-            {
-                await connection.WriteResponse(
-                    new SmtpResponse(
-                        StandardSmtpResponseCode.ExceededStorageAllocation,
-                        "Message exceeds fixed size limit")).ConfigureAwait(false);
-            }
-            else
-            {
-                messageStream.Dispose();
-                await connection.Server.Behaviour.OnMessageCompleted(connection).ConfigureAwait(false);
-                await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted"))
-                    .ConfigureAwait(false);
-                await connection.CommitMessage().ConfigureAwait(false);
-            }
         }
+        long? maxMessageSize =
+            await connection.Server.Behaviour.GetMaximumMessageSize(connection).ConfigureAwait(false);
+
+
+
+
+        if (maxMessageSize.HasValue && messageSize > maxMessageSize.Value)
+        {
+            await connection.WriteResponse(
+                new SmtpResponse(
+                    StandardSmtpResponseCode.ExceededStorageAllocation,
+                    "Message exceeds fixed size limit")).ConfigureAwait(false);
+            await connection.AbortMessage().ConfigureAwait(false);
+            return;
+
+        }
+
+
+        try
+        {
+            await connection.Server.Behaviour.OnMessageCompleted(connection).ConfigureAwait(false);
+            await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted"))
+                .ConfigureAwait(false);
+            await connection.CommitMessage().ConfigureAwait(false);
+        }
+        catch (SmtpServerException ex)
+        {
+            await connection.AbortMessage().ConfigureAwait(false);
+            await connection.WriteResponse(ex.SmtpResponse);
+        }
+        catch
+        {
+            await connection.AbortMessage().ConfigureAwait(false);
+            throw;
+        }
+
     }
 
     /// <summary>
