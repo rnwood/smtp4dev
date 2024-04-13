@@ -6,9 +6,9 @@ export default class Message {
   constructor(
     id: string,
     from: string,
-    to: string,
-    cc: string,
-    bcc: string,
+    to: string[],
+    cc: string[],
+    bcc: string[],
     receivedDate: Date,
     subject: string,
     parts: MessageEntitySummary[],
@@ -37,9 +37,9 @@ export default class Message {
 
   id: string;
   from: string;
-  to: string;
-  cc: string;
-  bcc: string;
+  to: string[];
+  cc: string[];
+  bcc: string[];
   receivedDate: Date;
   subject: string;
   parts: MessageEntitySummary[];

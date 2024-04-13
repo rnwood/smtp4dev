@@ -85,6 +85,7 @@
           label="To"
           width="180"
           sortable="custom"
+          :formatter="formatTo"
       ></el-table-column>
       <el-table-column
           property="isRelayed"
@@ -228,6 +229,11 @@ export default class MessageList extends Vue {
     return (<any>moment)(cellValue).format("YYYY-MM-DD HH:mm:ss");
   }
 
+  formatTo(row: number, column: number, cellValue: []): string {
+    return cellValue.join(", ");
+  }
+
+
   getRowClass(event: { row: MessageSummary }): string {
     return event.row.isUnread ? "unread" : "read";
   }
@@ -245,7 +251,7 @@ export default class MessageList extends Vue {
           "Relay Message",
           {
             confirmButtonText: "OK",
-            inputValue: this.selectedmessage.to,
+            inputValue: this.selectedmessage.to.join(","),
             cancelButtonText: "Cancel",
             inputPattern: /[^, ]+(, *[^, ]+)*/,
             inputErrorMessage: "Invalid email addresses",

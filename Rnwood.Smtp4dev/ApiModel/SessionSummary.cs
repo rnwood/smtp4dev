@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.ApiModel
@@ -29,6 +30,8 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public int Size { get; private set; }
 
+
+        [JsonIgnore]
         string ICacheByKey.CacheKey => Id.ToString();
     }
 }

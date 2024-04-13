@@ -7,14 +7,8 @@ using Serilog;
 
 namespace Rnwood.Smtp4dev.Server
 {
-    public static class CertificateHelper
+    internal static class CertificateHelper
     {
-        /// <summary>
-        /// Load certificate and private key
-        /// </summary>
-        /// <param name="certificatePath"></param>
-        /// <param name="certificateKeyPath"></param>
-        /// <returns>Exported x509 Certificate</returns>
         public static X509Certificate2 LoadCertificateWithKey(string certificatePath, string certificateKeyPath, string password)
         {
             using var rsa = RSA.Create();

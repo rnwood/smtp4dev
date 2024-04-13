@@ -16,9 +16,9 @@ namespace Rnwood.Smtp4dev.ApiModel
             Data = dbMessage.Data;
             Id = dbMessage.Id;
             From = dbMessage.From;
-            To = dbMessage.To;
-            Cc = "";
-            Bcc = "";
+            To = dbMessage.To.Split(',');
+            Cc = Array.Empty<string>();
+            Bcc = Array.Empty<string>();
             ReceivedDate = dbMessage.ReceivedDate;
             Subject = dbMessage.Subject;
             SecureConnection = dbMessage.SecureConnection;
@@ -50,7 +50,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
                 if (MimeMessage.To != null)
                 {
-                    To = string.Join(", ", MimeMessage.To.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())));
+                    To = MimeMessage.To.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())).ToArray();
 
                     foreach (var internetAddress in MimeMessage.To.Where(t => t is MailboxAddress))
                     {
@@ -61,7 +61,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
                 if (MimeMessage.Cc != null)
                 {
-                    Cc = string.Join(", ", MimeMessage.Cc.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())));
+                    Cc = MimeMessage.Cc.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())).ToArray();
 
                     foreach (var internetAddress in MimeMessage.Cc.Where(t => t is MailboxAddress))
                     {
@@ -70,7 +70,7 @@ namespace Rnwood.Smtp4dev.ApiModel
                     }
                 }
 
-                Bcc = string.Join(", ", recipients);
+                Bcc = recipients.ToArray();
 
                 Headers = MimeMessage.Headers.Select(h => new Header { Name = h.Field, Value = PunyCodeReplacer.DecodePunycode(h.Value) }).ToList();
                 Parts.Add(HandleMimeEntity(MimeMessage.Body));
@@ -216,9 +216,9 @@ namespace Rnwood.Smtp4dev.ApiModel
         public Guid Id { get; set; }
 
         public string From { get; set; }
-        public string To { get; set; }
-        public string Cc { get; set; }
-        public string Bcc { get; set; }
+        public string[] To { get; set; }
+        public string[] Cc { get; set; }
+        public string[] Bcc { get; set; }
         public DateTime ReceivedDate { get; set; }
 
         public bool SecureConnection { get; set; }
@@ -238,6 +238,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         internal byte[] Data { get; set; }
 
-        string ICacheByKey.CacheKey => Id.ToString();
+        [JsonIgnore]
+        string ICacheByKey.CacheKey => Id.ToString() + "v2";
     }
 }
