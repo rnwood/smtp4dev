@@ -68,7 +68,8 @@ namespace Rnwood.Smtp4dev.Controllers
                 AuthenticationRequired = serverOptions.CurrentValue.AuthenticationRequired,
                 SecureConnectionRequired = serverOptions.CurrentValue.SecureConnectionRequired,
                 CredentialsValidationExpression = serverOptions.CurrentValue.CredentialsValidationExpression,
-                RecipientValidationExpression = serverOptions.CurrentValue.RecipientValidationExpression
+                RecipientValidationExpression = serverOptions.CurrentValue.RecipientValidationExpression,
+                MessageValidationExpression = serverOptions.CurrentValue.MessageValidationExpression
             };
         }
 
@@ -101,6 +102,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.SecureConnectionRequired = serverUpdate.SecureConnectionRequired;
             newSettings.CredentialsValidationExpression = serverUpdate.CredentialsValidationExpression;
             newSettings.RecipientValidationExpression = serverUpdate.RecipientValidationExpression;
+            newSettings.MessageValidationExpression = serverUpdate.MessageValidationExpression;
 
             newRelaySettings.SmtpServer = serverUpdate.RelayOptions.SmtpServer;
             newRelaySettings.SmtpPort = serverUpdate.RelayOptions.SmtpPort;

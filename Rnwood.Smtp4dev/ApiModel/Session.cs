@@ -12,13 +12,15 @@ namespace Rnwood.Smtp4dev.ApiModel
         {
             this.Id = dbSession.Id;
             this.Error = dbSession.SessionError;
-            this.ErrorType = dbSession.SessionErrorType.ToString();
+            this.ErrorType = dbSession.SessionErrorType?.ToString();
+            this.StartDate = dbSession.StartDate;
         }
 
 
         public Guid Id { get; private set; }
      
         public string ErrorType { get; private set; }
+        public DateTime StartDate { get; }
         public string Error { get; private set; }
 
 
