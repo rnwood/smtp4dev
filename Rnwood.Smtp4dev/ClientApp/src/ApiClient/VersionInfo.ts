@@ -1,4 +1,4 @@
-﻿export default class Info {
+﻿export default class VersionInfo {
  
     constructor(version: string, infoVersion: string) {
          

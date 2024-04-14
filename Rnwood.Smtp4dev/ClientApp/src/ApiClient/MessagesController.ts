@@ -42,7 +42,7 @@ export default class MessagesController {
 
     // post: api/Messages/${encodeURIComponent(id)}  
     public markMessageRead_url(id: string): string {
-        return `${this.apiBaseUrl}/${encodeURIComponent(id)}`;
+        return `${this.apiBaseUrl}/${encodeURIComponent(id)}/markRead`;
     }
 
     public async markMessageRead(id: string): Promise<void> {

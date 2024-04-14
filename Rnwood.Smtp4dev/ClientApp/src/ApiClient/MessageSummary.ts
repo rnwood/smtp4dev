@@ -2,7 +2,7 @@
   constructor(
     id: string,
     from: string,
-    to: string,
+    to: string[],
     receivedDate: Date,
     subject: string,
     attachmentCount: number,
@@ -21,7 +21,7 @@
 
   id: string;
   from: string;
-  to: string;
+  to: string[];
   receivedDate: Date;
   subject: string;
   attachmentCount: number;

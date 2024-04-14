@@ -8,6 +8,8 @@ using MailKit.Security;
 using Microsoft.Extensions.Hosting;
 using Rnwood.Smtp4dev.Service;
 using System.Text.Json.Serialization;
+using NSwag.Annotations;
+using System.ComponentModel;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -32,6 +34,10 @@ namespace Rnwood.Smtp4dev.Controllers
         private IOptionsMonitor<RelayOptions> relayOptions;
         private readonly IHostingEnvironmentHelper hostingEnvironmentHelper;
 
+        /// <summary>
+        /// Gets the current state and settings for the smtp4dev server.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public ApiModel.Server GetServer()
         {
@@ -66,7 +72,14 @@ namespace Rnwood.Smtp4dev.Controllers
             };
         }
 
+        /// <summary>
+        /// Updates the state of and settings for the smtp4dev server.
+        /// </summary>
+        /// Settings can not be updated if disabled in smtp4dev settings or if the settings file is not writable.
+        /// <param name="serverUpdate"></param>
         [HttpPost]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description="If settions were successfully updated and state changes initiated (not not applied synchronously and can fail).")]
+        [SwaggerResponse( System.Net.HttpStatusCode.Forbidden, typeof(void), Description = "If settings are not editable")]
         public ActionResult UpdateServer(ApiModel.Server serverUpdate)
         {
             if (!hostingEnvironmentHelper.SettingsAreEditable)
@@ -95,11 +108,11 @@ namespace Rnwood.Smtp4dev.Controllers
             newRelaySettings.SenderAddress = serverUpdate.RelayOptions.SenderAddress;
             newRelaySettings.Login = serverUpdate.RelayOptions.Login;
             newRelaySettings.Password = serverUpdate.RelayOptions.Password;
-            newRelaySettings.AutomaticEmails = serverUpdate.RelayOptions.AutomaticEmails.Where(s=> !String.IsNullOrWhiteSpace(s)).ToArray();
+            newRelaySettings.AutomaticEmails = serverUpdate.RelayOptions.AutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray();
             newRelaySettings.AutomaticRelayExpression = serverUpdate.RelayOptions.AutomaticRelayExpression;
 
             System.IO.File.WriteAllText(hostingEnvironmentHelper.GetEditableSettingsFilePath(),
-                JsonSerializer.Serialize(new SettingsFile{ ServerOptions = newSettings, RelayOptions = newRelaySettings },
+                JsonSerializer.Serialize(new SettingsFile { ServerOptions = newSettings, RelayOptions = newRelaySettings },
                     SettingsFileSerializationContext.Default.SettingsFile)
             );
 
@@ -135,7 +148,8 @@ namespace Rnwood.Smtp4dev.Controllers
 
     [JsonSourceGenerationOptions(WriteIndented = true)]
     [JsonSerializable(typeof(SettingsFile))]
-    internal partial class SettingsFileSerializationContext : JsonSerializerContext {
+    internal partial class SettingsFileSerializationContext : JsonSerializerContext
+    {
 
     }
 }

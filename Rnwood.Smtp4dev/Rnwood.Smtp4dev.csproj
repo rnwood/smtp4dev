@@ -11,6 +11,8 @@
     <IsPackable>true</IsPackable>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <NoWarn>$(NoWarn);1591</NoWarn>
   </PropertyGroup>
   <PropertyGroup Condition="'$(PackAsTool)'=='true'">
     <StaticWebAssetsEnabled>false</StaticWebAssetsEnabled>
@@ -40,9 +42,9 @@
     <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.0" />
     <PackageReference Include="MimeKit" Version="4.4.0" />
     <PackageReference Include="Mono.Options" Version="6.12.0.148" />
+    <PackageReference Include="NSwag.AspNetCore" Version="14.0.7" />
     <PackageReference Include="Rnwood.LumiSoft.Net" Version="1.0.0" />
 
-  
 
     <PackageReference Include="Serilog" Version="3.1.1" />
     <PackageReference Include="Serilog.AspNetCore" Version="8.0.1" />
@@ -53,13 +55,14 @@
     <PackageReference Include="System.Reactive" Version="6.0.0" />
     <PackageReference Include="VueCliMiddleware" Version="6.0.0" />
   </ItemGroup>
-  
+
   <ItemGroup>
     <PackageReference Include="Rnwood.SmtpServer" Version="3.1.0-ci0843" />
   </ItemGroup>
-  
+
   <ItemGroup>
-    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools" Version="2.1.0-preview1-final" />
+    <DotNetCliToolReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Tools"
+      Version="2.1.0-preview1-final" />
   </ItemGroup>
 
   <ItemGroup>
@@ -140,9 +143,11 @@
     <NpmInputs Include="ClientApp\package.json" />
   </ItemGroup>
 
-  <Target Name="NpmInstall" AfterTargets="Build" Inputs="@(NpmInputs)" Outputs="ClientApp\node_modules\.installedtimestamp" Condition="'$(SkipClientApp)'!='true'">
+  <Target Name="NpmInstall" AfterTargets="Build" Inputs="@(NpmInputs)"
+    Outputs="ClientApp\node_modules\.installedtimestamp" Condition="'$(SkipClientApp)'!='true'">
     <Message Importance="high" Text="Performing npm install..." />
-    <Exec Command="npm install --no-progress" WorkingDirectory="ClientApp" CustomErrorRegularExpression="^npm ERR!.*" />
+    <Exec Command="npm install --no-progress" WorkingDirectory="ClientApp"
+      CustomErrorRegularExpression="^npm ERR!.*" />
     <Touch Files="ClientApp\node_modules\.installedtimestamp" AlwaysCreate="true" />
   </Target>
 
@@ -179,18 +184,22 @@
     <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
   </ItemGroup>
 
-  <Target Name="DebugRunNpm" AfterTargets="Build" Inputs="@(ClientApp)" Outputs="wwwroot\.buildtimestamp" Condition="'$(SkipClientApp)'!='true'">
+  <Target Name="DebugRunNpm" AfterTargets="Build" Inputs="@(ClientApp)"
+    Outputs="wwwroot\.buildtimestamp" Condition="'$(SkipClientApp)'!='true'">
 
     <!-- Ensure Node.js is installed -->
     <Exec Command="node --version" ContinueOnError="true">
       <Output TaskParameter="ExitCode" PropertyName="ErrorCode" />
     </Exec>
-    <Error Condition="'$(ErrorCode)' != '0'" Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
+    <Error Condition="'$(ErrorCode)' != '0'"
+      Text="Node.js is required to build and run this project. To continue, please install Node.js from https://nodejs.org/, and then restart your command prompt or IDE." />
 
     <Message Importance="high" Text="Performing NPM build..." />
 
-    <Exec Condition=" '$(Configuration)' != 'Release' " Command="npm --prefix ClientApp run-script build:dev" CustomErrorRegularExpression="^ERROR in" />
-    <Exec Condition=" '$(Configuration)' == 'Release' " Command="npm --prefix ClientApp run-script build" CustomErrorRegularExpression="^ERROR in" />
+    <Exec Condition=" '$(Configuration)' != 'Release' "
+      Command="npm --prefix ClientApp run-script build:dev" CustomErrorRegularExpression="^ERROR in" />
+    <Exec Condition=" '$(Configuration)' == 'Release' "
+      Command="npm --prefix ClientApp run-script build" CustomErrorRegularExpression="^ERROR in" />
 
     <Touch Files="wwwroot\.buildtimestamp" AlwaysCreate="true" />
   </Target>
@@ -199,7 +208,8 @@
     <!-- Include the newly-built files in the publish output -->
     <ItemGroup>
       <DistFiles Include="wwwroot\**" />
-      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')" Exclude="@(ResolvedFileToPublish)">
+      <ResolvedFileToPublish Include="@(DistFiles->'%(FullPath)')"
+        Exclude="@(ResolvedFileToPublish)">
         <RelativePath>%(DistFiles.Identity)</RelativePath>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </ResolvedFileToPublish>

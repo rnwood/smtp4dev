@@ -37,9 +37,9 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             Assert.Equal(testMessage1.Id, result.Id);
             Assert.InRange(result.ReceivedDate, startDate, DateTime.Now);
             Assert.Equal("from@message.com", result.From);
-            Assert.Equal("to@message.com", result.To);
-            Assert.Equal("to@envelope.com", result.Bcc);
-            Assert.Equal("cc@message.com", result.Cc);
+            Assert.Equal(new[]{"to@message.com"}, result.To);
+            Assert.Equal(new[]{"to@envelope.com"}, result.Bcc);
+            Assert.Equal(new[]{"cc@message.com"}, result.Cc);
             Assert.Equal("subject", result.Subject);
 
             var allParts = result.Parts.Flatten(p => p.ChildParts).ToList();

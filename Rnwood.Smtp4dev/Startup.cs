@@ -22,6 +22,7 @@ using Serilog;
 using System.Linq;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.AspNetCore.Http;
 
 namespace Rnwood.Smtp4dev
 {
@@ -37,6 +38,13 @@ namespace Rnwood.Smtp4dev
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOpenApiDocument(config =>
+            {
+                config.DocumentName = "v1";
+                config.Title = "smtp4dev";
+                config.Version = "v1";
+            });
+
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
             services.Configure<RelayOptions>(Configuration.GetSection("RelayOptions"));
             services.Configure<ClientOptions>(Configuration.GetSection("ClientOptions"));
@@ -101,7 +109,6 @@ namespace Rnwood.Smtp4dev
         }
 
 
-
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
@@ -111,6 +118,16 @@ namespace Rnwood.Smtp4dev
 
             Action<IApplicationBuilder> configure = subdir =>
             {
+                subdir.UseOpenApi(c =>
+                {
+                    c.Path = "/api/{documentName}/swagger.json";
+                });
+                subdir.UseSwaggerUi(c =>
+                {
+                    c.Path = "/api";
+                    c.DocumentPath = "/api/{documentName}/swagger.json";
+                    c.DocumentTitle = "smtp4dev API";
+                });
                 subdir.UseRouting();
                 subdir.UseDeveloperExceptionPage();
                 subdir.UseDefaultFiles();
@@ -124,6 +141,19 @@ namespace Rnwood.Smtp4dev
                 {
                     e.MapHub<NotificationsHub>("/hubs/notifications");
 
+                    subdir.Use(async (context, next) =>
+                     {
+                         try
+                         {
+                             await next(context);
+                         }
+                         catch (FileNotFoundException ex)
+                         {
+                             context.Response.StatusCode = 404;
+                             await context.Response.WriteAsync(ex.Message);
+
+                         }
+                     });
                     e.MapControllers();
                     if (env.IsDevelopment())
                     {
@@ -137,6 +167,10 @@ namespace Rnwood.Smtp4dev
                         );
                     }
                 });
+
+
+
+
 
                 using (var scope = subdir.ApplicationServices.CreateScope())
                 {

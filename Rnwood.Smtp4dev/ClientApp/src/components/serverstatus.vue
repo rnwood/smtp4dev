@@ -3,7 +3,7 @@
         <el-button v-if="server && server.isRunning" :disabled="!server || !server.settingsAreEditable" @click="stop" icon="el-icon-circle-check" type="text" :title="'Stop'+ ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')"> SMTP server listening on port {{server.portNumber}}</el-button>
         <el-button v-if="server && !server.isRunning && !server.exception" :disabled="!server || !server.settingsAreEditable" @click="start" icon="el-icon-circle-close" type="danger" :title="'Start'+ ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')"> SMTP server stopped</el-button>
         <el-button v-if="server && !server.isRunning && server.exception" :disabled="!server || !server.settingsAreEditable" @click="start" icon="el-icon-circle-close" type="danger" :title="'Start'+ ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')"> SMTP server error:<br />{{server.exception}}</el-button>
-        <el-button style="float:right; font-size: 1.7em; padding: 6px; margin: 0 3px" circle icon="el-icon-setting" :title="'Settings' + ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')" :disabled="!server || !server.settingsAreEditable" @click="showSettings"></el-button>&nbsp;
+        <el-button style="font-size: 1.7em; padding: 6px;" circle icon="el-icon-setting" :title="'Settings' + ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')" :disabled="!server || !server.settingsAreEditable" @click="showSettings"></el-button>&nbsp;
     </div>
 
 </template>

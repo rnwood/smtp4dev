@@ -191,7 +191,7 @@ namespace Rnwood.Smtp4dev.Server
             dbSession.NumberOfMessages = (await session.GetMessages()).Count;
             dbSession.Log = (await session.GetLog()).ReadToEnd();
             dbSession.SessionErrorType = session.SessionErrorType;
-            dbSession.SessionError = session.SessionError?.ToString();
+            dbSession.SessionError = session.SessionError?.Message;
         }
 
         private async Task OnSessionStarted(object sender, SessionEventArgs e)

@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
+using System.Text.Json.Serialization;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
@@ -15,9 +16,9 @@ namespace Rnwood.Smtp4dev.ApiModel
             Data = dbMessage.Data;
             Id = dbMessage.Id;
             From = dbMessage.From;
-            To = dbMessage.To;
-            Cc = "";
-            Bcc = "";
+            To = dbMessage.To.Split(',');
+            Cc = Array.Empty<string>();
+            Bcc = Array.Empty<string>();
             ReceivedDate = dbMessage.ReceivedDate;
             Subject = dbMessage.Subject;
             SecureConnection = dbMessage.SecureConnection;
@@ -49,27 +50,27 @@ namespace Rnwood.Smtp4dev.ApiModel
 
                 if (MimeMessage.To != null)
                 {
-                    To = string.Join(", ", MimeMessage.To.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())));
+                    To = MimeMessage.To.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())).ToArray();
 
                     foreach (var internetAddress in MimeMessage.To.Where(t => t is MailboxAddress))
                     {
-                        var to = (MailboxAddress) internetAddress;
+                        var to = (MailboxAddress)internetAddress;
                         recipients.Remove(PunyCodeReplacer.DecodePunycode(to.Address));
                     }
                 }
 
                 if (MimeMessage.Cc != null)
                 {
-                    Cc = string.Join(", ", MimeMessage.Cc.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())));
+                    Cc = MimeMessage.Cc.Select(t => PunyCodeReplacer.DecodePunycode(t.ToString())).ToArray();
 
                     foreach (var internetAddress in MimeMessage.Cc.Where(t => t is MailboxAddress))
                     {
-                        var cc = (MailboxAddress) internetAddress;
+                        var cc = (MailboxAddress)internetAddress;
                         recipients.Remove(PunyCodeReplacer.DecodePunycode(cc.Address));
                     }
                 }
 
-                Bcc = string.Join(", ", recipients);
+                Bcc = recipients.ToArray();
 
                 Headers = MimeMessage.Headers.Select(h => new Header { Name = h.Field, Value = PunyCodeReplacer.DecodePunycode(h.Value) }).ToList();
                 Parts.Add(HandleMimeEntity(MimeMessage.Body));
@@ -148,8 +149,8 @@ namespace Rnwood.Smtp4dev.ApiModel
             {
                 return new FileStreamResult(mimePart.Content.Open(), contentEntity.ContentType?.MimeType ?? "application/text")
                 {
-                    FileDownloadName = mimePart.FileName ?? 
-                                       ((contentEntity.ContentId  ?? "content") + (MimeTypes.TryGetExtension(mimePart.ContentType.MimeType, out string extn) ? extn : ""))
+                    FileDownloadName = mimePart.FileName ??
+                                       ((contentEntity.ContentId ?? "content") + (MimeTypes.TryGetExtension(mimePart.ContentType.MimeType, out string extn) ? extn : ""))
                 };
             }
             else
@@ -169,7 +170,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         internal static string GetPartContentAsText(Message result, string id)
         {
             var contentEntity = GetPart(result, id);
-            
+
             if (contentEntity is MimePart part)
             {
                 var encoding = part.ContentType.CharsetEncoding ?? ApiModel.Message.GetSessionEncodingOrAssumed(result);
@@ -193,7 +194,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             using (MemoryStream ms = new MemoryStream())
             {
                 contentEntity.WriteTo(ms, false);
-                var encoding = contentEntity.ContentType.CharsetEncoding ??ApiModel.Message.GetSessionEncodingOrAssumed(message);
+                var encoding = contentEntity.ContentType.CharsetEncoding ?? ApiModel.Message.GetSessionEncodingOrAssumed(message);
                 return encoding.GetString(ms.GetBuffer());
             }
 
@@ -215,16 +216,16 @@ namespace Rnwood.Smtp4dev.ApiModel
         public Guid Id { get; set; }
 
         public string From { get; set; }
-        public string To { get; set; }
-        public string Cc { get; set; }
-        public string Bcc { get; set; }
+        public string[] To { get; set; }
+        public string[] Cc { get; set; }
+        public string[] Bcc { get; set; }
         public DateTime ReceivedDate { get; set; }
-        
+
         public bool SecureConnection { get; set; }
 
         public string Subject { get; set; }
 
-        public List<MessageEntitySummary> Parts { get; set; } 
+        public List<MessageEntitySummary> Parts { get; set; }
 
         public List<Header> Headers { get; set; }
 
@@ -232,10 +233,12 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public string RelayError { get; set; }
 
+        [JsonIgnore]
         internal MimeMessage MimeMessage { get; set; }
 
         internal byte[] Data { get; set; }
 
-        string ICacheByKey.CacheKey => Id.ToString();
+        [JsonIgnore]
+        string ICacheByKey.CacheKey => Id.ToString() + "v2";
     }
 }

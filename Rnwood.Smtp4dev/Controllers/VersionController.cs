@@ -4,17 +4,24 @@ using Rnwood.Smtp4dev.ApiModel;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
+    /// <summary>
+    /// Returns information about the version of smtp4dev
+    /// </summary>
     [Route("api/[controller]")]
     [ApiController]
     [UseEtagFilter]
-    public class InfoController : Controller
+    public class VersionController : Controller
     {
+        /// <summary>
+        /// Gets version infomation about smtp4dev.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
-        public ActionResult<Info> Get()
+        public ActionResult<VersionInfo> Get()
         {
             var version = Assembly.GetExecutingAssembly().GetName().Version?.ToString();
             var infoVersion = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion;
-            return new Info { Version = version, InfoVersion = infoVersion };
+            return new VersionInfo { Version = version, InfoVersion = infoVersion };
         }
     }
 }

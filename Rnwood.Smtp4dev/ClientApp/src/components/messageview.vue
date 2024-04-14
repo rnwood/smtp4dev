@@ -30,15 +30,15 @@
 
                     <tr>
                         <td>To:</td>
-                        <td><span v-if="message">{{message.to}}</span></td>
+                        <td><span v-if="message">{{message.to.join(", ")}}</span></td>
                     </tr>
-                    <tr v-if="message && message.cc">
+                    <tr v-if="message && message.cc.length">
                         <td>Cc:</td>
-                        <td>{{message.cc}}</td>
+                        <td>{{message.cc.join(", ")}}</td>
                     </tr>
-                    <tr v-if="message && message.bcc">
+                    <tr v-if="message && message.bcc.length">
                         <td>Bcc:</td>
-                        <td>{{message.bcc}}</td>
+                        <td>{{message.bcc.join(", ")}}</td>
                     </tr>
                     <tr>
                         <td>Subject:</td>
@@ -288,7 +288,7 @@ export default class MessageView extends Vue {
 
                 let dialogResult = <MessageBoxInputData>await this.$prompt('Email address(es) to relay to (separate multiple with ,)', 'Relay Message', {
                     confirmButtonText: 'OK',
-                    inputValue: this.messageSummary.to,
+                    inputValue: this.messageSummary.to.join(","),
                     cancelButtonText: 'Cancel',
                     inputPattern: /[^, ]+(, *[^, ]+)*/,
                     inputErrorMessage: 'Invalid email addresses'
