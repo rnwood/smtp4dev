@@ -84,7 +84,7 @@ namespace Rnwood.Smtp4dev.Server
             this.smtpServer.AuthenticationCredentialsValidationRequiredEventHandler += OnAuthenticationCredentialsValidationRequired;
             this.smtpServer.IsRunningChanged += OnIsRunningChanged;
             ((DefaultServerBehaviour)this.smtpServer.Behaviour).MessageStartEventHandler += OnMessageStart;
-            
+
             ((DefaultServerBehaviour)this.smtpServer.Behaviour).MessageRecipientAddingEventHandler += OnMessageRecipientAddingEventHandler;
         }
 
@@ -94,12 +94,13 @@ namespace Rnwood.Smtp4dev.Server
             using var scope = serviceScopeFactory.CreateScope();
             Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
             var session = dbContext.Sessions.AsNoTracking().Single(s => s.Id == sessionId);
+            var apiSession = new ApiModel.Session(session);
 
-            if (!this.scriptingHost.ValidateRecipient(session, e.Recipient))
+            if (!this.scriptingHost.ValidateRecipient(apiSession, e.Recipient))
             {
                 throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.RecipientRejected, "Recipient rejected"));
             }
-            
+
             return Task.CompletedTask;
         }
 
@@ -109,12 +110,12 @@ namespace Rnwood.Smtp4dev.Server
             {
                 throw new SmtpServerException(new SmtpResponse(451, "Secure connection required"));
             }
-            
+
             if (this.serverOptions.CurrentValue.AuthenticationRequired && !e.Session.Authenticated)
             {
                 throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationRequired, "Authentication is required"));
             }
-            
+
             return Task.CompletedTask;
         }
 
@@ -125,9 +126,29 @@ namespace Rnwood.Smtp4dev.Server
             this.notificationsHub.OnServerChanged().Wait();
         }
 
-        private Task OnMessageCompleted(object sender, ConnectionEventArgs e)
+        private async Task OnMessageCompleted(object sender, ConnectionEventArgs e)
         {
-            return Task.CompletedTask;
+            if (!scriptingHost.HasValidateMessageExpression)
+            {
+                return;
+            }
+
+            Message message = new MessageConverter().ConvertAsync(await e.Connection.CurrentMessage.ToMessage()).Result;
+
+            var apiMessage = new ApiModel.Message(message);
+
+            using var scope = serviceScopeFactory.CreateScope();
+            Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+            Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Connection.Session]);
+
+            var apiSession = new ApiModel.Session(dbSession);
+
+            var errorResponse = scriptingHost.ValidateMessage(apiMessage, apiSession);
+
+            if (errorResponse != null)
+            {
+                throw new SmtpServerException(errorResponse);
+            }
         }
 
         public void Stop()
@@ -170,7 +191,9 @@ namespace Rnwood.Smtp4dev.Server
             Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
             var session = dbContext.Sessions.Single(s => s.Id == sessionId);
 
-            AuthenticationResult result = scriptingHost.ValidateCredentials(session, e.Credentials);
+            var apiSession = new ApiModel.Session(session);
+
+            AuthenticationResult result = scriptingHost.ValidateCredentials(apiSession, e.Credentials);
 
             e.AuthenticationResult = result;
             return Task.CompletedTask;
@@ -278,7 +301,7 @@ namespace Rnwood.Smtp4dev.Server
                 log.Information("Processing received message");
                 using var scope = serviceScopeFactory.CreateScope();
                 Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-              
+
                 message.Session = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
                 var relayResult = TryRelayMessage(message, null);
                 message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
@@ -340,7 +363,7 @@ namespace Rnwood.Smtp4dev.Server
                 recipients.AddRange(overrideRecipients);
             }
 
-            foreach (MailboxAddress recipient in recipients.DistinctBy(r =>r.Address))
+            foreach (MailboxAddress recipient in recipients.DistinctBy(r => r.Address))
             {
                 try
                 {

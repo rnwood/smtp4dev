@@ -35,5 +35,7 @@ namespace Rnwood.Smtp4dev.Server
         public bool AuthenticationRequired { get; set; } = false;
         public bool SecureConnectionRequired { get; set; } = false;
         public string RecipientValidationExpression { get; set; }
+
+        public string MessageValidationExpression { get; set; }
     }
 }

@@ -43,6 +43,10 @@
                       <el-form-item label="Recipient validation expression (see comments in appsettings.json)" prop="server.recipientValidationExpression">
                         <el-input v-model="server.recipientValidationExpression" />
                       </el-form-item>
+
+                      <el-form-item label="Message validation expression (see comments in appsettings.json)" prop="server.messageValidationExpression">
+                        <el-input v-model="server.messageValidationExpression" />
+                      </el-form-item>
                     </el-tab-pane>
 
 
