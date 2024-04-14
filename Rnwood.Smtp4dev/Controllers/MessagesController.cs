@@ -56,7 +56,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// Returns a list of message summaries including basic details but not the content.
         /// </summary>
         /// <param name="searchTerms">Case insensitive term to search for in subject,from,to</param>
-        /// <param name="sortColumn"></param>
+        /// <param name="sortColumn">Property name from response type to sort by</param>
         /// <param name="sortIsDescending">True if sort should be descending</param>
         /// <param name="page">Page number to retrieve</param>
         /// <param name="pageSize">Max number of items to retrieve</param>
@@ -97,8 +97,8 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <param name="id">The message ID to get.</param>
         /// <returns></returns>
         [HttpGet("{id}")]
-        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.Message), Description ="")]
-                [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description ="If the message does not exist")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.Message), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message does not exist")]
         public async Task<ApiModel.Message> GetMessage(Guid id)
         {
             return new ApiModel.Message(await GetDbMessage(id, false));
@@ -110,6 +110,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <param name="id">The ID of the message to mark read.</param>
         /// <returns></returns>
         [HttpPost("{id}/markRead")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
         public Task MarkMessageRead(Guid id)
         {
             return messagesRepository.MarkMessageRead(id);
@@ -120,6 +121,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpPost("markAllRead")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
         public Task MarkAllRead()
         {
             return messagesRepository.MarkAllMessagesRead();
@@ -131,7 +133,10 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <param name="id">The ID of the message to download</param>
         /// <returns></returns>
         [HttpGet("{id}/download")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(FileStreamResult), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message does not exist")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
+
         public async Task<FileStreamResult> DownloadMessage(Guid id)
         {
             Message result = await GetDbMessage(id, false);
@@ -171,29 +176,62 @@ namespace Rnwood.Smtp4dev.Controllers
             return Ok();
         }
 
+        /// <summary>
+        /// Returns the MIME part contents for the specified message and part.
+        /// </summary>
+        /// <param name="id">Message ID</param>
+        /// <param name="partid">Part ID</param>
+        /// <returns></returns>
         [HttpGet("{id}/part/{partid}/content")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(string), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message or part does not exist")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
         public async Task<FileStreamResult> GetPartContent(Guid id, string partid)
         {
             return ApiModel.Message.GetPartContent(await GetMessage(id), partid);
         }
 
+        /// <summary>
+        /// Returns the source text of MIME part contents for the specified message and part.
+        /// </summary>
+        /// <param name="id">Message ID</param>
+        /// <param name="partid">Part ID</param>
+        /// <returns></returns>
         [HttpGet("{id}/part/{partid}/source")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(string), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message or part does not exist")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
         public async Task<string> GetPartSource(Guid id, string partid)
         {
             return ApiModel.Message.GetPartContentAsText(await GetMessage(id), partid);
         }
 
+        /// <summary>
+        /// Returns the raw source of MIME part contents for the specified message and part.
+        /// </summary>
+        /// RAW source is before any content decoding steps like base64.
+        /// <param name="id">Message ID</param>
+        /// <param name="partid">Part ID</param>
+        /// <returns></returns>
         [HttpGet("{id}/part/{partid}/raw")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(string), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message or part does not exist")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
         public async Task<string> GetPartSourceRaw(Guid id, string partid)
         {
             return ApiModel.Message.GetPartSource(await GetMessage(id), partid);
         }
 
+        /// <summary>
+        /// Returns the raw source text of the specified message.
+        /// </summary>
+        /// RAW source is before any content decoding steps like base64.
+        /// <param name="id">Message ID</param>
+        /// <returns></returns>
         [HttpGet("{id}/raw")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(string), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message does not exist")]
         public async Task<string> GetMessageSourceRaw(Guid id)
         {
             ApiModel.Message message = await GetMessage(id);
@@ -201,7 +239,14 @@ namespace Rnwood.Smtp4dev.Controllers
             return encoding.GetString(message.Data);
         }
 
+        /// <summary>
+        /// Returns the source text of the specified message.
+        /// </summary>
+        /// <param name="id">Message ID</param>
+        /// <returns></returns>
         [HttpGet("{id}/source")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(string), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message does not exist")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
         public async Task<string> GetMessageSource(Guid id)
         {
@@ -216,6 +261,8 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <param name="id">The ID of the message to get body of.</param>
         /// <returns></returns>
         [HttpGet("{id}/plaintext")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(string), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message or part does not exist")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
         public async Task<ActionResult<string>> GetMessagePlainText(Guid id)
         {
@@ -242,6 +289,9 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <returns></returns>
 
         [HttpGet("{id}/html")]
+
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(string), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message or part does not exist")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
         public async Task<ActionResult<string>> GetMessageHtml(Guid id)
         {
@@ -275,13 +325,25 @@ namespace Rnwood.Smtp4dev.Controllers
             return doc.DocumentNode.OuterHtml;
         }
 
+        /// <summary>
+        /// Deletes the specified message.
+        /// </summary>
+        /// <param name="id">Message ID</param>
+        /// <returns></returns>
         [HttpDelete("{id}")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
         public async Task Delete(Guid id)
         {
             await messagesRepository.DeleteMessage(id);
         }
 
+
+        /// <summary>
+        /// Deletes all messages.
+        /// </summary>
+        /// <returns></returns>
         [HttpDelete("*")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
         public async Task DeleteAll()
         {
             await messagesRepository.DeleteAllMessages();

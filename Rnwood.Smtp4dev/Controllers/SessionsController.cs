@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NSwag.Annotations;
 using Rnwood.Smtp4dev.ApiModel;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.Server;
@@ -44,6 +45,8 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <param name="id">The ID of the session to get</param>
         /// <returns></returns>
         [HttpGet("{id}")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.Session), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the session does not exist")]
         public ApiModel.Session GetSession(Guid id)
         {
             Session result = dbContext.Sessions.AsNoTracking().SingleOrDefault(m => m.Id == id);
@@ -55,6 +58,9 @@ namespace Rnwood.Smtp4dev.Controllers
         /// </summary>
         /// <param name="id">The ID for the session to get.</param>
         /// <returns></returns>
+        /// 
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(string), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the session does not exist")]
         [HttpGet("{id}/log")]
         public string GetSessionLog(Guid id)
         {

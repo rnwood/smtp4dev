@@ -13,7 +13,7 @@ namespace Rnwood.Smtp4dev.Controllers
     public class VersionController : Controller
     {
         /// <summary>
-        /// Gets the version infomation.
+        /// Gets version infomation about smtp4dev.
         /// </summary>
         /// <returns></returns>
         [HttpGet]

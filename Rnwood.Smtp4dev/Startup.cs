@@ -22,6 +22,7 @@ using Serilog;
 using System.Linq;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.AspNetCore.Http;
 
 namespace Rnwood.Smtp4dev
 {
@@ -39,9 +40,9 @@ namespace Rnwood.Smtp4dev
         {
             services.AddOpenApiDocument(config =>
             {
-                config.DocumentName = "v0";
+                config.DocumentName = "v1";
                 config.Title = "smtp4dev";
-                config.Version = "v0";
+                config.Version = "v1";
             });
 
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
@@ -140,6 +141,19 @@ namespace Rnwood.Smtp4dev
                 {
                     e.MapHub<NotificationsHub>("/hubs/notifications");
 
+                    subdir.Use(async (context, next) =>
+                     {
+                         try
+                         {
+                             await next(context);
+                         }
+                         catch (FileNotFoundException ex)
+                         {
+                             context.Response.StatusCode = 404;
+                             await context.Response.WriteAsync(ex.Message);
+
+                         }
+                     });
                     e.MapControllers();
                     if (env.IsDevelopment())
                     {
@@ -153,6 +167,8 @@ namespace Rnwood.Smtp4dev
                         );
                     }
                 });
+
+
 
 
 
