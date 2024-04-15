@@ -7,11 +7,11 @@
                     trigger="manual">
             <p>{{message}}</p>
             <div style="text-align: right; margin: 0">
-                <el-button size="mini" type="text" @click="cancel()">cancel</el-button>
-                <el-button size="mini" type="text" v-if="alwaysIsAvailable()" @click="confirm(true)">always</el-button>
-                <el-button type="primary" size="mini" @click="confirm(false)">confirm</el-button>
+                <el-button size="small" type="text" @click="cancel()">cancel</el-button>
+                <el-button size="small" type="text" v-if="alwaysIsAvailable()" @click="confirm(true)">always</el-button>
+                <el-button type="primary" size="small" @click="confirm(false)">confirm</el-button>
             </div>
-            <slot slot="reference"></slot>
+            <template #reference></template>
         </el-popover>
 
     </div>
@@ -19,23 +19,20 @@
 </template>
 
 <script lang="ts">
-    import { Component, Prop } from 'vue-property-decorator';
-    import Vue from 'vue'
+    import { Component, Vue, Prop, toNative, Emit } from 'vue-facing-decorator';
+        
 
     @Component
-    export default class ConfirmationDialog extends Vue {
-        constructor() {
-            super();
-        }
-
+    class ConfirmationDialog extends Vue {
         mounted() {
-            if (this.$slots.default && this.$slots.default.length > 0 && this.$slots.default[0].componentInstance) {
-                this.$slots.default[0].componentInstance.$on("click", this.getConfirmation);
+
+            if (this.$slots.default && this.$slots.default().length && this.$slots.default()[0].component) {
+                this.$slots.default()![0]!.component!.emit =() => this.getConfirmation;
 
                 //Get rid of the intermediate <span> which breaks styling;
                 if (this.$el.parentElement) {
                     var parent = this.$el.parentElement;
-                    parent.insertBefore(this.$slots.default[0].componentInstance.$el, this.$el)
+                    parent.insertBefore(this.$slots.default()[0].el, this.$el)
                     parent.removeChild(this.$el);
                 }
             }
@@ -58,6 +55,7 @@
             this.visible = false;
         }
 
+        @Emit("confirm")
         confirm(always: boolean) {
 
             if (always) {
@@ -65,14 +63,13 @@
             }
 
             this.visible = false;
-            this.$emit("confirm");
         }
 
         private checkReferenceVisible() {
             if (this.visible) {
 
-                if (this.$slots.default && this.$slots.default.length > 0 && this.$slots.default[0].componentInstance) {
-                    if ((<any>!this.$slots.default[0].componentInstance.$el).offsetParent) {
+                if (this.$slots.default && this.$slots.default().length > 0) {
+                    if ((!this.$slots.default()![0]!.el as any).offsetParent) {
                         this.visible = false;
                     }
                 }
@@ -95,4 +92,6 @@
 
 
     }
+
+    export default toNative(ConfirmationDialog);
 </script>

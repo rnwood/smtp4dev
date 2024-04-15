@@ -1,36 +1,32 @@
 ﻿<template>
 
     <div>
-        <aceeditor v-model="textToShow" @init="editorInit" lang="text" theme="chrome" width="100%" height="100%"></aceeditor>
+        <aceeditor v-model="textToShow" @init="editorInit" theme="chrome" lang="text" width="100%" height="100%"></aceeditor>
     </div>
 </template>
 
 <script lang="ts">
-    import { Component, Prop } from 'vue-property-decorator';
-    import Vue from 'vue'
-    import AceEditor from 'vue2-ace-editor';
+    import { Component, Vue, Prop, toNative } from 'vue-facing-decorator';
+    
+    import { VAceEditor } from 'vue3-ace-editor';
     import { Editor } from 'brace';
+    import "ace-builds/src-noconflict/mode-text";
+    import "ace-builds/src-noconflict/theme-chrome";
+
+    
 
     @Component({
         components: {
-            aceeditor: AceEditor
+            aceeditor: VAceEditor
         }
     }
     )
-    export default class TextView extends Vue {
-        constructor() {
-            super();
-        }
-
+    class TextView extends Vue {
+        
         @Prop()
         text: string | null = null;
 
         editorInit(brace: Editor) {
-            require('brace/ext/language_tools') //language extension prerequsite...
-            require('brace/mode/text')
-            require('brace/theme/chrome')
-            require('brace/snippets/javascript') //snippet
-
             brace.setReadOnly(true);
         }
 
@@ -52,4 +48,6 @@
 
 
     }
+
+    export default toNative(TextView)
 </script>

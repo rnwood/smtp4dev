@@ -6,17 +6,17 @@
           always-key="deleteAllMessages"
           message="Are you sure you want to delete all messages?"
       >
-        <el-button icon="el-icon-close" title="Clear"></el-button>
+        <el-button icon="close" title="Clear"></el-button>
       </confirmationdialog>
 
       <el-button
-          icon="el-icon-delete"
+          icon="Delete"
           v-on:click="deleteSelected"
           :disabled="!selectedmessage"
           title="Delete"
       ></el-button>
       <el-button
-          icon="el-icon-refresh"
+          icon="refresh"
           v-on:click="refresh"
           :disabled="loading"
           title="Refresh"
@@ -31,7 +31,7 @@
 
       <el-button
           v-on:click="relaySelected"
-          icon="el-icon-d-arrow-right"
+          icon="d-arrow-right"
           :disabled="!selectedmessage || !isRelayAvailable"
           :loading="isRelayInProgress"
           title="Relay"
@@ -41,7 +41,7 @@
           v-model="searchTerm"
           clearable
           placeholder="Search"
-          prefix-icon="el-icon-search"
+          prefix-icon="search"
           style="float: right; width: 35%; min-width: 150px"
       />
     </div>
@@ -93,7 +93,7 @@
           width="28"
           :formatter="cellValueRenderer"
       >
-        <template v-slot:default="scope">
+        <template #default="scope">
           <div v-if="scope.row.isRelayed">
             <el-tooltip
                 effect="light"
@@ -106,10 +106,10 @@
         </template>
       </el-table-column>
       <el-table-column property="subject" label="Subject" sortable="custom">
-        <template v-slot:default="scope">
+        <template #default="scope">
           {{ scope.row.subject }}
           <i
-              class="el-icon-paperclip"
+              class="paperclip"
               v-if="scope.row.attachmentCount"
               :title="scope.row.attachmentCount + ' attachments'"
           ></i>
@@ -124,9 +124,8 @@
   </div>
 </template>
 <script lang="ts">
-import {Component, Watch, Prop} from "vue-property-decorator";
-import Vue, {computed} from "vue";
-import {DefaultSortOptions, ElTable} from "element-ui/types/table";
+import {Component, Watch, Prop, Vue, toNative, Emit} from "vue-facing-decorator";
+import {ElMessageBox, ElNotification, TableInstance} from "element-plus";
 import MessagesController from "../ApiClient/MessagesController";
 import MessageSummary from "../ApiClient/MessageSummary";
 import * as moment from "moment";
@@ -137,7 +136,7 @@ import MessageNotificationManager from "../MessageNotificationManager";
 import {debounce} from "ts-debounce";
 
 import ConfirmationDialog from "@/components/confirmationdialog.vue";
-import {MessageBoxInputData} from "element-ui/types/message-box";
+import {MessageBoxInputData} from "element-plus/es/components/message-box";
 import ServerController from "../ApiClient/ServerController";
 import ClientSettingsController from "../ApiClient/ClientSettingsController";
 
@@ -152,19 +151,15 @@ import Messagelistpager from "@/components/messagelistpager.vue";
     confirmationdialog: ConfirmationDialog,
   },
 })
-export default class MessageList extends Vue {
-  constructor() {
-    super();
-    this.pagedServerMessages = EmptyPagedResult<MessageSummary>();
-  }
-
+class MessageList extends Vue {
+  
   private selectedSortDescending: boolean = true;
   private selectedSortColumn: string = "receivedDate";
 
   page: number = 1;
   pageSize: number = 25;
 
-  pagedServerMessages: PagedResult<MessageSummary> | undefined = undefined;
+  pagedServerMessages: PagedResult<MessageSummary> | undefined = EmptyPagedResult<MessageSummary>();
 
   @Prop({default: null})
   connection: HubConnectionManager | null = null;
@@ -193,13 +188,14 @@ export default class MessageList extends Vue {
   );
 
   selectMessage(message: MessageSummary) {
-    (<ElTable>this.$refs.table).setCurrentRow(message);
+    (this.$refs.table as TableInstance).setCurrentRow(message);
     this.handleCurrentChange(message);
   }
 
+  @Emit("selected-message-changed")
   handleCurrentChange(message: MessageSummary | null) {
     this.selectedmessage = message;
-    this.$emit("selected-message-changed", message);
+    return message;
   }
 
   async handlePaginationCurrentChange(page: number) {
@@ -226,7 +222,7 @@ export default class MessageList extends Vue {
   }
 
   formatDate(row: number, column: number, cellValue: Date): string {
-    return (<any>moment)(cellValue).format("YYYY-MM-DD HH:mm:ss");
+    return (moment as any)(cellValue).format("YYYY-MM-DD HH:mm:ss");
   }
 
   formatTo(row: number, column: number, cellValue: []): string {
@@ -246,7 +242,7 @@ export default class MessageList extends Vue {
     let emails: string[];
 
     try {
-      let dialogResult = <MessageBoxInputData>await this.$prompt(
+      let dialogResult = await ElMessageBox.prompt(
           "Email address(es) to relay to (separate multiple with ,)",
           "Relay Message",
           {
@@ -258,7 +254,7 @@ export default class MessageList extends Vue {
           }
       );
 
-      emails = (<string>dialogResult.value).split(",").map((e) => e.trim());
+      emails = dialogResult.value.split(",").map((e) => e.trim());
     } catch {
       return;
     }
@@ -269,14 +265,14 @@ export default class MessageList extends Vue {
         overrideRecipientAddresses: emails,
       });
 
-      this.$notify.success({
+      ElNotification.success({
         title: "Relay Message Success",
         message: "Completed OK",
       });
     } catch (e: any) {
       const message = e.response?.data?.detail ?? e.sessage;
 
-      this.$notify.error({title: "Relay Message Failed", message: message});
+      ElNotification.error({title: "Relay Message Failed", message: message});
     } finally {
       this.isRelayInProgress = false;
     }
@@ -300,7 +296,7 @@ export default class MessageList extends Vue {
       await new MessagesController().delete(messageToDelete.id);
       await this.refresh(false);
     } catch (e: any) {
-      this.$notify.error({
+      ElNotification.error({
         title: "Delete Message Failed",
         message: e.message,
       });
@@ -315,7 +311,7 @@ export default class MessageList extends Vue {
       await new MessagesController().deleteAll();
       await this.refresh(true);
     } catch (e: any) {
-      this.$notify.error({
+      ElNotification.error({
         title: "Clear Messages Failed",
         message: e.message,
       });
@@ -399,7 +395,7 @@ export default class MessageList extends Vue {
     }
   }
 
-  async sort(sortOptions: DefaultSortOptions) {
+  async sort(sortOptions: {prop: string, order: string}) {
     let descending: boolean = true;
     if (sortOptions.order === "ascending") {
       descending = false;
@@ -445,4 +441,7 @@ export default class MessageList extends Vue {
     }
   }
 }
+
+
+export default toNative(MessageList)
 </script>

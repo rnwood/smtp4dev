@@ -1,12 +1,11 @@
 import './css/site.css';
-import Vue from 'vue';
-import VueRouter from 'vue-router';
-import Element from 'element-ui';
+import { createApp } from 'vue';
+import { createRouter, createWebHistory } from 'vue-router';
+import Element from 'element-plus';
 import axios from "axios";
-import {prollyfill as localeIndexOfProllyfill } from "locale-index-of";
 import Home from '@/components/home/home.vue';
 import App from '@/components/app/app.vue';
-import './icons';
+import useIcons from './icons';
 
 const supportedBrowser = typeof (document.createElement("p").style.flex) != "undefined" && Object.prototype.hasOwnProperty.call(window, "Reflect") && Object.prototype.hasOwnProperty.call(window, "Promise");
 
@@ -17,31 +16,26 @@ if (!supportedBrowser) {
 
 } else {
 
-    Vue.use(Element);
-    Vue.use(VueRouter);
+    const app = createApp(App);
+    app.use(Element);
+    useIcons(app);
 
     const routes = [
         { path: '/', component: Home },
     ];
 
-    const router = new VueRouter({
-        base: location.pathname,
-        mode: 'history',
+    const router = createRouter({
+        history: createWebHistory(),
         routes: routes
     })
-    const app = new Vue({
-        el: '#app-root',
-        router: router,
-        render: h => h(App)
-    });
+    app.use(router);
+    app.mount('#app-root')
 
     axios.interceptors.response.use(response => {
 
         fixDates(response.data);
         return response;
     });
-
-    localeIndexOfProllyfill();
 }
 
 const dateRegex = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*))(?:Z|(\+|-)([\d|:]*))?$/;

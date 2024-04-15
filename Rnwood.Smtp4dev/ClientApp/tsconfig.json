@@ -29,17 +29,17 @@
       "dom.iterable",
       "scripthost"
     ]
-  },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx",
-    "vue.config.js",
-    "src/babel.config.js"
-  ],
-  "exclude": [
-    "node_modules"
-  ]
+  }
+  //"include": [
+  //  "src/**/*.ts",
+  //  "src/**/*.tsx",
+  //  "src/**/*.vue",
+  //  "tests/**/*.ts",
+  //  "tests/**/*.tsx",
+  //  "vue.config.js",
+  //  "src/babel.config.js"
+  //],
+  //"exclude": [
+  //  "node_modules"
+  //]
 }

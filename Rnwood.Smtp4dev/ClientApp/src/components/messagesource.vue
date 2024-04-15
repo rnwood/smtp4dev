@@ -13,8 +13,8 @@
     </div>
 </template>
 <script lang="ts">
-    import { Component, Prop, Watch } from 'vue-property-decorator'
-    import Vue from 'vue'
+    import { Component, Vue, Prop, Watch, toNative } from 'vue-facing-decorator'
+    
     import MessagesController from "../ApiClient/MessagesController";
     import Message from "../ApiClient/Message";
     import TextView from "@/components/textview.vue";
@@ -24,10 +24,7 @@
             textview: TextView
         }
     })
-    export default class MessagePartSource extends Vue {
-        constructor() {
-            super();
-        }
+    class MessageSource extends Vue {
 
         @Prop()
         message: Message | null = null;
@@ -87,4 +84,6 @@
 
         }
     }
+
+    export default toNative(MessageSource);
 </script>

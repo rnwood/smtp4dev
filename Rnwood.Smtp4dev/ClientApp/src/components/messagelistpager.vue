@@ -14,17 +14,14 @@
 </template>
 
 <script lang="ts">
-import { Component, Emit, Prop, Watch } from "vue-property-decorator";
-import Vue from "vue";
+import { Component, Vue, Emit, Prop, Watch, toNative } from "vue-facing-decorator";
+
 import PagedResult from "@/ApiClient/PagedResult";
 import ClientSettingsController from "@/ApiClient/ClientSettingsController";
 
 
 @Component({})
-export default class MessageListPager extends Vue {
-  constructor() {
-    super();
-  }
+class MessageListPager extends Vue {
 
   page: number = 1;
   pageSize: number = 25;
@@ -75,5 +72,6 @@ export default class MessageListPager extends Vue {
       this.page = this.pageCount;
     }
   }
-}
+    }
+    export default toNative(MessageListPager)
 </script>

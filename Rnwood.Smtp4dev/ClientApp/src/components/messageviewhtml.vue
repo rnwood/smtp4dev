@@ -7,15 +7,15 @@
             <el-button v-on:click="loadMessage">Retry</el-button>
         </el-alert>
         <el-alert v-if="wasSanitized" type="warning">
-            Message HTML was sanizited for display. <el-button type="danger" size="mini" v-on:click="disableSanitization">Disable (DANGER!)</el-button>
+            Message HTML was sanizited for display. <el-button type="danger" size="small" v-on:click="disableSanitization">Disable (DANGER!)</el-button>
         </el-alert>
 
         <iframe class="fill" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
     </div>
 </template>
 <script lang="ts">
-    import { Component, Prop, Watch } from 'vue-property-decorator'
-    import Vue from 'vue'
+    import { Component, Vue, Prop, Watch, toNative } from 'vue-facing-decorator'
+    
     import MessagesController from "../ApiClient/MessagesController";
     import ServerController from "../ApiClient/ServerController";
     import Message from "../ApiClient/Message";
@@ -23,11 +23,7 @@
     import sanitizeHtml from 'sanitize-html';
 
     @Component
-    export default class MessageViewHtml extends Vue {
-        constructor() {
-            super();
-        }
-
+    class MessageViewHtml extends Vue {
         @Prop({ default: null })
         message: Message | null | undefined;
         html: string | null = null;
@@ -42,6 +38,7 @@
         @Watch("message")
         async onMessageChanged(value: Message | null, oldValue: Message | null) {
 
+            this.html = "";
             await this.loadMessage();
 
         }
@@ -65,11 +62,11 @@
                 }
             }
 
-            srcDoc.set(<HTMLIFrameElement>this.$refs.htmlframe, this.sanitizedHtml);
+            srcDoc.set(this.$refs.htmlframe as HTMLIFrameElement, this.sanitizedHtml);
         }
 
         async onHtmlFrameLoaded() {
-            var doc = (<HTMLIFrameElement>this.$refs.htmlframe).contentDocument;
+            var doc = (this.$refs.htmlframe as HTMLIFrameElement).contentDocument;
             if (!doc) {
                 return;
             }
@@ -116,4 +113,6 @@
             this.updateIframe();
         }
     }
+
+    export default toNative(MessageViewHtml)
 </script>

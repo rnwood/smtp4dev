@@ -3,16 +3,12 @@
 </template>
 
 <script lang="ts">
-    import Vue from "vue";
-    import { Component, Prop } from "vue-property-decorator";
+    
+    import { Component, Vue, Prop, toNative } from "vue-facing-decorator";
     import HubConnectionManager from "../HubConnectionManager";
 
     @Component
-    export default class HubConnectionStatus extends Vue {
-
-        constructor() {
-            super();
-        }
+    class HubConnectionStatus extends Vue {
 
         @Prop({ default: null })
         connection: HubConnectionManager | null = null;
@@ -34,7 +30,7 @@ var errorText = this.connection && this.connection.error ? "\nError: " + this.co
         }
 
         buttonIcon(): string {
-            return this.connection && this.connection.connected ? "el-icon-success" : this.connection && this.connection.started ? "el-icon-warning" : "el-icon-warning";
+            return this.connection && this.connection.connected ? "success" : this.connection && this.connection.started ? "warning" : "warning";
         }
 
 
@@ -58,4 +54,6 @@ var errorText = this.connection && this.connection.error ? "\nError: " + this.co
         }
 
     }
+
+    export default toNative(HubConnectionStatus)
 </script>

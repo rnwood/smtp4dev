@@ -38,7 +38,6 @@ export default class MessageNotificationManager {
                 const notification = this.currentNotification = new Notification("smtp4dev: " + this.unnotifiedMessages.length + " new message(s) received.", {
                     body: this.unnotifiedMessages.slice(0, 5).map(m => "From: " + m.from + " - " + m.subject).join("\n") + (this.unnotifiedMessages.length > 5 ? "..." : ""),
                     tag: "newmessages",
-                    renotify: false,
                     silent: (!!this.currentNotification),
                     requireInteraction: false
                 });
