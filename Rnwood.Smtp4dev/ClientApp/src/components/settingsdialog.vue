@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="Settings" v-model:visible="visible" width="80%" :close-on-click-modal="false" @open="refresh" :before-close="handleClose">
+    <el-dialog title="Settings" :visible="visible" width="80%" :close-on-click-modal="false" @open="refresh" :before-close="handleClose">
         <div v-loading="loading">
             <el-alert v-if="error" type="error" title="Error" show-icon>
                 {{error.message}}
@@ -181,7 +181,7 @@
 
         }
 
-        @Prop({ default: false })
+        @Prop()
         visible: boolean = false;
 
         @Emit("closed")

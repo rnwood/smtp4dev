@@ -60,10 +60,10 @@
                 </template>
             </div>
 
-            <el-tabs value="view" style="height: 100%; width:100%" class="fill" type="border-card">
-                <el-tab-pane name="view" class="hfillpanel">
+            <el-tabs v:model="selectedTabId" style="height: 100%; width:100%" class="fill" type="border-card">
+                <el-tab-pane id="view" class="hfillpanel">
                     <template #label>
-                        <i class="view"></i> View
+                        <el-icon><View /></el-icon>&nbsp;View
                     </template>
                     <messageviewattachments :message="message" v-if="message && messageSummary.attachmentCount"></messageviewattachments>
 
@@ -71,34 +71,40 @@
                     <messageview-plaintext v-if="message && !message.hasHtmlBody && message.hasPlainTextBody" :message="message" class="fill messageplaintext"></messageview-plaintext>
                     <div v-if="message && !message.hasHtmlBody && !message.hasPlainTextBody">This MIME message has no HTML or plain text body.</div>
 
-                    <el-tabs v-if="message && message.hasPlainTextBody && message.hasPlainTextBody" value="html" style="height: 100%; width:100%" class="fill">
-                        <el-tab-pane name="html" label="HTML" class="hfillpanel" v-if="message && message.hasHtmlBody">
+                    <el-tabs v-if="message && message.hasPlainTextBody && message.hasPlainTextBody" v-model="selectedPreviewTabId" style="height: 100%; width:100%" class="fill">
+                        <el-tab-pane id="html" label="HTML" class="hfillpanel" v-if="message && message.hasHtmlBody">
                             <messageview-html :message="message" class="fill messagepreview"></messageview-html>
                         </el-tab-pane>
-                        <el-tab-pane name="plaintext" label="Plain text" class="hfillpanel" v-if="message && message.hasPlainTextBody">
+                        <el-tab-pane id="plaintext" label="Plain text" class="hfillpanel" v-if="message && message.hasPlainTextBody">
                             <messageview-plaintext :message="message" class="fill messageplaintext"></messageview-plaintext>
                         </el-tab-pane>
                     </el-tabs>
                 </el-tab-pane>
 
-                <el-tab-pane label="Analysis" name="analysis" class="fill vfillpanel">
+                <el-tab-pane label="Analysis" id="analysis" class="fill vfillpanel">
+                    <template #label>
+                        <el-icon><FirstAidKit /></el-icon>&nbsp;Analysis
+                    </template>
                     <messageanalysis class="fill" :message="message" type="source"></messageanalysis>
                 </el-tab-pane>
 
-                <el-tab-pane label="Source" name="source" class="fill vfillpanel">
+                <el-tab-pane label="Source" id="source" class="fill vfillpanel">
+                    <template #label>
+                        <el-icon><Document /></el-icon>&nbsp;Source
+                    </template>
                     <messagesource class="fill" :message="message" type="source"></messagesource>
                 </el-tab-pane>
 
                 <el-tab-pane name="headers" class="hfillpanel">
                     <template #label>
-                        <i class="notebook-2"></i> Headers
+                        <el-icon><Memo /></el-icon>&nbsp;Headers
                     </template>
                     <headers :headers="headers" class="fill"></headers>
                 </el-tab-pane>
 
                 <el-tab-pane name="parts" class="hfillpanel">
                     <template #label>
-                        <i class="document-copy"></i> Parts
+                        <el-icon><document-copy /></el-icon>&nbsp;Parts
                     </template>
 
                     <el-tree v-if="message"
@@ -107,9 +113,9 @@
                              @node-click="onPartSelection"
                              highlight-current
                              empty-message="No parts"
-                             ref="partstree"
                              accordion
                              node-key="id"
+                             :current-node-key="'0'"
                              :default-expanded-keys="['0']">
                         <template v-slot="{node, data}">
                             <span class="custom-tree-node">
@@ -122,18 +128,24 @@
 
                     <div v-show="selectedPart" class="fill vfillpanel">
                         <el-tabs value="headers" class="fill hfillpanel" type="border-card">
-                            <el-tab-pane label="Headers" name="headers" class="fill vfillpanel">
+                            <el-tab-pane label="Headers" id="headers" class="fill vfillpanel">
                                 <template #label>
-                                    <i class="notebook-2"></i> Headers
+                                    <el-icon><Memo /></el-icon>&nbsp;Headers
                                 </template>
                                 <headers :headers="selectedPartHeaders" class="fill"></headers>
                             </el-tab-pane>
 
-                            <el-tab-pane label="Source" name="source" class="fill vfillpanel">
+                            <el-tab-pane label="Source" id="source" class="fill vfillpanel">
+                                <template #label>
+                                    <el-icon><Document /></el-icon>&nbsp;Source
+                                </template>
                                 <messagepartsource class="fill" :messageEntitySummary="selectedPart" type="source"></messagepartsource>
                             </el-tab-pane>
 
-                            <el-tab-pane label="Raw" name="raw" class="fill vfillpanel">
+                            <el-tab-pane label="Source (Encoded)" id="raw" class="fill vfillpanel">
+                                <template #label>
+                                    <el-icon><Document /></el-icon>&nbsp;Source (Encoded)
+                                </template>
                                 <messagepartsource class="fill" :messageEntitySummary="selectedPart" type="raw"></messagepartsource>
                             </el-tab-pane>
                         </el-tabs>
@@ -188,6 +200,8 @@
 
         @Prop({})
         messageSummary: MessageSummary | null = null;
+        selectedTabId = "view";
+        selectedPreviewTabId = "html";
         message: Message | null = null;
         selectedPart: MessageEntitySummary | null = null;
         warnings: MessageWarning[] = [];
@@ -218,11 +232,8 @@
                     this.message = await new MessagesController().getMessage(
                         this.messageSummary.id
                     );
-                    if (this.$refs.partstree) {
-                        (this.$refs.partstree as TreeInstance).setCurrentNode(
-                            (this.$refs.partstree as TreeInstance).getNode(0)
-                        );
-                    }
+                    this.selectedPart = this.message.parts[0];
+                    this.selectedPreviewTabId = this.message.hasHtmlBody ? "html" : "plaintext";
                     this.setWarnings();
 
                     if (this.messageSummary.isUnread) {

@@ -13,17 +13,17 @@
 <script lang="ts">
     import { Component, Vue, Prop, toNative } from 'vue-facing-decorator';
 
-import Header from "../ApiClient/Header";
+    import Header from "../ApiClient/Header";
 
-@Component
-class Headers extends Vue {
+    @Component
+    class Headers extends Vue {
 
-    @Prop({ default: [] })
-    headers!: Header[];
+        @Prop({ default: [] })
+        headers!: Header[];
 
-    async destroyed() {
-        
-    }
+        async destroyed() {
+
+        }
 
 
     }

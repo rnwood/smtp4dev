@@ -1,6 +1,5 @@
 ﻿<template>
 
-    <div>
         <el-popover placement="bottom"
                     width="160"
                     v-model="visible"
@@ -11,10 +10,12 @@
                 <el-button size="small" type="text" v-if="alwaysIsAvailable()" @click="confirm(true)">always</el-button>
                 <el-button type="primary" size="small" @click="confirm(false)">confirm</el-button>
             </div>
-            <template #reference></template>
+            <template #reference>
+                <slot @click="getConfirmation"></slot>
+            </template>
         </el-popover>
+ 
 
-    </div>
 
 </template>
 
@@ -24,20 +25,7 @@
 
     @Component
     class ConfirmationDialog extends Vue {
-        mounted() {
-
-            if (this.$slots.default && this.$slots.default().length && this.$slots.default()[0].component) {
-                this.$slots.default()![0]!.component!.emit =() => this.getConfirmation;
-
-                //Get rid of the intermediate <span> which breaks styling;
-                if (this.$el.parentElement) {
-                    var parent = this.$el.parentElement;
-                    parent.insertBefore(this.$slots.default()[0].el, this.$el)
-                    parent.removeChild(this.$el);
-                }
-            }
-        }
-
+ 
         @Prop({ default: "" })
         message!: string;
 
@@ -78,7 +66,7 @@
             }
         }
 
-        private getConfirmation() {
+        getConfirmation() {
 
 
             if (this.alwaysIsAvailable() && window.localStorage.getItem("always-" + this.alwaysKey) === "true") {

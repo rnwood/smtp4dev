@@ -44,10 +44,12 @@
                              label="# Msgs"
                              width="120"
                              sortable>
-                <template v-slot:default="scope">
-                    <i class="warning"
-                       v-if="scope.row.terminatedWithError"
-                       title="This session terminated abnormally"></i>
+                <template #default="scope">
+                    <el-icon
+                        
+                        title="This session terminated abnormally">
+                        <warning v-if="scope.row.terminatedWithError"/>
+                    </el-icon>
                     {{ scope.row.numberOfMessages }}
                 </template>
             </el-table-column>

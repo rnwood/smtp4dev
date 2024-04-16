@@ -3,7 +3,11 @@
     <div>
         <h1>Analysis:</h1>
 
-        <div>{{this.doIUseResults}}</div>
+        <template v-for="i in doIUseResults?.warnings ?? []" :key="i">
+            <div>
+                {{i}}
+            </div>
+        </template>
     </div>
 
 
@@ -14,7 +18,7 @@
     import MessagesController from "../ApiClient/MessagesController";
     import ServerController from "../ApiClient/ServerController";
     import Message from "../ApiClient/Message";
-    //import { doIUseEmail } from '@jsx-email/doiuse-email/dist/index.mjs';
+    import { doIUseEmail } from '@jsx-email/doiuse-email';
 
     @Component
     class MessageAnalysis extends Vue {
@@ -26,7 +30,7 @@
         error: Error | null = null;
         loading = false;
 
-        doIUseResults = "";
+        doIUseResults : ReturnType<typeof doIUseEmail> | null = null;
 
         @Watch("message")
         async onMessageChanged(value: Message | null, oldValue: Message | null) {
@@ -38,7 +42,7 @@
 
         @Watch("html")
         async onHtmlChanged(value: string) {
-            //this.doIUseResults = JSON.stringify(doIUseEmail(value, {emailClients: ["*"]}));
+
         }
 
         async loadMessage() {
@@ -51,6 +55,7 @@
                 if (this.message != null) {
 
                     this.html = await new MessagesController().getMessageHtml(this.message.id);
+                    this.doIUseResults = doIUseEmail(this.html, {emailClients: ["*"]});
                 }
             } catch (e: any) {
                 this.error = e;

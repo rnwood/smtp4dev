@@ -13,7 +13,7 @@
                       title="This session terminated abnormally">{{session.error}}</el-alert>
 
             <el-tabs value="log" style="height: 100%; width:100%" class="fill" type="border-card">
-                <el-tab-pane name="log" class="hfillpanel">
+                <el-tab-pane id="log" class="hfillpanel">
                     <template #label>
                         <span>
                             <i class="notebook-2"></i> Log

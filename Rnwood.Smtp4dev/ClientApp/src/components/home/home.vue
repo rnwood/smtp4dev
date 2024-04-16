@@ -10,7 +10,7 @@
             <VersionInfo style="flex: 1 1 content; align-self: center;"></VersionInfo>
 
             <hubconnstatus style="flex: 0 1 content" :connection="connection"></hubconnstatus>
-            <serverstatus style="flex: 0 1 content" :connection="connection" v-on:showsettings="settingsVisible = true">
+            <serverstatus style="flex: 0 1 content" :connection="connection" v-on:showsettings="showSettings(true)">
             </serverstatus>
             <el-dropdown trigger="click" @command="handleMenuCommand">
                 <el-button style="flex: 0 0 content; font-size: 1.7em; padding: 6px;" circle icon="more" />
@@ -22,13 +22,13 @@
                 </template>
             </el-dropdown>
         </el-header>
-        <settingsdialog :visible="settingsVisible" :connection="connection" v-on:closed="settingsVisible = false" />
+        <settingsdialog v-model="settingsVisible" :connection="connection" v-on:closed="showSettings(false)" />
         <el-main class="fill vfillpanel">
-            <el-tabs id="maintabs" class="fill" :value="'messages'" type="border-card" >
+            <el-tabs id="maintabs" class="fill" v-model="activeTabId" type="border-card" >
                 <el-tab-pane label="Messages" name="messages" class="vfillpanel">
                     <template #label>
                         <span>
-                            <i class="message"></i> Messages
+                            <el-icon><message/></el-icon> Messages
                         </span>
                     </template>
 
@@ -47,7 +47,7 @@
                 <el-tab-pane label="Sessions" name="sessions" class="vfillpanel">
                     <template #label>
                         <span>
-                            <i class="monitor"></i> Sessions
+                            <el-icon><monitor /></el-icon> Sessions
                         </span>
                     </template>
 
@@ -103,12 +103,17 @@
         }
     })
     class Home extends Vue {
+        activeTabId = "messages";
         selectedMessage: MessageSummary | null = null;
         selectedSession: SessionSummary | null = null;
 
         connection: HubConnectionManager | null = null;
 
         settingsVisible: boolean = false;
+
+        showSettings(visible: boolean) {
+            this.settingsVisible = visible;
+        }
 
         handleMenuCommand(command: string) {
             switch (command) {

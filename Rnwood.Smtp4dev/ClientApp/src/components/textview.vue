@@ -1,8 +1,8 @@
 ﻿<template>
 
-    <div>
-        <aceeditor v-model="textToShow" @init="editorInit" theme="chrome" lang="text" width="100%" height="100%"></aceeditor>
-    </div>
+    
+        <aceeditor v-model:value="textToShow" @init="editorInit" theme="chrome" lang="text" width="100%" :wrap="true" height="100%"></aceeditor>
+    
 </template>
 
 <script lang="ts">
