@@ -76,12 +76,41 @@ namespace Rnwood.Smtp4dev
 
                     opt.UseSqlite($"Data Source={dbLocation}");
                 }
+
+                
+
+                using var context = new Smtp4devDbContext((DbContextOptions<Smtp4devDbContext>)opt.Options);
+                if (string.IsNullOrEmpty(serverOptions.Database))
+                {
+                    context.Database.Migrate();
+                    context.SaveChanges();
+                }
+                else
+                {
+
+                    var pendingMigrations = context.Database.GetPendingMigrations();
+                    if (pendingMigrations.Any())
+                    {
+                        Log.Logger.Information("Updating DB schema with migrations: {migrations}", string.Join(", ", pendingMigrations));
+                        context.Database.Migrate();
+                        context.SaveChanges();
+                    }
+                }
+
+                if (!context.ImapState.Any())
+                {
+                    context.Add(new ImapState
+                    {
+                        Id = Guid.Empty,
+                        LastUid = 1
+                    });
+                    context.SaveChanges();
+                }
             }, ServiceLifetime.Scoped, ServiceLifetime.Singleton);
 
+
             services.AddSingleton<ISmtp4devServer, Smtp4devServer>();
-            services.AddHostedService<Smtp4devServer>(sp => (Smtp4devServer) sp.GetRequiredService<ISmtp4devServer>());
             services.AddSingleton<ImapServer>();
-            services.AddHostedService<ImapServer>(sp => sp.GetRequiredService<ImapServer>());
             services.AddScoped<IMessagesRepository, MessagesRepository>();
             services.AddScoped<IHostingEnvironmentHelper, HostingEnvironmentHelper>();
             services.AddSingleton<ITaskQueue, TaskQueue>();
@@ -176,44 +205,6 @@ namespace Rnwood.Smtp4dev
 
                     }
                 });
-
-
-
-
-
-                using (var scope = subdir.ApplicationServices.CreateScope())
-                {
-                    using (var context = scope.ServiceProvider.GetService<Smtp4devDbContext>())
-                    {
-                        if (string.IsNullOrEmpty(serverOptions.Database))
-                        {
-                            context.Database.Migrate();
-                            context.SaveChanges();
-                        }
-                        else
-                        {
-
-                            var pendingMigrations = context.Database.GetPendingMigrations();
-                            if (pendingMigrations.Any())
-                            {
-                                Log.Logger.Information("Updating DB schema with migrations: {migrations}", string.Join(", ", pendingMigrations));
-                                context.Database.Migrate();
-                                context.SaveChanges();
-                            }
-                        }
-
-                        if (!context.ImapState.Any())
-                        {
-                            context.Add(new ImapState
-                            {
-                                Id = Guid.Empty,
-                                LastUid = 1
-                            });
-                            context.SaveChanges();
-                        }
-
-                    }
-                }
             };
 
             if (!string.IsNullOrEmpty(serverOptions.BasePath) && serverOptions.BasePath != "/")
