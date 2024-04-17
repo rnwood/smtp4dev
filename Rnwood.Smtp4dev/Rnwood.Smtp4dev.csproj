@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="4.5.0" />
-    <PackageReference Include="CommandLiners.MonoOptions" Version="1.0.36" />
+    <PackageReference Include="CommandLiners.MonoOptions" Version="1.0.45" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.60" />
     <PackageReference Include="Jint" Version="3.0.1" />
     <PackageReference Include="MailKit" Version="4.4.0" />
