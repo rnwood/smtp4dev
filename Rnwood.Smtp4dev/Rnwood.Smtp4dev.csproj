@@ -46,7 +46,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MimeKit" Version="4.4.0" />
+    <PackageReference Include="MimeKit" Version="4.5.0" />
     <PackageReference Include="Mono.Options" Version="6.12.0.148" />
     <PackageReference Include="NSwag.AspNetCore" Version="14.0.7" />
     <PackageReference Include="Rnwood.LumiSoft.Net" Version="1.0.0" />
