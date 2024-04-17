@@ -1,11 +1,8 @@
 ﻿<template>
     <div class="sessionlist">
         <div class="toolbar">
-            <confirmationdialog v-on:confirm="clear"
-                                always-key="deleteAllSessions"
-                                message="Are you sure you want to delete all sessions?">
-                <el-button icon="close" title="Clear"></el-button>
-            </confirmationdialog>
+            <el-button icon="close" title="Clear" @click="clear"></el-button>
+
             <el-button icon="Delete"
                        v-on:click="deleteSelected"
                        :disabled="!selectedsession"
@@ -45,10 +42,8 @@
                              width="120"
                              sortable>
                 <template #default="scope">
-                    <el-icon
-                        
-                        title="This session terminated abnormally">
-                        <warning v-if="scope.row.terminatedWithError"/>
+                    <el-icon title="This session terminated abnormally">
+                        <warning v-if="scope.row.terminatedWithError" />
                     </el-icon>
                     {{ scope.row.numberOfMessages }}
                 </template>
@@ -61,7 +56,6 @@
 </template>
 <script lang="ts">
     import { Component, Vue, Prop, Watch, toNative, Emit } from "vue-facing-decorator";
-    
     import SessionsController from "../ApiClient/SessionsController";
     import SessionSummary from "../ApiClient/SessionSummary";
     import * as moment from "moment";
@@ -69,7 +63,7 @@
     import sortedArraySync from "../sortedArraySync";
     import { Mutex } from "async-mutex";
     import ConfirmationDialog from "@/components/confirmationdialog.vue";
-    import { TableInstance, ElNotification } from "element-plus";
+    import { TableInstance, ElNotification, ElMessageBox } from "element-plus";
     import PagedResult, { EmptyPagedResult } from "@/ApiClient/PagedResult";
     import Messagelistpager from "@/components/messagelistpager.vue";
     import ClientSettingsController from "@/ApiClient/ClientSettingsController";
@@ -152,6 +146,12 @@
         }
 
         async clear() {
+            try {
+                await ElMessageBox.confirm("Delete all sessions?")
+            } catch {
+                return;
+            }
+            
             this.loading = true;
             try {
                 await new SessionsController().deleteAll();

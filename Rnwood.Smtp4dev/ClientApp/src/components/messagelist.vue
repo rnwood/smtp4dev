@@ -1,14 +1,7 @@
 ﻿<template>
     <div class="messagelist">
         <div class="toolbar">
-            <confirmationdialog v-on:confirm="clear"
-                                always-key="deleteAllMessages"
-                                message="Are you sure you want to delete all messages?"
-                                >
-                <template #default>
-                    <el-button icon="close" title="Clear"></el-button>
-                </template>
-            </confirmationdialog>
+            <el-button icon="close" title="Clear" @click="clear"></el-button>
 
             <el-button icon="Delete"
                        v-on:click="deleteSelected"
@@ -266,6 +259,14 @@
         }
 
         async clear() {
+
+            try {
+                await ElMessageBox.confirm("Delete all messages?")
+            } catch {
+                return;
+            }
+
+
             try {
                 this.loading = true;
                 await new MessagesController().deleteAll();

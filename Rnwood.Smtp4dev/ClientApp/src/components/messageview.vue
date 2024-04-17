@@ -81,12 +81,12 @@
                     </el-tabs>
                 </el-tab-pane>
 
-                <el-tab-pane label="Analysis" id="analysis" class="fill vfillpanel">
+                <!--<el-tab-pane label="Analysis" id="analysis" class="fill vfillpanel">
                     <template #label>
                         <el-icon><FirstAidKit /></el-icon>&nbsp;Analysis
                     </template>
                     <messageanalysis class="fill" :message="message" type="source"></messageanalysis>
-                </el-tab-pane>
+                </el-tab-pane>-->
 
                 <el-tab-pane label="Source" id="source" class="fill vfillpanel">
                     <template #label>
