@@ -25,9 +25,10 @@ if (!supportedBrowser) {
     ];
 
     const router = createRouter({
-        history: createWebHistory(),
-        routes: routes
-    })
+        history: createWebHistory(location.pathname),
+        routes: routes,
+    });
+    
     app.use(router);
     app.mount('#app-root')
 

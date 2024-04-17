@@ -157,7 +157,8 @@ namespace Rnwood.Smtp4dev
                      });
                     e.MapControllers();
                     if (env.IsDevelopment())
-                    {
+                    { 
+                        
                         e.MapToVueCliProxy(
                             "{*path}",
                             new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp") },
