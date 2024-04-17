@@ -202,15 +202,18 @@ namespace Rnwood.Smtp4dev
                             }
                         }
 
-                        context.Messages.ToList();
-                        context.Sessions.ToList();
-                        context.ImapState.ToList();
-                        context.MessageRelays.ToList();
+                        if (!context.ImapState.Any())
+                        {
+                            context.Add(new ImapState
+                            {
+                                Id = Guid.Empty,
+                                LastUid = 1
+                            });
+                            context.SaveChanges();
+                        }
 
                     }
                 }
-
-                subdir.ApplicationServices.GetService<ImapServer>().TryStart();
             };
 
             if (!string.IsNullOrEmpty(serverOptions.BasePath) && serverOptions.BasePath != "/")

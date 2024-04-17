@@ -23,6 +23,8 @@ using Rnwood.Smtp4dev.Data;
 using Rnwood.SmtpServer.Extensions.Auth;
 using Serilog;
 using SmtpResponse = Rnwood.SmtpServer.SmtpResponse;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
 
 namespace Rnwood.Smtp4dev.Server
 {
