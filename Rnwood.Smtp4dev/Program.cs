@@ -100,6 +100,7 @@ namespace Rnwood.Smtp4dev
 
             var host = BuildWebHost(args.Where(arg => arg != "--service").ToArray(), cmdLineOptions, commandLineOptions);
 
+
             await host.StartAsync();
 
 
@@ -195,9 +196,13 @@ namespace Rnwood.Smtp4dev
 
                 if (!string.IsNullOrEmpty(cmdLineOptions.Urls))
                 {
-
                     c.UseUrls(cmdLineOptions.Urls.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).ToArray());
                 }
+                c.ConfigureServices(services =>
+                {
+                    services.AddHostedService<Smtp4devServer>(sp => (Smtp4devServer)sp.GetRequiredService<ISmtp4devServer>());
+                    services.AddHostedService<ImapServer>(sp => sp.GetRequiredService<ImapServer>());
+                });
             });
 
 

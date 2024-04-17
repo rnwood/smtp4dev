@@ -16,10 +16,12 @@ using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
 using System.Net.NetworkInformation;
 using Serilog;
+using Microsoft.Extensions.Hosting;
+using System.Threading;
 
 namespace Rnwood.Smtp4dev.Server
 {
-    public class ImapServer
+    public class ImapServer : IHostedService
     {
         public ImapServer(IOptionsMonitor<ServerOptions> serverOptions, IServiceScopeFactory serviceScopeFactory)
         {
@@ -29,18 +31,7 @@ namespace Rnwood.Smtp4dev.Server
             IDisposable eventHandler = null;
             var obs = Observable.FromEvent<ServerOptions>(e => eventHandler = serverOptions.OnChange(e), e => eventHandler.Dispose());
             obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
-
-            using var scope = serviceScopeFactory.CreateScope();
-            var dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-            if (!dbContext.ImapState.Any())
-            {
-                dbContext.Add(new ImapState
-                {
-                    Id = Guid.Empty,
-                    LastUid = 1
-                });
-                dbContext.SaveChanges();
-            }
+  
         }
 
         private void OnServerOptionsChanged(ServerOptions serverOptions)
@@ -126,6 +117,16 @@ namespace Rnwood.Smtp4dev.Server
         private void Logger_WriteLog(object sender, LumiSoft.Net.Log.WriteLogEventArgs e)
         {
             log.Information(e.LogEntry.Text);
+        }
+
+        Task IHostedService.StartAsync(CancellationToken cancellationToken)
+        {
+            return Task.Run(() => this.TryStart());
+        }
+
+        Task IHostedService.StopAsync(CancellationToken cancellationToken)
+        {
+            return Task.Run(() => this.Stop());
         }
 
         class SessionHandler
