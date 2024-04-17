@@ -1,31 +1,36 @@
-<template>
+﻿<template>
 
-    <div class="hfillpanel" v-loading="!html">
-        <el-alert v-if="error" type="error">
-            {{error.message}}
+    <div>
+        <h1>Analysis:</h1>
 
-            <el-button v-on:click="loadMessage">Retry</el-button>
-        </el-alert>
-
-        <iframe class="fill" ref="htmlframe"></iframe>
+        <template v-for="i in doIUseResults?.warnings ?? []" :key="i">
+            <div>
+                {{i}}
+            </div>
+        </template>
     </div>
+
+
 </template>
 <script lang="ts">
     import { Component, Vue, Prop, Watch, toNative } from 'vue-facing-decorator'
     
     import MessagesController from "../ApiClient/MessagesController";
+    import ServerController from "../ApiClient/ServerController";
     import Message from "../ApiClient/Message";
-    import * as srcDoc from 'srcdoc-polyfill';
+    import { doIUseEmail } from '@jsx-email/doiuse-email';
 
     @Component
-    class MessageViewPlainText extends Vue {
+    class MessageAnalysis extends Vue {
 
         @Prop({ default: null })
         message: Message | null | undefined;
         html: string | null = null;
-
+        
         error: Error | null = null;
         loading = false;
+
+        doIUseResults : ReturnType<typeof doIUseEmail> | null = null;
 
         @Watch("message")
         async onMessageChanged(value: Message | null, oldValue: Message | null) {
@@ -37,23 +42,20 @@
 
         @Watch("html")
         async onHtmlChanged(value: string) {
-            this.updateIframe();
+
         }
 
-        private updateIframe() {
-          
-            srcDoc.set(this.$refs.htmlframe as HTMLIFrameElement, this.html ?? "");
-        }
         async loadMessage() {
 
             this.error = null;
             this.loading = true;
             this.html = null;
-           
+
             try {
                 if (this.message != null) {
 
-                    this.html = "<pre>" + await new MessagesController().getMessagePlainText(this.message.id) + "</pre>"
+                    this.html = await new MessagesController().getMessageHtml(this.message.id);
+                    this.doIUseResults = doIUseEmail(this.html, {emailClients: ["*"]});
                 }
             } catch (e: any) {
                 this.error = e;
@@ -70,7 +72,8 @@
         async destroyed() {
 
         }
+
     }
 
-    export default toNative(MessageViewPlainText)
+    export default toNative(MessageAnalysis)
 </script>

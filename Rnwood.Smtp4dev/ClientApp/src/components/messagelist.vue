@@ -2,6 +2,7 @@
     <div class="messagelist">
         <div class="toolbar">
             <el-button icon="close" title="Clear" @click="clear"></el-button>
+
             <el-button icon="Delete"
                        v-on:click="deleteSelected"
                        :disabled="!selectedmessage"
@@ -264,6 +265,7 @@
             } catch {
                 return;
             }
+
 
             try {
                 this.loading = true;

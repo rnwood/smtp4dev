@@ -11,23 +11,21 @@
 </template>
 
 <script lang="ts">
-    import { Component, Prop, Watch } from 'vue-property-decorator';
-import Vue from 'vue'
-import Header from "../ApiClient/Header";
+    import { Component, Vue, Prop, toNative } from 'vue-facing-decorator';
 
-@Component
-export default class Headers extends Vue {
-    constructor() {
-        super(); 
+    import Header from "../ApiClient/Header";
+
+    @Component
+    class Headers extends Vue {
+
+        @Prop({ default: [] })
+        headers!: Header[];
+
+        async destroyed() {
+
+        }
+
+
     }
-
-    @Prop({ default: [] })
-    headers!: Header[];
-
-    async destroyed() {
-        
-    }
-
-
-}
+    export default toNative(Headers);
 </script>

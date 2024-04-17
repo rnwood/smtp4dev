@@ -23,11 +23,14 @@ using System.Linq;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.ResponseCompression;
 
 namespace Rnwood.Smtp4dev
 {
     public class Startup
     {
+        private const string InMemoryDbConnString = "Data Source=file:cachedb?mode=memory&cache=shared";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -56,7 +59,9 @@ namespace Rnwood.Smtp4dev
                 if (string.IsNullOrEmpty(serverOptions.Database))
                 {
                     Log.Logger.Information("Using in memory database.");
-                    opt.UseSqlite("Data Source=file:cachedb?mode=memory&cache=shared");
+                    var keepAliveConnection = new SqliteConnection(InMemoryDbConnString);
+                    keepAliveConnection.Open();
+                    opt.UseSqlite(InMemoryDbConnString);
                 }
                 else
                 {
@@ -156,15 +161,17 @@ namespace Rnwood.Smtp4dev
                      });
                     e.MapControllers();
                     if (env.IsDevelopment())
-                    {
+                    { 
+                        
                         e.MapToVueCliProxy(
                             "{*path}",
                             new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp") },
                             npmScript: "serve",
-                            regex: "Compiled successfully",
+                            regex: "App running at",
                             forceKill: true,
                             port: 8123
                         );
+
                     }
                 });
 

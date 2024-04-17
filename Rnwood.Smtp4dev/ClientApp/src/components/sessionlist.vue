@@ -2,6 +2,7 @@
     <div class="sessionlist">
         <div class="toolbar">
             <el-button icon="close" title="Clear" @click="clear"></el-button>
+
             <el-button icon="Delete"
                        v-on:click="deleteSelected"
                        :disabled="!selectedsession"
@@ -55,7 +56,6 @@
 </template>
 <script lang="ts">
     import { Component, Vue, Prop, Watch, toNative, Emit } from "vue-facing-decorator";
-
     import SessionsController from "../ApiClient/SessionsController";
     import SessionSummary from "../ApiClient/SessionSummary";
     import * as moment from "moment";
@@ -146,12 +146,12 @@
         }
 
         async clear() {
-
             try {
                 await ElMessageBox.confirm("Delete all sessions?")
             } catch {
                 return;
             }
+            
             this.loading = true;
             try {
                 await new SessionsController().deleteAll();

@@ -7,9 +7,9 @@
     </el-alert>
 
     <div class="toolbar">
-      <el-button size="small" icon="el-icon-document" @click="viewSource">Open</el-button>
+      <el-button size="small" icon="document" @click="viewSource">Open</el-button>
 
-      <el-button size="small" icon="el-icon-download" @click="download" v-show="downloadurl">Download</el-button>
+      <el-button size="small" icon="download" @click="download" v-show="downloadurl">Download</el-button>
     </div>
     <div v-show="source" class="vfillpanel fill">
       <textview :text="source" class="fill"></textview>
@@ -17,8 +17,8 @@
   </div>
 </template>
 <script lang="ts">
-import {Component, Prop, Watch} from 'vue-property-decorator'
-import Vue from 'vue'
+import {Component, Prop, Watch, Vue, toNative} from 'vue-facing-decorator'
+
 import MessagesController from "../ApiClient/MessagesController";
 import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
 import TextView from "@/components/textview.vue";
@@ -28,10 +28,8 @@ import TextView from "@/components/textview.vue";
     textview: TextView
   }
 })
-export default class MessagePartSource extends Vue {
-  constructor() {
-    super();
-  }
+class MessagePartSource extends Vue {
+ 
 
   @Prop()
   messageEntitySummary: MessageEntitySummary | null = null;
@@ -99,5 +97,6 @@ export default class MessagePartSource extends Vue {
   async destroyed() {
 
   }
-}
+    }
+    export default toNative(MessagePartSource);
 </script>
