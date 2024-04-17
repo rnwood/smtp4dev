@@ -1,21 +1,18 @@
 ﻿<template>
     <div class="vfillpanel pad" v-show="attachments">
-        <div v-for="attachment in attachments" :key="attachment.id"><el-button icon="el-icon-paperclip" size="small" type="primary" round v-on:click="openAttachment(attachment)">{{attachment.fileName}}</el-button></div>
+        <div v-for="attachment in attachments" :key="attachment.id"><el-button icon="paperclip" size="small" type="primary" round v-on:click="openAttachment(attachment)">{{attachment.fileName}}</el-button></div>
     </div>
 </template>
 <script lang="ts">
-    import { Component, Prop, Watch } from 'vue-property-decorator'
-import Vue from 'vue'
+    import { Component, Vue, Prop, Watch, toNative } from 'vue-facing-decorator'
+
 import MessagesController from "../ApiClient/MessagesController";
 import Message from "../ApiClient/Message";
 import AttachmentSummary from "../ApiClient/AttachmentSummary";
 import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
 
 @Component
-export default class MessageViewAttachments extends Vue {
-    constructor() {
-        super();
-    }
+ class MessageViewAttachments extends Vue {
 
     @Prop({ default: null })
     message: Message | null = null;
@@ -62,5 +59,7 @@ export default class MessageViewAttachments extends Vue {
     async destroyed() {
 
     }
-}
+    }
+
+    export default toNative(MessageViewAttachments)
 </script>

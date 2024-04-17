@@ -12,6 +12,7 @@ using System.Threading.Tasks;
 using CommandLiners;
 using CommandLiners.Options;
 using Microsoft.AspNetCore;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Builder.Extensions;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
@@ -185,7 +186,6 @@ namespace Rnwood.Smtp4dev
                         }
 
                     });
-
 
             builder.UseWindowsService(s => s.ServiceName = "smtp4dev");
             builder.ConfigureWebHostDefaults(c =>

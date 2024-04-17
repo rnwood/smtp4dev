@@ -6,7 +6,7 @@ using System.Text;
 
 var smtpClient = new SmtpClient(Dns.GetHostName())
             {
-                Port = 2525,
+                Port = 25,
                 EnableSsl = true,
                  Credentials = new NetworkCredential("blah", "blah")
             };

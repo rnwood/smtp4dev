@@ -1,12 +1,4 @@
 {
-  "iisSettings": {
-    "windowsAuthentication": false,
-    "anonymousAuthentication": true,
-    "iisExpress": {
-      "applicationUrl": "http://localhost:28260",
-      "sslPort": 0
-    }
-  },
   "profiles": {
     "IIS Express": {
       "commandName": "IISExpress",
@@ -18,12 +10,20 @@
     },
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "--imapport=0 --db=",
+      "commandLineArgs": "--imapport=0 --basepath=/smtp4dev",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "http://localhost:5000/"
+    }
+  },
+  "iisSettings": {
+    "windowsAuthentication": false,
+    "anonymousAuthentication": true,
+    "iisExpress": {
+      "applicationUrl": "http://localhost:28260",
+      "sslPort": 0
     }
   }
 }

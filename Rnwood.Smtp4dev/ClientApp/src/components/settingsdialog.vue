@@ -1,5 +1,5 @@
 <template>
-    <el-dialog title="Settings" :visible.sync="visible" width="80%" :close-on-click-modal="false" @open="refresh" :before-close="handleClose">
+    <el-dialog title="Settings" :visible="visible" width="80%" :close-on-click-modal="false" @open="refresh" :before-close="handleClose">
         <div v-loading="loading">
             <el-alert v-if="error" type="error" title="Error" show-icon>
                 {{error.message}}
@@ -20,33 +20,33 @@
                             <el-switch v-model="server.allowRemoteConnections" />
                         </el-form-item>
 
-                      <el-form-item label="TLS mode" prop="server.tlsMode">
-                        <el-select v-model="server.tlsMode" style="width: 100%;">
-                          <el-option key="None" label="None" value="None"></el-option>
-                          <el-option key="StartTls" label="STARTTLS (client requests TLS after session starts)" value="StartTls"></el-option>
-                          <el-option key="ImplicitTls" label="Implicit TLS (TLS immediately)" value="ImplicitTls"></el-option>
-                        </el-select>
-                      </el-form-item>
+                        <el-form-item label="TLS mode" prop="server.tlsMode">
+                            <el-select v-model="server.tlsMode" style="width: 100%;">
+                                <el-option key="None" label="None" value="None"></el-option>
+                                <el-option key="StartTls" label="STARTTLS (client requests TLS after session starts)" value="StartTls"></el-option>
+                                <el-option key="ImplicitTls" label="Implicit TLS (TLS immediately)" value="ImplicitTls"></el-option>
+                            </el-select>
+                        </el-form-item>
 
-                      <el-form-item label="Require Secure Connection" prop="server.secureConnectionRequired">
-                        <el-switch v-model="server.secureConnectionRequired" />
-                      </el-form-item>
+                        <el-form-item label="Require Secure Connection" prop="server.secureConnectionRequired">
+                            <el-switch v-model="server.secureConnectionRequired" />
+                        </el-form-item>
 
-                      <el-form-item label="Require Authentication" prop="server.authenticationRequired">
-                        <el-switch v-model="server.authenticationRequired" />
-                      </el-form-item>
+                        <el-form-item label="Require Authentication" prop="server.authenticationRequired">
+                            <el-switch v-model="server.authenticationRequired" />
+                        </el-form-item>
 
-                      <el-form-item label="Credentials validation expression (see comments in appsettings.json)" prop="server.credentialsValidationExpression">
-                        <el-input v-model="server.credentialsValidationExpression" />
-                      </el-form-item>
+                        <el-form-item label="Credentials validation expression (see comments in appsettings.json)" prop="server.credentialsValidationExpression">
+                            <el-input v-model="server.credentialsValidationExpression" />
+                        </el-form-item>
 
-                      <el-form-item label="Recipient validation expression (see comments in appsettings.json)" prop="server.recipientValidationExpression">
-                        <el-input v-model="server.recipientValidationExpression" />
-                      </el-form-item>
+                        <el-form-item label="Recipient validation expression (see comments in appsettings.json)" prop="server.recipientValidationExpression">
+                            <el-input v-model="server.recipientValidationExpression" />
+                        </el-form-item>
 
-                      <el-form-item label="Message validation expression (see comments in appsettings.json)" prop="server.messageValidationExpression">
-                        <el-input v-model="server.messageValidationExpression" />
-                      </el-form-item>
+                        <el-form-item label="Message validation expression (see comments in appsettings.json)" prop="server.messageValidationExpression">
+                            <el-input v-model="server.messageValidationExpression" />
+                        </el-form-item>
                     </el-tab-pane>
 
 
@@ -101,15 +101,19 @@
                             <el-input v-model="server.relayOptions.senderAddress" />
                         </el-form-item>
 
-                      <el-form-item label="Auto relay expression (see comments in appsettings.json)" prop="server.relayOptions.automaticRelayExpression" v-show="isRelayEnabled">
-                        <el-input v-model="server.relayOptions.automaticRelayExpression" />
-                      </el-form-item>
+                        <el-form-item label="Auto relay expression (see comments in appsettings.json)" prop="server.relayOptions.automaticRelayExpression" v-show="isRelayEnabled">
+                            <el-input v-model="server.relayOptions.automaticRelayExpression" />
+                        </el-form-item>
 
                         <el-form-item label="Auto-Relay Recipients" v-show="isRelayEnabled" prop="isRelayEnabled">
                             <div v-for="(email, index) in server.relayOptions.automaticEmails" :key="index">
                                 <el-form-item :prop="'relayOptionsAutomaticEmails[' + index + '].value'" :rules="{required: true, message: 'Required'}">
                                     <el-input v-model="server.relayOptions.automaticEmails[index]">
-                                        <el-button slot="append" @click="server.relayOptions.automaticEmails.splice(index, 1)">Remove</el-button>
+                                        <template #append>
+                                            <el-button @click="server.relayOptions.automaticEmails.splice(index, 1)">
+                                                Remove
+                                            </el-button>
+                                        </template>
                                     </el-input>
                                 </el-form-item>
                             </div>
@@ -125,27 +129,25 @@
             </el-form>
         </div>
 
-        <span slot="footer" class="dialog-footer">
-            <el-button @click="save" :disabled="saving" :loading="saving">Save</el-button>
-        </span>
+        <template #footer>
+            <span class="dialog-footer">
+                <el-button @click="save" :disabled="saving" :loading="saving">Save</el-button>
+            </span>
+        </template>
     </el-dialog>
 </template>
 
 <script lang="ts">
-    import Vue from "vue";
-    import { Form } from 'element-ui'
-    import { Component, Prop, Watch } from "vue-property-decorator";
+
+    import { FormInstance } from 'element-plus'
+    import { Component, Vue, Prop, Watch, toNative, Emit } from "vue-facing-decorator";
     import HubConnectionManager from "../HubConnectionManager";
     import { Mutex } from "async-mutex";
     import ServerController from "../ApiClient/ServerController";
     import Server from "../ApiClient/Server";
 
     @Component
-    export default class SettingsDialog extends Vue {
-
-        constructor() {
-            super();
-        }
+    class SettingsDialog extends Vue {
 
         @Prop({ default: null })
         connection: HubConnectionManager | null = null;
@@ -164,8 +166,8 @@
                     numberOfMessagesToKeep: [{ required: true, message: '# of Messages to Keep is required' }],
                     numberOfSessionsToKeep: [{ required: true, message: '# of Sessions to Keep is required' }],
                     relayOptions: {
-                        smtpServer: <object[]>[],
-                        smtpPort: <object[]>[]
+                        smtpServer: [] as object[],
+                        smtpPort: [] as object[]
                     }
                 }
             };
@@ -179,11 +181,12 @@
 
         }
 
-        @Prop({ default: false })
+        @Prop()
         visible: boolean = false;
 
+        @Emit("closed")
         handleClose() {
-            this.$emit('closed');
+            return;
         }
 
 
@@ -219,7 +222,7 @@
             this.saving = true;
             this.error = null;
             try {
-                let valid = await (<Form>this.$refs["form"]).validate()
+                let valid = await (this.$refs["form"] as FormInstance).validate()
 
                 if (valid) {
 
@@ -265,4 +268,6 @@
             }
         }
     }
+
+    export default toNative(SettingsDialog)
 </script>
