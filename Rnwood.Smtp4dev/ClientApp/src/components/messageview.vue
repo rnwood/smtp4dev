@@ -9,10 +9,10 @@
 
         <div v-if="messageSummary" class="hfillpanel fill">
             <div class="toolbar">
-                <el-button icon="el-icon-download"
+                <el-button icon="download"
                            v-on:click="download">Download</el-button>
 
-                <el-button v-on:click="relay" icon="el-icon-d-arrow-right" :disabled="!messageSummary || !isRelayAvailable" :loading="isRelayInProgress" title="Relay">Relay</el-button>
+                <el-button v-on:click="relay" icon="d-arrow-right" :disabled="!messageSummary || !isRelayAvailable" :loading="isRelayInProgress" title="Relay">Relay</el-button>
             </div>
 
             <div class="pad">
@@ -60,42 +60,52 @@
                 </template>
             </div>
 
-            <el-tabs value="view" style="height: 100%; width:100%" class="fill" type="border-card">
-                <el-tab-pane name="view" class="hfillpanel">
-                    <span slot="label">
-                        <i class="el-icon-view"></i> View
-                    </span>
-          <messageviewattachments  :message="message" v-if="message && messageSummary.attachmentCount"></messageviewattachments>
+            <el-tabs v:model="selectedTabId" style="height: 100%; width:100%" class="fill" type="border-card">
+                <el-tab-pane id="view" class="hfillpanel">
+                    <template #label>
+                        <el-icon><View /></el-icon>&nbsp;View
+                    </template>
+                    <messageviewattachments :message="message" v-if="message && messageSummary.attachmentCount"></messageviewattachments>
 
-          <messageview-html v-if="message && message.hasHtmlBody && !message.hasPlainTextBody" :message="message" class="fill messagepreview"></messageview-html>
-          <messageview-plaintext v-if="message && !message.hasHtmlBody && message.hasPlainTextBody" :message="message" class="fill messageplaintext"></messageview-plaintext>
-          <div v-if="message && !message.hasHtmlBody && !message.hasPlainTextBody">This MIME message has no HTML or plain text body.</div>
-          
-          <el-tabs v-if="message && message.hasPlainTextBody && message.hasPlainTextBody" value="html" style="height: 100%; width:100%" class="fill">
-            <el-tab-pane name="html" label="HTML" class="hfillpanel" v-if="message && message.hasHtmlBody">
-              <messageview-html :message="message" class="fill messagepreview"></messageview-html>
-            </el-tab-pane>
-            <el-tab-pane name="plaintext" label="Plain text" class="hfillpanel" v-if="message && message.hasPlainTextBody">
-              <messageview-plaintext :message="message" class="fill messageplaintext"></messageview-plaintext>
-            </el-tab-pane>
-          </el-tabs>
-        </el-tab-pane>
+                    <messageview-html v-if="message && message.hasHtmlBody && !message.hasPlainTextBody" :message="message" class="fill messagepreview"></messageview-html>
+                    <messageview-plaintext v-if="message && !message.hasHtmlBody && message.hasPlainTextBody" :message="message" class="fill messageplaintext"></messageview-plaintext>
+                    <div v-if="message && !message.hasHtmlBody && !message.hasPlainTextBody">This MIME message has no HTML or plain text body.</div>
 
-        <el-tab-pane label="Source" name="source" class="fill vfillpanel">
-          <messagesource class="fill" :message="message" type="source"></messagesource>
-        </el-tab-pane>
+                    <el-tabs v-if="message && message.hasPlainTextBody && message.hasPlainTextBody" v-model="selectedPreviewTabId" style="height: 100%; width:100%" class="fill">
+                        <el-tab-pane id="html" label="HTML" class="hfillpanel" v-if="message && message.hasHtmlBody">
+                            <messageview-html :message="message" class="fill messagepreview"></messageview-html>
+                        </el-tab-pane>
+                        <el-tab-pane id="plaintext" label="Plain text" class="hfillpanel" v-if="message && message.hasPlainTextBody">
+                            <messageview-plaintext :message="message" class="fill messageplaintext"></messageview-plaintext>
+                        </el-tab-pane>
+                    </el-tabs>
+                </el-tab-pane>
+
+                <!--<el-tab-pane label="Analysis" id="analysis" class="fill vfillpanel">
+                    <template #label>
+                        <el-icon><FirstAidKit /></el-icon>&nbsp;Analysis
+                    </template>
+                    <messageanalysis class="fill" :message="message" type="source"></messageanalysis>
+                </el-tab-pane>-->
+
+                <el-tab-pane label="Source" id="source" class="fill vfillpanel">
+                    <template #label>
+                        <el-icon><Document /></el-icon>&nbsp;Source
+                    </template>
+                    <messagesource class="fill" :message="message" type="source"></messagesource>
+                </el-tab-pane>
 
                 <el-tab-pane name="headers" class="hfillpanel">
-                    <span slot="label">
-                        <i class="el-icon-notebook-2"></i> Headers
-                    </span>
+                    <template #label>
+                        <el-icon><Memo /></el-icon>&nbsp;Headers
+                    </template>
                     <headers :headers="headers" class="fill"></headers>
                 </el-tab-pane>
 
                 <el-tab-pane name="parts" class="hfillpanel">
-                    <span slot="label">
-                        <i class="el-icon-document-copy"></i> Parts
-                    </span>
+                    <template #label>
+                        <el-icon><document-copy /></el-icon>&nbsp;Parts
+                    </template>
 
                     <el-tree v-if="message"
                              :data="message.parts"
@@ -103,13 +113,13 @@
                              @node-click="onPartSelection"
                              highlight-current
                              empty-message="No parts"
-                             ref="partstree"
                              accordion
                              node-key="id"
+                             :current-node-key="'0'"
                              :default-expanded-keys="['0']">
                         <template v-slot="{node, data}">
                             <span class="custom-tree-node">
-                                <i :class="{'el-icon-document-copy': data.childParts.length, 'el-icon-document': data.childParts.length == 0 && !data.isAttachment, 'el-icon-paperclip': data.childParts.length == 0 && data.isAttachment}">
+                                <i :class="{'document-copy': data.childParts.length, 'document': data.childParts.length == 0 && !data.isAttachment, 'paperclip': data.childParts.length == 0 && data.isAttachment}">
                                 </i>
                                 {{ node.label }}
                             </span>
@@ -118,18 +128,24 @@
 
                     <div v-show="selectedPart" class="fill vfillpanel">
                         <el-tabs value="headers" class="fill hfillpanel" type="border-card">
-                            <el-tab-pane label="Headers" name="headers" class="fill vfillpanel">
-                                <span slot="label">
-                                    <i class="el-icon-notebook-2"></i> Headers
-                                </span>
+                            <el-tab-pane label="Headers" id="headers" class="fill vfillpanel">
+                                <template #label>
+                                    <el-icon><Memo /></el-icon>&nbsp;Headers
+                                </template>
                                 <headers :headers="selectedPartHeaders" class="fill"></headers>
                             </el-tab-pane>
 
-                            <el-tab-pane label="Source" name="source" class="fill vfillpanel">
+                            <el-tab-pane label="Source" id="source" class="fill vfillpanel">
+                                <template #label>
+                                    <el-icon><Document /></el-icon>&nbsp;Source
+                                </template>
                                 <messagepartsource class="fill" :messageEntitySummary="selectedPart" type="source"></messagepartsource>
                             </el-tab-pane>
 
-                            <el-tab-pane label="Raw" name="raw" class="fill vfillpanel">
+                            <el-tab-pane label="Source (Encoded)" id="raw" class="fill vfillpanel">
+                                <template #label>
+                                    <el-icon><Document /></el-icon>&nbsp;Source (Encoded)
+                                </template>
                                 <messagepartsource class="fill" :messageEntitySummary="selectedPart" type="raw"></messagepartsource>
                             </el-tab-pane>
                         </el-tabs>
@@ -150,40 +166,42 @@
     </div>
 </template>
 <script lang="ts">
-import {Component, Prop, Watch} from "vue-property-decorator";
-import Vue from "vue";
-import MessagesController from "../ApiClient/MessagesController";
-import MessageSummary from "../ApiClient/MessageSummary";
-import Message from "../ApiClient/Message";
-import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
-import MessageWarning from "../ApiClient/MessageWarning";
-import Headers from "@/components/headers.vue";
-import MessageViewHtml from "@/components/messageviewhtml.vue";
-import MessageviewAttachments from "@/components/messageviewattachments.vue";
-import MessagePartsSource from "@/components/messagepartsource.vue";
-import MessageSource from "@/components/messagesource.vue";
-import {Tree} from "element-ui";
-import {MessageBoxInputData} from 'element-ui/types/message-box';
-import ServerController from '../ApiClient/ServerController';
-import MessageViewPlainText from "./messageviewplaintext.vue";
+    import { Component, Vue, Prop, Watch, toNative } from "vue-facing-decorator";
 
-@Component({
-  components: {
-    headers: Headers,
-    "messageview-html": MessageViewHtml,
-    "messageview-plaintext": MessageViewPlainText,
-    messageviewattachments: MessageviewAttachments,
-    messagepartsource: MessagePartsSource,
-    messagesource: MessageSource
-  }
-})
-export default class MessageView extends Vue {
-  constructor() {
-    super();
-  }
+    import MessagesController from "../ApiClient/MessagesController";
+    import MessageSummary from "../ApiClient/MessageSummary";
+    import Message from "../ApiClient/Message";
+    import MessageEntitySummary from "../ApiClient/MessageEntitySummary";
+    import MessageWarning from "../ApiClient/MessageWarning";
+    import Headers from "@/components/headers.vue";
+    import MessageViewHtml from "@/components/messageviewhtml.vue";
+    import MessageviewAttachments from "@/components/messageviewattachments.vue";
+    import MessagePartsSource from "@/components/messagepartsource.vue";
+    import MessageSource from "@/components/messagesource.vue";
+    import MessageAnalysis from "@/components/messageanalysis.vue";
+    import { TreeInstance } from "element-plus/es/components/tree";
+    import { MessageBoxInputData } from 'element-plus/es/components/message-box';
+    import { ElMessageBox, ElNotification } from 'element-plus';
+    import ServerController from '../ApiClient/ServerController';
+    import MessageViewPlainText from "./messageviewplaintext.vue";
+
+    @Component({
+        components: {
+            headers: Headers,
+            "messageview-html": MessageViewHtml,
+            "messageview-plaintext": MessageViewPlainText,
+            messageviewattachments: MessageviewAttachments,
+            messagepartsource: MessagePartsSource,
+            messagesource: MessageSource,
+            messageanalysis: MessageAnalysis
+        }
+    })
+    class MessageView extends Vue {
 
         @Prop({})
         messageSummary: MessageSummary | null = null;
+        selectedTabId = "view";
+        selectedPreviewTabId = "html";
         message: Message | null = null;
         selectedPart: MessageEntitySummary | null = null;
         warnings: MessageWarning[] = [];
@@ -214,11 +232,8 @@ export default class MessageView extends Vue {
                     this.message = await new MessagesController().getMessage(
                         this.messageSummary.id
                     );
-                    if (this.$refs.partstree) {
-                        (<Tree>this.$refs.partstree).setCurrentNode(
-                            (<Tree>this.$refs.partstree).getNode(0)
-                        );
-                    }
+                    this.selectedPart = this.message.parts[0];
+                    this.selectedPreviewTabId = this.message.hasHtmlBody ? "html" : "plaintext";
                     this.setWarnings();
 
                     if (this.messageSummary.isUnread) {
@@ -286,15 +301,15 @@ export default class MessageView extends Vue {
 
             try {
 
-                let dialogResult = <MessageBoxInputData>await this.$prompt('Email address(es) to relay to (separate multiple with ,)', 'Relay Message', {
+                let dialogResult = await ElMessageBox.prompt('Email address(es) to relay to (separate multiple with ,)', 'Relay Message', {
                     confirmButtonText: 'OK',
                     inputValue: this.messageSummary.to.join(","),
                     cancelButtonText: 'Cancel',
                     inputPattern: /[^, ]+(, *[^, ]+)*/,
                     inputErrorMessage: 'Invalid email addresses'
-                });
+                }) as MessageBoxInputData;
 
-                emails = (<string>dialogResult.value).split(",").map(e => e.trim());
+                emails = dialogResult.value.split(",").map(e => e.trim());
             } catch {
                 return;
             }
@@ -303,11 +318,11 @@ export default class MessageView extends Vue {
                 this.isRelayInProgress = true;
                 await new MessagesController().relayMessage(this.messageSummary.id, { overrideRecipientAddresses: emails });
 
-                this.$notify.success({ title: "Relay Message Success", message: "Completed OK" });
+                ElNotification.success({ title: "Relay Message Success", message: "Completed OK" });
             } catch (e: any) {
                 var message = e.response?.data?.detail ?? e.sessage;
 
-                this.$notify.error({ title: "Relay Message Failed", message: message });
+                ElNotification.error({ title: "Relay Message Failed", message: message });
             } finally {
                 this.isRelayInProgress = false;
             }
@@ -337,4 +352,6 @@ export default class MessageView extends Vue {
             return this.selectedPart != null ? this.selectedPart.headers : [];
         }
     }
+
+    export default toNative(MessageView);
 </script>
