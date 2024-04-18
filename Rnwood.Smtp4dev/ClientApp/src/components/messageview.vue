@@ -71,11 +71,11 @@
                     <messageview-plaintext v-if="message && !message.hasHtmlBody && message.hasPlainTextBody" :message="message" class="fill messageplaintext"></messageview-plaintext>
                     <div v-if="message && !message.hasHtmlBody && !message.hasPlainTextBody">This MIME message has no HTML or plain text body.</div>
 
-                    <el-tabs v-if="message && message.hasPlainTextBody && message.hasPlainTextBody" v-model="selectedPreviewTabId" style="height: 100%; width:100%" class="fill">
-                        <el-tab-pane id="html" label="HTML" class="hfillpanel" v-if="message && message.hasHtmlBody">
+                    <el-tabs v-if="message && message.hasPlainTextBody && message.hasHtmlBody" value="html" style="height: 100%; width:100%" class="fill">
+                        <el-tab-pane id="html" label="HTML" class="hfillpanel">
                             <messageview-html :message="message" class="fill messagepreview"></messageview-html>
                         </el-tab-pane>
-                        <el-tab-pane id="plaintext" label="Plain text" class="hfillpanel" v-if="message && message.hasPlainTextBody">
+                        <el-tab-pane id="plaintext" label="Plain text" class="hfillpanel">
                             <messageview-plaintext :message="message" class="fill messageplaintext"></messageview-plaintext>
                         </el-tab-pane>
                     </el-tabs>
@@ -201,7 +201,6 @@
         @Prop({})
         messageSummary: MessageSummary | null = null;
         selectedTabId = "view";
-        selectedPreviewTabId = "html";
         message: Message | null = null;
         selectedPart: MessageEntitySummary | null = null;
         warnings: MessageWarning[] = [];
@@ -233,7 +232,6 @@
                         this.messageSummary.id
                     );
                     this.selectedPart = this.message.parts[0];
-                    this.selectedPreviewTabId = this.message.hasHtmlBody ? "html" : "plaintext";
                     this.setWarnings();
 
                     if (this.messageSummary.isUnread) {
