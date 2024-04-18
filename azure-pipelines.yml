@@ -378,16 +378,19 @@ stages:
             inputs:
               gitHubConnection: github.com_rnwood
               repositoryName: rnwood/smtp4dev
-              action: create
               title: $(tag)
               tag: $(tag)
               tagSource: userSpecifiedTag
-              isDraft: false
               releaseNotesSource: inline
               addChangeLog: true
               releaseNotesInline: |
+                
+                [See full installation instructions and options](https://github.com/rnwood/smtp4dev/wiki/Installation)
+
                 File Name | Description
                 -- | --
+                [Docker rnwood/smtp4dev:$(tag)](https://hub.docker.com/r/rnwood/smtp4dev/tags?page=&page_size=&ordering=&name=$(tag)) | Docker image (Linux and Windows)
+                [.NET tool Rnwood.Smtp4dev $(tag)](https://www.nuget.org/packages/Rnwood.Smtp4dev/$(tag)) | .NET tool
                 [Rnwood.Smtp4dev-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip) | Windows x64 binary standalone - Server edition
                 [Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip) | Windows x64 binary standalone - Desktop app edition.
                 [Rnwood.Smtp4dev-win-arm64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip) | Windows ARM 62-bit binary standalone
@@ -396,9 +399,13 @@ stages:
                 [Rnwood.Smtp4dev-noruntime-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-noruntime-$(tag).zip) | Architecture independent version. Should run on any platform where the .NET 8.0 (or greater) runtime is installed
 
               ${{ if variables['isreleasebuild'] }}:
+                action: edit
+                isDraft: true
                 isPreRelease: false
                 changeLogCompareToRelease: lastFullRelease
               ${{ if not(variables['isreleasebuild']) }}:
+                action: create
+                isDraft: true
                 isPreRelease: true
                 changeLogCompareToRelease: lastNonDraftRelease
 
