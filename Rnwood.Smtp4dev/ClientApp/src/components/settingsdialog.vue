@@ -18,6 +18,10 @@
                             <el-switch v-model="server.disableIPv6" />
                         </el-form-item>
 
+                        <el-form-item label="Require Authentication (SMTP, IMAP)" prop="server.authenticationRequired">
+                            <el-switch v-model="server.authenticationRequired" />
+                        </el-form-item>
+
                         <el-form-item label="# of Messages to Keep" prop="server.numberOfMessagesToKeep">
                             <el-input-number :min=1 controls-position="right" v-model="server.numberOfMessagesToKeep" />
                         </el-form-item>
@@ -47,10 +51,6 @@
 
                         <el-form-item label="Require Secure Connection" prop="server.secureConnectionRequired">
                             <el-switch v-model="server.secureConnectionRequired" />
-                        </el-form-item>
-
-                        <el-form-item label="Require Authentication" prop="server.authenticationRequired">
-                            <el-switch v-model="server.authenticationRequired" />
                         </el-form-item>
 
                         <el-form-item label="Credentials validation expression (see comments in appsettings.json)" prop="server.credentialsValidationExpression">
@@ -126,6 +126,33 @@
                             <el-button size="small" @click="server.relayOptions.automaticEmails.push('')">New Auto-Relay Recipient</el-button>
                         </el-form-item>
                     </el-tab-pane>
+                    <el-tab-pane label="Users">
+
+
+                        <el-form-item>
+                            SMTP and IMAP Users:
+                        </el-form-item>
+
+                        <div v-for="(user, index) in server.users" :key="index">
+                            <el-form-item class="flex md-5 gap-4" :prop="'server.users[' + index + ']'" :rules="{validator: checkUsernameUnique}">
+                                <el-form-item label="Username" :prop="'server.users[' + index + '].username'" :rules="{required: true, message: 'Required'}">
+                                    <el-input v-model="user.username" >
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item label="Password" :prop="'server.users[' + index + '].password'" :rules="{required: true, message: 'Required'}">
+                                    <el-input v-model="user.password" show-password>
+
+                                    </el-input>
+                                </el-form-item>
+                                <el-button @click="server.users.splice(index, 1)">
+                                    Remove
+                                </el-button>
+                            </el-form-item>
+                        </div>
+                        <el-button size="small" @click="server.users.push({})">New User</el-button>
+
+
+                    </el-tab-pane>
                 </el-tabs>
             </el-form>
         </div>
@@ -179,6 +206,16 @@
             }
 
             return result;
+
+        }
+
+        checkUsernameUnique(rule: any, value: any, callback: any) {
+            if (this.server?.users.filter(u => u != value).find(u=> u.username == value.username)) {
+
+                            callback(new Error('Username must be unique'));
+            } else {
+                callback();
+            }
 
         }
 

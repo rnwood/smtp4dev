@@ -10,22 +10,23 @@ using Jint.Runtime;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Options;
 using Rnwood.Smtp4dev.DbModel;
+using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.SmtpServer;
 using Rnwood.SmtpServer.Extensions.Auth;
 using Serilog;
 
 namespace Rnwood.Smtp4dev.Server;
 
-internal class ScriptingHost
+public class ScriptingHost
 {
     private readonly ILogger log = Log.ForContext<ScriptingHost>();
 
 
 
     private IOptionsMonitor<RelayOptions> relayOptions;
-    private IOptionsMonitor<ServerOptions> serverOptions;
+    private IOptionsMonitor<Settings.ServerOptions> serverOptions;
 
-    public ScriptingHost(IOptionsMonitor<RelayOptions> relayOptions, IOptionsMonitor<ServerOptions> serverOptions)
+    public ScriptingHost(IOptionsMonitor<RelayOptions> relayOptions, IOptionsMonitor<Settings.ServerOptions> serverOptions)
     {
         this.relayOptions = relayOptions;
         this.serverOptions = serverOptions;
@@ -55,7 +56,7 @@ internal class ScriptingHost
         }
     }
 
-    private void ParseScripts(RelayOptions relayOptionsCurrentValue, ServerOptions serverOptionsCurrentValue)
+    private void ParseScripts(RelayOptions relayOptionsCurrentValue, Settings.ServerOptions serverOptionsCurrentValue)
     {
         ParseScript("AutomaticRelayExpression", relayOptionsCurrentValue.AutomaticRelayExpression, ref shouldRelayScript, ref shouldRelaySource);
         ParseScript("CredentialsValidationExpression", serverOptionsCurrentValue.CredentialsValidationExpression, ref credValidationScript,
@@ -135,11 +136,11 @@ internal class ScriptingHost
 
     }
 
-    public AuthenticationResult ValidateCredentials(ApiModel.Session session, IAuthenticationCredentials credentials)
+    public AuthenticationResult? ValidateCredentials(ApiModel.Session session, IAuthenticationCredentials credentials)
     {
         if (credValidationScript == null)
         {
-            return AuthenticationResult.Success;
+            return null;
         }
 
         Engine jsEngine = new Engine();

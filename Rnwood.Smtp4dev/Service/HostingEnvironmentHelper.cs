@@ -4,7 +4,7 @@ using System.IO;
 using System.Runtime.InteropServices;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Options;
-using Rnwood.Smtp4dev.Server;
+using Rnwood.Smtp4dev.Server.Settings;
 
 namespace Rnwood.Smtp4dev.Service
 {

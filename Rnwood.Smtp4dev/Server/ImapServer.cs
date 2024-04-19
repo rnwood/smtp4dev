@@ -20,15 +20,17 @@ using Microsoft.Extensions.Hosting;
 using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Org.BouncyCastle.Utilities.Net;
+using Rnwood.Smtp4dev.Server.Settings;
 
 namespace Rnwood.Smtp4dev.Server
 {
     public class ImapServer : IHostedService
     {
-        public ImapServer(IOptionsMonitor<ServerOptions> serverOptions, IServiceScopeFactory serviceScopeFactory)
+        public ImapServer(IOptionsMonitor<ServerOptions> serverOptions, ScriptingHost scriptingHost, IServiceScopeFactory serviceScopeFactory)
         {
             this.serverOptions = serverOptions;
             this.serviceScopeFactory = serviceScopeFactory;
+            this.scriptingHost = scriptingHost;
 
             IDisposable eventHandler = null;
             var obs = Observable.FromEvent<ServerOptions>(e => eventHandler = serverOptions.OnChange(e), e => eventHandler.Dispose());
@@ -91,7 +93,7 @@ namespace Rnwood.Smtp4dev.Server
                 Bindings = bindings.ToArray(),
                 GreetingText = "smtp4dev"
             };
-            imapServer.SessionCreated += (o, ea) => new SessionHandler(ea.Session, this.serviceScopeFactory);
+            imapServer.SessionCreated += (o, ea) => new SessionHandler(ea.Session, scriptingHost, serverOptions, this.serviceScopeFactory);
 
 
             var errorTcs = new TaskCompletionSource<Error_EventArgs>();
@@ -102,6 +104,7 @@ namespace Rnwood.Smtp4dev.Server
                     errorTcs.TrySetResult(ea);
                 }
             };
+
             var startedTcs = new TaskCompletionSource<EventArgs>();
             imapServer.Started += (s, ea) => startedTcs.SetResult(ea);
 
@@ -152,6 +155,7 @@ namespace Rnwood.Smtp4dev.Server
         private IMAP_Server imapServer;
         private IOptionsMonitor<ServerOptions> serverOptions;
         private readonly IServiceScopeFactory serviceScopeFactory;
+        private readonly ScriptingHost scriptingHost;
         private readonly ILogger log = Log.ForContext<ImapServer>();
 
         private void Logger_WriteLog(object sender, LumiSoft.Net.Log.WriteLogEventArgs e)
@@ -171,7 +175,8 @@ namespace Rnwood.Smtp4dev.Server
 
         class SessionHandler
         {
-            public SessionHandler(IMAP_Session session, IServiceScopeFactory serviceScopeFactory)
+            private readonly ILogger log = Log.ForContext<SessionHandler>();
+            public SessionHandler(IMAP_Session session, ScriptingHost scriptingHost, IOptionsMonitor<ServerOptions> serverOptions, IServiceScopeFactory serviceScopeFactory)
             {
                 this.session = session;
                 session.List += Session_List;
@@ -182,6 +187,8 @@ namespace Rnwood.Smtp4dev.Server
                 session.Capabilities.Remove("NAMESPACE");
                 session.Store += Session_Store;
                 session.Select += Session_Select;
+                this.scriptingHost = scriptingHost;
+                this.serverOptions = serverOptions;
                 this.serviceScopeFactory = serviceScopeFactory;
             }
 
@@ -220,6 +227,8 @@ namespace Rnwood.Smtp4dev.Server
                 }
             }
 
+            private readonly ScriptingHost scriptingHost;
+            private readonly IOptionsMonitor<ServerOptions> serverOptions;
             private readonly IServiceScopeFactory serviceScopeFactory;
             private readonly IMAP_Session session;
 
@@ -268,7 +277,23 @@ namespace Rnwood.Smtp4dev.Server
 
             private void Session_Login(object sender, IMAP_e_Login e)
             {
-                e.IsAuthenticated = true;
+                if (!serverOptions.CurrentValue.AuthenticationRequired)
+                {
+                    e.IsAuthenticated = true;
+                    return;
+                }
+
+                var user = serverOptions.CurrentValue.Users?.FirstOrDefault(u => e.UserName.Equals(u.Username, StringComparison.CurrentCultureIgnoreCase));
+     
+                if (user != null && e.Password.Equals( user.Password, StringComparison.CurrentCultureIgnoreCase))
+                {
+                    log.Information("IMAP login success for user {user}", e.UserName);
+                    e.IsAuthenticated = true;
+                } else
+                {
+                    log.Error("IMAP login failure for user {user}", e.UserName);
+                    e.IsAuthenticated = false;
+                }
             }
 
             private void Session_List(object sender, IMAP_e_List e)

@@ -10,6 +10,7 @@ using Rnwood.Smtp4dev.Service;
 using System.Text.Json.Serialization;
 using NSwag.Annotations;
 using System.ComponentModel;
+using Rnwood.Smtp4dev.Server.Settings;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -70,7 +71,8 @@ namespace Rnwood.Smtp4dev.Controllers
                 CredentialsValidationExpression = serverOptions.CurrentValue.CredentialsValidationExpression,
                 RecipientValidationExpression = serverOptions.CurrentValue.RecipientValidationExpression,
                 MessageValidationExpression = serverOptions.CurrentValue.MessageValidationExpression,
-                DisableIPv6 = serverOptions.CurrentValue.DisableIPv6
+                DisableIPv6 = serverOptions.CurrentValue.DisableIPv6,
+                Users = serverOptions.CurrentValue.Users
             };
         }
 
@@ -105,6 +107,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.RecipientValidationExpression = serverUpdate.RecipientValidationExpression;
             newSettings.MessageValidationExpression = serverUpdate.MessageValidationExpression;
             newSettings.DisableIPv6 = serverUpdate.DisableIPv6;
+            newSettings.Users = serverUpdate.Users;
 
             newRelaySettings.SmtpServer = serverUpdate.RelayOptions.SmtpServer;
             newRelaySettings.SmtpPort = serverUpdate.RelayOptions.SmtpPort;

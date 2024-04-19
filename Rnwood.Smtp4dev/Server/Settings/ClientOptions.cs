@@ -1,4 +1,4 @@
-﻿namespace Rnwood.Smtp4dev.Server
+﻿namespace Rnwood.Smtp4dev.Server.Settings
 {
     public class ClientOptions
     {

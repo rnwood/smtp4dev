@@ -1,7 +1,7 @@
 ﻿using System.Net;
 using Esprima.Ast;
 
-namespace Rnwood.Smtp4dev.Server
+namespace Rnwood.Smtp4dev.Server.Settings
 {
     public class ServerOptions
     {
@@ -38,5 +38,7 @@ namespace Rnwood.Smtp4dev.Server
 
         public string MessageValidationExpression { get; set; }
         public bool DisableIPv6 { get; set; } = false;
+
+        public User[] Users { get; set; } = new User[0];
     }
 }

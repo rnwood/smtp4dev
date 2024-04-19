@@ -2,7 +2,7 @@
 using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using Rnwood.Smtp4dev.ApiModel;
-using Rnwood.Smtp4dev.Server;
+using Rnwood.Smtp4dev.Server.Settings;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
