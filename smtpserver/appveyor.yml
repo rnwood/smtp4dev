@@ -1,0 +1,102 @@
+version: 3.1.0-ci@{build}
+image: Visual Studio 2019
+environment:
+  matrix:
+     - TESTFRAMEWORK: net6.0
+       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+       PUBLISH: 1
+     - TESTFRAMEWORK: net6.0
+       APPVEYOR_BUILD_WORKER_IMAGE: Ubuntu2004
+       PUBLISH: 0
+     - TESTFRAMEWORK: net462
+       APPVEYOR_BUILD_WORKER_IMAGE: Visual Studio 2022
+       PUBLISH: 0
+  APPVEYORAPIKEY:
+   secure: f6ZDvXLvu8fryoFvnGfIUdpvlUC6Rft/qZKbWGh5CFw=
+skip_tags:  false
+assembly_info:
+  patch: true
+  file: '**\SolutionInfo.*'
+  assembly_version: '{version}'
+  assembly_file_version: '{version}'
+  assembly_informational_version: '{version}'
+nuget:
+  account_feed: false
+  project_feed: false
+init:
+ - ps: |
+    $ErrorActionPreference="Stop"
+    $version = $env:APPVEYOR_BUILD_VERSION
+    if ($env:APPVEYOR_REPO_TAG_NAME) {
+       write-host "Using label ${env:APPVEYOR_REPO_TAG_NAME} as version number"
+       try {
+           Update-AppveyorBuild -version $env:APPVEYOR_REPO_TAG_NAME
+       } catch {
+          Add-AppveyorMessage -Message "Skipping github release label."
+          
+          Exit-AppveyorBuild
+       }
+       $version = $env:APPVEYOR_REPO_TAG_NAME
+       Set-AppveyorBuildVariable 'PRERELEASE' (($version.Contains("-")).ToString())
+    } else {
+        $paddedbuild = ([int]$env:APPVEYOR_BUILD_NUMBER).ToString("0000")
+        write-host "Version is $version - replacing @${env:APPVEYOR_BUILD_NUMBER} with $paddedbuild"
+        Update-AppveyorBuild -version ($version.Replace("@${env:APPVEYOR_BUILD_NUMBER}", "$paddedbuild"))
+        Set-AppveyorBuildVariable 'PRERELEASE' "true"
+    }
+    
+install:
+- ps: |
+    dotnet restore
+build_script:
+ - ps: |
+    dotnet build Rnwood.SmtpServer -c Debug
+    if ($env:PUBLISH -eq "1") {
+       dotnet pack Rnwood.SmtpServer --include-source -c Release -p:Version=$env:APPVEYOR_BUILD_VERSION -p:"PackageVersion=$env:APPVEYOR_BUILD_VERSION"
+    } else {
+      write-host "Skipping publish"
+    }
+artifacts:
+- path: Rnwood.SmtpServer\bin\Release\*.nupkg
+- path: Rnwood.SmtpServer\bin\Release\*.snupkg
+test_script:
+- ps: |
+    dotnet test -f $env:TESTFRAMEWORK -r Debug Rnwood.SmtpServer.Tests\Rnwood.SmtpServer.Tests.csproj
+after_deploy:
+ - ps: |
+    if ($env:APPVEYOR_REPO_TAG -eq "false") {
+      $headers = @{
+        "Authorization" = "Bearer $($env:APPVEYORAPIKEY)"
+        "Content-type" = "application/json"
+      }
+      $history = Invoke-RestMethod -Uri "https://ci.appveyor.com/api/projects/$($env:APPVEYOR_ACCOUNT_NAME)/$($env:APPVEYOR_PROJECT_SLUG)/history?recordsNumber=25&branch=$($env:APPVEYOR_REPO_BRANCH)" -Headers $headers  -Method Get
+      $buildtoremove = $history.builds | where-object { $_.tag -eq $env:APPVEYOR_BUILD_VERSION}
+      if ($buildtoremove) {
+        Invoke-RestMethod -uri "https://ci.appveyor.com/api/builds/$($env:APPVEYOR_ACCOUNT_NAME)/$($env:APPVEYOR_PROJECT_SLUG)/$($buildtoremove.version)"  -Headers $headers  -Method Delete
+        Invoke-RestMethod -uri "https://ci.appveyor.com/api/account/$($env:APPVEYOR_ACCOUNT_NAME)/builds/$($buildtoremove.buildid)"  -Headers $headers  -Method Delete
+      }
+    }
+deploy:
+- provider: GitHub
+  artifact: /.*\..*/
+  auth_token:
+    secure: kwKatdFixHGt6H2kF/Tcvg1Uds+I077wvItDbYz0uxrb9+9r8HIb1w50vgpZbpIq
+  prerelease: $(PRERELEASE)
+  tag: $(APPVEYOR_REPO_TAG_NAME)
+  on:
+    appveyor_repo_tag: true
+- provider: GitHub
+  artifact: /.*\..*/
+  auth_token:
+    secure: kwKatdFixHGt6H2kF/Tcvg1Uds+I077wvItDbYz0uxrb9+9r8HIb1w50vgpZbpIq
+  prerelease: $(PRERELEASE)
+  on:
+    branch: master
+    appveyor_repo_tag: false
+- provider: NuGet
+  api_key:
+    secure: eKfQ9Opi9SCUWrmxYOGm9xGMKx2+KXnAjAvqCWnYbSDN37CWzGehvH74kY4iH/B1
+  skip_symbols: false
+  artifact: /.*\.s?nupkg/
+  on:
+    branch: master

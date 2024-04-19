@@ -1,0 +1,36 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.28803.352
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rnwood.SmtpServer", "Rnwood.SmtpServer\Rnwood.SmtpServer.csproj", "{C376BE9A-B775-4C75-8AFC-267C7B28817F}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Rnwood.SmtpServer.Tests", "Rnwood.SmtpServer.Tests\Rnwood.SmtpServer.Tests.csproj", "{86D80D1D-732D-4BBD-8CE7-CD185E24C91C}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{71E2C199-A23D-4024-8165-06D4A71982F8}"
+	ProjectSection(SolutionItems) = preProject
+		.editorconfig = .editorconfig
+	EndProjectSection
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{C376BE9A-B775-4C75-8AFC-267C7B28817F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C376BE9A-B775-4C75-8AFC-267C7B28817F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C376BE9A-B775-4C75-8AFC-267C7B28817F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C376BE9A-B775-4C75-8AFC-267C7B28817F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{86D80D1D-732D-4BBD-8CE7-CD185E24C91C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{86D80D1D-732D-4BBD-8CE7-CD185E24C91C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{86D80D1D-732D-4BBD-8CE7-CD185E24C91C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{86D80D1D-732D-4BBD-8CE7-CD185E24C91C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {890DDC84-2D51-4854-A468-1668639F5721}
+	EndGlobalSection
+EndGlobal
