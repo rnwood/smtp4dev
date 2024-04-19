@@ -38,7 +38,7 @@ public class DataVerbTests
 
         MemoryMessageBuilder messageBuilder = new MemoryMessageBuilder();
         mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
-        mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).ReturnsAsync(10);
+        mocks.ServerOptions.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).ReturnsAsync(10);
 
         string[] messageData = { new('x', 11), "." };
         int messageLine = 0;
@@ -82,7 +82,7 @@ public class DataVerbTests
 
         MemoryMessageBuilder messageBuilder = new MemoryMessageBuilder();
         mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
-        mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).ReturnsAsync(10);
+        mocks.ServerOptions.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).ReturnsAsync(10);
 
         string[] messageData = { new('x', 10), "." };
         int messageLine = 0;
@@ -100,14 +100,14 @@ public class DataVerbTests
     }
 
       [Fact]
-    public async Task Data_BehaviourThrowsErrorOnCompletedMessage_Rejected()
+    public async Task Data_OptionsThrowsErrorOnCompletedMessage_Rejected()
     {
         TestMocks mocks = new TestMocks();
 
         MemoryMessageBuilder messageBuilder = new MemoryMessageBuilder();
         mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
-        mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).ReturnsAsync(10);
-        mocks.ServerBehaviour.Setup(b => b.OnMessageCompleted(It.IsAny<IConnection>())).ThrowsAsync(new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.TransactionFailed, "No thanks!")));
+        mocks.ServerOptions.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).ReturnsAsync(10);
+        mocks.ServerOptions.Setup(b => b.OnMessageCompleted(It.IsAny<IConnection>())).ThrowsAsync(new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.TransactionFailed, "No thanks!")));
 
         string[] messageData = { new('x', 10), "." };
         int messageLine = 0;
@@ -149,7 +149,7 @@ public class DataVerbTests
 
         MemoryMessageBuilder messageBuilder = new MemoryMessageBuilder();
         mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
-        mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).ReturnsAsync(10);
+        mocks.ServerOptions.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).ReturnsAsync(10);
 
         string[] messageData = { new('x', 9), "." };
         int messageLine = 0;
@@ -176,7 +176,7 @@ public class DataVerbTests
 
         MemoryMessageBuilder messageBuilder = new MemoryMessageBuilder();
         mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
-        mocks.ServerBehaviour.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>()))
+        mocks.ServerOptions.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>()))
             .ReturnsAsync((long?)null);
 
         int messageLine = 0;

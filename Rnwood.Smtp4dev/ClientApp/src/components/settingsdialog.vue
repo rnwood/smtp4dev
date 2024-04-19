@@ -7,17 +7,34 @@
 
             <el-form v-if="server" :model="this" ref="form" :rules="rules" :disabled="saving">
                 <el-tabs tab-position="top">
-                    <el-tab-pane label="SMTP Server">
-                        <el-form-item label="Hostname" prop="server.hostName">
+                    <el-tab-pane label="General">
+                        <el-form-item label="Hostname (SMTP, IMAP)" prop="server.hostName">
                             <el-input v-model="server.hostName" />
                         </el-form-item>
-
-                        <el-form-item label="Port Number" prop="server.portNumber">
-                            <el-input-number :min=1 :max=65535 controls-position="right" v-model="server.portNumber" />
+                        <el-form-item label="Allow Remote Connections (SMTP, IMAP)" prop="server.allowRemoteConnections">
+                            <el-switch v-model="server.allowRemoteConnections" />
+                        </el-form-item>
+                        <el-form-item label="Disable IPv6 (SMTP, IMAP)" prop="server.disableIPv6">
+                            <el-switch v-model="server.disableIPv6" />
                         </el-form-item>
 
-                        <el-form-item label="Allow Remote Connections" prop="server.allowRemoteConnections">
-                            <el-switch v-model="server.allowRemoteConnections" />
+                        <el-form-item label="# of Messages to Keep" prop="server.numberOfMessagesToKeep">
+                            <el-input-number :min=1 controls-position="right" v-model="server.numberOfMessagesToKeep" />
+                        </el-form-item>
+
+                        <el-form-item label="# of Sessions to Keep" prop="server.numberOfSessionsToKeep">
+                            <el-input-number :min=1 controls-position="right" v-model="server.numberOfSessionsToKeep" />
+                        </el-form-item>
+
+                        <el-form-item label="Disable HTML message sanitisation on display (DANGER!)" prop="server.disableMessageSanitisation">
+                            <el-switch v-model="server.disableMessageSanitisation" />
+                        </el-form-item>
+                    </el-tab-pane>
+                    <el-tab-pane label="SMTP Server">
+
+
+                        <el-form-item label="Port Number (0=auto assign)" prop="server.portNumber">
+                            <el-input-number :min=0 :max=65535 controls-position="right" v-model="server.portNumber" />
                         </el-form-item>
 
                         <el-form-item label="TLS mode" prop="server.tlsMode">
@@ -51,19 +68,8 @@
 
 
                     <el-tab-pane label="IMAP Server">
-                        <el-form-item label="Port Number" prop="server.imapPortNumber">
-                            <el-input-number :min=1 :max=65535 controls-position="right" v-model="server.imapPortNumber" />
-                        </el-form-item>
-                    </el-tab-pane>
-
-                    <el-tab-pane label="Limits">
-
-                        <el-form-item label="# of Messages to Keep" prop="server.numberOfMessagesToKeep">
-                            <el-input-number :min=1 controls-position="right" v-model="server.numberOfMessagesToKeep" />
-                        </el-form-item>
-
-                        <el-form-item label="# of Sessions to Keep" prop="server.numberOfSessionsToKeep">
-                            <el-input-number :min=1 controls-position="right" v-model="server.numberOfSessionsToKeep" />
+                        <el-form-item label="Port Number (0=auto assign)" prop="server.imapPortNumber">
+                            <el-input-number :min=0 :max=65535 controls-position="right" v-model="server.imapPortNumber" />
                         </el-form-item>
                     </el-tab-pane>
                     <el-tab-pane label="Message Relay">
@@ -118,11 +124,6 @@
                                 </el-form-item>
                             </div>
                             <el-button size="small" @click="server.relayOptions.automaticEmails.push('')">New Auto-Relay Recipient</el-button>
-                        </el-form-item>
-                    </el-tab-pane>
-                    <el-tab-pane label="User Interface">
-                        <el-form-item label="Disable message sanitisation (DANGER!)" prop="server.disableMessageSanitisation">
-                            <el-switch v-model="server.disableMessageSanitisation" />
                         </el-form-item>
                     </el-tab-pane>
                 </el-tabs>

@@ -69,7 +69,7 @@ public class DataVerb : IVerb
             await messageStream.FlushAsync().ConfigureAwait(false);
         }
         long? maxMessageSize =
-            await connection.Server.Behaviour.GetMaximumMessageSize(connection).ConfigureAwait(false);
+            await connection.Server.Options.GetMaximumMessageSize(connection).ConfigureAwait(false);
 
 
 
@@ -88,7 +88,7 @@ public class DataVerb : IVerb
 
         try
         {
-            await connection.Server.Behaviour.OnMessageCompleted(connection).ConfigureAwait(false);
+            await connection.Server.Options.OnMessageCompleted(connection).ConfigureAwait(false);
             await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Mail accepted"))
                 .ConfigureAwait(false);
             await connection.CommitMessage().ConfigureAwait(false);

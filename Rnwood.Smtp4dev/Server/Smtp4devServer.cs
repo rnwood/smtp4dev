@@ -25,6 +25,7 @@ using Serilog;
 using SmtpResponse = Rnwood.SmtpServer.SmtpResponse;
 using Microsoft.Extensions.Hosting;
 using System.Threading;
+using System.Net;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -75,19 +76,19 @@ namespace Rnwood.Smtp4dev.Server
             X509Certificate2 cert = CertificateHelper.GetTlsCertificate(serverOptions.CurrentValue, log);
 
             ServerOptions serverOptionsValue = serverOptions.CurrentValue;
-            this.smtpServer = new DefaultServer(serverOptionsValue.AllowRemoteConnections, serverOptionsValue.HostName, serverOptionsValue.Port,
+            this.smtpServer = new Rnwood.SmtpServer.SmtpServer(new SmtpServer.ServerOptions(serverOptionsValue.AllowRemoteConnections, !serverOptionsValue.DisableIPv6, serverOptionsValue.HostName, serverOptionsValue.Port,
                 serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
                 serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null
-            );
+            ));
             this.smtpServer.MessageCompletedEventHandler += OnMessageCompleted;
             this.smtpServer.MessageReceivedEventHandler += OnMessageReceived;
             this.smtpServer.SessionCompletedEventHandler += OnSessionCompleted;
             this.smtpServer.SessionStartedHandler += OnSessionStarted;
             this.smtpServer.AuthenticationCredentialsValidationRequiredEventHandler += OnAuthenticationCredentialsValidationRequired;
             this.smtpServer.IsRunningChanged += OnIsRunningChanged;
-            ((DefaultServerBehaviour)this.smtpServer.Behaviour).MessageStartEventHandler += OnMessageStart;
+            ((SmtpServer.ServerOptions)this.smtpServer.Options).MessageStartEventHandler += OnMessageStart;
 
-            ((DefaultServerBehaviour)this.smtpServer.Behaviour).MessageRecipientAddingEventHandler += OnMessageRecipientAddingEventHandler;
+            ((SmtpServer.ServerOptions)this.smtpServer.Options).MessageRecipientAddingEventHandler += OnMessageRecipientAddingEventHandler;
         }
 
         private Task OnMessageRecipientAddingEventHandler(object sender, RecipientAddingEventArgs e)
@@ -405,7 +406,7 @@ namespace Rnwood.Smtp4dev.Server
 
 
         private readonly ITaskQueue taskQueue;
-        private DefaultServer smtpServer;
+        private Rnwood.SmtpServer.SmtpServer smtpServer;
         private readonly Func<RelayOptions, SmtpClient> relaySmtpClientFactory;
         private readonly NotificationsHub notificationsHub;
         private readonly IServiceScopeFactory serviceScopeFactory;
@@ -414,7 +415,7 @@ namespace Rnwood.Smtp4dev.Server
 
         public bool IsRunning => this.smtpServer.IsRunning;
 
-        public int PortNumber => this.smtpServer.PortNumber;
+        public IPEndPoint[] ListeningEndpoints => this.smtpServer.ListeningEndpoints;
 
         public void TryStart()
         {
@@ -425,8 +426,12 @@ namespace Rnwood.Smtp4dev.Server
                 CreateSmtpServer();
                 smtpServer.Start();
 
-                log.Information("SMTP Server is listening on port {smtpPortNumber}.",
-                    smtpServer.PortNumber);
+                foreach (var l in smtpServer.ListeningEndpoints)
+                {
+                    log.Information("SMTP Server is listening on port {smtpPortNumber} ({address}).",
+                        l.Port, l.Address);
+                }
+
                 log.Information("Keeping last {messagesToKeep} messages and {sessionsToKeep} sessions.",
                     serverOptions.CurrentValue.NumberOfMessagesToKeep, serverOptions.CurrentValue.NumberOfSessionsToKeep);
             }

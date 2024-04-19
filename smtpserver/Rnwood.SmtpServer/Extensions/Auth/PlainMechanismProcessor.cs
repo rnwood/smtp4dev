@@ -77,7 +77,7 @@ public class PlainMechanismProcessor : AuthMechanismProcessor, IAuthMechanismPro
         Credentials = new PlainAuthenticationCredentials(username, password);
 
         AuthenticationResult result =
-            await Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials)
+            await Connection.Server.Options.ValidateAuthenticationCredentials(Connection, Credentials)
                 .ConfigureAwait(false);
         switch (result)
         {

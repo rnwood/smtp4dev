@@ -56,13 +56,16 @@ public class SmtpServer : ISmtpServer
     /// <summary>
     ///     Defines the listener.
     /// </summary>
-    private TcpListener listener;
+    private TcpListener[] listeners;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="SmtpServer" /> class.
     /// </summary>
-    /// <param name="behaviour">The behaviour<see cref="IServerBehaviour" />.</param>
-    public SmtpServer(IServerBehaviour behaviour) => Behaviour = behaviour;
+    /// <param name="options">The Options<see cref="IServerOptions" />.</param>
+    public SmtpServer(IServerOptions options)
+    {
+        this.Options = options;
+    }
 
     /// <summary>
     ///     Gets the ActiveConnections.
@@ -85,15 +88,59 @@ public class SmtpServer : ISmtpServer
         }
     }
 
-    /// <summary>
-    ///     Gets the PortNumber.
-    /// </summary>
-    public int PortNumber => ((IPEndPoint)listener.LocalEndpoint).Port;
+    public IPEndPoint[] ListeningEndpoints => listeners.Select(l => (IPEndPoint)l.LocalEndpoint).ToArray();
 
     /// <summary>
-    ///     Gets the Behaviour.
+    ///     Gets the Options.
     /// </summary>
-    public IServerBehaviour Behaviour { get; }
+    public IServerOptions Options { get; }
+
+
+    /// <summary>
+    ///     Occurs when authentication results need to be validated.
+    /// </summary>
+    public event AsyncEventHandler<AuthenticationCredentialsValidationEventArgs>
+        AuthenticationCredentialsValidationRequiredEventHandler
+    {
+        add => Options.AuthenticationCredentialsValidationRequiredEventHandler += value;
+        remove => Options.AuthenticationCredentialsValidationRequiredEventHandler -= value;
+    }
+
+    /// <summary>
+    ///     Occurs when a message has been fully received but not yet acknowledged by the server.
+    /// </summary>
+    public event AsyncEventHandler<ConnectionEventArgs> MessageCompletedEventHandler
+    {
+        add => Options.MessageCompletedEventHandler += value;
+        remove => Options.MessageCompletedEventHandler -= value;
+    }
+
+    /// <summary>
+    ///     Occurs when a message has been received and acknowledged by the server.
+    /// </summary>
+    public event AsyncEventHandler<MessageEventArgs> MessageReceivedEventHandler
+    {
+        add => Options.MessageReceivedEventHandler += value;
+        remove => Options.MessageReceivedEventHandler -= value;
+    }
+
+    /// <summary>
+    ///     Occurs when a session is terminated.
+    /// </summary>
+    public event AsyncEventHandler<SessionEventArgs> SessionCompletedEventHandler
+    {
+        add => Options.SessionCompletedEventHandler += value;
+        remove => Options.SessionCompletedEventHandler -= value;
+    }
+
+    /// <summary>
+    ///     Occurs when a new session is started, when a new client connects to the server.
+    /// </summary>
+    public event AsyncEventHandler<SessionEventArgs> SessionStartedHandler
+    {
+        add => Options.SessionStartedEventHandler += value;
+        remove => Options.SessionStartedEventHandler -= value;
+    }
 
     /// <summary>
     ///     Performs application-defined tasks associated with freeing, releasing, or resetting unmanaged resources.
@@ -141,10 +188,43 @@ public class SmtpServer : ISmtpServer
             throw new InvalidOperationException("Already running");
         }
 
-        logger.LogDebug("Starting server on {0}:{1}", Behaviour.IpAddress, Behaviour.PortNumber);
+        logger.LogDebug("Starting server on {0}:{1}", Options.IpAddress, Options.PortNumber);
 
-        listener = new TcpListener(Behaviour.IpAddress, Behaviour.PortNumber);
-        listener.Start();
+        if (Options.IpAddress == IPAddress.IPv6Loopback)
+        {
+            //https://stackoverflow.com/questions/37729475/create-dual-stack-socket-on-all-loopback-interfaces-on-windows
+            listeners = new[]
+            {
+                new TcpListener(IPAddress.IPv6Loopback, Options.PortNumber),
+                new TcpListener(IPAddress.Loopback, Options.PortNumber)
+            };
+        }
+        else
+        {
+
+            listeners = new[] { new TcpListener(Options.IpAddress, Options.PortNumber) };
+            if (Options.IpAddress.AddressFamily == AddressFamily.InterNetworkV6)
+            {
+                listeners[0].Server.DualMode = true;
+            }
+        }
+
+        try
+        {
+            foreach(var l in listeners)
+            {
+                l.Start();
+            }
+        } catch
+        {
+            foreach (var l in listeners)
+            {
+                l.Stop();
+            }
+
+            throw;
+        }
+        pendingAcceptTasks = new Task<TcpClient>[listeners.Length];
 
         IsRunning = true;
 
@@ -175,7 +255,10 @@ public class SmtpServer : ISmtpServer
         logger.LogDebug("Stopping server");
 
         IsRunning = false;
-        listener.Stop();
+        foreach (var l in listeners)
+        {
+            l.Stop();
+        }
 
         logger.LogDebug("Listener stopped. Waiting for core task to exit");
         coreTask.Wait();
@@ -234,12 +317,26 @@ public class SmtpServer : ISmtpServer
         return verbMap;
     }
 
+    private Task<TcpClient>[] pendingAcceptTasks;
+
     private async Task AcceptNextClient()
     {
         TcpClient tcpClient = null;
         try
         {
-            tcpClient = await listener.AcceptTcpClientAsync().ConfigureAwait(false);
+            for(int i=0; i<listeners.Length; i++)
+            {
+                if (pendingAcceptTasks[i] == null)
+                {
+                    pendingAcceptTasks[i] = listeners[i].AcceptTcpClientAsync();
+                }
+            }
+
+            var completedTaskIdx = Task.WaitAny(pendingAcceptTasks);
+            var completedTask = pendingAcceptTasks[completedTaskIdx];
+            pendingAcceptTasks[completedTaskIdx] = null;
+
+            tcpClient = await completedTask;
         }
         catch (SocketException)
         {
@@ -265,10 +362,10 @@ public class SmtpServer : ISmtpServer
             logger.LogDebug("New connection from {0}", tcpClient.Client.RemoteEndPoint);
 
             TcpClientConnectionChannel connectionChannel =
-                new TcpClientConnectionChannel(tcpClient, Behaviour.FallbackEncoding);
+                new TcpClientConnectionChannel(tcpClient, Options.FallbackEncoding);
             connectionChannel.ReceiveTimeout =
-                await Behaviour.GetReceiveTimeout(connectionChannel).ConfigureAwait(false);
-            connectionChannel.SendTimeout = await Behaviour.GetSendTimeout(connectionChannel).ConfigureAwait(false);
+                await Options.GetReceiveTimeout(connectionChannel).ConfigureAwait(false);
+            connectionChannel.SendTimeout = await Options.GetSendTimeout(connectionChannel).ConfigureAwait(false);
 
             Connection connection =
                 await Connection.Create(this, connectionChannel, CreateVerbMap()).ConfigureAwait(false);

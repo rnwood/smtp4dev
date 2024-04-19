@@ -1,4 +1,4 @@
-// <copyright file="IServerBehaviour.cs" company="Rnwood.SmtpServer project contributors">
+// <copyright file="IServerOptions.cs" company="Rnwood.SmtpServer project contributors">
 // Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -15,9 +15,9 @@ using Rnwood.SmtpServer.Extensions.Auth;
 namespace Rnwood.SmtpServer;
 
 /// <summary>
-///     Defines the <see cref="IServerBehaviour" />.
+///     Defines the <see cref="IServerOptions" />.
 /// </summary>
-public interface IServerBehaviour
+public interface IServerOptions
 {
     /// <summary>
     ///     Gets the DomainName
@@ -49,6 +49,12 @@ public interface IServerBehaviour
     ///     Gets or sets the list of Supported Auth Mechanism Identifiers.
     /// </summary>
     HashSet<IAuthMechanism> EnabledAuthMechanisms { get; set; }
+
+    event AsyncEventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequiredEventHandler;
+    event AsyncEventHandler<ConnectionEventArgs> MessageCompletedEventHandler;
+    event AsyncEventHandler<MessageEventArgs> MessageReceivedEventHandler;
+    event AsyncEventHandler<SessionEventArgs> SessionCompletedEventHandler;
+    event AsyncEventHandler<SessionEventArgs> SessionStartedEventHandler;
 
     /// <summary>
     ///     Gets the extensions that should be enabled for the specified connection.

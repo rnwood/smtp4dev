@@ -78,7 +78,7 @@ public class MailFromVerb : IVerb
             from = from.Remove(from.Length - 1, 1);
         }
 
-        await connection.Server.Behaviour.OnMessageStart(connection, from).ConfigureAwait(false);
+        await connection.Server.Options.OnMessageStart(connection, from).ConfigureAwait(false);
         await connection.NewMessage().ConfigureAwait(false);
         connection.CurrentMessage.ReceivedDate = currentDateTimeProvider.GetCurrentDateTime();
         connection.CurrentMessage.From = from;

@@ -13,7 +13,7 @@ namespace Rnwood.SmtpServer;
 public interface ISmtpServer : IDisposable
 {
     /// <summary>
-    ///     Gets the Behaviour.
+    ///     Gets the Options.
     /// </summary>
-    IServerBehaviour Behaviour { get; }
+    IServerOptions Options { get; }
 }

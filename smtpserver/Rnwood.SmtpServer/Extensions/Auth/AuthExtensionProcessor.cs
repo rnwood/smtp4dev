@@ -65,7 +65,7 @@ public class AuthExtensionProcessor : IExtensionProcessor
     /// </summary>
     /// <param name="mechanism">The mechanism.</param>
     /// <returns>A <see cref="Task{T}" /> representing the async operation which yields true if enabled.</returns>
-    public async Task<bool> IsMechanismEnabled(IAuthMechanism mechanism) => await connection.Server.Behaviour
+    public async Task<bool> IsMechanismEnabled(IAuthMechanism mechanism) => await connection.Server.Options
         .IsAuthMechanismEnabled(connection, mechanism).ConfigureAwait(false);
 
     /// <summary>
@@ -78,7 +78,7 @@ public class AuthExtensionProcessor : IExtensionProcessor
 
         foreach (IAuthMechanism mechanism in MechanismMap.GetAll())
         {
-            if (await connection.Server.Behaviour.IsAuthMechanismEnabled(connection, mechanism).ConfigureAwait(false))
+            if (await connection.Server.Options.IsAuthMechanismEnabled(connection, mechanism).ConfigureAwait(false))
             {
                 result.Add(mechanism);
             }

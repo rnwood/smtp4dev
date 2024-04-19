@@ -18,6 +18,8 @@ using System.Net.NetworkInformation;
 using Serilog;
 using Microsoft.Extensions.Hosting;
 using System.Threading;
+using Microsoft.AspNetCore.Http;
+using Org.BouncyCastle.Utilities.Net;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -31,7 +33,7 @@ namespace Rnwood.Smtp4dev.Server
             IDisposable eventHandler = null;
             var obs = Observable.FromEvent<ServerOptions>(e => eventHandler = serverOptions.OnChange(e), e => eventHandler.Dispose());
             obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
-  
+
         }
 
         private void OnServerOptionsChanged(ServerOptions serverOptions)
@@ -49,7 +51,7 @@ namespace Rnwood.Smtp4dev.Server
             }
         }
 
-        public void TryStart()
+        public async void TryStart()
         {
             if (!serverOptions.CurrentValue.ImapPort.HasValue)
             {
@@ -57,9 +59,36 @@ namespace Rnwood.Smtp4dev.Server
                 return;
             }
 
+
+            List<IPBindInfo> bindings = new List<IPBindInfo>();
+
+
+            if (serverOptions.CurrentValue.AllowRemoteConnections)
+            {
+                if (!serverOptions.CurrentValue.DisableIPv6)
+                {
+                    bindings.Add(new IPBindInfo(serverOptions.CurrentValue.HostName, BindInfoProtocol.TCP, System.Net.IPAddress.IPv6Any, serverOptions.CurrentValue.ImapPort.Value));
+                }
+                else
+                {
+                    bindings.Add(new IPBindInfo(serverOptions.CurrentValue.HostName, BindInfoProtocol.TCP, System.Net.IPAddress.Any, serverOptions.CurrentValue.ImapPort.Value));
+
+                }
+            }
+            else
+            {
+                bindings.Add(new IPBindInfo(serverOptions.CurrentValue.HostName, BindInfoProtocol.TCP, System.Net.IPAddress.Loopback, serverOptions.CurrentValue.ImapPort.Value));
+
+                if (!serverOptions.CurrentValue.DisableIPv6)
+                {
+                    bindings.Add(new IPBindInfo(serverOptions.CurrentValue.HostName, BindInfoProtocol.TCP, System.Net.IPAddress.IPv6Loopback, serverOptions.CurrentValue.ImapPort.Value));
+                }
+            }
+
             imapServer = new IMAP_Server()
             {
-                Bindings = new[] { new IPBindInfo(Dns.GetHostName(), BindInfoProtocol.TCP, serverOptions.CurrentValue.AllowRemoteConnections ? IPAddress.Any : IPAddress.Loopback, serverOptions.CurrentValue.ImapPort.Value) },
+
+                Bindings = bindings.ToArray(),
                 GreetingText = "smtp4dev"
             };
             imapServer.SessionCreated += (o, ea) => new SessionHandler(ea.Session, this.serviceScopeFactory);
@@ -86,7 +115,8 @@ namespace Rnwood.Smtp4dev.Server
             if (index == 1)
             {
                 log.Warning("The IMAP server failed to start: {Exception}" + errorTask.Result.Exception.ToString());
-            } else if (index == 2)
+            }
+            else if (index == 2)
             {
                 log.Warning("The IMAP server failed to start: Timeout");
 
@@ -98,8 +128,18 @@ namespace Rnwood.Smtp4dev.Server
             }
             else
             {
-                int port = ((IPEndPoint)imapServer.ListeningPoints[0].Socket.LocalEndPoint).Port;
-                log.Information("IMAP Server is listening on port {port}", port);
+                while(imapServer.ListeningPoints.Length < imapServer.Bindings.Length)
+                {
+                    await Task.Delay(100);
+                }
+
+                foreach(var lp in imapServer.ListeningPoints)
+                {
+                    var ep = ((IPEndPoint)lp.Socket.LocalEndPoint);
+                    int port = ep.Port;
+                    log.Information("IMAP Server is listening on port {port} ({address})", port, ep.Address);
+                }
+
             }
         }
 

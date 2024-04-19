@@ -50,7 +50,7 @@ public class ConnectionTests
 
         await connection.CommitMessage();
         mocks.Session.Verify(s => s.AddMessage(message));
-        mocks.ServerBehaviour.Verify(b => b.OnMessageReceived(connection, message));
+        mocks.ServerOptions.Verify(b => b.OnMessageReceived(connection, message));
         Assert.Null(connection.CurrentMessage);
     }
 
@@ -169,7 +169,7 @@ public class ConnectionTests
     public async Task Process_TooManyBadCommands_Disconnected()
     {
         TestMocks mocks = new TestMocks();
-        mocks.ServerBehaviour.SetupGet(b => b.MaximumNumberOfSequentialBadCommands).Returns(2);
+        mocks.ServerOptions.SetupGet(b => b.MaximumNumberOfSequentialBadCommands).Returns(2);
 
         mocks.ConnectionChannel.Setup(c => c.ReadLine()).ReturnsAsync("BADCOMMAND");
 

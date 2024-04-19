@@ -45,7 +45,7 @@ public class SizeExtension : IExtension
         public async Task<string[]> GetEHLOKeywords()
         {
             long? maxMessageSize =
-                await Connection.Server.Behaviour.GetMaximumMessageSize(Connection).ConfigureAwait(false);
+                await Connection.Server.Options.GetMaximumMessageSize(Connection).ConfigureAwait(false);
 
             if (maxMessageSize.HasValue)
             {
@@ -62,7 +62,7 @@ public class SizeExtension : IExtension
             {
                 if (long.TryParse(value, out long messageSize) && messageSize > 0)
                 {
-                    long? maxMessageSize = await Connection.Server.Behaviour.GetMaximumMessageSize(Connection)
+                    long? maxMessageSize = await Connection.Server.Options.GetMaximumMessageSize(Connection)
                         .ConfigureAwait(false);
                     connection.CurrentMessage.DeclaredMessageSize = messageSize;
 

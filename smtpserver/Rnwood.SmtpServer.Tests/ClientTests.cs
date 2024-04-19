@@ -54,7 +54,7 @@ public partial class ClientTests
     [Fact]
     public async Task MailKit_SmtpUtf8()
     {
-        using (DefaultServer server = new DefaultServer(false, StandardSmtpPort.AssignAutomatically))
+        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false,false, (int) StandardSmtpPort.AssignAutomatically)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -82,7 +82,7 @@ public partial class ClientTests
     [Fact]
     public async Task MailKit_NonSSL()
     {
-        using (DefaultServer server = new DefaultServer(false, StandardSmtpPort.AssignAutomatically))
+        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, (int)StandardSmtpPort.AssignAutomatically)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -108,9 +108,9 @@ public partial class ClientTests
     [Fact]
     public async Task MailKit_StartTLS()
     {
-        using (DefaultServer server = new DefaultServer(false, Dns.GetHostName(),
+        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false,false, Dns.GetHostName(),
                    (int)StandardSmtpPort.AssignAutomatically,
-                   null, CreateSelfSignedCertificate()))
+                   null, CreateSelfSignedCertificate())))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -136,9 +136,9 @@ public partial class ClientTests
     [Fact]
     public async Task MailKit_ImplicitTLS()
     {
-        using (DefaultServer server = new DefaultServer(false, Dns.GetHostName(),
+        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false,false, Dns.GetHostName(),
                    (int)StandardSmtpPort.AssignAutomatically,
-                   CreateSelfSignedCertificate(), null))
+                   CreateSelfSignedCertificate(), null)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -165,7 +165,7 @@ public partial class ClientTests
     [Fact]
     public async Task MailKit_NonSSL_StressTest()
     {
-        using (DefaultServer server = new DefaultServer(false, StandardSmtpPort.AssignAutomatically))
+        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false, false, (int) StandardSmtpPort.AssignAutomatically)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -189,7 +189,7 @@ public partial class ClientTests
                 {
                     using (SmtpClient client = new SmtpClient())
                     {
-                        await client.ConnectAsync("localhost", server.PortNumber);
+                        await client.ConnectAsync("localhost", server.ListeningEndpoints.First().Port);
 
                         for (int i = 0; i < numberOfMessagesPerThread; i++)
                         {
@@ -232,10 +232,10 @@ public partial class ClientTests
 
     /// <summary>
     /// </summary>
-    /// <param name="server">The server<see cref="DefaultServer" /></param>
+    /// <param name="server">The server<see cref="SmtpServer" /></param>
     /// <param name="toAddress">The toAddress<see cref="string" /></param>
     /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
-    private async Task SendMessage_MailKit_Async(DefaultServer server, string toAddress,
+    private async Task SendMessage_MailKit_Async(SmtpServer server, string toAddress,
         string fromAddress = "from@from.com", SecureSocketOptions secureSocketOptions = SecureSocketOptions.None)
     {
         MimeMessage message = NewMessage(toAddress, fromAddress);
@@ -248,7 +248,7 @@ public partial class ClientTests
                 return true;
             };
             client.SslProtocols = SslProtocols.Tls12;
-            await client.ConnectAsync("localhost", server.PortNumber, secureSocketOptions);
+            await client.ConnectAsync("localhost", server.ListeningEndpoints.First().Port, secureSocketOptions);
             await client.SendAsync(new FormatOptions { International = true }, message);
             await client.DisconnectAsync(true);
         }

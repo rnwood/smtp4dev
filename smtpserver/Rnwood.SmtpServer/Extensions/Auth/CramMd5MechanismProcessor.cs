@@ -66,7 +66,7 @@ public class CramMd5MechanismProcessor : AuthMechanismProcessor
             challengeStringBuilder.Append(".");
             challengeStringBuilder.Append(dateTimeProvider.GetCurrentDateTime().Ticks.ToString(CultureInfo.InvariantCulture));
             challengeStringBuilder.Append("@");
-            challengeStringBuilder.Append(Connection.Server.Behaviour.DomainName);
+            challengeStringBuilder.Append(Connection.Server.Options.DomainName);
             this.challenge = challengeStringBuilder.ToString();
 
             string base64Challenge = Convert.ToBase64String(Encoding.ASCII.GetBytes(challengeStringBuilder.ToString()));
@@ -92,7 +92,7 @@ public class CramMd5MechanismProcessor : AuthMechanismProcessor
         Credentials = new CramMd5AuthenticationCredentials(username, challenge, hash);
 
         AuthenticationResult result =
-            await Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials)
+            await Connection.Server.Options.ValidateAuthenticationCredentials(Connection, Credentials)
                 .ConfigureAwait(false);
 
         switch (result)

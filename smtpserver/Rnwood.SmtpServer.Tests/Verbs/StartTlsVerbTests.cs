@@ -24,7 +24,7 @@ public class StartTlsVerbTests
     public async Task NoCertificateAvailable_ReturnsErrorResponse()
     {
         TestMocks mocks = new TestMocks();
-        mocks.ServerBehaviour.Setup(b => b.GetSSLCertificate(It.IsAny<IConnection>()))
+        mocks.ServerOptions.Setup(b => b.GetSSLCertificate(It.IsAny<IConnection>()))
             .ReturnsAsync((X509Certificate)null);
 
         StartTlsVerb verb = new StartTlsVerb();
