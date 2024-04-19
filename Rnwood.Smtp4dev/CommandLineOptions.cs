@@ -1,4 +1,4 @@
-using Rnwood.Smtp4dev.Server;
+using Rnwood.Smtp4dev.Server.Settings;
 
 namespace Rnwood.Smtp4dev
 {

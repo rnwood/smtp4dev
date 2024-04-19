@@ -12,7 +12,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth;
 /// <summary>
 ///     Defines the <see cref="CramMd5AuthenticationCredentials" />.
 /// </summary>
-public class CramMd5AuthenticationCredentials : IAuthenticationCredentials
+public class CramMd5AuthenticationCredentials : IAuthenticationCredentialsCanValidateWithPassword
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="CramMd5AuthenticationCredentials" /> class.

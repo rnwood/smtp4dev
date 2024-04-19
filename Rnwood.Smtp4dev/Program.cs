@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Mono.Options;
 using Rnwood.Smtp4dev.Server;
+using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.Smtp4dev.Service;
 using Serilog;
 

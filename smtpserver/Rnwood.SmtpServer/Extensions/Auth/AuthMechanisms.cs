@@ -21,6 +21,5 @@ public static class AuthMechanisms
         yield return new CramMd5Mechanism();
         yield return new PlainMechanism();
         yield return new LoginMechanism();
-        yield return new AnonymousMechanism();
     }
 }

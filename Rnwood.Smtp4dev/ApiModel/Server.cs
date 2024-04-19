@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rnwood.Smtp4dev.Server.Settings;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -34,6 +35,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string RecipientValidationExpression { get; set; }
         public string MessageValidationExpression { get; set; }
 		public bool DisableIPv6 { get; set; }
+        public User[] Users { get; set; }
     }
 
 }

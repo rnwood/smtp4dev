@@ -24,6 +24,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
+using Rnwood.Smtp4dev.Server.Settings;
 
 namespace Rnwood.Smtp4dev
 {

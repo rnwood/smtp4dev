@@ -23,7 +23,7 @@ public class ServerOptions : IServerOptions
 {
     private readonly bool allowRemoteConnections;
     private readonly bool enableIpV6;
-
+    private readonly bool requireAuthentication;
     private readonly X509Certificate implcitTlsCertificate;
     private readonly X509Certificate startTlsCertificate;
 
@@ -32,8 +32,8 @@ public class ServerOptions : IServerOptions
     /// </summary>
     /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
     /// <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
-    public ServerOptions(bool allowRemoteConnections, bool enableIpV6)
-        : this(allowRemoteConnections, enableIpV6, 25, null, null)
+    public ServerOptions(bool allowRemoteConnections, bool enableIpV6, bool requireAuthentication)
+        : this(allowRemoteConnections, enableIpV6, 25, requireAuthentication, null, null)
     {
     }
 
@@ -43,8 +43,8 @@ public class ServerOptions : IServerOptions
     /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
     /// <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
     /// <param name="portNumber">The port number.</param>
-    public ServerOptions(bool allowRemoteConnections, bool enableIpV6, int portNumber)
-        : this(allowRemoteConnections, enableIpV6, portNumber, null, null)
+    public ServerOptions(bool allowRemoteConnections, bool enableIpV6, int portNumber , bool requireAuthentication)
+        : this(allowRemoteConnections, enableIpV6, portNumber, requireAuthentication, null, null)
     {
     }
 
@@ -55,8 +55,8 @@ public class ServerOptions : IServerOptions
     /// <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
     /// <param name="portNumber">The port number.</param>
     /// <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-    public ServerOptions(bool allowRemoteConnections, bool enableIpV6, int portNumber, X509Certificate implicitTlsCertificate)
-        : this(allowRemoteConnections, enableIpV6, portNumber, implicitTlsCertificate, null)
+    public ServerOptions(bool allowRemoteConnections, bool enableIpV6, int portNumber, bool requireAuthentication, X509Certificate implicitTlsCertificate)
+        : this(allowRemoteConnections, enableIpV6, portNumber, requireAuthentication, implicitTlsCertificate, null)
     {
     }
 
@@ -72,9 +72,10 @@ public class ServerOptions : IServerOptions
         bool allowRemoteConnections,
         bool enableIpV6,
         int portNumber,
+        bool requireAuthentication,
         X509Certificate implicitTlsCertificate,
         X509Certificate startTlsCertificate)
-        : this(allowRemoteConnections, enableIpV6, Dns.GetHostName(), portNumber, implicitTlsCertificate, startTlsCertificate)
+        : this(allowRemoteConnections, enableIpV6, Dns.GetHostName(), portNumber, requireAuthentication, implicitTlsCertificate, startTlsCertificate)
     {
     }
 
@@ -92,6 +93,7 @@ public class ServerOptions : IServerOptions
         bool enableIpV6,
         string domainName,
         int portNumber,
+        bool requireAuthentication,
         X509Certificate implcitTlsCertificate,
         X509Certificate startTlsCertificate)
     {
@@ -101,6 +103,7 @@ public class ServerOptions : IServerOptions
         this.startTlsCertificate = startTlsCertificate;
         this.allowRemoteConnections = allowRemoteConnections;
         this.enableIpV6 = enableIpV6;
+        this.requireAuthentication = requireAuthentication;
     }
 
     /// <summary>
@@ -109,8 +112,8 @@ public class ServerOptions : IServerOptions
     /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
     /// <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
     /// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-    public ServerOptions(bool allowRemoteConnections, bool enableIpV6, X509Certificate implcitTlsCertificate)
-        : this(allowRemoteConnections, enableIpV6, 587, implcitTlsCertificate, null)
+    public ServerOptions(bool allowRemoteConnections, bool enableIpV6, bool requireAuthentication, X509Certificate implcitTlsCertificate)
+        : this(allowRemoteConnections, enableIpV6, 587, requireAuthentication, implcitTlsCertificate, null)
     {
     }
 
@@ -187,7 +190,7 @@ public class ServerOptions : IServerOptions
 
     /// <inheritdoc />
     public virtual Task<bool> IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism) =>
-        Task.FromResult(
+         Task.FromResult(this.requireAuthentication &&
             EnabledAuthMechanisms.Contains(authMechanism));
 
     /// <inheritdoc />

@@ -3,6 +3,7 @@ using System.IO;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
+using Rnwood.Smtp4dev.Server.Settings;
 using Serilog;
 
 namespace Rnwood.Smtp4dev.Server

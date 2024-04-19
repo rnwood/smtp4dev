@@ -26,6 +26,7 @@ using SmtpResponse = Rnwood.SmtpServer.SmtpResponse;
 using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Net;
+using Rnwood.Smtp4dev.Server.Settings;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -33,7 +34,7 @@ namespace Rnwood.Smtp4dev.Server
     {
         private readonly ILogger log = Log.ForContext<Smtp4devServer>();
 
-        public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<ServerOptions> serverOptions,
+        public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<Settings.ServerOptions> serverOptions,
             IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory,
             ITaskQueue taskQueue, ScriptingHost scriptingHost)
         {
@@ -53,11 +54,11 @@ namespace Rnwood.Smtp4dev.Server
         private void StartWatchingServerOptionsForChanges()
         {
             IDisposable eventHandler = null;
-            var obs = Observable.FromEvent<ServerOptions>(e => eventHandler = this.serverOptions.OnChange(e), e => eventHandler.Dispose());
+            var obs = Observable.FromEvent<Settings.ServerOptions>(e => eventHandler = this.serverOptions.OnChange(e), e => eventHandler.Dispose());
             obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
         }
 
-        private void OnServerOptionsChanged(ServerOptions arg1)
+        private void OnServerOptionsChanged(Settings.ServerOptions arg1)
         {
             if (this.smtpServer?.IsRunning == true)
             {
@@ -75,8 +76,8 @@ namespace Rnwood.Smtp4dev.Server
         {
             X509Certificate2 cert = CertificateHelper.GetTlsCertificate(serverOptions.CurrentValue, log);
 
-            ServerOptions serverOptionsValue = serverOptions.CurrentValue;
-            this.smtpServer = new Rnwood.SmtpServer.SmtpServer(new SmtpServer.ServerOptions(serverOptionsValue.AllowRemoteConnections, !serverOptionsValue.DisableIPv6, serverOptionsValue.HostName, serverOptionsValue.Port,
+            Settings.ServerOptions serverOptionsValue = serverOptions.CurrentValue;
+            this.smtpServer = new Rnwood.SmtpServer.SmtpServer(new SmtpServer.ServerOptions(serverOptionsValue.AllowRemoteConnections, !serverOptionsValue.DisableIPv6, serverOptionsValue.HostName, serverOptionsValue.Port, serverOptionsValue.AuthenticationRequired,
                 serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
                 serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null
             ));
@@ -196,14 +197,38 @@ namespace Rnwood.Smtp4dev.Server
 
             var apiSession = new ApiModel.Session(session);
 
-            AuthenticationResult result = scriptingHost.ValidateCredentials(apiSession, e.Credentials);
+            AuthenticationResult? result = scriptingHost.ValidateCredentials(apiSession, e.Credentials);
 
-            e.AuthenticationResult = result;
+            if (result == null)
+            {
+                if (e.Credentials is IAuthenticationCredentialsCanValidateWithPassword val)
+                {
+                    var user = serverOptions.CurrentValue.Users.FirstOrDefault(u => u.Username.Equals(val.Username, StringComparison.CurrentCultureIgnoreCase));
+                    if (user != null && val.ValidateResponse(user.Password))
+                    {
+                        result = AuthenticationResult.Success;
+                        this.log.Warning("SMTP auth success for user {user}", val.Username);
+
+                    }
+                    else
+                    {
+                        result = AuthenticationResult.Failure;
+                        this.log.Warning("SMTP auth failure for user {user}", val.Username);
+                    }
+                }
+                else
+                {
+                    result = AuthenticationResult.Failure;
+                    this.log.Warning("SMTP auth failure: Cannot validate credentials of type {type}", e.Credentials.Type);
+                }
+            }
+
+            e.AuthenticationResult = result.Value;
             return Task.CompletedTask;
         }
 
 
-        private readonly IOptionsMonitor<ServerOptions> serverOptions;
+        private readonly IOptionsMonitor<Settings.ServerOptions> serverOptions;
         private readonly IOptionsMonitor<RelayOptions> relayOptions;
         private readonly IDictionary<ISession, Guid> activeSessionsToDbId = new Dictionary<ISession, Guid>();
         private readonly ScriptingHost scriptingHost;

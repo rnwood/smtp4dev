@@ -4,14 +4,10 @@
 // </copyright>
 
 namespace Rnwood.SmtpServer.Extensions.Auth;
-/// <summary>
-///     Represents credentials supplied by the client.
-/// </summary>
-public interface IAuthenticationCredentials
-{
-    /// <summary>
-    /// Gets a string representing the type of this credential.
-    /// </summary>
-    string Type { get;  }
 
+public interface IAuthenticationCredentialsCanValidateWithPassword : IAuthenticationCredentials
+{
+    string Username { get; }
+
+    bool ValidateResponse(string password);
 }

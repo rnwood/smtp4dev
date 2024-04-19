@@ -2,7 +2,7 @@
 using MailKit.Security;
 using System.Text.Json.Serialization;
 
-namespace Rnwood.Smtp4dev.Server
+namespace Rnwood.Smtp4dev.Server.Settings
 {
     public class RelayOptions
     {
@@ -24,7 +24,7 @@ namespace Rnwood.Smtp4dev.Server
         public SecureSocketOptions TlsMode { get; set; } = SecureSocketOptions.Auto;
 
         public string[] AutomaticEmails { get; set; } = System.Array.Empty<string>();
-        
+
         public string AutomaticRelayExpression { get; set; }
 
         public string SenderAddress { get; set; } = "";
@@ -37,7 +37,7 @@ namespace Rnwood.Smtp4dev.Server
         public string AutomaticEmailsString
         {
             get => string.Join(",", AutomaticEmails);
-            set => this.AutomaticEmails = value.Split(',');
+            set => AutomaticEmails = value.Split(',');
         }
     }
 }
