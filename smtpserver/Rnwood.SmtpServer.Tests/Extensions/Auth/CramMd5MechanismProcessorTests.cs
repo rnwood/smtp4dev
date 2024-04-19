@@ -101,7 +101,7 @@ public class CramMd5MechanismProcessorTests : AuthMechanismTest
         Mock<ICurrentDateTimeProvider> dateMock = new();
         dateMock.Setup(d => d.GetCurrentDateTime()).Returns(new DateTime(FAKEDATETIME, DateTimeKind.Local));
 
-        mocks.ServerBehaviour.SetupGet(b => b.DomainName).Returns(FAKEDOMAIN);
+        mocks.ServerOptions.SetupGet(b => b.DomainName).Returns(FAKEDOMAIN);
 
         return new CramMd5MechanismProcessor(mocks.Connection.Object, randomMock.Object, dateMock.Object,
             challenge);

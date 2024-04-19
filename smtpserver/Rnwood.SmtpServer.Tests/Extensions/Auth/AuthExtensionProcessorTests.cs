@@ -13,7 +13,7 @@ public class AuthExtensionProcessorTests
     public async Task GetEHLOKeywords_ReturnsIdentifiers()
     {
         TestMocks mocks = new TestMocks();
-        mocks.ServerBehaviour.Setup(sb => sb.IsAuthMechanismEnabled(
+        mocks.ServerOptions.Setup(sb => sb.IsAuthMechanismEnabled(
             It.IsAny<IConnection>(),
             It.IsAny<IAuthMechanism>()
         )).Returns<IConnection, IAuthMechanism>((c, m) =>

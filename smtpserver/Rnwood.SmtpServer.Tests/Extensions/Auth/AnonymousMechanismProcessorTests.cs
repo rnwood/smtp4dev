@@ -53,7 +53,7 @@ public class AnomymousMechanismProcessorTests
         AuthMechanismProcessorStatus authMechanismProcessorStatus)
     {
         TestMocks mocks = new TestMocks();
-        mocks.ServerBehaviour.Setup(
+        mocks.ServerOptions.Setup(
                 b =>
                     b.ValidateAuthenticationCredentials(mocks.Connection.Object,
                         It.IsAny<AnonymousAuthenticationCredentials>()))

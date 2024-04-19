@@ -71,7 +71,7 @@ public class LoginMechanismProcessorTests : AuthMechanismTest
     public async Task ProcessResponse_PasswordAcceptedAfterUserNameInInitialRequest()
     {
         TestMocks mocks = new TestMocks();
-        mocks.ServerBehaviour
+        mocks.ServerOptions
             .Setup(sb =>
                 sb.ValidateAuthenticationCredentials(It.IsAny<IConnection>(),
                     It.IsAny<IAuthenticationCredentials>())).Returns(Task.FromResult(AuthenticationResult.Success));

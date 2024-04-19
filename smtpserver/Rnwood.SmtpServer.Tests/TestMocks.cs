@@ -28,36 +28,36 @@ public class TestMocks
         ConnectionChannel = new Mock<IConnectionChannel>(MockBehavior.Strict);
         Session = new Mock<MemorySession>(IPAddress.Loopback, DateTime.Now) { CallBase = true };
         Server = new Mock<ISmtpServer>(MockBehavior.Strict);
-        ServerBehaviour = new Mock<IServerBehaviour>(MockBehavior.Strict);
+        ServerOptions = new Mock<IServerOptions>(MockBehavior.Strict);
         MessageBuilder = new Mock<MemoryMessageBuilder> { CallBase = true };
         VerbMap = new Mock<VerbMap> { CallBase = true };
 
-        ServerBehaviour.Setup(
+        ServerOptions.Setup(
             sb => sb.OnCreateNewSession(It.IsAny<IConnectionChannel>())).ReturnsAsync(Session.Object);
-        ServerBehaviour.Setup(s => s.FallbackEncoding).Returns(Encoding.GetEncoding("iso-8859-1"));
-        ServerBehaviour.Setup(sb => sb.OnCreateNewMessage(It.IsAny<IConnection>()))
+        ServerOptions.Setup(s => s.FallbackEncoding).Returns(Encoding.GetEncoding("iso-8859-1"));
+        ServerOptions.Setup(sb => sb.OnCreateNewMessage(It.IsAny<IConnection>()))
             .ReturnsAsync(MessageBuilder.Object);
-        ServerBehaviour.Setup(sb => sb.GetExtensions(It.IsAny<IConnectionChannel>()))
+        ServerOptions.Setup(sb => sb.GetExtensions(It.IsAny<IConnectionChannel>()))
             .ReturnsAsync(new IExtension[0]);
-        ServerBehaviour.Setup(sb => sb.OnSessionCompleted(It.IsAny<IConnection>(), It.IsAny<ISession>()))
+        ServerOptions.Setup(sb => sb.OnSessionCompleted(It.IsAny<IConnection>(), It.IsAny<ISession>()))
             .Returns(Task.CompletedTask);
-        ServerBehaviour.SetupGet(sb => sb.DomainName).Returns("tests");
-        ServerBehaviour.Setup(sb => sb.IsSSLEnabled(It.IsAny<IConnection>())).Returns(Task.FromResult(false));
-        ServerBehaviour.Setup(sb => sb.OnSessionStarted(It.IsAny<IConnection>(), It.IsAny<ISession>()))
+        ServerOptions.SetupGet(sb => sb.DomainName).Returns("tests");
+        ServerOptions.Setup(sb => sb.IsSSLEnabled(It.IsAny<IConnection>())).Returns(Task.FromResult(false));
+        ServerOptions.Setup(sb => sb.OnSessionStarted(It.IsAny<IConnection>(), It.IsAny<ISession>()))
             .Returns(Task.CompletedTask);
-        ServerBehaviour
+        ServerOptions
             .Setup(sb =>
                 sb.OnMessageRecipientAdding(It.IsAny<IConnection>(), It.IsAny<IMessageBuilder>(),
                     It.IsAny<string>())).Returns(Task.CompletedTask);
-        ServerBehaviour.Setup(sb => sb.OnMessageStart(It.IsAny<IConnection>(), It.IsAny<string>()))
+        ServerOptions.Setup(sb => sb.OnMessageStart(It.IsAny<IConnection>(), It.IsAny<string>()))
             .Returns(Task.CompletedTask);
-        ServerBehaviour.Setup(sb => sb.OnMessageReceived(It.IsAny<IConnection>(), It.IsAny<IMessage>()))
+        ServerOptions.Setup(sb => sb.OnMessageReceived(It.IsAny<IConnection>(), It.IsAny<IMessage>()))
             .Returns(Task.CompletedTask);
-        ServerBehaviour.Setup(sb => sb.OnMessageCompleted(It.IsAny<IConnection>())).Returns(Task.CompletedTask);
-        ServerBehaviour.Setup(sb => sb.OnCommandReceived(It.IsAny<IConnection>(), It.IsAny<SmtpCommand>()))
+        ServerOptions.Setup(sb => sb.OnMessageCompleted(It.IsAny<IConnection>())).Returns(Task.CompletedTask);
+        ServerOptions.Setup(sb => sb.OnCommandReceived(It.IsAny<IConnection>(), It.IsAny<SmtpCommand>()))
             .Returns(Task.CompletedTask);
-        ServerBehaviour.SetupGet(sb => sb.MaximumNumberOfSequentialBadCommands).Returns(0);
-        ServerBehaviour
+        ServerOptions.SetupGet(sb => sb.MaximumNumberOfSequentialBadCommands).Returns(0);
+        ServerOptions
             .Setup(sb =>
                 sb.ValidateAuthenticationCredentials(It.IsAny<IConnection>(),
                     It.IsAny<IAuthenticationCredentials>())).Returns(Task.FromResult(AuthenticationResult.Failure));
@@ -72,7 +72,7 @@ public class TestMocks
         Connection.Setup(c => c.CommitMessage()).Returns(Task.CompletedTask);
         Connection.Setup(c => c.AbortMessage()).Returns(Task.CompletedTask);
 
-        Server.SetupGet(s => s.Behaviour).Returns(ServerBehaviour.Object);
+        Server.SetupGet(s => s.Options).Returns(ServerOptions.Object);
 
         bool isConnected = true;
         ConnectionChannel.Setup(s => s.IsConnected).Returns(() => isConnected);
@@ -103,9 +103,9 @@ public class TestMocks
     public Mock<ISmtpServer> Server { get; }
 
     /// <summary>
-    ///     Gets the ServerBehaviour
+    ///     Gets the ServerOptions
     /// </summary>
-    public Mock<IServerBehaviour> ServerBehaviour { get; }
+    public Mock<IServerOptions> ServerOptions { get; }
 
     /// <summary>
     ///     Gets the Session

@@ -1,4 +1,4 @@
-﻿// <copyright file="DefaultServerBehaviour.cs" company="Rnwood.SmtpServer project contributors">
+﻿// <copyright file="SmtpServerOptions.cs" company="Rnwood.SmtpServer project contributors">
 // Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -16,72 +16,80 @@ using Rnwood.SmtpServer.Extensions.Auth;
 namespace Rnwood.SmtpServer;
 
 /// <summary>
-///     Implements a default <see cref="IServerBehaviour" /> which is suitable for many basic uses.
+///     Implements a default <see cref="IServerOptions" /> which is suitable for many basic uses.
 /// </summary>
-/// <seealso cref="Rnwood.SmtpServer.IServerBehaviour" />
-public class DefaultServerBehaviour : IServerBehaviour
+/// <seealso cref="Rnwood.SmtpServer.IServerOptions" />
+public class ServerOptions : IServerOptions
 {
     private readonly bool allowRemoteConnections;
+    private readonly bool enableIpV6;
 
     private readonly X509Certificate implcitTlsCertificate;
     private readonly X509Certificate startTlsCertificate;
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    ///     Initializes a new instance of the <see cref="ServerOptions" /> class.
     /// </summary>
     /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-    public DefaultServerBehaviour(bool allowRemoteConnections)
-        : this(allowRemoteConnections, 25, null, null)
+    /// <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
+    public ServerOptions(bool allowRemoteConnections, bool enableIpV6)
+        : this(allowRemoteConnections, enableIpV6, 25, null, null)
     {
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    ///     Initializes a new instance of the <see cref="ServerOptions" /> class.
     /// </summary>
     /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+    /// <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
     /// <param name="portNumber">The port number.</param>
-    public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber)
-        : this(allowRemoteConnections, portNumber, null, null)
+    public ServerOptions(bool allowRemoteConnections, bool enableIpV6, int portNumber)
+        : this(allowRemoteConnections, enableIpV6, portNumber, null, null)
     {
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    ///     Initializes a new instance of the <see cref="ServerOptions" /> class.
     /// </summary>
     /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+    /// <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
     /// <param name="portNumber">The port number.</param>
     /// <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-    public DefaultServerBehaviour(bool allowRemoteConnections, int portNumber, X509Certificate implicitTlsCertificate)
-        : this(allowRemoteConnections, portNumber, implicitTlsCertificate, null)
+    public ServerOptions(bool allowRemoteConnections, bool enableIpV6, int portNumber, X509Certificate implicitTlsCertificate)
+        : this(allowRemoteConnections, enableIpV6, portNumber, implicitTlsCertificate, null)
     {
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    ///     Initializes a new instance of the <see cref="ServerOptions" /> class.
     /// </summary>
     /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+    /// <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
     /// <param name="portNumber">The port number.</param>
     /// <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
     /// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
-    public DefaultServerBehaviour(
+    public ServerOptions(
         bool allowRemoteConnections,
+        bool enableIpV6,
         int portNumber,
         X509Certificate implicitTlsCertificate,
         X509Certificate startTlsCertificate)
-        : this(allowRemoteConnections, Dns.GetHostName(), portNumber, implicitTlsCertificate, startTlsCertificate)
+        : this(allowRemoteConnections, enableIpV6, Dns.GetHostName(), portNumber, implicitTlsCertificate, startTlsCertificate)
     {
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    ///     Initializes a new instance of the <see cref="ServerOptions" /> class.
     /// </summary>
     /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+    /// <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
     /// <param name="domainName">The domain name the server will send in greeting.</param>
     /// <param name="portNumber">The port number.</param>
     /// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
     /// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
-    public DefaultServerBehaviour(
+    public ServerOptions(
         bool allowRemoteConnections,
+        bool enableIpV6,
         string domainName,
         int portNumber,
         X509Certificate implcitTlsCertificate,
@@ -92,15 +100,17 @@ public class DefaultServerBehaviour : IServerBehaviour
         this.implcitTlsCertificate = implcitTlsCertificate;
         this.startTlsCertificate = startTlsCertificate;
         this.allowRemoteConnections = allowRemoteConnections;
+        this.enableIpV6 = enableIpV6;
     }
 
     /// <summary>
-    ///     Initializes a new instance of the <see cref="DefaultServerBehaviour" /> class.
+    ///     Initializes a new instance of the <see cref="ServerOptions" /> class.
     /// </summary>
     /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+    /// <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
     /// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-    public DefaultServerBehaviour(bool allowRemoteConnections, X509Certificate implcitTlsCertificate)
-        : this(allowRemoteConnections, 587, implcitTlsCertificate, null)
+    public ServerOptions(bool allowRemoteConnections, bool enableIpV6, X509Certificate implcitTlsCertificate)
+        : this(allowRemoteConnections, enableIpV6, 587, implcitTlsCertificate, null)
     {
     }
 
@@ -114,7 +124,20 @@ public class DefaultServerBehaviour : IServerBehaviour
     public virtual string DomainName { get; }
 
     /// <inheritdoc />
-    public virtual IPAddress IpAddress => allowRemoteConnections ? IPAddress.Any : IPAddress.Loopback;
+    public virtual IPAddress IpAddress
+    {
+        get
+        {
+
+            if (this.enableIpV6)
+            {
+                return allowRemoteConnections ?
+            IPAddress.IPv6Any : IPAddress.IPv6Loopback;
+            }
+
+            return allowRemoteConnections ? IPAddress.Any : IPAddress.Loopback;
+        }
+    }
 
     /// <inheritdoc />
     public int MaximumNumberOfSequentialBadCommands => 10;
@@ -124,6 +147,7 @@ public class DefaultServerBehaviour : IServerBehaviour
 
     /// <inheritdoc />
     public virtual Encoding FallbackEncoding => Encoding.GetEncoding("iso-8859-1");
+
 
     /// <inheritdoc />
     public virtual Task<IEnumerable<IExtension>> GetExtensions(IConnectionChannel connectionChannel)
@@ -281,4 +305,7 @@ public class DefaultServerBehaviour : IServerBehaviour
     ///     Occurs when a new message is started.
     /// </summary>
     public event AsyncEventHandler<MessageStartEventArgs> MessageStartEventHandler;
+
+
+
 }

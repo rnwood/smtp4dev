@@ -65,7 +65,7 @@ public class LoginMechanismProcessor : AuthMechanismProcessor
                 Credentials = new LoginAuthenticationCredentials(username, password);
 
                 AuthenticationResult result =
-                    await Connection.Server.Behaviour.ValidateAuthenticationCredentials(
+                    await Connection.Server.Options.ValidateAuthenticationCredentials(
                         Connection,
                         Credentials).ConfigureAwait(false);
 

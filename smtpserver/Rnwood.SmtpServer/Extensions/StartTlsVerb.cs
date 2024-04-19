@@ -22,7 +22,7 @@ public class StartTlsVerb : IVerb
     public async Task Process(IConnection connection, SmtpCommand command)
     {
         X509Certificate certificate =
-            await connection.Server.Behaviour.GetSSLCertificate(connection).ConfigureAwait(false);
+            await connection.Server.Options.GetSSLCertificate(connection).ConfigureAwait(false);
 
         if (certificate == null)
         {

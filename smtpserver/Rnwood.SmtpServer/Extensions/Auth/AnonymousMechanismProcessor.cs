@@ -35,7 +35,7 @@ public class AnonymousMechanismProcessor : IAuthMechanismProcessor
         Credentials = new AnonymousAuthenticationCredentials();
 
         AuthenticationResult result =
-            await Connection.Server.Behaviour.ValidateAuthenticationCredentials(Connection, Credentials)
+            await Connection.Server.Options.ValidateAuthenticationCredentials(Connection, Credentials)
                 .ConfigureAwait(false);
 
         switch (result)

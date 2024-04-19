@@ -95,13 +95,13 @@ public class Connection : IConnection
         await Session.AddMessage(message).ConfigureAwait(false);
         CurrentMessage = null;
 
-        await Server.Behaviour.OnMessageReceived(this, message).ConfigureAwait(false);
+        await Server.Options.OnMessageReceived(this, message).ConfigureAwait(false);
     }
 
     /// <inheritdoc />
     public async Task<IMessageBuilder> NewMessage()
     {
-        CurrentMessage = await Server.Behaviour.OnCreateNewMessage(this).ConfigureAwait(false);
+        CurrentMessage = await Server.Options.OnCreateNewMessage(this).ConfigureAwait(false);
         CurrentMessage.Session = Session;
         return CurrentMessage;
     }
@@ -146,9 +146,9 @@ public class Connection : IConnection
     internal static async Task<Connection> Create(ISmtpServer server, IConnectionChannel connectionChannel,
         IVerbMap verbMap)
     {
-        IEditableSession session = await server.Behaviour.OnCreateNewSession(connectionChannel).ConfigureAwait(false);
+        IEditableSession session = await server.Options.OnCreateNewSession(connectionChannel).ConfigureAwait(false);
         IEnumerable<IExtension> extensions =
-            await server.Behaviour.GetExtensions(connectionChannel).ConfigureAwait(false);
+            await server.Options.GetExtensions(connectionChannel).ConfigureAwait(false);
 
         IExtensionProcessor[] CreateConnectionExtensions(IConnection c)
         {
@@ -182,7 +182,7 @@ public class Connection : IConnection
         }
 
         X509Certificate cert =
-            await Server.Behaviour.GetSSLCertificate(this).ConfigureAwait(false);
+            await Server.Options.GetSSLCertificate(this).ConfigureAwait(false);
 
         await sslStream.AuthenticateAsServerAsync(cert, false, sslProtos, false).ConfigureAwait(false);
         return sslStream;
@@ -196,9 +196,9 @@ public class Connection : IConnection
     {
         try
         {
-            await Server.Behaviour.OnSessionStarted(this, Session).ConfigureAwait(false);
+            await Server.Options.OnSessionStarted(this, Session).ConfigureAwait(false);
 
-            if (await Server.Behaviour.IsSSLEnabled(this).ConfigureAwait(false))
+            if (await Server.Options.IsSSLEnabled(this).ConfigureAwait(false))
             {
                 await ConnectionChannel.ApplyStreamFilter(StartImplicitTls).ConfigureAwait(false);
 
@@ -207,7 +207,7 @@ public class Connection : IConnection
 
             await WriteResponse(new SmtpResponse(
                 StandardSmtpResponseCode.ServiceReady,
-                Server.Behaviour.DomainName + " smtp4dev ready")).ConfigureAwait(false);
+                Server.Options.DomainName + " smtp4dev ready")).ConfigureAwait(false);
 
             while (ConnectionChannel.IsConnected)
             {
@@ -230,14 +230,14 @@ public class Connection : IConnection
         await CloseConnection().ConfigureAwait(false);
 
         Session.EndDate = DateTime.Now;
-        await Server.Behaviour.OnSessionCompleted(this, Session).ConfigureAwait(false);
+        await Server.Options.OnSessionCompleted(this, Session).ConfigureAwait(false);
     }
 
     private async Task ReadAndProcessNextCommand()
     {
         bool badCommand = false;
         SmtpCommand command = new SmtpCommand(await ReadLine().ConfigureAwait(false));
-        await Server.Behaviour.OnCommandReceived(this, command).ConfigureAwait(false);
+        await Server.Options.OnCommandReceived(this, command).ConfigureAwait(false);
 
         if (command.IsValid)
         {
@@ -252,8 +252,8 @@ public class Connection : IConnection
         {
             await Session.IncrementBadCommandCounter().ConfigureAwait(false);
 
-            if (Server.Behaviour.MaximumNumberOfSequentialBadCommands > 0 &&
-                Session.NumberOfBadCommandsInARow >= Server.Behaviour.MaximumNumberOfSequentialBadCommands)
+            if (Server.Options.MaximumNumberOfSequentialBadCommands > 0 &&
+                Session.NumberOfBadCommandsInARow >= Server.Options.MaximumNumberOfSequentialBadCommands)
             {
                 await WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel,
                     "Too many bad commands. Bye!")).ConfigureAwait(false);

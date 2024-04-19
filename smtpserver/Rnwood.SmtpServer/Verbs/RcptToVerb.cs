@@ -38,7 +38,7 @@ public class RcptToVerb : IVerb
         }
 
         string address = command.ArgumentsText.Remove(0, 1).Remove(command.ArgumentsText.Length - 2);
-        await connection.Server.Behaviour.OnMessageRecipientAdding(connection, connection.CurrentMessage, address)
+        await connection.Server.Options.OnMessageRecipientAdding(connection, connection.CurrentMessage, address)
             .ConfigureAwait(false);
         connection.CurrentMessage.Recipients.Add(address);
         await connection.WriteResponse(new SmtpResponse(StandardSmtpResponseCode.OK, "Recipient accepted"))

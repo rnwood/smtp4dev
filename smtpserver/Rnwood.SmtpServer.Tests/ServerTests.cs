@@ -4,6 +4,8 @@
 // </copyright>
 
 using System;
+using System.Linq;
+using System.Net;
 using System.Net.Sockets;
 using System.Threading.Tasks;
 using Xunit;
@@ -16,16 +18,39 @@ namespace Rnwood.SmtpServer.Tests;
 public class ServerTests
 {
     /// <summary>
-    ///     The Start_CanConnect
+    ///     Tests that when running, can connect in all the various combinations of allow remote and IPV6 vs IPV4
     /// </summary>
-    [Fact]
-    public async Task Start_CanConnect()
+    [Theory]
+    [InlineData(true, true, false, false)]
+    [InlineData(true, true, true, false)]
+    [InlineData(true, true, true, true)]
+    [InlineData(true, false, false, false)]
+    [InlineData(true, false, true, false)]
+    [InlineData(true, false, true, true)]
+
+    [InlineData(false, false, false, false)]
+    [InlineData(false, false, true, false)]
+    [InlineData(false, false, true, true)]
+    public async Task Start_CanConnect(bool allowRemoteConnections, bool testRemoteConnection, bool enableIpV6, bool testIpV6)
     {
-        using (SmtpServer server = StartServer())
+
+        using (SmtpServer server = StartServer(allowRemoteConnections, enableIpV6))
         {
-            using (TcpClient client = new TcpClient())
+            IPAddress ipAddress;
+            if (allowRemoteConnections)
             {
-                await client.ConnectAsync("localhost", server.PortNumber);
+                ipAddress = (enableIpV6 ? IPAddress.IPv6Any : IPAddress.Any);
+            }
+            else
+            {
+
+                ipAddress = (testIpV6 ? IPAddress.IPv6Loopback : IPAddress.Loopback);
+            }
+
+            int port = server.ListeningEndpoints.Single(p => p.Address.ToString() == ipAddress.ToString()).Port;
+            using (TcpClient client = new TcpClient(testIpV6 ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork))
+            { 
+                await client.ConnectAsync(testRemoteConnection ? Dns.GetHostName() : "localhost", port);
                 Assert.True(client.Connected);
             }
 
@@ -33,6 +58,39 @@ public class ServerTests
         }
 
     }
+
+    [Theory]
+    [InlineData(false, true, false, false)]
+    [InlineData(false, true, true, false)]
+    [InlineData(false, true, true, true)]
+    public async Task Start_CanNotConnect(bool allowRemoteConnections, bool testRemoteConnection, bool enableIpV6, bool testIpV6)
+    {
+
+        using (SmtpServer server = StartServer(allowRemoteConnections, enableIpV6))
+        {
+            IPAddress ipAddress;
+            if (allowRemoteConnections)
+            {
+                ipAddress = (enableIpV6 ? IPAddress.IPv6Any : IPAddress.Any);
+            }
+            else
+            {
+
+                ipAddress = (testIpV6 ? IPAddress.IPv6Loopback : IPAddress.Loopback);
+            }
+
+            int port = server.ListeningEndpoints.Single(p => p.Address.ToString() == ipAddress.ToString()).Port;
+            using (TcpClient client = new TcpClient(testIpV6 ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork))
+            {
+                await Assert.ThrowsAsync<SocketException>(async () => { await client.ConnectAsync(testRemoteConnection ? Dns.GetHostName() : "localhost", port); });   
+            }
+
+            server.Stop();
+        }
+
+    }
+
+
 
     /// <summary>
     ///     The Start_IsRunning
@@ -50,9 +108,9 @@ public class ServerTests
     [Fact]
     public void StartOnAutomaticPort_PortNumberReturned()
     {
-        SmtpServer server = new DefaultServer(false, StandardSmtpPort.AssignAutomatically);
+        SmtpServer server = new SmtpServer(new ServerOptions(false, false, (int)StandardSmtpPort.AssignAutomatically));
         server.Start();
-        Assert.NotEqual(0, server.PortNumber);
+        Assert.NotEqual(0, server.ListeningEndpoints.First().Port);
     }
 
     /// <summary>
@@ -66,11 +124,11 @@ public class ServerTests
         //all the connections.
         Skip.IfNot(Environment.OSVersion.Platform == PlatformID.Win32NT);
 
-        using (SmtpServer server1 = new DefaultServer(false, StandardSmtpPort.AssignAutomatically))
+        using (SmtpServer server1 = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, (int)StandardSmtpPort.AssignAutomatically)))
         {
             server1.Start();
 
-            using (SmtpServer server2 = new DefaultServer(false, server1.PortNumber))
+            using (SmtpServer server2 = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, server1.ListeningEndpoints.First().Port)))
             {
                 Assert.Throws<SocketException>(() => { server2.Start(); });
             }
@@ -86,7 +144,7 @@ public class ServerTests
     {
         using (SmtpServer server = StartServer())
         {
-            int portNumber = server.PortNumber;
+            int portNumber = server.ListeningEndpoints.First().Port;
             server.Stop();
 
             using TcpClient client = new TcpClient();
@@ -119,7 +177,7 @@ public class ServerTests
 
         using (TcpClient client = new TcpClient())
         {
-            await client.ConnectAsync("localhost", server.PortNumber).WithTimeout("waiting for client to connect")
+            await client.ConnectAsync("localhost", server.ListeningEndpoints.First().Port).WithTimeout("waiting for client to connect")
                 ;
             await serverTask.WithTimeout(30, "waiting for server task to complete");
         }
@@ -144,7 +202,7 @@ public class ServerTests
         });
 
         using TcpClient client = new TcpClient();
-        await client.ConnectAsync("localhost", server.PortNumber)
+        await client.ConnectAsync("localhost", server.ListeningEndpoints.First().Port)
             .WithTimeout("waiting for client to connect");
         await serverTask.WithTimeout(30, "waiting for server task to complete");
     }
@@ -165,14 +223,14 @@ public class ServerTests
     /// <summary>
     /// </summary>
     /// <returns>The <see cref="SmtpServer" /></returns>
-    private SmtpServer NewServer() => new DefaultServer(false, StandardSmtpPort.AssignAutomatically);
+    private SmtpServer NewServer(bool allowRemoteConnections, bool allowIpV6) => new SmtpServer(new Rnwood.SmtpServer.ServerOptions(allowRemoteConnections, allowIpV6, (int)StandardSmtpPort.AssignAutomatically));
 
     /// <summary>
     /// </summary>
     /// <returns>The <see cref="SmtpServer" /></returns>
-    private SmtpServer StartServer()
+    private SmtpServer StartServer(bool allowRemoteConnections = false, bool allowIpV6 = true)
     {
-        SmtpServer server = NewServer();
+        SmtpServer server = NewServer(allowRemoteConnections, allowIpV6);
         server.Start();
         return server;
     }

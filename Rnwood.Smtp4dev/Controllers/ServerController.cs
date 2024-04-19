@@ -69,7 +69,8 @@ namespace Rnwood.Smtp4dev.Controllers
                 SecureConnectionRequired = serverOptions.CurrentValue.SecureConnectionRequired,
                 CredentialsValidationExpression = serverOptions.CurrentValue.CredentialsValidationExpression,
                 RecipientValidationExpression = serverOptions.CurrentValue.RecipientValidationExpression,
-                MessageValidationExpression = serverOptions.CurrentValue.MessageValidationExpression
+                MessageValidationExpression = serverOptions.CurrentValue.MessageValidationExpression,
+                DisableIPv6 = serverOptions.CurrentValue.DisableIPv6
             };
         }
 
@@ -79,7 +80,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// Settings can not be updated if disabled in smtp4dev settings or if the settings file is not writable.
         /// <param name="serverUpdate"></param>
         [HttpPost]
-        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description="If settions were successfully updated and state changes initiated (not not applied synchronously and can fail).")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description="If settings were successfully updated and state changes initiated (not not applied synchronously and can fail).")]
         [SwaggerResponse( System.Net.HttpStatusCode.Forbidden, typeof(void), Description = "If settings are not editable")]
         public ActionResult UpdateServer(ApiModel.Server serverUpdate)
         {
@@ -103,6 +104,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.CredentialsValidationExpression = serverUpdate.CredentialsValidationExpression;
             newSettings.RecipientValidationExpression = serverUpdate.RecipientValidationExpression;
             newSettings.MessageValidationExpression = serverUpdate.MessageValidationExpression;
+            newSettings.DisableIPv6 = serverUpdate.DisableIPv6;
 
             newRelaySettings.SmtpServer = serverUpdate.RelayOptions.SmtpServer;
             newRelaySettings.SmtpPort = serverUpdate.RelayOptions.SmtpPort;

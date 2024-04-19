@@ -54,6 +54,11 @@ public abstract class AuthMechanismProcessor : IAuthMechanismProcessor
         }
     }
 
+    /// <summary>
+    /// Base64 encodes the provided values using ASCII encoding
+    /// </summary>
+    /// <param name="asciiString"></param>
+    /// <returns></returns>
     protected static string EncodeBase64(string asciiString) =>
         Convert.ToBase64String(Encoding.ASCII.GetBytes(asciiString));
 }

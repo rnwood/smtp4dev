@@ -37,5 +37,6 @@ namespace Rnwood.Smtp4dev.Server
         public string RecipientValidationExpression { get; set; }
 
         public string MessageValidationExpression { get; set; }
+        public bool DisableIPv6 { get; set; } = false;
     }
 }
