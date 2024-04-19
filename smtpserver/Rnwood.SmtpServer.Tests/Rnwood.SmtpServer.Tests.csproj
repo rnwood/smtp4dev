@@ -24,10 +24,10 @@
     <PackageReference Include="FluentAssertions" Version="6.12.0"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0"/>
     <PackageReference Include="NETStandard.Library" Version="2.0.3"/>
-    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.7"/>
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.8"/>
     <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0"/>
     <PackageReference Include="System.Net.Security" Version="4.3.2"/>
-    <PackageReference Include="xunit" Version="2.7.0"/>
+    <PackageReference Include="xunit" Version="2.7.1"/>
     <PackageReference Include="Moq" Version="4.20.70"/>
     <PackageReference Include="MailKit" Version="2.5.2"/>
     <PackageReference Include="Xunit.SkippableFact" Version="1.4.13"/>
