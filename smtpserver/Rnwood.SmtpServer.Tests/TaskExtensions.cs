@@ -28,7 +28,7 @@ public static class TaskExtensions
             return;
         }
 
-        Task completedTask = await Task.WhenAny(task, Task.Delay(seconds * 1000)).ConfigureAwait(false);
+        Task completedTask = await Task.WhenAny(task, Task.Delay(seconds * 1000));
 
         if (completedTask != task)
         {
@@ -42,5 +42,5 @@ public static class TaskExtensions
     /// <param name="descriptionOfTask">The descriptionOfTask<see cref="string" /></param>
     /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
     public static async Task WithTimeout(this Task task, string descriptionOfTask) =>
-        await WithTimeout(task, 10, descriptionOfTask).ConfigureAwait(false);
+        await WithTimeout(task, 10, descriptionOfTask);
 }

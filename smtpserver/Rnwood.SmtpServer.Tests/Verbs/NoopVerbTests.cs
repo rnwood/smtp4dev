@@ -23,7 +23,7 @@ public class NoopVerbTests
         TestMocks mocks = new TestMocks();
 
         NoopVerb verb = new NoopVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("NOOP")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("NOOP"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
     }

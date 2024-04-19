@@ -30,7 +30,7 @@ public class DefaultServerBehaviourTests
         DefaultServerBehaviour defaultServerBehaviour = new DefaultServerBehaviour(true);
         defaultServerBehaviour.EnabledAuthMechanisms.Should().NotBeNull();
         bool enabled = await defaultServerBehaviour.IsAuthMechanismEnabled(connectionMock.Object, authMechanism)
-            .ConfigureAwait(false);
+            ;
         enabled.Should().BeTrue();
     }
 
@@ -45,7 +45,7 @@ public class DefaultServerBehaviourTests
         defaultServerBehaviour.EnabledAuthMechanisms.Add(enabledMechanism);
 
         bool enabled = await defaultServerBehaviour.IsAuthMechanismEnabled(connectionMock.Object, authMechanism)
-            .ConfigureAwait(false);
+            ;
         if (authMechanism.Identifier == enabledMechanism.Identifier)
         {
             enabled.Should().BeTrue();

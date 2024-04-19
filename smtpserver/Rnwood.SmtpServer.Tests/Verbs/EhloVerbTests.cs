@@ -24,7 +24,7 @@ public class EhloVerbTests
     {
         TestMocks mocks = new TestMocks();
         EhloVerb ehloVerb = new EhloVerb();
-        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO")).ConfigureAwait(false);
+        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO"));
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
 
         mocks.Session.VerifySet(s => s.ClientName = "");
@@ -39,7 +39,7 @@ public class EhloVerbTests
     {
         TestMocks mocks = new TestMocks();
         EhloVerb ehloVerb = new EhloVerb();
-        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar")).ConfigureAwait(false);
+        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar"));
 
         mocks.Session.VerifySet(s => s.ClientName = "foobar");
     }
@@ -63,7 +63,7 @@ public class EhloVerbTests
         });
 
         EhloVerb ehloVerb = new EhloVerb();
-        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar")).ConfigureAwait(false);
+        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
     }
@@ -87,7 +87,7 @@ public class EhloVerbTests
         });
 
         EhloVerb ehloVerb = new EhloVerb();
-        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar")).ConfigureAwait(false);
+        await ehloVerb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foobar"));
 
         mocks.Connection.Verify(c => c.WriteResponse(It.Is<SmtpResponse>(r =>
             r.Message.Contains("EXTN1") &&
@@ -107,8 +107,8 @@ public class EhloVerbTests
 
 
         EhloVerb verb = new EhloVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foo.blah")).ConfigureAwait(false);
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foo.blah")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foo.blah"));
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("EHLO foo.blah"));
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK, Times.Exactly(2));
     }
 }

@@ -28,7 +28,7 @@ public class StartTlsVerbTests
             .ReturnsAsync((X509Certificate)null);
 
         StartTlsVerb verb = new StartTlsVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("STARTTLS")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("STARTTLS"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.CommandNotImplemented);
     }

@@ -44,8 +44,8 @@ public class CramMd5MechanismProcessorTests : AuthMechanismTest
             string challenge = string.Format("{0}.{1}@{2}", FAKERANDOM, FAKEDATETIME, FAKEDOMAIN);
 
             CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks, challenge);
-            await cramMd5MechanismProcessor.ProcessResponse("BLAH").ConfigureAwait(false);
-        }).ConfigureAwait(false);
+            await cramMd5MechanismProcessor.ProcessResponse("BLAH");
+        });
 
     /// <summary>
     ///     The ProcessRepsonse_GetChallenge
@@ -58,7 +58,7 @@ public class CramMd5MechanismProcessorTests : AuthMechanismTest
 
         CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks);
         AuthMechanismProcessorStatus result =
-            await cramMd5MechanismProcessor.ProcessResponse(null).ConfigureAwait(false);
+            await cramMd5MechanismProcessor.ProcessResponse(null);
 
         string expectedResponse = string.Format("{0}.{1}@{2}", FAKERANDOM, FAKEDATETIME, FAKEDOMAIN);
 
@@ -84,9 +84,9 @@ public class CramMd5MechanismProcessorTests : AuthMechanismTest
             TestMocks mocks = new();
 
             CramMd5MechanismProcessor cramMd5MechanismProcessor = Setup(mocks);
-            await cramMd5MechanismProcessor.ProcessResponse(null).ConfigureAwait(false);
-            await cramMd5MechanismProcessor.ProcessResponse("rob blah").ConfigureAwait(false);
-        }).ConfigureAwait(false);
+            await cramMd5MechanismProcessor.ProcessResponse(null);
+            await cramMd5MechanismProcessor.ProcessResponse("rob blah");
+        });
 
     /// <summary>
     /// </summary>

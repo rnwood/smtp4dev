@@ -43,13 +43,13 @@ public abstract class MessageBuilderTests
         byte[] writtenBytes = new byte[64 * 1024];
         new Random().NextBytes(writtenBytes);
 
-        using (Stream stream = await builder.WriteData().ConfigureAwait(false))
+        using (Stream stream = await builder.WriteData())
         {
             stream.Write(writtenBytes, 0, writtenBytes.Length);
         }
 
         byte[] readBytes;
-        using (Stream stream = await builder.GetData().ConfigureAwait(false))
+        using (Stream stream = await builder.GetData())
         {
             readBytes = new byte[stream.Length];
             stream.Read(readBytes, 0, readBytes.Length);

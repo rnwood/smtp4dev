@@ -27,10 +27,10 @@ public class ConnectionTests
 
         Connection connection = await Connection
             .Create(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object)
-            .ConfigureAwait(false);
-        await connection.NewMessage().ConfigureAwait(false);
+            ;
+        await connection.NewMessage();
 
-        await connection.AbortMessage().ConfigureAwait(false);
+        await connection.AbortMessage();
         Assert.Null(connection.CurrentMessage);
     }
 
@@ -44,11 +44,11 @@ public class ConnectionTests
 
         Connection connection = await Connection
             .Create(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object)
-            .ConfigureAwait(false);
-        IMessageBuilder messageBuilder = await connection.NewMessage().ConfigureAwait(false);
-        IMessage message = await messageBuilder.ToMessage().ConfigureAwait(false);
+            ;
+        IMessageBuilder messageBuilder = await connection.NewMessage();
+        IMessage message = await messageBuilder.ToMessage();
 
-        await connection.CommitMessage().ConfigureAwait(false);
+        await connection.CommitMessage();
         mocks.Session.Verify(s => s.AddMessage(message));
         mocks.ServerBehaviour.Verify(b => b.OnMessageReceived(connection, message));
         Assert.Null(connection.CurrentMessage);
@@ -67,8 +67,8 @@ public class ConnectionTests
 
         Connection connection = await Connection
             .Create(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object)
-            .ConfigureAwait(false);
-        await connection.ProcessAsync().ConfigureAwait(false);
+            ;
+        await connection.ProcessAsync();
 
         mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.IsRegex("500 .*", RegexOptions.IgnoreCase)));
     }
@@ -87,8 +87,8 @@ public class ConnectionTests
 
         Connection connection = await Connection
             .Create(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object)
-            .ConfigureAwait(false);
-        await connection.ProcessAsync().ConfigureAwait(false);
+            ;
+        await connection.ProcessAsync();
 
         // Should only print service ready message
         mocks.ConnectionChannel.Verify(
@@ -112,8 +112,8 @@ public class ConnectionTests
 
         Connection connection = await Connection
             .Create(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object)
-            .ConfigureAwait(false);
-        await connection.ProcessAsync().ConfigureAwait(false);
+            ;
+        await connection.ProcessAsync();
 
         mockVerb.Verify(v => v.Process(It.IsAny<IConnection>(), It.IsAny<SmtpCommand>()));
     }
@@ -131,8 +131,8 @@ public class ConnectionTests
 
         Connection connection = await Connection
             .Create(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object)
-            .ConfigureAwait(false);
-        await connection.ProcessAsync().ConfigureAwait(false);
+            ;
+        await connection.ProcessAsync();
 
         mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.IsRegex("220 .*", RegexOptions.IgnoreCase)));
     }
@@ -155,8 +155,8 @@ public class ConnectionTests
 
         Connection connection = await Connection
             .Create(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object)
-            .ConfigureAwait(false);
-        await connection.ProcessAsync().ConfigureAwait(false);
+            ;
+        await connection.ProcessAsync();
 
         mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.IsRegex("500 error", RegexOptions.IgnoreCase)));
     }
@@ -175,8 +175,8 @@ public class ConnectionTests
 
         Connection connection = await Connection
             .Create(mocks.Server.Object, mocks.ConnectionChannel.Object, mocks.VerbMap.Object)
-            .ConfigureAwait(false);
-        await connection.ProcessAsync().ConfigureAwait(false);
+            ;
+        await connection.ProcessAsync();
 
         mocks.ConnectionChannel.Verify(c => c.ReadLine(), Times.Exactly(2));
         mocks.ConnectionChannel.Verify(cc => cc.WriteLine(It.IsRegex("221 .*", RegexOptions.IgnoreCase)));

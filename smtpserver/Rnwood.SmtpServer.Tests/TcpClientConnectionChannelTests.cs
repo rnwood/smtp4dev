@@ -32,17 +32,17 @@ public class TcpClientConnectionChannelTests
 
             TcpClient client = new TcpClient();
             await client.ConnectAsync(IPAddress.Loopback, ((IPEndPoint)listener.LocalEndpoint).Port)
-                .ConfigureAwait(false);
+                ;
 
-            using (TcpClient serverTcpClient = await acceptTask.ConfigureAwait(false))
+            using (TcpClient serverTcpClient = await acceptTask)
             {
                 TcpClientConnectionChannel channel = new TcpClientConnectionChannel(serverTcpClient, Encoding.Default);
                 client.Dispose();
 
                 await Assert.ThrowsAsync<ConnectionUnexpectedlyClosedException>(async () =>
                 {
-                    await channel.ReadLine().ConfigureAwait(false);
-                }).ConfigureAwait(false);
+                    await channel.ReadLine();
+                });
             }
         }
         finally

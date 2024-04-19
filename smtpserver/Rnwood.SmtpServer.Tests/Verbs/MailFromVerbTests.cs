@@ -21,7 +21,7 @@ public class MailFromVerbTests
     [Fact]
     public async Task Process_Address_Bracketed() =>
         await Process_AddressAsync("<rob@rnwood.co.uk>", "rob@rnwood.co.uk", StandardSmtpResponseCode.OK)
-            .ConfigureAwait(false);
+            ;
 
     /// <summary>
     ///     The Process_Address_BracketedWithName
@@ -30,7 +30,7 @@ public class MailFromVerbTests
     [Fact]
     public async Task Process_Address_BracketedWithName() =>
         await Process_AddressAsync("<Robert Wood <rob@rnwood.co.uk>>", "Robert Wood <rob@rnwood.co.uk>",
-            StandardSmtpResponseCode.OK).ConfigureAwait(false);
+            StandardSmtpResponseCode.OK);
 
     /// <summary>
     ///     The Process_Address_NonAsciiChars_Rejected
@@ -39,7 +39,7 @@ public class MailFromVerbTests
     [Fact]
     public async Task Process_NonAsciiChars_SmtpUtf8_Accepted() =>
         await Process_AddressAsync("<ظػؿقط <rob@rnwood.co.uk>>", "ظػؿقط <rob@rnwood.co.uk>",
-            StandardSmtpResponseCode.OK, eightBitMessage: true).ConfigureAwait(false);
+            StandardSmtpResponseCode.OK, eightBitMessage: true);
 
     /// <summary>
     ///     The Process_Address_Plain
@@ -48,7 +48,7 @@ public class MailFromVerbTests
     [Fact]
     public async Task Process_Address_Plain() =>
         await Process_AddressAsync("rob@rnwood.co.uk", "rob@rnwood.co.uk", StandardSmtpResponseCode.OK)
-            .ConfigureAwait(false);
+            ;
 
     /// <summary>
     ///     The Process_AlreadyGivenFrom_ErrorResponse
@@ -62,7 +62,7 @@ public class MailFromVerbTests
 
         MailFromVerb mailFromVerb = new MailFromVerb();
         await mailFromVerb.Process(mocks.Connection.Object, new SmtpCommand("FROM <foo@bar.com>"))
-            .ConfigureAwait(false);
+            ;
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
     }
@@ -77,7 +77,7 @@ public class MailFromVerbTests
         TestMocks mocks = new TestMocks();
 
         MailFromVerb mailFromVerb = new MailFromVerb();
-        await mailFromVerb.Process(mocks.Connection.Object, new SmtpCommand("FROM")).ConfigureAwait(false);
+        await mailFromVerb.Process(mocks.Connection.Object, new SmtpCommand("FROM"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
     }
@@ -108,7 +108,7 @@ public class MailFromVerbTests
         if (!asException)
         {
             await mailFromVerb.Process(mocks.Connection.Object, new SmtpCommand("FROM " + address))
-                .ConfigureAwait(false);
+                ;
             mocks.VerifyWriteResponse(expectedResponse);
         }
         else

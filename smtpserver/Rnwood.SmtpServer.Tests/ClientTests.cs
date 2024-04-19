@@ -66,7 +66,7 @@ public partial class ClientTests
             server.Start();
 
             await SendMessage_MailKit_Async(server, "ظػؿقط@to.com", "ظػؿقط@from.com").WithTimeout("sending message")
-                .ConfigureAwait(false);
+                ;
 
             Assert.Single(messages);
             Assert.Equal("ظػؿقط@from.com", messages.First().From);
@@ -94,7 +94,7 @@ public partial class ClientTests
             server.Start();
 
             await SendMessage_MailKit_Async(server, "to@to.com").WithTimeout("sending message")
-                .ConfigureAwait(false);
+                ;
 
             Assert.Single(messages);
             Assert.Equal("from@from.com", messages.First().From);
@@ -122,7 +122,7 @@ public partial class ClientTests
             server.Start();
 
             await SendMessage_MailKit_Async(server, "to@to.com", secureSocketOptions: SecureSocketOptions.StartTls)
-                .WithTimeout("sending message").ConfigureAwait(false);
+                .WithTimeout("sending message");
 
             Assert.Single(messages);
             Assert.Equal("from@from.com", messages.First().From);
@@ -151,7 +151,7 @@ public partial class ClientTests
 
             await SendMessage_MailKit_Async(server, "to@to.com",
                     secureSocketOptions: SecureSocketOptions.SslOnConnect).WithTimeout("sending message")
-                .ConfigureAwait(false);
+                ;
 
             Assert.Single(messages);
             Assert.Equal("from@from.com", messages.First().From);
@@ -189,21 +189,21 @@ public partial class ClientTests
                 {
                     using (SmtpClient client = new SmtpClient())
                     {
-                        await client.ConnectAsync("localhost", server.PortNumber).ConfigureAwait(false);
+                        await client.ConnectAsync("localhost", server.PortNumber);
 
                         for (int i = 0; i < numberOfMessagesPerThread; i++)
                         {
                             MimeMessage message = NewMessage(i + "@" + localThreadId, "from@from.com");
 
-                            await client.SendAsync(message).ConfigureAwait(false);
+                            await client.SendAsync(message);
                         }
 
-                        await client.DisconnectAsync(true).ConfigureAwait(false);
+                        await client.DisconnectAsync(true);
                     }
                 }));
             }
 
-            await Task.WhenAll(sendingTasks).WithTimeout(120, "sending messages").ConfigureAwait(false);
+            await Task.WhenAll(sendingTasks).WithTimeout(120, "sending messages");
             Assert.Equal(numberOfMessagesPerThread * numberOfThreads, messages.Count);
 
             for (int threadId = 0; threadId < numberOfThreads; threadId++)
@@ -248,9 +248,9 @@ public partial class ClientTests
                 return true;
             };
             client.SslProtocols = SslProtocols.Tls12;
-            await client.ConnectAsync("localhost", server.PortNumber, secureSocketOptions).ConfigureAwait(false);
-            await client.SendAsync(new FormatOptions { International = true }, message).ConfigureAwait(false);
-            await client.DisconnectAsync(true).ConfigureAwait(false);
+            await client.ConnectAsync("localhost", server.PortNumber, secureSocketOptions);
+            await client.SendAsync(new FormatOptions { International = true }, message);
+            await client.DisconnectAsync(true);
         }
     }
 

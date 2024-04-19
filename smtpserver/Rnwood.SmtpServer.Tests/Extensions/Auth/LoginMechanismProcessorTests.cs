@@ -25,7 +25,7 @@ public class LoginMechanismProcessorTests : AuthMechanismTest
         TestMocks mocks = new TestMocks();
 
         LoginMechanismProcessor processor = Setup(mocks);
-        AuthMechanismProcessorStatus result = await processor.ProcessResponse(null).ConfigureAwait(false);
+        AuthMechanismProcessorStatus result = await processor.ProcessResponse(null);
 
         Assert.Equal(AuthMechanismProcessorStatus.Continue, result);
         mocks.Connection.Verify(c =>
@@ -49,7 +49,7 @@ public class LoginMechanismProcessorTests : AuthMechanismTest
 
         LoginMechanismProcessor processor = Setup(mocks);
         AuthMechanismProcessorStatus
-            result = await processor.ProcessResponse(EncodeBase64("rob")).ConfigureAwait(false);
+            result = await processor.ProcessResponse(EncodeBase64("rob"));
 
         Assert.Equal(AuthMechanismProcessorStatus.Continue, result);
 
@@ -79,7 +79,7 @@ public class LoginMechanismProcessorTests : AuthMechanismTest
 
         LoginMechanismProcessor processor = Setup(mocks);
         AuthMechanismProcessorStatus
-            result = await processor.ProcessResponse(EncodeBase64("rob")).ConfigureAwait(false);
+            result = await processor.ProcessResponse(EncodeBase64("rob"));
 
         Assert.Equal(AuthMechanismProcessorStatus.Continue, result);
 
@@ -92,7 +92,7 @@ public class LoginMechanismProcessorTests : AuthMechanismTest
             )
         );
 
-        result = await processor.ProcessResponse(EncodeBase64("password")).ConfigureAwait(false);
+        result = await processor.ProcessResponse(EncodeBase64("password"));
         Assert.Equal(AuthMechanismProcessorStatus.Success, result);
     }
 
@@ -107,9 +107,9 @@ public class LoginMechanismProcessorTests : AuthMechanismTest
             TestMocks mocks = new TestMocks();
 
             LoginMechanismProcessor processor = Setup(mocks);
-            await processor.ProcessResponse(null).ConfigureAwait(false);
-            await processor.ProcessResponse("rob blah").ConfigureAwait(false);
-        }).ConfigureAwait(false);
+            await processor.ProcessResponse(null);
+            await processor.ProcessResponse("rob blah");
+        });
 
     /// <summary>
     /// </summary>

@@ -25,7 +25,7 @@ public class ServerTests
         {
             using (TcpClient client = new TcpClient())
             {
-                await client.ConnectAsync("localhost", server.PortNumber).ConfigureAwait(false);
+                await client.ConnectAsync("localhost", server.PortNumber);
                 Assert.True(client.Connected);
             }
 
@@ -91,8 +91,8 @@ public class ServerTests
 
             using TcpClient client = new TcpClient();
             await Assert.ThrowsAnyAsync<SocketException>(async () =>
-                await client.ConnectAsync("localhost", portNumber).ConfigureAwait(false)
-            ).ConfigureAwait(false);
+                await client.ConnectAsync("localhost", portNumber)
+            );
         }
     }
 
@@ -108,20 +108,20 @@ public class ServerTests
         Task serverTask = Task.Run(async () =>
         {
             await Task.Run(() => server.WaitForNextConnection()).WithTimeout("waiting for next server connection")
-                .ConfigureAwait(false);
+                ;
             Assert.Single(server.ActiveConnections);
 
-            await Task.Run(() => server.Stop(false)).WithTimeout("stopping server").ConfigureAwait(false);
+            await Task.Run(() => server.Stop(false)).WithTimeout("stopping server");
             Assert.Single(server.ActiveConnections);
-            await Task.Run(() => server.KillConnections()).WithTimeout("killing connections").ConfigureAwait(false);
+            await Task.Run(() => server.KillConnections()).WithTimeout("killing connections");
             Assert.Empty(server.ActiveConnections);
         });
 
         using (TcpClient client = new TcpClient())
         {
             await client.ConnectAsync("localhost", server.PortNumber).WithTimeout("waiting for client to connect")
-                .ConfigureAwait(false);
-            await serverTask.WithTimeout(30, "waiting for server task to complete").ConfigureAwait(false);
+                ;
+            await serverTask.WithTimeout(30, "waiting for server task to complete");
         }
     }
 
@@ -137,16 +137,16 @@ public class ServerTests
         Task serverTask = Task.Run(async () =>
         {
             await Task.Run(() => server.WaitForNextConnection())
-                .WithTimeout("waiting for next server connection").ConfigureAwait(false);
+                .WithTimeout("waiting for next server connection");
             Assert.Single(server.ActiveConnections);
-            await Task.Run(() => server.Stop(true)).WithTimeout("stopping server").ConfigureAwait(false);
+            await Task.Run(() => server.Stop(true)).WithTimeout("stopping server");
             Assert.Empty(server.ActiveConnections);
         });
 
         using TcpClient client = new TcpClient();
         await client.ConnectAsync("localhost", server.PortNumber)
-            .WithTimeout("waiting for client to connect").ConfigureAwait(false);
-        await serverTask.WithTimeout(30, "waiting for server task to complete").ConfigureAwait(false);
+            .WithTimeout("waiting for client to connect");
+        await serverTask.WithTimeout(30, "waiting for server task to complete");
     }
 
     /// <summary>

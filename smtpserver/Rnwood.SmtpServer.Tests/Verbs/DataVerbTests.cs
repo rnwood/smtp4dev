@@ -24,7 +24,7 @@ public class DataVerbTests
     public async Task Data_8BitData_PassedThrough()
     {
         string data = ((char)(0x41 + 128)).ToString();
-        await TestGoodDataAsync(new[] { data, "." }, data).ConfigureAwait(false);
+        await TestGoodDataAsync(new[] { data, "." }, data);
     }
 
     /// <summary>
@@ -46,7 +46,7 @@ public class DataVerbTests
             Task.FromResult(Encoding.ASCII.GetBytes(messageData[messageLine++])));
 
         DataVerb verb = new DataVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.ExceededStorageAllocation);
@@ -62,14 +62,14 @@ public class DataVerbTests
     public async Task Data_DoubleDots_Unescaped() =>
         //Check escaping of end of message character ".." is decoded to "."
         //but the .. after B should be left alone
-        await TestGoodDataAsync(new[] { "A", "..", "B..", "." }, "A\r\n.\r\nB..").ConfigureAwait(false);
+        await TestGoodDataAsync(new[] { "A", "..", "B..", "." }, "A\r\n.\r\nB..");
 
     /// <summary>
     ///     The Data_EmptyMessage_Accepted
     /// </summary>
     /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
     [Fact]
-    public async Task Data_EmptyMessage_Accepted() => await TestGoodDataAsync(new[] { "." }, "").ConfigureAwait(false);
+    public async Task Data_EmptyMessage_Accepted() => await TestGoodDataAsync(new[] { "." }, "");
 
     /// <summary>
     ///     The Data_ExactlySizeLimit_Accepted
@@ -90,7 +90,7 @@ public class DataVerbTests
             .Returns(() => Task.FromResult(Encoding.UTF8.GetBytes(messageData[messageLine++])));
 
         DataVerb verb = new DataVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
@@ -115,7 +115,7 @@ public class DataVerbTests
             .Returns(() => Task.FromResult(Encoding.UTF8.GetBytes(messageData[messageLine++])));
 
         DataVerb verb = new DataVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.TransactionFailed);
@@ -133,7 +133,7 @@ public class DataVerbTests
         TestMocks mocks = new TestMocks();
 
         DataVerb verb = new DataVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
     }
@@ -157,7 +157,7 @@ public class DataVerbTests
             .Returns(() => Task.FromResult(Encoding.UTF8.GetBytes(messageData[messageLine++])));
 
         DataVerb verb = new DataVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
@@ -184,7 +184,7 @@ public class DataVerbTests
             .Returns(() => Task.FromResult(Encoding.UTF8.GetBytes(messageData[messageLine++])));
 
         DataVerb verb = new DataVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
@@ -193,7 +193,7 @@ public class DataVerbTests
         mocks.Connection.Verify(c=>c.CommitMessage());
 
         using StreamReader dataReader =
-            new StreamReader(await messageBuilder.GetData().ConfigureAwait(false), Encoding.UTF8);
+            new StreamReader(await messageBuilder.GetData(), Encoding.UTF8);
         Assert.Equal(expectedData, dataReader.ReadToEnd());
     }
 }

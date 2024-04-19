@@ -19,7 +19,7 @@ public class RcptToVerbTests
     /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
     [Fact]
     public async Task EmailAddressOnly() =>
-        await TestGoodAddressAsync("<rob@rnwood.co.uk>", "rob@rnwood.co.uk").ConfigureAwait(false);
+        await TestGoodAddressAsync("<rob@rnwood.co.uk>", "rob@rnwood.co.uk");
 
     /// <summary>
     /// </summary>
@@ -28,14 +28,14 @@ public class RcptToVerbTests
     public async Task EmailAddressWithDisplayName() =>
         //Should this format be accepted????
         await TestGoodAddressAsync("<Robert Wood<rob@rnwood.co.uk>>", "Robert Wood<rob@rnwood.co.uk>")
-            .ConfigureAwait(false);
+            ;
 
     /// <summary>
     ///     The EmptyAddress_ReturnsError
     /// </summary>
     /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
     [Fact]
-    public async Task EmptyAddress_ReturnsError() => await TestBadAddressAsync("<>").ConfigureAwait(false);
+    public async Task EmptyAddress_ReturnsError() => await TestBadAddressAsync("<>");
 
     /// <summary>
     ///     The MismatchedBraket_ReturnsError
@@ -44,8 +44,8 @@ public class RcptToVerbTests
     [Fact]
     public async Task MismatchedBraket_ReturnsError()
     {
-        await TestBadAddressAsync("<rob@rnwood.co.uk").ConfigureAwait(false);
-        await TestBadAddressAsync("<Robert Wood<rob@rnwood.co.uk>").ConfigureAwait(false);
+        await TestBadAddressAsync("<rob@rnwood.co.uk");
+        await TestBadAddressAsync("<Robert Wood<rob@rnwood.co.uk>");
     }
 
     /// <summary>
@@ -54,13 +54,13 @@ public class RcptToVerbTests
     /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
     [Fact]
     public async Task UnbraketedAddress_ReturnsError() =>
-        await TestBadAddressAsync("rob@rnwood.co.uk").ConfigureAwait(false);
+        await TestBadAddressAsync("rob@rnwood.co.uk");
 
 
     [Fact]
     public async Task NonAsciiAddress_SmtpUtf8_Accepted() =>
         await TestGoodAddressAsync("<ظػؿقط <rob@rnwood.co.uk>>", "ظػؿقط <rob@rnwood.co.uk>", true)
-            .ConfigureAwait(false);
+            ;
 
 
     /// <summary>
@@ -77,14 +77,14 @@ public class RcptToVerbTests
 
         if (!asException)
         {
-            await verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address)).ConfigureAwait(false);
+            await verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address));
             mocks.VerifyWriteResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
         }
         else
         {
             SmtpServerException e = await Assert
                 .ThrowsAsync<SmtpServerException>(() =>
-                    verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address))).ConfigureAwait(false);
+                    verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address)));
             Assert.Equal((int)StandardSmtpResponseCode.SyntaxErrorInCommandArguments, e.SmtpResponse.Code);
         }
 
@@ -104,7 +104,7 @@ public class RcptToVerbTests
         mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
 
         RcptToVerb verb = new RcptToVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address)).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("TO " + address));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         Assert.Equal(expectedAddress, messageBuilder.Recipients.First());

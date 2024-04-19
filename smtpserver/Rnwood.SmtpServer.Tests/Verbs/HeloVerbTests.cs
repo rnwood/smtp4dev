@@ -22,7 +22,7 @@ public class HeloVerbTests
         TestMocks mocks = new TestMocks();
 
         HeloVerb verb = new HeloVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("HELO foo.blah")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("HELO foo.blah"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         mocks.Session.VerifySet(s => s.ClientName = "foo.blah");
@@ -38,7 +38,7 @@ public class HeloVerbTests
         TestMocks mocks = new TestMocks();
 
         HeloVerb verb = new HeloVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("HELO")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("HELO"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
         mocks.Session.VerifySet(s => s.ClientName = "");
@@ -55,7 +55,7 @@ public class HeloVerbTests
         mocks.Session.SetupGet(s => s.ClientName).Returns("already.said.helo");
 
         HeloVerb verb = new HeloVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("HELO foo.blah")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("HELO foo.blah"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
     }

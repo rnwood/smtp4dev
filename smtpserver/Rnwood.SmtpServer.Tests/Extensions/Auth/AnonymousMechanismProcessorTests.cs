@@ -22,7 +22,7 @@ public class AnomymousMechanismProcessorTests
     [Fact]
     public async Task ProcessResponse_Failure() =>
         await ProcessResponseAsync(AuthenticationResult.Failure, AuthMechanismProcessorStatus.Failed)
-            .ConfigureAwait(false);
+            ;
 
     /// <summary>
     ///     The ProcessResponse_Success
@@ -31,7 +31,7 @@ public class AnomymousMechanismProcessorTests
     [Fact]
     public async Task ProcessResponse_Success() =>
         await ProcessResponseAsync(AuthenticationResult.Success, AuthMechanismProcessorStatus.Success)
-            .ConfigureAwait(false);
+            ;
 
     /// <summary>
     ///     The ProcessResponse_TemporarilyFailure
@@ -40,7 +40,7 @@ public class AnomymousMechanismProcessorTests
     [Fact]
     public async Task ProcessResponse_TemporarilyFailure() =>
         await ProcessResponseAsync(AuthenticationResult.TemporaryFailure, AuthMechanismProcessorStatus.Failed)
-            .ConfigureAwait(false);
+            ;
 
     /// <summary>
     /// </summary>
@@ -62,7 +62,7 @@ public class AnomymousMechanismProcessorTests
         AnonymousMechanismProcessor anonymousMechanismProcessor =
             new AnonymousMechanismProcessor(mocks.Connection.Object);
         AuthMechanismProcessorStatus result =
-            await anonymousMechanismProcessor.ProcessResponse(null).ConfigureAwait(false);
+            await anonymousMechanismProcessor.ProcessResponse(null);
 
         Assert.Equal(authMechanismProcessorStatus, result);
 

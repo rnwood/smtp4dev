@@ -29,7 +29,7 @@ public class VerbWithSubCommandsTests
         verbWithSubCommands.Object.SubVerbMap.SetVerbProcessor("SUBCOMMAND1", verb.Object);
 
         await verbWithSubCommands.Object.Process(mocks.Connection.Object, new SmtpCommand("VERB SUBCOMMAND1"))
-            .ConfigureAwait(false);
+            ;
 
         verb.Verify(v => v.Process(mocks.Connection.Object, new SmtpCommand("SUBCOMMAND1")));
     }
@@ -46,7 +46,7 @@ public class VerbWithSubCommandsTests
         Mock<VerbWithSubCommands> verbWithSubCommands = new Mock<VerbWithSubCommands> { CallBase = true };
 
         await verbWithSubCommands.Object.Process(mocks.Connection.Object, new SmtpCommand("VERB SUBCOMMAND1"))
-            .ConfigureAwait(false);
+            ;
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.CommandParameterNotImplemented);
     }

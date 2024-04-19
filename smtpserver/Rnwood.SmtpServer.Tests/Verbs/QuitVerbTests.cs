@@ -23,7 +23,7 @@ public class QuitVerbTests
         TestMocks mocks = new TestMocks();
 
         QuitVerb quitVerb = new QuitVerb();
-        await quitVerb.Process(mocks.Connection.Object, new SmtpCommand("QUIT")).ConfigureAwait(false);
+        await quitVerb.Process(mocks.Connection.Object, new SmtpCommand("QUIT"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.ClosingTransmissionChannel);
     }

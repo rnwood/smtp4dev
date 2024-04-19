@@ -68,7 +68,7 @@ public class ParameterProcessorMapTests
         map.SetProcessor("keyb", keyBProcessor.Object);
 
         await map.Process(mocks.Connection.Object, new[] { "KEYA=VALUEA", "KEYB=VALUEB" }, true)
-            .ConfigureAwait(false);
+            ;
 
         keyAProcessor.Verify(p => p.SetParameter(mocks.Connection.Object, "KEYA", "VALUEA"));
         keyBProcessor.Verify(p => p.SetParameter(mocks.Connection.Object, "KEYB", "VALUEB"));
@@ -84,7 +84,7 @@ public class ParameterProcessorMapTests
         TestMocks mocks = new TestMocks();
 
         ParameterProcessorMap map = new ParameterProcessorMap();
-        await map.Process(mocks.Connection.Object, new string[] { }, true).ConfigureAwait(false);
+        await map.Process(mocks.Connection.Object, new string[] { }, true);
         Assert.True(true);
     }
 
@@ -100,8 +100,8 @@ public class ParameterProcessorMapTests
             TestMocks mocks = new TestMocks();
 
             ParameterProcessorMap map = new ParameterProcessorMap();
-            await map.Process(mocks.Connection.Object, new[] { "KEYA=VALUEA" }, true).ConfigureAwait(false);
-        }).ConfigureAwait(false);
+            await map.Process(mocks.Connection.Object, new[] { "KEYA=VALUEA" }, true);
+        });
 
         Assert.Equal("Parameter KEYA is not recognised", e.Message);
     }

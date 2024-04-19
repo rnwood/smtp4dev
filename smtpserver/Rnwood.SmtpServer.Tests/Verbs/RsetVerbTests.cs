@@ -25,7 +25,7 @@ public class RsetVerbTests
         mocks.Connection.Setup(c => c.AbortMessage()).Returns(Task.CompletedTask).Verifiable();
 
         RsetVerb verb = new RsetVerb();
-        await verb.Process(mocks.Connection.Object, new SmtpCommand("RSET")).ConfigureAwait(false);
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("RSET"));
 
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
