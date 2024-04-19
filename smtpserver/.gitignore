@@ -1,0 +1,9 @@
+.vs
+obj
+bin
+*.ncrunch*
+packages
+_ncrunch_*
+*.user
+/Rnwood.Smtp4dev/node_modules
+.idea

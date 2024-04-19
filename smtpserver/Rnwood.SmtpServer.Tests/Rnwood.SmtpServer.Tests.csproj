@@ -1,0 +1,46 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <VersionPrefix>3.0</VersionPrefix>
+    <TargetFrameworks>net6.0;net462</TargetFrameworks>
+    <AssemblyName>Rnwood.SmtpServer.Tests</AssemblyName>
+    <OutputType>Library</OutputType>
+    <LangVersion>latest</LangVersion>
+
+    <PackageId>Rnwood.SmtpServer.Tests</PackageId>
+    <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
+    <RuntimeFrameworkVersion Condition=" '$(TargetFramework)' == 'net6.0' ">6.0.0</RuntimeFrameworkVersion>
+    <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
+    <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
+    <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Rnwood.SmtpServer\Rnwood.SmtpServer.csproj"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentAssertions" Version="6.12.0"/>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.9.0"/>
+    <PackageReference Include="NETStandard.Library" Version="2.0.3"/>
+    <PackageReference Include="xunit.runner.visualstudio" Version="2.5.7"/>
+    <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0"/>
+    <PackageReference Include="System.Net.Security" Version="4.3.2"/>
+    <PackageReference Include="xunit" Version="2.7.0"/>
+    <PackageReference Include="Moq" Version="4.20.70"/>
+    <PackageReference Include="MailKit" Version="2.5.2"/>
+    <PackageReference Include="Xunit.SkippableFact" Version="1.4.13"/>
+  </ItemGroup>
+
+  <ItemGroup>
+    <AdditionalFiles Include="../stylecop.json"/>
+  </ItemGroup>
+
+  <ItemGroup Condition=" '$(TargetFramework)' == 'net462' ">
+    <Reference Include="mscorlib">
+      <HintPath>..\..\..\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.6.2\mscorlib.dll</HintPath>
+    </Reference>
+  </ItemGroup>
+
+</Project>
