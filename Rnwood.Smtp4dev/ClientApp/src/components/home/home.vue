@@ -18,6 +18,8 @@
                 <template #dropdown>
                     <el-dropdown-menu>
                         <el-dropdown-item icon="Connection" command="api">API</el-dropdown-item>
+                        <el-dropdown-item icon="QuestionFilled" command="help">Help</el-dropdown-item>
+                        <el-dropdown-item icon="Service" command="issues">Issues</el-dropdown-item>
                     </el-dropdown-menu>
                 </template>
             </el-dropdown>
@@ -119,6 +121,12 @@
             switch (command) {
                 case "api":
                     window.open("/api");
+                    break;
+                case "help":
+                    window.open("https://github.com/rnwood/smtp4dev/wiki");
+                    break;
+                case "issues":
+                    window.open("https://github.com/rnwood/smtp4dev/issues");
                     break;
 
                 default:
