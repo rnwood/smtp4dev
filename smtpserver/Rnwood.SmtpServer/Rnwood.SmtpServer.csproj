@@ -26,8 +26,8 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2"/>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="2.2.0"/>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="3.1.32"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0"/>
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.1"/>
 
     <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0"/>
     <PackageReference Include="System.Net.Security" Version="4.3.2"/>
