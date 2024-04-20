@@ -4,6 +4,7 @@ COPY out /app
 EXPOSE 80
 EXPOSE 25
 EXPOSE 143
+ENV ASPNETCORE_HTTP_PORTS 80
 VOLUME c:\smtp4dev
 WORKDIR c:\
 ENTRYPOINT ["dotnet", "/app/Rnwood.Smtp4dev.dll"]
