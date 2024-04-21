@@ -223,7 +223,7 @@ public class ServerTests
     /// <summary>
     /// </summary>
     /// <returns>The <see cref="SmtpServer" /></returns>
-    private SmtpServer NewServer(bool allowRemoteConnections, bool allowIpV6) => new SmtpServer(new Rnwood.SmtpServer.ServerOptions(allowRemoteConnections, allowIpV6, (int)StandardSmtpPort.AssignAutomatically));
+    private SmtpServer NewServer(bool allowRemoteConnections, bool allowIpV6) => new SmtpServer(new Rnwood.SmtpServer.ServerOptions(allowRemoteConnections, allowIpV6, (int)StandardSmtpPort.AssignAutomatically, false));
 
     /// <summary>
     /// </summary>

@@ -10,10 +10,10 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public string SmtpServer { get; set; }
 
+        private int? smtpPort;
         public int? SmtpPort
-        {
-            get; set;
-        }
+        { get => smtpPort; set => smtpPort = value.HasValue ? Guard.Against.OutOfRange(value.Value, nameof(value), 1, 65535) : null; }
+
 
         public SecureSocketOptions? TlsMode { get; set; }
 

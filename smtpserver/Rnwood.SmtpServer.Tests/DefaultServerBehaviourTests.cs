@@ -31,7 +31,14 @@ public class SmtpServerOptionsTests
         SmtpServerOptions.EnabledAuthMechanisms.Should().NotBeNull();
         bool enabled = await SmtpServerOptions.IsAuthMechanismEnabled(connectionMock.Object, authMechanism)
             ;
-        enabled.Should().BeTrue();
+        if (authMechanism is AnonymousMechanism)
+        {
+            enabled.Should().BeFalse();
+        }
+        else
+        {
+            enabled.Should().BeTrue();
+        }
     }
 
     [Theory]

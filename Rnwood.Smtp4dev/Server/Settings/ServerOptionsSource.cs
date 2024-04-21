@@ -1,11 +1,14 @@
 ﻿using System.Net;
+using Ardalis.GuardClauses;
 using Esprima.Ast;
 
 namespace Rnwood.Smtp4dev.Server.Settings
 {
     public class ServerOptionsSource
     {
-        public int? Port { get; set; }
+        private int? port;
+
+        public int? Port { get => port; set => port = value.HasValue ? Guard.Against.OutOfRange(value.Value, nameof(value), 0, 65535) : null; }
         public bool? AllowRemoteConnections { get; set; }
 
         public string Database { get; set; }
