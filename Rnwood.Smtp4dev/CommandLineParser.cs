@@ -47,8 +47,10 @@ namespace Rnwood.Smtp4dev
                 { "disablemessagesanitisation", "Disables message HTML sanitisation.", data => map.Add((data != null).ToString(), x => x.ServerOptions.DisableMessageSanitisation) },
                 { "applicationName=","",  data => map.Add(data, x => x.ApplicationName), true},
                 { "authenticationrequired", "Requires that SMTP and IMAP clients authenticate", data => map.Add((data != null).ToString(), x => x.ServerOptions.AuthenticationRequired) },
-                { "secureconnectionrequired", "Requires that SMTP clients use SSL/TLS", data => map.Add((data != null).ToString(), x => x.ServerOptions.SecureConnectionRequired) }
-            };
+                { "secureconnectionrequired", "Requires that SMTP clients use SSL/TLS", data => map.Add((data != null).ToString(), x => x.ServerOptions.SecureConnectionRequired) },
+				{ "webauthenticationrequired", "Require authentication for web interface", data => map.Add((data != null).ToString(), x => x.ServerOptions.WebAuthenticationRequired) }
+
+			};
 
             if (!isDesktopApp)
             {

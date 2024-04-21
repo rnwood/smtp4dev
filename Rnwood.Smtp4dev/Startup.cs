@@ -25,6 +25,8 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.ResponseCompression;
 using Rnwood.Smtp4dev.Server.Settings;
+using Microsoft.AspNetCore.Authorization;
+using AspNetCore.Authentication.Basic;
 
 namespace Rnwood.Smtp4dev
 {
@@ -139,10 +141,23 @@ namespace Rnwood.Smtp4dev
             services.AddSignalR();
             services.AddSingleton<NotificationsHub>();
 
+
+
             services.AddControllers();
             services.AddRequestLocalization(options => { options.SupportedCultures = CultureInfo.GetCultures(CultureTypes.AllCultures); });
 
             services.AddSpaStaticFiles(o => o.RootPath = "ClientApp");
+
+            services.AddAuthentication(BasicDefaults.AuthenticationScheme)
+           .AddBasic<UserValidationService>(options => { options.Realm = "smtp4dev"; });
+
+
+            services.AddAuthorization(options =>
+            {
+                options.FallbackPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+            });
+
+            services.AddScoped<IAuthorizationHandler, UserValidationService>();
         }
 
 
@@ -166,6 +181,8 @@ namespace Rnwood.Smtp4dev
                     c.DocumentTitle = "smtp4dev API";
                 });
                 subdir.UseRouting();
+                subdir.UseAuthentication();
+                subdir.UseAuthorization();
                 subdir.UseDeveloperExceptionPage();
                 subdir.UseDefaultFiles();
                 subdir.UseStaticFiles();

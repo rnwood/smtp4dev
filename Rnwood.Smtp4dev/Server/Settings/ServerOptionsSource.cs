@@ -43,5 +43,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public bool? DisableIPv6 { get; set; }
 
         public User[] Users { get; set; }
-    }
+
+		public bool? WebAuthenticationRequired { get; set; }
+	}
 }

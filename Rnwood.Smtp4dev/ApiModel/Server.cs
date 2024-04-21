@@ -52,6 +52,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public string RelayTlsMode { get; set; }
         public string RelayAutomaticRelayExpression { get; set; }
+        public bool WebAuthenticationRequired { get; set; }
     }
 
 }

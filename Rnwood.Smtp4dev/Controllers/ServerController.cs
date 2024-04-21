@@ -77,6 +77,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 RecipientValidationExpression = serverOptions.CurrentValue.RecipientValidationExpression,
                 MessageValidationExpression = serverOptions.CurrentValue.MessageValidationExpression,
                 DisableIPv6 = serverOptions.CurrentValue.DisableIPv6,
+                WebAuthenticationRequired = serverOptions.CurrentValue.WebAuthenticationRequired,
                 Users = serverOptions.CurrentValue.Users
             };
         }
@@ -195,6 +196,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.MessageValidationExpression = serverUpdate.MessageValidationExpression;
             newSettings.DisableIPv6 = serverUpdate.DisableIPv6;
             newSettings.Users = serverUpdate.Users;
+            newSettings.WebAuthenticationRequired = serverUpdate.WebAuthenticationRequired;
 
 
 
