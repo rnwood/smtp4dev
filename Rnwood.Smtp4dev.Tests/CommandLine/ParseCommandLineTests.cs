@@ -32,5 +32,18 @@ namespace Rnwood.Smtp4dev.Tests.CommandLine
             Action act = () => new ConfigurationBuilder().AddCommandLineOptions(commandLineOptions).Build().Bind(cmdLineOptions);
             act.Should().Throw<TargetInvocationException>().WithInnerException<ArgumentOutOfRangeException>();
         }
+
+        [Fact]
+        public void CanParseMultipleUsers()
+        {
+            var commandLineOptions = CommandLineParser.TryParseCommandLine(new[] { $"--user:u1=p1", "--user:u2=p2" }, false);
+            var cmdLineOptions = new CommandLineOptions();
+            new ConfigurationBuilder().AddCommandLineOptions(commandLineOptions).Build().Bind(cmdLineOptions);
+            cmdLineOptions.ServerOptions.Users.Length.Should().Be(2);
+            cmdLineOptions.ServerOptions.Users[0].Username.Should().Be("u1");
+            cmdLineOptions.ServerOptions.Users[0].Password.Should().Be("p1");
+            cmdLineOptions.ServerOptions.Users[1].Username.Should().Be("u2");
+            cmdLineOptions.ServerOptions.Users[1].Password.Should().Be("p2");
+        }
     }
 }
