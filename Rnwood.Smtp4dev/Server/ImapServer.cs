@@ -176,12 +176,15 @@ namespace Rnwood.Smtp4dev.Server
 
         Task IHostedService.StartAsync(CancellationToken cancellationToken)
         {
-            return Task.Run(() => this.TryStart());
+            this.TryStart();
+            return Task.CompletedTask;
+ 
         }
 
         Task IHostedService.StopAsync(CancellationToken cancellationToken)
         {
-            return Task.Run(() => this.Stop());
+            Task.Run(() => this.Stop());
+            return Task.CompletedTask;
         }
 
         class SessionHandler
