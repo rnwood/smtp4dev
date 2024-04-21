@@ -11,6 +11,7 @@ namespace Rnwood.Smtp4dev.Service
     public interface IHostingEnvironmentHelper
     {
         string GetEditableSettingsFilePath();
+        bool IsRunningInContainer();
 
         bool SettingsAreEditable { get; }
     }
@@ -42,6 +43,11 @@ namespace Rnwood.Smtp4dev.Service
             var processName = Path.GetFileNameWithoutExtension(Process.GetCurrentProcess().ProcessName);
             return (processName.Contains("w3wp", StringComparison.OrdinalIgnoreCase) ||
                     processName.Contains("iisexpress", StringComparison.OrdinalIgnoreCase));
+        }
+
+        public bool IsRunningInContainer()
+        {
+            return Environment.GetEnvironmentVariable("DOTNET_RUNNING_IN_CONTAINER") == "true";
         }
 
         public bool SettingsAreEditable

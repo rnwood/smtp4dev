@@ -10,11 +10,13 @@ namespace Rnwood.Smtp4dev.ApiModel
     {
         public bool SettingsAreEditable { get; internal set; }
 
+        public IDictionary<string, string> LockedSettings { get; internal set; }
+
         public bool IsRunning { get; set; }
 
         public string Exception { get; internal set; }
 
-        public int PortNumber { get; set; }
+        public int Port { get; set; }
 
         public string HostName { get; set; }
 
@@ -24,8 +26,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public int NumberOfSessionsToKeep { get; set; }
 
-        public ServerRelayOptions RelayOptions { get; set; }
-        public int? ImapPortNumber { get; set; }
+        public int? ImapPort { get; set; }
 
         public bool DisableMessageSanitisation { get; set; }
         public string TlsMode { get; set; }
@@ -36,6 +37,21 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string MessageValidationExpression { get; set; }
 		public bool DisableIPv6 { get; set; }
         public User[] Users { get; set; }
+
+        public string RelaySmtpServer { get; set; }
+
+        public int RelaySmtpPort { get; set; }
+
+        public string[] RelayAutomaticEmails { get; set; }
+
+        public string RelaySenderAddress { get; set; }
+
+        public string RelayLogin { get; set; }
+
+        public string RelayPassword { get; set; }
+
+        public string RelayTlsMode { get; set; }
+        public string RelayAutomaticRelayExpression { get; set; }
     }
 
 }

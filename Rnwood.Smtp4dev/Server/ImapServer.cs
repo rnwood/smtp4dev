@@ -131,7 +131,18 @@ namespace Rnwood.Smtp4dev.Server
             }
             else
             {
-                while(imapServer.ListeningPoints.Length < imapServer.Bindings.Length)
+                //Race condition in IMAP server - it fires the running event before this is all populated (or replaced from prev start).
+                while (imapServer.ListeningPoints.Length < imapServer.Bindings.Length && !imapServer.ListeningPoints.All(lp =>
+                {
+                    try
+                    {
+                        return lp.Socket.LocalEndPoint != null;
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        return false;
+                    }
+                })) ;
                 {
                     await Task.Delay(100);
                 }

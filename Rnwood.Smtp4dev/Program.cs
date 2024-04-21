@@ -201,6 +201,7 @@ namespace Rnwood.Smtp4dev
                 }
                 c.ConfigureServices(services =>
                 {
+                    services.AddSingleton(cmdLineOptions);
                     services.AddHostedService<Smtp4devServer>(sp => (Smtp4devServer)sp.GetRequiredService<ISmtp4devServer>());
                     services.AddHostedService<ImapServer>(sp => sp.GetRequiredService<ImapServer>());
                 });

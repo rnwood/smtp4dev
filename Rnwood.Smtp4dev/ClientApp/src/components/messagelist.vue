@@ -347,7 +347,7 @@
                 this.lastSortDescending = this.selectedSortDescending;
 
                 this.isRelayAvailable = !!(await new ServerController().getServer())
-                    .relayOptions.smtpServer;
+                    .relaySmtpServer;
             } catch (e: any) {
                 this.error = e;
             } finally {

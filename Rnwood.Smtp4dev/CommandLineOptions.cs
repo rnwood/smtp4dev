@@ -4,8 +4,8 @@ namespace Rnwood.Smtp4dev
 {
     public class CommandLineOptions
     {
-        public ServerOptions ServerOptions { get; set; }
-        public RelayOptions RelayOptions { get; set; }
+        public ServerOptionsSource ServerOptions { get; set; }
+        public RelayOptionsSource RelayOptions { get; set; }
 
         public string Urls { get; set; }
 

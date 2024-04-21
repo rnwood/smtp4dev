@@ -146,7 +146,7 @@
 
   <Target Name="NpmInstall" AfterTargets="Build" Inputs="@(NpmInputs)" Outputs="ClientApp\node_modules\.installedtimestamp" Condition="'$(SkipClientApp)'!='true'">
     <Message Importance="high" Text="Performing npm install..." />
-    <Exec Command="npm install --no-progress" WorkingDirectory="ClientApp" CustomErrorRegularExpression="^npm ERR!.*" />
+    <Exec Command="npm install --no-progress" WorkingDirectory="ClientApp" CustomErrorRegularExpression="^error  in .*" />
     <Touch Files="ClientApp\node_modules\.installedtimestamp" AlwaysCreate="true" />
   </Target>
 
@@ -172,7 +172,6 @@
     <ClientApp Remove="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
     <ClientApp Remove="ClientApp\src\ApiClient\Server.ts" />
     <ClientApp Remove="ClientApp\src\ApiClient\ServerController.ts" />
-    <ClientApp Remove="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
     <ClientApp Remove="ClientApp\src\ApiClient\User.ts" />
     <ClientApp Remove="ClientApp\src\components\messageanalysis.vue" />
     <ClientApp Remove="ClientApp\src\components\messagesource.vue" />
@@ -183,7 +182,6 @@
     <None Remove="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
     <None Remove="ClientApp\src\ApiClient\Server.ts" />
     <None Remove="ClientApp\src\ApiClient\ServerController.ts" />
-    <None Remove="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
   </ItemGroup>
 
   <ItemGroup>
@@ -194,7 +192,6 @@
     <TypeScriptCompile Include="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
     <TypeScriptCompile Include="ClientApp\src\ApiClient\Server.ts" />
     <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerController.ts" />
-    <TypeScriptCompile Include="ClientApp\src\ApiClient\ServerRelayOptions.ts" />
   </ItemGroup>
 
   <Target Name="DebugRunNpm" AfterTargets="Build" Inputs="@(ClientApp)" Outputs="wwwroot\.buildtimestamp" Condition="'$(SkipClientApp)'!='true'">

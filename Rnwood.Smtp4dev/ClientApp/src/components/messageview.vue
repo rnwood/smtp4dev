@@ -337,7 +337,7 @@
 
         async mounted() {
             await this.loadMessage();
-            this.isRelayAvailable = !!await (await new ServerController().getServer()).relayOptions.smtpServer;
+            this.isRelayAvailable = !!await (await new ServerController().getServer()).relaySmtpServer;
         }
 
         async destroyed() { }
