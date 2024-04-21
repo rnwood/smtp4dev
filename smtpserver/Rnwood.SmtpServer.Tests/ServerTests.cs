@@ -108,7 +108,7 @@ public class ServerTests
     [Fact]
     public void StartOnAutomaticPort_PortNumberReturned()
     {
-        SmtpServer server = new SmtpServer(new ServerOptions(false, false, (int)StandardSmtpPort.AssignAutomatically));
+        SmtpServer server = new SmtpServer(new ServerOptions(false, false, (int)StandardSmtpPort.AssignAutomatically,true));
         server.Start();
         Assert.NotEqual(0, server.ListeningEndpoints.First().Port);
     }
@@ -124,11 +124,11 @@ public class ServerTests
         //all the connections.
         Skip.IfNot(Environment.OSVersion.Platform == PlatformID.Win32NT);
 
-        using (SmtpServer server1 = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, (int)StandardSmtpPort.AssignAutomatically)))
+        using (SmtpServer server1 = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, (int)StandardSmtpPort.AssignAutomatically, true)))
         {
             server1.Start();
 
-            using (SmtpServer server2 = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, server1.ListeningEndpoints.First().Port)))
+            using (SmtpServer server2 = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, server1.ListeningEndpoints.First().Port, true)))
             {
                 Assert.Throws<SocketException>(() => { server2.Start(); });
             }
@@ -223,7 +223,7 @@ public class ServerTests
     /// <summary>
     /// </summary>
     /// <returns>The <see cref="SmtpServer" /></returns>
-    private SmtpServer NewServer(bool allowRemoteConnections, bool allowIpV6) => new SmtpServer(new Rnwood.SmtpServer.ServerOptions(allowRemoteConnections, allowIpV6, (int)StandardSmtpPort.AssignAutomatically));
+    private SmtpServer NewServer(bool allowRemoteConnections, bool allowIpV6) => new SmtpServer(new Rnwood.SmtpServer.ServerOptions(allowRemoteConnections, allowIpV6, (int)StandardSmtpPort.AssignAutomatically, false));
 
     /// <summary>
     /// </summary>

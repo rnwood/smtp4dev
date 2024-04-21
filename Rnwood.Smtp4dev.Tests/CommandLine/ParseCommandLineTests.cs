@@ -22,11 +22,11 @@ namespace Rnwood.Smtp4dev.Tests.CommandLine
         }
 
         [Theory]
-        [InlineData(0)]
+        [InlineData(-1)]
         [InlineData(67000)]
         public void SmtpPortMustBeValidTcpPort(int portNumber)
         {
-            // TCP port range 1-65535 is valid
+            // TCP port range 0-65535 is valid
             var commandLineOptions = CommandLineParser.TryParseCommandLine(new[] { $"{RelaySmtpPortParam}={portNumber}" }, false);
             var cmdLineOptions = new CommandLineOptions();
             Action act = () => new ConfigurationBuilder().AddCommandLineOptions(commandLineOptions).Build().Bind(cmdLineOptions);

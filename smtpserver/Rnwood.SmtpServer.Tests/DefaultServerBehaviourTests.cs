@@ -17,7 +17,7 @@ public class SmtpServerOptionsTests
     [Fact]
     public void CanSetAuthMechanismsViaSmtpServer()
     {
-        SmtpServer smtpServer = new SmtpServer( new Rnwood.SmtpServer.ServerOptions(true, true));
+        SmtpServer smtpServer = new SmtpServer( new Rnwood.SmtpServer.ServerOptions(true, true,(int) StandardSmtpPort.AssignAutomatically,true));
         smtpServer.Options.EnabledAuthMechanisms.Clear();
         smtpServer.Options.EnabledAuthMechanisms.Add(new LoginMechanism());
         smtpServer.Options.EnabledAuthMechanisms.Count.Should().Be(1);
@@ -27,11 +27,18 @@ public class SmtpServerOptionsTests
     [ClassData(typeof(AuthMechanismData))]
     public async Task EnsureDefaultOptionsIsAllAUthMechanismsAreEnabled(IAuthMechanism authMechanism)
     {
-        ServerOptions SmtpServerOptions = new Rnwood.SmtpServer.ServerOptions(true, true);
+        ServerOptions SmtpServerOptions = new Rnwood.SmtpServer.ServerOptions(true, true, (int)StandardSmtpPort.AssignAutomatically, true);
         SmtpServerOptions.EnabledAuthMechanisms.Should().NotBeNull();
         bool enabled = await SmtpServerOptions.IsAuthMechanismEnabled(connectionMock.Object, authMechanism)
             ;
-        enabled.Should().BeTrue();
+        if (authMechanism is AnonymousMechanism)
+        {
+            enabled.Should().BeFalse();
+        }
+        else
+        {
+            enabled.Should().BeTrue();
+        }
     }
 
     [Theory]
@@ -39,7 +46,7 @@ public class SmtpServerOptionsTests
     public async Task WhenASupportedAuthMechanismIdentifierIsConfiguredThenVerifyOnlyTheyAreEnabled(
         IAuthMechanism authMechanism)
     {
-        ServerOptions SmtpServerOptions = new Rnwood.SmtpServer.ServerOptions(true, true);
+        ServerOptions SmtpServerOptions = new Rnwood.SmtpServer.ServerOptions(true, true, (int)StandardSmtpPort.AssignAutomatically, true);
         PlainMechanism enabledMechanism = new PlainMechanism();
         SmtpServerOptions.EnabledAuthMechanisms.Clear();
         SmtpServerOptions.EnabledAuthMechanisms.Add(enabledMechanism);

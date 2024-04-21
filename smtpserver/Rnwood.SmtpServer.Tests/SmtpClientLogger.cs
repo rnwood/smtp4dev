@@ -4,6 +4,7 @@
 // </copyright>
 
 using System;
+using System.Collections.Generic;
 using System.Text;
 using MailKit;
 using Xunit.Abstractions;
@@ -18,7 +19,7 @@ public partial class ClientTests
     /// <summary>
     ///     Defines the <see cref="SmtpClientLogger" />
     /// </summary>
-    internal class SmtpClientLogger : IProtocolLogger
+    internal class SmtpClientLogger : IProtocolLogger, IAuthenticationSecretDetector
     {
         /// <summary>
         ///     Defines the testOutput
@@ -30,6 +31,10 @@ public partial class ClientTests
         /// </summary>
         /// <param name="testOutput">The testOutput<see cref="ITestOutputHelper" /></param>
         public SmtpClientLogger(ITestOutputHelper testOutput) => this.testOutput = testOutput;
+
+        public IAuthenticationSecretDetector AuthenticationSecretDetector { get => this; set { } }
+
+        public IList<AuthenticationSecret> DetectSecrets(byte[] buffer, int offset, int count) => new List<AuthenticationSecret>();
 
         /// <summary>
         /// </summary>

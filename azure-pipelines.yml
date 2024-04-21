@@ -128,6 +128,13 @@ stages:
               destinationFolder: $(Agent.TempDirectory)/e2e
           - task: DotNetCoreCLI@2
             condition: eq(variables['runTests'], true)
+            displayName: Run SmtpServer Tests
+            inputs:
+              command: test
+              projects: Rnwood.SmtpServer.Tests
+              configuration: release
+          - task: DotNetCoreCLI@2
+            condition: eq(variables['runTests'], true)
             displayName: Run Tests
             env:
               SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e

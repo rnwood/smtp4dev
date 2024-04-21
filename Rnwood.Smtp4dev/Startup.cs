@@ -117,13 +117,13 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<ITaskQueue, TaskQueue>();
             services.AddSingleton<ScriptingHost>();
 
-            services.AddSingleton<Func<RelayOptions, SmtpClient>>((relayOptions) =>
+            services.AddSingleton<Func<RelayOptions, SmtpClient>>(relayOptions =>
             {
-                if (!relayOptions.IsEnabled)
+                if (!string.IsNullOrEmpty( relayOptions.SmtpServer))
                 {
                     return null;
                 }
-
+                
                 SmtpClient result = new SmtpClient();
                 result.Connect(relayOptions.SmtpServer, relayOptions.SmtpPort, relayOptions.TlsMode);
 
