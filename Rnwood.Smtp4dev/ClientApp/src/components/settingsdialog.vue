@@ -51,6 +51,12 @@
                             <el-input-number :min=1 controls-position="right" v-model="server.numberOfSessionsToKeep" :disabled="server.lockedSettings.numberOfSessionsToKeep" />
                         </el-form-item>
 
+                        <el-form-item label="Require Authentication (web, API)" prop="server.webAuthenticationRequired">
+                            <el-icon v-if="server.lockedSettings.webAuthenticationRequired" :title="`Locked: ${server.lockedSettings.webAuthenticationRequired}`"><Lock /></el-icon>
+
+                            <el-switch v-model="server.webAuthenticationRequired" :disabled="server.lockedSettings.webAuthenticationRequired" />
+                        </el-form-item>
+
                         <el-form-item label="Disable HTML message sanitisation on display (DANGER!)" prop="server.disableMessageSanitisation">
                             <el-icon v-if="server.lockedSettings.disableMessageSanitisation" :title="`Locked: ${server.lockedSettings.disableMessageSanitisation}`"><Lock /></el-icon>
 
