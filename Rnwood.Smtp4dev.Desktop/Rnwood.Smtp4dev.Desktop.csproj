@@ -1,11 +1,17 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <OutputType>WinExe</OutputType>
+    <OutputType>Exe</OutputType>
     <TargetFramework>net8.0</TargetFramework>
     <ApplicationIcon>app\icon.ico</ApplicationIcon>
+    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
   </PropertyGroup>
 
+
+  <ItemGroup>
+    <SupportedPlatform Include="Windows" />
+  </ItemGroup>
+  
   <ItemGroup>
     <None Remove="icon.ico" />
     <None Remove="icon.svg" />
@@ -21,6 +27,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="H.NotifyIcon" Version="2.0.124" />
     <PackageReference Include="ParallelExtensionsExtras.NetFxStandard" Version="2.1.0" />
     <PackageReference Include="Photino.NET" Version="2.6.0" />
   </ItemGroup>

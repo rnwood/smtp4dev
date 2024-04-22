@@ -3,7 +3,7 @@ using Esprima.Ast;
 
 namespace Rnwood.Smtp4dev.Server.Settings
 {
-    public class ServerOptions
+    public record ServerOptions
     {
         public int Port { get; set; } = 25;
         public bool AllowRemoteConnections { get; set; } = true;

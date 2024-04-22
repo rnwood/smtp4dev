@@ -1,6 +1,6 @@
 ﻿namespace Rnwood.Smtp4dev.Server.Settings
 {
-    public class ClientOptions
+    public record ClientOptions
     {
         /// <summary>
         /// Page size for message pagination

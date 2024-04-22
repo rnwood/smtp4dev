@@ -27,6 +27,7 @@ using Microsoft.Extensions.Hosting;
 using System.Threading;
 using System.Net;
 using Rnwood.Smtp4dev.Server.Settings;
+using DeepEqual.Syntax;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -60,6 +61,11 @@ namespace Rnwood.Smtp4dev.Server
 
         private void OnServerOptionsChanged(Settings.ServerOptions arg1)
         {
+            if (arg1 .IsDeepEqual( this.lastStartOptions))
+            {
+                return;
+            }
+
             if (this.smtpServer?.IsRunning == true)
             {
                 log.Information("ServerOptions changed. Restarting server...");
@@ -435,6 +441,7 @@ namespace Rnwood.Smtp4dev.Server
         private readonly Func<RelayOptions, SmtpClient> relaySmtpClientFactory;
         private readonly NotificationsHub notificationsHub;
         private readonly IServiceScopeFactory serviceScopeFactory;
+        private Settings.ServerOptions lastStartOptions;
 
         public Exception Exception { get; private set; }
 
@@ -447,6 +454,7 @@ namespace Rnwood.Smtp4dev.Server
             try
             {
                 this.Exception = null;
+                this.lastStartOptions = this.serverOptions.CurrentValue with { };
 
                 CreateSmtpServer();
                 smtpServer.Start();

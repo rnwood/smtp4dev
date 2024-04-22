@@ -17,17 +17,23 @@ using Serilog.Core;
 using Serilog.Events;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Hosting.Server;
+using System.Reactive;
+using Microsoft.Extensions.Options;
+using Rnwood.Smtp4dev.Server.Settings;
 
 namespace Rnwood.Smtp4dev.Desktop
 {
-    class Program
+    public class Program
     {
+
+
 
         [STAThread]
         static async Task Main(string[] args)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
+                DesktopApp.HideConsole();
                 StaTaskScheduler scheduler = new StaTaskScheduler(64);
                 await Task.Factory.StartNew(() => RunAsync(args), CancellationToken.None, TaskCreationOptions.None, scheduler);
             }
@@ -41,20 +47,30 @@ namespace Rnwood.Smtp4dev.Desktop
         {
             Rnwood.Smtp4dev.Program.SetupStaticLogger(args);
             string origWorkingDir = AppContext.BaseDirectory;
+            DesktopApp app = null;
 
             try
             {
-
+                app = new DesktopApp();
 
                 var host =
-                       await Rnwood.Smtp4dev.Program.StartApp(args, true, o => o.Urls = "http://127.0.0.1:0");
+                       await Rnwood.Smtp4dev.Program.StartApp(args, true, o =>
+                       {
+                           o.Urls = "http://127.0.0.1:0";
+                           o.IsDesktopApp = true;
+
+                       });
+
+
 
 
                 var addressesFeature = host.Services.GetRequiredService<IServer>().Features.Get<IServerAddressesFeature>();
                 var urls = addressesFeature.Addresses;
                 var appUrl = new Uri(urls.First());
 
-                DesktopApp.Run(origWorkingDir, appUrl);
+                var desktopOptions = host.Services.GetService<IOptionsMonitor<DesktopOptions>>();
+
+                app.Run(origWorkingDir, appUrl, desktopOptions);
 
                 await host.StopAsync();
 
@@ -63,13 +79,16 @@ namespace Rnwood.Smtp4dev.Desktop
             catch (CommandLineOptionsException ex)
             {
                 DesktopApp.ShowFatalError(origWorkingDir, "Command Line " + (ex.IsHelpRequest ? "Help" : "Error"), ex.Message);
-                Environment.Exit(1);
                 return;
+            }
+            catch (Exception ex)
+            {
+                DesktopApp.ShowFatalError(origWorkingDir, "Fatal Error", ex.Message);
             }
             finally
             {
 
-                DesktopApp.Exit();
+                app?.Exit();
             }
         }
 

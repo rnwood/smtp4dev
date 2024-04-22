@@ -2,6 +2,8 @@
 import User from './User';
 export default class Server {
     webAuthenticationRequired: boolean;
+    minimiseToTrayIcon: boolean;
+    isDesktopApp: boolean;
 
     constructor(isRunning: boolean, exception: string, portNumber: number, hostName: string, allowRemoteConnections: boolean, numberOfMessagesToKeep: number, numberOfSessionsToKeep: number, imapPortNumber: number, settingsAreEditable: boolean, disableMessageSanitisation: boolean, automaticRelayExpression: string, tlsMode: string,     credentialsValidationExpression: string,
     authenticationRequired: boolean,
@@ -14,7 +16,11 @@ export default class Server {
         relayLogin: string,
         relayPassword: string,
         webAuthenticationRequired : boolean,
-        lockedSettings: { [key: string]: string }) {
+        lockedSettings: { [key: string]: string },
+        minimiseToTrayIcon: boolean,
+        isDesktopApp: boolean
+    )
+ {
          
         this.isRunning = isRunning; 
         this.exception = exception; 
@@ -43,7 +49,9 @@ export default class Server {
         this.relayLogin = relayLogin;
         this.relayPassword = relayPassword;
         this.lockedSettings = lockedSettings;
-        this.webAuthenticationRequired = webAuthenticationRequired
+        this.webAuthenticationRequired = webAuthenticationRequired;
+        this.minimiseToTrayIcon = minimiseToTrayIcon;
+        this.isDesktopApp = isDesktopApp;
     }
 
      

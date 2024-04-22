@@ -15,6 +15,7 @@ using System.Collections.Generic;
 using System.Runtime.ConstrainedExecution;
 using Namotion.Reflection;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using DeepEqual.Syntax;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -23,20 +24,22 @@ namespace Rnwood.Smtp4dev.Controllers
     public class ServerController : Controller
     {
         public ServerController(ISmtp4devServer server, ImapServer imapServer, IOptionsMonitor<ServerOptions> serverOptions,
-            IOptionsMonitor<RelayOptions> relayOptions, CommandLineOptions cmdLineOptions, IHostingEnvironmentHelper hostingEnvironmentHelper)
+            IOptionsMonitor<RelayOptions> relayOptions, IOptionsMonitor<DesktopOptions> desktopOptions, CommandLineOptions cmdLineOptions, IHostingEnvironmentHelper hostingEnvironmentHelper)
         {
             this.server = server;
             this.imapServer = imapServer;
             this.serverOptions = serverOptions;
             this.relayOptions = relayOptions;
+            this.desktopOptions = desktopOptions;
             this.hostingEnvironmentHelper = hostingEnvironmentHelper;
             this.cmdLineOptions = cmdLineOptions;
         }
 
-        private ISmtp4devServer server;
-        private ImapServer imapServer;
-        private IOptionsMonitor<ServerOptions> serverOptions;
-        private IOptionsMonitor<RelayOptions> relayOptions;
+        private readonly ISmtp4devServer server;
+        private readonly ImapServer imapServer;
+        private readonly IOptionsMonitor<ServerOptions> serverOptions;
+        private readonly IOptionsMonitor<RelayOptions> relayOptions;
+        private readonly IOptionsMonitor<DesktopOptions> desktopOptions;
         private readonly IHostingEnvironmentHelper hostingEnvironmentHelper;
         private readonly CommandLineOptions cmdLineOptions;
 
@@ -78,7 +81,9 @@ namespace Rnwood.Smtp4dev.Controllers
                 MessageValidationExpression = serverOptions.CurrentValue.MessageValidationExpression,
                 DisableIPv6 = serverOptions.CurrentValue.DisableIPv6,
                 WebAuthenticationRequired = serverOptions.CurrentValue.WebAuthenticationRequired,
-                Users = serverOptions.CurrentValue.Users
+                Users = serverOptions.CurrentValue.Users,
+                DesktopMinimiseToTrayIcon = desktopOptions.CurrentValue.MinimiseToTrayIcon,
+                IsDesktopApp = cmdLineOptions.IsDesktopApp
             };
         }
 
@@ -170,16 +175,18 @@ namespace Rnwood.Smtp4dev.Controllers
                     var oldValue = currentSettings.TryGetPropertyValue<object>(lockedSetting.Key);
                     var newValue = serverUpdate.TryGetPropertyValue<object>(lockedSetting.Key);
 
-                    if (!object.Equals(oldValue, newValue))
+                    if (!oldValue.IsDeepEqual(newValue))
                     {
                         return Unauthorized($"The property '{ConvertPropertyNameToJsonCasing(lockedSetting.Key)}' is locked because '{lockedSetting.Value}'");
+
                     }
                 }
             }
 
 
-            ServerOptions newSettings = serverOptions.CurrentValue;
-            RelayOptions newRelaySettings = relayOptions.CurrentValue;
+            ServerOptions newSettings = serverOptions.CurrentValue with { };
+            RelayOptions newRelaySettings = relayOptions.CurrentValue with { };
+            DesktopOptions newDesktopSettings = desktopOptions.CurrentValue with { };
 
             newSettings.Port = serverUpdate.Port;
             newSettings.HostName = serverUpdate.HostName;
@@ -198,8 +205,6 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.Users = serverUpdate.Users;
             newSettings.WebAuthenticationRequired = serverUpdate.WebAuthenticationRequired;
 
-
-
             newRelaySettings.SmtpServer = serverUpdate.RelaySmtpServer;
             newRelaySettings.SmtpPort = serverUpdate.RelaySmtpPort;
             newRelaySettings.TlsMode = Enum.Parse<SecureSocketOptions>(serverUpdate.RelayTlsMode);
@@ -209,8 +214,14 @@ namespace Rnwood.Smtp4dev.Controllers
             newRelaySettings.AutomaticEmails = serverUpdate.RelayAutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray();
             newRelaySettings.AutomaticRelayExpression = serverUpdate.RelayAutomaticRelayExpression;
 
+            newDesktopSettings.MinimiseToTrayIcon = serverUpdate.DesktopMinimiseToTrayIcon;
+
             System.IO.File.WriteAllText(hostingEnvironmentHelper.GetEditableSettingsFilePath(),
-                JsonSerializer.Serialize(new SettingsFile { ServerOptions = newSettings, RelayOptions = newRelaySettings },
+                JsonSerializer.Serialize(new SettingsFile {
+                    ServerOptions = newSettings,
+                    RelayOptions = newRelaySettings,
+                    DesktopOptions = newDesktopSettings
+                },
                     SettingsFileSerializationContext.Default.SettingsFile)
             );
 
@@ -241,6 +252,8 @@ namespace Rnwood.Smtp4dev.Controllers
     {
         public ServerOptions ServerOptions { get; set; }
         public RelayOptions RelayOptions { get; set; }
+
+        public DesktopOptions DesktopOptions { get; set; }
     }
 
 

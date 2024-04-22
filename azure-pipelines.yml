@@ -18,7 +18,7 @@ variables:
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
     isreleasebuild: ${{ true }}
     tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
-    docker_tags: #Set by init script
+    docker_tags: "" #Set by init script
     version_major: "" #Set by init script
     version_minor: "" #Set by init script
     version_build: "" #Set by init script
@@ -184,7 +184,7 @@ stages:
               command: publish
               projects: "Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj"
               publishWebProjects: false
-              arguments: '-c Release -r win-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
+              arguments: '-c Release -r win-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
           - task: ExtractFiles@1
             displayName: Extract files for E2E tests
             inputs:
@@ -210,7 +210,7 @@ stages:
           #     command: publish
           #     projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
           #     publishWebProjects: false
-          #     arguments: '-c Release -r linux-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -p:PublishReadyToRun=true -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
+          #     arguments: '-c Release -r linux-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
           # - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop-linux-x64-$(tag).zip
           #   displayName: Rename artifact
           # - publish: $(Build.ArtifactStagingDirectory)/linux-x64-desktop
@@ -320,7 +320,7 @@ stages:
               publishWebProjects: false
               zipAfterPublish: false
               modifyOutputPath: false
-              arguments: '-c Release -p:version=$(tag) -o out'
+              arguments: '-c Release -p:version=$(tag) -r win-x64 --self-contained -o out'
           - task: Docker@2
             displayName: Build image
             inputs:
@@ -471,6 +471,7 @@ stages:
             inputs:
               targetType: inline
               script: |
+                write-host "Docker tags: '$(docker_tags)'"
                 docker pull $(docker_repo):windows-amd64-$(tag)
 
                 ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {

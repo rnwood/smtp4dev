@@ -21,6 +21,7 @@ using System.Threading;
 using Microsoft.AspNetCore.Http;
 using Org.BouncyCastle.Utilities.Net;
 using Rnwood.Smtp4dev.Server.Settings;
+using DeepEqual.Syntax;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -40,9 +41,17 @@ namespace Rnwood.Smtp4dev.Server
 
         private void OnServerOptionsChanged(ServerOptions serverOptions)
         {
-            Stop();
+            if (serverOptions.IsDeepEqual( this.lastStartOptions))
+            {
+                return;
+            }
 
-            TryStart();
+            if (IsRunning)
+            {
+                Stop();
+
+                TryStart();
+            }
         }
 
         public bool IsRunning
@@ -55,6 +64,8 @@ namespace Rnwood.Smtp4dev.Server
 
         public async void TryStart()
         {
+            this.lastStartOptions = serverOptions.CurrentValue with { };
+
             if (!serverOptions.CurrentValue.ImapPort.HasValue)
             {
                 log.Information("IMAP server disabled");
@@ -142,7 +153,7 @@ namespace Rnwood.Smtp4dev.Server
                     {
                         return false;
                     }
-                })) ;
+                }))
                 {
                     await Task.Delay(100);
                 }
@@ -165,6 +176,7 @@ namespace Rnwood.Smtp4dev.Server
 
         private IMAP_Server imapServer;
         private IOptionsMonitor<ServerOptions> serverOptions;
+        private ServerOptions lastStartOptions;
         private readonly IServiceScopeFactory serviceScopeFactory;
         private readonly ScriptingHost scriptingHost;
         private readonly ILogger log = Log.ForContext<ImapServer>();
