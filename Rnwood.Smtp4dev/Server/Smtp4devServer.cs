@@ -196,6 +196,8 @@ namespace Rnwood.Smtp4dev.Server
 
         private Task OnAuthenticationCredentialsValidationRequired(object sender, AuthenticationCredentialsValidationEventArgs e)
         {
+            
+
             var sessionId = activeSessionsToDbId[e.Session];
             using var scope = serviceScopeFactory.CreateScope();
             Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
@@ -205,6 +207,12 @@ namespace Rnwood.Smtp4dev.Server
 
             AuthenticationResult? result = scriptingHost.ValidateCredentials(apiSession, e.Credentials);
 
+            if (result == null && this.serverOptions.CurrentValue.SmtpAllowAnyCredentials)
+            {
+                this.log.Information("SMTP auth success (allow any credentials is on)");
+                result = AuthenticationResult.Success;
+            }
+
             if (result == null)
             {
                 if (e.Credentials is IAuthenticationCredentialsCanValidateWithPassword val)
@@ -213,7 +221,7 @@ namespace Rnwood.Smtp4dev.Server
                     if (user != null && val.ValidateResponse(user.Password))
                     {
                         result = AuthenticationResult.Success;
-                        this.log.Warning("SMTP auth success for user {user}", val.Username);
+                        this.log.Information("SMTP auth success for user {user}", val.Username);
 
                     }
                     else

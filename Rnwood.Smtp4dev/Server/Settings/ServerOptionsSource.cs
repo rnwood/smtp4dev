@@ -36,6 +36,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public bool? DisableMessageSanitisation { get; set; }
         public string CredentialsValidationExpression { get; set; }
         public bool? AuthenticationRequired { get; set; }
+
+        public bool? SmtpAllowAnyCredentials { get; set; }
         public bool? SecureConnectionRequired { get; set; }
         public string RecipientValidationExpression { get; set; }
 

@@ -48,7 +48,8 @@ namespace Rnwood.Smtp4dev
                 { "applicationName=","",  data => map.Add(data, x => x.ApplicationName), true},
                 { "authenticationrequired", "Requires that SMTP and IMAP clients authenticate", data => map.Add((data != null).ToString(), x => x.ServerOptions.AuthenticationRequired) },
                 { "secureconnectionrequired", "Requires that SMTP clients use SSL/TLS", data => map.Add((data != null).ToString(), x => x.ServerOptions.SecureConnectionRequired) },
-				{ "webauthenticationrequired", "Require authentication for web interface", data => map.Add((data != null).ToString(), x => x.ServerOptions.WebAuthenticationRequired) },
+                { "smtpallowanycredentials", "True if the SMTP server will allow any credentials to be used without checking them again the 'Users'", data => map.Add((data != null).ToString(), x => x.ServerOptions.SmtpAllowAnyCredentials) },
+                { "webauthenticationrequired", "Require authentication for web interface", data => map.Add((data != null).ToString(), x => x.ServerOptions.WebAuthenticationRequired) },
                 { "user=", "Adds a user and password combination for web, SMTP and IMAP. Use format username=password. This option can be repeated to add multiple users.", data =>
 					   map.Add(data, x => x.ServerOptions.Users)
 				}

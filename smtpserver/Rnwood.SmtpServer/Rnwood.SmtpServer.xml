@@ -2390,40 +2390,6 @@
             </summary>
             <seealso cref="T:Rnwood.SmtpServer.IServerOptions" />
         </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.#ctor(System.Boolean,System.Boolean,System.Boolean)">
-            <summary>
-                Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.ServerOptions" /> class.
-            </summary>
-            <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-            <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.#ctor(System.Boolean,System.Boolean,System.Int32,System.Boolean)">
-            <summary>
-                Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.ServerOptions" /> class.
-            </summary>
-            <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-            <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
-            <param name="portNumber">The port number.</param>
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.#ctor(System.Boolean,System.Boolean,System.Int32,System.Boolean,System.Security.Cryptography.X509Certificates.X509Certificate)">
-            <summary>
-                Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.ServerOptions" /> class.
-            </summary>
-            <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-            <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
-            <param name="portNumber">The port number.</param>
-            <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.#ctor(System.Boolean,System.Boolean,System.Int32,System.Boolean,System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Certificate)">
-            <summary>
-                Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.ServerOptions" /> class.
-            </summary>
-            <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-            <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
-            <param name="portNumber">The port number.</param>
-            <param name="implicitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-            <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
-        </member>
         <member name="M:Rnwood.SmtpServer.ServerOptions.#ctor(System.Boolean,System.Boolean,System.String,System.Int32,System.Boolean,System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Certificate)">
             <summary>
                 Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.ServerOptions" /> class.
@@ -2434,14 +2400,6 @@
             <param name="portNumber">The port number.</param>
             <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
             <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.#ctor(System.Boolean,System.Boolean,System.Boolean,System.Security.Cryptography.X509Certificates.X509Certificate)">
-            <summary>
-                Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.ServerOptions" /> class.
-            </summary>
-            <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-            <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
-            <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
         </member>
         <member name="P:Rnwood.SmtpServer.ServerOptions.EnabledAuthMechanisms">
             <summary>
