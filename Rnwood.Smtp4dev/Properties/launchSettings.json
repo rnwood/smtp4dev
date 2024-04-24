@@ -2,7 +2,7 @@
   "profiles": {
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "--hostname=BLAH --smtpport=2525 --user:u1=p1 --user:u2=p2",
+      "commandLineArgs": "",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"

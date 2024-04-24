@@ -2,6 +2,7 @@
 import User from './User';
 export default class Server {
     webAuthenticationRequired: boolean;
+    smtpAllowAnyCredentials: boolean;
     minimiseToTrayIcon: boolean;
     isDesktopApp: boolean;
 
@@ -16,6 +17,7 @@ export default class Server {
         relayLogin: string,
         relayPassword: string,
         webAuthenticationRequired : boolean,
+		smtpAllowAnyCredentials: boolean,
         lockedSettings: { [key: string]: string },
         minimiseToTrayIcon: boolean,
         isDesktopApp: boolean
@@ -50,6 +52,7 @@ export default class Server {
         this.relayPassword = relayPassword;
         this.lockedSettings = lockedSettings;
         this.webAuthenticationRequired = webAuthenticationRequired;
+		this.smtpAllowAnyCredentials = smtpAllowAnyCredentials;
         this.minimiseToTrayIcon = minimiseToTrayIcon;
         this.isDesktopApp = isDesktopApp;
     }

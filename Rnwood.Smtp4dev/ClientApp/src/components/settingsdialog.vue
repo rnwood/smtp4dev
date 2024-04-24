@@ -51,7 +51,7 @@
                             <el-input-number :min=1 controls-position="right" v-model="server.numberOfSessionsToKeep" :disabled="server.lockedSettings.numberOfSessionsToKeep" />
                         </el-form-item>
 
-                        <el-form-item label="Require Authentication (web, API)" prop="server.webAuthenticationRequired">
+                        <el-form-item label="Require Authentication (web, API)" prop="server.webAuthenticationRequired" :rules="{validator: checkWebAuthHasUsers}">
                             <el-icon v-if="server.lockedSettings.webAuthenticationRequired" :title="`Locked: ${server.lockedSettings.webAuthenticationRequired}`"><Lock /></el-icon>
 
                             <el-switch v-model="server.webAuthenticationRequired" :disabled="server.lockedSettings.webAuthenticationRequired" />
@@ -89,6 +89,12 @@
                             <el-icon v-if="server.lockedSettings.secureConnectionRequired" :title="`Locked: ${server.lockedSettings.secureConnectionRequired}`"><Lock /></el-icon>
 
                             <el-switch v-model="server.secureConnectionRequired" :disabled="server.lockedSettings.secureConnectionRequired" />
+                        </el-form-item>
+
+                        <el-form-item label="Allow Any Credentials (off = see 'Users')" prop="server.smtpAllowAnyCredentials">
+                            <el-icon v-if="server.lockedSettings.smtpAllowAnyCredentials" :title="`Locked: ${server.lockedSettings.smtpAllowAnyCredentials}`"><Lock /></el-icon>
+
+                            <el-switch v-model="server.smtpAllowAnyCredentials" :disabled="server.lockedSettings.smtpAllowAnyCredentials" />
                         </el-form-item>
 
                         <el-form-item label="Credentials validation expression (see comments in appsettings.json)" prop="server.credentialsValidationExpression">
@@ -325,6 +331,14 @@
                 callback();
             }
 
+        }
+
+        checkWebAuthHasUsers(rule: any, value: any, callback: any) {
+            if (value && !this.server?.users?.length) {
+                callback("You must add at least one user under 'Users' to enable this setting.")
+            } else {
+                callback();
+            }
         }
 
         @Prop()

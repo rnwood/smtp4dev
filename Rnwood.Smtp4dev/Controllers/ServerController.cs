@@ -75,6 +75,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 DisableMessageSanitisation = serverOptions.CurrentValue.DisableMessageSanitisation,
                 TlsMode = serverOptions.CurrentValue.TlsMode.ToString(),
                 AuthenticationRequired = serverOptions.CurrentValue.AuthenticationRequired,
+                SmtpAllowAnyCredentials = serverOptions.CurrentValue.SmtpAllowAnyCredentials,
                 SecureConnectionRequired = serverOptions.CurrentValue.SecureConnectionRequired,
                 CredentialsValidationExpression = serverOptions.CurrentValue.CredentialsValidationExpression,
                 RecipientValidationExpression = serverOptions.CurrentValue.RecipientValidationExpression,
@@ -204,6 +205,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.DisableIPv6 = serverUpdate.DisableIPv6;
             newSettings.Users = serverUpdate.Users;
             newSettings.WebAuthenticationRequired = serverUpdate.WebAuthenticationRequired;
+            newSettings.SmtpAllowAnyCredentials = serverUpdate.SmtpAllowAnyCredentials;
 
             newRelaySettings.SmtpServer = serverUpdate.RelaySmtpServer;
             newRelaySettings.SmtpPort = serverUpdate.RelaySmtpPort;
