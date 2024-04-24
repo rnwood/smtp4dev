@@ -4,7 +4,7 @@ using System.Text.Json.Serialization;
 
 namespace Rnwood.Smtp4dev.Server.Settings
 {
-    public class RelayOptions
+    public record RelayOptions
     {
         private int smtpPort = 25;
         public bool IsEnabled => SmtpServer != string.Empty;

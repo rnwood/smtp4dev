@@ -251,6 +251,19 @@
 
 
                     </el-tab-pane>
+                    <el-tab-pane label="Desktop" v-if="server.isDesktopApp">
+
+
+
+                        <el-form-item label="Minimise to system notification tray icon" prop="server.desktopMinimiseToTrayIcon">
+
+                            <el-icon v-if="server.lockedSettings.desktopMinimiseToTrayIcon" :title="`Locked: ${server.lockedSettings.desktopMinimiseToTrayIcon}`"><Lock /></el-icon>
+
+                            <el-switch v-model="server.desktopMinimiseToTrayIcon" :disabled="server.lockedSettings.desktopMinimiseToTrayIcon">
+                            </el-switch>
+
+                        </el-form-item>
+                    </el-tab-pane>
                 </el-tabs>
             </el-form>
         </div>
@@ -306,7 +319,7 @@
         }
 
         checkUsernameUnique(rule: any, value: any, callback: any) {
-            if (this.server?.users.filter(u => u != value).find(u => u.username == value.username)) {
+            if (value && this.server?.users.filter(u => u != value).find(u => u.username == value.username)) {
                 callback(new Error('Username must be unique'));
             } else {
                 callback();

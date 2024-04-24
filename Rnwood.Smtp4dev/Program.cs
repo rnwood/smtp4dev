@@ -21,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Mono.Options;
+using Rnwood.Smtp4dev.Controllers;
 using Rnwood.Smtp4dev.Server;
 using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.Smtp4dev.Service;
@@ -183,7 +184,8 @@ namespace Rnwood.Smtp4dev
                                 CmdLineArgs = Environment.GetCommandLineArgs(),
                                 CmdLineOptions = cmdLineOptions,
                                 ServerOptions = config.GetSection("ServerOptions").Get<ServerOptions>(),
-                                RelayOption = config.GetSection("RelayOptions").Get<RelayOptions>()
+                                RelayOption = config.GetSection("RelayOptions").Get<RelayOptions>(),
+                                DesktopOptions = config.GetSection("DesktopOptions").Get<DesktopOptions>()
                             }, SettingsDebugInfoSerializationContext.Default.SettingsDebugInfo));
                         }
 
@@ -265,6 +267,8 @@ namespace Rnwood.Smtp4dev
         public CommandLineOptions CmdLineOptions { get; set; }
         public ServerOptions ServerOptions { get; set; }
         public RelayOptions RelayOption { get; set; }
+
+        public DesktopOptions DesktopOptions { get; set; }
     }
 
     [JsonSourceGenerationOptions(WriteIndented = true)]

@@ -1,5 +1,5 @@
 # escape=`
-FROM mcr.microsoft.com/dotnet/aspnet:8.0.4-windowsservercore-ltsc2019 AS final
+FROM mcr.microsoft.com/windows/nanoserver:ltsc2019 AS final
 COPY out /app
 EXPOSE 80
 EXPOSE 25
@@ -7,4 +7,4 @@ EXPOSE 143
 ENV ASPNETCORE_HTTP_PORTS 80
 VOLUME c:\smtp4dev
 WORKDIR c:\
-ENTRYPOINT ["dotnet", "/app/Rnwood.Smtp4dev.dll"]
+ENTRYPOINT ["/app/Rnwood.Smtp4dev.exe"]

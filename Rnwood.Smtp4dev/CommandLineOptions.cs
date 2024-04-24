@@ -7,6 +7,8 @@ namespace Rnwood.Smtp4dev
         public ServerOptionsSource ServerOptions { get; set; }
         public RelayOptionsSource RelayOptions { get; set; }
 
+        public DesktopOptionsSource DesktopOptions { get; set; }
+
         public string Urls { get; set; }
 
         public bool NoUserSettings { get; set; }
@@ -14,5 +16,6 @@ namespace Rnwood.Smtp4dev
         public string BaseAppDataPath { get; set; }
         public string InstallPath { get; set; }
         public string ApplicationName { get; set; }
+        public bool IsDesktopApp { get; set; }
     }
 }

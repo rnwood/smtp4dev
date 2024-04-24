@@ -6,7 +6,7 @@ using System.Linq;
 namespace Rnwood.Smtp4dev.Server.Settings
 {
     [TypeConverter(typeof(UserFromStringConverter))]
-    public class User
+    public record User
     {
         public string Username { get; set; }
         public string Password { get; set; }

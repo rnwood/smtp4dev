@@ -4,7 +4,7 @@ using Esprima.Ast;
 
 namespace Rnwood.Smtp4dev.Server.Settings
 {
-    public class ServerOptionsSource
+    public record ServerOptionsSource
     {
         private int? port;
 
@@ -43,7 +43,6 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public bool? DisableIPv6 { get; set; }
 
         public User[] Users { get; set; }
-
-		public bool? WebAuthenticationRequired { get; set; }
-	}
+        public bool? WebAuthenticationRequired { get; internal set; }
+    }
 }
