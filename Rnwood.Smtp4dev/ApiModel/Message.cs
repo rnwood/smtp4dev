@@ -55,7 +55,9 @@ namespace Rnwood.Smtp4dev.ApiModel
                     foreach (var internetAddress in MimeMessage.To.Where(t => t is MailboxAddress))
                     {
                         var to = (MailboxAddress)internetAddress;
-                        recipients.Remove(PunyCodeReplacer.DecodePunycode(to.Address));
+                        var decodedToAddress = PunyCodeReplacer.DecodePunycode(to.Address);
+                        recipients.Remove(decodedToAddress.TrimEnd('.'));
+                        recipients.Remove($"{decodedToAddress}.");
                     }
                 }
 
@@ -66,7 +68,9 @@ namespace Rnwood.Smtp4dev.ApiModel
                     foreach (var internetAddress in MimeMessage.Cc.Where(t => t is MailboxAddress))
                     {
                         var cc = (MailboxAddress)internetAddress;
-                        recipients.Remove(PunyCodeReplacer.DecodePunycode(cc.Address));
+                        var decodedCCAddress = PunyCodeReplacer.DecodePunycode(cc.Address);
+                        recipients.Remove(decodedCCAddress.TrimEnd('.'));
+                        recipients.Remove($"{decodedCCAddress}.");
                     }
                 }
 
@@ -145,7 +149,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         {
             var contentEntity = GetPart(result, cid);
 
-            if (contentEntity is MimePart mimePart)
+            if (contentEntity is MimePart mimePart && mimePart.Content != null)
             {
                 return new FileStreamResult(mimePart.Content.Open(), contentEntity.ContentType?.MimeType ?? "application/text")
                 {
@@ -171,7 +175,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         {
             var contentEntity = GetPart(result, id);
 
-            if (contentEntity is MimePart part)
+            if (contentEntity is MimePart part && part.Content != null)
             {
                 var encoding = part.ContentType.CharsetEncoding ?? ApiModel.Message.GetSessionEncodingOrAssumed(result);
                 using var reader = new StreamReader(part.Content.Open(), encoding);
