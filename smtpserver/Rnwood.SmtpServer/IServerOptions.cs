@@ -45,11 +45,6 @@ public interface IServerOptions
     /// </summary>
     Encoding FallbackEncoding { get; }
 
-    /// <summary>
-    ///     Gets or sets the list of Supported Auth Mechanism Identifiers.
-    /// </summary>
-    HashSet<IAuthMechanism> EnabledAuthMechanisms { get; set; }
-
     event AsyncEventHandler<AuthenticationCredentialsValidationEventArgs> AuthenticationCredentialsValidationRequiredEventHandler;
     event AsyncEventHandler<ConnectionEventArgs> MessageCompletedEventHandler;
     event AsyncEventHandler<MessageEventArgs> MessageReceivedEventHandler;

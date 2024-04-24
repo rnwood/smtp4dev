@@ -52,40 +52,44 @@ namespace Rnwood.Smtp4dev.Controllers
         {
             var lockedSettings = GetLockedSettings(true);
 
+            var serverOptionsCurrentValue = serverOptions.CurrentValue;
+            var relayOptionsCurrentValue = relayOptions.CurrentValue;
             return new ApiModel.Server()
             {
                 IsRunning = server.IsRunning,
                 LockedSettings = lockedSettings,
-                Port = serverOptions.CurrentValue.Port,
-                ImapPort = serverOptions.CurrentValue.ImapPort,
-                HostName = serverOptions.CurrentValue.HostName,
-                AllowRemoteConnections = serverOptions.CurrentValue.AllowRemoteConnections,
-                NumberOfMessagesToKeep = serverOptions.CurrentValue.NumberOfMessagesToKeep,
-                NumberOfSessionsToKeep = serverOptions.CurrentValue.NumberOfSessionsToKeep,
+                Port = serverOptionsCurrentValue.Port,
+                ImapPort = serverOptionsCurrentValue.ImapPort,
+                HostName = serverOptionsCurrentValue.HostName,
+                AllowRemoteConnections = serverOptionsCurrentValue.AllowRemoteConnections,
+                NumberOfMessagesToKeep = serverOptionsCurrentValue.NumberOfMessagesToKeep,
+                NumberOfSessionsToKeep = serverOptionsCurrentValue.NumberOfSessionsToKeep,
                 Exception = server.Exception?.Message,
-                RelaySmtpServer = relayOptions.CurrentValue.SmtpServer,
-                RelayTlsMode = relayOptions.CurrentValue.TlsMode.ToString(),
-                RelaySmtpPort = relayOptions.CurrentValue.SmtpPort,
-                RelayLogin = relayOptions.CurrentValue.Login,
-                RelayPassword = relayOptions.CurrentValue.Password,
-                RelayAutomaticEmails = relayOptions.CurrentValue.AutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray(),
-                RelaySenderAddress = relayOptions.CurrentValue.SenderAddress,
-                RelayAutomaticRelayExpression = relayOptions.CurrentValue.AutomaticRelayExpression,
+                RelaySmtpServer = relayOptionsCurrentValue.SmtpServer,
+                RelayTlsMode = relayOptionsCurrentValue.TlsMode.ToString(),
+                RelaySmtpPort = relayOptionsCurrentValue.SmtpPort,
+                RelayLogin = relayOptionsCurrentValue.Login,
+                RelayPassword = relayOptionsCurrentValue.Password,
+                RelayAutomaticEmails = relayOptionsCurrentValue.AutomaticEmails.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray(),
+                RelaySenderAddress = relayOptionsCurrentValue.SenderAddress,
+                RelayAutomaticRelayExpression = relayOptionsCurrentValue.AutomaticRelayExpression,
                 SettingsAreEditable = hostingEnvironmentHelper.SettingsAreEditable,
-                DisableMessageSanitisation = serverOptions.CurrentValue.DisableMessageSanitisation,
-                TlsMode = serverOptions.CurrentValue.TlsMode.ToString(),
-                AuthenticationRequired = serverOptions.CurrentValue.AuthenticationRequired,
-                SmtpAllowAnyCredentials = serverOptions.CurrentValue.SmtpAllowAnyCredentials,
-                SecureConnectionRequired = serverOptions.CurrentValue.SecureConnectionRequired,
-                CredentialsValidationExpression = serverOptions.CurrentValue.CredentialsValidationExpression,
-                RecipientValidationExpression = serverOptions.CurrentValue.RecipientValidationExpression,
-                MessageValidationExpression = serverOptions.CurrentValue.MessageValidationExpression,
-                DisableIPv6 = serverOptions.CurrentValue.DisableIPv6,
-                WebAuthenticationRequired = serverOptions.CurrentValue.WebAuthenticationRequired,
-                Users = serverOptions.CurrentValue.Users,
+                DisableMessageSanitisation = serverOptionsCurrentValue.DisableMessageSanitisation,
+                TlsMode = serverOptionsCurrentValue.TlsMode.ToString(),
+                AuthenticationRequired = serverOptionsCurrentValue.AuthenticationRequired,
+                SmtpAllowAnyCredentials = serverOptionsCurrentValue.SmtpAllowAnyCredentials,
+                SecureConnectionRequired = serverOptionsCurrentValue.SecureConnectionRequired,
+                CredentialsValidationExpression = serverOptionsCurrentValue.CredentialsValidationExpression,
+                RecipientValidationExpression = serverOptionsCurrentValue.RecipientValidationExpression,
+                MessageValidationExpression = serverOptionsCurrentValue.MessageValidationExpression,
+                DisableIPv6 = serverOptionsCurrentValue.DisableIPv6,
+                WebAuthenticationRequired = serverOptionsCurrentValue.WebAuthenticationRequired,
+                Users = serverOptionsCurrentValue.Users,
                 DesktopMinimiseToTrayIcon = desktopOptions.CurrentValue.MinimiseToTrayIcon,
-                IsDesktopApp = cmdLineOptions.IsDesktopApp
-            };
+                IsDesktopApp = cmdLineOptions.IsDesktopApp,
+				SmtpEnabledAuthTypesWhenNotSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+				SmtpEnabledAuthTypesWhenSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+			};
         }
 
         private IDictionary<string, string> GetLockedSettings(bool toJsonCasing)
@@ -206,8 +210,10 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.Users = serverUpdate.Users;
             newSettings.WebAuthenticationRequired = serverUpdate.WebAuthenticationRequired;
             newSettings.SmtpAllowAnyCredentials = serverUpdate.SmtpAllowAnyCredentials;
+			newSettings.SmtpEnabledAuthTypesWhenNotSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection);
+			newSettings.SmtpEnabledAuthTypesWhenSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection);
 
-            newRelaySettings.SmtpServer = serverUpdate.RelaySmtpServer;
+			newRelaySettings.SmtpServer = serverUpdate.RelaySmtpServer;
             newRelaySettings.SmtpPort = serverUpdate.RelaySmtpPort;
             newRelaySettings.TlsMode = Enum.Parse<SecureSocketOptions>(serverUpdate.RelayTlsMode);
             newRelaySettings.SenderAddress = serverUpdate.RelaySenderAddress;

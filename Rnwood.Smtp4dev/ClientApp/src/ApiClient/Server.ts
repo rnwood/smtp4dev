@@ -5,6 +5,8 @@ export default class Server {
     smtpAllowAnyCredentials: boolean;
     minimiseToTrayIcon: boolean;
     isDesktopApp: boolean;
+    smtpEnabledAuthTypesWhenNotSecureConnection: string[];
+    smtpEnabledAuthTypesWhenSecureConnection: string[];
 
     constructor(isRunning: boolean, exception: string, portNumber: number, hostName: string, allowRemoteConnections: boolean, numberOfMessagesToKeep: number, numberOfSessionsToKeep: number, imapPortNumber: number, settingsAreEditable: boolean, disableMessageSanitisation: boolean, automaticRelayExpression: string, tlsMode: string,     credentialsValidationExpression: string,
     authenticationRequired: boolean,
@@ -20,7 +22,9 @@ export default class Server {
 		smtpAllowAnyCredentials: boolean,
         lockedSettings: { [key: string]: string },
         minimiseToTrayIcon: boolean,
-        isDesktopApp: boolean
+        isDesktopApp: boolean,
+        smtpEnabledAuthTypesWhenNotSecureConnection: string[],
+        smtpEnabledAuthTypesWhenSecureConnection: string[]
     )
  {
          
@@ -55,6 +59,9 @@ export default class Server {
 		this.smtpAllowAnyCredentials = smtpAllowAnyCredentials;
         this.minimiseToTrayIcon = minimiseToTrayIcon;
         this.isDesktopApp = isDesktopApp;
+        this.smtpEnabledAuthTypesWhenNotSecureConnection = smtpEnabledAuthTypesWhenNotSecureConnection;
+        this.smtpEnabledAuthTypesWhenSecureConnection = smtpEnabledAuthTypesWhenSecureConnection;
+
     }
 
      

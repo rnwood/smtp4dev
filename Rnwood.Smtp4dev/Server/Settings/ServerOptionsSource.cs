@@ -46,5 +46,10 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public User[] Users { get; set; }
         public bool? WebAuthenticationRequired { get; internal set; }
+
+        public string[] SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; } = [];
+
+        public string[] SmtpEnabledAuthTypesWhenSecureConnection { get; set; } = [];
+
     }
 }

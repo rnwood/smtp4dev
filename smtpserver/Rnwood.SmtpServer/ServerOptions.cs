@@ -24,6 +24,8 @@ public class ServerOptions : IServerOptions
     private readonly bool allowRemoteConnections;
     private readonly bool enableIpV6;
     private readonly bool requireAuthentication;
+    private readonly string[] nonSecureAuthMechanismIds;
+    private readonly string[] secureAuthMechanismIds;
     private readonly X509Certificate implcitTlsCertificate;
     private readonly X509Certificate startTlsCertificate;
 
@@ -35,6 +37,9 @@ public class ServerOptions : IServerOptions
     /// <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
     /// <param name="domainName">The domain name the server will send in greeting.</param>
     /// <param name="portNumber">The port number.</param>
+    /// <param name="requireAuthentication"></param>
+    /// <param name="nonSecureAuthMechanismIds">The identifier of AUTH mechanisms that will be allowed for insecure connections.</param>
+    /// <param name="secureAuthMechanismNamesIds">The identifier of AUTH mechanisms that will be allowed for secure connections.</param>
     /// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
     /// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
     public ServerOptions(
@@ -43,6 +48,8 @@ public class ServerOptions : IServerOptions
         string domainName,
         int portNumber,
         bool requireAuthentication,
+        string[] nonSecureAuthMechanismIds,
+        string[] secureAuthMechanismNamesIds,
         X509Certificate implcitTlsCertificate,
         X509Certificate startTlsCertificate)
     {
@@ -53,14 +60,11 @@ public class ServerOptions : IServerOptions
         this.allowRemoteConnections = allowRemoteConnections;
         this.enableIpV6 = enableIpV6;
         this.requireAuthentication = requireAuthentication;
+        this.nonSecureAuthMechanismIds = nonSecureAuthMechanismIds;
+        this.secureAuthMechanismIds = secureAuthMechanismNamesIds ?? throw new ArgumentNullException(nameof(secureAuthMechanismNamesIds));
     }
 
 
-    /// <summary>
-    ///     Gets or sets a List of active Auth Mechanism Identifiers.
-    /// </summary>
-    public HashSet<IAuthMechanism> EnabledAuthMechanisms { get; set; } =
-        new(AuthMechanisms.All());
 
     /// <inheritdoc />
     public virtual string DomainName { get; }
@@ -128,9 +132,18 @@ public class ServerOptions : IServerOptions
         Task.FromResult(implcitTlsCertificate ?? startTlsCertificate);
 
     /// <inheritdoc />
-    public virtual Task<bool> IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism) =>
-         Task.FromResult(
-            EnabledAuthMechanisms.Contains(authMechanism));
+    public virtual Task<bool> IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism)
+    {
+
+        if (connection.Session.SecureConnection)
+        {
+            return Task.FromResult(this.secureAuthMechanismIds.Contains(authMechanism.Identifier, StringComparer.InvariantCultureIgnoreCase));
+        } else
+        {
+
+            return Task.FromResult(this.nonSecureAuthMechanismIds.Contains(authMechanism.Identifier, StringComparer.InvariantCultureIgnoreCase));
+        }
+    }
 
     /// <inheritdoc />
     public Task<bool> IsSessionLoggingEnabled(IConnection connection) => Task.FromResult(false);

@@ -54,7 +54,7 @@ public partial class ClientTests
     [Fact]
     public async Task MailKit_SmtpUtf8()
     {
-        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, (int)StandardSmtpPort.AssignAutomatically, false)))
+        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, "test", (int)StandardSmtpPort.AssignAutomatically, false, [], [], null, null)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -82,7 +82,7 @@ public partial class ClientTests
     [Fact]
     public async Task MailKit_NonSSL()
     {
-        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, (int)StandardSmtpPort.AssignAutomatically, false)))
+        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, "test",(int)StandardSmtpPort.AssignAutomatically, false, [], [], null, null)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -109,7 +109,7 @@ public partial class ClientTests
     public async Task MailKit_StartTLS()
     {
         using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false,false, Dns.GetHostName(),
-                   (int)StandardSmtpPort.AssignAutomatically, false,
+                   (int)StandardSmtpPort.AssignAutomatically, false, [], [],
                    null, CreateSelfSignedCertificate())))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
@@ -137,7 +137,7 @@ public partial class ClientTests
     public async Task MailKit_ImplicitTLS()
     {
         using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false,false, Dns.GetHostName(),
-                   (int)StandardSmtpPort.AssignAutomatically, false,
+                   (int)StandardSmtpPort.AssignAutomatically, false, [], [],
                    CreateSelfSignedCertificate(), null)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
@@ -165,7 +165,7 @@ public partial class ClientTests
     [Fact]
     public async Task MailKit_NonSSL_StressTest()
     {
-        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false, false, (int) StandardSmtpPort.AssignAutomatically, false)))
+        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false, false, "test", (int) StandardSmtpPort.AssignAutomatically, false, [], [], null, null)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 

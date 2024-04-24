@@ -91,6 +91,38 @@
                             <el-switch v-model="server.secureConnectionRequired" :disabled="server.lockedSettings.secureConnectionRequired" />
                         </el-form-item>
 
+                        <el-form-item label="Auth Types when not secure connection" prop="server.smtpEnabledAuthTypesWhenNotSecureConnection">
+                        
+                            <el-select v-model="server.smtpEnabledAuthTypesWhenNotSecureConnection"
+                                       multiple
+                                       style="width: 100%" :disabled="server.lockedSettings.smtpEnabledAuthTypesWhenNotSecureConnection">
+                                <el-option v-for="item in ['ANONYMOUS', 'PLAIN', 'LOGIN', 'CRAM-MD5']"
+                                           :key="item"
+                                           :label="item"
+                                           :value="item" />
+                                <template #prefix>
+                                    <el-icon v-if="server.lockedSettings.smtpEnabledAuthTypesWhenNotSecureConnection" :title="`Locked: ${server.lockedSettings.smtpEnabledAuthTypesWhenNotSecureConnection}`"><Lock /></el-icon>
+                                </template>
+                            </el-select>
+                        </el-form-item>
+
+                        <el-form-item label="Auth Types when secure connection" prop="server.smtpEnabledAuthTypesWhenSecureConnection">
+                  
+                            <el-select v-model="server.smtpEnabledAuthTypesWhenSecureConnection"
+                                       multiple
+                                       style="width: 100%" :disabled="server.lockedSettings.smtpEnabledAuthTypesWhenSecureConnection">
+                                <el-option v-for="item in ['ANONYMOUS', 'PLAIN', 'LOGIN', 'CRAM-MD5']"
+                                           :key="item"
+                                           :label="item"
+                                           :value="item" />
+                                <template #prefix>
+                                    <el-icon v-if="server.lockedSettings.smtpEnabledAuthTypesWhenSecureConnection" :title="`Locked: ${server.lockedSettings.smtpEnabledAuthTypesWhenSecureConnection}`"><Lock /></el-icon>
+                                </template>
+                            </el-select>
+                        </el-form-item>
+
+
+
                         <el-form-item label="Allow Any Credentials (off = see 'Users')" prop="server.smtpAllowAnyCredentials">
                             <el-icon v-if="server.lockedSettings.smtpAllowAnyCredentials" :title="`Locked: ${server.lockedSettings.smtpAllowAnyCredentials}`"><Lock /></el-icon>
 
