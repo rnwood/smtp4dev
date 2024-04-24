@@ -84,6 +84,7 @@ namespace Rnwood.Smtp4dev.Server
 
             Settings.ServerOptions serverOptionsValue = serverOptions.CurrentValue;
             this.smtpServer = new Rnwood.SmtpServer.SmtpServer(new SmtpServer.ServerOptions(serverOptionsValue.AllowRemoteConnections, !serverOptionsValue.DisableIPv6, serverOptionsValue.HostName, serverOptionsValue.Port, serverOptionsValue.AuthenticationRequired,
+                serverOptionsValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries|StringSplitOptions.RemoveEmptyEntries), serverOptionsValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
                 serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null
             ));

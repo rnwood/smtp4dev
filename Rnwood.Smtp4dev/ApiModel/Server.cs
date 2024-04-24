@@ -56,6 +56,9 @@ namespace Rnwood.Smtp4dev.ApiModel
         public bool DesktopMinimiseToTrayIcon { get;  set; }
         public bool IsDesktopApp { get; internal set; }
         public bool SmtpAllowAnyCredentials { get; set; }
+
+        public string[] SmtpEnabledAuthTypesWhenSecureConnection { get; set; }
+        public string[] SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; }
     }
 
 }
