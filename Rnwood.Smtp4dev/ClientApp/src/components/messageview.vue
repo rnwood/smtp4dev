@@ -81,12 +81,24 @@
                     </el-tabs>
                 </el-tab-pane>
 
-                <!--<el-tab-pane label="Analysis" id="analysis" class="fill vfillpanel">
+                <el-tab-pane label="Analysis" id="analysis">
                     <template #label>
-                        <el-icon><FirstAidKit /></el-icon>&nbsp;Analysis
+                        <el-badge type="warning" :value="analysisWarningCount ? analysisWarningCount : ''"  :offset="[8, 3]">
+                            <el-icon><FirstAidKit /></el-icon>&nbsp;Analysis
+                        </el-badge>
                     </template>
-                    <messageanalysis class="fill" :message="message" type="source"></messageanalysis>
-                </el-tab-pane>-->
+
+                    <el-tabs value="clients">
+                        <el-tab-pane label="HTML Compatibility" id="clients" class="hfillpanel">
+                            <template #label>
+                                <el-badge type="warning" :value="analysisWarningCount ? analysisWarningCount : ''"  :offset="[8, 3]">
+                                    HTML Compatibility
+                                </el-badge>
+                            </template>
+                            <messageclientanalysis class="fill" :message="message" @warning-count-changed="n => this.analysisWarningCount=n"></messageclientanalysis>
+                        </el-tab-pane>
+                    </el-tabs>
+                </el-tab-pane>
 
                 <el-tab-pane label="Source" id="source" class="fill vfillpanel">
                     <template #label>
@@ -178,8 +190,7 @@
     import MessageviewAttachments from "@/components/messageviewattachments.vue";
     import MessagePartsSource from "@/components/messagepartsource.vue";
     import MessageSource from "@/components/messagesource.vue";
-    import MessageAnalysis from "@/components/messageanalysis.vue";
-    import { TreeInstance } from "element-plus/es/components/tree";
+    import MessageClientAnalysis from "@/components/messageclientanalysis.vue";
     import { MessageBoxInputData } from 'element-plus/es/components/message-box';
     import { ElMessageBox, ElNotification } from 'element-plus';
     import ServerController from '../ApiClient/ServerController';
@@ -193,7 +204,7 @@
             messageviewattachments: MessageviewAttachments,
             messagepartsource: MessagePartsSource,
             messagesource: MessageSource,
-            messageanalysis: MessageAnalysis
+            messageclientanalysis: MessageClientAnalysis
         }
     })
     class MessageView extends Vue {
@@ -204,6 +215,7 @@
         message: Message | null = null;
         selectedPart: MessageEntitySummary | null = null;
         warnings: MessageWarning[] = [];
+        analysisWarningCount: number = 0;
 
         error: Error | null = null;
         loading = false;

@@ -178,7 +178,7 @@
     <ClientApp Remove="ClientApp\src\ApiClient\Server.ts" />
     <ClientApp Remove="ClientApp\src\ApiClient\ServerController.ts" />
     <ClientApp Remove="ClientApp\src\ApiClient\User.ts" />
-    <ClientApp Remove="ClientApp\src\components\messageanalysis.vue" />
+    <ClientApp Remove="ClientApp\src\components\messageclientanalysis.vue" />
     <ClientApp Remove="ClientApp\src\components\messagesource.vue" />
     <ClientApp Remove="ClientApp\src\components\settingsdialog.vue" />
   </ItemGroup>

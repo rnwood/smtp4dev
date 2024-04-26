@@ -464,6 +464,7 @@ namespace Rnwood.Smtp4dev.Server
         public RelayResult TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
         {
             var result = new RelayResult(message);
+
             if (!relayOptions.CurrentValue.IsEnabled)
             {
                 return result;
@@ -499,12 +500,13 @@ namespace Rnwood.Smtp4dev.Server
                 {
                     log.Information("Relaying message to {recipient}", recipient);
 
-                    using var relaySmtpClient = this.relaySmtpClientFactory(this.relayOptions.CurrentValue);
+					using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
 
                     if (relaySmtpClient == null)
                     {
                         throw new ApplicationException("Relay server options are incomplete.");
                     }
+
                     var apiMsg = new ApiModel.Message(message);
                     MimeMessage newEmail = apiMsg.MimeMessage;
                     MailboxAddress sender = MailboxAddress.Parse(
