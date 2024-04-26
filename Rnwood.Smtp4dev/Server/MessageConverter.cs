@@ -55,7 +55,7 @@ namespace Rnwood.Smtp4dev.Server
                     try
                     {
                         CancellationTokenSource cts = new CancellationTokenSource();
-                        cts.CancelAfter(TimeSpan.FromSeconds(10));
+                        cts.CancelAfter(TimeSpan.FromSeconds(30));
                         MimeMessage mime = await MimeMessage.LoadAsync(messageData, true, cts.Token).ConfigureAwait(false);
                         subject = mime.Subject;
 

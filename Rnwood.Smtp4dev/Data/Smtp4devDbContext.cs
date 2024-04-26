@@ -32,5 +32,7 @@ namespace Rnwood.Smtp4dev.Data
         public DbSet<Session> Sessions { get; set; }
 
         public DbSet<ImapState> ImapState { get; set; }
+
+        public DbSet<Mailbox> Mailboxes { get; set; }
     }
 }

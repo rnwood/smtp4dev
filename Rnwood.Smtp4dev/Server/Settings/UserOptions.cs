@@ -6,10 +6,12 @@ using System.Linq;
 namespace Rnwood.Smtp4dev.Server.Settings
 {
     [TypeConverter(typeof(UserFromStringConverter))]
-    public record User
+    public record UserOptions
     {
         public string Username { get; set; }
         public string Password { get; set; }
+
+        public string DefaultMailbox { get; set; } = "Default";
     }
 
     public class UserFromStringConverter : TypeConverter
@@ -25,7 +27,11 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
             string[] values = stringValue.Split('=', 2);
 
-            return new User { Username = values[0], Password = values.Last() ?? "" };
+            if (values.Length != 2) {
+                throw new FormatException("User must be in format \"Username:Password\"");
+            }
+
+            return new UserOptions { Username = values[0], Password = values[1] };
         }
     }
 }

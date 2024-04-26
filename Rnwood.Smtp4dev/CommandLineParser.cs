@@ -26,7 +26,7 @@ namespace Rnwood.Smtp4dev
                 { "disableipv6", "If true, SMTP and IMAP servers will NOT listen using IPv6 Dual Stack", data => map.Add((data !=null).ToString(), x => x.ServerOptions.DisableIPv6)},
                 { "smtpport=", "Set the port the SMTP server listens on. Specify 0 to assign automatically", data => map.Add(data, x => x.ServerOptions.Port) },
                 { "db=", "Specifies the path where the database will be stored relative to APPDATA env var on Windows or XDG_CONFIG_HOME on non-Windows. Specify \"\" to use an in memory database.", data => map.Add(data, x => x.ServerOptions.Database) },
-                { "messagestokeep=", "Specifies the number of messages to keep", data => map.Add(data, x => x.ServerOptions.NumberOfMessagesToKeep) },
+                { "messagestokeep=", "Specifies the number of messages to keep per mailbox", data => map.Add(data, x => x.ServerOptions.NumberOfMessagesToKeep) },
                 { "sessionstokeep=", "Specifies the number of sessions to keep", data => map.Add(data, x => x.ServerOptions.NumberOfSessionsToKeep) },
                 { "tlsmode=", "Specifies the TLS mode to use for SMTP. None=Off. StartTls=On demand if client supports STARTTLS. ImplicitTls=TLS as soon as connection is established.", data => map.Add(data, x => x.ServerOptions.TlsMode) },
                 { "tlscertificate=", "Specifies the TLS certificate to use for SMTP if TLS is enabled/requested. Specify \"\" to use an auto-generated self-signed certificate (then see console output on first startup)", data => map.Add(data, x => x.ServerOptions.TlsCertificate) },
@@ -55,8 +55,10 @@ namespace Rnwood.Smtp4dev
                 { "SmtpAuthTypesNotSecure=", "SMTP auth type enabled when not using secure connection (choices: ANONYMOUS, PLAIN, LOGIN, CRAM-MD5). Separate values with comma.", data =>
                        map.Add(data, x => x.ServerOptions.SmtpEnabledAuthTypesWhenNotSecureConnection) },
                 { "SmtpAuthTypesSecure=", "SMTP auth type enabled when  using secure connection (choices: ANONYMOUS, PLAIN, LOGIN, CRAM-MD5). Separate values with comma.", data =>
-                       map.Add(data, x => x.ServerOptions.SmtpEnabledAuthTypesWhenSecureConnection) }
-                
+                       map.Add(data, x => x.ServerOptions.SmtpEnabledAuthTypesWhenSecureConnection) },
+                { "mailbox=", "Adds a mailbox in Name=Recipients format (Recipients can contain comma separated wildcards or regex)see appsettings for more details). This option can be repeated to add multiple users.", data =>
+                       map.Add(data, x => x.ServerOptions.Users)},
+
 
             };
 

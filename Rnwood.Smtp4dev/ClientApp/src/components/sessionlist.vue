@@ -1,16 +1,18 @@
 ﻿<template>
     <div class="sessionlist">
         <div class="toolbar">
-            <el-button icon="close" title="Clear" @click="clear"></el-button>
-
             <el-button icon="Delete"
                        v-on:click="deleteSelected"
                        :disabled="!selectedsession"
-                       title="Delete"></el-button>
-            <el-button icon="refresh"
-                       v-on:click="refresh"
-                       :disabled="loading"
-                       title="Refresh"></el-button>
+                       title="Delete">Delete</el-button>
+            <el-button-group>
+                <el-button icon="refresh"
+                           v-on:click="refresh"
+                           :disabled="loading"
+                           title="Refresh"></el-button>
+                <el-button icon="close" title="Clear" @click="clear"></el-button>
+            </el-button-group>
+
         </div>
 
         <el-alert v-if="error" type="error" title="Error" show-icon>

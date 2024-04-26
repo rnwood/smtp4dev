@@ -5,9 +5,20 @@
 
 namespace Rnwood.SmtpServer.Extensions.Auth;
 
+/// <summary>
+/// Represents auth credentials that have a username and which can be validated by the server using the clear text password.
+/// </summary>
 public interface IAuthenticationCredentialsCanValidateWithPassword : IAuthenticationCredentials
 {
+    /// <summary>
+    /// The username
+    /// </summary>
     string Username { get; }
 
+    /// <summary>
+    /// Checks the response using clear text password.
+    /// </summary>
+    /// <param name="password"></param>
+    /// <returns>True if response matches the password.</returns>
     bool ValidateResponse(string password);
 }

@@ -12,22 +12,22 @@ export default class MessagesController {
 
     private apiBaseUrl = `api/Messages`;
 
-    public getNewSummaries_url(lastSeenMessageId: string|null, pageSize: number = 50): string {
-        return `${this.apiBaseUrl}/new?lastSeenMessageId=${encodeURIComponent(lastSeenMessageId ?? "")}&pageSize=${pageSize}`;
+    public getNewSummaries_url(lastSeenMessageId: string | null, mailboxName: string, pageSize: number = 50): string {
+        return `${this.apiBaseUrl}/new?mailboxName=${mailboxName}&lastSeenMessageId=${encodeURIComponent(lastSeenMessageId ?? "")}&pageSize=${pageSize}`;
     }
 
-    public async getNewSummaries(lastSeenMessageId: string|null, pageSize: number = 50): Promise<MessageSummary[]> {
+    public async getNewSummaries(lastSeenMessageId: string|null, mailboxName: string, pageSize: number = 50): Promise<MessageSummary[]> {
 
-        return (await axios.get(this.getNewSummaries_url(lastSeenMessageId, pageSize), null || undefined)).data as MessageSummary[];
+        return (await axios.get(this.getNewSummaries_url(lastSeenMessageId, mailboxName, pageSize), null || undefined)).data as MessageSummary[];
     }
 
-    public getSummaries_url(searchTerms: string, sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): string {
-        return `${this.apiBaseUrl}?searchTerms=${encodeURIComponent(searchTerms)}&sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}&page=${page}&pageSize=${pageSize}`;
+    public getSummaries_url(mailboxName: string, searchTerms: string, sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): string {
+        return `${this.apiBaseUrl}?mailboxName=${encodeURIComponent(mailboxName)}&searchTerms=${encodeURIComponent(searchTerms)}&sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}&page=${page}&pageSize=${pageSize}`;
     }
 
-    public async getSummaries(searchTerms: string, sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): Promise<PagedResult<MessageSummary>> {
+    public async getSummaries(mailboxName: string, searchTerms: string, sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): Promise<PagedResult<MessageSummary>> {
 
-        return (await axios.get(this.getSummaries_url(searchTerms, sortColumn, sortIsDescending, page, pageSize), null || undefined)).data as PagedResult<MessageSummary>;
+        return (await axios.get(this.getSummaries_url(mailboxName, searchTerms, sortColumn, sortIsDescending, page, pageSize), null || undefined)).data as PagedResult<MessageSummary>;
     }
 
     // get: api/Messages/${encodeURIComponent(id)}  
@@ -50,8 +50,8 @@ export default class MessagesController {
         return (await axios.post(this.markMessageRead_url(id), null || undefined)).data as void;
     }
 
-    public async markAllMessageRead(): Promise<void> {
-        return await axios.post(`${this.apiBaseUrl}/markAllRead`);
+    public async markAllMessageRead(mailboxName: string): Promise<void> {
+        return await axios.post(`${this.apiBaseUrl}/markAllRead?mailboxName=${encodeURIComponent(mailboxName)}`);
     }
 
     // get: api/Messages/${encodeURIComponent(id)}/download  
@@ -155,12 +155,12 @@ export default class MessagesController {
     }
 
     // delete: api/Messages/*  
-    public deleteAll_url(): string {
-        return `${this.apiBaseUrl}/*`;
+    public deleteAll_url(mailboxName: string): string {
+        return `${this.apiBaseUrl}/*?mailboxName=${encodeURIComponent(mailboxName)}`;
     }
 
-    public async deleteAll(): Promise<void> {
+    public async deleteAll(mailboxName: string): Promise<void> {
 
-        return (await axios.delete(this.deleteAll_url(), null || undefined)).data as void;
+        return (await axios.delete(this.deleteAll_url(mailboxName), null || undefined)).data as void;
     }
 }

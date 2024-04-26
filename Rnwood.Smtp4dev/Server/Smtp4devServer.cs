@@ -28,481 +28,574 @@ using System.Threading;
 using System.Net;
 using Rnwood.Smtp4dev.Server.Settings;
 using DeepEqual.Syntax;
+using MailboxOptions = Rnwood.Smtp4dev.Server.Settings.MailboxOptions;
+using DotNet.Globbing;
+using System.Text.RegularExpressions;
+using static System.Formats.Asn1.AsnWriter;
+using static MailKit.Net.Imap.ImapMailboxFilter;
 
 namespace Rnwood.Smtp4dev.Server
 {
-    internal class Smtp4devServer : ISmtp4devServer, IHostedService
-    {
-        private readonly ILogger log = Log.ForContext<Smtp4devServer>();
+	internal class Smtp4devServer : ISmtp4devServer, IHostedService
+	{
+		private readonly ILogger log = Log.ForContext<Smtp4devServer>();
 
-        public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<Settings.ServerOptions> serverOptions,
-            IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory,
-            ITaskQueue taskQueue, ScriptingHost scriptingHost)
-        {
-            this.notificationsHub = notificationsHub;
-            this.serverOptions = serverOptions;
-            this.relayOptions = relayOptions;
-            this.serviceScopeFactory = serviceScopeFactory;
-            this.relaySmtpClientFactory = relaySmtpClientFactory;
-            this.taskQueue = taskQueue;
-            this.scriptingHost = scriptingHost;
+		public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<Settings.ServerOptions> serverOptions,
+			IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory,
+			ITaskQueue taskQueue, ScriptingHost scriptingHost)
+		{
+			this.notificationsHub = notificationsHub;
+			this.serverOptions = serverOptions;
+			this.relayOptions = relayOptions;
+			this.serviceScopeFactory = serviceScopeFactory;
+			this.relaySmtpClientFactory = relaySmtpClientFactory;
+			this.taskQueue = taskQueue;
+			this.scriptingHost = scriptingHost;
 
-            taskQueue.Start();
-            QueueCleanup();
-            StartWatchingServerOptionsForChanges();
-        }
+			taskQueue.Start();
+			StartWatchingServerOptionsForChanges();
+		}
 
-        private void StartWatchingServerOptionsForChanges()
-        {
-            IDisposable eventHandler = null;
-            var obs = Observable.FromEvent<Settings.ServerOptions>(e => eventHandler = this.serverOptions.OnChange(e), e => eventHandler.Dispose());
-            obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
-        }
+		private void StartWatchingServerOptionsForChanges()
+		{
+			IDisposable eventHandler = null;
+			var obs = Observable.FromEvent<Settings.ServerOptions>(e => eventHandler = this.serverOptions.OnChange(e), e => eventHandler.Dispose());
+			obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
+		}
 
-        private void OnServerOptionsChanged(Settings.ServerOptions arg1)
-        {
-            if (arg1 .IsDeepEqual( this.lastStartOptions))
-            {
-                return;
-            }
+		private void OnServerOptionsChanged(Settings.ServerOptions arg1)
+		{
+			if (arg1.IsDeepEqual(this.lastStartOptions))
+			{
+				return;
+			}
 
-            if (this.smtpServer?.IsRunning == true)
-            {
-                log.Information("ServerOptions changed. Restarting server...");
-                Stop();
-                TryStart();
-            }
-            else
-            {
-                log.Information("ServerOptions changed.");
-            }
-        }
+			if (this.smtpServer?.IsRunning == true)
+			{
+				log.Information("ServerOptions changed. Restarting server...");
+				Stop();
+				TryStart();
+			}
+			else
+			{
+				log.Information("ServerOptions changed.");
+			}
+		}
 
-        private void CreateSmtpServer()
-        {
-            X509Certificate2 cert = CertificateHelper.GetTlsCertificate(serverOptions.CurrentValue, log);
+		private void CreateSmtpServer()
+		{
+			X509Certificate2 cert = CertificateHelper.GetTlsCertificate(serverOptions.CurrentValue, log);
 
-            Settings.ServerOptions serverOptionsValue = serverOptions.CurrentValue;
-            this.smtpServer = new Rnwood.SmtpServer.SmtpServer(new SmtpServer.ServerOptions(serverOptionsValue.AllowRemoteConnections, !serverOptionsValue.DisableIPv6, serverOptionsValue.HostName, serverOptionsValue.Port, serverOptionsValue.AuthenticationRequired,
-                serverOptionsValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries|StringSplitOptions.RemoveEmptyEntries), serverOptionsValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
-                serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
-                serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null
-            ));
-            this.smtpServer.MessageCompletedEventHandler += OnMessageCompleted;
-            this.smtpServer.MessageReceivedEventHandler += OnMessageReceived;
-            this.smtpServer.SessionCompletedEventHandler += OnSessionCompleted;
-            this.smtpServer.SessionStartedHandler += OnSessionStarted;
-            this.smtpServer.AuthenticationCredentialsValidationRequiredEventHandler += OnAuthenticationCredentialsValidationRequired;
-            this.smtpServer.IsRunningChanged += OnIsRunningChanged;
-            ((SmtpServer.ServerOptions)this.smtpServer.Options).MessageStartEventHandler += OnMessageStart;
+			Settings.ServerOptions serverOptionsValue = serverOptions.CurrentValue;
+			this.smtpServer = new Rnwood.SmtpServer.SmtpServer(new SmtpServer.ServerOptions(serverOptionsValue.AllowRemoteConnections, !serverOptionsValue.DisableIPv6, serverOptionsValue.HostName, serverOptionsValue.Port, serverOptionsValue.AuthenticationRequired,
+				serverOptionsValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries), serverOptionsValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+				serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
+				serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null
+			));
+			this.smtpServer.MessageCompletedEventHandler += OnMessageCompleted;
+			this.smtpServer.MessageReceivedEventHandler += OnMessageReceived;
+			this.smtpServer.SessionCompletedEventHandler += OnSessionCompleted;
+			this.smtpServer.SessionStartedHandler += OnSessionStarted;
+			this.smtpServer.AuthenticationCredentialsValidationRequiredEventHandler += OnAuthenticationCredentialsValidationRequired;
+			this.smtpServer.IsRunningChanged += OnIsRunningChanged;
+			((SmtpServer.ServerOptions)this.smtpServer.Options).MessageStartEventHandler += OnMessageStart;
 
-            ((SmtpServer.ServerOptions)this.smtpServer.Options).MessageRecipientAddingEventHandler += OnMessageRecipientAddingEventHandler;
-        }
+			((SmtpServer.ServerOptions)this.smtpServer.Options).MessageRecipientAddingEventHandler += OnMessageRecipientAddingEventHandler;
+		}
 
-        private Task OnMessageRecipientAddingEventHandler(object sender, RecipientAddingEventArgs e)
-        {
-            var sessionId = activeSessionsToDbId[e.Message.Session];
-            using var scope = serviceScopeFactory.CreateScope();
-            Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-            var session = dbContext.Sessions.AsNoTracking().Single(s => s.Id == sessionId);
-            var apiSession = new ApiModel.Session(session);
+		private Task OnMessageRecipientAddingEventHandler(object sender, RecipientAddingEventArgs e)
+		{
+			var sessionId = activeSessionsToDbId[e.Message.Session];
+			using var scope = serviceScopeFactory.CreateScope();
+			Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+			var session = dbContext.Sessions.AsNoTracking().Single(s => s.Id == sessionId);
+			var apiSession = new ApiModel.Session(session);
 
-            if (!this.scriptingHost.ValidateRecipient(apiSession, e.Recipient))
-            {
-                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.RecipientRejected, "Recipient rejected"));
-            }
+			if (!this.scriptingHost.ValidateRecipient(apiSession, e.Recipient))
+			{
+				throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.RecipientRejected, "Recipient rejected"));
+			}
 
-            return Task.CompletedTask;
-        }
+			return Task.CompletedTask;
+		}
 
-        private Task OnMessageStart(object sender, MessageStartEventArgs e)
-        {
-            if (this.serverOptions.CurrentValue.SecureConnectionRequired && !e.Session.SecureConnection)
-            {
-                throw new SmtpServerException(new SmtpResponse(451, "Secure connection required"));
-            }
+		private Task OnMessageStart(object sender, MessageStartEventArgs e)
+		{
+			if (this.serverOptions.CurrentValue.SecureConnectionRequired && !e.Session.SecureConnection)
+			{
+				throw new SmtpServerException(new SmtpResponse(451, "Secure connection required"));
+			}
 
-            if (this.serverOptions.CurrentValue.AuthenticationRequired && !e.Session.Authenticated)
-            {
-                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationRequired, "Authentication is required"));
-            }
+			if (this.serverOptions.CurrentValue.AuthenticationRequired && !e.Session.Authenticated)
+			{
+				throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationRequired, "Authentication is required"));
+			}
 
-            return Task.CompletedTask;
-        }
+			return Task.CompletedTask;
+		}
 
-        private void OnIsRunningChanged(object sender, EventArgs e)
-        {
-            if (this.smtpServer.IsRunning) return;
-            log.Information("SMTP server stopped.");
-            this.notificationsHub.OnServerChanged().Wait();
-        }
+		private void OnIsRunningChanged(object sender, EventArgs e)
+		{
+			if (this.smtpServer.IsRunning) return;
+			log.Information("SMTP server stopped.");
+			this.notificationsHub.OnServerChanged().Wait();
+		}
 
-        private async Task OnMessageCompleted(object sender, ConnectionEventArgs e)
-        {
-            if (!scriptingHost.HasValidateMessageExpression)
-            {
-                return;
-            }
+		private async Task OnMessageCompleted(object sender, ConnectionEventArgs e)
+		{
+			if (!scriptingHost.HasValidateMessageExpression)
+			{
+				return;
+			}
 
-            Message message = new MessageConverter().ConvertAsync(await e.Connection.CurrentMessage.ToMessage()).Result;
+			Message message = new MessageConverter().ConvertAsync(await e.Connection.CurrentMessage.ToMessage()).Result;
 
-            var apiMessage = new ApiModel.Message(message);
+			var apiMessage = new ApiModel.Message(message);
 
-            using var scope = serviceScopeFactory.CreateScope();
-            Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-            Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Connection.Session]);
+			using var scope = serviceScopeFactory.CreateScope();
+			Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+			Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Connection.Session]);
 
-            var apiSession = new ApiModel.Session(dbSession);
+			var apiSession = new ApiModel.Session(dbSession);
 
-            var errorResponse = scriptingHost.ValidateMessage(apiMessage, apiSession);
+			var errorResponse = scriptingHost.ValidateMessage(apiMessage, apiSession);
 
-            if (errorResponse != null)
-            {
-                throw new SmtpServerException(errorResponse);
-            }
-        }
+			if (errorResponse != null)
+			{
+				throw new SmtpServerException(errorResponse);
+			}
+		}
 
-        public void Stop()
-        {
-            log.Information("SMTP server stopping...");
-            this.smtpServer.Stop(true);
-        }
+		public void Stop()
+		{
+			log.Information("SMTP server stopping...");
+			this.smtpServer?.Stop(true);
+		}
 
 
-        private void QueueCleanup()
-        {
-            this.taskQueue.QueueTask(
-                () =>
+		private void DoCleanup()
+		{
+			//Mark sessions as ended.
+			using var scope = serviceScopeFactory.CreateScope();
+			Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+			dbContext.Sessions.Where(s => !s.EndDate.HasValue).ExecuteUpdate(u => u.SetProperty(s => s.EndDate, DateTime.Now));
+			
+			//Find mailboxes in config not in DB and create
+			var serverOptionsCurrentValue = this.serverOptions.CurrentValue;
+            var configuredMailboxesAndDefault = serverOptionsCurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME } });
+            foreach (MailboxOptions mailbox in configuredMailboxesAndDefault)
+			{
+				var dbMailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == mailbox.Name);
+				if (dbMailbox == null)
+				{
+                    log.Information("Creating mailbox {name}", mailbox.Name);
+                    dbMailbox = new Mailbox
+					{
+						Name = mailbox.Name
+					};
+					dbContext.Add(dbMailbox);
+				}
+			}
+
+			//Find configuredMailboxesAndDefault in DB not in config and delete
+			foreach (var dbMailbox in dbContext.Mailboxes)
+			{
+				if (!configuredMailboxesAndDefault.Any(m => m.Name == dbMailbox.Name))
                 {
-                    using var scope = serviceScopeFactory.CreateScope();
-                    Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+					log.Information("Deleting mailbox {name}", dbMailbox.Name);
+					dbContext.Remove(dbMailbox);
+				}
+			}
+			dbContext.SaveChanges();
 
-                    foreach (Session unfinishedSession in dbContext.Sessions.Where(s => !s.EndDate.HasValue).ToArray())
-                    {
-                        unfinishedSession.EndDate = DateTime.Now;
-                    }
+			var defaultMailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == MailboxOptions.DEFAULTNAME);
+			foreach(var messageWithoutMailbox in dbContext.Messages.Where(m => m.Mailbox == null))
+			{
+				messageWithoutMailbox.Mailbox = defaultMailbox;
+			}
+			dbContext.SaveChanges();
 
-                    dbContext.SaveChanges();
+			TrimMessages(dbContext);
+			dbContext.SaveChanges();
 
-                    TrimMessages(dbContext);
-                    dbContext.SaveChanges();
+			TrimSessions(dbContext);
+			dbContext.SaveChanges();
 
-                    TrimSessions(dbContext);
-                    dbContext.SaveChanges();
+			this.notificationsHub.OnMessagesChanged("*").Wait();
+			this.notificationsHub.OnSessionsChanged().Wait();
+            this.notificationsHub.OnMailboxesChanged().Wait();
 
-                    this.notificationsHub.OnMessagesChanged().Wait();
-                    this.notificationsHub.OnSessionsChanged().Wait();
-                }, true);
         }
 
-        private Task OnAuthenticationCredentialsValidationRequired(object sender, AuthenticationCredentialsValidationEventArgs e)
+		private Task OnAuthenticationCredentialsValidationRequired(object sender, AuthenticationCredentialsValidationEventArgs e)
+		{
+
+
+			var sessionId = activeSessionsToDbId[e.Session];
+			using var scope = serviceScopeFactory.CreateScope();
+			Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+			var session = dbContext.Sessions.Single(s => s.Id == sessionId);
+
+			var apiSession = new ApiModel.Session(session);
+
+			AuthenticationResult? result = scriptingHost.ValidateCredentials(apiSession, e.Credentials);
+
+			if (result == null && this.serverOptions.CurrentValue.SmtpAllowAnyCredentials)
+			{
+				this.log.Information("SMTP auth success (allow any credentials is on)");
+				result = AuthenticationResult.Success;
+			}
+
+			if (result == null)
+			{
+				if (e.Credentials is IAuthenticationCredentialsCanValidateWithPassword val)
+				{
+					var user = serverOptions.CurrentValue.Users.FirstOrDefault(u => u.Username.Equals(val.Username, StringComparison.CurrentCultureIgnoreCase));
+					if (user != null && val.ValidateResponse(user.Password))
+					{
+						result = AuthenticationResult.Success;
+						this.log.Information("SMTP auth success for user {user}", val.Username);
+
+					}
+					else
+					{
+						result = AuthenticationResult.Failure;
+						this.log.Warning("SMTP auth failure for user {user}", val.Username);
+					}
+				}
+				else
+				{
+					result = AuthenticationResult.Failure;
+					this.log.Warning("SMTP auth failure: Cannot validate credentials of type {type}", e.Credentials.Type);
+				}
+			}
+
+			e.AuthenticationResult = result.Value;
+			return Task.CompletedTask;
+		}
+
+
+		private readonly IOptionsMonitor<Settings.ServerOptions> serverOptions;
+		private readonly IOptionsMonitor<RelayOptions> relayOptions;
+		private readonly IDictionary<ISession, Guid> activeSessionsToDbId = new Dictionary<ISession, Guid>();
+		private readonly ScriptingHost scriptingHost;
+
+		private static async Task UpdateDbSession(ISession session, Session dbSession)
+		{
+			dbSession.StartDate = session.StartDate;
+			dbSession.EndDate = session.EndDate;
+			dbSession.ClientAddress = session.ClientAddress.ToString();
+			dbSession.ClientName = session.ClientName;
+			dbSession.NumberOfMessages = (await session.GetMessages()).Count;
+			dbSession.Log = (await session.GetLog()).ReadToEnd();
+			dbSession.SessionErrorType = session.SessionErrorType;
+			dbSession.SessionError = session.SessionError?.Message;
+		}
+
+		private async Task OnSessionStarted(object sender, SessionEventArgs e)
+		{
+			log.Information("Session started. Client address {clientAddress}.", e.Session.ClientAddress);
+			await taskQueue.QueueTask(() =>
+			{
+				using var scope = serviceScopeFactory.CreateScope();
+				Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+
+				Session dbSession = new Session();
+				UpdateDbSession(e.Session, dbSession).Wait();
+				dbContext.Sessions.Add(dbSession);
+				dbContext.SaveChanges();
+
+				activeSessionsToDbId[e.Session] = dbSession.Id;
+			}, false).ConfigureAwait(false);
+		}
+
+		private async Task OnSessionCompleted(object sender, SessionEventArgs e)
+		{
+			int messageCount = (await e.Session.GetMessages()).Count;
+			log.Information("Session completed. Client address {clientAddress}. Number of messages {messageCount}.", e.Session.ClientAddress,
+				messageCount);
+
+
+			await taskQueue.QueueTask(() =>
+			{
+				using var scope = serviceScopeFactory.CreateScope();
+				Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+
+				Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Session]);
+				UpdateDbSession(e.Session, dbSession).Wait();
+				dbContext.SaveChanges();
+
+				TrimSessions(dbContext);
+				dbContext.SaveChanges();
+
+				activeSessionsToDbId.Remove(e.Session);
+
+				notificationsHub.OnSessionsChanged().Wait();
+			}, false).ConfigureAwait(false);
+		}
+
+
+		public Task DeleteSession(Guid id)
+		{
+			return taskQueue.QueueTask(() =>
+			{
+				using var scope = serviceScopeFactory.CreateScope();
+				Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+				Session session = dbContext.Sessions.SingleOrDefault(s => s.Id == id);
+				if (session != null)
+				{
+					dbContext.Sessions.Remove(session);
+					dbContext.SaveChanges();
+					notificationsHub.OnSessionsChanged().Wait();
+				}
+			}, true);
+		}
+
+		public Task DeleteAllSessions()
+		{
+			return taskQueue.QueueTask(() =>
+			{
+				using var scope = serviceScopeFactory.CreateScope();
+				Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+				dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue));
+				dbContext.SaveChanges();
+				notificationsHub.OnSessionsChanged().Wait();
+			}, true);
+		}
+
+		private async Task OnMessageReceived(object sender, MessageEventArgs e)
         {
-            
-
-            var sessionId = activeSessionsToDbId[e.Session];
-            using var scope = serviceScopeFactory.CreateScope();
-            Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-            var session = dbContext.Sessions.Single(s => s.Id == sessionId);
-
-            var apiSession = new ApiModel.Session(session);
-
-            AuthenticationResult? result = scriptingHost.ValidateCredentials(apiSession, e.Credentials);
-
-            if (result == null && this.serverOptions.CurrentValue.SmtpAllowAnyCredentials)
-            {
-                this.log.Information("SMTP auth success (allow any credentials is on)");
-                result = AuthenticationResult.Success;
-            }
-
-            if (result == null)
-            {
-                if (e.Credentials is IAuthenticationCredentialsCanValidateWithPassword val)
-                {
-                    var user = serverOptions.CurrentValue.Users.FirstOrDefault(u => u.Username.Equals(val.Username, StringComparison.CurrentCultureIgnoreCase));
-                    if (user != null && val.ValidateResponse(user.Password))
-                    {
-                        result = AuthenticationResult.Success;
-                        this.log.Information("SMTP auth success for user {user}", val.Username);
-
-                    }
-                    else
-                    {
-                        result = AuthenticationResult.Failure;
-                        this.log.Warning("SMTP auth failure for user {user}", val.Username);
-                    }
-                }
-                else
-                {
-                    result = AuthenticationResult.Failure;
-                    this.log.Warning("SMTP auth failure: Cannot validate credentials of type {type}", e.Credentials.Type);
-                }
-            }
-
-            e.AuthenticationResult = result.Value;
-            return Task.CompletedTask;
-        }
-
-
-        private readonly IOptionsMonitor<Settings.ServerOptions> serverOptions;
-        private readonly IOptionsMonitor<RelayOptions> relayOptions;
-        private readonly IDictionary<ISession, Guid> activeSessionsToDbId = new Dictionary<ISession, Guid>();
-        private readonly ScriptingHost scriptingHost;
-
-        private static async Task UpdateDbSession(ISession session, Session dbSession)
-        {
-            dbSession.StartDate = session.StartDate;
-            dbSession.EndDate = session.EndDate;
-            dbSession.ClientAddress = session.ClientAddress.ToString();
-            dbSession.ClientName = session.ClientName;
-            dbSession.NumberOfMessages = (await session.GetMessages()).Count;
-            dbSession.Log = (await session.GetLog()).ReadToEnd();
-            dbSession.SessionErrorType = session.SessionErrorType;
-            dbSession.SessionError = session.SessionError?.Message;
-        }
-
-        private async Task OnSessionStarted(object sender, SessionEventArgs e)
-        {
-            log.Information("Session started. Client address {clientAddress}.", e.Session.ClientAddress);
-            await taskQueue.QueueTask(() =>
-            {
-                using var scope = serviceScopeFactory.CreateScope();
-                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-
-                Session dbSession = new Session();
-                UpdateDbSession(e.Session, dbSession).Wait();
-                dbContext.Sessions.Add(dbSession);
-                dbContext.SaveChanges();
-
-                activeSessionsToDbId[e.Session] = dbSession.Id;
-            }, false).ConfigureAwait(false);
-        }
-
-        private async Task OnSessionCompleted(object sender, SessionEventArgs e)
-        {
-            int messageCount = (await e.Session.GetMessages()).Count;
-            log.Information("Session completed. Client address {clientAddress}. Number of messages {messageCount}.", e.Session.ClientAddress,
-                messageCount);
-
-
-            await taskQueue.QueueTask(() =>
-            {
-                using var scope = serviceScopeFactory.CreateScope();
-                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-
-                Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Session]);
-                UpdateDbSession(e.Session, dbSession).Wait();
-                dbContext.SaveChanges();
-
-                TrimSessions(dbContext);
-                dbContext.SaveChanges();
-
-                activeSessionsToDbId.Remove(e.Session);
-
-                notificationsHub.OnSessionsChanged().Wait();
-            }, false).ConfigureAwait(false);
-        }
-
-
-        public Task DeleteSession(Guid id)
-        {
-            return taskQueue.QueueTask(() =>
-            {
-                using var scope = serviceScopeFactory.CreateScope();
-                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-                Session session = dbContext.Sessions.SingleOrDefault(s => s.Id == id);
-                if (session != null)
-                {
-                    dbContext.Sessions.Remove(session);
-                    dbContext.SaveChanges();
-                    notificationsHub.OnSessionsChanged().Wait();
-                }
-            }, true);
-        }
-
-        public Task DeleteAllSessions()
-        {
-            return taskQueue.QueueTask(() =>
-            {
-                using var scope = serviceScopeFactory.CreateScope();
-                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-                dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue));
-                dbContext.SaveChanges();
-                notificationsHub.OnSessionsChanged().Wait();
-            }, true);
-        }
-
-        private async Task OnMessageReceived(object sender, MessageEventArgs e)
-        {
-
-            Message message = new MessageConverter().ConvertAsync(e.Message).Result;
             log.Information("Message received. Client address {clientAddress}, From {messageFrom}, To {messageTo}, SecureConnection: {secure}.",
-                e.Message.Session.ClientAddress, e.Message.From, message.To, e.Message.SecureConnection);
-            message.IsUnread = true;
+                e.Message.Session.ClientAddress, e.Message.From, e.Message.Recipients, e.Message.SecureConnection);
 
-            void ProcessMessage()
+            var targetMailboxes = GetTargetMailboxes(e.Message.Recipients);
+
+			if (!targetMailboxes.Any())
+			{
+				log.Warning("Message with recipients {recipients} will be delivered to 0 configuredMailboxesAndDefault", e.Message.Recipients);
+				return;
+			}
+
+			foreach (var targetMailbox in targetMailboxes)
+			{
+				Message message = new MessageConverter().ConvertAsync(e.Message).Result;
+				message.IsUnread = true;
+
+				await taskQueue.QueueTask(() => ProcessMessage(message, e.Message.Session, targetMailbox), false).ConfigureAwait(false);
+			}
+        }
+
+        private HashSet<MailboxOptions> GetTargetMailboxes(IEnumerable<string> recipients)
+		{
+            HashSet<MailboxOptions> targetMailboxes = new HashSet<MailboxOptions>();
+
+            foreach (var to in recipients)
             {
-                log.Information("Processing received message");
-                using var scope = serviceScopeFactory.CreateScope();
-                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+                MailboxOptions targetMailbox = null;
 
-                message.Session = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
-                var relayResult = TryRelayMessage(message, null);
-                message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
-
-                ImapState imapState = dbContext.ImapState.Single();
-                imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
-                message.ImapUid = imapState.LastUid;
-                if (relayResult.WasRelayed)
+                foreach (var mailbox in this.serverOptions.CurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" } }))
                 {
-                    foreach (var relay in relayResult.RelayRecipients)
+                    foreach (var recipRule in mailbox.Recipients?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
                     {
-                        message.AddRelay(new MessageRelay { SendDate = DateTime.UtcNow, To = relay.Email });
+                        bool isRegex = recipRule.StartsWith("/") && recipRule.EndsWith("/");
+
+                        bool isMatch = isRegex ?
+                            Regex.IsMatch(to, recipRule.Substring(1, recipRule.Length - 2), RegexOptions.IgnoreCase) :
+                            Glob.Parse(recipRule).IsMatch(to);
+
+                        if (isMatch)
+                        {
+                            targetMailbox = mailbox;
+                            break;
+                        }
+                    }
+
+                    if (targetMailbox != null)
+                    {
+                        break;
                     }
                 }
 
-                dbContext.Messages.Add(message);
-
-                dbContext.SaveChanges();
-
-                TrimMessages(dbContext);
-                dbContext.SaveChanges();
-                notificationsHub.OnMessagesChanged().Wait();
-                log.Information("Processing received message DONE");
+				if (targetMailbox != null)
+				{
+					targetMailboxes.Add(targetMailbox);
+				}
+				else
+				{
+					log.Warning("Message recipient {recipient} did not match any mailbox recipients", to);
+				}
             }
 
-            await taskQueue.QueueTask(ProcessMessage, false).ConfigureAwait(false);
+			return targetMailboxes;
         }
 
-        public RelayResult TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
-        {
-            var result = new RelayResult(message);
+        void ProcessMessage(Message message, ISession session, MailboxOptions targetMailbox)
+		{
+			log.Information("Processing received message for mailbox '{mailbox}'", targetMailbox.Name);
+			using var scope = serviceScopeFactory.CreateScope();
+			Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
 
-            if (!relayOptions.CurrentValue.IsEnabled)
-            {
-                return result;
-            }
+			message.Session = dbContext.Sessions.Find(activeSessionsToDbId[session]);
+			message.Mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == targetMailbox.Name);
+			var relayResult = TryRelayMessage(message, null);
+			message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
 
-            List<MailboxAddress> recipients = new List<MailboxAddress>();
+			ImapState imapState = dbContext.ImapState.Single();
+			imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
+			message.ImapUid = imapState.LastUid;
+			if (relayResult.WasRelayed)
+			{
+				foreach (var relay in relayResult.RelayRecipients)
+				{
+					message.AddRelay(new MessageRelay { SendDate = DateTime.UtcNow, To = relay.Email });
+				}
+			}
 
-            if (overrideRecipients == null)
-            {
-                recipients.AddRange(message.To
-                    .Split(",")
-                    .Select(r => MailboxAddress.Parse(r))
-                    .Where(r => relayOptions.CurrentValue.AutomaticEmails.Contains(r.Address, StringComparer.OrdinalIgnoreCase))
-                );
+			dbContext.Messages.Add(message);
 
+			dbContext.SaveChanges();
 
-                var apiMessage = new ApiModel.Message(message);
-                var apiSession = new ApiModel.Session(message.Session);
-                foreach (string recipient in message.To.Split(','))
-                {
-                    recipients.AddRange(scriptingHost.GetAutoRelayRecipients(apiMessage, recipient, apiSession)
-                        .Select(r => MailboxAddress.Parse(r)));
-                }
-            }
-            else
-            {
-                recipients.AddRange(overrideRecipients);
-            }
+			TrimMessages(dbContext);
+			dbContext.SaveChanges();
+			notificationsHub.OnMessagesChanged(targetMailbox.Name).Wait();
+			log.Information("Processing received message DONE");
+		}
 
-            foreach (MailboxAddress recipient in recipients.DistinctBy(r => r.Address))
-            {
-                try
-                {
-                    log.Information("Relaying message to {recipient}", recipient);
+		public RelayResult TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
+		{
+			var result = new RelayResult(message);
 
-                    using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
 
                     if (relaySmtpClient == null)
                     {
                         throw new ApplicationException("Relay server options are incomplete.");
                     } 
-                    var apiMsg = new ApiModel.Message(message);
-                    MimeMessage newEmail = apiMsg.MimeMessage;
-                    MailboxAddress sender = MailboxAddress.Parse(
-                        !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)
-                            ? relayOptions.CurrentValue.SenderAddress
-                            : apiMsg.From);
-                    relaySmtpClient.Send(newEmail, sender, new[] { recipient });
-                    result.RelayRecipients.Add(new RelayRecipientResult() { Email = recipient.Address, RelayDate = DateTime.UtcNow });
-                }
-                catch (Exception e)
-                {
-                    log.Error(e, "Can not relay message to {recipient}: {errorMessage}", recipient, e.ToString());
-                    result.Exceptions[recipient] = e;
-                }
-            }
 
-            return result;
-        }
+			if (!relayOptions.CurrentValue.IsEnabled)
+			{
+				return result;
+			}
 
-        private void TrimMessages(Smtp4devDbContext dbContext)
-        {
-            dbContext.Messages.RemoveRange(dbContext.Messages.OrderByDescending(m => m.ReceivedDate)
-                .Skip(serverOptions.CurrentValue.NumberOfMessagesToKeep));
-        }
+			List<MailboxAddress> recipients = new List<MailboxAddress>();
 
-        private void TrimSessions(Smtp4devDbContext dbContext)
-        {
-            dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue).OrderByDescending(m => m.EndDate)
-                .Skip(serverOptions.CurrentValue.NumberOfSessionsToKeep));
-        }
+			if (overrideRecipients == null)
+			{
+				recipients.AddRange(message.To
+					.Split(",")
+					.Select(r => MailboxAddress.Parse(r))
+					.Where(r => relayOptions.CurrentValue.AutomaticEmails.Contains(r.Address, StringComparer.OrdinalIgnoreCase))
+				);
 
 
-        private readonly ITaskQueue taskQueue;
-        private Rnwood.SmtpServer.SmtpServer smtpServer;
-        private readonly Func<RelayOptions, SmtpClient> relaySmtpClientFactory;
-        private readonly NotificationsHub notificationsHub;
-        private readonly IServiceScopeFactory serviceScopeFactory;
-        private Settings.ServerOptions lastStartOptions;
+				var apiMessage = new ApiModel.Message(message);
+				var apiSession = new ApiModel.Session(message.Session);
+				foreach (string recipient in message.To.Split(','))
+				{
+					recipients.AddRange(scriptingHost.GetAutoRelayRecipients(apiMessage, recipient, apiSession)
+						.Select(r => MailboxAddress.Parse(r)));
+				}
+			}
+			else
+			{
+				recipients.AddRange(overrideRecipients);
+			}
 
-        public Exception Exception { get; private set; }
+			foreach (MailboxAddress recipient in recipients.DistinctBy(r => r.Address))
+			{
+				try
+				{
+					log.Information("Relaying message to {recipient}", recipient);
 
-        public bool IsRunning => this.smtpServer.IsRunning;
+					using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
+					var apiMsg = new ApiModel.Message(message);
+					MimeMessage newEmail = apiMsg.MimeMessage;
+					MailboxAddress sender = MailboxAddress.Parse(
+						!string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)
+							? relayOptions.CurrentValue.SenderAddress
+							: apiMsg.From);
+					relaySmtpClient.Send(newEmail, sender, new[] { recipient });
+					result.RelayRecipients.Add(new RelayRecipientResult() { Email = recipient.Address, RelayDate = DateTime.UtcNow });
+				}
+				catch (Exception e)
+				{
+					log.Error(e, "Can not relay message to {recipient}: {errorMessage}", recipient, e.ToString());
+					result.Exceptions[recipient] = e;
+				}
+			}
 
-        public IPEndPoint[] ListeningEndpoints => this.smtpServer.ListeningEndpoints;
+			return result;
+		}
 
-        public void TryStart()
-        {
-            try
-            {
-                this.Exception = null;
-                this.lastStartOptions = this.serverOptions.CurrentValue with { };
+		private void TrimMessages(Smtp4devDbContext dbContext)
+		{
+			foreach (var mailbox in dbContext.Mailboxes)
+			{
+				dbContext.Messages.RemoveRange(dbContext.Messages.Where(m=> m.Mailbox == mailbox).OrderByDescending(m => m.ReceivedDate)
+					.Skip(serverOptions.CurrentValue.NumberOfMessagesToKeep));
+			}
+		}
 
-                CreateSmtpServer();
-                smtpServer.Start();
+		private void TrimSessions(Smtp4devDbContext dbContext)
+		{
+			dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue).OrderByDescending(m => m.EndDate)
+				.Skip(serverOptions.CurrentValue.NumberOfSessionsToKeep));
+		}
 
-                foreach (var l in smtpServer.ListeningEndpoints)
-                {
-                    log.Information("SMTP Server is listening on port {smtpPortNumber} ({address}).",
-                        l.Port, l.Address);
-                }
 
-                log.Information("Keeping last {messagesToKeep} messages and {sessionsToKeep} sessions.",
-                    serverOptions.CurrentValue.NumberOfMessagesToKeep, serverOptions.CurrentValue.NumberOfSessionsToKeep);
-            }
-            catch (Exception e)
-            {
-                log.Fatal(e, "The SMTP server failed to start: {failureReason}", e.ToString());
-                this.Exception = e;
-            }
-            finally
-            {
-                this.notificationsHub.OnServerChanged().Wait();
-            }
-        }
+		private readonly ITaskQueue taskQueue;
+		private Rnwood.SmtpServer.SmtpServer smtpServer;
+		private readonly Func<RelayOptions, SmtpClient> relaySmtpClientFactory;
+		private readonly NotificationsHub notificationsHub;
+		private readonly IServiceScopeFactory serviceScopeFactory;
+		private Settings.ServerOptions lastStartOptions;
 
-        Task IHostedService.StartAsync(CancellationToken cancellationToken)
-        {
-             this.TryStart();
-            return Task.CompletedTask;
-        }
+		public Exception Exception { get; private set; }
 
-        Task IHostedService.StopAsync(CancellationToken cancellationToken)
-        {
-            this.Stop();
-            return Task.CompletedTask;
-        }
-    }
+		public bool IsRunning => this.smtpServer?.IsRunning ?? false;
+
+		public IPEndPoint[] ListeningEndpoints => this.smtpServer?.ListeningEndpoints ?? [];
+
+		public void TryStart()
+		{
+			try
+			{
+				this.Exception = null;
+				this.lastStartOptions = this.serverOptions.CurrentValue with { };
+
+				DoCleanup();
+				CreateSmtpServer();
+				smtpServer.Start();
+
+				foreach (var l in smtpServer.ListeningEndpoints)
+				{
+					log.Information("SMTP Server is listening on port {smtpPortNumber} ({address}).",
+						l.Port, l.Address);
+				}
+
+				log.Information("Keeping last {messagesToKeep} messages per mailbox and {sessionsToKeep} sessions.",
+					serverOptions.CurrentValue.NumberOfMessagesToKeep, serverOptions.CurrentValue.NumberOfSessionsToKeep);
+			}
+			catch (Exception e)
+			{
+				log.Fatal(e, "The SMTP server failed to start: {failureReason}", e.ToString());
+				this.Exception = e;
+			}
+			finally
+			{
+				this.notificationsHub.OnServerChanged().Wait();
+			}
+		}
+
+		Task IHostedService.StartAsync(CancellationToken cancellationToken)
+		{
+			this.TryStart();
+			return Task.CompletedTask;
+		}
+
+		Task IHostedService.StopAsync(CancellationToken cancellationToken)
+		{
+			this.Stop();
+			return Task.CompletedTask;
+		}
+	}
 }

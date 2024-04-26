@@ -30,6 +30,7 @@
     <PackageReference Include="AspNetCore.Authentication.Basic" Version="8.0.0" />
     <PackageReference Include="CommandLiners.MonoOptions" Version="1.0.45" />
     <PackageReference Include="DeepEqual" Version="5.0.0" />
+    <PackageReference Include="DotNet.Glob" Version="3.1.3" />
     <PackageReference Include="HtmlAgilityPack" Version="1.11.60" />
     <PackageReference Include="Jint" Version="3.0.1" />
     <PackageReference Include="MailKit" Version="4.5.0" />
@@ -170,6 +171,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ClientApp Remove="ClientApp\src\ApiClient\Mailbox.ts" />
+    <ClientApp Remove="ClientApp\src\ApiClient\MailboxesController.ts" />
     <ClientApp Remove="ClientApp\src\ApiClient\MessageRelayOptions.cs" />
     <ClientApp Remove="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
     <ClientApp Remove="ClientApp\src\ApiClient\Server.ts" />

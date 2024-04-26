@@ -22,6 +22,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Mono.Options;
 using Rnwood.Smtp4dev.Controllers;
+using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Server;
 using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.Smtp4dev.Service;
@@ -103,6 +104,7 @@ namespace Rnwood.Smtp4dev
             var host = BuildWebHost(args.Where(arg => arg != "--service").ToArray(), cmdLineOptions, commandLineOptions);
 
 
+
             await host.StartAsync();
 
 
@@ -118,6 +120,7 @@ namespace Rnwood.Smtp4dev
 
 
         }
+
 
         private static string GetContentRoot()
         {

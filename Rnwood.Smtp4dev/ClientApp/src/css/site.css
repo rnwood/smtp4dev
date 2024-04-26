@@ -164,3 +164,18 @@ pre.source code {
 .splitpanes.default-theme .splitpanes__pane {
     background-color: transparent !important;
 }
+
+.toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    column-gap: 6px;
+    row-gap: 6px;
+    align-items: start;
+    padding-right: 12px;
+    padding-bottom: 12px
+}
+
+.el-form-item__content {
+    column-gap: 6px;
+    row-gap: 6px;
+}

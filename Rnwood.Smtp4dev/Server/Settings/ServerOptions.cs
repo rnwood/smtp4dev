@@ -41,11 +41,14 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public string MessageValidationExpression { get; set; }
         public bool DisableIPv6 { get; set; } = false;
 
-        public User[] Users { get; set; } = new User[0];
+        public UserOptions[] Users { get; set; } = [];
+
         public bool WebAuthenticationRequired { get; set; } = false;
 
         public string SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; } = "PLAIN,LOGIN,CRAM-MD5";
 
         public string SmtpEnabledAuthTypesWhenSecureConnection { get; set; } = "PLAIN,LOGIN,CRAM-MD5";
+
+        public MailboxOptions[] Mailboxes { get; set; } = [];
     }
 }

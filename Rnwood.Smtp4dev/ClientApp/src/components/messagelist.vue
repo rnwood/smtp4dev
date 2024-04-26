@@ -1,92 +1,115 @@
 ﻿<template>
     <div class="messagelist">
+   
         <div class="toolbar">
-            <el-button icon="close" title="Clear" @click="clear"></el-button>
 
-            <el-button icon="Delete"
-                       v-on:click="deleteSelected"
-                       :disabled="!selectedmessage"
-                       title="Delete"></el-button>
-            <el-button icon="refresh"
-                       v-on:click="refresh"
-                       :disabled="loading"
-                       title="Refresh"></el-button>
-            <el-button v-on:click="markAllMessageRead"
-                       :disabled="loading"
-                       title="Mark all as read">
-                <font-awesome-icon :icon="['fa-regular','envelope-open']" />
-            </el-button>
+            <el-button-group>
+                <el-button icon="Delete"
+                           v-on:click="deleteSelected"
+                           :disabled="!selectedmessage"
+                           title="Delete">Delete</el-button>
 
-            <el-button v-on:click="relaySelected"
-                       icon="d-arrow-right"
-                       :disabled="!selectedmessage || !isRelayAvailable"
-                       :loading="isRelayInProgress"
-                       title="Relay"></el-button>
+                <el-button v-on:click="relaySelected"
+                           icon="d-arrow-right"
+                           :disabled="!selectedmessage || !isRelayAvailable"
+                           :loading="isRelayInProgress"
+                           title="Relay">Relay...</el-button>
+            </el-button-group>
 
-            <el-input v-model="searchTerm"
+            <el-button-group>
+                <el-button icon="refresh"
+                           v-on:click="refresh"
+                           :disabled="loading || !selectedMailbox"
+                           title="Refresh"></el-button>
+                <el-button v-on:click="markAllMessageRead"
+                           :disabled="loading  || !selectedMailbox"
+                           title="Mark all as read">
+                    <font-awesome-icon :icon="['fa-regular','envelope-open']" />
+                </el-button>
+                <el-button icon="close" title="Clear" @click="clear"></el-button>
+            </el-button-group>
+
+
+            <el-select style="flex: 1 0 200px;" v-model="selectedMailbox" class="fill">
+                <el-option v-for="item in availableMailboxes"
+                           :key="item.name"
+                           :label="item.name"
+                           :value="item.name" />
+
+                <template #prefix>
+                    <el-icon><MessageBox /></el-icon>
+                </template>
+
+            </el-select>
+
+
+
+            <el-input class="fill"
+                      v-model="searchTerm"
                       clearable
                       placeholder="Search"
                       prefix-icon="search"
-                      style="float: right; width: 35%; min-width: 150px" />
+                      style="flex: 1 0 150px" />
+
         </div>
 
-        <el-alert v-if="error" type="error" title="Error" show-icon>
-            {{ error.message }}
-            <el-button v-on:click="refresh">Retry</el-button>
-        </el-alert>
+    <el-alert v-if="error" type="error" title="Error" show-icon>
+        {{ error.message }}
+        <el-button v-on:click="refresh">Retry</el-button>
+    </el-alert>
 
-        <el-table :data="messages"
-                  v-loading="loading"
-                  :empty-text="emptyText"
-                  highlight-current-row
-                  @current-change="handleCurrentChange"
-                  @sort-change="sort"
-                  :default-sort="{ prop: 'receivedDate', order: 'descending' }"
-                  class="table"
-                  type="selection"
-                  reserve-selection="true"
-                  row-key="id"
-                  :row-class-name="getRowClass"
-                  ref="table"
-                  stripe>
-            <el-table-column property="receivedDate"
-                             label="Received"
-                             width="160"
-                             sortable="custom"
-                             :formatter="formatDate"></el-table-column>
-            <el-table-column property="from"
-                             label="From"
-                             width="140"
-                             sortable="custom"></el-table-column>
-            <el-table-column property="to"
-                             label="To"
-                             width="180"
-                             sortable="custom"
-                             :formatter="formatTo"></el-table-column>
-            <el-table-column property="isRelayed"
-                             label=""
-                             width="28">
-                <template #default="scope">
+    <el-table :data="messages"
+              v-loading="loading"
+              :empty-text="emptyText"
+              highlight-current-row
+              @current-change="handleCurrentChange"
+              @sort-change="sort"
+              :default-sort="{ prop: 'receivedDate', order: 'descending' }"
+              class="table"
+              type="selection"
+              reserve-selection="true"
+              row-key="id"
+              :row-class-name="getRowClass"
+              ref="table"
+              stripe>
+        <el-table-column property="receivedDate"
+                         label="Received"
+                         width="160"
+                         sortable="custom"
+                         :formatter="formatDate"></el-table-column>
+        <el-table-column property="from"
+                         label="From"
+                         width="140"
+                         sortable="custom"></el-table-column>
+        <el-table-column property="to"
+                         label="To"
+                         width="180"
+                         sortable="custom"
+                         :formatter="formatTo"></el-table-column>
+        <el-table-column property="isRelayed"
+                         label=""
+                         width="28">
+            <template #default="scope">
 
-                    <el-tooltip effect="light"
-                                content="Message has been relayed"
-                                placement="top-start">
-                        <span> <i v-if="scope.row.isRelayed" class="fas fa-share-square"></i></span>
-                    </el-tooltip>
-                </template>
-            </el-table-column>
-            <el-table-column property="subject" label="Subject" sortable="custom">
-                <template #default="scope">
-                    {{ scope.row.subject }}
-                    <i class="paperclip"
-                       v-if="scope.row.attachmentCount"
-                       :title="scope.row.attachmentCount + ' attachments'"></i>
-                </template>
-            </el-table-column>
-        </el-table>
-        <messagelistpager :paged-data="pagedServerMessages"
-                          @on-current-page-change="handlePaginationCurrentChange"
-                          @on-page-size-change="handlePaginationPageSizeChange"></messagelistpager>
+                <el-tooltip effect="light"
+                            content="Message has been relayed"
+                            placement="top-start">
+                    <span> <i v-if="scope.row.isRelayed" class="fas fa-share-square"></i></span>
+                </el-tooltip>
+            </template>
+        </el-table-column>
+        <el-table-column property="subject" label="Subject" sortable="custom">
+            <template #default="scope">
+                {{ scope.row.subject }}
+                <i class="paperclip"
+                   v-if="scope.row.attachmentCount"
+                   :title="scope.row.attachmentCount + ' attachments'"></i>
+            </template>
+        </el-table-column>
+    </el-table>
+    <messagelistpager :paged-data="pagedServerMessages"
+                      @on-current-page-change="handlePaginationCurrentChange"
+                      @on-page-size-change="handlePaginationPageSizeChange"></messagelistpager>
     </div>
 </template>
 <script lang="ts">
@@ -102,13 +125,13 @@
     import { debounce } from "ts-debounce";
 
     import ConfirmationDialog from "@/components/confirmationdialog.vue";
-    import { MessageBoxInputData } from "element-plus/es/components/message-box";
     import ServerController from "../ApiClient/ServerController";
     import ClientSettingsController from "../ApiClient/ClientSettingsController";
 
-    import { mapOrder } from "@/components/utils/mapOrder";
     import PagedResult, { EmptyPagedResult } from "@/ApiClient/PagedResult";
     import Messagelistpager from "@/components/messagelistpager.vue";
+    import Mailbox from "../ApiClient/Mailbox";
+import MailboxesController from "../ApiClient/MailboxesController";
 
 
     @Component({
@@ -131,27 +154,32 @@
         connection: HubConnectionManager | null = null;
 
         messages: MessageSummary[] = [];
+        selectedMailbox: string | null = null;
 
         isRelayInProgress: boolean = false;
         isRelayAvailable: boolean = false;
 
         get emptyText() {
-            return this.loading ? "Loading..." : (this.searchTerm ?
-                `No messages matching '${this.searchTerm}'`
-                : "No messages");
+            if (this.loading) {
+                return "Loading";
+            }
+
+            if (!this.selectedMailbox) {
+                return "Select a mailbox to view messages";
+            }
+
+            return this.searchTerm ?
+                `No messages matching '${this.searchTerm}' in mailbox '${this.selectedMailbox}'`
+                : `No messages in mailbox '${this.selectedMailbox}'`;
         }
 
         error: Error | null = null;
         selectedmessage: MessageSummary | null = null;
         searchTerm: string = "";
         loading: boolean = true;
+        availableMailboxes: Mailbox[] | null = null;
 
-        private messageNotificationManager = new MessageNotificationManager(
-            (message) => {
-                this.selectMessage(message);
-                this.handleCurrentChange(message);
-            }
-        );
+        private messageNotificationManager: MessageNotificationManager | null = null;
 
         selectMessage(message: MessageSummary) {
             (this.$refs.table as TableInstance).setCurrentRow(message);
@@ -261,7 +289,7 @@
         async clear() {
 
             try {
-                await ElMessageBox.confirm("Delete all messages?")
+                await ElMessageBox.confirm(`Delete all messages in mailbox '${this.selectedMailbox}'?`)
             } catch {
                 return;
             }
@@ -269,11 +297,11 @@
 
             try {
                 this.loading = true;
-                await new MessagesController().deleteAll();
+                await new MessagesController().deleteAll(this.selectedMailbox!);
                 await this.refresh(true);
             } catch (e: any) {
                 ElNotification.error({
-                    title: "Clear Messages Failed",
+                    title: "Delete All Messages Failed",
                     message: e.message,
                 });
             } finally {
@@ -284,14 +312,26 @@
         @Watch("searchTerm")
         doSearch = debounce(() => this.refresh(false), 200);
 
+        @Watch("selectedMailbox")
+        async onMailboxChanged() {
+            this.initialMailboxLoadDone = false;
+            this.messageNotificationManager = new MessageNotificationManager(this.selectedMailbox,
+                (message) => {
+                    this.selectMessage(message);
+                    this.handleCurrentChange(message);
+                }
+            );
+            await this.refresh(true, false);
+        }
+
         private lastSort: string | null = null;
         private lastSortDescending: boolean = false;
         private mutex = new Mutex();
 
-        initialLoadDone = false;
+        initialMailboxLoadDone = false;
 
         async markAllMessageRead() {
-            await new MessagesController().markAllMessageRead();
+            await new MessagesController().markAllMessageRead(this.selectedMailbox!);
         }
 
         async refresh(includeNotifications: boolean, silent: boolean = false) {
@@ -302,18 +342,34 @@
                 this.loading = !silent;
                 this.error = null;
 
+                const server = await new ServerController().getServer()
+                this.isRelayAvailable = !!server.relaySmtpServer;
+
+                this.availableMailboxes = await new MailboxesController().getAll();
+                if (!this.selectedMailbox) {
+                    this.selectedMailbox = this.availableMailboxes.find(m => m.name == server.currentUserDefaultMailboxName)?.name ?? this.availableMailboxes[this.availableMailboxes.length - 1]?.name ?? null;
+                } else {
+                    //Potentially removed mailbox
+                    this.selectedMailbox = this.availableMailboxes.find(m => m.name == this.selectedMailbox)?.name ?? null;
+                }
 
                 // Copy in case they are mutated during the async load below
                 let sortColumn = this.selectedSortColumn;
                 let sortDescending = this.selectedSortDescending;
 
-                this.pagedServerMessages = await new MessagesController().getSummaries(
-                    this.searchTerm,
-                    sortColumn,
-                    sortDescending,
-                    this.page,
-                    this.pageSize
-                );
+                if (!this.selectedMailbox) {
+                    this.pagedServerMessages = { currentPage: 1, firstRowOnPage: 0, lastRowOnPage: 0, pageCount: 1, rowCount: 0, pageSize: this.pageSize, results: [] };
+                } else {
+
+                    this.pagedServerMessages = await new MessagesController().getSummaries(
+                        this.selectedMailbox,
+                        this.searchTerm,
+                        sortColumn,
+                        sortDescending,
+                        this.page,
+                        this.pageSize
+                    );
+                }
 
                 if (
                     !this.lastSort ||
@@ -339,15 +395,12 @@
                 }
 
                 if (includeNotifications) {
-                    await this.messageNotificationManager.refresh(!this.initialLoadDone);
+                    await this.messageNotificationManager?.refresh(!this.initialMailboxLoadDone);
                 }
 
-                this.initialLoadDone = true;
+                this.initialMailboxLoadDone = true;
                 this.lastSort = sortColumn;
                 this.lastSortDescending = this.selectedSortDescending;
-
-                this.isRelayAvailable = !!(await new ServerController().getServer())
-                    .relaySmtpServer;
             } catch (e: any) {
                 this.error = e;
             } finally {
@@ -395,6 +448,9 @@
                 });
                 this.connection.on("serverchanged", async () => {
                     await this.refresh(true, true);
+                });
+                this.connection.on("mailboxeschanged", async () => {
+                    await this.refresh(false, true);
                 });
                 this.connection.addOnConnectedCallback(() => {
                     this.refresh(true, true);
