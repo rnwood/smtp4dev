@@ -122,7 +122,7 @@ namespace Rnwood.Smtp4dev
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>(relayOptions =>
             {
-                if (!string.IsNullOrEmpty( relayOptions.SmtpServer))
+                if (string.IsNullOrEmpty( relayOptions.SmtpServer))
                 {
                     return null;
                 }

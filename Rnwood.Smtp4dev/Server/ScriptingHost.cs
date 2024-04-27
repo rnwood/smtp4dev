@@ -96,7 +96,7 @@ public class ScriptingHost
         {
             JsValue result = jsEngine.Evaluate(shouldRelayScript);
 
-            List<string> recpients = new List<string>();
+            List<string> relayRecipients = new List<string>();
             if (result.IsNull())
             {
 
@@ -105,22 +105,22 @@ public class ScriptingHost
             {
                 if (result.AsString() != String.Empty)
                 {
-                    recpients.Add(result.AsString());
+                    relayRecipients.Add(result.AsString());
                 }
             }
             else if (result.IsArray())
             {
-                recpients.AddRange(result.AsArray().Select(v => v.AsString()));
+                relayRecipients.AddRange(result.AsArray().Select(v => v.AsString()));
             }
             else if (result.AsBoolean())
             {
-                recpients.Add(recipient);
+                relayRecipients.Add(recipient);
             }
 
-            log.Information("AutomaticRelayExpression: (message: {message.Id}, recipient: {recipient}, session: {session.Id}) => {result} => {recipients}", message.Id, recipient,
-                session.Id, result, recpients);
+            log.Information("AutomaticRelayExpression: (message: {messageId}, recipient: {recipient}, session: {sessionId}) => {result} => {relayRecipients}", message.Id, recipient,
+                session.Id, result, relayRecipients);
 
-            return recpients;
+            return relayRecipients;
 
         }
         catch (JavaScriptException ex)

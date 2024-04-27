@@ -413,6 +413,11 @@ namespace Rnwood.Smtp4dev.Server
                     log.Information("Relaying message to {recipient}", recipient);
 
                     using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
+
+                    if (relaySmtpClient == null)
+                    {
+                        throw new ApplicationException("Relay server options are incomplete.");
+                    } 
                     var apiMsg = new ApiModel.Message(message);
                     MimeMessage newEmail = apiMsg.MimeMessage;
                     MailboxAddress sender = MailboxAddress.Parse(
