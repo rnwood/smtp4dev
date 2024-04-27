@@ -10,7 +10,7 @@
             <VersionInfo style="flex: 1 1 content; align-self: center;"></VersionInfo>
 
             <hubconnstatus style="flex: 1 1 content" :connection="connection"></hubconnstatus>
-            <serverstatus style="flex: 1 1 content" :connection="connection" v-on:showsettings="showSettings(true)">
+            <serverstatus style="flex: 0 1 content" :connection="connection" v-on:showsettings="showSettings(true)">
             </serverstatus>
             <el-dropdown style="flex: 0 0 content;" trigger="click" @command="handleMenuCommand">
                 <el-button style="font-size: 1.7em; padding: 6px;" circle icon="more" />
