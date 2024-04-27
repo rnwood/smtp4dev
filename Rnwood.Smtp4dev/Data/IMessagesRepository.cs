@@ -6,14 +6,16 @@ namespace Rnwood.Smtp4dev.Data
 {
     public interface IMessagesRepository
     {
-        Task MarkAllMessagesRead();
+        Task MarkAllMessagesRead(string mailbox);
         Task MarkMessageRead(Guid id);
 
-        IQueryable<DbModel.Message> GetMessages(bool unTracked = true);
+        IQueryable<DbModel.Message> GetAllMessages(bool unTracked = true);
+
+        IQueryable<DbModel.Message> GetMessages(string mailboxName, bool unTracked = true);
 
         Task DeleteMessage(Guid id);
 
-        Task DeleteAllMessages();
+        Task DeleteAllMessages(string mailbox);
 
         Task<DbModel.Message> TryGetMessageById(Guid id, bool tracked);
 

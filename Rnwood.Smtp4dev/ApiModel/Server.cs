@@ -36,7 +36,9 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string RecipientValidationExpression { get; set; }
         public string MessageValidationExpression { get; set; }
 		public bool DisableIPv6 { get; set; }
-        public User[] Users { get; set; }
+        public UserOptions[] Users { get; set; }
+
+        public MailboxOptions[] Mailboxes { get; set; }
 
         public string RelaySmtpServer { get; set; }
 
@@ -59,6 +61,10 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public string[] SmtpEnabledAuthTypesWhenSecureConnection { get; set; }
         public string[] SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; }
+
+        public string CurrentUserName { get; set; }
+
+        public string CurrentUserDefaultMailboxName { get; set; }
     }
 
 }

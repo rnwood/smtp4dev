@@ -3,13 +3,15 @@ import { debounce } from 'ts-debounce';
 import MessagesController from "./ApiClient/MessagesController";
 
 export default class MessageNotificationManager {
-    constructor(onClick: (message: MessageSummary) => void) {
+    constructor(mailboxName: string|null, onClick: (message: MessageSummary) => void) {
         if (Notification.permission == "default") {
             Notification.requestPermission();
         }
+        this.mailboxName = mailboxName;
         this.onClick = onClick;
     }
 
+    private readonly mailboxName: string|null;
     private lastNotifiedMessage: MessageSummary | null = null;
     private onClick: (message: MessageSummary) => void;
     private visibleNotificationCloseTimeout: any | null = null;
@@ -20,8 +22,12 @@ export default class MessageNotificationManager {
     refresh = debounce(this.refreshInternal, 500);
     
     async refreshInternal(suppressNotifications: boolean) {
-        
-        const messagesByDate = await new MessagesController().getNewSummaries(this.lastNotifiedMessage?.id ?? "");
+
+        if (!this.mailboxName) {
+            return;
+        }
+
+        const messagesByDate = await new MessagesController().getNewSummaries(this.lastNotifiedMessage?.id ?? "", this.mailboxName);
         const messagesToAdd = messagesByDate.filter(m => !this.unnotifiedMessages.find(um => um.id=== m.id));
 
         

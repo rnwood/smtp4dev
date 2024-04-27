@@ -16,7 +16,7 @@ namespace Rnwood.Smtp4dev.Tests
 
         public List<DbModel.Message> Messages { get; } = new List<Message>();
 
-        public Task DeleteAllMessages()
+        public Task DeleteAllMessages(string mailboxName)
         {
             Messages.Clear();
             return Task.CompletedTask;
@@ -30,12 +30,17 @@ namespace Rnwood.Smtp4dev.Tests
             return Task.CompletedTask;
         }
 
-        public IQueryable<Message> GetMessages(bool unTracked = true)
+        public IQueryable<Message> GetAllMessages(bool unTracked = true)
         {
             return Messages.AsQueryable();
         }
 
-        public Task MarkAllMessagesRead()
+        public IQueryable<Message> GetMessages(string mailboxName, bool unTracked = true)
+        {
+            return Messages.AsQueryable();
+        }
+
+        public Task MarkAllMessagesRead(string mailboxName)
         {
             foreach (var msg in Messages)
             {

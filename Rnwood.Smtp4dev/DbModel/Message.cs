@@ -23,6 +23,8 @@ namespace Rnwood.Smtp4dev.DbModel
         public string SessionEncoding { get; set; }
 
         public Session Session { get; set; }
+
+        public Mailbox Mailbox { get; set; }
         public int AttachmentCount { get; set; }
 
         public bool IsUnread { get; set; }

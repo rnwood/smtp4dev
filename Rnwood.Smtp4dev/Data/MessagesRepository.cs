@@ -23,19 +23,19 @@ namespace Rnwood.Smtp4dev.Data
 
         public Smtp4devDbContext DbContext => this.dbContext;
 
-        public Task MarkAllMessagesRead()
+        public Task MarkAllMessagesRead(string mailbox)
         {
             return taskQueue.QueueTask(() =>
             {
                 // More performant to bulk update but will need to test platform compat of SQLitePCLRaw.bundle_e_sqlite3 https://github.com/borisdj/EFCore.BulkExtensions
-                var unReadMessages = dbContext.Messages.Where(m => m.IsUnread);
+                var unReadMessages = dbContext.Messages.Where(m => m.Mailbox.Name == mailbox && m.IsUnread);
                 foreach (var msg in unReadMessages)
                 {
                     msg.IsUnread = false;
                 }
 
                 dbContext.SaveChanges();
-                notificationsHub.OnMessagesChanged().Wait();
+                notificationsHub.OnMessagesChanged(mailbox).Wait();
             }, true);
         }
 
@@ -43,42 +43,54 @@ namespace Rnwood.Smtp4dev.Data
         {
             return taskQueue.QueueTask(() =>
             {
-                var message = dbContext.Messages.FindAsync(id).Result;
+                var message = dbContext.Messages.Include(m => m.Mailbox).FirstOrDefault(m => m.Id == id);
                 if (message?.IsUnread != true) return;
                 message.IsUnread = false;
                 dbContext.SaveChanges();
-                notificationsHub.OnMessagesChanged().Wait();
+                notificationsHub.OnMessagesChanged(message.Mailbox.Name).Wait();
             }, true);
         }
 
-        public IQueryable<Message> GetMessages(bool unTracked = true)
+        public IQueryable<Message> GetAllMessages(bool unTracked = true)
         {
-            return unTracked ? dbContext.Messages.AsNoTracking() : dbContext.Messages;
+            var query = dbContext.Messages;
+            return unTracked ? query.AsNoTracking() : query;
+        }
+
+        public IQueryable<Message> GetMessages(string mailboxName, bool unTracked = true)
+        {
+            var query = dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName);
+            return unTracked ? query.AsNoTracking() : query;
         }
 
         public Task DeleteMessage(Guid id)
         {
             return taskQueue.QueueTask(() =>
             {
-                dbContext.Messages.RemoveRange(dbContext.Messages.Where(m => m.Id == id));
-                dbContext.SaveChanges();
-                notificationsHub.OnMessagesChanged().Wait();
+                var message = dbContext.Messages.Include(m => m.Mailbox).FirstOrDefault(m => m.Id == id);
+
+                if (message != null)
+                {
+                    dbContext.Messages.Remove(message);
+                    dbContext.SaveChanges();
+                    notificationsHub.OnMessagesChanged(message.Mailbox.Name).Wait();
+                }
             }, true);
         }
 
-        public Task DeleteAllMessages()
+        public Task DeleteAllMessages(string mailbox)
         {
             return taskQueue.QueueTask(() =>
             {
-                dbContext.Messages.RemoveRange(dbContext.Messages);
+                dbContext.Messages.RemoveRange(dbContext.Messages.Where(m=> m.Mailbox.Name == mailbox));
                 dbContext.SaveChanges();
-                notificationsHub.OnMessagesChanged().Wait();
+                notificationsHub.OnMessagesChanged(mailbox).Wait();
             }, true);
         }
 
         public Task<Message> TryGetMessageById(Guid id, bool tracked)
         {
-            return this.GetMessages(!tracked).SingleOrDefaultAsync(m => m.Id == id);
+            return this.GetAllMessages(!tracked).SingleOrDefaultAsync(m => m.Id == id);
         }
         
     }

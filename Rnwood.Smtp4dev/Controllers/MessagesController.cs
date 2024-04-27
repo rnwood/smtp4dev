@@ -14,6 +14,7 @@ using MimeKit;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.DbModel;
 using NSwag.Annotations;
+using Rnwood.Smtp4dev.Server.Settings;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -36,13 +37,14 @@ namespace Rnwood.Smtp4dev.Controllers
         /// Returns all new messages since the provided message ID. Returns only the summary without message content.
         /// </summary>
         /// <param name="lastSeenMessageId">If not specified all recently received messages will be returned up to the page limit.</param>
+        /// <param name="mailboxName">Mailbox name. If not specified, defaults to the mailboxName with name 'Default'</param>
         /// <param name="pageSize">Max number of messages to retrieve. The most recent X are returned.</param>
         /// <returns></returns>
         [HttpGet("new")]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(MessageSummary[]), Description = "")]
-        public MessageSummary[] GetNewSummaries(Guid? lastSeenMessageId, int pageSize = 50)
+        public MessageSummary[] GetNewSummaries(Guid? lastSeenMessageId, string mailboxName = MailboxOptions.DEFAULTNAME, int pageSize = 50)
         {
-            return messagesRepository.GetMessages(true)
+            return messagesRepository.GetMessages(mailboxName, true)
                 .OrderByDescending(m => m.ReceivedDate)
                 .ThenByDescending(m => m.Id)
                 .AsEnumerable()
@@ -56,6 +58,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// Returns a list of message summaries including basic details but not the content.
         /// </summary>
         /// <param name="searchTerms">Case insensitive term to search for in subject,from,to</param>
+        /// <param name="mailboxName">Mailbox name. If not specified, defaults to the mailboxName with name 'Default'</param>
         /// <param name="sortColumn">Property name from response type to sort by</param>
         /// <param name="sortIsDescending">True if sort should be descending</param>
         /// <param name="page">Page number to retrieve</param>
@@ -63,11 +66,11 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <returns></returns>
         [HttpGet]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.PagedResult<MessageSummary>), Description = "")]
-        public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string sortColumn = "receivedDate",
+        public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string mailboxName = MailboxOptions.DEFAULTNAME, string sortColumn = "receivedDate",
             bool sortIsDescending = true, int page = 1,
             int pageSize = 5)
         {
-            IEnumerable<DbModel.Message> query = messagesRepository.GetMessages(true)
+            IEnumerable<DbModel.Message> query = messagesRepository.GetMessages(mailboxName, true)
                 .Include(m => m.Relays)
                 .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""));
 
@@ -122,9 +125,9 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <returns></returns>
         [HttpPost("markAllRead")]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
-        public Task MarkAllRead()
+        public Task MarkAllRead(string mailboxName=MailboxOptions.DEFAULTNAME)
         {
-            return messagesRepository.MarkAllMessagesRead();
+            return messagesRepository.MarkAllMessagesRead(mailboxName);
         }
 
         /// <summary>
@@ -344,9 +347,9 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <returns></returns>
         [HttpDelete("*")]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
-        public async Task DeleteAll()
+        public async Task DeleteAll(string mailboxName=MailboxOptions.DEFAULTNAME)
         {
-            await messagesRepository.DeleteAllMessages();
+            await messagesRepository.DeleteAllMessages(mailboxName);
         }
     }
 }

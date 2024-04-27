@@ -26,11 +26,11 @@ namespace Rnwood.Smtp4dev.Hubs
 
         
 
-        public async Task OnMessagesChanged()
+        public async Task OnMessagesChanged(string mailbox)
         {
             if (Clients != null)
             {
-                await Clients.All.SendAsync("messageschanged");
+                await Clients.All.SendAsync("messageschanged", mailbox);
             }
         }
 
@@ -47,6 +47,14 @@ namespace Rnwood.Smtp4dev.Hubs
             if (Clients != null)
             {
                 await Clients.All.SendAsync("sessionschanged");
+            }
+        }
+
+        public async Task OnMailboxesChanged()
+        {
+            if (Clients != null)
+            {
+                await Clients.All.SendAsync("mailboxeschanged");
             }
         }
     }

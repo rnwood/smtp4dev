@@ -88,7 +88,7 @@ public class RcptToVerbTests
             Assert.Equal((int)StandardSmtpResponseCode.SyntaxErrorInCommandArguments, e.SmtpResponse.Code);
         }
 
-        Assert.Equal(0, messageBuilder.Recipients.Count);
+        Assert.Empty(messageBuilder.Recipients);
     }
 
     /// <summary>

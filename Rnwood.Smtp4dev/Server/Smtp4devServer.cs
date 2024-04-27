@@ -28,6 +28,11 @@ using System.Threading;
 using System.Net;
 using Rnwood.Smtp4dev.Server.Settings;
 using DeepEqual.Syntax;
+using MailboxOptions = Rnwood.Smtp4dev.Server.Settings.MailboxOptions;
+using DotNet.Globbing;
+using System.Text.RegularExpressions;
+using static System.Formats.Asn1.AsnWriter;
+using static MailKit.Net.Imap.ImapMailboxFilter;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -48,7 +53,6 @@ namespace Rnwood.Smtp4dev.Server
             this.scriptingHost = scriptingHost;
 
             taskQueue.Start();
-            QueueCleanup();
             StartWatchingServerOptionsForChanges();
         }
 
@@ -61,7 +65,7 @@ namespace Rnwood.Smtp4dev.Server
 
         private void OnServerOptionsChanged(Settings.ServerOptions arg1)
         {
-            if (arg1 .IsDeepEqual( this.lastStartOptions))
+            if (arg1.IsDeepEqual(this.lastStartOptions))
             {
                 return;
             }
@@ -84,7 +88,7 @@ namespace Rnwood.Smtp4dev.Server
 
             Settings.ServerOptions serverOptionsValue = serverOptions.CurrentValue;
             this.smtpServer = new Rnwood.SmtpServer.SmtpServer(new SmtpServer.ServerOptions(serverOptionsValue.AllowRemoteConnections, !serverOptionsValue.DisableIPv6, serverOptionsValue.HostName, serverOptionsValue.Port, serverOptionsValue.AuthenticationRequired,
-                serverOptionsValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries|StringSplitOptions.RemoveEmptyEntries), serverOptionsValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                serverOptionsValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries), serverOptionsValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
                 serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null
             ));
@@ -165,39 +169,67 @@ namespace Rnwood.Smtp4dev.Server
         public void Stop()
         {
             log.Information("SMTP server stopping...");
-            this.smtpServer.Stop(true);
+            this.smtpServer?.Stop(true);
         }
 
 
-        private void QueueCleanup()
+        private void DoCleanup()
         {
-            this.taskQueue.QueueTask(
-                () =>
+            //Mark sessions as ended.
+            using var scope = serviceScopeFactory.CreateScope();
+            Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+            dbContext.Sessions.Where(s => !s.EndDate.HasValue).ExecuteUpdate(u => u.SetProperty(s => s.EndDate, DateTime.Now));
+
+            //Find mailboxes in config not in DB and create
+            var serverOptionsCurrentValue = this.serverOptions.CurrentValue;
+            var configuredMailboxesAndDefault = serverOptionsCurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME } });
+            foreach (MailboxOptions mailbox in configuredMailboxesAndDefault)
+            {
+                var dbMailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == mailbox.Name);
+                if (dbMailbox == null)
                 {
-                    using var scope = serviceScopeFactory.CreateScope();
-                    Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-
-                    foreach (Session unfinishedSession in dbContext.Sessions.Where(s => !s.EndDate.HasValue).ToArray())
+                    log.Information("Creating mailbox {name}", mailbox.Name);
+                    dbMailbox = new Mailbox
                     {
-                        unfinishedSession.EndDate = DateTime.Now;
-                    }
+                        Name = mailbox.Name
+                    };
+                    dbContext.Add(dbMailbox);
+                }
+            }
 
-                    dbContext.SaveChanges();
+            //Find configuredMailboxesAndDefault in DB not in config and delete
+            foreach (var dbMailbox in dbContext.Mailboxes)
+            {
+                if (!configuredMailboxesAndDefault.Any(m => m.Name == dbMailbox.Name))
+                {
+                    log.Information("Deleting mailbox {name}", dbMailbox.Name);
+                    dbContext.Remove(dbMailbox);
+                }
+            }
+            dbContext.SaveChanges();
 
-                    TrimMessages(dbContext);
-                    dbContext.SaveChanges();
+            var defaultMailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == MailboxOptions.DEFAULTNAME);
+            foreach (var messageWithoutMailbox in dbContext.Messages.Where(m => m.Mailbox == null))
+            {
+                messageWithoutMailbox.Mailbox = defaultMailbox;
+            }
+            dbContext.SaveChanges();
 
-                    TrimSessions(dbContext);
-                    dbContext.SaveChanges();
+            TrimMessages(dbContext);
+            dbContext.SaveChanges();
 
-                    this.notificationsHub.OnMessagesChanged().Wait();
-                    this.notificationsHub.OnSessionsChanged().Wait();
-                }, true);
+            TrimSessions(dbContext);
+            dbContext.SaveChanges();
+
+            this.notificationsHub.OnMessagesChanged("*").Wait();
+            this.notificationsHub.OnSessionsChanged().Wait();
+            this.notificationsHub.OnMailboxesChanged().Wait();
+
         }
 
         private Task OnAuthenticationCredentialsValidationRequired(object sender, AuthenticationCredentialsValidationEventArgs e)
         {
-            
+
 
             var sessionId = activeSessionsToDbId[e.Session];
             using var scope = serviceScopeFactory.CreateScope();
@@ -333,50 +365,105 @@ namespace Rnwood.Smtp4dev.Server
 
         private async Task OnMessageReceived(object sender, MessageEventArgs e)
         {
-
-            Message message = new MessageConverter().ConvertAsync(e.Message).Result;
             log.Information("Message received. Client address {clientAddress}, From {messageFrom}, To {messageTo}, SecureConnection: {secure}.",
-                e.Message.Session.ClientAddress, e.Message.From, message.To, e.Message.SecureConnection);
-            message.IsUnread = true;
+                e.Message.Session.ClientAddress, e.Message.From, e.Message.Recipients, e.Message.SecureConnection);
 
-            void ProcessMessage()
+            var targetMailboxes = GetTargetMailboxes(e.Message.Recipients);
+
+            if (!targetMailboxes.Any())
             {
-                log.Information("Processing received message");
-                using var scope = serviceScopeFactory.CreateScope();
-                Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+                log.Warning("Message with recipients {recipients} will be delivered to 0 configuredMailboxesAndDefault", e.Message.Recipients);
+                return;
+            }
 
-                message.Session = dbContext.Sessions.Find(activeSessionsToDbId[e.Message.Session]);
-                var relayResult = TryRelayMessage(message, null);
-                message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
+            foreach (var targetMailbox in targetMailboxes)
+            {
+                Message message = new MessageConverter().ConvertAsync(e.Message).Result;
+                message.IsUnread = true;
 
-                ImapState imapState = dbContext.ImapState.Single();
-                imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
-                message.ImapUid = imapState.LastUid;
-                if (relayResult.WasRelayed)
+                await taskQueue.QueueTask(() => ProcessMessage(message, e.Message.Session, targetMailbox), false).ConfigureAwait(false);
+            }
+        }
+
+        private HashSet<MailboxOptions> GetTargetMailboxes(IEnumerable<string> recipients)
+        {
+            HashSet<MailboxOptions> targetMailboxes = new HashSet<MailboxOptions>();
+
+            foreach (var to in recipients)
+            {
+                MailboxOptions targetMailbox = null;
+
+                foreach (var mailbox in this.serverOptions.CurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" } }))
                 {
-                    foreach (var relay in relayResult.RelayRecipients)
+                    foreach (var recipRule in mailbox.Recipients?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
                     {
-                        message.AddRelay(new MessageRelay { SendDate = DateTime.UtcNow, To = relay.Email });
+                        bool isRegex = recipRule.StartsWith("/") && recipRule.EndsWith("/");
+
+                        bool isMatch = isRegex ?
+                            Regex.IsMatch(to, recipRule.Substring(1, recipRule.Length - 2), RegexOptions.IgnoreCase) :
+                            Glob.Parse(recipRule).IsMatch(to);
+
+                        if (isMatch)
+                        {
+                            targetMailbox = mailbox;
+                            break;
+                        }
+                    }
+
+                    if (targetMailbox != null)
+                    {
+                        break;
                     }
                 }
 
-                dbContext.Messages.Add(message);
-
-                dbContext.SaveChanges();
-
-                TrimMessages(dbContext);
-                dbContext.SaveChanges();
-                notificationsHub.OnMessagesChanged().Wait();
-                log.Information("Processing received message DONE");
+                if (targetMailbox != null)
+                {
+                    targetMailboxes.Add(targetMailbox);
+                }
+                else
+                {
+                    log.Warning("Message recipient {recipient} did not match any mailbox recipients", to);
+                }
             }
 
-            await taskQueue.QueueTask(ProcessMessage, false).ConfigureAwait(false);
+            return targetMailboxes;
+        }
+
+        void ProcessMessage(Message message, ISession session, MailboxOptions targetMailbox)
+        {
+            log.Information("Processing received message for mailbox '{mailbox}'", targetMailbox.Name);
+            using var scope = serviceScopeFactory.CreateScope();
+            Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+
+            message.Session = dbContext.Sessions.Find(activeSessionsToDbId[session]);
+            message.Mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == targetMailbox.Name);
+            var relayResult = TryRelayMessage(message, null);
+            message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
+
+            ImapState imapState = dbContext.ImapState.Single();
+            imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
+            message.ImapUid = imapState.LastUid;
+            if (relayResult.WasRelayed)
+            {
+                foreach (var relay in relayResult.RelayRecipients)
+                {
+                    message.AddRelay(new MessageRelay { SendDate = DateTime.UtcNow, To = relay.Email });
+                }
+            }
+
+            dbContext.Messages.Add(message);
+
+            dbContext.SaveChanges();
+
+            TrimMessages(dbContext);
+            dbContext.SaveChanges();
+            notificationsHub.OnMessagesChanged(targetMailbox.Name).Wait();
+            log.Information("Processing received message DONE");
         }
 
         public RelayResult TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
         {
             var result = new RelayResult(message);
-
             if (!relayOptions.CurrentValue.IsEnabled)
             {
                 return result;
@@ -412,12 +499,12 @@ namespace Rnwood.Smtp4dev.Server
                 {
                     log.Information("Relaying message to {recipient}", recipient);
 
-                    using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
+                    using var relaySmtpClient = this.relaySmtpClientFactory(this.relayOptions.CurrentValue);
 
                     if (relaySmtpClient == null)
                     {
                         throw new ApplicationException("Relay server options are incomplete.");
-                    } 
+                    }
                     var apiMsg = new ApiModel.Message(message);
                     MimeMessage newEmail = apiMsg.MimeMessage;
                     MailboxAddress sender = MailboxAddress.Parse(
@@ -439,8 +526,11 @@ namespace Rnwood.Smtp4dev.Server
 
         private void TrimMessages(Smtp4devDbContext dbContext)
         {
-            dbContext.Messages.RemoveRange(dbContext.Messages.OrderByDescending(m => m.ReceivedDate)
-                .Skip(serverOptions.CurrentValue.NumberOfMessagesToKeep));
+            foreach (var mailbox in dbContext.Mailboxes)
+            {
+                dbContext.Messages.RemoveRange(dbContext.Messages.Where(m => m.Mailbox == mailbox).OrderByDescending(m => m.ReceivedDate)
+                    .Skip(serverOptions.CurrentValue.NumberOfMessagesToKeep));
+            }
         }
 
         private void TrimSessions(Smtp4devDbContext dbContext)
@@ -459,9 +549,9 @@ namespace Rnwood.Smtp4dev.Server
 
         public Exception Exception { get; private set; }
 
-        public bool IsRunning => this.smtpServer.IsRunning;
+        public bool IsRunning => this.smtpServer?.IsRunning ?? false;
 
-        public IPEndPoint[] ListeningEndpoints => this.smtpServer.ListeningEndpoints;
+        public IPEndPoint[] ListeningEndpoints => this.smtpServer?.ListeningEndpoints ?? [];
 
         public void TryStart()
         {
@@ -470,6 +560,7 @@ namespace Rnwood.Smtp4dev.Server
                 this.Exception = null;
                 this.lastStartOptions = this.serverOptions.CurrentValue with { };
 
+                DoCleanup();
                 CreateSmtpServer();
                 smtpServer.Start();
 
@@ -479,7 +570,7 @@ namespace Rnwood.Smtp4dev.Server
                         l.Port, l.Address);
                 }
 
-                log.Information("Keeping last {messagesToKeep} messages and {sessionsToKeep} sessions.",
+                log.Information("Keeping last {messagesToKeep} messages per mailbox and {sessionsToKeep} sessions.",
                     serverOptions.CurrentValue.NumberOfMessagesToKeep, serverOptions.CurrentValue.NumberOfSessionsToKeep);
             }
             catch (Exception e)
@@ -495,7 +586,7 @@ namespace Rnwood.Smtp4dev.Server
 
         Task IHostedService.StartAsync(CancellationToken cancellationToken)
         {
-             this.TryStart();
+            this.TryStart();
             return Task.CompletedTask;
         }
 

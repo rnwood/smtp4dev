@@ -5,7 +5,7 @@
                 {{error.message}}
             </el-alert>
 
-            <el-form v-if="server" :model="this" ref="form" :rules="rules" :disabled="saving">
+            <el-form v-if="server" :model="this" ref="form" :rules="rules" :disabled="saving" scroll-to-error>
                 <el-tabs tab-position="top">
                     <el-tab-pane label="General">
                         <el-form-item label="Hostname (SMTP, IMAP)" prop="server.hostName">
@@ -263,14 +263,14 @@
 
 
                         <el-form-item>
-                            SMTP and IMAP Users:       <el-icon v-if="server.lockedSettings.users" :title="`Locked: ${server.lockedSettings.users}`"><Lock /></el-icon>
+                            Web/API, SMTP, IMAP Users:       <el-icon v-if="server.lockedSettings.users" :title="`Locked: ${server.lockedSettings.users}`"><Lock /></el-icon>
 
                         </el-form-item>
 
 
 
                         <div v-for="(user, index) in server.users" :key="index">
-                            <el-form-item class="flex md-5 gap-4" :prop="'server.users[' + index + ']'" :rules="{validator: checkUsernameUnique}">
+                            <el-form-item :prop="'server.users[' + index + ']'" :rules="{validator: checkUsernameUnique}">
                                 <el-form-item label="Username" :prop="'server.users[' + index + '].username'" :rules="{required: true, message: 'Required'}">
                                     <el-input v-model="user.username" :disabled="server.lockedSettings.users">
                                     </el-input>
@@ -280,12 +280,60 @@
 
                                     </el-input>
                                 </el-form-item>
-                                <el-button @click="server.users.splice(index, 1)" :disabled="server.lockedSettings.users">
-                                    Remove
+                                <el-form-item label="Default Mailbox" :prop="'server.users[' + index + '].defaultMailbox'" :rules="{required: true, message: 'Required'}">
+                                    <el-select v-model="user.defaultMailbox" style="width: 150px;" :disabled="server.lockedSettings.defaultMailbox">
+                                        <el-option v-for="item in [{name:'Default'}].concat(server.mailboxes)"
+                                                   :key="item.name"
+                                                   :label="item.name"
+                                                   :value="item.name" />
+
+                                        <template #prefix>
+                                            <el-icon><MessageBox /></el-icon>
+                                        </template>
+                                    </el-select>
+                                </el-form-item>
+                                <el-button title="Remove" @click="server.users.splice(index, 1)" :disabled="server.lockedSettings.users">
+                                    <el-icon><Close /></el-icon>
                                 </el-button>
                             </el-form-item>
                         </div>
                         <el-button size="small" @click="server.users.push({})" :disabled="server.lockedSettings.users">New User</el-button>
+
+
+                    </el-tab-pane>
+                    <el-tab-pane label="Mailboxes">
+
+
+                        <el-form-item>
+                            Mailboxes:       <el-icon v-if="server.lockedSettings.mailboxes" :title="`Locked: ${server.lockedSettings.mailboxes}`"><Lock /></el-icon>
+
+                        </el-form-item>
+
+
+
+                        <div v-for="(mailbox, index) in server.mailboxes" :key="index">
+                            <el-form-item :prop="'server.mailboxes[' + index + ']'" :rules="{validator: checkMailboxNameUnique}">
+                                <el-button @click="server.mailboxes.splice(index, 1); server.mailboxes.splice(index-1, 0, mailbox);" :disabled="server.lockedSettings.mailboxes || index==0">
+                                    <el-icon><ArrowUp /></el-icon>
+                                </el-button>
+                                <el-button @click="server.mailboxes.splice(index, 1); server.mailboxes.splice(index+1, 0, mailbox) " :disabled="server.lockedSettings.mailboxes || index==server.mailboxes.length-1">
+                                    <el-icon><ArrowDown /></el-icon>
+                                </el-button>
+                                <el-form-item label="Name" :prop="'server.mailboxes[' + index + '].name'" :rules="{required: true, message: 'Required'}">
+                                    <el-input v-model="mailbox.name" :disabled="server.lockedSettings.mailboxes">
+                                    </el-input>
+                                </el-form-item>
+                                <el-form-item label="Recipients" :prop="'server.mailboxes[' + index + '].recipients'" :rules="{required: true, message: 'Required'}">
+                                    <el-input v-model="mailbox.recipients" :disabled="server.lockedSettings.mailboxes">
+
+                                    </el-input>
+                                </el-form-item>
+                                <el-button title="Remove" @click="server.mailboxes.splice(index, 1)" :disabled="server.lockedSettings.mailboxes">
+                                    <el-icon><Close /></el-icon>
+                                </el-button>
+                            </el-form-item>
+                        </div>
+                        <el-button size="small" @click="server.mailboxes.splice(0, 0, {})" :disabled="server.lockedSettings.mailboxes">New Mailbox</el-button>
 
 
                     </el-tab-pane>
@@ -353,6 +401,18 @@
             }
 
             return result;
+
+        }
+
+        checkMailboxNameUnique(rule: any, value: any, callback: any) {
+            if (value.name === "Default") {
+                callback(new Error("Name cannot be 'Default'"));
+            }
+            else if (value && this.server?.mailboxes.filter(u => u != value).find(u => u.name == value.name)) {
+                callback(new Error('Name must be unique'));
+            } else {
+                callback();
+            }
 
         }
 

@@ -41,7 +41,7 @@ namespace Rnwood.Smtp4dev.Server
 
         private void OnServerOptionsChanged(ServerOptions serverOptions)
         {
-            if (serverOptions.IsDeepEqual( this.lastStartOptions))
+            if (serverOptions.IsDeepEqual(this.lastStartOptions))
             {
                 return;
             }
@@ -158,7 +158,7 @@ namespace Rnwood.Smtp4dev.Server
                     await Task.Delay(100);
                 }
 
-                foreach(var lp in imapServer.ListeningPoints)
+                foreach (var lp in imapServer.ListeningPoints)
                 {
                     var ep = ((IPEndPoint)lp.Socket.LocalEndPoint);
                     int port = ep.Port;
@@ -190,7 +190,7 @@ namespace Rnwood.Smtp4dev.Server
         {
             this.TryStart();
             return Task.CompletedTask;
- 
+
         }
 
         Task IHostedService.StopAsync(CancellationToken cancellationToken)
@@ -266,7 +266,9 @@ namespace Rnwood.Smtp4dev.Server
 
                     if (e.Folder == "INBOX")
                     {
-                        foreach (var message in messagesRepository.GetMessages())
+
+
+                        foreach (var message in messagesRepository.GetMessages(GetMailboxName()))
                         {
                             List<string> flags = new List<string>();
                             if (!message.IsUnread)
@@ -280,6 +282,13 @@ namespace Rnwood.Smtp4dev.Server
                 }
             }
 
+            private string GetMailboxName()
+            {
+                var configUser = this.serverOptions.CurrentValue.Users?.FirstOrDefault(u => this.session.AuthenticatedUserIdentity.Name.Equals(u.Username, StringComparison.OrdinalIgnoreCase));
+
+                return configUser?.DefaultMailbox ?? "Default";
+            }
+
             private void Session_Fetch(object sender, IMAP_e_Fetch e)
             {
                 using (var scope = this.serviceScopeFactory.CreateScope())
@@ -288,7 +297,7 @@ namespace Rnwood.Smtp4dev.Server
 
                     foreach (var msgInfo in e.MessagesInfo)
                     {
-                        var dbMessage = messagesRepository.GetMessages().SingleOrDefault(m => m.Id == new Guid(msgInfo.ID));
+                        var dbMessage = messagesRepository.GetMessages(GetMailboxName()).SingleOrDefault(m => m.Id == new Guid(msgInfo.ID));
 
                         if (dbMessage != null)
                         {
@@ -310,12 +319,13 @@ namespace Rnwood.Smtp4dev.Server
                 }
 
                 var user = serverOptions.CurrentValue.Users?.FirstOrDefault(u => e.UserName.Equals(u.Username, StringComparison.CurrentCultureIgnoreCase));
-     
-                if (user != null && e.Password.Equals( user.Password, StringComparison.CurrentCultureIgnoreCase))
+
+                if (user != null && e.Password.Equals(user.Password))
                 {
-                    log.Information("IMAP login success for user {user}", e.UserName);
+                    log.Information("IMAP login success for user {user} to mailbox", e.UserName);
                     e.IsAuthenticated = true;
-                } else
+                }
+                else
                 {
                     log.Error("IMAP login failure for user {user}", e.UserName);
                     e.IsAuthenticated = false;

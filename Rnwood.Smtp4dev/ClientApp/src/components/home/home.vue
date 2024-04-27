@@ -1,6 +1,6 @@
 <template>
     <el-container class="fill hfillpanel">
-        <el-header height="35" style="display:flex; align-items: stretch; column-gap: 12px;">
+        <el-header height="35" style="display:flex; flex-wrap:wrap; align-items: end; column-gap: 12px;">
             <h1 style="flex: 0 0 content">
                 <a href="https://github.com/rnwood/smtp4dev/" target="_blank">
                     <img height="35" src="logo.png" alt="smtp4dev" />
@@ -9,11 +9,11 @@
 
             <VersionInfo style="flex: 1 1 content; align-self: center;"></VersionInfo>
 
-            <hubconnstatus style="flex: 0 1 content" :connection="connection"></hubconnstatus>
+            <hubconnstatus style="flex: 1 1 content" :connection="connection"></hubconnstatus>
             <serverstatus style="flex: 0 1 content" :connection="connection" v-on:showsettings="showSettings(true)">
             </serverstatus>
-            <el-dropdown trigger="click" @command="handleMenuCommand">
-                <el-button style="flex: 0 0 content; font-size: 1.7em; padding: 6px;" circle icon="more" />
+            <el-dropdown style="flex: 0 0 content;" trigger="click" @command="handleMenuCommand">
+                <el-button style="font-size: 1.7em; padding: 6px;" circle icon="more" />
 
                 <template #dropdown>
                     <el-dropdown-menu>

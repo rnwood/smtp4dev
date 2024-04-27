@@ -110,6 +110,8 @@ namespace Rnwood.Smtp4dev
                     });
                     context.SaveChanges();
                 }
+
+
             }, ServiceLifetime.Scoped, ServiceLifetime.Singleton);
 
 

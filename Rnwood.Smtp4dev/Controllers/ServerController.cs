@@ -50,6 +50,18 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpGet]
         public ApiModel.Server GetServer()
         {
+            string currentUserName = this.User?.Identity?.Name;
+            string currentUserDefaultMailbox = MailboxOptions.DEFAULTNAME;
+
+            if (!string.IsNullOrEmpty(currentUserName))
+            {
+               var user = serverOptions.CurrentValue.Users.FirstOrDefault(u => currentUserName.Equals(u.Username, StringComparison.CurrentCultureIgnoreCase));
+                if (user != null)
+                {
+                    currentUserDefaultMailbox = user.DefaultMailbox ?? MailboxOptions.DEFAULTNAME;
+                }
+            }
+
             var lockedSettings = GetLockedSettings(true);
 
             var serverOptionsCurrentValue = serverOptions.CurrentValue;
@@ -85,10 +97,13 @@ namespace Rnwood.Smtp4dev.Controllers
                 DisableIPv6 = serverOptionsCurrentValue.DisableIPv6,
                 WebAuthenticationRequired = serverOptionsCurrentValue.WebAuthenticationRequired,
                 Users = serverOptionsCurrentValue.Users,
+				Mailboxes = serverOptionsCurrentValue.Mailboxes,
                 DesktopMinimiseToTrayIcon = desktopOptions.CurrentValue.MinimiseToTrayIcon,
                 IsDesktopApp = cmdLineOptions.IsDesktopApp,
 				SmtpEnabledAuthTypesWhenNotSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
-				SmtpEnabledAuthTypesWhenSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries)
+				SmtpEnabledAuthTypesWhenSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                CurrentUserName = currentUserName,
+                CurrentUserDefaultMailboxName = currentUserDefaultMailbox
 			};
         }
 
@@ -208,6 +223,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.MessageValidationExpression = serverUpdate.MessageValidationExpression;
             newSettings.DisableIPv6 = serverUpdate.DisableIPv6;
             newSettings.Users = serverUpdate.Users;
+			newSettings.Mailboxes = serverUpdate.Mailboxes;
             newSettings.WebAuthenticationRequired = serverUpdate.WebAuthenticationRequired;
             newSettings.SmtpAllowAnyCredentials = serverUpdate.SmtpAllowAnyCredentials;
 			newSettings.SmtpEnabledAuthTypesWhenNotSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection);

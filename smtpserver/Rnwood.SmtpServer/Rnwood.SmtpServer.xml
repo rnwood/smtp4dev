@@ -814,6 +814,23 @@
             Gets a string representing the type of this credential.
             </summary>
         </member>
+        <member name="T:Rnwood.SmtpServer.Extensions.Auth.IAuthenticationCredentialsCanValidateWithPassword">
+            <summary>
+            Represents auth credentials that have a username and which can be validated by the server using the clear text password.
+            </summary>
+        </member>
+        <member name="P:Rnwood.SmtpServer.Extensions.Auth.IAuthenticationCredentialsCanValidateWithPassword.Username">
+            <summary>
+            The username
+            </summary>
+        </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.Auth.IAuthenticationCredentialsCanValidateWithPassword.ValidateResponse(System.String)">
+            <summary>
+            Checks the response using clear text password.
+            </summary>
+            <param name="password"></param>
+            <returns>True if response matches the password.</returns>
+        </member>
         <member name="T:Rnwood.SmtpServer.Extensions.Auth.IAuthMechanism">
             <summary>
                 Defines the <see cref="T:Rnwood.SmtpServer.Extensions.Auth.IAuthMechanism" /> which implements a single authentication mechansim for the server.
