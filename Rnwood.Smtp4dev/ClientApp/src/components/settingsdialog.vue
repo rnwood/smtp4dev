@@ -92,7 +92,7 @@
                         </el-form-item>
 
                         <el-form-item label="Auth Types when not secure connection" prop="server.smtpEnabledAuthTypesWhenNotSecureConnection">
-                        
+
                             <el-select v-model="server.smtpEnabledAuthTypesWhenNotSecureConnection"
                                        multiple
                                        style="width: 100%" :disabled="server.lockedSettings.smtpEnabledAuthTypesWhenNotSecureConnection">
@@ -107,7 +107,7 @@
                         </el-form-item>
 
                         <el-form-item label="Auth Types when secure connection" prop="server.smtpEnabledAuthTypesWhenSecureConnection">
-                  
+
                             <el-select v-model="server.smtpEnabledAuthTypesWhenSecureConnection"
                                        multiple
                                        style="width: 100%" :disabled="server.lockedSettings.smtpEnabledAuthTypesWhenSecureConnection">
@@ -244,20 +244,20 @@
 
                         <el-form-item label="Auto-Relay Recipients" v-show="isRelayEnabled" prop="isRelayEnabled">
                             <el-icon v-if="server.lockedSettings.relayAutomaticEmails" :title="`Locked: ${server.lockedSettings.relayAutomaticEmails}`"><Lock /></el-icon>
-
-                            <div v-for="(email, index) in server.relayAutomaticEmails" :key="index">
-                                <el-form-item :prop="'relayAutomaticEmails[' + index + '].value'" :rules="{required: true, message: 'Required'}">
-                                    <el-input v-model="server.relayAutomaticEmails[index]">
-                                        <template #append>
-                                            <el-button @click="server.relayAutomaticEmails.splice(index, 1)" :disabled="server.lockedSettings.relayAutomaticEmails">
-                                                Remove
-                                            </el-button>
-                                        </template>
-                                    </el-input>
-                                </el-form-item>
-                            </div>
-                            <el-button size="small" @click="server.relayAutomaticEmails.push('')" :disabled="server.lockedSettings.relayAutomaticEmails">New Auto-Relay Recipient</el-button>
                         </el-form-item>
+                        <div v-for="(email, index) in server.relayAutomaticEmails" :key="index">
+                            <el-form-item :prop="'server.relayAutomaticEmails[' + index + ']'" :rules="{required: true, message: 'Required'}">
+                                <el-input v-model="server.relayAutomaticEmails[index]">
+                                    <template #append>
+                                        <el-button @click="server.relayAutomaticEmails.splice(index, 1)" :disabled="server.lockedSettings.relayAutomaticEmails">
+                                            Remove
+                                        </el-button>
+                                    </template>
+                                </el-input>
+                            </el-form-item>
+                        </div>
+                        <el-button size="small" @click="server.relayAutomaticEmails.push('')" :disabled="server.lockedSettings.relayAutomaticEmails">New Auto-Relay Recipient</el-button>
+
                     </el-tab-pane>
                     <el-tab-pane label="Users">
 
@@ -393,21 +393,6 @@
                 this.server.relaySmtpServer = "";
                 this.server.relayAutomaticEmails.splice(0, this.server.relayAutomaticEmails.length);
             }
-        }
-
-        relayAutomaticEmails: any[] = [];
-
-        @Watch("server.relayAutomaticEmails")
-        updateAutomaticEmailsForValidation() {
-
-            if (!this.server) {
-                return;
-            }
-
-            this.relayAutomaticEmails = this.server.relayAutomaticEmails.map((v, i) => {
-                return { value: v };
-            });
-
         }
 
         async save() {
