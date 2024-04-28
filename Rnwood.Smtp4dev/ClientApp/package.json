@@ -32,6 +32,7 @@
     "brace": "^0.11.1",
     "core-js": "^3.36.1",
     "cross-env": "^7.0.3",
+    "device-sizes": "^1.2.3",
     "element-plus": "^2.7.0",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9",
