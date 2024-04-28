@@ -35,6 +35,7 @@
     "element-plus": "^2.7.0",
     "eslint": "^8.57.0",
     "eslint-plugin-vue": "^9",
+    "html-validate": "^8.18.2",
     "moment": "^2.30.1",
     "node-polyfill-webpack-plugin": "^3.0.0",
     "sanitize-html": "^2.13.0",

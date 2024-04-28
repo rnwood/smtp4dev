@@ -27,7 +27,7 @@
             <el-table-column prop="browser" label="Browsers">
                 <template #default="scope">
                     <div style="display: flex; flex-wrap: wrap; gap: 5px;">
-                        <el-tag v-for="browser in scope.row.browsers" :type="scope.row.isError ? 'error' : 'warning'" :key="browser">{{browser}}</el-tag>
+                        <el-tag v-for="browser in scope.row.browsers" :type="scope.row.isError ? 'danger' : 'warning'" :key="browser">{{browser}}</el-tag>
                     </div>
                 </template>
             </el-table-column>
@@ -99,6 +99,7 @@
             this.loading = true;
 
             try {
+                const newWarnings = [];
                 if (this.message != null && this.message.hasHtmlBody) {
 
                     const html = await new MessagesController().getMessageHtml(this.message.id);
@@ -121,7 +122,7 @@
                     const allGrouped = Object.groupBy(allWarnings, i => i.feature + " " + i.type);
                     for (const groupKey in allGrouped) {
                         const groupItems = allGrouped[groupKey]!;
-                        this.warnings.push({
+                        newWarnings.push({
                             type: groupItems[0].type, 
                             
                             feature: groupItems[0].feature,
@@ -133,7 +134,7 @@
                         })
                     }
 
-
+                    this.warnings = newWarnings;
 
                 }
             } catch (e: any) {
