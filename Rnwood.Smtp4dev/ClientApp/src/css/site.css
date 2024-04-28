@@ -167,6 +167,7 @@ pre.source code {
 
 .toolbar {
     display: flex;
+    flex: 0 0 content;
     flex-wrap: wrap;
     column-gap: 6px;
     row-gap: 6px;
