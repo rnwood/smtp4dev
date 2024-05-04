@@ -23,6 +23,7 @@ using Org.BouncyCastle.Utilities.Net;
 using Rnwood.Smtp4dev.Server.Settings;
 using DeepEqual.Syntax;
 using MailKit.Net.Imap;
+using Rnwood.Smtp4dev.Server.Imap;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -234,27 +235,27 @@ namespace Rnwood.Smtp4dev.Server
 
             private void Session_Search(object sender, IMAP_e_Search e)
             {
-                if (e.Criteria is IMAP_Search_Key_Group group
-             && group.Keys.Count == 1
-             && (
-                 group.Keys[0] is IMAP_Search_Key_Unseen
-                 || (group.Keys[0] is IMAP_Search_Key_Not not && not.SearchKey is IMAP_Search_Key_Seen)
-             )
-         )
+                try
                 {
+                    var condition = new ImapSearchTranslator().Translate(e.Criteria);
+
                     using (var scope = this.serviceScopeFactory.CreateScope())
                     {
                         var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
-                        foreach (var unseenMessage in messagesRepository.GetMessages(GetMailboxName(), true).Where(m => m.IsUnread))
+                        foreach (var unseenMessage in messagesRepository.GetMessages(GetMailboxName(), true).Where(condition))
                         {
                             e.AddMessage(unseenMessage.ImapUid);
                         }
                     }
                 }
-                else
+                catch (ImapSearchCriteriaNotSupportedException ex)
                 {
-                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", $"SEARCH criteria '{e.Criteria.ToString()}' not supported");
+                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", ex.Message);
                 }
+
+
+ 
+
             }
 
             private void Session_Select(object sender, IMAP_e_Select e)
