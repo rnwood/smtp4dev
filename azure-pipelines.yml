@@ -13,16 +13,10 @@ resources:
 variables:
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
     iscibuild: ${{ true }}
-    docker_tags: "prerelease"
 
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
     isreleasebuild: ${{ true }}
     tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
-    docker_tags: "" #Set by init script
-    version_major: "" #Set by init script
-    version_minor: "" #Set by init script
-    version_build: "" #Set by init script
-    version_revision: "" #Set by init script
 
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
     tag: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
@@ -44,17 +38,6 @@ stages:
             displayName: Display build number
           - powershell: Write-Host "##vso[build.updatebuildnumber]$(tag) $(Build.BuildNumber)"
             displayName: Update build number
-          - powershell: |
-              $version = [version] "$(tag)"
-              write-host "##vso[task.setvariable variable=version_major]$($version.Major)"
-              write-host "##vso[task.setvariable variable=version_minor]$(if ($version.Minor -ne -1) { $version.Minor })"
-              write-host "##vso[task.setvariable variable=version_build]$(if ($version.Build -ne -1) {$version.Build })"
-              write-host "##vso[task.setvariable variable=version_revision]$(if ($version.Revision -ne -1) {$version.Revision})"
-
-              $dockertags = 'latest v($version.Major) v($version.Major).$($version.Minor)'
-              write-host "##vso[task.setvariable variable=docker_tags]$dockertags"
-            displayName: Release build - Parse version from release tag
-            condition: variables['isreleasebuild']
   - stage: Build
     displayName: Build
     condition: succeeded()
@@ -434,17 +417,25 @@ stages:
             displayName: Tag release
             inputs:
               targetType: inline
-              script: |
+              script: | 
+                if ($(isreleasebuild)) {
+                    $version = [version] "$(tag)"
+                    $dockertags = 'latest v($version.Major) v($version.Major).$($version.Minor)'
+                } else {
+                    $dockertags = 'prerelease'
+                }
+                write-host "Docker tags: $dockertags"
+
                 docker pull $(docker_repo):linux-amd64-$(tag)
 
-                ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
+                ($dockertags.Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
                   docker tag $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-amd64-$_
                   docker push $(docker_repo):linux-amd64-$_
                 }
 
                 docker pull $(docker_repo):linux-arm64-$(tag)
 
-                ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
+                ($dockertags.Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
                   docker tag $(docker_repo):linux-arm64-$(tag) $(docker_repo):linux-arm64-$_
                   docker push $(docker_repo):linux-arm64-$_
                 }
@@ -469,10 +460,16 @@ stages:
             inputs:
               targetType: inline
               script: |
-                write-host "Docker tags: '$(docker_tags)'"
+                if ($(isreleasebuild)) {
+                    $version = [version] "$(tag)"
+                    $dockertags = 'latest v($version.Major) v($version.Major).$($version.Minor)'
+                } else {
+                    $dockertags = 'prerelease'
+                }
+                write-host "Docker tags: $dockertags"
                 docker pull $(docker_repo):windows-amd64-$(tag)
 
-                ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
+                ($dockertags.Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
                   docker tag $(docker_repo):windows-amd64-$(tag) $(docker_repo):windows-amd64-$_
                   docker push $(docker_repo):windows-amd64-$_
                 }
@@ -480,7 +477,7 @@ stages:
                 docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
                 docker manifest push $(docker_repo):$(tag)
 
-                ("$(docker_tags)".Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
+                ($dockertags.Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
                   docker manifest create $(docker_repo):$_ $(docker_repo):windows-amd64-$_ $(docker_repo):linux-amd64-$_ $(docker_repo):linux-arm64-$_
                   docker manifest push $(docker_repo):$_
                 }
