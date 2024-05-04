@@ -22,6 +22,8 @@ using Microsoft.AspNetCore.Http;
 using Org.BouncyCastle.Utilities.Net;
 using Rnwood.Smtp4dev.Server.Settings;
 using DeepEqual.Syntax;
+using MailKit.Net.Imap;
+using Rnwood.Smtp4dev.Server.Imap;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -205,6 +207,8 @@ namespace Rnwood.Smtp4dev.Server
             public SessionHandler(IMAP_Session session, ScriptingHost scriptingHost, IOptionsMonitor<ServerOptions> serverOptions, IServiceScopeFactory serviceScopeFactory)
             {
                 this.session = session;
+                session.Create += Session_Create;
+                session.Append += Session_Append;
                 session.List += Session_List;
                 session.Login += Session_Login;
                 session.Fetch += Session_Fetch;
@@ -213,11 +217,46 @@ namespace Rnwood.Smtp4dev.Server
                 session.Capabilities.Remove("NAMESPACE");
                 session.Store += Session_Store;
                 session.Select += Session_Select;
+                session.Search += Session_Search;
                 this.scriptingHost = scriptingHost;
                 this.serverOptions = serverOptions;
                 this.serviceScopeFactory = serviceScopeFactory;
             }
 
+            private void Session_Create(object sender, IMAP_e_Folder e)
+            {
+                e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Folders are not supported");
+            }
+
+            private void Session_Append(object sender, IMAP_e_Append e)
+            {
+                e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "APPEND is not supported");
+            }
+
+            private void Session_Search(object sender, IMAP_e_Search e)
+            {
+                try
+                {
+                    var condition = new ImapSearchTranslator().Translate(e.Criteria);
+
+                    using (var scope = this.serviceScopeFactory.CreateScope())
+                    {
+                        var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
+                        foreach (var unseenMessage in messagesRepository.GetMessages(GetMailboxName(), true).Where(condition))
+                        {
+                            e.AddMessage(unseenMessage.ImapUid);
+                        }
+                    }
+                }
+                catch (ImapSearchCriteriaNotSupportedException ex)
+                {
+                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", ex.Message);
+                }
+
+
+ 
+
+            }
 
             private void Session_Select(object sender, IMAP_e_Select e)
             {
@@ -266,8 +305,6 @@ namespace Rnwood.Smtp4dev.Server
 
                     if (e.Folder == "INBOX")
                     {
-
-
                         foreach (var message in messagesRepository.GetMessages(GetMailboxName()))
                         {
                             List<string> flags = new List<string>();
