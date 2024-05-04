@@ -407,12 +407,10 @@ stages:
 
               ${{ if variables['isreleasebuild'] }}:
                 action: edit
-                isDraft: true
                 isPreRelease: false
                 changeLogCompareToRelease: lastFullRelease
               ${{ if not(variables['isreleasebuild']) }}:
                 action: create
-                isDraft: true
                 isPreRelease: true
                 changeLogCompareToRelease: lastNonDraftRelease
 
