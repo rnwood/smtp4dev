@@ -13,8 +13,10 @@ resources:
 variables:
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
     iscibuild: ${{ true }}
+    isreleasebuild: ${{ false }}
 
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
+    iscibuild: ${{ false }}
     isreleasebuild: ${{ true }}
     tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
 
@@ -420,7 +422,7 @@ stages:
               script: | 
                 if ($(isreleasebuild)) {
                     $version = [version] "$(tag)"
-                    $dockertags = 'latest v($version.Major) v($version.Major).$($version.Minor)'
+                    $dockertags = 'latest v$($version.Major) v$($version.Major).$($version.Minor)'
                 } else {
                     $dockertags = 'prerelease'
                 }
@@ -462,7 +464,7 @@ stages:
               script: |
                 if ($(isreleasebuild)) {
                     $version = [version] "$(tag)"
-                    $dockertags = 'latest v($version.Major) v($version.Major).$($version.Minor)'
+                    $dockertags = 'latest v$($version.Major) v$($version.Major).$($version.Minor)'
                 } else {
                     $dockertags = 'prerelease'
                 }
