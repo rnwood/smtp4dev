@@ -420,7 +420,7 @@ stages:
             inputs:
               targetType: inline
               script: | 
-                if ($(isreleasebuild)) {
+                if ([bool]::Parse("$(isreleasebuild)")) {
                     $version = [version] "$(tag)"
                     $dockertags = 'latest v$($version.Major) v$($version.Major).$($version.Minor)'
                 } else {
@@ -462,7 +462,7 @@ stages:
             inputs:
               targetType: inline
               script: |
-                if ($(isreleasebuild)) {
+                if ([bool]::Parse("$(isreleasebuild)")) {
                     $version = [version] "$(tag)"
                     $dockertags = 'latest v$($version.Major) v$($version.Major).$($version.Minor)'
                 } else {
