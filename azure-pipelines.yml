@@ -422,9 +422,9 @@ stages:
               script: | 
                 if ([bool]::Parse("$(isreleasebuild)")) {
                     $version = [version] "$(tag)"
-                    $dockertags = 'latest v$($version.Major) v$($version.Major).$($version.Minor)'
+                    $dockertags = "latest v$($version.Major) v$($version.Major).$($version.Minor)"
                 } else {
-                    $dockertags = 'prerelease'
+                    $dockertags = "prerelease"
                 }
                 write-host "Docker tags: $dockertags"
 
@@ -464,9 +464,9 @@ stages:
               script: |
                 if ([bool]::Parse("$(isreleasebuild)")) {
                     $version = [version] "$(tag)"
-                    $dockertags = 'latest v$($version.Major) v$($version.Major).$($version.Minor)'
+                    $dockertags = "latest v$($version.Major) v$($version.Major).$($version.Minor)"
                 } else {
-                    $dockertags = 'prerelease'
+                    $dockertags = "prerelease"
                 }
                 write-host "Docker tags: $dockertags"
                 docker pull $(docker_repo):windows-amd64-$(tag)
