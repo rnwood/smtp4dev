@@ -1,4 +1,4 @@
-﻿// <copyright file="SmtpServerOptions.cs" company="Rnwood.SmtpServer project contributors">
+﻿// <copyright file="ServerOptions.cs" company="Rnwood.SmtpServer project contributors">
 // Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -16,10 +16,10 @@ using Rnwood.SmtpServer.Extensions.Auth;
 namespace Rnwood.SmtpServer;
 
 /// <summary>
-///     Implements a default <see cref="IServerOptions" /> which is suitable for many basic uses.
+///     Implements a default <see cref="ISmtpServerOptions" /> which is suitable for many basic uses.
 /// </summary>
-/// <seealso cref="Rnwood.SmtpServer.IServerOptions" />
-public class ServerOptions : IServerOptions
+/// <seealso cref="Rnwood.SmtpServer.ISmtpServerOptions" />
+public class ServerOptions : ISmtpServerOptions
 {
     private readonly bool allowRemoteConnections;
     private readonly bool enableIpV6;
@@ -94,6 +94,10 @@ public class ServerOptions : IServerOptions
     /// <inheritdoc />
     public virtual Encoding FallbackEncoding => Encoding.GetEncoding("iso-8859-1");
 
+    public X509Certificate TlsCertificate => this.implcitTlsCertificate ?? this.startTlsCertificate;
+
+    public TlsMode TlsMode => this.implcitTlsCertificate != null ? TlsMode.ImplicitTls : this.startTlsCertificate != null ? TlsMode.StartTls : TlsMode.None;
+
 
     /// <inheritdoc />
     public virtual Task<IEnumerable<IExtension>> GetExtensions(IConnectionChannel connectionChannel)
@@ -127,9 +131,6 @@ public class ServerOptions : IServerOptions
     public virtual Task<TimeSpan> GetSendTimeout(IConnectionChannel connectionChannel) =>
         Task.FromResult(new TimeSpan(0, 0, 30));
 
-    /// <inheritdoc />
-    public virtual Task<X509Certificate> GetSSLCertificate(IConnection connection) =>
-        Task.FromResult(implcitTlsCertificate ?? startTlsCertificate);
 
     /// <inheritdoc />
     public virtual Task<bool> IsAuthMechanismEnabled(IConnection connection, IAuthMechanism authMechanism)
@@ -148,8 +149,6 @@ public class ServerOptions : IServerOptions
     /// <inheritdoc />
     public Task<bool> IsSessionLoggingEnabled(IConnection connection) => Task.FromResult(false);
 
-    /// <inheritdoc />
-    public Task<bool> IsSSLEnabled(IConnection connection) => Task.FromResult(implcitTlsCertificate != null);
 
     /// <inheritdoc />
     public virtual Task OnCommandReceived(IConnection connection, SmtpCommand command) =>

@@ -1,4 +1,4 @@
-// <copyright file="IServerOptions.cs" company="Rnwood.SmtpServer project contributors">
+// <copyright file="ISmtpServerOptions.cs" company="Rnwood.SmtpServer project contributors">
 // Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
 // Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
 // </copyright>
@@ -15,9 +15,9 @@ using Rnwood.SmtpServer.Extensions.Auth;
 namespace Rnwood.SmtpServer;
 
 /// <summary>
-///     Defines the <see cref="IServerOptions" />.
+///     Defines the <see cref="ISmtpServerOptions" />.
 /// </summary>
-public interface IServerOptions
+public interface ISmtpServerOptions
 {
     /// <summary>
     ///     Gets the DomainName
@@ -79,12 +79,7 @@ public interface IServerOptions
     /// <returns>A <see cref="Task{T}" /> representing the async operation.</returns>
     Task<TimeSpan> GetSendTimeout(IConnectionChannel connectionChannel);
 
-    /// <summary>
-    ///     Gets the SSL certificate that should be used for the specified connection.
-    /// </summary>
-    /// <param name="connection">The connection.</param>
-    /// <returns>A <see cref="Task{T}" /> representing the async operation.</returns>
-    Task<X509Certificate> GetSSLCertificate(IConnection connection);
+    X509Certificate TlsCertificate { get; }
 
     /// <summary>
     ///     Determines whether the specified auth mechanism should be enabled for the specified connection.
@@ -101,14 +96,7 @@ public interface IServerOptions
     /// <returns>A <see cref="Task{T}" /> representing the async operation.</returns>
     Task<bool> IsSessionLoggingEnabled(IConnection connection);
 
-    /// <summary>
-    ///     Gets a value indicating whether to run in SSL mode.
-    /// </summary>
-    /// <param name="connection">The connection<see cref="IConnection" />.</param>
-    /// <returns>
-    ///     A <see cref="Task" /> representing the asynchronous operation.
-    /// </returns>
-    Task<bool> IsSSLEnabled(IConnection connection);
+    TlsMode TlsMode { get; }
 
     /// <summary>
     ///     Called when a command received in the specified SMTP session.

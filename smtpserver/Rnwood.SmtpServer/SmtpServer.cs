@@ -61,8 +61,8 @@ public class SmtpServer : ISmtpServer
     /// <summary>
     ///     Initializes a new instance of the <see cref="SmtpServer" /> class.
     /// </summary>
-    /// <param name="options">The Options<see cref="IServerOptions" />.</param>
-    public SmtpServer(IServerOptions options)
+    /// <param name="options">The Options<see cref="ISmtpServerOptions" />.</param>
+    public SmtpServer(ISmtpServerOptions options)
     {
         this.Options = options;
     }
@@ -93,7 +93,7 @@ public class SmtpServer : ISmtpServer
     /// <summary>
     ///     Gets the Options.
     /// </summary>
-    public IServerOptions Options { get; }
+    public ISmtpServerOptions Options { get; }
 
 
     /// <summary>

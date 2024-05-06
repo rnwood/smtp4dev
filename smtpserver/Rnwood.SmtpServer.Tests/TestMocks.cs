@@ -28,7 +28,7 @@ public class TestMocks
         ConnectionChannel = new Mock<IConnectionChannel>(MockBehavior.Strict);
         Session = new Mock<MemorySession>(IPAddress.Loopback, DateTime.Now) { CallBase = true };
         Server = new Mock<ISmtpServer>(MockBehavior.Strict);
-        ServerOptions = new Mock<IServerOptions>(MockBehavior.Strict);
+        ServerOptions = new Mock<ISmtpServerOptions>(MockBehavior.Strict);
         MessageBuilder = new Mock<MemoryMessageBuilder> { CallBase = true };
         VerbMap = new Mock<VerbMap> { CallBase = true };
 
@@ -42,7 +42,7 @@ public class TestMocks
         ServerOptions.Setup(sb => sb.OnSessionCompleted(It.IsAny<IConnection>(), It.IsAny<ISession>()))
             .Returns(Task.CompletedTask);
         ServerOptions.SetupGet(sb => sb.DomainName).Returns("tests");
-        ServerOptions.Setup(sb => sb.IsSSLEnabled(It.IsAny<IConnection>())).Returns(Task.FromResult(false));
+        ServerOptions.SetupGet(sb => sb.TlsMode).Returns(TlsMode.None);
         ServerOptions.Setup(sb => sb.OnSessionStarted(It.IsAny<IConnection>(), It.IsAny<ISession>()))
             .Returns(Task.CompletedTask);
         ServerOptions
@@ -105,7 +105,7 @@ public class TestMocks
     /// <summary>
     ///     Gets the ServerOptions
     /// </summary>
-    public Mock<IServerOptions> ServerOptions { get; }
+    public Mock<ISmtpServerOptions> ServerOptions { get; }
 
     /// <summary>
     ///     Gets the Session

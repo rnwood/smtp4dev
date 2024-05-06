@@ -11,6 +11,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public int? Port { get => port; set => port = value.HasValue ? Guard.Against.OutOfRange(value.Value, nameof(value), 0, 65535) : null; }
         public bool? AllowRemoteConnections { get; set; }
 
+        public string Urls { get; set; }
         public string Database { get; set; }
 
         public int? NumberOfMessagesToKeep { get; set; }

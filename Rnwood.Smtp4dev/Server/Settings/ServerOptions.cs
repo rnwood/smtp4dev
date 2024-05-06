@@ -6,6 +6,9 @@ namespace Rnwood.Smtp4dev.Server.Settings
     public record ServerOptions
     {
         public int Port { get; set; } = 25;
+
+        public string Urls { get; set; }
+
         public bool AllowRemoteConnections { get; set; } = true;
 
         public string Database { get; set; } = "database.db";

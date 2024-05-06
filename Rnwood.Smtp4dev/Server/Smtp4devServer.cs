@@ -45,7 +45,7 @@ namespace Rnwood.Smtp4dev.Server
             ITaskQueue taskQueue, ScriptingHost scriptingHost)
         {
             this.notificationsHub = notificationsHub;
-            this.serverOptions = serverOptions;
+            this.ServerOptions = serverOptions;
             this.relayOptions = relayOptions;
             this.serviceScopeFactory = serviceScopeFactory;
             this.relaySmtpClientFactory = relaySmtpClientFactory;
@@ -59,7 +59,7 @@ namespace Rnwood.Smtp4dev.Server
         private void StartWatchingServerOptionsForChanges()
         {
             IDisposable eventHandler = null;
-            var obs = Observable.FromEvent<Settings.ServerOptions>(e => eventHandler = this.serverOptions.OnChange(e), e => eventHandler.Dispose());
+            var obs = Observable.FromEvent<Settings.ServerOptions>(e => eventHandler = this.ServerOptions.OnChange(e), e => eventHandler.Dispose());
             obs.Throttle(TimeSpan.FromMilliseconds(100)).Subscribe(OnServerOptionsChanged);
         }
 
@@ -121,12 +121,12 @@ namespace Rnwood.Smtp4dev.Server
 
         private Task OnMessageStart(object sender, MessageStartEventArgs e)
         {
-            if (this.serverOptions.CurrentValue.SecureConnectionRequired && !e.Session.SecureConnection)
+            if (this.ServerOptions.CurrentValue.SecureConnectionRequired && !e.Session.SecureConnection)
             {
                 throw new SmtpServerException(new SmtpResponse(451, "Secure connection required"));
             }
 
-            if (this.serverOptions.CurrentValue.AuthenticationRequired && !e.Session.Authenticated)
+            if (this.ServerOptions.CurrentValue.AuthenticationRequired && !e.Session.Authenticated)
             {
                 throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.AuthenticationRequired, "Authentication is required"));
             }
@@ -181,7 +181,7 @@ namespace Rnwood.Smtp4dev.Server
             dbContext.Sessions.Where(s => !s.EndDate.HasValue).ExecuteUpdate(u => u.SetProperty(s => s.EndDate, DateTime.Now));
 
             //Find mailboxes in config not in DB and create
-            var serverOptionsCurrentValue = this.serverOptions.CurrentValue;
+            var serverOptionsCurrentValue = this.ServerOptions.CurrentValue;
             var configuredMailboxesAndDefault = serverOptionsCurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME } });
             foreach (MailboxOptions mailbox in configuredMailboxesAndDefault)
             {
@@ -240,7 +240,7 @@ namespace Rnwood.Smtp4dev.Server
 
             AuthenticationResult? result = scriptingHost.ValidateCredentials(apiSession, e.Credentials);
 
-            if (result == null && this.serverOptions.CurrentValue.SmtpAllowAnyCredentials)
+            if (result == null && this.ServerOptions.CurrentValue.SmtpAllowAnyCredentials)
             {
                 this.log.Information("SMTP auth success (allow any credentials is on)");
                 result = AuthenticationResult.Success;
@@ -393,7 +393,7 @@ namespace Rnwood.Smtp4dev.Server
             {
                 MailboxOptions targetMailbox = null;
 
-                foreach (var mailbox in this.serverOptions.CurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" } }))
+                foreach (var mailbox in this.ServerOptions.CurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" } }))
                 {
                     foreach (var recipRule in mailbox.Recipients?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
                     {
@@ -560,7 +560,7 @@ namespace Rnwood.Smtp4dev.Server
             try
             {
                 this.Exception = null;
-                this.lastStartOptions = this.serverOptions.CurrentValue with { };
+                this.lastStartOptions = this.ServerOptions.CurrentValue with { };
 
                 DoCleanup();
                 CreateSmtpServer();

@@ -31,7 +31,7 @@ namespace Rnwood.Smtp4dev.Server
     {
         public ImapServer(IOptionsMonitor<ServerOptions> serverOptions, ScriptingHost scriptingHost, IServiceScopeFactory serviceScopeFactory)
         {
-            this.serverOptions = serverOptions;
+            this.ServerOptions = serverOptions;
             this.serviceScopeFactory = serviceScopeFactory;
             this.scriptingHost = scriptingHost;
 
@@ -219,7 +219,7 @@ namespace Rnwood.Smtp4dev.Server
                 session.Select += Session_Select;
                 session.Search += Session_Search;
                 this.scriptingHost = scriptingHost;
-                this.serverOptions = serverOptions;
+                this.ServerOptions = serverOptions;
                 this.serviceScopeFactory = serviceScopeFactory;
             }
 
@@ -321,7 +321,7 @@ namespace Rnwood.Smtp4dev.Server
 
             private string GetMailboxName()
             {
-                var configUser = this.serverOptions.CurrentValue.Users?.FirstOrDefault(u => this.session.AuthenticatedUserIdentity.Name.Equals(u.Username, StringComparison.OrdinalIgnoreCase));
+                var configUser = this.ServerOptions.CurrentValue.Users?.FirstOrDefault(u => this.session.AuthenticatedUserIdentity.Name.Equals(u.Username, StringComparison.OrdinalIgnoreCase));
 
                 return configUser?.DefaultMailbox ?? "Default";
             }

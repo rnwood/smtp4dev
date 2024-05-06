@@ -18,7 +18,7 @@ namespace Rnwood.Smtp4dev
 
         public UserValidationService(IOptionsMonitor<ServerOptions> serverOptions)
         {
-            this.serverOptions = serverOptions;
+            this.ServerOptions = serverOptions;
         }
 
         public Task HandleAsync(AuthorizationHandlerContext context)
@@ -39,7 +39,7 @@ namespace Rnwood.Smtp4dev
 
         public Task<bool> IsValidAsync(string username, string password)
         {
-            return Task.FromResult(this.serverOptions.CurrentValue.Users?
+            return Task.FromResult(this.ServerOptions.CurrentValue.Users?
                 .Any(u =>
                     username.Equals(u.Username, System.StringComparison.CurrentCultureIgnoreCase) &&
                     password == u.Password

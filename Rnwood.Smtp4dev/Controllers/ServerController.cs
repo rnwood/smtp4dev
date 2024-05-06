@@ -28,7 +28,7 @@ namespace Rnwood.Smtp4dev.Controllers
         {
             this.server = server;
             this.imapServer = imapServer;
-            this.serverOptions = serverOptions;
+            this.ServerOptions = serverOptions;
             this.relayOptions = relayOptions;
             this.desktopOptions = desktopOptions;
             this.hostingEnvironmentHelper = hostingEnvironmentHelper;

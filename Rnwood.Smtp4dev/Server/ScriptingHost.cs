@@ -29,9 +29,9 @@ public class ScriptingHost
     public ScriptingHost(IOptionsMonitor<RelayOptions> relayOptions, IOptionsMonitor<Settings.ServerOptions> serverOptions)
     {
         this.relayOptions = relayOptions;
-        this.serverOptions = serverOptions;
+        this.ServerOptions = serverOptions;
         this.relayOptions.OnChange(_ => ParseScripts(relayOptions.CurrentValue, serverOptions.CurrentValue));
-        this.serverOptions.OnChange(_ => ParseScripts(relayOptions.CurrentValue, serverOptions.CurrentValue));
+        this.ServerOptions.OnChange(_ => ParseScripts(relayOptions.CurrentValue, serverOptions.CurrentValue));
         ParseScripts(relayOptions.CurrentValue, serverOptions.CurrentValue);
     }
 

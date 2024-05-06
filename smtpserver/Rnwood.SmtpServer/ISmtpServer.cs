@@ -15,5 +15,5 @@ public interface ISmtpServer : IDisposable
     /// <summary>
     ///     Gets the Options.
     /// </summary>
-    IServerOptions Options { get; }
+    ISmtpServerOptions Options { get; }
 }

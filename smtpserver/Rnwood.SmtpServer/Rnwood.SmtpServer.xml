@@ -1791,176 +1791,6 @@
                 The <see cref="T:System.Int32" />.
             </returns>
         </member>
-        <member name="T:Rnwood.SmtpServer.IServerOptions">
-            <summary>
-                Defines the <see cref="T:Rnwood.SmtpServer.IServerOptions" />.
-            </summary>
-        </member>
-        <member name="P:Rnwood.SmtpServer.IServerOptions.DomainName">
-            <summary>
-                Gets the DomainName
-                Gets domain name reported by the server to clients.
-            </summary>
-        </member>
-        <member name="P:Rnwood.SmtpServer.IServerOptions.IpAddress">
-            <summary>
-                Gets the IP address on which to listen for connections.
-            </summary>
-        </member>
-        <member name="P:Rnwood.SmtpServer.IServerOptions.MaximumNumberOfSequentialBadCommands">
-            <summary>
-                Gets the max number of sequential bad commands before the client will be disconnected.
-            </summary>
-        </member>
-        <member name="P:Rnwood.SmtpServer.IServerOptions.PortNumber">
-            <summary>
-                Gets the TCP port number on which to listen for connections.
-            </summary>
-        </member>
-        <member name="P:Rnwood.SmtpServer.IServerOptions.FallbackEncoding">
-            <summary>
-                Gets an encoding which will be used if bytes received from the client cannot be decoded as ASCII/UTF-8.
-            </summary>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.GetExtensions(Rnwood.SmtpServer.IConnectionChannel)">
-            <summary>
-                Gets the extensions that should be enabled for the specified connection.
-            </summary>
-            <param name="connectionChannel">The connectionChannel<see cref="T:Rnwood.SmtpServer.IConnectionChannel" />.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> resulting in a sequence of <see cref="T:Rnwood.SmtpServer.Extensions.IExtension" /> for the extensions.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.GetMaximumMessageSize(Rnwood.SmtpServer.IConnection)">
-            <summary>
-                Gets the maximum allowed size of the message for the specified connection.
-            </summary>
-            <param name="connection">The connection.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.GetReceiveTimeout(Rnwood.SmtpServer.IConnectionChannel)">
-            <summary>
-                Gets the receive timeout that should be used for the specified connection.
-            </summary>
-            <param name="connectionChannel">The connection channel.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.GetSendTimeout(Rnwood.SmtpServer.IConnectionChannel)">
-            <summary>
-                Gets the send timeout that should be used for the specified connection.
-            </summary>
-            <param name="connectionChannel">The connectionChannel<see cref="T:Rnwood.SmtpServer.IConnectionChannel" />.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.GetSSLCertificate(Rnwood.SmtpServer.IConnection)">
-            <summary>
-                Gets the SSL certificate that should be used for the specified connection.
-            </summary>
-            <param name="connection">The connection.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.IsAuthMechanismEnabled(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.Extensions.Auth.IAuthMechanism)">
-            <summary>
-                Determines whether the specified auth mechanism should be enabled for the specified connection.
-            </summary>
-            <param name="connection">The connection.</param>
-            <param name="authMechanism">The auth mechanism.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.IsSessionLoggingEnabled(Rnwood.SmtpServer.IConnection)">
-            <summary>
-                Gets a value indicating whether session logging should be enabled for the given connection.
-            </summary>
-            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" />.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.IsSSLEnabled(Rnwood.SmtpServer.IConnection)">
-            <summary>
-                Gets a value indicating whether to run in SSL mode.
-            </summary>
-            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" />.</param>
-            <returns>
-                A <see cref="T:System.Threading.Tasks.Task" /> representing the asynchronous operation.
-            </returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.OnCommandReceived(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.SmtpCommand)">
-            <summary>
-                Called when a command received in the specified SMTP session.
-            </summary>
-            <param name="connection">The connection.</param>
-            <param name="command">The command.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task" /> representing the asynchronous operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.OnCreateNewMessage(Rnwood.SmtpServer.IConnection)">
-            <summary>
-                Called when a new message is started using the MAIL FROM command and must returns the instance of
-                <see cref="T:Rnwood.SmtpServer.IMessageBuilder" /> which will be used to record the message.
-            </summary>
-            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" />.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.OnCreateNewSession(Rnwood.SmtpServer.IConnectionChannel)">
-            <summary>
-                Called when a new session is started and must return an object which is used to record details about that session.
-            </summary>
-            <param name="connectionChannel">The connectionChannel<see cref="T:Rnwood.SmtpServer.IConnectionChannel" />.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.OnMessageCompleted(Rnwood.SmtpServer.IConnection)">
-            <summary>
-                Called when a message is received but not committed.
-            </summary>
-            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" />.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.OnMessageReceived(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.IMessage)">
-            <summary>
-                Called when a new message is received by the server.
-            </summary>
-            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" />.</param>
-            <param name="message">The message<see cref="T:Rnwood.SmtpServer.IMessage" />.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.OnMessageRecipientAdding(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.IMessageBuilder,System.String)">
-            <summary>
-                Called when a new recipient is requested for a message using the MAIL FROM command.
-            </summary>
-            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" />.</param>
-            <param name="message">The message<see cref="T:Rnwood.SmtpServer.IMessageBuilder" />.</param>
-            <param name="recipient">The recipient<see cref="T:System.String" />.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.OnMessageStart(Rnwood.SmtpServer.IConnection,System.String)">
-            <summary>
-                Called when a new message is started in the specified session.
-            </summary>
-            <param name="connection">The connection.</param>
-            <param name="from">From.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task" /> representing the asynchronous operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.OnSessionCompleted(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.ISession)">
-            <summary>
-                Called when a SMTP session is completed.
-            </summary>
-            <param name="connection">The connection.</param>
-            <param name="session">The session.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task" /> representing the asynchronous operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.OnSessionStarted(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.ISession)">
-            <summary>
-                Called when a new SMTP session is started.
-            </summary>
-            <param name="connection">The connection.</param>
-            <param name="session">The session.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task" /> representing the asynchronous operation.</returns>
-        </member>
-        <member name="M:Rnwood.SmtpServer.IServerOptions.ValidateAuthenticationCredentials(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.Extensions.Auth.IAuthenticationCredentials)">
-            <summary>
-                Validates the authentication request to determine if the supplied details
-                are correct.
-            </summary>
-            <param name="connection">The connection.</param>
-            <param name="authenticationRequest">The authentication request.</param>
-            <returns>A <see cref="T:System.Threading.Tasks.Task" /> representing the async operation.</returns>
-        </member>
         <member name="T:Rnwood.SmtpServer.ISession">
             <summary>
                 Defines the <see cref="T:Rnwood.SmtpServer.ISession" />.
@@ -2047,6 +1877,160 @@
             <summary>
                 Gets the Options.
             </summary>
+        </member>
+        <member name="T:Rnwood.SmtpServer.ISmtpServerOptions">
+            <summary>
+                Defines the <see cref="T:Rnwood.SmtpServer.ISmtpServerOptions" />.
+            </summary>
+        </member>
+        <member name="P:Rnwood.SmtpServer.ISmtpServerOptions.DomainName">
+            <summary>
+                Gets the DomainName
+                Gets domain name reported by the server to clients.
+            </summary>
+        </member>
+        <member name="P:Rnwood.SmtpServer.ISmtpServerOptions.IpAddress">
+            <summary>
+                Gets the IP address on which to listen for connections.
+            </summary>
+        </member>
+        <member name="P:Rnwood.SmtpServer.ISmtpServerOptions.MaximumNumberOfSequentialBadCommands">
+            <summary>
+                Gets the max number of sequential bad commands before the client will be disconnected.
+            </summary>
+        </member>
+        <member name="P:Rnwood.SmtpServer.ISmtpServerOptions.PortNumber">
+            <summary>
+                Gets the TCP port number on which to listen for connections.
+            </summary>
+        </member>
+        <member name="P:Rnwood.SmtpServer.ISmtpServerOptions.FallbackEncoding">
+            <summary>
+                Gets an encoding which will be used if bytes received from the client cannot be decoded as ASCII/UTF-8.
+            </summary>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.GetExtensions(Rnwood.SmtpServer.IConnectionChannel)">
+            <summary>
+                Gets the extensions that should be enabled for the specified connection.
+            </summary>
+            <param name="connectionChannel">The connectionChannel<see cref="T:Rnwood.SmtpServer.IConnectionChannel" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> resulting in a sequence of <see cref="T:Rnwood.SmtpServer.Extensions.IExtension" /> for the extensions.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.GetMaximumMessageSize(Rnwood.SmtpServer.IConnection)">
+            <summary>
+                Gets the maximum allowed size of the message for the specified connection.
+            </summary>
+            <param name="connection">The connection.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.GetReceiveTimeout(Rnwood.SmtpServer.IConnectionChannel)">
+            <summary>
+                Gets the receive timeout that should be used for the specified connection.
+            </summary>
+            <param name="connectionChannel">The connection channel.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.GetSendTimeout(Rnwood.SmtpServer.IConnectionChannel)">
+            <summary>
+                Gets the send timeout that should be used for the specified connection.
+            </summary>
+            <param name="connectionChannel">The connectionChannel<see cref="T:Rnwood.SmtpServer.IConnectionChannel" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.IsAuthMechanismEnabled(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.Extensions.Auth.IAuthMechanism)">
+            <summary>
+                Determines whether the specified auth mechanism should be enabled for the specified connection.
+            </summary>
+            <param name="connection">The connection.</param>
+            <param name="authMechanism">The auth mechanism.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.IsSessionLoggingEnabled(Rnwood.SmtpServer.IConnection)">
+            <summary>
+                Gets a value indicating whether session logging should be enabled for the given connection.
+            </summary>
+            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.OnCommandReceived(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.SmtpCommand)">
+            <summary>
+                Called when a command received in the specified SMTP session.
+            </summary>
+            <param name="connection">The connection.</param>
+            <param name="command">The command.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task" /> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.OnCreateNewMessage(Rnwood.SmtpServer.IConnection)">
+            <summary>
+                Called when a new message is started using the MAIL FROM command and must returns the instance of
+                <see cref="T:Rnwood.SmtpServer.IMessageBuilder" /> which will be used to record the message.
+            </summary>
+            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.OnCreateNewSession(Rnwood.SmtpServer.IConnectionChannel)">
+            <summary>
+                Called when a new session is started and must return an object which is used to record details about that session.
+            </summary>
+            <param name="connectionChannel">The connectionChannel<see cref="T:Rnwood.SmtpServer.IConnectionChannel" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.OnMessageCompleted(Rnwood.SmtpServer.IConnection)">
+            <summary>
+                Called when a message is received but not committed.
+            </summary>
+            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.OnMessageReceived(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.IMessage)">
+            <summary>
+                Called when a new message is received by the server.
+            </summary>
+            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" />.</param>
+            <param name="message">The message<see cref="T:Rnwood.SmtpServer.IMessage" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.OnMessageRecipientAdding(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.IMessageBuilder,System.String)">
+            <summary>
+                Called when a new recipient is requested for a message using the MAIL FROM command.
+            </summary>
+            <param name="connection">The connection<see cref="T:Rnwood.SmtpServer.IConnection" />.</param>
+            <param name="message">The message<see cref="T:Rnwood.SmtpServer.IMessageBuilder" />.</param>
+            <param name="recipient">The recipient<see cref="T:System.String" />.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task`1" /> representing the async operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.OnMessageStart(Rnwood.SmtpServer.IConnection,System.String)">
+            <summary>
+                Called when a new message is started in the specified session.
+            </summary>
+            <param name="connection">The connection.</param>
+            <param name="from">From.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task" /> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.OnSessionCompleted(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.ISession)">
+            <summary>
+                Called when a SMTP session is completed.
+            </summary>
+            <param name="connection">The connection.</param>
+            <param name="session">The session.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task" /> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.OnSessionStarted(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.ISession)">
+            <summary>
+                Called when a new SMTP session is started.
+            </summary>
+            <param name="connection">The connection.</param>
+            <param name="session">The session.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task" /> representing the asynchronous operation.</returns>
+        </member>
+        <member name="M:Rnwood.SmtpServer.ISmtpServerOptions.ValidateAuthenticationCredentials(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.Extensions.Auth.IAuthenticationCredentials)">
+            <summary>
+                Validates the authentication request to determine if the supplied details
+                are correct.
+            </summary>
+            <param name="connection">The connection.</param>
+            <param name="authenticationRequest">The authentication request.</param>
+            <returns>A <see cref="T:System.Threading.Tasks.Task" /> representing the async operation.</returns>
         </member>
         <member name="T:Rnwood.SmtpServer.Logging">
             <summary>
@@ -2396,135 +2380,6 @@
                 Gets the Recipient.
             </summary>
         </member>
-        <member name="T:Rnwood.SmtpServer.ServerOptions">
-            <summary>
-                Implements a default <see cref="T:Rnwood.SmtpServer.IServerOptions" /> which is suitable for many basic uses.
-            </summary>
-            <seealso cref="T:Rnwood.SmtpServer.IServerOptions" />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.#ctor(System.Boolean,System.Boolean,System.String,System.Int32,System.Boolean,System.String[],System.String[],System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Certificate)">
-            <summary>
-                Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.ServerOptions" /> class.
-            </summary>
-            <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
-            <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
-            <param name="domainName">The domain name the server will send in greeting.</param>
-            <param name="portNumber">The port number.</param>
-            <param name="requireAuthentication"></param>
-            <param name="nonSecureAuthMechanismIds">The identifier of AUTH mechanisms that will be allowed for insecure connections.</param>
-            <param name="secureAuthMechanismNamesIds">The identifier of AUTH mechanisms that will be allowed for secure connections.</param>
-            <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
-            <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
-        </member>
-        <member name="P:Rnwood.SmtpServer.ServerOptions.DomainName">
-            <inheritdoc />
-        </member>
-        <member name="P:Rnwood.SmtpServer.ServerOptions.IpAddress">
-            <inheritdoc />
-        </member>
-        <member name="P:Rnwood.SmtpServer.ServerOptions.MaximumNumberOfSequentialBadCommands">
-            <inheritdoc />
-        </member>
-        <member name="P:Rnwood.SmtpServer.ServerOptions.PortNumber">
-            <inheritdoc />
-        </member>
-        <member name="P:Rnwood.SmtpServer.ServerOptions.FallbackEncoding">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.GetExtensions(Rnwood.SmtpServer.IConnectionChannel)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.GetMaximumMessageSize(Rnwood.SmtpServer.IConnection)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.GetReceiveTimeout(Rnwood.SmtpServer.IConnectionChannel)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.GetSendTimeout(Rnwood.SmtpServer.IConnectionChannel)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.GetSSLCertificate(Rnwood.SmtpServer.IConnection)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.IsAuthMechanismEnabled(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.Extensions.Auth.IAuthMechanism)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.IsSessionLoggingEnabled(Rnwood.SmtpServer.IConnection)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.IsSSLEnabled(Rnwood.SmtpServer.IConnection)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.OnCommandReceived(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.SmtpCommand)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.OnCreateNewMessage(Rnwood.SmtpServer.IConnection)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.OnCreateNewSession(Rnwood.SmtpServer.IConnectionChannel)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.OnMessageCompleted(Rnwood.SmtpServer.IConnection)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.OnMessageReceived(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.IMessage)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.OnMessageRecipientAdding(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.IMessageBuilder,System.String)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.OnMessageStart(Rnwood.SmtpServer.IConnection,System.String)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.OnSessionCompleted(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.ISession)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.OnSessionStarted(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.ISession)">
-            <inheritdoc />
-        </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.ValidateAuthenticationCredentials(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.Extensions.Auth.IAuthenticationCredentials)">
-            <inheritdoc />
-        </member>
-        <member name="E:Rnwood.SmtpServer.ServerOptions.AuthenticationCredentialsValidationRequiredEventHandler">
-            <summary>
-                Occurs when authentication credential provided by the client need to be validated.
-            </summary>
-        </member>
-        <member name="E:Rnwood.SmtpServer.ServerOptions.CommandReceivedEventHandler">
-            <summary>
-                Occurs when a command is received from a client.
-            </summary>
-        </member>
-        <member name="E:Rnwood.SmtpServer.ServerOptions.MessageRecipientAddingEventHandler">
-            <summary>
-                Occurs when a message has been requested for a message.
-            </summary>
-        </member>
-        <member name="E:Rnwood.SmtpServer.ServerOptions.MessageCompletedEventHandler">
-            <summary>
-                Occurs when a message is received but not yet committed.
-            </summary>
-        </member>
-        <member name="E:Rnwood.SmtpServer.ServerOptions.MessageReceivedEventHandler">
-            <summary>
-                Occurs when a message is received and committed.
-            </summary>
-        </member>
-        <member name="E:Rnwood.SmtpServer.ServerOptions.SessionCompletedEventHandler">
-            <summary>
-                Occurs when a client session is closed.
-            </summary>
-        </member>
-        <member name="E:Rnwood.SmtpServer.ServerOptions.SessionStartedEventHandler">
-            <summary>
-                Occurs when a new session is created, when a client connects to the server.
-            </summary>
-        </member>
-        <member name="E:Rnwood.SmtpServer.ServerOptions.MessageStartEventHandler">
-            <summary>
-                Occurs when a new message is started.
-            </summary>
-        </member>
         <member name="T:Rnwood.SmtpServer.ServerStopOptions">
             <summary>
                 Defines the ServerStopOptions.
@@ -2769,11 +2624,11 @@
                 Defines the listener.
             </summary>
         </member>
-        <member name="M:Rnwood.SmtpServer.SmtpServer.#ctor(Rnwood.SmtpServer.IServerOptions)">
+        <member name="M:Rnwood.SmtpServer.SmtpServer.#ctor(Rnwood.SmtpServer.ISmtpServerOptions)">
             <summary>
                 Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.SmtpServer" /> class.
             </summary>
-            <param name="options">The Options<see cref="T:Rnwood.SmtpServer.IServerOptions" />.</param>
+            <param name="options">The Options<see cref="T:Rnwood.SmtpServer.ISmtpServerOptions" />.</param>
         </member>
         <member name="P:Rnwood.SmtpServer.SmtpServer.ActiveConnections">
             <summary>
@@ -2911,6 +2766,129 @@
         <member name="P:Rnwood.SmtpServer.SmtpServerException.SmtpResponse">
             <summary>
                 Gets the SmtpResponse.
+            </summary>
+        </member>
+        <member name="T:Rnwood.SmtpServer.ServerOptions">
+            <summary>
+                Implements a default <see cref="T:Rnwood.SmtpServer.ISmtpServerOptions" /> which is suitable for many basic uses.
+            </summary>
+            <seealso cref="T:Rnwood.SmtpServer.ISmtpServerOptions" />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.#ctor(System.Boolean,System.Boolean,System.String,System.Int32,System.Boolean,System.String[],System.String[],System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Certificate)">
+            <summary>
+                Initializes a new instance of the <see cref="!:ServerOptions" /> class.
+            </summary>
+            <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
+            <param name="enableIpV6">If IPV6 dual stack should be enabled</param>
+            <param name="domainName">The domain name the server will send in greeting.</param>
+            <param name="portNumber">The port number.</param>
+            <param name="requireAuthentication"></param>
+            <param name="nonSecureAuthMechanismIds">The identifier of AUTH mechanisms that will be allowed for insecure connections.</param>
+            <param name="secureAuthMechanismNamesIds">The identifier of AUTH mechanisms that will be allowed for secure connections.</param>
+            <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
+            <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
+        </member>
+        <member name="P:Rnwood.SmtpServer.ServerOptions.DomainName">
+            <inheritdoc />
+        </member>
+        <member name="P:Rnwood.SmtpServer.ServerOptions.IpAddress">
+            <inheritdoc />
+        </member>
+        <member name="P:Rnwood.SmtpServer.ServerOptions.MaximumNumberOfSequentialBadCommands">
+            <inheritdoc />
+        </member>
+        <member name="P:Rnwood.SmtpServer.ServerOptions.PortNumber">
+            <inheritdoc />
+        </member>
+        <member name="P:Rnwood.SmtpServer.ServerOptions.FallbackEncoding">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.GetExtensions(Rnwood.SmtpServer.IConnectionChannel)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.GetMaximumMessageSize(Rnwood.SmtpServer.IConnection)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.GetReceiveTimeout(Rnwood.SmtpServer.IConnectionChannel)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.GetSendTimeout(Rnwood.SmtpServer.IConnectionChannel)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.IsAuthMechanismEnabled(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.Extensions.Auth.IAuthMechanism)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.IsSessionLoggingEnabled(Rnwood.SmtpServer.IConnection)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.OnCommandReceived(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.SmtpCommand)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.OnCreateNewMessage(Rnwood.SmtpServer.IConnection)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.OnCreateNewSession(Rnwood.SmtpServer.IConnectionChannel)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.OnMessageCompleted(Rnwood.SmtpServer.IConnection)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.OnMessageReceived(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.IMessage)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.OnMessageRecipientAdding(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.IMessageBuilder,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.OnMessageStart(Rnwood.SmtpServer.IConnection,System.String)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.OnSessionCompleted(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.ISession)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.OnSessionStarted(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.ISession)">
+            <inheritdoc />
+        </member>
+        <member name="M:Rnwood.SmtpServer.ServerOptions.ValidateAuthenticationCredentials(Rnwood.SmtpServer.IConnection,Rnwood.SmtpServer.Extensions.Auth.IAuthenticationCredentials)">
+            <inheritdoc />
+        </member>
+        <member name="E:Rnwood.SmtpServer.ServerOptions.AuthenticationCredentialsValidationRequiredEventHandler">
+            <summary>
+                Occurs when authentication credential provided by the client need to be validated.
+            </summary>
+        </member>
+        <member name="E:Rnwood.SmtpServer.ServerOptions.CommandReceivedEventHandler">
+            <summary>
+                Occurs when a command is received from a client.
+            </summary>
+        </member>
+        <member name="E:Rnwood.SmtpServer.ServerOptions.MessageRecipientAddingEventHandler">
+            <summary>
+                Occurs when a message has been requested for a message.
+            </summary>
+        </member>
+        <member name="E:Rnwood.SmtpServer.ServerOptions.MessageCompletedEventHandler">
+            <summary>
+                Occurs when a message is received but not yet committed.
+            </summary>
+        </member>
+        <member name="E:Rnwood.SmtpServer.ServerOptions.MessageReceivedEventHandler">
+            <summary>
+                Occurs when a message is received and committed.
+            </summary>
+        </member>
+        <member name="E:Rnwood.SmtpServer.ServerOptions.SessionCompletedEventHandler">
+            <summary>
+                Occurs when a client session is closed.
+            </summary>
+        </member>
+        <member name="E:Rnwood.SmtpServer.ServerOptions.SessionStartedEventHandler">
+            <summary>
+                Occurs when a new session is created, when a client connects to the server.
+            </summary>
+        </member>
+        <member name="E:Rnwood.SmtpServer.ServerOptions.MessageStartEventHandler">
+            <summary>
+                Occurs when a new message is started.
             </summary>
         </member>
         <member name="T:Rnwood.SmtpServer.SmtpStreamReader">

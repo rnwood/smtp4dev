@@ -181,8 +181,7 @@ public class Connection : IConnection
             sslProtos = SslProtocols.None;
         }
 
-        X509Certificate cert =
-            await Server.Options.GetSSLCertificate(this).ConfigureAwait(false);
+        X509Certificate cert = Server.Options.TlsCertificate;
 
         await sslStream.AuthenticateAsServerAsync(cert, false, sslProtos, false).ConfigureAwait(false);
         return sslStream;
@@ -198,7 +197,7 @@ public class Connection : IConnection
         {
             await Server.Options.OnSessionStarted(this, Session).ConfigureAwait(false);
 
-            if (await Server.Options.IsSSLEnabled(this).ConfigureAwait(false))
+            if (Server.Options.TlsMode == TlsMode.ImplicitTls)
             {
                 await ConnectionChannel.ApplyStreamFilter(StartImplicitTls).ConfigureAwait(false);
 

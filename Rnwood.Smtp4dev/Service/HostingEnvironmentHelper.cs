@@ -26,7 +26,7 @@ namespace Rnwood.Smtp4dev.Service
         {
             this.hostEnvironment = hostEnvironment;
             this.commandLineOptions = commandLineOptions;
-            this.serverOptions = serverOptions;
+            this.ServerOptions = serverOptions;
         }
 
         /// <summary>

@@ -9,8 +9,6 @@ namespace Rnwood.Smtp4dev
 
         public DesktopOptionsSource DesktopOptions { get; set; }
 
-        public string Urls { get; set; }
-
         public bool NoUserSettings { get; set; }
         public bool DebugSettings { get; set; }
         public string BaseAppDataPath { get; set; }
