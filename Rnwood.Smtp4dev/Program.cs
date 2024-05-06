@@ -142,8 +142,6 @@ namespace Rnwood.Smtp4dev
 
         private static IHost BuildWebHost(string[] args, CommandLineOptions cmdLineOptions, MapOptions<CommandLineOptions> commandLineOptions)
         {
-
-
             var contentRoot = GetContentRoot();
             var dataDir = GetOrCreateDataDir(cmdLineOptions);
             _log.Information("DataDir: {dataDir}", dataDir);
@@ -155,9 +153,9 @@ namespace Rnwood.Smtp4dev
                 .ConfigureAppConfiguration(
                     (hostingContext, configBuilder) =>
                     {
-                        IHostEnvironment env = hostingContext.HostingEnvironment;
+                        var env = hostingContext.HostingEnvironment;
 
-                        IConfigurationBuilder cb = configBuilder
+                        var cb = configBuilder
                             .SetBasePath(env.ContentRootPath)
                             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
@@ -168,20 +166,20 @@ namespace Rnwood.Smtp4dev
                             cb = cb.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
                             cb = cb.AddJsonFile(Path.Join(dataDir, "appsettings.json"), optional: true, reloadOnChange: true);
 
-
                             _log.Information("User settings file: {file}", Path.Join(dataDir, "appsettings.json"));
                         }
 
                         cb.AddEnvironmentVariables()
                             .AddCommandLineOptions(commandLineOptions);
 
-                        IConfigurationRoot config = cb
+                        var config = cb
                             .Build();
 
                         hostingContext.HostingEnvironment.EnvironmentName = config["Environment"];
 
                         if (cmdLineOptions.DebugSettings)
                         {
+
                             Console.WriteLine(JsonSerializer.Serialize(new SettingsDebugInfo
                             {
                                 CmdLineArgs = Environment.GetCommandLineArgs(),
@@ -192,25 +190,32 @@ namespace Rnwood.Smtp4dev
                             }, SettingsDebugInfoSerializationContext.Default.SettingsDebugInfo));
                         }
 
+
                     });
 
-            builder.UseWindowsService(s => s.ServiceName = "smtp4dev");
+
             builder.ConfigureWebHostDefaults(c =>
             {
                 c.UseStartup<Startup>();
                 c.UseShutdownTimeout(TimeSpan.FromSeconds(10));
 
-                if (!string.IsNullOrEmpty(cmdLineOptions.Urls))
+                c.ConfigureServices((webBuilderContext, services) =>
                 {
-                    c.UseUrls(cmdLineOptions.Urls.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).ToArray());
-                }
-                c.ConfigureServices(services =>
-                {
+                    ServerOptions serverOptions = webBuilderContext.Configuration.GetSection("ServerOptions").Get<ServerOptions>();
+
+                    if (!string.IsNullOrEmpty(serverOptions.Urls))
+                    {
+                        c.UseUrls(serverOptions.Urls.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).ToArray());
+                    }
+
                     services.AddSingleton(cmdLineOptions);
-                    services.AddHostedService<Smtp4devServer>(sp => (Smtp4devServer)sp.GetRequiredService<ISmtp4devServer>());
-                    services.AddHostedService<ImapServer>(sp => sp.GetRequiredService<ImapServer>());
+                    services.AddHostedService(sp => (Smtp4devServer)sp.GetRequiredService<ISmtp4devServer>());
+                    services.AddHostedService(sp => sp.GetRequiredService<ImapServer>());
                 });
             });
+
+            builder.UseWindowsService(s => s.ServiceName = "smtp4dev");
+        
 
 
 
