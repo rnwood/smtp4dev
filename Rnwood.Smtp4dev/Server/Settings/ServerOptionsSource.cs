@@ -6,6 +6,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
 {
     public record ServerOptionsSource
     {
+        public string Urls { get; set; }
+
         private int? port;
 
         public int? Port { get => port; set => port = value.HasValue ? Guard.Against.OutOfRange(value.Value, nameof(value), 0, 65535) : null; }
