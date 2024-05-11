@@ -15,6 +15,7 @@ using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.DbModel;
 using NSwag.Annotations;
 using Rnwood.Smtp4dev.Server.Settings;
+using Org.BouncyCastle.Cms;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -107,6 +108,40 @@ namespace Rnwood.Smtp4dev.Controllers
             return new ApiModel.Message(await GetDbMessage(id, false));
         }
 
+        [HttpPost("{id}/reply")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.Message), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message does not exist")]
+        public async Task<IActionResult> Reply(Guid id, string to, string cc, string bcc, string from, bool deliverToAll, [FromBody] string bodyHtml)
+        {
+            var origMessage = new ApiModel.Message(await GetDbMessage(id, false));
+            var origMessageId = origMessage.Headers.FirstOrDefault(h => h.Name.Equals("Message-Id", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
+
+
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            headers["References"] = (
+                origMessageId
+                + " " +
+                origMessage.Headers.FirstOrDefault(h => h.Name.Equals("References"))?.Value ?? "").Trim();
+
+            if (!string.IsNullOrEmpty(origMessageId))
+            {
+                headers["In-Reply-To"] = origMessageId;
+            }
+
+            var toRecips = to?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+            var ccRecips = cc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+            var bccRecips = bcc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+
+            List<string> envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
+
+            this.server.Send(headers,
+                toRecips,
+                ccRecips,
+                from, envelopeRecips.Distinct().ToArray(), bodyHtml);
+
+            return Ok();
+        }
+
         /// <summary>
         /// Marks a single message as read
         /// </summary>
@@ -125,7 +160,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <returns></returns>
         [HttpPost("markAllRead")]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
-        public Task MarkAllRead(string mailboxName=MailboxOptions.DEFAULTNAME)
+        public Task MarkAllRead(string mailboxName = MailboxOptions.DEFAULTNAME)
         {
             return messagesRepository.MarkAllMessagesRead(mailboxName);
         }
@@ -146,7 +181,7 @@ namespace Rnwood.Smtp4dev.Controllers
             return new FileStreamResult(new MemoryStream(result.Data), "message/rfc822") { FileDownloadName = $"{id}.eml" };
         }
         /// <summary>
-        /// Relays the specified message either to the original recipients or to those specified.
+        /// Attempt to relay the specified message either to the original recipients or to those specified.
         /// </summary>
         /// <param name="id">The ID of the message to relay.</param>
         /// <param name="options"></param>
@@ -347,7 +382,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <returns></returns>
         [HttpDelete("*")]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
-        public async Task DeleteAll(string mailboxName=MailboxOptions.DEFAULTNAME)
+        public async Task DeleteAll(string mailboxName = MailboxOptions.DEFAULTNAME)
         {
             await messagesRepository.DeleteAllMessages(mailboxName);
         }

@@ -6,6 +6,7 @@ using System.Linq;
 using System.Text;
 using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
+using Rnwood.Smtp4dev.Migrations;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
@@ -16,9 +17,10 @@ namespace Rnwood.Smtp4dev.ApiModel
             Data = dbMessage.Data;
             Id = dbMessage.Id;
             From = dbMessage.From;
-            To = dbMessage.To.Split(',');
+            To = dbMessage.To.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             Cc = Array.Empty<string>();
             Bcc = Array.Empty<string>();
+            DeliveredTo = dbMessage.DeliveredTo.Split(',', StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries);
             ReceivedDate = dbMessage.ReceivedDate;
             Subject = dbMessage.Subject;
             SecureConnection = dbMessage.SecureConnection;
@@ -223,6 +225,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string[] To { get; set; }
         public string[] Cc { get; set; }
         public string[] Bcc { get; set; }
+        public string[] DeliveredTo { get; set; }
         public DateTime ReceivedDate { get; set; }
 
         public bool SecureConnection { get; set; }
@@ -243,6 +246,6 @@ namespace Rnwood.Smtp4dev.ApiModel
         internal byte[] Data { get; set; }
 
         [JsonIgnore]
-        string ICacheByKey.CacheKey => Id.ToString() + "v2";
+        string ICacheByKey.CacheKey => Id.ToString() + "v4";
     }
 }

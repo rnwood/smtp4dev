@@ -5,14 +5,22 @@
             <el-button v-on:click="loadMessage">Retry</el-button>
         </el-alert>
 
+        <el-dialog v-model="replyDialogVisible" :title="replyAll ? 'Reply All' : 'Reply'" destroy-on-close append-to-body align-center width="80%">
+            <messagereply :message="message" @closed="() => replyDialogVisible=false" :replyAll="replyAll" />
+        </el-dialog>
 
 
         <div v-if="messageSummary" class="hfillpanel fill">
             <div class="toolbar">
-                <el-button icon="download"
-                           v-on:click="download">Download</el-button>
+                <el-button-group>
+                    <el-button v-on:click="reply(false)" icon="arrow-right" :disabled="!message || !isRelayAvailable" title="Reply">Reply</el-button>
+                    <el-button v-on:click="reply(true)" icon="arrow-right" :disabled="!message || !isRelayAvailable" title="Reply All">Reply All</el-button>
 
-                <el-button v-on:click="relay" icon="d-arrow-right" :disabled="!messageSummary || !isRelayAvailable" :loading="isRelayInProgress" title="Relay">Relay</el-button>
+                    <el-button v-on:click="relay" icon="d-arrow-right" :disabled="!messageSummary || !isRelayAvailable" :loading="isRelayInProgress" title="Relay...">Relay...</el-button>
+                    <el-button icon="download"
+                               v-on:click="download">Download</el-button>
+
+                </el-button-group>
             </div>
 
             <div class="pad">
@@ -30,15 +38,36 @@
 
                     <tr>
                         <td>To:</td>
-                        <td><span v-if="message">{{message.to.join(", ")}}</span></td>
+                        <td style="display: flow; gap: 6px;">
+                            <template v-if="message">
+                                <div v-for="recip in message.to" :key="recip">
+                                    <strong v-if="message.deliveredTo.includes(recip)">{{recip}}</strong>
+                                    <span v-if="!message.deliveredTo.includes(recip)">{{recip}}</span>
+                                </div>
+                            </template>
+                        </td>
                     </tr>
                     <tr v-if="message && message.cc.length">
                         <td>Cc:</td>
-                        <td>{{message.cc.join(", ")}}</td>
+                        <td style="display: flow; gap: 6px;">
+                            <template v-if="message">
+                                <div v-for="recip in message.cc" :key="recip">
+                                    <strong v-if="message.deliveredTo.includes(recip)">{{recip}}</strong>
+                                    <span v-if="!message.deliveredTo.includes(recip)">{{recip}}</span>
+                                </div>
+                            </template>
+                        </td>
                     </tr>
                     <tr v-if="message && message.bcc.length">
                         <td>Bcc:</td>
-                        <td>{{message.bcc.join(", ")}}</td>
+                        <td style="display: flow; gap: 6px;">
+                            <template v-if="message">
+                                <div v-for="recip in message.bcc" :key="recip">
+                                    <strong v-if="message.deliveredTo.includes(recip)">{{recip}}</strong>
+                                    <span v-if="!message.deliveredTo.includes(recip)">{{recip}}</span>
+                                </div>
+                            </template>
+                        </td>
                     </tr>
                     <tr>
                         <td>Subject:</td>
@@ -205,6 +234,7 @@
     import { ElMessageBox, ElNotification } from 'element-plus';
     import ServerController from '../ApiClient/ServerController';
     import MessageViewPlainText from "./messageviewplaintext.vue";
+    import MessageReply from "@/components/messagereply.vue";
 
     @Component({
         components: {
@@ -215,7 +245,8 @@
             messagepartsource: MessagePartsSource,
             messagesource: MessageSource,
             messageclientanalysis: MessageClientAnalysis,
-            messagehtmlvalidation: MessageHtmlValidation
+            messagehtmlvalidation: MessageHtmlValidation,
+            messagereply: MessageReply
         }
     })
     class MessageView extends Vue {
@@ -236,6 +267,9 @@
 
         isRelayInProgress: boolean = false;
         isRelayAvailable: boolean = false;
+
+        replyDialogVisible = false;
+        replyAll = false;
 
         @Watch("messageSummary")
         async onMessageSummaryChange(
@@ -313,6 +347,11 @@
 
         onPartSelection(part: MessageEntitySummary | null) {
             this.selectedPart = part;
+        }
+
+        async reply(replyAll: boolean) {
+            this.replyAll = replyAll;
+            this.replyDialogVisible = true;
         }
 
         async relay() {

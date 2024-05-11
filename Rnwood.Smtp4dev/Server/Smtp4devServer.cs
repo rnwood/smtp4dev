@@ -33,6 +33,9 @@ using DotNet.Globbing;
 using System.Text.RegularExpressions;
 using static System.Formats.Asn1.AsnWriter;
 using static MailKit.Net.Imap.ImapMailboxFilter;
+using Org.BouncyCastle.Cms;
+using LinqKit;
+using Org.BouncyCastle.Bcpg.OpenPgp;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -148,7 +151,7 @@ namespace Rnwood.Smtp4dev.Server
                 return;
             }
 
-            Message message = new MessageConverter().ConvertAsync(await e.Connection.CurrentMessage.ToMessage()).Result;
+            Message message = new MessageConverter().ConvertAsync(await e.Connection.CurrentMessage.ToMessage(), e.Connection.CurrentMessage.Recipients.ToArray()).Result;
 
             var apiMessage = new ApiModel.Message(message);
 
@@ -368,26 +371,26 @@ namespace Rnwood.Smtp4dev.Server
             log.Information("Message received. Client address {clientAddress}, From {messageFrom}, To {messageTo}, SecureConnection: {secure}.",
                 e.Message.Session.ClientAddress, e.Message.From, e.Message.Recipients, e.Message.SecureConnection);
 
-            var targetMailboxes = GetTargetMailboxes(e.Message.Recipients);
+            var targetMailboxesWithMatchedRecipients = GetTargetMailboxes(e.Message.Recipients);
 
-            if (!targetMailboxes.Any())
+            if (!targetMailboxesWithMatchedRecipients.Any())
             {
-                log.Warning("Message with recipients {recipients} will be delivered to 0 configuredMailboxesAndDefault", e.Message.Recipients);
+                log.Warning("Message with recipients {recipients} will be delivered to 0 mailboxes.", e.Message.Recipients);
                 return;
             }
 
-            foreach (var targetMailbox in targetMailboxes)
+            foreach (var targetMailboxWithMatchedRecipients in targetMailboxesWithMatchedRecipients)
             {
-                Message message = new MessageConverter().ConvertAsync(e.Message).Result;
+                Message message = new MessageConverter().ConvertAsync(e.Message, targetMailboxWithMatchedRecipients.ToArray()).Result;
                 message.IsUnread = true;
 
-                await taskQueue.QueueTask(() => ProcessMessage(message, e.Message.Session, targetMailbox), false).ConfigureAwait(false);
+                await taskQueue.QueueTask(() => ProcessMessage(message, e.Message.Session, targetMailboxWithMatchedRecipients), false).ConfigureAwait(false);
             }
         }
 
-        private HashSet<MailboxOptions> GetTargetMailboxes(IEnumerable<string> recipients)
+        private ILookup<MailboxOptions, string> GetTargetMailboxes(IEnumerable<string> recipients)
         {
-            HashSet<MailboxOptions> targetMailboxes = new HashSet<MailboxOptions>();
+            List<(MailboxOptions,string)> targetMailboxesWithMatchedRecipient = new List<(MailboxOptions, string)>();
 
             foreach (var to in recipients)
             {
@@ -418,7 +421,7 @@ namespace Rnwood.Smtp4dev.Server
 
                 if (targetMailbox != null)
                 {
-                    targetMailboxes.Add(targetMailbox);
+                    targetMailboxesWithMatchedRecipient.Add((targetMailbox, to));
                 }
                 else
                 {
@@ -426,17 +429,17 @@ namespace Rnwood.Smtp4dev.Server
                 }
             }
 
-            return targetMailboxes;
+            return targetMailboxesWithMatchedRecipient.ToLookup(t => t.Item1, t=> t.Item2);
         }
 
-        void ProcessMessage(Message message, ISession session, MailboxOptions targetMailbox)
+        void ProcessMessage(Message message, ISession session, IGrouping<MailboxOptions, string> targetMailboxWithRecipients)
         {
-            log.Information("Processing received message for mailbox '{mailbox}'", targetMailbox.Name);
+            log.Information("Processing received message for mailbox '{mailbox}' for recipients '{recipients}'", targetMailboxWithRecipients.Key.Name, targetMailboxWithRecipients.ToArray());
             using var scope = serviceScopeFactory.CreateScope();
             Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
 
             message.Session = dbContext.Sessions.Find(activeSessionsToDbId[session]);
-            message.Mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == targetMailbox.Name);
+            message.Mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == targetMailboxWithRecipients.Key.Name);
             var relayResult = TryRelayMessage(message, null);
             message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
 
@@ -457,13 +460,13 @@ namespace Rnwood.Smtp4dev.Server
 
             TrimMessages(dbContext);
             dbContext.SaveChanges();
-            notificationsHub.OnMessagesChanged(targetMailbox.Name).Wait();
+            notificationsHub.OnMessagesChanged(targetMailboxWithRecipients.Key.Name).Wait();
             log.Information("Processing received message DONE");
         }
 
         public RelayResult TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
         {
-            var result = new RelayResult(message);
+            var result = new RelayResult();
 
             if (!relayOptions.CurrentValue.IsEnabled)
             {
@@ -500,7 +503,7 @@ namespace Rnwood.Smtp4dev.Server
                 {
                     log.Information("Relaying message to {recipient}", recipient);
 
-					using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
+                    using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
 
                     if (relaySmtpClient == null)
                     {
@@ -596,6 +599,36 @@ namespace Rnwood.Smtp4dev.Server
         {
             this.Stop();
             return Task.CompletedTask;
+        }
+
+        public void Send(IDictionary<string, string> headers, string[] to, string[] cc, string from, string[] envelopeRecipients, string bodyHtml)
+        {
+            MailboxAddress sender = MailboxAddress.Parse(from);
+            var relaySmtpClient = this.relaySmtpClientFactory(this.relayOptions.CurrentValue);
+
+            MimeMessage message = new MimeMessage();
+            message.MessageId = $"<{Guid.NewGuid()}@{this.serverOptions.CurrentValue.HostName}>";
+            BodyBuilder bodyBuilder = new BodyBuilder();
+            bodyBuilder.HtmlBody = bodyHtml;
+            message.Body = bodyBuilder.ToMessageBody();
+            foreach (var kvp in headers)
+            {
+                message.Headers.Add(kvp.Key, kvp.Value);
+            }
+
+            message.From.Add(InternetAddress.Parse(from));
+
+            foreach (var toItem in to)
+            {
+                message.To.Add(InternetAddress.Parse(toItem));
+            }
+
+            foreach (var toItem in cc)
+            {
+                message.Cc.Add(InternetAddress.Parse(toItem));
+            }
+
+            relaySmtpClient.Send(message, MailboxAddress.Parse(from), envelopeRecipients.Select(t => MailboxAddress.Parse(t)));
         }
     }
 }

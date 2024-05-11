@@ -70,8 +70,16 @@ export default class MessagesController {
     }
 
     public async relayMessage(id: string, options: MessageRelayOptions): Promise<void> {
-
         return (await axios.post(this.relayMessage_url(id), options || undefined)).data as void;
+    }
+
+    // post: api/Messages/${encodeURIComponent(id)}/reply  
+    public reply_url(id: string, from: string, to: string, cc: string, bcc: string, deliverToAll: boolean, subject: string): string {
+        return `${this.apiBaseUrl}/${encodeURIComponent(id)}/reply?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc)}&bcc=${encodeURIComponent(bcc)}&deliverToAll=${encodeURIComponent(deliverToAll)}&subject=${encodeURIComponent(subject)}`;
+    }
+
+    public async reply(id: string, from: string, to: string, cc: string, bcc: string, deliverToAll: boolean, subject: string, bodyHtml: string): Promise<void> {
+        return (await axios.post(this.reply_url(id, from, to, cc, bcc, deliverToAll, subject), bodyHtml || undefined, { headers: { "Content-Type": "text/html" } })).data as void;
     }
 
     // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content  

@@ -12,7 +12,7 @@ namespace Rnwood.Smtp4dev.Server
 {
     public class MessageConverter
     {
-        public async Task<DbModel.Message> ConvertAsync(IMessage message)
+        public async Task<DbModel.Message> ConvertAsync(IMessage message, string[] deliveredTo)
         {
             string subject = "";
             string mimeParseError = null;
@@ -77,6 +77,7 @@ namespace Rnwood.Smtp4dev.Server
                 Id = Guid.NewGuid(),
                 From = PunyCodeReplacer.DecodePunycode(message.From),
                 To = PunyCodeReplacer.DecodePunycode(toAddress),
+                DeliveredTo = PunyCodeReplacer.DecodePunycode(string.Join(", ", deliveredTo)),
                 ReceivedDate = DateTime.Now,
                 Subject = PunyCodeReplacer.DecodePunycode(subject),
                 Data = data,

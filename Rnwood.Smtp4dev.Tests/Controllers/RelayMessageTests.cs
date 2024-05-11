@@ -46,7 +46,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             // setup
             var messageId = GetData().First().Id;
 
-            server.TryRelayMessage(Arg.Any<DbModel.Message>(), Arg.Any<MailboxAddress[]>()).Returns(new RelayResult(GetData().First())
+            server.TryRelayMessage(Arg.Any<DbModel.Message>(), Arg.Any<MailboxAddress[]>()).Returns(new RelayResult()
             {
                 RelayRecipients = new List<RelayRecipientResult>()
                     { new RelayRecipientResult { Email = "relay@blah.com", RelayDate = DateTime.UtcNow } }

@@ -289,7 +289,7 @@ namespace Rnwood.Smtp4dev.Tests
 
             IMessage message = await memoryMessageBuilder.ToMessage();
 
-            var dbMessage = await new MessageConverter().ConvertAsync(message);
+            var dbMessage = await new MessageConverter().ConvertAsync(message, [to]);
             dbMessage.Mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
             dbMessage.IsUnread = unread;
 

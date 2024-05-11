@@ -35,7 +35,7 @@ namespace Rnwood.Smtp4dev.DbModel
         public bool? EightBitTransport { get; set; }
 
         public virtual List<MessageRelay> Relays { get; set; } = new List<MessageRelay>();
-
+        public string DeliveredTo { get; set; }
 
         public void AddRelay(MessageRelay messageRelay)
         {
