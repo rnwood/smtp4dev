@@ -1,6 +1,6 @@
 ﻿<template>
     <div class="messagelist">
-   
+
         <div class="toolbar">
 
             <el-button-group>
@@ -53,63 +53,71 @@
 
         </div>
 
-    <el-alert v-if="error" type="error" title="Error" show-icon>
-        {{ error.message }}
-        <el-button v-on:click="refresh">Retry</el-button>
-    </el-alert>
+        <el-alert v-if="error" type="error" title="Error" show-icon>
+            {{ error.message }}
+            <el-button v-on:click="refresh">Retry</el-button>
+        </el-alert>
 
-    <el-table :data="messages"
-              v-loading="loading"
-              :empty-text="emptyText"
-              highlight-current-row
-              @current-change="handleCurrentChange"
-              @sort-change="sort"
-              :default-sort="{ prop: 'receivedDate', order: 'descending' }"
-              class="table"
-              type="selection"
-              reserve-selection="true"
-              row-key="id"
-              :row-class-name="getRowClass"
-              ref="table"
-              stripe>
-        <el-table-column property="receivedDate"
-                         label="Received"
-                         width="160"
-                         sortable="custom"
-                         :formatter="formatDate"></el-table-column>
-        <el-table-column property="from"
-                         label="From"
-                         width="140"
-                         sortable="custom"></el-table-column>
-        <el-table-column property="to"
-                         label="To"
-                         width="180"
-                         sortable="custom"
-                         :formatter="formatTo"></el-table-column>
-        <el-table-column property="isRelayed"
-                         label=""
-                         width="28">
-            <template #default="scope">
+        <el-table :data="messages"
+                  v-loading="loading"
+                  :empty-text="emptyText"
+                  highlight-current-row
+                  @current-change="handleCurrentChange"
+                  @sort-change="sort"
+                  :default-sort="{ prop: 'receivedDate', order: 'descending' }"
+                  class="table"
+                  type="selection"
+                  reserve-selection="true"
+                  row-key="id"
+                  :row-class-name="getRowClass"
+                  ref="table"
+                  stripe>
+            <el-table-column property="receivedDate"
+                             label="Received"
+                             width="160"
+                             sortable="custom"
+                             :formatter="formatDate"></el-table-column>
+            <el-table-column property="from"
+                             label="From"
+                             width="140"
+                             sortable="custom"></el-table-column>
+            <el-table-column property="to"
+                             label="To"
+                             width="180"
+                             sortable="custom">
+                <template #default="scope">
+                    <div style="display: flow; gap: 6px;">
+                        <div v-for="recip in scope.row.to" :key="recip">
+                            <strong v-if="scope.row.deliveredTo.includes(recip)">{{recip}}</strong>
+                            <span v-if="!scope.row.deliveredTo.includes(recip)">{{recip}}</span>
+                        </div>
+                    </div>
+                </template>
+            </el-table-column>
+            <el-table-column property="isRelayed"
+                             label=""
+                             width="28">
+                <template #default="scope">
 
-                <el-tooltip effect="light"
-                            content="Message has been relayed"
-                            placement="top-start">
-                    <span> <i v-if="scope.row.isRelayed" class="fas fa-share-square"></i></span>
-                </el-tooltip>
-            </template>
-        </el-table-column>
-        <el-table-column property="subject" label="Subject" sortable="custom">
-            <template #default="scope">
-                {{ scope.row.subject }}
-                <i class="paperclip"
-                   v-if="scope.row.attachmentCount"
-                   :title="scope.row.attachmentCount + ' attachments'"></i>
-            </template>
-        </el-table-column>
-    </el-table>
-    <messagelistpager :paged-data="pagedServerMessages"
-                      @on-current-page-change="handlePaginationCurrentChange"
-                      @on-page-size-change="handlePaginationPageSizeChange"></messagelistpager>
+                    <el-tooltip effect="light"
+                                content="Message has been relayed"
+                                placement="top-start">
+                        <span> <i v-if="scope.row.isRelayed" class="fas fa-share-square"></i></span>
+                    </el-tooltip>
+                </template>
+            </el-table-column>
+            <el-table-column property="subject" label="Subject" sortable="custom">
+                <template #default="scope">
+                    {{ scope.row.subject }}
+                    <i class="paperclip"
+                       v-if="scope.row.attachmentCount"
+                       :title="scope.row.attachmentCount + ' attachments'"></i>
+                </template>
+            </el-table-column>
+        </el-table>
+        <messagelistpager :paged-data="pagedServerMessages"
+                          @on-current-page-change="handlePaginationCurrentChange"
+                          @on-page-size-change="handlePaginationPageSizeChange"></messagelistpager>
     </div>
 </template>
 <script lang="ts">
@@ -131,7 +139,7 @@
     import PagedResult, { EmptyPagedResult } from "@/ApiClient/PagedResult";
     import Messagelistpager from "@/components/messagelistpager.vue";
     import Mailbox from "../ApiClient/Mailbox";
-import MailboxesController from "../ApiClient/MailboxesController";
+    import MailboxesController from "../ApiClient/MailboxesController";
 
 
     @Component({
@@ -206,10 +214,6 @@ import MailboxesController from "../ApiClient/MailboxesController";
             return (moment as any)(cellValue).format("YYYY-MM-DD HH:mm:ss");
         }
 
-        formatTo(row: number, column: number, cellValue: []): string {
-            return cellValue.join(", ");
-        }
-
 
         getRowClass(event: { row: MessageSummary }): string {
             return event.row.isUnread ? "unread" : "read";
@@ -251,7 +255,7 @@ import MailboxesController from "../ApiClient/MailboxesController";
                     message: "Completed OK",
                 });
             } catch (e: any) {
-                const message = e.response?.data?.detail ?? e.sessage;
+                const message = e.response?.data?.detail ?? e.message;
 
                 ElNotification.error({ title: "Relay Message Failed", message: message });
             } finally {

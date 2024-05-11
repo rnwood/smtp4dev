@@ -51,7 +51,8 @@
     "vue-facing-decorator": "^3.0.4",
     "vue-loader": "^17.4.2",
     "vue-router": "^4.3.0",
-    "vue3-ace-editor": "^2.2.4"
+    "vue3-ace-editor": "^2.2.4",
+    "vue3-quill": "^0.3.1"
   },
   "eslintConfig": {
     "root": true,

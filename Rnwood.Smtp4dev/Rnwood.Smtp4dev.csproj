@@ -35,7 +35,7 @@
     <PackageReference Include="Jint" Version="3.0.1" />
     <PackageReference Include="LinqKit" Version="1.2.5" />
     <PackageReference Include="MailKit" Version="4.5.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="8.0.4" />
+     <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="8.0.4" />
     <PackageReference Include="Microsoft.CodeAnalysis.Common" Version="4.9.2" />
     <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.9.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="8.0.4" />
@@ -181,6 +181,7 @@
     <ClientApp Remove="ClientApp\src\ApiClient\User.ts" />
     <ClientApp Remove="ClientApp\src\components\messageclientanalysis.vue" />
     <ClientApp Remove="ClientApp\src\components\messagehtmlvalidation.vue" />
+    <ClientApp Remove="clientapp\src\components\messagereply.vue" />
     <ClientApp Remove="ClientApp\src\components\messagesource.vue" />
     <ClientApp Remove="ClientApp\src\components\settingsdialog.vue" />
   </ItemGroup>

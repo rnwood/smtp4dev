@@ -1,8 +1,10 @@
 ﻿export default class MessageSummary {
+  deliveredTo: string[];
   constructor(
     id: string,
     from: string,
-    to: string[],
+      to: string[],
+    deliveredTo: string[],
     receivedDate: Date,
     subject: string,
     attachmentCount: number,
@@ -11,7 +13,8 @@
   ) {
     this.id = id;
     this.from = from;
-    this.to = to;
+      this.to = to;
+      this.deliveredTo = to;
     this.receivedDate = receivedDate;
     this.subject = subject;
     this.attachmentCount = attachmentCount;

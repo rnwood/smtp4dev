@@ -10,9 +10,9 @@ namespace Rnwood.Smtp4dev.Data
         public Smtp4devDbContext(DbContextOptions<Smtp4devDbContext> options)
             : base(options)
         {
-            
+
         }
-        
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

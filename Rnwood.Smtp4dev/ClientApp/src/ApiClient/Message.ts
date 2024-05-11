@@ -3,12 +3,14 @@ import MessageEntitySummary from "./MessageEntitySummary";
 //Header[] from Message 
 import Header from "./Header";
 export default class Message {
+  deliveredTo: string[];
   constructor(
     id: string,
     from: string,
     to: string[],
     cc: string[],
     bcc: string[],
+    deliveredTo: string[],
     receivedDate: Date,
     subject: string,
     parts: MessageEntitySummary[],
@@ -24,6 +26,7 @@ export default class Message {
     this.to = to;
     this.cc = cc;
     this.bcc = bcc;
+    this.deliveredTo = deliveredTo;
     this.receivedDate = receivedDate;
     this.subject = subject;
     this.parts = parts;

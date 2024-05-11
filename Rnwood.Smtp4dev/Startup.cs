@@ -114,6 +114,13 @@ namespace Rnwood.Smtp4dev
                     context.SaveChanges();
                 }
 
+                //For message before delivered to was added, assume all recipients.
+                foreach (var m in context.Messages.Where(m => m.DeliveredTo == null))
+                {
+                    m.DeliveredTo = m.To;
+                }
+                context.SaveChanges();
+
 
             }, ServiceLifetime.Scoped, ServiceLifetime.Singleton);
 
@@ -149,7 +156,10 @@ namespace Rnwood.Smtp4dev
 
 
 
-            services.AddControllers();
+            services.AddControllers(o =>
+            {
+                o.InputFormatters.Add(new HtmlBodyInputFormatter());
+            });
             services.AddRequestLocalization(options => { options.SupportedCultures = CultureInfo.GetCultures(CultureTypes.AllCultures); });
 
             services.AddSpaStaticFiles(o => o.RootPath = "ClientApp");

@@ -100,7 +100,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
             IMessage message = await memoryMessageBuilder.ToMessage();
 
-            var dbMessage = await new MessageConverter().ConvertAsync(message);
+            var dbMessage = await new MessageConverter().ConvertAsync(message, ["to@envelope.com"]);
             return dbMessage;
         }
 
@@ -128,7 +128,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
             IMessage message = await memoryMessageBuilder.ToMessage();
 
-            var dbMessage = await new MessageConverter().ConvertAsync(message);
+            var dbMessage = await new MessageConverter().ConvertAsync(message, [to]);
             dbMessage.Mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
           
             return dbMessage;
@@ -159,7 +159,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
             IMessage message = await memoryMessageBuilder.ToMessage();
 
-            var dbMessage = await new MessageConverter().ConvertAsync(message);
+            var dbMessage = await new MessageConverter().ConvertAsync(message, ["to@message.com"]);
             return dbMessage;
         }
 

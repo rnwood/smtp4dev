@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Net;
 using System.Threading.Tasks;
 using MimeKit;
@@ -16,5 +17,6 @@ namespace Rnwood.Smtp4dev.Server
         void Stop();
         Task DeleteSession(Guid id);
         Task DeleteAllSessions();
+        void Send(IDictionary<string, string> headers, string[] to, string[] cc, string from, string[] envelopeRecipients, string bodyHtml);
     }
 }

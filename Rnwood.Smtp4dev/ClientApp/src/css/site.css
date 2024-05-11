@@ -122,12 +122,6 @@ iframe {
     display: none
 }
 
-h1 {
-    margin: 0;
-    font-size: 1.2em;
-    float: left;
-}
-
 
 .messageviewheader td, .sessionviewheader td {
     padding: 5px;
@@ -179,4 +173,8 @@ pre.source code {
 .el-form-item__content {
     column-gap: 6px;
     row-gap: 6px;
+}
+
+.el-form-item--small {
+    margin-bottom: 6px !important;
 }

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Rnwood.Smtp4dev.Migrations;
+using System;
 using System.Text.Json.Serialization;
 
 namespace Rnwood.Smtp4dev.ApiModel
@@ -15,10 +16,11 @@ namespace Rnwood.Smtp4dev.ApiModel
             AttachmentCount = dbMessage.AttachmentCount;
             IsUnread = dbMessage.IsUnread;
             IsRelayed = dbMessage.Relays.Count > 0;
+            DeliveredTo = dbMessage.DeliveredTo;
         }
 
         public bool IsRelayed { get; set; }
-
+        public string DeliveredTo { get; set; }
         public Guid Id { get; set; }
 
         public string From { get; set; }
@@ -33,6 +35,6 @@ namespace Rnwood.Smtp4dev.ApiModel
 
 
         [JsonIgnore]
-        string ICacheByKey.CacheKey => Id.ToString() + IsUnread + IsRelayed + "v2";
+        string ICacheByKey.CacheKey => Id.ToString() + IsUnread + IsRelayed + "v3";
     }
 }

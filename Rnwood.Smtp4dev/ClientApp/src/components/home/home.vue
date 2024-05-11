@@ -1,11 +1,11 @@
 <template>
     <el-container class="fill hfillpanel">
         <el-header height="35" style="display:flex; flex-wrap:wrap; align-items: end; column-gap: 12px;">
-            <h1 style="flex: 0 0 content">
+            <div style="flex: 0 0 content">
                 <a href="https://github.com/rnwood/smtp4dev/" target="_blank">
                     <img height="35" src="logo.png" alt="smtp4dev" />
                 </a>
-            </h1>
+            </div>
 
             <VersionInfo style="flex: 1 1 content; align-self: center;"></VersionInfo>
 
