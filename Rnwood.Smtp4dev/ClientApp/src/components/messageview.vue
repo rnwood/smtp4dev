@@ -6,19 +6,29 @@
         </el-alert>
 
         <el-dialog v-model="replyDialogVisible" :title="replyAll ? 'Reply All' : 'Reply'" destroy-on-close append-to-body align-center width="80%">
-            <messagereply :message="message" @closed="() => replyDialogVisible=false" :replyAll="replyAll" />
+            <messagecompose :reply-to-message="message" @closed="() => replyDialogVisible=false" :replyAll="replyAll" />
         </el-dialog>
 
 
         <div v-if="messageSummary" class="hfillpanel fill">
             <div class="toolbar">
+                <el-dropdown split-button @command="reply" @click="reply" :disabled="!message || !isRelayAvailable" icon="Reply">
+                    Reply
+                    <template #dropdown>
+                        <el-dropdown-menu>
+                            <el-dropdown-item icon="arrow-right" command="reply" title="Reply">Reply</el-dropdown-item>
+                            <el-dropdown-item icon="arrow-right" command="replyAll" title="Reply All">Reply All</el-dropdown-item>
+                        </el-dropdown-menu>
+                    </template>
+                </el-dropdown>
                 <el-button-group>
-                    <el-button v-on:click="reply(false)" icon="arrow-right" :disabled="!message || !isRelayAvailable" title="Reply">Reply</el-button>
-                    <el-button v-on:click="reply(true)" icon="arrow-right" :disabled="!message || !isRelayAvailable" title="Reply All">Reply All</el-button>
+
+
 
                     <el-button v-on:click="relay" icon="d-arrow-right" :disabled="!messageSummary || !isRelayAvailable" :loading="isRelayInProgress" title="Relay...">Relay...</el-button>
                     <el-button icon="download"
                                v-on:click="download">Download</el-button>
+
 
                 </el-button-group>
             </div>
@@ -234,7 +244,7 @@
     import { ElMessageBox, ElNotification } from 'element-plus';
     import ServerController from '../ApiClient/ServerController';
     import MessageViewPlainText from "./messageviewplaintext.vue";
-    import MessageReply from "@/components/messagereply.vue";
+    import MessageCompose from "@/components/messagecompose.vue";
 
     @Component({
         components: {
@@ -246,7 +256,7 @@
             messagesource: MessageSource,
             messageclientanalysis: MessageClientAnalysis,
             messagehtmlvalidation: MessageHtmlValidation,
-            messagereply: MessageReply
+            messagecompose: MessageCompose
         }
     })
     class MessageView extends Vue {
@@ -349,8 +359,8 @@
             this.selectedPart = part;
         }
 
-        async reply(replyAll: boolean) {
-            this.replyAll = replyAll;
+        async reply(command: string) {
+            this.replyAll = command == "replyAll";
             this.replyDialogVisible = true;
         }
 

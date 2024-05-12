@@ -1,7 +1,17 @@
 ﻿<template>
     <div class="messagelist">
 
+        <el-dialog v-model="composeDialogVisible" title="Send" destroy-on-close append-to-body align-center width="80%">
+            <messagecompose @closed="() => composeDialogVisible=false" />
+        </el-dialog>
+
         <div class="toolbar">
+
+
+            <el-button
+                       v-on:click="composeDialogVisible=true"
+                       :disabled="!isRelayAvailable"
+                       title="Compose">Compose</el-button>
 
             <el-button-group>
                 <el-button icon="Delete"
@@ -140,12 +150,14 @@
     import Messagelistpager from "@/components/messagelistpager.vue";
     import Mailbox from "../ApiClient/Mailbox";
     import MailboxesController from "../ApiClient/MailboxesController";
+    import MessageCompose from "@/components/messagecompose.vue";
 
 
     @Component({
         components: {
             Messagelistpager,
             confirmationdialog: ConfirmationDialog,
+            messagecompose: MessageCompose
         },
     })
     class MessageList extends Vue {
@@ -166,6 +178,8 @@
 
         isRelayInProgress: boolean = false;
         isRelayAvailable: boolean = false;
+
+        composeDialogVisible = false;
 
         get emptyText() {
             if (this.loading) {
