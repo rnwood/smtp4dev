@@ -82,6 +82,15 @@ export default class MessagesController {
         return (await axios.post(this.reply_url(id, from, to, cc, bcc, deliverToAll, subject), bodyHtml || undefined, { headers: { "Content-Type": "text/html" } })).data as void;
     }
 
+    // post: api/Messages/send  
+    public send_url(from: string, to: string, cc: string, bcc: string, deliverToAll: boolean, subject: string): string {
+        return `${this.apiBaseUrl}/send?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc)}&bcc=${encodeURIComponent(bcc)}&deliverToAll=${encodeURIComponent(deliverToAll)}&subject=${encodeURIComponent(subject)}`;
+    }
+
+    public async send(from: string, to: string, cc: string, bcc: string, deliverToAll: boolean, subject: string, bodyHtml: string): Promise<void> {
+        return (await axios.post(this.send_url(from, to, cc, bcc, deliverToAll, subject), bodyHtml || undefined, { headers: { "Content-Type": "text/html" } })).data as void;
+    }
+
     // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content  
     public getPartContent_url(id: string, partid: string): string {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content`;

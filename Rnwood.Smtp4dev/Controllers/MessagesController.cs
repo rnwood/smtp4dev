@@ -142,6 +142,27 @@ namespace Rnwood.Smtp4dev.Controllers
             return Ok();
         }
 
+        [HttpPost("send")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.Message), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message does not exist")]
+        public async Task<IActionResult> Send(string to, string cc, string bcc, string from, bool deliverToAll, [FromBody] string bodyHtml)
+        {
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+      
+            var toRecips = to?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+            var ccRecips = cc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+            var bccRecips = bcc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+
+            List<string> envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
+
+            this.server.Send(headers,
+                toRecips,
+                ccRecips,
+                from, envelopeRecips.Distinct().ToArray(), bodyHtml);
+
+            return Ok();
+        }
+
         /// <summary>
         /// Marks a single message as read
         /// </summary>
