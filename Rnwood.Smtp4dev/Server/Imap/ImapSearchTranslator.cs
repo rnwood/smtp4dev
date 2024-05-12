@@ -26,8 +26,22 @@ namespace Rnwood.Smtp4dev.Server.Imap
                 IMAP_Search_Key_Subject subject => HandleSubject(subject),
                 IMAP_Search_Key_Or or => HandleOr(or),
                 IMAP_Search_Key_All all => HandleAll(all),
+                IMAP_Search_Key_Draft => HandleNone(),
+                IMAP_Search_Key_Flagged => HandleNone(),
+                IMAP_Search_Key_Deleted => HandleNone(),
+                IMAP_Search_Key_Since since => HandleSince(since),
                 { } unknown => throw new ImapSearchCriteriaNotSupportedException($"The criteria '{unknown} is not supported'")
             };
+        }
+
+        private Expression<Func<Message, bool>> HandleSince(IMAP_Search_Key_Since since)
+        {
+            return m => m.ReceivedDate >= since.Date;
+        }
+
+        private Expression<Func<Message, bool>> HandleNone()
+        {
+            return m => false;
         }
 
         private Expression<Func<Message, bool>> HandleAll(IMAP_Search_Key_All all)
