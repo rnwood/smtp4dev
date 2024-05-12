@@ -60,11 +60,9 @@
     import { Component, Vue, Prop, Watch, toNative, Emit } from "vue-facing-decorator";
     import SessionsController from "../ApiClient/SessionsController";
     import SessionSummary from "../ApiClient/SessionSummary";
-    import * as moment from "moment";
     import HubConnectionManager from "../HubConnectionManager";
     import sortedArraySync from "../sortedArraySync";
     import { Mutex } from "async-mutex";
-    import ConfirmationDialog from "@/components/confirmationdialog.vue";
     import { TableInstance, ElNotification, ElMessageBox } from "element-plus";
     import PagedResult, { EmptyPagedResult } from "@/ApiClient/PagedResult";
     import Messagelistpager from "@/components/messagelistpager.vue";
@@ -72,8 +70,7 @@
 
     @Component({
         components: {
-            Messagelistpager,
-            confirmationdialog: ConfirmationDialog,
+            Messagelistpager
         },
     })
     class SessionList extends Vue {
@@ -113,7 +110,7 @@
             cellValue: Date,
             index: number
         ): string {
-            return (moment as any)(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            return cellValue?.toLocaleString();
         }
 
         selectSession(session: SessionSummary) {

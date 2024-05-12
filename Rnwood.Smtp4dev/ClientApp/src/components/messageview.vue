@@ -240,7 +240,6 @@
     import MessageSource from "@/components/messagesource.vue";
     import MessageClientAnalysis from "@/components/messageclientanalysis.vue";
     import MessageHtmlValidation from "@/components/messagehtmlvalidation.vue";
-    import { MessageBoxInputData } from 'element-plus/es/components/message-box';
     import { ElMessageBox, ElNotification } from 'element-plus';
     import ServerController from '../ApiClient/ServerController';
     import MessageViewPlainText from "./messageviewplaintext.vue";

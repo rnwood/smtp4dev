@@ -30,7 +30,7 @@
             </el-form-item>
         </el-form>
 
-        <quillEditor style="height: 50vh" v-model:value="body"></quillEditor>
+        <quillEditor style="height: 50vh" ref="editor"  content-type="html"></quillEditor>
 
         <div style="display: flex; justify-content: end;">
             <el-button @click="send" type="primary" :loading="sendInProgress">Send</el-button>
@@ -41,15 +41,15 @@
 
 <script lang="ts">
     import { Component, Vue, Prop, Watch, toNative, Emit } from 'vue-facing-decorator'
-    import { quillEditor } from 'vue3-quill';
+    import { QuillEditor } from '@vueup/vue-quill';
+    import '@vueup/vue-quill/dist/vue-quill.snow.css'
     import Message from '../ApiClient/Message';
     import MessagesController from '../ApiClient/MessagesController';
     import { ElNotification } from 'element-plus';
 
-    @Component({ components: { quillEditor: quillEditor } })
+    @Component({ components: { quillEditor: QuillEditor } })
     class MessageCompose extends Vue {
 
-        body = "";
         from = "";
         to = "";
         cc = "";
@@ -76,10 +76,13 @@
         async send() {
             try {
                 this.sendInProgress = true
+
+                const body = (this.$refs.editor as any).getHTML();
+
                 if (this.replyToMessage) {
-                    await new MessagesController().reply(this.replyToMessage?.id, this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, this.body);
+                    await new MessagesController().reply(this.replyToMessage?.id, this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject,body);
                 } else {
-                    await new MessagesController().send(this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, this.body);
+                    await new MessagesController().send(this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body);
                 }
                 
                 ElNotification.success({ title: "Message sent" });
@@ -99,6 +102,8 @@
         @Watch("replyToMessage")
         @Watch("replyAll")
         async onReplyToMessageChanged() {
+
+            let body="";
 
             if (this.replyToMessage) {
 
@@ -130,7 +135,7 @@
                     messageHtml = textArea.innerHTML.split("<br>").join("\n");
                 }
 
-                this.body = `<br><br>On ${this.replyToMessage.receivedDate} ${this.replyToMessage.from} wrote:<br><br><blockquote type="cite">${messageHtml}</blockquote>`;
+                body = `<br/><br/>On ${this.replyToMessage.receivedDate} ${this.replyToMessage.from} wrote:<br/><br/><blockquote type="cite">${messageHtml}</blockquote>`;
 
             } else {
                 this.subject =""
@@ -139,8 +144,11 @@
                 this.to="";
                 this.cc="";
                 this.bcc="";
-                this.body = "";
+                body = "";
             }
+
+            (this.$refs.editor as any).setHTML('');
+            (this.$refs.editor as any).pasteHTML(body, 'silent');
         }
 
     }

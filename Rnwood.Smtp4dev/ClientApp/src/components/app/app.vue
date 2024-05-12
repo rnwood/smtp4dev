@@ -29,5 +29,5 @@
     $--button-small-padding-horizontal: 12px;
     $--input-small-padding-vertical: 7px;
 
-    @import "~element-plus/theme-chalk/src/index";
+    @import "element-plus/theme-chalk/src/index";
 </style>
