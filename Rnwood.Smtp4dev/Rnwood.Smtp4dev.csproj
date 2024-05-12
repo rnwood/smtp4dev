@@ -184,6 +184,7 @@
     <ClientApp Remove="ClientApp\src\components\messagehtmlvalidation.vue" />
     <ClientApp Remove="ClientApp\src\components\messagesource.vue" />
     <ClientApp Remove="ClientApp\src\components\settingsdialog.vue" />
+    <ClientApp Remove="clientapp\src\vite.config.js" />
   </ItemGroup>
 
   <ItemGroup>
@@ -212,7 +213,7 @@
 
     <Message Importance="high" Text="Performing NPM build..." />
 
-    <Exec Condition=" '$(Configuration)' != 'Release' " Command="npm --prefix ClientApp run-script build:dev" CustomErrorRegularExpression="^ERROR in" />
+    <Exec Condition=" '$(Configuration)' != 'Release' " Command="npm --prefix ClientApp run-script build" CustomErrorRegularExpression="^ERROR in" />
     <Exec Condition=" '$(Configuration)' == 'Release' " Command="npm --prefix ClientApp run-script build" CustomErrorRegularExpression="^ERROR in" />
 
     <Touch Files="wwwroot\.buildtimestamp" AlwaysCreate="true" />

@@ -230,11 +230,11 @@ namespace Rnwood.Smtp4dev
                         
                         e.MapToVueCliProxy(
                             "{*path}",
-                            new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp") },
-                            npmScript: "serve",
-                            regex: "App running at",
+                            new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp"), DevServerPort = 5173 },
+                            npmScript: "dev",
+                            regex: "VITE.*ready in",
                             forceKill: true,
-                            port: 8123
+                            port: 5173
                         );
 
                     }

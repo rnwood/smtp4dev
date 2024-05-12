@@ -135,14 +135,11 @@
     import { ElMessageBox, ElNotification, TableInstance } from "element-plus";
     import MessagesController from "../ApiClient/MessagesController";
     import MessageSummary from "../ApiClient/MessageSummary";
-    import * as moment from "moment";
     import HubConnectionManager from "../HubConnectionManager";
     import sortedArraySync from "../sortedArraySync";
     import { Mutex } from "async-mutex";
     import MessageNotificationManager from "../MessageNotificationManager";
     import { debounce } from "ts-debounce";
-
-    import ConfirmationDialog from "@/components/confirmationdialog.vue";
     import ServerController from "../ApiClient/ServerController";
     import ClientSettingsController from "../ApiClient/ClientSettingsController";
 
@@ -156,7 +153,6 @@
     @Component({
         components: {
             Messagelistpager,
-            confirmationdialog: ConfirmationDialog,
             messagecompose: MessageCompose
         },
     })
@@ -225,7 +221,7 @@
         }
 
         formatDate(row: number, column: number, cellValue: Date): string {
-            return (moment as any)(cellValue).format("YYYY-MM-DD HH:mm:ss");
+            return cellValue?.toLocaleString();
         }
 
 

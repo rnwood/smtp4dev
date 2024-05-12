@@ -5,9 +5,9 @@
     "strict": true,
     "jsx": "preserve",
     "importHelpers": true,
-    "moduleResolution": "node",
+    "moduleResolution": "Bundler",
     "experimentalDecorators": true,
-    "esModuleInterop": true,
+    "esModuleInterop": false,
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
@@ -30,15 +30,6 @@
       "scripthost"
     ]
   },
-  //"include": [
-  //  "src/**/*.ts",
-  //  "src/**/*.tsx",
-  //  "src/**/*.vue",
-  //  "tests/**/*.ts",
-  //  "tests/**/*.tsx",
-  //  "vue.config.js",
-  //  "src/babel.config.js"
-  //],
   "exclude": [
     "node_modules"
   ]
