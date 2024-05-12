@@ -8,6 +8,7 @@ const pathSegments = path.dirname(filename);
 
 export default defineConfig({
     plugins: [vue()],
+    base: "./",
     resolve: {
         alias: {
             '@': path.resolve(pathSegments, './src'),
@@ -15,7 +16,9 @@ export default defineConfig({
         extensions: ['.mjs', '.js', '.ts', '.jsx', '.tsx', '.json'],
     },
     define: {
-        'process.env': {}
+        'process.env': {},
+        'process.platform': null,
+        'process.version': null
     },
     build: {
         outDir: "../wwwroot",
