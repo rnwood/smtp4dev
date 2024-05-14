@@ -114,6 +114,9 @@ namespace Rnwood.Smtp4dev.Server
             var session = dbContext.Sessions.AsNoTracking().Single(s => s.Id == sessionId);
             var apiSession = new ApiModel.Session(session);
 
+            var delay = scriptingHost.DelayRecipient(apiSession, e.Recipient);
+            Task.Delay(delay).Wait();
+
             if (!this.scriptingHost.ValidateRecipient(apiSession, e.Recipient))
             {
                 throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.RecipientRejected, "Recipient rejected"));
@@ -160,6 +163,9 @@ namespace Rnwood.Smtp4dev.Server
             Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Connection.Session]);
 
             var apiSession = new ApiModel.Session(dbSession);
+
+            var delay = scriptingHost.DelayMessage(apiMessage, apiSession);
+            Task.Delay(delay).Wait();
 
             var errorResponse = scriptingHost.ValidateMessage(apiMessage, apiSession);
 

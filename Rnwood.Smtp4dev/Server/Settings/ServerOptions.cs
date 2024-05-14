@@ -1,5 +1,4 @@
 ﻿using System.Net;
-using Esprima.Ast;
 
 namespace Rnwood.Smtp4dev.Server.Settings
 {
@@ -39,8 +38,11 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public bool SmtpAllowAnyCredentials { get; set; }
         public string RecipientValidationExpression { get; set; }
+        public string RecipientDelayExpression { get; set; }
 
         public string MessageValidationExpression { get; set; }
+        public string MessageDelayExpression { get; set; }
+
         public bool DisableIPv6 { get; set; } = false;
 
         public UserOptions[] Users { get; set; } = [];

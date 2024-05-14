@@ -146,11 +146,28 @@
                                 </template>
                             </el-input>
                         </el-form-item>
+                        
+                        <el-form-item label="Recipient delay expression (see comments in appsettings.json)" prop="server.recipientDelayExpression">
+
+                            <el-input v-model="server.recipientDelayExpression" :disabled="server.lockedSettings.recipientDelayExpression">
+                                <template #prefix>
+                                    <el-icon v-if="server.lockedSettings.recipientDelayExpression" :title="`Locked: ${server.lockedSettings.recipientDelayExpression}`"><Lock /></el-icon>
+                                </template>
+                            </el-input>
+                        </el-form-item>
 
                         <el-form-item label="Message validation expression (see comments in appsettings.json)" prop="server.messageValidationExpression">
                             <el-input v-model="server.messageValidationExpression" :disabled="server.lockedSettings.messageValidationExpression">
                                 <template #prefix>
                                     <el-icon v-if="server.lockedSettings.messageValidationExpression" :title="`Locked: ${server.lockedSettings.messageValidationExpression}`"><Lock /></el-icon>
+                                </template>
+                            </el-input>
+                        </el-form-item>
+                        
+                        <el-form-item label="Message delay expression (see comments in appsettings.json)" prop="server.messageDelayExpression">
+                            <el-input v-model="server.messageDelayExpression" :disabled="server.lockedSettings.messageDelayExpression">
+                                <template #prefix>
+                                    <el-icon v-if="server.lockedSettings.messageDelayExpression" :title="`Locked: ${server.lockedSettings.messageDelayExpression}`"><Lock /></el-icon>
                                 </template>
                             </el-input>
                         </el-form-item>

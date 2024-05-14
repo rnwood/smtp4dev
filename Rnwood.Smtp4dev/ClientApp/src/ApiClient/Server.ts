@@ -8,7 +8,12 @@ export default class Server {
 
     constructor(isRunning: boolean, exception: string, portNumber: number, hostName: string, allowRemoteConnections: boolean, numberOfMessagesToKeep: number, numberOfSessionsToKeep: number, imapPortNumber: number, settingsAreEditable: boolean, disableMessageSanitisation: boolean, automaticRelayExpression: string, tlsMode: string, credentialsValidationExpression: string,
         authenticationRequired: boolean,
-        secureConnectionRequired: boolean, recipientValidationExpression: string, messageValidationExpression: string, disableIPv6: string, users: User[],
+        secureConnectionRequired: boolean, 
+        recipientValidationExpression: string, 
+        recipientDelayExpression: string, 
+        messageValidationExpression: string, 
+        messageDelayExpression: string, 
+        disableIPv6: string, users: User[],
         relayTlsMode: string | undefined,
         relaySmtpServer: string,
         relaySmtpPort: number,
@@ -44,7 +49,9 @@ export default class Server {
         this.authenticationRequired = authenticationRequired;
         this.secureConnectionRequired = secureConnectionRequired;
         this.recipientValidationExpression = recipientValidationExpression;
+        this.recipientDelayExpression = recipientDelayExpression;
         this.messageValidationExpression = messageValidationExpression;
+        this.messageDelayExpression = messageDelayExpression;
         this.disableIPv6 = disableIPv6;
         this.users = users;
         this.relayTlsMode = relayTlsMode;
@@ -83,7 +90,9 @@ export default class Server {
     authenticationRequired: boolean;
     secureConnectionRequired: boolean;
     recipientValidationExpression: string;
+    recipientDelayExpression: string;
     messageValidationExpression: string;
+    messageDelayExpression: string;
     disableIPv6: string;
     users: User[];
     relayTlsMode: string | undefined;

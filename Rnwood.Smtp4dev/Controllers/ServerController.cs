@@ -93,7 +93,9 @@ namespace Rnwood.Smtp4dev.Controllers
                 SecureConnectionRequired = serverOptionsCurrentValue.SecureConnectionRequired,
                 CredentialsValidationExpression = serverOptionsCurrentValue.CredentialsValidationExpression,
                 RecipientValidationExpression = serverOptionsCurrentValue.RecipientValidationExpression,
+                RecipientDelayExpression = serverOptionsCurrentValue.RecipientDelayExpression,
                 MessageValidationExpression = serverOptionsCurrentValue.MessageValidationExpression,
+                MessageDelayExpression = serverOptionsCurrentValue.MessageDelayExpression,
                 DisableIPv6 = serverOptionsCurrentValue.DisableIPv6,
                 WebAuthenticationRequired = serverOptionsCurrentValue.WebAuthenticationRequired,
                 Users = serverOptionsCurrentValue.Users,
@@ -220,7 +222,9 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.SecureConnectionRequired = serverUpdate.SecureConnectionRequired;
             newSettings.CredentialsValidationExpression = serverUpdate.CredentialsValidationExpression;
             newSettings.RecipientValidationExpression = serverUpdate.RecipientValidationExpression;
+            newSettings.RecipientDelayExpression = serverUpdate.RecipientDelayExpression;
             newSettings.MessageValidationExpression = serverUpdate.MessageValidationExpression;
+            newSettings.MessageDelayExpression = serverUpdate.MessageDelayExpression;
             newSettings.DisableIPv6 = serverUpdate.DisableIPv6;
             newSettings.Users = serverUpdate.Users;
 			newSettings.Mailboxes = serverUpdate.Mailboxes;

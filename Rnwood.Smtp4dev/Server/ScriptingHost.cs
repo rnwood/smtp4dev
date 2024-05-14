@@ -63,8 +63,12 @@ public class ScriptingHost
             ref credValidationSource);
         ParseScript("RecipientValidationExpression", serverOptionsCurrentValue.RecipientValidationExpression, ref recipValidationScript,
             ref recipValidationSource);
+        ParseScript("RecipientDelayExpression", serverOptionsCurrentValue.RecipientDelayExpression, ref recipDelayScript,
+            ref recipDelaySource);
         ParseScript("MessageValidationExpression", serverOptionsCurrentValue.MessageValidationExpression, ref messageValidationScript,
             ref messageValidationSource);
+        ParseScript("MessageDelayExpression", serverOptionsCurrentValue.MessageDelayExpression, ref messageDelayScript,
+            ref messageDelaySource);
     }
 
     private string shouldRelaySource;
@@ -73,9 +77,13 @@ public class ScriptingHost
     private Script credValidationScript;
     private string recipValidationSource;
     private Script recipValidationScript;
+    private string recipDelaySource;
+    private Script recipDelayScript;
 
     private string messageValidationSource;
     private Script messageValidationScript;
+    private string messageDelaySource;
+    private Script messageDelayScript;
 
     public bool HasValidateMessageExpression { get => this.messageValidationScript != null; }
 
@@ -208,6 +216,42 @@ public class ScriptingHost
         }
     }
 
+    public int DelayRecipient(ApiModel.Session session, string recipient)
+    {
+        int delay = 0;
+        if (recipDelayScript == null)
+        {
+            return delay;
+        }
+
+        Engine jsEngine = new Engine();
+
+        jsEngine.SetValue("recipient", recipient);
+        jsEngine.SetValue("session", session);
+
+        try
+        {
+            JsValue result = jsEngine.Evaluate(recipDelayScript);
+
+            if (result.IsNumber())
+            {
+                delay = Convert.ToInt32(result.AsNumber());
+            }
+
+            log.Information("DelayRecipientExpression: (recipient: {recipient}, session: {session.Id}) => {result} => {success}", recipient,
+                session.Id, result, delay);
+        }
+        catch (JavaScriptException ex)
+        {
+            log.Error("Error executing DelayRecpientExpression : {error}", ex.Error);
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error executing DelayRecipientExpression : {error}", ex.ToString());
+        }
+        return delay;
+    }
+
     internal SmtpResponse ValidateMessage(ApiModel.Message message, ApiModel.Session session)
     {
         if (messageValidationScript == null)
@@ -262,5 +306,41 @@ public class ScriptingHost
             log.Error("Error executing MessageValidationExpression : {error}", ex.ToString());
             return new SmtpResponse(StandardSmtpResponseCode.TransactionFailed, "MessageValidationExpression failed");
         }
+    }
+
+    public int DelayMessage(ApiModel.Message message, ApiModel.Session session)
+    {
+        int delay = 0;
+        if (messageDelayScript == null)
+        {
+            return delay;
+        }
+
+        Engine jsEngine = new Engine();
+
+        jsEngine.SetValue("message", message);
+        jsEngine.SetValue("session", session);
+
+        try
+        {
+            JsValue result = jsEngine.Evaluate(messageDelayScript);
+
+            if (result.IsNumber())
+            {
+                delay = Convert.ToInt32(result.AsNumber());
+            }
+
+            log.Information("DelayMessageExpression: (recipient: {recipient}, session: {session.Id}) => {result} => {success}", message,
+                session.Id, result, delay);
+        }
+        catch (JavaScriptException ex)
+        {
+            log.Error("Error executing DelayMessageExpression : {error}", ex.Error);
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error executing DelayExpression : {error}", ex.ToString());
+        }
+        return delay;
     }
 }
