@@ -1,6 +1,7 @@
 ﻿using System.Globalization;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore;
+using Namotion.Reflection;
 using Rnwood.Smtp4dev.DbModel;
 
 namespace Rnwood.Smtp4dev.Data
@@ -22,7 +23,18 @@ namespace Rnwood.Smtp4dev.Data
                 .HasOne(r => r.Message)
                 .WithMany(x => x.Relays)
                 .HasForeignKey(x => x.MessageId)
+                .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
+
+            modelBuilder.Entity<Mailbox>()
+                .HasMany<Message>()
+                    .WithOne(m => m.Mailbox)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<Message>()
+                .HasOne<Session>(x => x.Session)
+               .WithMany()
+                .OnDelete(DeleteBehavior.SetNull);
 
             base.OnModelCreating(modelBuilder);
         }

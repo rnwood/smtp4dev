@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.Data.Entity.Core.Objects.DataClasses;
 
 namespace Rnwood.Smtp4dev.DbModel
 {
