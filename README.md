@@ -13,7 +13,7 @@ smtp4dev support many advanced features:
 - TLS/SSL with implicit and STARTTLS modes and auto self-signed cert generation
 - Authentication
 - Multiple mailboxes along with rules to control what message goes where
-- Reply, compose and relay messages incuding rules to auto relay
+- Reply, compose and relay messages including rules to auto relay
 - Scripting expressions including error simulation
 
 *If you're looking for the older v2 Windows only GUI version. [Grab it here](https://github.com/rnwood/smtp4dev/releases/tag/v2.0.10).*
