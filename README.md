@@ -1,7 +1,21 @@
 # <img src='Rnwood.Smtp4dev/ClientApp/public/logo.png' alt='logo'/>
 **smtp4dev - the fake SMTP email server for development and testing.**
 
-A dummy SMTP server for Windows, Linux, Mac OS-X (and maybe elsewhere where .NET Core is available). Lets you test your application without spamming your real customers and without needing to set up a complicated real email server with a special configuration. Messages received in smtp4dev can be viewed and inspected. There is an API you can use for automated tests.
+A dummy SMTP server for Windows, Linux, Mac OS-X (and maybe elsewhere where .NET Core is available). Lets you test your application without spamming your real customers.
+
+smtp4dev support many advanced features:
+- OpenAPI/Swagger API
+- IMAP access to retrieve and delete messages
+- SMTP session logging
+- UTF8 support
+- Viewport size switcher to simulate mobile etc
+- Multipart MIME inspector
+- HTML compatibility report and HTML validation
+- TLS/SSL with implicit and STARTTLS modes and auto self-signed cert generation
+- Authentication
+- Multiple mailboxes along with rules to control what message goes where
+- Reply, compose and relay messages including rules to auto relay
+- Scripting expressions including error simulation
 
 *If you're looking for the older v2 Windows only GUI version. [Grab it here](https://github.com/rnwood/smtp4dev/releases/tag/v2.0.10).*
 
