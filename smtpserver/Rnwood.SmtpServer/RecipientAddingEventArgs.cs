@@ -17,10 +17,11 @@ public class RecipientAddingEventArgs : EventArgs
     /// </summary>
     /// <param name="message">The message<see cref="IMessage" />.</param>
     /// <param name="recipient">The recipient being added.</param>
-    public RecipientAddingEventArgs(IMessageBuilder message, string recipient)
+    public RecipientAddingEventArgs(IMessageBuilder message, string recipient, IConnection connection)
     {
         Message = message;
         Recipient = recipient;
+        Connection = connection;
     }
 
     /// <summary>
@@ -32,4 +33,5 @@ public class RecipientAddingEventArgs : EventArgs
     ///     Gets the Recipient.
     /// </summary>
     public string Recipient { get; private set; }
+    public IConnection Connection { get; private set; }
 }

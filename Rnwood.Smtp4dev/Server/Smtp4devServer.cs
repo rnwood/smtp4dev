@@ -114,7 +114,7 @@ namespace Rnwood.Smtp4dev.Server
             var session = dbContext.Sessions.AsNoTracking().Single(s => s.Id == sessionId);
             var apiSession = new ApiModel.Session(session);
 
-            if (!this.scriptingHost.ValidateRecipient(apiSession, e.Recipient))
+            if (!this.scriptingHost.ValidateRecipient(apiSession, e.Recipient, e.Connection))
             {
                 throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.RecipientRejected, "Recipient rejected"));
             }
@@ -161,7 +161,7 @@ namespace Rnwood.Smtp4dev.Server
 
             var apiSession = new ApiModel.Session(dbSession);
 
-            var errorResponse = scriptingHost.ValidateMessage(apiMessage, apiSession);
+            var errorResponse = scriptingHost.ValidateMessage(apiMessage, apiSession, e.Connection);
 
             if (errorResponse != null)
             {
@@ -241,7 +241,7 @@ namespace Rnwood.Smtp4dev.Server
 
             var apiSession = new ApiModel.Session(session);
 
-            AuthenticationResult? result = scriptingHost.ValidateCredentials(apiSession, e.Credentials);
+            AuthenticationResult? result = scriptingHost.ValidateCredentials(apiSession, e.Credentials, e.Connection);
 
             if (result == null && this.serverOptions.CurrentValue.SmtpAllowAnyCredentials)
             {

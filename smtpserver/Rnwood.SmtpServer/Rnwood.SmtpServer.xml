@@ -221,7 +221,7 @@
                 Defines the <see cref="T:Rnwood.SmtpServer.AuthenticationCredentialsValidationEventArgs" />.
             </summary>
         </member>
-        <member name="M:Rnwood.SmtpServer.AuthenticationCredentialsValidationEventArgs.#ctor(Rnwood.SmtpServer.ISession,Rnwood.SmtpServer.Extensions.Auth.IAuthenticationCredentials)">
+        <member name="M:Rnwood.SmtpServer.AuthenticationCredentialsValidationEventArgs.#ctor(Rnwood.SmtpServer.ISession,Rnwood.SmtpServer.Extensions.Auth.IAuthenticationCredentials,Rnwood.SmtpServer.IConnection)">
             <summary>
                 Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.AuthenticationCredentialsValidationEventArgs" /> class.
             </summary>
@@ -2379,7 +2379,7 @@
                 Defines the <see cref="T:Rnwood.SmtpServer.RecipientAddingEventArgs" />.
             </summary>
         </member>
-        <member name="M:Rnwood.SmtpServer.RecipientAddingEventArgs.#ctor(Rnwood.SmtpServer.IMessageBuilder,System.String)">
+        <member name="M:Rnwood.SmtpServer.RecipientAddingEventArgs.#ctor(Rnwood.SmtpServer.IMessageBuilder,System.String,Rnwood.SmtpServer.IConnection)">
             <summary>
                 Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.RecipientAddingEventArgs" /> class.
             </summary>

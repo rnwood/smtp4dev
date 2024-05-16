@@ -173,7 +173,7 @@ public class ServerOptions : IServerOptions
 
     /// <inheritdoc />
     public virtual Task OnMessageRecipientAdding(IConnection connection, IMessageBuilder message, string recipient) =>
-        MessageRecipientAddingEventHandler?.Invoke(this, new RecipientAddingEventArgs(message, recipient)) ??
+        MessageRecipientAddingEventHandler?.Invoke(this, new RecipientAddingEventArgs(message, recipient, connection)) ??
         Task.CompletedTask;
 
     /// <inheritdoc />
@@ -204,7 +204,7 @@ public class ServerOptions : IServerOptions
                 .Select(h =>
                 {
                     AuthenticationCredentialsValidationEventArgs args =
-                        new AuthenticationCredentialsValidationEventArgs(connection.Session, authenticationRequest);
+                        new AuthenticationCredentialsValidationEventArgs(connection.Session, authenticationRequest, connection);
                     return new { Args = args, Task = h(this, args) };
                 });
 
