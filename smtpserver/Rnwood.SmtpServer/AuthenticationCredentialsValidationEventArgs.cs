@@ -18,16 +18,18 @@ public class AuthenticationCredentialsValidationEventArgs : EventArgs
     /// </summary>
     /// <param name="session">The session</param>
     /// <param name="credentials">The credentials<see cref="IAuthenticationCredentials" />.</param>
-    public AuthenticationCredentialsValidationEventArgs(ISession session, IAuthenticationCredentials credentials)
+    public AuthenticationCredentialsValidationEventArgs(ISession session, IAuthenticationCredentials credentials, IConnection connection)
     {
         Credentials = credentials;
         Session = session;
+        Connection = connection;
     }
 
     /// <summary>
     /// Gets the session
     /// </summary>
     public ISession Session { get; private set; }
+    public IConnection Connection { get; private set; }
 
     /// <summary>
     ///     Gets or sets the AuthenticationResult.

@@ -1,12 +1,16 @@
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
+using System.Threading;
 using System.Threading.Tasks;
 using Esprima;
 using Esprima.Ast;
 using Jint;
 using Jint.Native;
 using Jint.Runtime;
+using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Options;
 using Rnwood.Smtp4dev.DbModel;
@@ -14,6 +18,7 @@ using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.SmtpServer;
 using Rnwood.SmtpServer.Extensions.Auth;
 using Serilog;
+using StreamLib;
 
 namespace Rnwood.Smtp4dev.Server;
 
@@ -40,19 +45,31 @@ public class ScriptingHost
         if (source != expression)
         {
             expression = expression ?? "";
-            log.Information("Parsing {type} {expression}", type, expression);
+            log.Information("Parsing {type} - {expression}", type, expression);
 
             if (string.IsNullOrWhiteSpace(expression))
             {
                 script = null;
+                source = expression;
             }
             else
             {
                 var parser = new JavaScriptParser();
-                script = parser.ParseScript(expression);
+
+                try
+                {
+                    script = parser.ParseScript(expression);
+                    source = expression;
+                }
+                catch (Esprima.ParserException e)
+                {
+                    log.Error("Error parsing {type} - {error}", type, e.Message);
+                    script = null;
+                    source = "";
+                }
             }
 
-            source = expression;
+
         }
     }
 
@@ -79,14 +96,32 @@ public class ScriptingHost
 
     public bool HasValidateMessageExpression { get => this.messageValidationScript != null; }
 
+    private void AddStandardApi(Engine jsEngine, IConnection connection)
+    {
+        jsEngine.SetValue("error", (Action<int?, string>)((code, message) => throw new SmtpServerException(new SmtpResponse(code ?? (int)StandardSmtpResponseCode.TransactionFailed, message ?? ""))));
+
+        jsEngine.SetValue("delay", (Func<double, bool>)(seconds => { Thread.Sleep(seconds == -1 ? TimeSpan.MaxValue : TimeSpan.FromSeconds(seconds)); return true; }));
+
+        jsEngine.SetValue("random", (Func<int, int, int>)((minValue, maxValue) => Random.Shared.Next(minValue, maxValue)));
+
+        jsEngine.SetValue("disconnect", (Action)(() => throw new ConnectionUnexpectedlyClosedException("Closed by scripting expression")));
+
+        jsEngine.SetValue("throttle", (Func<int, bool>)(bps =>
+        {
+            connection.ApplyStreamFilter((s) => Task.FromResult<Stream>(new ThrottledStream(s, bps, throttleWrites: true, throttleReads: true))).Wait();
+            return true;
+        }));
+        ;
+
+    }
+
     public IReadOnlyCollection<string> GetAutoRelayRecipients(ApiModel.Message message, string recipient, ApiModel.Session session)
     {
         if (shouldRelayScript == null)
         {
             return Array.Empty<string>();
         }
-
-        Engine jsEngine = new Engine();
+        var jsEngine = CreateEngineWithStandardApi(null);
 
         jsEngine.SetValue("recipient", recipient);
         jsEngine.SetValue("message", message);
@@ -123,6 +158,14 @@ public class ScriptingHost
             return relayRecipients;
 
         }
+        catch (ConnectionUnexpectedlyClosedException)
+        {
+            throw;
+        }
+        catch (SmtpServerException)
+        {
+            throw;
+        }
         catch (JavaScriptException ex)
         {
             log.Error("Error executing AutomaticRelayExpression : {error}", ex.Error);
@@ -136,14 +179,21 @@ public class ScriptingHost
 
     }
 
-    public AuthenticationResult? ValidateCredentials(ApiModel.Session session, IAuthenticationCredentials credentials)
+    private Engine CreateEngineWithStandardApi(IConnection connection)
+    {
+        var result = new Engine();
+        AddStandardApi(result, connection);
+        return result;
+    }
+
+    public AuthenticationResult? ValidateCredentials(ApiModel.Session session, IAuthenticationCredentials credentials, IConnection connection)
     {
         if (credValidationScript == null)
         {
             return null;
         }
 
-        Engine jsEngine = new Engine();
+        Engine jsEngine = CreateEngineWithStandardApi(connection);
 
         jsEngine.SetValue("credentials", credentials);
         jsEngine.SetValue("session", session);
@@ -160,6 +210,14 @@ public class ScriptingHost
             return success ? AuthenticationResult.Success : AuthenticationResult.Failure;
 
         }
+        catch (ConnectionUnexpectedlyClosedException)
+        {
+            throw;
+        }
+        catch (SmtpServerException)
+        {
+            throw;
+        }
         catch (JavaScriptException ex)
         {
             log.Error("Error executing CredentialValidationExpression : {error}", ex.Error);
@@ -172,14 +230,14 @@ public class ScriptingHost
         }
     }
 
-    public bool ValidateRecipient(ApiModel.Session session, string recipient)
+    public bool ValidateRecipient(ApiModel.Session session, string recipient, IConnection connection)
     {
         if (recipValidationScript == null)
         {
             return true;
         }
 
-        Engine jsEngine = new Engine();
+        Engine jsEngine = CreateEngineWithStandardApi(connection);
 
         jsEngine.SetValue("recipient", recipient);
         jsEngine.SetValue("session", session);
@@ -196,6 +254,14 @@ public class ScriptingHost
             return success;
 
         }
+        catch (ConnectionUnexpectedlyClosedException)
+        {
+            throw;
+        }
+        catch (SmtpServerException)
+        {
+            throw;
+        }
         catch (JavaScriptException ex)
         {
             log.Error("Error executing RecipientValidationExpression : {error}", ex.Error);
@@ -208,18 +274,17 @@ public class ScriptingHost
         }
     }
 
-    internal SmtpResponse ValidateMessage(ApiModel.Message message, ApiModel.Session session)
+    internal SmtpResponse ValidateMessage(ApiModel.Message message, ApiModel.Session session, IConnection connection)
     {
         if (messageValidationScript == null)
         {
             return null;
         }
 
-        Engine jsEngine = new Engine();
+        Engine jsEngine = CreateEngineWithStandardApi(connection);
 
         jsEngine.SetValue("message", message);
         jsEngine.SetValue("session", session);
-        jsEngine.SetValue("error", (Action<int?, string>)((code, message) => throw new SmtpServerException(new SmtpResponse(code ?? (int)StandardSmtpResponseCode.TransactionFailed, message ?? ""))));
 
         try
         {
@@ -234,7 +299,9 @@ public class ScriptingHost
             else if (result.IsNumber())
             {
                 response = new SmtpResponse((int)result.AsNumber(), "Message rejected by MessageValidationExpression");
-            } else if (result.IsString()) {
+            }
+            else if (result.IsString())
+            {
                 response = new SmtpResponse(StandardSmtpResponseCode.TransactionFailed, result.AsString());
             }
             else
@@ -247,6 +314,10 @@ public class ScriptingHost
 
             return response;
 
+        }
+        catch (ConnectionUnexpectedlyClosedException)
+        {
+            throw;
         }
         catch (SmtpServerException ex)
         {
