@@ -13,7 +13,7 @@
             "args": "--urls http://localhost:5000",
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
-            "preLaunchTask": "build"
+            "preLaunchTask": "build Rnwood.Smtp4dev"
             
         },
         {
@@ -35,6 +35,6 @@
             ".NET Core Launch (web)",
             "Chrome"
         ],
-        "preLaunchTask": "build"
+        "preLaunchTask": "build Rnwood.Smtp4dev"
     }]
 }

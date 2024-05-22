@@ -1,4 +1,26 @@
 {
-    "appPort": [2525, 8080],
-    "extensions": ["ms-vscode.csharp", "formulahendry.dotnet-test-explorer", "msjsdiag.debugger-for-chrome", "ms-azuretools.vscode-docker", "dbaeumer.vscode-eslint", "octref.vetur", "ms-azure-devops.azure-pipelines"]
+    "appPort": [
+        2525,
+        8080
+    ],
+    "extensions": [
+        "ms-vscode.csharp",
+        "formulahendry.dotnet-test-explorer",
+        "ms-azuretools.vscode-docker",
+        "dbaeumer.vscode-eslint",
+        "octref.vetur",
+        "ms-azure-devops.azure-pipelines",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "ms-dotnettools.csdevkit",
+        "ms-vscode.PowerShell"
+    ],
+    
+    "build": {
+        "dockerfile": "Dockerfile",
+        "context": "."
+    },
+    
+    "containerEnv": {
+        "SERVEROPTIONS__PORT": "2525"
+    }
 }

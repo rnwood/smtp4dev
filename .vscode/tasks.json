@@ -2,15 +2,19 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "build",
+            "label": "build Rnwood.Smtp4dev",
             "command": "dotnet",
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/smtp4dev.sln",
+                "${workspaceFolder}/Rnwood.Smtp4dev",
                 "/property:GenerateFullPaths=true"
             ],
             "problemMatcher": "$msCompile",
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
         }
     ]
 }
