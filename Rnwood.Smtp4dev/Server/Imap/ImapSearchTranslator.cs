@@ -51,7 +51,7 @@ namespace Rnwood.Smtp4dev.Server.Imap
 
         private Expression<Func<Message, bool>> HandleOr(IMAP_Search_Key_Or or) { 
         
-            return Translate(or.SearchKey1).Or(Translate(or.SearchKey2));
+            return ExpressionOptimizer.tryVisitTyped(Translate(or.SearchKey1).Or(Translate(or.SearchKey2)).Expand());
         }
 
         private string EscapeLike(string text)
@@ -63,7 +63,7 @@ namespace Rnwood.Smtp4dev.Server.Imap
         {
             string like = $"%{EscapeLike(text)}%";
             Expression<Func<Message, bool>> expression = m => EF.Functions.Like(property.Invoke(m), like);
-            return expression.Expand();
+            return ExpressionOptimizer.tryVisitTyped(expression.Expand());
         }
 
         private Expression<Func<Message, bool>> HandleSubject(IMAP_Search_Key_Subject subject)
@@ -84,7 +84,7 @@ namespace Rnwood.Smtp4dev.Server.Imap
         private Expression<Func<Message, bool>> HandleNot(IMAP_Search_Key_Not not)
         {
             Expression<Func<Message, bool>> query = (m => !Translate(not.SearchKey).Invoke(m));
-            return query.Expand();
+            return ExpressionOptimizer.tryVisitTyped(query.Expand());
         }
 
         private Expression<Func<Message, bool>> HandleSeen(IMAP_Search_Key_Seen seen)
@@ -105,8 +105,7 @@ namespace Rnwood.Smtp4dev.Server.Imap
             {
                 result = result.And(Translate(key));
             }
-
-            return result;
+            return ExpressionOptimizer.tryVisitTyped(result.Expand());
         }
     }
 
