@@ -601,12 +601,18 @@ namespace Rnwood.Smtp4dev.Server
             return Task.CompletedTask;
         }
 
-        public void Send(IDictionary<string, string> headers, string[] to, string[] cc, string from, string[] envelopeRecipients, string bodyHtml)
+        public void Send(IDictionary<string, string> headers, string[] to, string[] cc, string from, string[] envelopeRecipients, string subject, string bodyHtml)
         {
             MailboxAddress sender = MailboxAddress.Parse(from);
             var relaySmtpClient = this.relaySmtpClientFactory(this.relayOptions.CurrentValue);
 
+            if (relaySmtpClient == null)
+            {
+                throw new InvalidOperationException("Relay SMTP server must be configued to send messages.");
+            }
+
             MimeMessage message = new MimeMessage();
+            message.Subject = subject;
             message.MessageId = $"<{Guid.NewGuid()}@{this.serverOptions.CurrentValue.HostName}>";
             BodyBuilder bodyBuilder = new BodyBuilder();
             bodyBuilder.HtmlBody = bodyHtml;

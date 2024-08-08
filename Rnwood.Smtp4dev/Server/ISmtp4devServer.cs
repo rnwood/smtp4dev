@@ -17,6 +17,6 @@ namespace Rnwood.Smtp4dev.Server
         void Stop();
         Task DeleteSession(Guid id);
         Task DeleteAllSessions();
-        void Send(IDictionary<string, string> headers, string[] to, string[] cc, string from, string[] envelopeRecipients, string bodyHtml);
+        void Send(IDictionary<string, string> headers, string[] to, string[] cc, string from, string[] envelopeRecipients, string subject, string bodyHtml);
     }
 }

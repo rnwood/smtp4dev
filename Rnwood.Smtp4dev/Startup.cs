@@ -50,6 +50,13 @@ namespace Rnwood.Smtp4dev
                 config.DocumentName = "v1";
                 config.Title = "smtp4dev";
                 config.Version = "v1";
+                config.PostProcess = d =>
+                {
+                    //Remove the JSON content type from the actions where it is not supported.
+                    NSwag.OpenApiOperationDescription sendOp = d.Operations.FirstOrDefault(o => o.Path.EndsWith("/send") || o.Path.EndsWith("/reply"));
+                    sendOp.Operation.RequestBody.Content.Remove("application/json");
+              
+                };
             });
 
             services.Configure<ServerOptions>(Configuration.GetSection("ServerOptions"));
@@ -60,69 +67,69 @@ namespace Rnwood.Smtp4dev
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
 
             services.AddDbContext<Smtp4devDbContext>(opt =>
-            {
-                if (string.IsNullOrEmpty(serverOptions.Database))
-                {
-                    Log.Logger.Information("Using in memory database.");
-
-                    //Must be held open to keep the memory DB alive
-                    keepAliveConnection = new SqliteConnection(InMemoryDbConnString);
-                    keepAliveConnection.Open();
-                    opt.UseSqlite(InMemoryDbConnString);
-                }
-                else
-                {
-                    var dbLocation = Path.GetFullPath(serverOptions.Database);
-                    if (serverOptions.RecreateDb && File.Exists(dbLocation))
                     {
-                        Log.Logger.Information("Deleting Sqlite database.");
-                        File.Delete(dbLocation);
-                    }
+                        if (string.IsNullOrEmpty(serverOptions.Database))
+                        {
+                            Log.Logger.Information("Using in memory database.");
 
-                    Log.Logger.Information("Using Sqlite database at {dbLocation}", dbLocation);
+                            //Must be held open to keep the memory DB alive
+                            keepAliveConnection = new SqliteConnection(InMemoryDbConnString);
+                            keepAliveConnection.Open();
+                            opt.UseSqlite(InMemoryDbConnString);
+                        }
+                        else
+                        {
+                            var dbLocation = Path.GetFullPath(serverOptions.Database);
+                            if (serverOptions.RecreateDb && File.Exists(dbLocation))
+                            {
+                                Log.Logger.Information("Deleting Sqlite database.");
+                                File.Delete(dbLocation);
+                            }
 
-                    opt.UseSqlite($"Data Source={dbLocation}");
-                }
+                            Log.Logger.Information("Using Sqlite database at {dbLocation}", dbLocation);
 
-                
+                            opt.UseSqlite($"Data Source={dbLocation}");
+                        }
 
-                using var context = new Smtp4devDbContext((DbContextOptions<Smtp4devDbContext>)opt.Options);
-                if (string.IsNullOrEmpty(serverOptions.Database))
-                {
-                    context.Database.Migrate();
-                    context.SaveChanges();
-                }
-                else
-                {
 
-                    var pendingMigrations = context.Database.GetPendingMigrations();
-                    if (pendingMigrations.Any())
-                    {
-                        Log.Logger.Information("Updating DB schema with migrations: {migrations}", string.Join(", ", pendingMigrations));
-                        context.Database.Migrate();
+
+                        using var context = new Smtp4devDbContext((DbContextOptions<Smtp4devDbContext>)opt.Options);
+                        if (string.IsNullOrEmpty(serverOptions.Database))
+                        {
+                            context.Database.Migrate();
+                            context.SaveChanges();
+                        }
+                        else
+                        {
+
+                            var pendingMigrations = context.Database.GetPendingMigrations();
+                            if (pendingMigrations.Any())
+                            {
+                                Log.Logger.Information("Updating DB schema with migrations: {migrations}", string.Join(", ", pendingMigrations));
+                                context.Database.Migrate();
+                                context.SaveChanges();
+                            }
+                        }
+
+                        if (!context.ImapState.Any())
+                        {
+                            context.Add(new ImapState
+                            {
+                                Id = Guid.Empty,
+                                LastUid = 1
+                            });
+                            context.SaveChanges();
+                        }
+
+                        //For message before delivered to was added, assume all recipients.
+                        foreach (var m in context.Messages.Where(m => m.DeliveredTo == null))
+                        {
+                            m.DeliveredTo = m.To;
+                        }
                         context.SaveChanges();
-                    }
-                }
-
-                if (!context.ImapState.Any())
-                {
-                    context.Add(new ImapState
-                    {
-                        Id = Guid.Empty,
-                        LastUid = 1
-                    });
-                    context.SaveChanges();
-                }
-
-                //For message before delivered to was added, assume all recipients.
-                foreach (var m in context.Messages.Where(m => m.DeliveredTo == null))
-                {
-                    m.DeliveredTo = m.To;
-                }
-                context.SaveChanges();
 
 
-            }, ServiceLifetime.Scoped, ServiceLifetime.Singleton);
+                    }, ServiceLifetime.Scoped, ServiceLifetime.Singleton);
 
 
             services.AddSingleton<ISmtp4devServer, Smtp4devServer>();
@@ -134,11 +141,11 @@ namespace Rnwood.Smtp4dev
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>(relayOptions =>
             {
-                if (string.IsNullOrEmpty( relayOptions.SmtpServer))
+                if (string.IsNullOrEmpty(relayOptions.SmtpServer))
                 {
                     return null;
                 }
-                
+
                 SmtpClient result = new SmtpClient();
                 result.Connect(relayOptions.SmtpServer, relayOptions.SmtpPort, relayOptions.TlsMode);
 
@@ -165,7 +172,7 @@ namespace Rnwood.Smtp4dev
             services.AddSpaStaticFiles(o => o.RootPath = "ClientApp");
 
             services.AddAuthentication(BasicDefaults.AuthenticationScheme)
-           .AddBasic<UserValidationService>(options => { options.Realm = "smtp4dev"; });
+            .AddBasic<UserValidationService>(options => { options.Realm = "smtp4dev"; });
 
 
             services.AddAuthorization(options =>
@@ -226,8 +233,8 @@ namespace Rnwood.Smtp4dev
                      });
                     e.MapControllers();
                     if (env.IsDevelopment())
-                    { 
-                        
+                    {
+
                         e.MapToVueCliProxy(
                             "{*path}",
                             new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp"), DevServerPort = 5173 },

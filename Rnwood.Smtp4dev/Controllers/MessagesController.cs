@@ -108,10 +108,25 @@ namespace Rnwood.Smtp4dev.Controllers
             return new ApiModel.Message(await GetDbMessage(id, false));
         }
 
+        /// <summary>
+        /// Replies to the message with the specified ID using the configured relay SMTP server.
+        /// </summary>
+        /// <param name="id">The Id of the message to reply to</param>
+        /// <param name="to">List of email addresses separated by commas</param>
+        /// <param name="cc">List of email addresses separated by commas</param>
+        /// <param name="bcc">List of email addresses separated by commas</param>
+        /// <param name="from">Email address</param>
+        /// <param name="deliverToAll">True if the message should be delivered to the CC and BCC recipients in addition to the TO recipients. When false, the message is only delivered to the TO recipients, but the message headers will show the specified other recipients.</param>
+        /// <param name="subject">The subject of message</param>
+        /// <param name="bodyHtml">UTF8 encoded HTML body for the message</param>
+        /// <returns></returns>
         [HttpPost("{id}/reply")]
-        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.Message), Description = "")]
+        [OpenApiBodyParameter("text/html")]
+        [Consumes("text/html")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
         [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message does not exist")]
-        public async Task<IActionResult> Reply(Guid id, string to, string cc, string bcc, string from, bool deliverToAll, [FromBody] string bodyHtml)
+        [SwaggerResponse(System.Net.HttpStatusCode.InternalServerError, typeof(void), Description = "If message fails to send.")]
+        public async Task<IActionResult> Reply(Guid id, string to, string cc, string bcc, string from, bool deliverToAll, string subject, [FromBody] string bodyHtml)
         {
             var origMessage = new ApiModel.Message(await GetDbMessage(id, false));
             var origMessageId = origMessage.Headers.FirstOrDefault(h => h.Name.Equals("Message-Id", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
@@ -137,15 +152,28 @@ namespace Rnwood.Smtp4dev.Controllers
             this.server.Send(headers,
                 toRecips,
                 ccRecips,
-                from, envelopeRecips.Distinct().ToArray(), bodyHtml);
+                from, envelopeRecips.Distinct().ToArray(), subject, bodyHtml);
 
             return Ok();
         }
 
+        /// <summary>
+        /// Sends a message via the configured upstream/relay SMTP server.
+        /// </summary>
+        /// <param name="to">List of email addresses separated by commas</param>
+        /// <param name="cc">List of email addresses separated by commas</param>
+        /// <param name="bcc">List of email addresses separated by commas</param>
+        /// <param name="from">Email address</param>
+        /// <param name="deliverToAll">True if the message should be delivered to the CC and BCC recipients in addition to the TO recipients. When false, the message is only delivered to the TO recipients, but the message headers will show the specified other recipients.</param>
+        /// <param name="subject">The subject of message</param>
+        /// <param name="bodyHtml">UTF8 encoded HTML body for the message</param>
+        /// <returns></returns>
         [HttpPost("send")]
-        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.Message), Description = "")]
-        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message does not exist")]
-        public async Task<IActionResult> Send(string to, string cc, string bcc, string from, bool deliverToAll, [FromBody] string bodyHtml)
+        [OpenApiBodyParameter("text/html")]
+        [Consumes("text/html")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.InternalServerError, typeof(void), Description = "If message fails to send.")]
+        public async Task<IActionResult> Send(string to, string cc, string bcc, string from, bool deliverToAll, string subject, [FromBody] string bodyHtml)
         {
             Dictionary<string, string> headers = new Dictionary<string, string>();
       
@@ -158,7 +186,7 @@ namespace Rnwood.Smtp4dev.Controllers
             this.server.Send(headers,
                 toRecips,
                 ccRecips,
-                from, envelopeRecips.Distinct().ToArray(), bodyHtml);
+                from, envelopeRecips.Distinct().ToArray(), subject, bodyHtml);
 
             return Ok();
         }
