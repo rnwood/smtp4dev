@@ -8,7 +8,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth;
 /// <summary>
 ///     Defines the <see cref="UsernameAndPasswordAuthenticationCredentials" />.
 /// </summary>
-public abstract class UsernameAndPasswordAuthenticationCredentials : IAuthenticationCredentials
+public abstract class UsernameAndPasswordAuthenticationCredentials : IAuthenticationCredentials, IAuthenticationCredentialsCanValidateWithPassword
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="UsernameAndPasswordAuthenticationCredentials" /> class.
@@ -33,4 +33,9 @@ public abstract class UsernameAndPasswordAuthenticationCredentials : IAuthentica
 
     /// <inheritdoc />
     public string Type { get => "USERNAME_PASSWORD"; }
+
+    /// <inheritdoc/>
+    public bool ValidateResponse(string password) {
+        return string.Equals(Password, password);
+    }
 }

@@ -1042,6 +1042,9 @@
         <member name="P:Rnwood.SmtpServer.Extensions.Auth.UsernameAndPasswordAuthenticationCredentials.Type">
             <inheritdoc />
         </member>
+        <member name="M:Rnwood.SmtpServer.Extensions.Auth.UsernameAndPasswordAuthenticationCredentials.ValidateResponse(System.String)">
+            <inheritdoc/>
+        </member>
         <member name="T:Rnwood.SmtpServer.Extensions.EightBitMimeExtension">
             <summary>
                 Defines the <see cref="T:Rnwood.SmtpServer.Extensions.EightBitMimeExtension" />.
