@@ -111,6 +111,24 @@ public class LoginMechanismProcessorTests : AuthMechanismTest
             await processor.ProcessResponse("rob blah");
         });
 
+    [Fact]
+    public void ValidateCredentials_Correct()
+    {
+        var creds = new LoginAuthenticationCredentials("a", "b");
+        bool result = creds.ValidateResponse("b");
+
+        Assert.True(result);
+    }
+
+    [Fact]
+    public void ValidateCredentials_Incorrect()
+    {
+        var creds = new LoginAuthenticationCredentials("a", "b");
+        bool result = creds.ValidateResponse("c");
+
+        Assert.False(result);
+    }
+
     /// <summary>
     /// </summary>
     /// <param name="mocks">The mocks<see cref="TestMocks" /></param>
