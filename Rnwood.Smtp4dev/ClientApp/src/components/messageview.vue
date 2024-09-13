@@ -10,7 +10,7 @@
         </el-dialog>
 
 
-        <div v-if="messageSummary" class="hfillpanel fill">
+        <div v-if="messageSummary" class="hfillpanel fill nogap">
             <div class="toolbar">
                 <el-dropdown split-button @command="reply" @click="reply" :disabled="!message || !isRelayAvailable" icon="Reply">
                     Reply
@@ -40,54 +40,48 @@
                           type="warning"
                           show-icon />
 
-                <table class="messageviewheader">
-                    <tr>
-                        <td>From:</td>
-                        <td><span v-if="message">{{message.from}}</span></td>
-                    </tr>
+                <div class="messageviewheader" v-if="message">
+                    <p :class="{expanded: fromExpanded}" :title="message.from" @click="fromExpanded = !fromExpanded">
 
-                    <tr>
-                        <td>To:</td>
-                        <td style="display: flow; gap: 6px;">
-                            <template v-if="message">
-                                <div v-for="recip in message.to" :key="recip">
-                                    <strong v-if="message.deliveredTo.includes(recip)">{{recip}}</strong>
-                                    <span v-if="!message.deliveredTo.includes(recip)">{{recip}}</span>
-                                </div>
-                            </template>
-                        </td>
-                    </tr>
-                    <tr v-if="message && message.cc.length">
-                        <td>Cc:</td>
-                        <td style="display: flow; gap: 6px;">
-                            <template v-if="message">
-                                <div v-for="recip in message.cc" :key="recip">
-                                    <strong v-if="message.deliveredTo.includes(recip)">{{recip}}</strong>
-                                    <span v-if="!message.deliveredTo.includes(recip)">{{recip}}</span>
-                                </div>
-                            </template>
-                        </td>
-                    </tr>
-                    <tr v-if="message && message.bcc.length">
-                        <td>Bcc:</td>
-                        <td style="display: flow; gap: 6px;">
-                            <template v-if="message">
-                                <div v-for="recip in message.bcc" :key="recip">
-                                    <strong v-if="message.deliveredTo.includes(recip)">{{recip}}</strong>
-                                    <span v-if="!message.deliveredTo.includes(recip)">{{recip}}</span>
-                                </div>
-                            </template>
-                        </td>
-                    </tr>
-                    <tr>
-                        <td>Subject:</td>
-                        <td><span v-if="message">{{message.subject}}</span></td>
-                    </tr>
-                    <tr>
-                        <td>Secure:</td>
-                        <td><span v-if="message">{{message.secureConnection}}</span></td>
-                    </tr>
-                </table>
+                        From: <span v-if="message">{{message.from}}</span>
+                    </p>
+
+
+                    <p :class="{expanded: toExpanded}" :title="message.to?.join(', ')" @click="toExpanded = !toExpanded">
+                        To:
+                        <span v-for="recip in message.to" :key="recip">
+                            <strong v-if="message.deliveredTo.includes(recip)">{{recip}}</strong>
+                            <span v-if="!message.deliveredTo.includes(recip)">{{recip}}</span>
+                            <span>, </span>
+                        </span>
+                    </p>
+
+                    <p v-if="message.cc.length" :class="{expanded: ccExpanded}" :title="message.cc?.join(', ')" @click="ccExpanded = !ccExpanded">
+                        To:
+                        <span v-for="recip in message.cc" :key="recip">
+                            <strong v-if="message.deliveredTo.includes(recip)">{{recip}}</strong>
+                            <span v-if="!message.deliveredTo.includes(recip)">{{recip}}</span>
+                            <span>, </span>
+                        </span>
+                    </p>
+
+
+                    <p v-if="message.bcc.length" :class="{expanded: bccExpanded}" :title="message.bcc?.join(', ')" @click="bccExpanded = !bccExpanded">
+                        To:
+                        <span v-for="recip in message.bcc" :key="recip">
+                            <strong v-if="message.deliveredTo.includes(recip)">{{recip}}</strong>
+                            <span v-if="!message.deliveredTo.includes(recip)">{{recip}}</span>
+                            <span>, </span>
+                        </span>
+                    </p>
+
+                    <p :class="{expanded: subjectExpanded}" :title="message.subject" @click="subjectExpanded = !subjectExpanded">
+
+                        Subject: <span v-if="message">{{message.subject}}</span>
+                    </p>
+
+
+                </div>
 
 
                 <div v-if="message && message.relayError">
@@ -279,6 +273,12 @@
 
         replyDialogVisible = false;
         replyAll = false;
+
+        toExpanded = false;
+        fromExpanded = false;
+        ccExpanded = false;
+        bccExpanded = false;
+        subjectExpanded = false;
 
         @Watch("messageSummary")
         async onMessageSummaryChange(

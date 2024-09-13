@@ -64,23 +64,23 @@ html, body {
 }
 
 
-.hfillpanel > .fill, .hfillpanel > .fillhalf {
+    .hfillpanel > .fill, .hfillpanel > .fillhalf {
+        flex: 1 0 0;
+        overflow: auto;
+        box-sizing: border-box;
+    }
+
+.vfillpanel > .fill, .vfillpanel > .fillhalf {
     flex: 1 0 0;
     overflow: auto;
     box-sizing: border-box;
 }
 
-.vfillpanel  >.fill, .vfillpanel > .fillhalf {
-    flex: 1 0 0;
-    overflow: auto;
-    box-sizing: border-box;
-}
+    .vfillpanel > .fill:not(:first-of-type), .vfillpanel > .fillhalf:not(:first-of-type) {
+        margin-left: 16px;
+    }
 
-.vfillpanel > .fill:not(:first-of-type), .vfillpanel > .fillhalf:not(:first-of-type) {
-    margin-left: 16px;
-}
-
-.hfillpanel > .fill:not(:first-of-type), .hfillpanel > .fillhalf:not(:first-of-type) {
+.hfillpanel:not(.nogap) > .fill:not(:first-of-type), .hfillpanel > .fillhalf:not(:first-of-type) {
     margin-top: 16px;
 }
 
@@ -122,8 +122,23 @@ iframe {
     display: none
 }
 
+.messageviewheader p {
+    margin: 0 0 0.5em 0;
+}
 
-.messageviewheader td, .sessionviewheader td {
+.messageviewheader p:not(.expanded) {
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    cursor: zoom-in;
+}
+
+.messageviewheader p.expanded {
+    word-wrap: anywhere;
+    cursor: zoom-out;
+}
+
+.sessionviewheader td {
     padding: 5px;
     vertical-align: top;
 }
@@ -147,7 +162,7 @@ pre.source code {
 }
 
 
-.el-main{ 
+.el-main {
     padding: 3px !important;
 }
 
