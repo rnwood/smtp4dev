@@ -28,7 +28,7 @@
     <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0"/>
     <PackageReference Include="System.Net.Security" Version="4.3.2"/>
     <PackageReference Include="xunit" Version="2.8.1"/>
-    <PackageReference Include="Moq" Version="4.20.70"/>
+    <PackageReference Include="Moq" Version="4.20.72"/>
     <PackageReference Include="MailKit" Version="4.6.0"/>
     <PackageReference Include="Xunit.SkippableFact" Version="1.4.13"/>
   </ItemGroup>
