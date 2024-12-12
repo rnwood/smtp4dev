@@ -203,7 +203,12 @@ namespace Rnwood.Smtp4dev
                 {
                     ServerOptions serverOptions = webBuilderContext.Configuration.GetSection("ServerOptions").Get<ServerOptions>();
 
-                    if (!string.IsNullOrEmpty(serverOptions.Urls))
+                    if (!string.IsNullOrEmpty(cmdLineOptions.Urls))
+                    {
+                        c.UseUrls(cmdLineOptions.Urls.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).ToArray());
+
+                    }
+                    else if (!string.IsNullOrEmpty(serverOptions.Urls))
                     {
                         c.UseUrls(serverOptions.Urls.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).ToArray());
                     }
