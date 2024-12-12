@@ -21,7 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="6.12.0"/>
+    <PackageReference Include="FluentAssertions" Version="6.12.2"/>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0"/>
     <PackageReference Include="NETStandard.Library" Version="2.0.3"/>
     <PackageReference Include="xunit.runner.visualstudio" Version="2.8.1"/>
