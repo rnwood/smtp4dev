@@ -1,6 +1,6 @@
 ﻿using H.NotifyIcon.Core;
 using Microsoft.Extensions.Options;
-using PhotinoNET;
+using Photino.NET;
 using Rnwood.Smtp4dev.Server.Settings;
 using System;
 using System.Collections.Generic;

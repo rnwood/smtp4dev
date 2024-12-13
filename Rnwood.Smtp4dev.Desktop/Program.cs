@@ -7,7 +7,6 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using System.Diagnostics;
 using System.Text;
-using PhotinoNET;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using System.Reflection;
@@ -55,7 +54,7 @@ namespace Rnwood.Smtp4dev.Desktop
 
                 var host =
                        await Rnwood.Smtp4dev.Program.StartApp(args, true, o =>
-                       {
+                       { 
                            o.Urls = "http://127.0.0.1:0";
                            o.IsDesktopApp = true;
 
