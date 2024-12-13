@@ -32,7 +32,7 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.10.0" />
     <PackageReference Include="Selenium.Support" Version="4.27.0" />
     <PackageReference Include="Selenium.WebDriver" Version="4.27.0" />
-    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.0" />
+    <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.5.1" />
     <PackageReference Include="WebDriverManager" Version="2.17.4" />
     <PackageReference Include="xunit" Version="2.9.2" />
