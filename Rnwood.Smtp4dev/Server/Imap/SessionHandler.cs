@@ -35,6 +35,7 @@ namespace Rnwood.Smtp4dev.Server
                 session.Store += Session_Store;
                 session.Select += Session_Select;
                 session.Search += Session_Search;
+                session.Copy += Session_Copy;
                 this.scriptingHost = scriptingHost;
                 this.serverOptions = serverOptions;
                 this.serviceScopeFactory = serviceScopeFactory;
@@ -43,7 +44,12 @@ namespace Rnwood.Smtp4dev.Server
 
             private void Session_Create(object sender, IMAP_e_Folder e)
             {
-                e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Folders are not supported");
+                using (var scope = this.serviceScopeFactory.CreateScope())
+                {
+                    var mailboxRepository = scope.ServiceProvider.GetService<IMailboxRepository>();
+
+                    mailboxRepository.CreateMailbox(e.Folder).Wait();
+                }
             }
 
             private void Session_Append(object sender, IMAP_e_Append e)
@@ -109,6 +115,21 @@ namespace Rnwood.Smtp4dev.Server
                     }
                 }
             }
+            
+            private void Session_Copy(object sender, IMAP_e_Copy e)
+            {
+                using (var scope = this.serviceScopeFactory.CreateScope())
+                {
+                    
+                    var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
+                    
+                    foreach (var message in e.MessagesInfo)
+                    {
+                        messagesRepository.MoveMessageToFolder(new Guid(message.ID), e.TargetFolder).Wait();
+                    }
+                    
+                }
+            }
 
             private readonly ScriptingHost scriptingHost;
             private readonly IOptionsMonitor<ServerOptions> serverOptions;
@@ -124,6 +145,19 @@ namespace Rnwood.Smtp4dev.Server
                     if (e.Folder == "INBOX")
                     {
                         foreach (var message in messagesRepository.GetMessages(GetMailboxName()))
+                        {
+                            List<string> flags = new List<string>();
+                            if (!message.IsUnread)
+                            {
+                                flags.Add("Seen");
+                            }
+
+                            e.MessagesInfo.Add(new IMAP_MessageInfo(message.Id.ToString(), message.ImapUid, flags.ToArray(), message.Data.Length, message.ReceivedDate));
+                        }
+                    }
+                    else
+                    {
+                        foreach (var message in messagesRepository.GetMessages(e.Folder))
                         {
                             List<string> flags = new List<string>();
                             if (!message.IsUnread)
@@ -189,7 +223,15 @@ namespace Rnwood.Smtp4dev.Server
 
             private void Session_List(object sender, IMAP_e_List e)
             {
+                using (var scope = this.serviceScopeFactory.CreateScope())
+                {
+                    var mailboxRepository = scope.ServiceProvider.GetService<IMailboxRepository>();
 
+                    foreach (var mailbox in mailboxRepository.GetAllMailboxes())
+                    {
+                        e.Folders.Add(new IMAP_r_u_List(mailbox.Name, '/', ["\\HasNoChildren"]));    
+                    }
+                }
                 if (e.FolderFilter == "INBOX" || e.FolderFilter == "*")
                 {
                     e.Folders.Add(new IMAP_r_u_List("INBOX", '/', ["\\HasNoChildren"]));

@@ -20,5 +20,6 @@ namespace Rnwood.Smtp4dev.Data
         Task<DbModel.Message> TryGetMessageById(Guid id, bool tracked);
 
         Smtp4devDbContext DbContext { get; }
+        Task MoveMessageToFolder(Guid id, string targetFolder);
     }
 }

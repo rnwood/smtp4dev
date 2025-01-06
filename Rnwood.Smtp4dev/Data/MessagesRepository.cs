@@ -22,6 +22,17 @@ namespace Rnwood.Smtp4dev.Data
         }
 
         public Smtp4devDbContext DbContext => this.dbContext;
+        public Task MoveMessageToFolder(Guid id, string targetFolder)
+        {
+            return taskQueue.QueueTask(() =>
+            {
+                var message = dbContext.Messages.Include(m => m.Mailbox).FirstOrDefault(m => m.Id == id);
+                var mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == targetFolder);
+                message.Mailbox = mailbox;
+                dbContext.SaveChanges();
+                notificationsHub.OnMessagesChanged(message.Mailbox.Name).Wait();
+            }, true);
+        }
 
         public Task MarkAllMessagesRead(string mailbox)
         {
@@ -59,6 +70,7 @@ namespace Rnwood.Smtp4dev.Data
 
         public IQueryable<Message> GetMessages(string mailboxName, bool unTracked = true)
         {
+            Console.WriteLine(mailboxName);
             var query = dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName);
             return unTracked ? query.AsNoTracking() : query;
         }
