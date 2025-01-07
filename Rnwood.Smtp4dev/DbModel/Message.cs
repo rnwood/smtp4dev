@@ -26,6 +26,7 @@ namespace Rnwood.Smtp4dev.DbModel
         public Session Session { get; set; }
 
         public Mailbox Mailbox { get; set; }
+        public Folder Folder { get; set; }
         public int AttachmentCount { get; set; }
 
         public bool IsUnread { get; set; }

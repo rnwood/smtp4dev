@@ -22,15 +22,17 @@ namespace Rnwood.Smtp4dev.Data
         }
 
         public Smtp4devDbContext DbContext => this.dbContext;
-        public Task MoveMessageToFolder(Guid id, string targetFolder)
+        public Task CopyMessageToFolder(Guid id, string targetFolder)
         {
             return taskQueue.QueueTask(() =>
             {
                 var message = dbContext.Messages.Include(m => m.Mailbox).FirstOrDefault(m => m.Id == id);
-                var mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == targetFolder);
-                message.Mailbox = mailbox;
+                var folder = dbContext.Folders.FirstOrDefault(m => m.Name == targetFolder);
+                message.Folder = folder;
+                message.Id = Guid.NewGuid();
+                dbContext.Messages.Add(message);
                 dbContext.SaveChanges();
-                notificationsHub.OnMessagesChanged(message.Mailbox.Name).Wait();
+                notificationsHub.OnMessagesChanged(message.Folder.Name).Wait();
             }, true);
         }
 
@@ -68,10 +70,18 @@ namespace Rnwood.Smtp4dev.Data
             return unTracked ? query.AsNoTracking() : query;
         }
 
-        public IQueryable<Message> GetMessages(string mailboxName, bool unTracked = true)
+        public IQueryable<Message> GetMessages(string mailboxName, string folder = null, bool unTracked = true)
         {
-            Console.WriteLine(mailboxName);
-            var query = dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName);
+            IQueryable<Message> query;
+            if (folder == null)
+            {
+                query = dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName && m.Folder == null);
+                
+            }
+            else
+            {
+                query = dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName && m.Folder.Name == folder);
+            }
             return unTracked ? query.AsNoTracking() : query;
         }
 

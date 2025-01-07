@@ -47,8 +47,9 @@ namespace Rnwood.Smtp4dev.Server
                 using (var scope = this.serviceScopeFactory.CreateScope())
                 {
                     var mailboxRepository = scope.ServiceProvider.GetService<IMailboxRepository>();
+                    var folderRepository = scope.ServiceProvider.GetService<IFolderRepository>();
 
-                    mailboxRepository.CreateMailbox(e.Folder).Wait();
+                    folderRepository.CreateFolder(e.Folder, mailboxRepository.GetMailboxByName(GetMailboxName())).Wait();
                 }
             }
 
@@ -66,7 +67,7 @@ namespace Rnwood.Smtp4dev.Server
                     using (var scope = this.serviceScopeFactory.CreateScope())
                     {
                         var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
-                        foreach (var unseenMessage in messagesRepository.GetMessages(GetMailboxName(), true).Where(condition))
+                        foreach (var unseenMessage in messagesRepository.GetMessages(GetMailboxName(), null, true).Where(condition))
                         {
                             e.AddMessage(unseenMessage.ImapUid);
                         }
@@ -76,10 +77,6 @@ namespace Rnwood.Smtp4dev.Server
                 {
                     e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", ex.Message);
                 }
-
-
- 
-
             }
 
             private void Session_Select(object sender, IMAP_e_Select e)
@@ -120,12 +117,10 @@ namespace Rnwood.Smtp4dev.Server
             {
                 using (var scope = this.serviceScopeFactory.CreateScope())
                 {
-                    
                     var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
-                    
                     foreach (var message in e.MessagesInfo)
                     {
-                        messagesRepository.MoveMessageToFolder(new Guid(message.ID), e.TargetFolder).Wait();
+                        messagesRepository.CopyMessageToFolder(new Guid(message.ID), e.TargetFolder).Wait();
                     }
                     
                 }
@@ -157,7 +152,7 @@ namespace Rnwood.Smtp4dev.Server
                     }
                     else
                     {
-                        foreach (var message in messagesRepository.GetMessages(e.Folder))
+                        foreach (var message in messagesRepository.GetMessages(GetMailboxName(), e.Folder))
                         {
                             List<string> flags = new List<string>();
                             if (!message.IsUnread)
@@ -225,11 +220,11 @@ namespace Rnwood.Smtp4dev.Server
             {
                 using (var scope = this.serviceScopeFactory.CreateScope())
                 {
-                    var mailboxRepository = scope.ServiceProvider.GetService<IMailboxRepository>();
+                    var folderRepository = scope.ServiceProvider.GetService<IFolderRepository>();
 
-                    foreach (var mailbox in mailboxRepository.GetAllMailboxes())
+                    foreach (var folder in folderRepository.GetAllFolders())
                     {
-                        e.Folders.Add(new IMAP_r_u_List(mailbox.Name, '/', ["\\HasNoChildren"]));    
+                        e.Folders.Add(new IMAP_r_u_List(folder.Name, '/', ["\\HasNoChildren"]));    
                     }
                 }
                 if (e.FolderFilter == "INBOX" || e.FolderFilter == "*")

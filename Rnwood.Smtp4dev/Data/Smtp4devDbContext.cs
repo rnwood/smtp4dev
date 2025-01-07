@@ -31,6 +31,12 @@ namespace Rnwood.Smtp4dev.Data
                     .WithOne(m => m.Mailbox)
                     .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<Folder>()
+                .HasMany<Message>()
+                .WithOne(m => m.Folder)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            
             modelBuilder.Entity<Message>()
                 .HasOne<Session>(x => x.Session)
                .WithMany()
@@ -42,9 +48,8 @@ namespace Rnwood.Smtp4dev.Data
         public DbSet<MessageRelay> MessageRelays { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Session> Sessions { get; set; }
-
         public DbSet<ImapState> ImapState { get; set; }
-
         public DbSet<Mailbox> Mailboxes { get; set; }
+        public DbSet<Folder> Folders { get; set; }
     }
 }

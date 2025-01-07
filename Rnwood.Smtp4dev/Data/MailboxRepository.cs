@@ -21,23 +21,15 @@ namespace Rnwood.Smtp4dev.Data
             this.dbContext = dbContext;
         }
 
-        public Task CreateMailbox(string mailbox)
-        {
-            return taskQueue.QueueTask(() =>
-            {
-                dbContext.Mailboxes.Add(new Mailbox()
-                {
-                    Name = mailbox,
-                    Id = Guid.NewGuid(),
-                });
-                dbContext.SaveChanges();
-            }, true);
-        }
-
         public IQueryable<Mailbox> GetAllMailboxes()
         {
             var query = dbContext.Mailboxes;
             return query;
+        }
+
+        public Mailbox GetMailboxByName(string name)
+        {
+            return dbContext.Mailboxes.FirstOrDefault(m => m.Name == name);
         }
 
         public Smtp4devDbContext DbContext => this.dbContext;

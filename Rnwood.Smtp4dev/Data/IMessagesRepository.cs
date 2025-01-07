@@ -11,7 +11,7 @@ namespace Rnwood.Smtp4dev.Data
 
         IQueryable<DbModel.Message> GetAllMessages(bool unTracked = true);
 
-        IQueryable<DbModel.Message> GetMessages(string mailboxName, bool unTracked = true);
+        IQueryable<DbModel.Message> GetMessages(string mailboxName, string folder = null, bool unTracked = true);
 
         Task DeleteMessage(Guid id);
 
@@ -20,6 +20,6 @@ namespace Rnwood.Smtp4dev.Data
         Task<DbModel.Message> TryGetMessageById(Guid id, bool tracked);
 
         Smtp4devDbContext DbContext { get; }
-        Task MoveMessageToFolder(Guid id, string targetFolder);
+        Task CopyMessageToFolder(Guid id, string targetFolder);
     }
 }
