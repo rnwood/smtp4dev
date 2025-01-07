@@ -11,7 +11,7 @@ using Rnwood.Smtp4dev.Data;
 namespace Rnwood.Smtp4dev.Migrations
 {
     [DbContext(typeof(Smtp4devDbContext))]
-    [Migration("20240511110456_AddDeliveredTo")]
+    [Migration("20230511110456_AddDeliveredTo")]
     partial class AddDeliveredTo
     {
         /// <inheritdoc />

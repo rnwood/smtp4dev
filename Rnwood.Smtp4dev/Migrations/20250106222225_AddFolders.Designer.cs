@@ -11,7 +11,7 @@ using Rnwood.Smtp4dev.Data;
 namespace Rnwood.Smtp4dev.Migrations
 {
     [DbContext(typeof(Smtp4devDbContext))]
-    [Migration("20250106222225_AddFolders")]
+    [Migration("20250515191815_AddFolders")]
     partial class AddFolders
     {
         /// <inheritdoc />
