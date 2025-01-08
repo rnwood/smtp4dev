@@ -130,6 +130,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
             var dbMessage = await new MessageConverter().ConvertAsync(message, [to]);
             dbMessage.Mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
+            dbMessage.Folder = new DbModel.Folder { Name = "INBOX", Path = "INBOX"};
           
             return dbMessage;
         }
