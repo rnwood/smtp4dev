@@ -197,6 +197,21 @@ namespace Rnwood.Smtp4dev.Server
                         Name = mailbox.Name
                     };
                     dbContext.Add(dbMailbox);
+                    
+                }
+                
+                var dbFolder = dbContext.Folders.FirstOrDefault(f => f.Mailbox == dbMailbox);
+                if (dbFolder == null)
+                {
+                    log.Information("Creating folder {name} for mailbox {name}", mailbox.Name, "INBOX");
+                    dbFolder = new Folder
+                    {
+                        Name = "INBOX",
+                        Path = "INBOX",
+                        Mailbox = dbMailbox
+                    };
+                    dbContext.Add(dbFolder);
+                    
                 }
             }
 
@@ -437,6 +452,7 @@ namespace Rnwood.Smtp4dev.Server
             log.Information("Processing received message for mailbox '{mailbox}' for recipients '{recipients}'", targetMailboxWithRecipients.Key.Name, targetMailboxWithRecipients.ToArray());
             using var scope = serviceScopeFactory.CreateScope();
             Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+            IFolderRepository folderRepository = scope.ServiceProvider.GetService<IFolderRepository>();
 
             message.Session = dbContext.Sessions.Find(activeSessionsToDbId[session]);
             message.Mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == targetMailboxWithRecipients.Key.Name);
@@ -454,6 +470,7 @@ namespace Rnwood.Smtp4dev.Server
                 }
             }
 
+            message.Folder = folderRepository.GetFolderOrCreate("INBOX", message.Mailbox);
             dbContext.Messages.Add(message);
 
             dbContext.SaveChanges();

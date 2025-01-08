@@ -24,6 +24,7 @@ namespace Rnwood.Smtp4dev.Migrations
                     Id = table.Column<Guid>(type: "TEXT", nullable: false),
                     Name = table.Column<string>(type: "TEXT", nullable: true),
                     Path = table.Column<string>(type: "TEXT", nullable: true),
+                    MailboxId = table.Column<Guid>(type: "TEXT", nullable: false),
                 },
                 constraints: table =>
                 {
@@ -34,6 +35,11 @@ namespace Rnwood.Smtp4dev.Migrations
                 name: "IX_Messages_FolderId",
                 table: "Messages",
                 column: "FolderId");
+            
+            migrationBuilder.CreateIndex(
+                name: "IX_Mailbox_MailboxId",
+                table: "Folders",
+                column: "MailboxId");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_Messages_Folders_FolderId",
@@ -50,6 +56,10 @@ namespace Rnwood.Smtp4dev.Migrations
             migrationBuilder.DropForeignKey(
                 name: "FK_Messages_Folders_FolderId",
                 table: "Messages");
+            
+            migrationBuilder.DropForeignKey(
+                name: "IX_Mailbox_MailboxId",
+                table: "Folders");
 
             migrationBuilder.DropTable(
                 name: "Folders");

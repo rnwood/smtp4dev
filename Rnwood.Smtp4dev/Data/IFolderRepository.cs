@@ -8,8 +8,9 @@ namespace Rnwood.Smtp4dev.Data
     {
         Task CreateFolder(string name, Mailbox mailbox);
         
-        IQueryable<DbModel.Folder> GetAllFolders();
+        IQueryable<DbModel.Folder> GetAllFolders(Mailbox mailbox);
 
         Smtp4devDbContext DbContext { get; }
+        Folder GetFolderOrCreate(string folderName, Mailbox mailbox);
     }
 }

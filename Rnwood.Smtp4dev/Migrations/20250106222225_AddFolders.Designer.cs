@@ -64,6 +64,8 @@ namespace Rnwood.Smtp4dev.Migrations
                     .HasColumnType("TEXT");
 
                 b.HasKey("Id");
+                
+                b.HasIndex("MailboxId");
 
                 b.ToTable("Folders");
             });
@@ -79,6 +81,9 @@ namespace Rnwood.Smtp4dev.Migrations
 
                     b.Property<byte[]>("Data")
                         .HasColumnType("BLOB");
+
+                    b.Property<string>("DeliveredTo")
+                        .HasColumnType("TEXT");
 
                     b.Property<bool?>("EightBitTransport")
                         .HasColumnType("INTEGER");
@@ -197,7 +202,8 @@ namespace Rnwood.Smtp4dev.Migrations
 
                     b.HasOne("Rnwood.Smtp4dev.DbModel.Session", "Session")
                         .WithMany()
-                        .HasForeignKey("SessionId");
+                        .HasForeignKey("SessionId")
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Mailbox");
 

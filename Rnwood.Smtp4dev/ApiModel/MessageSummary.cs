@@ -1,6 +1,7 @@
 ﻿using Rnwood.Smtp4dev.Migrations;
 using System;
 using System.Text.Json.Serialization;
+using Rnwood.Smtp4dev.DbModel;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
@@ -17,6 +18,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             IsUnread = dbMessage.IsUnread;
             IsRelayed = dbMessage.Relays.Count > 0;
             DeliveredTo = dbMessage.DeliveredTo;
+            Folder = dbMessage.Folder.Name;
         }
 
         public bool IsRelayed { get; set; }
@@ -28,6 +30,8 @@ namespace Rnwood.Smtp4dev.ApiModel
         public DateTime ReceivedDate { get; set; }
 
         public string Subject { get; set; }
+        
+        public string Folder { get; set; }
 
         public int AttachmentCount { get; set; }
 

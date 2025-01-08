@@ -8,6 +8,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using Microsoft.Extensions.DependencyInjection;
 using Rnwood.Smtp4dev.Data;
+using Rnwood.Smtp4dev.DbModel;
 using Serilog;
 using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.Smtp4dev.Server.Imap;
@@ -89,7 +90,15 @@ namespace Rnwood.Smtp4dev.Server
                 e.PermanentFlags.Add("\\Deleted");
                 e.PermanentFlags.Add("\\Seen");
 
-                e.FolderUID = 1234;
+                using (var scope = this.serviceScopeFactory.CreateScope())
+                {
+                    var mailboxRepository = scope.ServiceProvider.GetService<IMailboxRepository>();
+                    var folderRepository = scope.ServiceProvider.GetService<IFolderRepository>();
+
+                    var folder = folderRepository.GetFolderOrCreate(e.Folder, mailboxRepository.GetMailboxByName(GetMailboxName()));
+                    
+                    e.FolderUID = 1234;
+                }
             }
 
             private void Session_Store(object sender, IMAP_e_Store e)
@@ -137,32 +146,17 @@ namespace Rnwood.Smtp4dev.Server
                 {
                     var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
 
-                    if (e.Folder == "INBOX")
+                    foreach (var message in messagesRepository.GetMessages(GetMailboxName(), e.Folder))
                     {
-                        foreach (var message in messagesRepository.GetMessages(GetMailboxName()))
+                        List<string> flags = new List<string>();
+                        if (!message.IsUnread)
                         {
-                            List<string> flags = new List<string>();
-                            if (!message.IsUnread)
-                            {
-                                flags.Add("Seen");
-                            }
-
-                            e.MessagesInfo.Add(new IMAP_MessageInfo(message.Id.ToString(), message.ImapUid, flags.ToArray(), message.Data.Length, message.ReceivedDate));
+                            flags.Add("Seen");
                         }
-                    }
-                    else
-                    {
-                        foreach (var message in messagesRepository.GetMessages(GetMailboxName(), e.Folder))
-                        {
-                            List<string> flags = new List<string>();
-                            if (!message.IsUnread)
-                            {
-                                flags.Add("Seen");
-                            }
 
-                            e.MessagesInfo.Add(new IMAP_MessageInfo(message.Id.ToString(), message.ImapUid, flags.ToArray(), message.Data.Length, message.ReceivedDate));
-                        }
+                        e.MessagesInfo.Add(new IMAP_MessageInfo(message.Id.ToString(), message.ImapUid, flags.ToArray(), message.Data.Length, message.ReceivedDate));
                     }
+                    
                 }
             }
 
@@ -181,7 +175,7 @@ namespace Rnwood.Smtp4dev.Server
 
                     foreach (var msgInfo in e.MessagesInfo)
                     {
-                        var dbMessage = messagesRepository.GetMessages(GetMailboxName()).SingleOrDefault(m => m.Id == new Guid(msgInfo.ID));
+                        var dbMessage = messagesRepository.TryGetMessageById(new Guid(msgInfo.ID), false).Result;
 
                         if (dbMessage != null)
                         {
@@ -221,8 +215,8 @@ namespace Rnwood.Smtp4dev.Server
                 using (var scope = this.serviceScopeFactory.CreateScope())
                 {
                     var folderRepository = scope.ServiceProvider.GetService<IFolderRepository>();
-
-                    foreach (var folder in folderRepository.GetAllFolders())
+                    var mailboxRepository = scope.ServiceProvider.GetService<IMailboxRepository>();
+                    foreach (var folder in folderRepository.GetAllFolders(mailboxRepository.GetMailboxByName(GetMailboxName())))
                     {
                         e.Folders.Add(new IMAP_r_u_List(folder.Name, '/', ["\\HasNoChildren"]));    
                     }

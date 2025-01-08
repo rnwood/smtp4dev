@@ -36,15 +36,29 @@ namespace Rnwood.Smtp4dev.Data
             }, true);
         }
 
-        public IQueryable<Folder> GetAllFolders()
+        public IQueryable<Folder> GetAllFolders(Mailbox mailbox)
         {
-            var query = dbContext.Folders;
-            return query;
+            return dbContext.Folders.Where(f => f.Mailbox == mailbox);
         }
 
         public Smtp4devDbContext DbContext => this.dbContext;
+        public Folder GetFolderOrCreate(string folderName, Mailbox mailbox)
+        {
+            var folder =  dbContext.Folders.Include(m => m.Mailbox).FirstOrDefault(m => m.Path == folderName);
+            if (folder == null)
+            {
+                folder = new Folder()
+                {
+                    Name = folderName,
+                    Path = folderName,
+                    Mailbox = mailbox,
+                    Id = Guid.NewGuid(),
+                };
+                
+                dbContext.Folders.Add(folder);
+            }
 
-       
-        
+            return folder;
+        }
     }
 }

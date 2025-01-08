@@ -69,13 +69,13 @@ namespace Rnwood.Smtp4dev.Data
             var query = dbContext.Messages;
             return unTracked ? query.AsNoTracking() : query;
         }
-
+        
         public IQueryable<Message> GetMessages(string mailboxName, string folder = null, bool unTracked = true)
         {
             IQueryable<Message> query;
             if (folder == null)
             {
-                query = dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName && m.Folder == null);
+                query = dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName);
                 
             }
             else
