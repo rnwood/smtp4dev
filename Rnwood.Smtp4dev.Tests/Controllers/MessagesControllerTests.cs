@@ -14,6 +14,7 @@ using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
 using NSubstitute;
 using Rnwood.Smtp4dev.Data;
+using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Tests.DBMigrations.Helpers;
 using Xunit;
@@ -101,6 +102,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             IMessage message = await memoryMessageBuilder.ToMessage();
 
             var dbMessage = await new MessageConverter().ConvertAsync(message, ["to@envelope.com"]);
+            dbMessage.Folder = new Folder { Name = "INBOX", Path = "INBOX" };
             return dbMessage;
         }
 
@@ -130,7 +132,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
             var dbMessage = await new MessageConverter().ConvertAsync(message, [to]);
             dbMessage.Mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
-            dbMessage.Folder = new DbModel.Folder { Name = "INBOX", Path = "INBOX"};
+            dbMessage.Folder = new DbModel.Folder { Name = "INBOX", Path = "INBOX", Mailbox = dbMessage.Mailbox };
           
             return dbMessage;
         }
