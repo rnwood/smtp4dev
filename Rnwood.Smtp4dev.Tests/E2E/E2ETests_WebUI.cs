@@ -2,6 +2,7 @@
 using MailKit.Security;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using MimeKit;
+using MimeKit.Cryptography;
 using OpenQA.Selenium;
 using OpenQA.Selenium.Chrome;
 using OpenQA.Selenium.Support.Extensions;
@@ -10,6 +11,8 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Net.Security;
+using System.Security.Cryptography.X509Certificates;
 using System.Threading;
 using WebDriverManager;
 using WebDriverManager.DriverConfigs.Impl;
@@ -35,18 +38,18 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             RunUITest($"{nameof(CheckMessageIsReceivedAndDisplayed)}-{basePath}-{inMemoryDb}", (browser, baseUrl, smtpPortNumber) =>
             {
                 browser.Navigate().GoToUrl(baseUrl);
-                HomePage homePage = new HomePage(browser);
+                var homePage = new HomePage(browser);
 
                 HomePage.MessageListControl messageList = WaitFor(() => homePage.MessageList);
                 Assert.NotNull(messageList);
 
                 string messageSubject = Guid.NewGuid().ToString();
-                using (SmtpClient smtpClient = new SmtpClient())
+                using (var smtpClient = new SmtpClient())
                 {
                     smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
-                    smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                    smtpClient.ServerCertificateValidationCallback = GetCertvalidationCallbackHandler();
                     smtpClient.CheckCertificateRevocation = false;
-                    MimeMessage message = new MimeMessage();
+                    var message = new MimeMessage();
                     message.To.Add(MailboxAddress.Parse("to@to.com"));
                     message.From.Add(MailboxAddress.Parse("from@from.com"));
 
@@ -62,7 +65,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
                 }
 
-                HomePage.Grid.GridRow messageRow = WaitFor(() => messageList.Grid?.Rows?.SingleOrDefault());
+                HomePage.Grid.GridRow messageRow = WaitFor(() => (messageList.Grid?.Rows?.SingleOrDefault()));
                 Assert.NotNull(messageRow);
 
                 Assert.Contains(messageRow.Cells, c => c.Text.Contains(messageSubject));
@@ -71,6 +74,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 InMemoryDB = inMemoryDb,
                 BasePath = basePath
             });
+        }
+
+        private static RemoteCertificateValidationCallback GetCertvalidationCallbackHandler()
+        {
+            return (s, c, h, e) => new X509Certificate2(c.GetRawCertData()).GetSubjectDnsNames().Contains("localhost");
         }
 
         [Fact]
@@ -88,7 +96,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 using (SmtpClient smtpClient = new SmtpClient() { })
                 {
                     smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.None;
-                    smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                    smtpClient.ServerCertificateValidationCallback = GetCertvalidationCallbackHandler();
                     smtpClient.CheckCertificateRevocation = false;
                     MimeMessage message = new MimeMessage();
 

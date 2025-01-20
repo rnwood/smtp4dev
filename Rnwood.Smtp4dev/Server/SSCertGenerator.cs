@@ -12,6 +12,8 @@ using System.IO;
 using System.Runtime.CompilerServices;
 using System.Security.Cryptography.X509Certificates;
 using Org.BouncyCastle.Crypto.Operators;
+using Org.BouncyCastle.Asn1;
+using System.Collections;
 
 [assembly: InternalsVisibleTo("Rnwood.Smtp4dev.Tests")]
 namespace Rnwood.Smtp4dev.Server
@@ -27,6 +29,9 @@ namespace Rnwood.Smtp4dev.Server
             X509V3CertificateGenerator certGenerator = new X509V3CertificateGenerator();
             certGenerator.SetSubjectDN(new X509Name("CN=" + hostname));
             certGenerator.SetIssuerDN(new X509Name("CN=" + hostname));
+            GeneralNames subjectAltNames = new GeneralNames(new GeneralName(GeneralName.DnsName, hostname));
+
+            certGenerator.AddExtension(X509Extensions.SubjectAlternativeName, false, subjectAltNames);
 
             BigInteger serialNumber = BigIntegers.CreateRandomInRange(BigInteger.One, BigInteger.ValueOf(Int64.MaxValue), random);
             certGenerator.SetSerialNumber(serialNumber);
