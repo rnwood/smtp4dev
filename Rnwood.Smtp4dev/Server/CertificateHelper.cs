@@ -1,8 +1,10 @@
 ﻿using System;
 using System.IO;
+using System.Linq;
 using System.Security.Cryptography;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.RegularExpressions;
+using MimeKit.Cryptography;
 using Rnwood.Smtp4dev.Server.Settings;
 using Serilog;
 
@@ -66,7 +68,8 @@ namespace Rnwood.Smtp4dev.Server
                             X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
 
                         if (cert.Subject != $"CN={options.HostName}" ||
-                            DateTime.Parse(cert.GetExpirationDateString()) < DateTime.Now.AddDays(30))
+                            DateTime.Parse(cert.GetExpirationDateString()) < DateTime.Now.AddDays(30)
+                            || !cert.GetSubjectDnsNames().Contains(options.HostName))
                         {
                             cert = null;
                         }
