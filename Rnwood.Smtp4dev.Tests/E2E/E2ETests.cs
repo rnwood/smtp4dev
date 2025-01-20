@@ -99,6 +99,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 args.Add("--smtpport=0");
             }
 
+            if (!args.Any(a => a.StartsWith("--hostname")))
+            {
+                args.Add("--hostname=localhost");
+            }
+
             if (!args.Any(a => a.StartsWith("--smtpport")))
             {
                 args.Add("--smtpport=0");
