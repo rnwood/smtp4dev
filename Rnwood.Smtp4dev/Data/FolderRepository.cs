@@ -41,6 +41,18 @@ namespace Rnwood.Smtp4dev.Data
             return dbContext.Folders.Where(f => f.Mailbox == mailbox);
         }
 
+        public Task DeleteFolder(string folderName, Mailbox mailbox)
+        {
+            foreach(var folder in dbContext.Folders.Where(f => f.Path == folderName))
+            {
+                dbContext.Remove(folder);
+            }
+
+            dbContext.SaveChanges();
+
+            return Task.CompletedTask;
+        }
+
         public Smtp4devDbContext DbContext => this.dbContext;
         public Folder GetFolderOrCreate(string folderName, Mailbox mailbox)
         {
@@ -56,6 +68,7 @@ namespace Rnwood.Smtp4dev.Data
                 };
                 
                 dbContext.Folders.Add(folder);
+                dbContext.SaveChanges();
             }
 
             return folder;

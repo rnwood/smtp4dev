@@ -18,7 +18,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             IsUnread = dbMessage.IsUnread;
             IsRelayed = dbMessage.Relays.Count > 0;
             DeliveredTo = dbMessage.DeliveredTo;
-            Folder = dbMessage.Folder.Name;
+            Folder = dbMessage.Folder?.Name;
         }
 
         public bool IsRelayed { get; set; }

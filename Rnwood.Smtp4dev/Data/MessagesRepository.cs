@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Server;
+using Rnwood.Smtp4dev.Server.Settings;
 
 namespace Rnwood.Smtp4dev.Data
 {
@@ -13,15 +15,54 @@ namespace Rnwood.Smtp4dev.Data
         private readonly ITaskQueue taskQueue;
         private readonly NotificationsHub notificationsHub;
         private readonly Smtp4devDbContext dbContext;
+        private readonly ServerOptions serverOptions;
 
-        public MessagesRepository(ITaskQueue taskQueue, NotificationsHub notificationsHub, Smtp4devDbContext dbContext)
+        public MessagesRepository(ITaskQueue taskQueue, NotificationsHub notificationsHub, Smtp4devDbContext dbContext, IOptions<ServerOptions> serverOptions)
         {
             this.taskQueue = taskQueue;
             this.notificationsHub = notificationsHub;
             this.dbContext = dbContext;
+            this.serverOptions = serverOptions.Value;
         }
 
-        public Smtp4devDbContext DbContext => this.dbContext;
+        public Task AddMessage(DbModel.Message message)
+        {
+            return taskQueue.QueueTask(() =>
+            {
+                ImapState imapState = dbContext.ImapState.Single();
+                imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
+                message.ImapUid = imapState.LastUid;
+
+                dbContext.Messages.Add(message);
+
+                dbContext.SaveChanges();
+
+                TrimMessages(dbContext);
+
+                dbContext.SaveChanges();
+
+                notificationsHub.OnMessagesChanged(message.Mailbox.Name).Wait();
+            }, true);
+
+        }
+
+        private void TrimMessages(Smtp4devDbContext dbContext)
+        {
+            foreach (var mailbox in dbContext.Mailboxes)
+            {
+                dbContext.Messages.RemoveRange(dbContext.Messages.Where(m => m.Mailbox == mailbox).OrderByDescending(m => m.ReceivedDate)
+                    .Skip(serverOptions.NumberOfMessagesToKeep));
+            }
+        }
+
+        public Task TrimMessages()
+        {
+            return taskQueue.QueueTask(() =>
+            {
+                TrimMessages(dbContext);
+            }, true);
+        }
+
         public Task CopyMessageToFolder(Guid id, string targetFolder)
         {
             return taskQueue.QueueTask(() =>
@@ -69,14 +110,14 @@ namespace Rnwood.Smtp4dev.Data
             var query = dbContext.Messages;
             return unTracked ? query.AsNoTracking() : query;
         }
-        
+
         public IQueryable<Message> GetMessages(string mailboxName, string folder = null, bool unTracked = true)
         {
             IQueryable<Message> query;
             if (folder == null)
             {
                 query = dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName);
-                
+
             }
             else
             {
@@ -104,7 +145,7 @@ namespace Rnwood.Smtp4dev.Data
         {
             return taskQueue.QueueTask(() =>
             {
-                dbContext.Messages.RemoveRange(dbContext.Messages.Where(m=> m.Mailbox.Name == mailbox));
+                dbContext.Messages.RemoveRange(dbContext.Messages.Where(m => m.Mailbox.Name == mailbox));
                 dbContext.SaveChanges();
                 notificationsHub.OnMessagesChanged(mailbox).Wait();
             }, true);
@@ -114,6 +155,14 @@ namespace Rnwood.Smtp4dev.Data
         {
             return this.GetAllMessages(!tracked).SingleOrDefaultAsync(m => m.Id == id);
         }
-        
+
+        public Task UpdateMessage(Message message)
+        {
+            return taskQueue.QueueTask(() =>
+            {
+                dbContext.Update(message);
+                dbContext.SaveChanges();
+            }, true);
+        }
     }
 }

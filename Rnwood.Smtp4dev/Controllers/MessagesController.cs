@@ -260,7 +260,7 @@ namespace Rnwood.Smtp4dev.Controllers
                     message.AddRelay(new MessageRelay { SendDate = relay.RelayDate, To = relay.Email });
                 }
 
-                messagesRepository.DbContext.SaveChanges();
+                await messagesRepository.UpdateMessage(message);
             }
 
             return Ok();
