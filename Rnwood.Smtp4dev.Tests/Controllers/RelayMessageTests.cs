@@ -32,7 +32,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             var sqlLiteForTesting = new SqliteInMemory();
             context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
             InitRepo();
-            messagesRepository.GetMessages(Arg.Any<string>(), Arg.Any<bool>())
+            messagesRepository.GetMessages(Arg.Any<string>(), null, Arg.Any<bool>())
                 .Returns(context.Messages);
                             messagesRepository.TryGetMessageById(Arg.Any<Guid>(), Arg.Any<bool>())
   

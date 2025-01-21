@@ -41,6 +41,7 @@ namespace Rnwood.Smtp4dev.Server
 {
     internal class Smtp4devServer : ISmtp4devServer, IHostedService
     {
+        private const string INBOXFOLDERNAME = "INBOX";
         private readonly ILogger log = Log.ForContext<Smtp4devServer>();
 
         public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<Settings.ServerOptions> serverOptions,
@@ -197,6 +198,21 @@ namespace Rnwood.Smtp4dev.Server
                         Name = mailbox.Name
                     };
                     dbContext.Add(dbMailbox);
+                    
+                }
+                
+                var dbFolder = dbContext.Folders.FirstOrDefault(f => f.Mailbox == dbMailbox);
+                if (dbFolder == null)
+                {
+                    log.Information("Creating folder {name} for mailbox {name}", mailbox.Name, INBOXFOLDERNAME);
+                    dbFolder = new Folder
+                    {
+                        Name = INBOXFOLDERNAME,
+                        Path = INBOXFOLDERNAME,
+                        Mailbox = dbMailbox
+                    };
+                    dbContext.Add(dbFolder);
+                    
                 }
             }
 
@@ -218,8 +234,7 @@ namespace Rnwood.Smtp4dev.Server
             }
             dbContext.SaveChanges();
 
-            TrimMessages(dbContext);
-            dbContext.SaveChanges();
+            scope.ServiceProvider.GetService<IMessagesRepository>().TrimMessages().Wait();
 
             TrimSessions(dbContext);
             dbContext.SaveChanges();
@@ -437,15 +452,13 @@ namespace Rnwood.Smtp4dev.Server
             log.Information("Processing received message for mailbox '{mailbox}' for recipients '{recipients}'", targetMailboxWithRecipients.Key.Name, targetMailboxWithRecipients.ToArray());
             using var scope = serviceScopeFactory.CreateScope();
             Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+            IFolderRepository folderRepository = scope.ServiceProvider.GetService<IFolderRepository>();
 
             message.Session = dbContext.Sessions.Find(activeSessionsToDbId[session]);
             message.Mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == targetMailboxWithRecipients.Key.Name);
             var relayResult = TryRelayMessage(message, null);
             message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
 
-            ImapState imapState = dbContext.ImapState.Single();
-            imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
-            message.ImapUid = imapState.LastUid;
             if (relayResult.WasRelayed)
             {
                 foreach (var relay in relayResult.RelayRecipients)
@@ -454,13 +467,10 @@ namespace Rnwood.Smtp4dev.Server
                 }
             }
 
-            dbContext.Messages.Add(message);
+            message.Folder = folderRepository.GetFolderOrCreate(INBOXFOLDERNAME, message.Mailbox);
+            var messagesRepo = scope.ServiceProvider.GetService<IMessagesRepository>();
+            messagesRepo.AddMessage(message).Wait();
 
-            dbContext.SaveChanges();
-
-            TrimMessages(dbContext);
-            dbContext.SaveChanges();
-            notificationsHub.OnMessagesChanged(targetMailboxWithRecipients.Key.Name).Wait();
             log.Information("Processing received message DONE");
         }
 
@@ -529,15 +539,7 @@ namespace Rnwood.Smtp4dev.Server
             return result;
         }
 
-        private void TrimMessages(Smtp4devDbContext dbContext)
-        {
-            foreach (var mailbox in dbContext.Mailboxes)
-            {
-                dbContext.Messages.RemoveRange(dbContext.Messages.Where(m => m.Mailbox == mailbox).OrderByDescending(m => m.ReceivedDate)
-                    .Skip(serverOptions.CurrentValue.NumberOfMessagesToKeep));
-            }
-        }
-
+       
         private void TrimSessions(Smtp4devDbContext dbContext)
         {
             dbContext.Sessions.RemoveRange(dbContext.Sessions.Where(s => s.EndDate.HasValue).OrderByDescending(m => m.EndDate)

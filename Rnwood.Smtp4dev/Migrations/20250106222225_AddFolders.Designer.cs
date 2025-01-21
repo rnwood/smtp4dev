@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rnwood.Smtp4dev.Data;
 
@@ -10,9 +11,11 @@ using Rnwood.Smtp4dev.Data;
 namespace Rnwood.Smtp4dev.Migrations
 {
     [DbContext(typeof(Smtp4devDbContext))]
-    partial class Smtp4devDbContextModelSnapshot : ModelSnapshot
+    [Migration("20250515191815_AddFolders")]
+    partial class AddFolders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
@@ -60,9 +63,9 @@ namespace Rnwood.Smtp4dev.Migrations
                 b.Property<string>("Path")
                     .HasColumnType("TEXT");
 
-                b.HasIndex("MailboxId");
-                
                 b.HasKey("Id");
+                
+                b.HasIndex("MailboxId");
 
                 b.ToTable("Folders");
             });
@@ -190,16 +193,6 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.ToTable("Sessions");
                 });
 
-            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Folder", b =>
-            {
-                b.HasOne("Rnwood.Smtp4dev.DbModel.Mailbox", "Mailbox")
-                    .WithMany()
-                    .HasForeignKey("MailboxId")
-                    .OnDelete(DeleteBehavior.Cascade);
-
-                b.Navigation("Mailbox");
-            });
-            
             modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Message", b =>
                 {
                     b.HasOne("Rnwood.Smtp4dev.DbModel.Mailbox", "Mailbox")

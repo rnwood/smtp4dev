@@ -14,10 +14,12 @@ using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
 using NSubstitute;
 using Rnwood.Smtp4dev.Data;
+using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Tests.DBMigrations.Helpers;
 using Xunit;
 using Rnwood.Smtp4dev.Server.Settings;
+using Microsoft.Extensions.Options;
 
 namespace Rnwood.Smtp4dev.Tests.Controllers
 {
@@ -101,6 +103,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             IMessage message = await memoryMessageBuilder.ToMessage();
 
             var dbMessage = await new MessageConverter().ConvertAsync(message, ["to@envelope.com"]);
+            dbMessage.Folder = new Folder { Name = "INBOX", Path = "INBOX" };
             return dbMessage;
         }
 
@@ -130,6 +133,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
             var dbMessage = await new MessageConverter().ConvertAsync(message, [to]);
             dbMessage.Mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
+            dbMessage.Folder = new DbModel.Folder { Name = "INBOX", Path = "INBOX", Mailbox = dbMessage.Mailbox };
           
             return dbMessage;
         }
@@ -185,9 +189,10 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             var sqlLiteForTesting = new SqliteInMemory();
             var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
             MessagesRepository messagesRepository =
-                new MessagesRepository(Substitute.For<ITaskQueue>(), Substitute.For<NotificationsHub>(), context);
-            messagesRepository.DbContext.Messages.AddRange(testMessage1, testMessage2, testMessage3);
-            await messagesRepository.DbContext.SaveChangesAsync();
+                new MessagesRepository(Substitute.For<ITaskQueue>(), Substitute.For<NotificationsHub>(), context, Options.Create( new Smtp4dev.Server.Settings.ServerOptions()));
+            await messagesRepository.AddMessage(testMessage1);
+            await  messagesRepository.AddMessage(testMessage2);
+            await messagesRepository.AddMessage(testMessage3);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
             var result = messagesController.GetSummaries("sUbJect2");

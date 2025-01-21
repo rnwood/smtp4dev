@@ -87,6 +87,9 @@
                              width="160"
                              sortable="custom"
                              :formatter="formatDate"></el-table-column>
+            <el-table-column property="folder"
+                           label="Folder"
+                           width="140"></el-table-column>
             <el-table-column property="from"
                              label="From"
                              width="140"

@@ -23,6 +23,20 @@ namespace Rnwood.Smtp4dev.Tests
         }
 
         public Smtp4devDbContext DbContext => throw new NotImplementedException();
+        public Task CopyMessageToFolder(Guid id, string targetFolder)
+        {
+            var message = Messages.FirstOrDefault(m => m.Id == id);
+            if (message != null)
+            {
+                message.Folder = new Folder() { Name = targetFolder, Path = targetFolder };
+            }
+            return Task.CompletedTask;
+        }
+
+        public IQueryable<Message> GetMessages(string mailboxName, string folder = null, bool unTracked = true)
+        {
+            return Messages.AsQueryable();
+        }
 
         public Task DeleteMessage(Guid id)
         {
@@ -31,11 +45,6 @@ namespace Rnwood.Smtp4dev.Tests
         }
 
         public IQueryable<Message> GetAllMessages(bool unTracked = true)
-        {
-            return Messages.AsQueryable();
-        }
-
-        public IQueryable<Message> GetMessages(string mailboxName, bool unTracked = true)
         {
             return Messages.AsQueryable();
         }

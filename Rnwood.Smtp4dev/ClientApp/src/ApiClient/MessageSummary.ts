@@ -3,18 +3,20 @@
   constructor(
     id: string,
     from: string,
-      to: string[],
+    to: string[],
     deliveredTo: string[],
     receivedDate: Date,
     subject: string,
     attachmentCount: number,
     isUnread: boolean,
     isRelayed: boolean,
+    folder: string,
   ) {
     this.id = id;
     this.from = from;
-      this.to = to;
-      this.deliveredTo = to;
+    this.to = to;
+    this.folder = folder;
+    this.deliveredTo = to;
     this.receivedDate = receivedDate;
     this.subject = subject;
     this.attachmentCount = attachmentCount;
@@ -24,6 +26,7 @@
 
   id: string;
   from: string;
+  folder: string;
   to: string[];
   receivedDate: Date;
   subject: string;

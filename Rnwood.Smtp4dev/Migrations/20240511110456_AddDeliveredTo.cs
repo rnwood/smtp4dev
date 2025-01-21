@@ -21,7 +21,7 @@ namespace Rnwood.Smtp4dev.Migrations
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropColumn(
+           migrationBuilder.DropColumn(
                 name: "DeliveredTo",
                 table: "Messages");
 

@@ -11,7 +11,7 @@ namespace Rnwood.SmtpServer;
 /// <summary>
 ///     Defines the <see cref="CloseNotifyingMemoryStream" /> which is a memory stream that fires an event when disposed.
 /// </summary>
-internal class CloseNotifyingMemoryStream : MemoryStream
+internal class CloseNotifyingMemoryStream : MemoryStream, ICloseNotifyingStream
 {
     /// <summary>
     ///     Occurs when the stream is disposed.
