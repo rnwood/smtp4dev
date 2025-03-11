@@ -6,9 +6,16 @@
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-          "SERVEROPTIONS__URLS": "http://*:5000"
+        "SERVEROPTIONS__URLS": "http://*:5000"
       },
       "applicationUrl": "http://localhost:5000/"
+    },
+    "IIS Express": {
+      "commandName": "IISExpress",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      }
     }
   },
   "iisSettings": {

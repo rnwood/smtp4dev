@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <VersionPrefix>3.0</VersionPrefix>
-    <TargetFrameworks>net6.0;net462</TargetFrameworks>
+    <TargetFrameworks>net8.0</TargetFrameworks>
     <AssemblyName>Rnwood.SmtpServer.Tests</AssemblyName>
     <OutputType>Library</OutputType>
     <LangVersion>latest</LangVersion>
