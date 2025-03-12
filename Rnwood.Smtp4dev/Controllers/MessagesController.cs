@@ -94,11 +94,11 @@ namespace Rnwood.Smtp4dev.Controllers
         /// Search for emails with given search terms. 
         /// </summary>
         /// <param name="searchCriteria">Criteria to search for an email</param>
-        /// <param name="mailboxName"></param>
-        /// <param name="sortColumn"></param>
-        /// <param name="sortIsDescending"></param>
-        /// <param name="page"></param>
-        /// <param name="pageSize"></param>
+        /// <param name="mailboxName">Name of the mailbox to search in</param>
+        /// <param name="sortColumn">Column to sort the results by</param>
+        /// <param name="sortIsDescending">Indicates if sorting should be in descending order</param>
+        /// <param name="page">Page number for pagination</param>
+        /// <param name="pageSize">Number of items per page</param>
         /// <returns>Returns a list of message summaries including basic details but not the content</returns>
         [HttpPut]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.PagedResult<MessageSummary>), Description = "")]
@@ -110,17 +110,17 @@ namespace Rnwood.Smtp4dev.Controllers
 
             if (!string.IsNullOrEmpty(searchCriteria.To))
             {
-                query = query.Where(m => m.To.Contains(searchCriteria.To, StringComparison.CurrentCultureIgnoreCase));
+                query = query.Where(m => m.To.Contains(searchCriteria.To, StringComparison.OrdinalIgnoreCase));
             }
 
             if (!string.IsNullOrEmpty(searchCriteria.Subject))
             {
-                query = query.Where(m => m.Subject.Contains(searchCriteria.Subject, StringComparison.CurrentCultureIgnoreCase));
+                query = query.Where(m => m.Subject.Contains(searchCriteria.Subject, StringComparison.OrdinalIgnoreCase));
             }
 
             if (!string.IsNullOrEmpty(searchCriteria.Content))
             {
-                query = query.Where(m => Regex.IsMatch(System.Text.Encoding.UTF8.GetString(m.Data), searchCriteria.Content));
+                query = query.Where(m => Regex.IsMatch(System.Text.Encoding.UTF8.GetString(m.Data), searchCriteria.Content, RegexOptions.IgnoreCase));
             }
 
             if (searchCriteria.DateFrom.HasValue)
