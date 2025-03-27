@@ -168,18 +168,7 @@ public class Connection : IConnection
     {
         SslStream sslStream = new SslStream(s);
 
-        SslProtocols sslProtos;
-
-        string ver = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
-        if (ver == null || !ver.StartsWith(".NETCoreApp,"))
-        {
-            sslProtos = SslProtocols.Tls12 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Ssl3 |
-                        SslProtocols.Ssl2;
-        }
-        else
-        {
-            sslProtos = SslProtocols.None;
-        }
+        SslProtocols sslProtos = await Server.Options.GetSSLProtocols(this);
 
         X509Certificate cert =
             await Server.Options.GetSSLCertificate(this).ConfigureAwait(false);

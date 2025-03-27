@@ -35,18 +35,9 @@ public class StartTlsVerb : IVerb
             StandardSmtpResponseCode.ServiceReady,
             "Ready to start TLS")).ConfigureAwait(false);
 
-        SslProtocols sslProtos;
+        SslProtocols sslProtos = await connection.Server.Options.GetSSLProtocols(connection);
 
-        string ver = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
-        if (ver == null || !ver.StartsWith(".NETCoreApp,"))
-        {
-            sslProtos = SslProtocols.Tls12 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Ssl3 |
-                        SslProtocols.Ssl2;
-        }
-        else
-        {
-            sslProtos = SslProtocols.None;
-        }
+       
 
         await connection.ApplyStreamFilter(async stream =>
         {

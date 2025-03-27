@@ -36,6 +36,7 @@ using static MailKit.Net.Imap.ImapMailboxFilter;
 using Org.BouncyCastle.Cms;
 using LinqKit;
 using Org.BouncyCastle.Bcpg.OpenPgp;
+using System.Security.Authentication;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -93,7 +94,9 @@ namespace Rnwood.Smtp4dev.Server
             this.smtpServer = new Rnwood.SmtpServer.SmtpServer(new SmtpServer.ServerOptions(serverOptionsValue.AllowRemoteConnections, !serverOptionsValue.DisableIPv6, serverOptionsValue.HostName, serverOptionsValue.Port, serverOptionsValue.AuthenticationRequired,
                 serverOptionsValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries), serverOptionsValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
-                serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null
+            serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null,
+                serverOptionsValue.SslProtocols.Aggregate((current, protocol) => current | protocol)
+
             ));
             this.smtpServer.MessageCompletedEventHandler += OnMessageCompleted;
             this.smtpServer.MessageReceivedEventHandler += OnMessageReceived;

@@ -1,6 +1,8 @@
 ﻿using System.Net;
+using System.Security.Authentication;
 using Ardalis.GuardClauses;
 using Esprima.Ast;
+using LumiSoft.Net;
 
 namespace Rnwood.Smtp4dev.Server.Settings
 {
@@ -54,6 +56,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public string[] SmtpEnabledAuthTypesWhenSecureConnection { get; set; }
 
         public MailboxOptions[] Mailboxes { get; set; }
+
+        public SslProtocols[] SslProtocols { get; set; }
 
     }
 }
