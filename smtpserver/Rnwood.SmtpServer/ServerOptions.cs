@@ -7,6 +7,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Reflection;
+using System.Runtime.Versioning;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -138,7 +141,8 @@ public class ServerOptions : IServerOptions
         if (connection.Session.SecureConnection)
         {
             return Task.FromResult(this.secureAuthMechanismIds.Contains(authMechanism.Identifier, StringComparer.InvariantCultureIgnoreCase));
-        } else
+        }
+        else
         {
 
             return Task.FromResult(this.nonSecureAuthMechanismIds.Contains(authMechanism.Identifier, StringComparer.InvariantCultureIgnoreCase));
@@ -218,6 +222,21 @@ public class ServerOptions : IServerOptions
         }
 
         return AuthenticationResult.Failure;
+    }
+
+    /// <inheritdoc/>
+    public async Task<SslProtocols> GetSSLProtocols(IConnection connection)
+    {
+        string ver = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
+        if (ver == null || !ver.StartsWith(".NETCoreApp,"))
+        {
+            return SslProtocols.Tls12 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Ssl3 |
+                        SslProtocols.Ssl2;
+        }
+        else
+        {
+            return SslProtocols.None;
+        }
     }
 
     /// <summary>

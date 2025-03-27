@@ -247,7 +247,14 @@ public partial class ClientTests
             {
                 return true;
             };
+
+#if NETCOREAPP
+            client.SslProtocols = SslProtocols.Tls13;
+#else
             client.SslProtocols = SslProtocols.Tls12;
+#endif
+
+
             await client.ConnectAsync("localhost", server.ListeningEndpoints.First().Port, secureSocketOptions);
             await client.SendAsync(new FormatOptions { International = true }, message);
             await client.DisconnectAsync(true);
