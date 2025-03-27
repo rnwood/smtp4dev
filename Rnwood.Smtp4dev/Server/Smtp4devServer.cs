@@ -36,7 +36,6 @@ using static MailKit.Net.Imap.ImapMailboxFilter;
 using Org.BouncyCastle.Cms;
 using LinqKit;
 using Org.BouncyCastle.Bcpg.OpenPgp;
-using static Microsoft.CodeAnalysis.CSharp.SyntaxTokenParser;
 using System.Security.Authentication;
 
 namespace Rnwood.Smtp4dev.Server
