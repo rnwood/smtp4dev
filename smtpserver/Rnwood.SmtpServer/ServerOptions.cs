@@ -31,6 +31,7 @@ public class ServerOptions : IServerOptions
     private readonly string[] secureAuthMechanismIds;
     private readonly X509Certificate implcitTlsCertificate;
     private readonly X509Certificate startTlsCertificate;
+    private readonly SslProtocols sslProtocols;
 
 
     /// <summary>
@@ -45,6 +46,7 @@ public class ServerOptions : IServerOptions
     /// <param name="secureAuthMechanismNamesIds">The identifier of AUTH mechanisms that will be allowed for secure connections.</param>
     /// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
     /// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
+    /// <param name="sslProtocols">The SSL protocol veresions to allow</param>
     public ServerOptions(
         bool allowRemoteConnections,
         bool enableIpV6,
@@ -54,7 +56,8 @@ public class ServerOptions : IServerOptions
         string[] nonSecureAuthMechanismIds,
         string[] secureAuthMechanismNamesIds,
         X509Certificate implcitTlsCertificate,
-        X509Certificate startTlsCertificate)
+        X509Certificate startTlsCertificate,
+        SslProtocols sslProtocols)
     {
         DomainName = domainName;
         PortNumber = portNumber;
@@ -65,6 +68,7 @@ public class ServerOptions : IServerOptions
         this.requireAuthentication = requireAuthentication;
         this.nonSecureAuthMechanismIds = nonSecureAuthMechanismIds;
         this.secureAuthMechanismIds = secureAuthMechanismNamesIds ?? throw new ArgumentNullException(nameof(secureAuthMechanismNamesIds));
+        this.sslProtocols = sslProtocols;
     }
 
 
@@ -225,18 +229,9 @@ public class ServerOptions : IServerOptions
     }
 
     /// <inheritdoc/>
-    public async Task<SslProtocols> GetSSLProtocols(IConnection connection)
+    public Task<SslProtocols> GetSSLProtocols(IConnection connection)
     {
-        string ver = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
-        if (ver == null || !ver.StartsWith(".NETCoreApp,"))
-        {
-            return SslProtocols.Tls12 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Ssl3 |
-                        SslProtocols.Ssl2;
-        }
-        else
-        {
-            return SslProtocols.None;
-        }
+        return Task.FromResult(this.sslProtocols);
     }
 
     /// <summary>

@@ -2412,7 +2412,7 @@
             </summary>
             <seealso cref="T:Rnwood.SmtpServer.IServerOptions" />
         </member>
-        <member name="M:Rnwood.SmtpServer.ServerOptions.#ctor(System.Boolean,System.Boolean,System.String,System.Int32,System.Boolean,System.String[],System.String[],System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Certificate)">
+        <member name="M:Rnwood.SmtpServer.ServerOptions.#ctor(System.Boolean,System.Boolean,System.String,System.Int32,System.Boolean,System.String[],System.String[],System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Cryptography.X509Certificates.X509Certificate,System.Security.Authentication.SslProtocols)">
             <summary>
                 Initializes a new instance of the <see cref="T:Rnwood.SmtpServer.ServerOptions" /> class.
             </summary>
@@ -2425,6 +2425,7 @@
             <param name="secureAuthMechanismNamesIds">The identifier of AUTH mechanisms that will be allowed for secure connections.</param>
             <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
             <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
+            <param name="sslProtocols">The SSL protocol veresions to allow</param>
         </member>
         <member name="P:Rnwood.SmtpServer.ServerOptions.DomainName">
             <inheritdoc />

@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Security.Authentication;
 using Esprima.Ast;
 
 namespace Rnwood.Smtp4dev.Server.Settings
@@ -18,6 +19,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public string BasePath { get; set; } = "/";
 
         public TlsMode TlsMode { get; set; } = TlsMode.None;
+
+        public SslProtocols[] SslProtocols { get; set; } = [System.Security.Authentication.SslProtocols.None];
 
         public string TlsCertificate { get; set; }
         public string TlsCertificatePrivateKey { get; set; }
