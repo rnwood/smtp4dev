@@ -59,8 +59,8 @@ namespace Rnwood.Smtp4dev
                        map.Add(data, x => x.ServerOptions.SmtpEnabledAuthTypesWhenSecureConnection) },
                 { "mailbox=", "Adds a mailbox in Name=Recipients format (Recipients can contain comma separated wildcards or regex)see appsettings for more details). This option can be repeated to add multiple users.", data =>
                        map.Add(data, x => x.ServerOptions.Users)},
-                {"sslprotocols=", "Specifies the SSL/TLS protocol version(s) that will be allowed. Separate with commas. See https://learn.microsoft.com/en-us/dotnet/api/system.security.authentication.sslprotocols?view=net-9.0", data => map.Add(data, x => x.ServerOptions.SslProtocols)  }
-
+                {"sslprotocols=", "Specifies the SSL/TLS protocol version(s) that will be allowed. Separate with commas. See https://learn.microsoft.com/en-us/dotnet/api/system.security.authentication.sslprotocols?view=net-9.0", data => map.Add(data, x => x.ServerOptions.SslProtocols)  },
+                {"tlsciphersuites=", "Specifies the TLS cipher suites to be allowed. Not supported on Windows. Separate with commas. See https://learn.microsoft.com/en-us/dotnet/api/system.net.security.tlsciphersuite?view=net-9.0", data => map.Add(data, x => x.ServerOptions.TlsCipherSuites) }
 
             };
 
@@ -90,25 +90,25 @@ namespace Rnwood.Smtp4dev
             catch (OptionException e)
             {
                 errorStream.WriteLine("Invalid command line: " + e.Message);
-hadBadArgs = true;
+                hadBadArgs = true;
             }
 
             if (help || hadBadArgs)
-{
-    errorStream.WriteLine();
-    errorStream.WriteLine(" > For information about default values see documentation in appsettings.json.");
-    errorStream.WriteLine();
-    options.WriteOptionDescriptions(errorStream);
-    throw new CommandLineOptionsException(errorStream.ToString()) { IsHelpRequest = help };
-}
-else
-{
-    Console.WriteLine();
-    Console.WriteLine(" > For help use argument --help");
-    Console.WriteLine();
-}
+            {
+                errorStream.WriteLine();
+                errorStream.WriteLine(" > For information about default values see documentation in appsettings.json.");
+                errorStream.WriteLine();
+                options.WriteOptionDescriptions(errorStream);
+                throw new CommandLineOptionsException(errorStream.ToString()) { IsHelpRequest = help };
+            }
+            else
+            {
+                Console.WriteLine();
+                Console.WriteLine(" > For help use argument --help");
+                Console.WriteLine();
+            }
 
-return map;
+            return map;
         }
     }
 }

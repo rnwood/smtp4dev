@@ -1,4 +1,5 @@
 ﻿using System.Net;
+using System.Net.Security;
 using System.Security.Authentication;
 using Ardalis.GuardClauses;
 using Esprima.Ast;
@@ -59,5 +60,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public SslProtocols[] SslProtocols { get; set; }
 
-    }
+		public TlsCipherSuite[] TlsCipherSuites { get; set; }
+
+	}
 }

@@ -95,7 +95,8 @@ namespace Rnwood.Smtp4dev.Server
                 serverOptionsValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries), serverOptionsValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
             serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null,
-                serverOptionsValue.SslProtocols.Aggregate((current, protocol) => current | protocol)
+                serverOptionsValue.SslProtocols.Aggregate((current, protocol) => current | protocol),
+                serverOptionsValue.TlsCipherSuites.Length > 0 ? serverOptionsValue.TlsCipherSuites : null
 
             ));
             this.smtpServer.MessageCompletedEventHandler += OnMessageCompleted;
