@@ -16,6 +16,8 @@ using Rnwood.Smtp4dev.DbModel;
 using NSwag.Annotations;
 using Rnwood.Smtp4dev.Server.Settings;
 using Org.BouncyCastle.Cms;
+using StreamLib;
+using System.Text;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -159,6 +161,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
         /// <summary>
         /// Sends a message via the configured upstream/relay SMTP server.
+        /// The body of the request should be a HTML message to send encoded as UTF-8.
         /// </summary>
         /// <param name="to">List of email addresses separated by commas</param>
         /// <param name="cc">List of email addresses separated by commas</param>
@@ -166,15 +169,15 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <param name="from">Email address</param>
         /// <param name="deliverToAll">True if the message should be delivered to the CC and BCC recipients in addition to the TO recipients. When false, the message is only delivered to the TO recipients, but the message headers will show the specified other recipients.</param>
         /// <param name="subject">The subject of message</param>
-        /// <param name="bodyHtml">UTF8 encoded HTML body for the message</param>
         /// <returns></returns>
         [HttpPost("send")]
         [OpenApiBodyParameter("text/html")]
         [Consumes("text/html")]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
         [SwaggerResponse(System.Net.HttpStatusCode.InternalServerError, typeof(void), Description = "If message fails to send.")]
-        public async Task<IActionResult> Send(string to, string cc, string bcc, string from, bool deliverToAll, string subject, [FromBody] string bodyHtml)
+        public async Task<IActionResult> Send(string to, string cc, string bcc, string from, bool deliverToAll, string subject)
         {
+            string bodyHtml = await HttpContext.Request.Body.ReadStringAsync(Encoding.UTF8);
             Dictionary<string, string> headers = new Dictionary<string, string>();
       
             var toRecips = to?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
