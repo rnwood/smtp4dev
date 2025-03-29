@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Hosting.Server;
 using Microsoft.AspNetCore.Hosting.Server.Features;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Mono.Options;
@@ -179,14 +180,30 @@ namespace Rnwood.Smtp4dev
 
                         if (cmdLineOptions.DebugSettings)
                         {
+                            
 
                             Console.WriteLine(JsonSerializer.Serialize(new SettingsDebugInfo
                             {
                                 CmdLineArgs = Environment.GetCommandLineArgs(),
                                 CmdLineOptions = cmdLineOptions,
-                                ServerOptions = config.GetSection("ServerOptions").Get<ServerOptions>(),
-                                RelayOption = config.GetSection("RelayOptions").Get<RelayOptions>(),
-                                DesktopOptions = config.GetSection("DesktopOptions").Get<DesktopOptions>()
+                                Sources = cb.Sources.Select( s=>
+                                {
+                                    var source = new ConfigurationBuilder().Add(s).Build();
+
+                                    return new SettingsSourceDebugInfo
+                                    {
+                                        Description = s is JsonConfigurationSource js ? js.Path : s.ToString(),
+                                        ServerOptions = source.GetSection("ServerOptions").Get<ServerOptionsSource>(),
+                                        RelayOption = source.GetSection("RelayOptions").Get<RelayOptionsSource>(),
+                                        DesktopOptions = source.GetSection("DesktopOptions").Get<DesktopOptionsSource>()
+                                    };
+                                }).ToArray(),
+                                Result = new SettingsResultDebugInfo
+                                {
+                                    ServerOptions = config.GetSection("ServerOptions").Get<ServerOptions>(),
+                                    RelayOption = config.GetSection("RelayOptions").Get<RelayOptions>(),
+                                    DesktopOptions = config.GetSection("DesktopOptions").Get<DesktopOptions>()
+                                }
                             }, SettingsDebugInfoSerializationContext.Default.SettingsDebugInfo));
                         }
 
@@ -278,13 +295,28 @@ namespace Rnwood.Smtp4dev
     {
         public string[] CmdLineArgs { get; set; }
         public CommandLineOptions CmdLineOptions { get; set; }
-        public ServerOptions ServerOptions { get; set; }
-        public RelayOptions RelayOption { get; set; }
 
-        public DesktopOptions DesktopOptions { get; set; }
+        public SettingsSourceDebugInfo[] Sources { get; set; }
+        public SettingsResultDebugInfo Result { get; set; }
     }
 
-    [JsonSourceGenerationOptions(WriteIndented = true)]
+    internal class SettingsSourceDebugInfo
+    {
+        public string Description { get; set; }
+        public ServerOptionsSource ServerOptions { get; set; }
+        public RelayOptionsSource RelayOption { get; set; }
+        public DesktopOptionsSource DesktopOptions { get; set; }
+    }
+
+    internal class SettingsResultDebugInfo
+    {
+        public ServerOptions ServerOptions { get; set; }
+        public RelayOptions RelayOption { get; set; }
+        public DesktopOptions DesktopOptions { get; set; }
+    }
+    
+
+        [JsonSourceGenerationOptions(WriteIndented = true)]
     [JsonSerializable(typeof(SettingsDebugInfo))]
     internal partial class SettingsDebugInfoSerializationContext : JsonSerializerContext {
 
