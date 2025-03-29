@@ -2,6 +2,8 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net.Security;
+using System.Security.Authentication;
 using CommandLiners;
 using Mono.Options;
 

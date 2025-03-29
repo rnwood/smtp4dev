@@ -21,9 +21,9 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public TlsMode TlsMode { get; set; } = TlsMode.None;
 
-        public SslProtocols[] SslProtocols { get; set; } = [System.Security.Authentication.SslProtocols.None];
+        public string SslProtocols { get; set; } = "";
 
-        public TlsCipherSuite[] TlsCipherSuites { get; set; } = [];
+        public string TlsCipherSuites { get; set; } = "";
 
         public string TlsCertificate { get; set; }
         public string TlsCertificatePrivateKey { get; set; }

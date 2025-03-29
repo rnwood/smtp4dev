@@ -58,9 +58,9 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public MailboxOptions[] Mailboxes { get; set; }
 
-        public SslProtocols[] SslProtocols { get; set; }
+        public string SslProtocols { get; set; }
 
-		public TlsCipherSuite[] TlsCipherSuites { get; set; }
+		public string TlsCipherSuites { get; set; }
 
 	}
 }

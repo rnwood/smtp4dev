@@ -37,6 +37,7 @@ using Org.BouncyCastle.Cms;
 using LinqKit;
 using Org.BouncyCastle.Bcpg.OpenPgp;
 using System.Security.Authentication;
+using System.Net.Security;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -95,8 +96,8 @@ namespace Rnwood.Smtp4dev.Server
                 serverOptionsValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries), serverOptionsValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
             serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null,
-                serverOptionsValue.SslProtocols.Aggregate((current, protocol) => current | protocol),
-                serverOptionsValue.TlsCipherSuites.Length > 0 ? serverOptionsValue.TlsCipherSuites : null
+                !string.IsNullOrWhiteSpace(serverOptionsValue.SslProtocols) ? serverOptionsValue.SslProtocols.Split(",", StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries).Select(s => Enum.Parse<SslProtocols>(s, true)).Aggregate((current, protocol) => current | protocol) : SslProtocols.None,
+                !string.IsNullOrWhiteSpace(serverOptionsValue.TlsCipherSuites) ? serverOptionsValue.TlsCipherSuites.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(s => Enum.Parse<TlsCipherSuite>(s, true)).ToArray() : null
 
             ));
             this.smtpServer.MessageCompletedEventHandler += OnMessageCompleted;
