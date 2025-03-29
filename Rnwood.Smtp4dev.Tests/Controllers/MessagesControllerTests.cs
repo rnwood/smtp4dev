@@ -27,7 +27,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         public async Task GetMessage_ValidMime()
         {
             DateTime startDate = DateTime.Now;
-            DbModel.Message testMessage1 = await GetTestMessage1();
+            var testMessage1 = await GetTestMessage1();
 
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
@@ -38,9 +38,9 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             Assert.Equal(testMessage1.Id, result.Id);
             Assert.InRange(result.ReceivedDate, startDate, DateTime.Now);
             Assert.Equal("from@message.com", result.From);
-            Assert.Equal(new[]{"to@message.com"}, result.To);
-            Assert.Equal(new[]{"to@envelope.com"}, result.Bcc);
-            Assert.Equal(new[]{"cc@message.com"}, result.Cc);
+            Assert.Equal(new[] { "to@message.com" }, result.To);
+            Assert.Equal(new[] { "to@envelope.com" }, result.Bcc);
+            Assert.Equal(new[] { "cc@message.com" }, result.Cc);
             Assert.Equal("subject", result.Subject);
 
             var allParts = result.Parts.Flatten(p => p.ChildParts).ToList();
@@ -65,7 +65,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         private static readonly string message1HtmlBody = "<html>Hi</html>";
         private static readonly string message1TextBody = "Hi";
 
-        private static async Task<DbModel.Message> GetTestMessage1(bool includeHtmlBody=true, bool includeTextBody=true)
+        private static async Task<DbModel.Message> GetTestMessage1(bool includeHtmlBody = true, bool includeTextBody = true)
         {
             MimeMessage mimeMessage = new MimeMessage();
             mimeMessage.From.Add(InternetAddress.Parse("from@message.com"));
@@ -130,7 +130,37 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
             var dbMessage = await new MessageConverter().ConvertAsync(message, [to]);
             dbMessage.Mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
-          
+
+            return dbMessage;
+        }
+
+        private static async Task<DbModel.Message> GetTestMessageWithContent(string subject, string content, string from = "from@from.com", string to = "to@to.com")
+        {
+            MimeMessage mimeMessage = new MimeMessage();
+            mimeMessage.From.Add(InternetAddress.Parse(from));
+            mimeMessage.To.Add(InternetAddress.Parse(to));
+
+            mimeMessage.Subject = subject;
+            BodyBuilder bodyBuilder = new BodyBuilder();
+            bodyBuilder.HtmlBody = "<html>" + content + "</html>";
+            bodyBuilder.TextBody = content;
+
+            mimeMessage.Body = bodyBuilder.ToMessageBody();
+
+            MemoryMessageBuilder memoryMessageBuilder = new MemoryMessageBuilder();
+            memoryMessageBuilder.Recipients.Add(to);
+            memoryMessageBuilder.From = from;
+            memoryMessageBuilder.ReceivedDate = DateTime.Now;
+            using (var messageData = await memoryMessageBuilder.WriteData())
+            {
+                mimeMessage.WriteTo(messageData);
+            }
+
+            IMessage message = await memoryMessageBuilder.ToMessage();
+
+            var dbMessage = await new MessageConverter().ConvertAsync(message, [to]);
+            dbMessage.Mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
+
             return dbMessage;
         }
 
@@ -142,7 +172,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             mimeMessage.Cc.Add(InternetAddress.Parse("cc@message.com"));
 
             mimeMessage.Subject = "subject";
-            MimePart body = new MimePart( new ContentType("text", "html"));
+            MimePart body = new MimePart(new ContentType("text", "html"));
             body.ContentTransferEncoding = ContentEncoding.QuotedPrintable;
             body.ContentType.CharsetEncoding = encoding;
             body.Content = new MimeContent(new MemoryStream(encoding.GetBytes(QPMESSAGE_BODY)));
@@ -166,9 +196,9 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         [Fact]
         public async Task GetSummaries_NoSearch_AllMessagesReturned()
         {
-            DbModel.Message testMessage1 = await GetTestMessage("Message subject1");
-            DbModel.Message testMessage2 = await GetTestMessage("Message subject2");
-            DbModel.Message testMessage3 = await GetTestMessage("Message subject3");
+            var testMessage1 = await GetTestMessage("Message subject1");
+            var testMessage2 = await GetTestMessage("Message subject2");
+            var testMessage3 = await GetTestMessage("Message subject3");
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1, testMessage2, testMessage3);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
@@ -179,9 +209,9 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         [Fact]
         public async Task GetSummaries_Search_MatchingMessagesReturned()
         {
-            DbModel.Message testMessage1 = await GetTestMessage("Message subject1");
-            DbModel.Message testMessage2 = await GetTestMessage("Message subject2");
-            DbModel.Message testMessage3 = await GetTestMessage("Message subject3");
+            var testMessage1 = await GetTestMessage(subject: "Message subject1");
+            var testMessage2 = await GetTestMessage("Message subject2");
+            var testMessage3 = await GetTestMessage("Message subject3");
             var sqlLiteForTesting = new SqliteInMemory();
             var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
             MessagesRepository messagesRepository =
@@ -194,57 +224,96 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage2.Id });
         }
 
+        [Theory]
+        [InlineData("subject1", "content1", 1)]
+        [InlineData("subject2", "content2", 1)]
+        [InlineData("subject3", "content3", 1)]
+        [InlineData("subject3", "", 2)]
+        [InlineData("subject3", "content4", 1)]
+        public async Task GetSummaries_Find_MatchingMessagesReturned(string subjectToSearch, string contentSearchPattern, int expectedResultCount)
+        {
+            // Arrange
+            var testMessage1 = await GetTestMessageWithContent("Message subject1", "This is my test content1");
+            var testMessage2 = await GetTestMessageWithContent("Message subject2", "This is my test content2");
+            var testMessage3 = await GetTestMessageWithContent("Message subject3", "This is my test content3");
+            var testMessage4 = await GetTestMessageWithContent("Message subject3", "This is my test content4");
+            testMessage4.Id = Guid.NewGuid();
+            var sqlLiteForTesting = new SqliteInMemory();
+            var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
+            MessagesRepository messagesRepository = new MessagesRepository(Substitute.For<ITaskQueue>(), Substitute.For<NotificationsHub>(), context);
+            messagesRepository.DbContext.Messages.AddRange(testMessage1, testMessage2, testMessage3, testMessage4);
+            await messagesRepository.DbContext.SaveChangesAsync();
+
+            // Act
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+            var result = messagesController.Find(new ApiModel.SearchMessagesCriteria("", subjectToSearch, contentSearchPattern, null));
+
+            // Assert
+            result.Results.Count.Should().Be(expectedResultCount);
+            if (expectedResultCount > 1)
+            {
+                result.Results[0].Subject.Should().Contain(subjectToSearch);
+                result.Results[1].Subject.Should().Contain(subjectToSearch);
+            }
+            else
+            {
+                var mailContent = await messagesController.GetMessageSource(result.Results[0].Id);
+                result.Results.First().Subject.Should().Contain(subjectToSearch);
+                mailContent.Should().Contain(contentSearchPattern);
+            }
+        }
+
         [Fact]
         public async Task GetHtmlBody()
         {
-            DbModel.Message testMessage1 = await GetTestMessage1();
+            var testMessage1 = await GetTestMessage1();
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
             var result = await messagesController.GetMessageHtml(testMessage1.Id);
             Assert.Equal(message1HtmlBody, result.Value);
         }
-        
+
         [Fact]
         public async Task GetTextBody()
         {
-            DbModel.Message testMessage1 = await GetTestMessage1();
+            var testMessage1 = await GetTestMessage1();
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
             string text = (await messagesController.GetMessagePlainText(testMessage1.Id)).Value;
             Assert.Equal(message1TextBody, text);
         }
-        
+
         [Fact]
         public async Task GetHtmlBody_WhenThereIsntOne_ReturnsNotFound()
         {
-            DbModel.Message testMessage1 = await GetTestMessage1(includeHtmlBody:false);
+            var testMessage1 = await GetTestMessage1(includeHtmlBody: false);
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
             var result = await messagesController.GetMessageHtml(testMessage1.Id);
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
-        
+
         [Fact]
         public async Task GetTextBody_WhenThereIsntOne_ReturnsNotFound()
         {
-            DbModel.Message testMessage1 = await GetTestMessage1(includeTextBody:false);
+            var testMessage1 = await GetTestMessage1(includeTextBody: false);
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
-            var result= await messagesController.GetMessagePlainText(testMessage1.Id);
+            var result = await messagesController.GetMessagePlainText(testMessage1.Id);
             Assert.IsType<NotFoundObjectResult>(result.Result);
         }
         [Fact]
         public async Task GetNewSummaries_NoBookmark_AllMessagesReturned()
         {
-            DbModel.Message testMessage1 = await GetTestMessage1();
-            DbModel.Message testMessage2 = await GetTestMessage1();
-            DbModel.Message testMessage3 = await GetTestMessage1();
+            var testMessage1 = await GetTestMessage1();
+            var testMessage2 = await GetTestMessage1();
+            var testMessage3 = await GetTestMessage1();
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1, testMessage2, testMessage3);
-            
+
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
             var result = messagesController.GetNewSummaries(null);
@@ -254,9 +323,9 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         [Fact]
         public async Task GetNewSummaries_NoBookmark_NewerMessagesReturned()
         {
-            DbModel.Message testMessage1 = await GetTestMessage1();
-            DbModel.Message testMessage2 = await GetTestMessage1();
-            DbModel.Message testMessage3 = await GetTestMessage1();
+            var testMessage1 = await GetTestMessage1();
+            var testMessage2 = await GetTestMessage1();
+            var testMessage3 = await GetTestMessage1();
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1, testMessage2, testMessage3);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
@@ -267,7 +336,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         [Fact]
         public async Task GetPartContent()
         {
-            DbModel.Message testMessage1 = await GetTestMessage1();
+            var testMessage1 = await GetTestMessage1();
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
@@ -286,7 +355,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         [InlineData("iso-8859-1")]
         public async Task GetMessageSource_QPMessage_ReturnsNotHeadersDecodedContent(string encodingName)
         {
-            DbModel.Message testMessage2 = await GetTestMessage_QuotedPrintable(Encoding.GetEncoding(encodingName));
+            var testMessage2 = await GetTestMessage_QuotedPrintable(Encoding.GetEncoding(encodingName));
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage2);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
@@ -302,7 +371,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         public async Task GetMessageRaw_QPMessage_ReturnsHeadersAndQPContent(string encodingName)
         {
             var encoding = Encoding.GetEncoding(encodingName);
-            DbModel.Message testMessage2 = await GetTestMessage_QuotedPrintable(encoding);
+            var testMessage2 = await GetTestMessage_QuotedPrintable(encoding);
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage2);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
@@ -315,7 +384,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             byte[] output = new byte[e.EstimateOutputLength(bytes.Length)];
             int outputLen = e.Encode(bytes, 0, bytes.Length, output);
             string qpResult = Encoding.ASCII.GetString(output, 0, outputLen);
-            
+
             Assert.Contains(qpResult, result);
         }
     }

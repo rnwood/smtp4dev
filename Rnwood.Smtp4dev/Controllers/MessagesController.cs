@@ -16,6 +16,7 @@ using Rnwood.Smtp4dev.DbModel;
 using NSwag.Annotations;
 using Rnwood.Smtp4dev.Server.Settings;
 using Org.BouncyCastle.Cms;
+using System.Text.RegularExpressions;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -82,6 +83,49 @@ namespace Rnwood.Smtp4dev.Controllers
                                          || m.From.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
                                          || m.To.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
                 );
+            }
+
+            return query
+                .Select(m => new MessageSummary(m))
+                .GetPaged(page, pageSize);
+        }
+
+        /// <summary>
+        /// Search for emails with given search terms. 
+        /// </summary>
+        /// <param name="searchCriteria">Criteria to search for an email</param>
+        /// <param name="mailboxName">Name of the mailbox to search in</param>
+        /// <param name="sortColumn">Column to sort the results by</param>
+        /// <param name="sortIsDescending">Indicates if sorting should be in descending order</param>
+        /// <param name="page">Page number for pagination</param>
+        /// <param name="pageSize">Number of items per page</param>
+        /// <returns>Returns a list of message summaries including basic details but not the content</returns>
+        [HttpPut]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.PagedResult<MessageSummary>), Description = "")]
+        public ApiModel.PagedResult<MessageSummary> Find([FromBody] SearchMessagesCriteria searchCriteria, string mailboxName = MailboxOptions.DEFAULTNAME, string sortColumn = "receivedDate", bool sortIsDescending = true, int page = 1, int pageSize = 5)
+        {
+            IEnumerable<DbModel.Message> query = messagesRepository.GetMessages(mailboxName, true)
+                .Include(m => m.Relays)
+                .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""));
+
+            if (!string.IsNullOrEmpty(searchCriteria.To))
+            {
+                query = query.Where(m => m.To.Contains(searchCriteria.To, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(searchCriteria.Subject))
+            {
+                query = query.Where(m => m.Subject.Contains(searchCriteria.Subject, StringComparison.OrdinalIgnoreCase));
+            }
+
+            if (!string.IsNullOrEmpty(searchCriteria.Content))
+            {
+                query = query.Where(m => Regex.IsMatch(System.Text.Encoding.UTF8.GetString(m.Data), searchCriteria.Content, RegexOptions.IgnoreCase));
+            }
+
+            if (searchCriteria.DateFrom.HasValue)
+            {
+                query = query.Where(m => m.ReceivedDate >= searchCriteria.DateFrom);
             }
 
             return query
