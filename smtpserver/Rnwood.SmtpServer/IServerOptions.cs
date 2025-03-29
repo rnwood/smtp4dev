@@ -98,7 +98,7 @@ public interface IServerOptions
     /// <summary>
     /// Gets the TLS ciper suites to be allowed for the specified connection
     /// </summary>
-    /// <param name="connection">The connnection</param>
+    /// <param name="connection">The connection</param>
     /// <returns>Gets the TLS ciper suites to be allowed</returns>
     Task<TlsCipherSuite[]> GetTlsCipherSuites(IConnection connection);
 
