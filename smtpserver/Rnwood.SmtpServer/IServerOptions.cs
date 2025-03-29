@@ -96,10 +96,10 @@ public interface IServerOptions
     Task<SslProtocols> GetSSLProtocols(IConnection connection);
 
     /// <summary>
-    /// Gets the TLS ciper suites to be allowed for the specified connection
+    /// Gets the TLS cipher suites to be allowed for the specified connection
     /// </summary>
     /// <param name="connection">The connection</param>
-    /// <returns>Gets the TLS ciper suites to be allowed</returns>
+    /// <returns>Gets the TLS cipher suites to be allowed</returns>
     Task<TlsCipherSuite[]> GetTlsCipherSuites(IConnection connection);
 
     /// <summary>
