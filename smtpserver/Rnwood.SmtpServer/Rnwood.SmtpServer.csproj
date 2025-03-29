@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <Description>Rnwood.SmtpServer is an SMTP server component that can be embedded in application to allow them to receive and process emails using the SMTP protocol. This component powers the popular Smtp4dev application.</Description>
@@ -16,7 +16,7 @@
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>
     <GenerateFullPaths>true</GenerateFullPaths>
     <SymbolPackageFormat>snupkg</SymbolPackageFormat>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>default</LangVersion>
   </PropertyGroup>
 

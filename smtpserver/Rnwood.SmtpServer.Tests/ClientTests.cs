@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
 using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Threading.Tasks;
@@ -54,7 +55,7 @@ public partial class ClientTests
     [Fact]
     public async Task MailKit_SmtpUtf8()
     {
-        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, "test", (int)StandardSmtpPort.AssignAutomatically, false, [], [], null, null, SslProtocols.None)))
+        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, "test", (int)StandardSmtpPort.AssignAutomatically, false, [], [], null, null, SslProtocols.None, new System.Net.Security.TlsCipherSuite[]{ })))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -82,7 +83,7 @@ public partial class ClientTests
     [Fact]
     public async Task MailKit_NonSSL()
     {
-        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, "test",(int)StandardSmtpPort.AssignAutomatically, false, [], [], null, null, SslProtocols.None)))
+        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions(false, false, "test",(int)StandardSmtpPort.AssignAutomatically, false, [], [], null, null, SslProtocols.None, null)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -110,7 +111,7 @@ public partial class ClientTests
     {
         using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false,false, Dns.GetHostName(),
                    (int)StandardSmtpPort.AssignAutomatically, false, [], [],
-                   null, CreateSelfSignedCertificate(), SslProtocols.None)))
+                   null, CreateSelfSignedCertificate(), SslProtocols.None, null)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -138,7 +139,7 @@ public partial class ClientTests
     {
         using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false,false, Dns.GetHostName(),
                    (int)StandardSmtpPort.AssignAutomatically, false, [], [],
-                   CreateSelfSignedCertificate(), null, SslProtocols.None)))
+                   CreateSelfSignedCertificate(), null, SslProtocols.None, null)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
@@ -165,7 +166,7 @@ public partial class ClientTests
     [Fact]
     public async Task MailKit_NonSSL_StressTest()
     {
-        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false, false, "test", (int) StandardSmtpPort.AssignAutomatically, false, [], [], null, null, SslProtocols.None)))
+        using (SmtpServer server = new SmtpServer(new Rnwood.SmtpServer.ServerOptions( false, false, "test", (int) StandardSmtpPort.AssignAutomatically, false, [], [], null, null, SslProtocols.None, null)))
         {
             ConcurrentBag<IMessage> messages = new ConcurrentBag<IMessage>();
 
