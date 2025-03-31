@@ -53,7 +53,7 @@
     </PackageReference>
     <PackageReference Include="MimeKit" Version="4.9.0" />
     <PackageReference Include="Mono.Options" Version="6.12.0.148" />
-    <PackageReference Include="NSwag.AspNetCore" Version="14.2.0" />
+    <PackageReference Include="NSwag.AspNetCore" Version="14.3.0" />
     <PackageReference Include="Rnwood.LumiSoft.Net" Version="1.0.2" />
 
 
