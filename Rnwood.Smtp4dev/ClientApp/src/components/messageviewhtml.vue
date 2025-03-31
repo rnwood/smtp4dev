@@ -136,7 +136,7 @@
                     this.sanitizedHtml = this.html;
                 } else {
                     this.sanitizedHtml = sanitizeHtml(this.html, { allowedTags: sanitizeHtml.defaults.allowedTags.concat("img"), allowedSchemesByTag: { "img": ["cid", "data"] } });
-                    let normalizedOriginalHtml = sanitizeHtml(this.html, { allowedAttributes: false, allowedTags: false });
+                    let normalizedOriginalHtml = sanitizeHtml(this.html, { allowedAttributes: false, allowedTags: false, allowVulnerableTags: true });
                     this.wasSanitized = normalizedOriginalHtml !== this.sanitizedHtml;
                 }
             }
