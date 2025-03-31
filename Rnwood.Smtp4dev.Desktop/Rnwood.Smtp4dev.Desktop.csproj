@@ -29,7 +29,7 @@
   <ItemGroup>
     <PackageReference Include="H.NotifyIcon" Version="2.2.0" />
     <PackageReference Include="ParallelExtensionsExtras.NetFxStandard" Version="2.1.0" />
-    <PackageReference Include="Photino.NET" Version="3.2.3" />
+    <PackageReference Include="Photino.NET" Version="4.0.16" />
   </ItemGroup>
 
   <ItemGroup>
