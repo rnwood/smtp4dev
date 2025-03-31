@@ -35,7 +35,7 @@
     "node-polyfill-webpack-plugin": "^4.0.0",
     "sanitize-html": "^2.13.0",
     "sass": "^1.75.0",
-    "splitpanes": "^3.1.5",
+    "splitpanes": "^4.0.0",
     "srcdoc-polyfill": "^1.0.0",
     "ts-debounce": "^4.0.0",
     "ts-jest": "^29.1.2",
