@@ -53,6 +53,7 @@ namespace Rnwood.Smtp4dev
                 { "secureconnectionrequired", "Requires that SMTP clients use SSL/TLS", data => map.Add((data != null).ToString(), x => x.ServerOptions.SecureConnectionRequired) },
                 { "smtpallowanycredentials", "True if the SMTP server will allow any credentials to be used without checking them again the 'Users'", data => map.Add((data != null).ToString(), x => x.ServerOptions.SmtpAllowAnyCredentials) },
                 { "webauthenticationrequired", "Require authentication for web interface", data => map.Add((data != null).ToString(), x => x.ServerOptions.WebAuthenticationRequired) },
+                { "delivermessagestousersdefaultmailbox", "True if the mailbox recipient filter should be ignored for authenticated smtp sessions and messages should be delivered to the user's default mailbox instead", data => map.Add((data != null).ToString(), x => x.ServerOptions.DeliverMessagesToUsersDefaultMailbox) },
                 { "user=", "Adds a user and password combination for web, SMTP and IMAP. Use format username=password. This option can be repeated to add multiple users.", data =>
                        map.Add(data, x => x.ServerOptions.Users)},
                 { "SmtpAuthTypesNotSecure=", "SMTP auth type enabled when not using secure connection (choices: ANONYMOUS, PLAIN, LOGIN, CRAM-MD5). Separate values with comma.", data =>
