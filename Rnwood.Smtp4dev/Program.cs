@@ -154,8 +154,10 @@ namespace Rnwood.Smtp4dev
                 .ConfigureAppConfiguration(
                     (hostingContext, configBuilder) =>
                     {
+                        configBuilder.Sources.Clear();
                         var env = hostingContext.HostingEnvironment;
 
+                        configBuilder.Sources.Clear();
                         var cb = configBuilder
                             .SetBasePath(env.ContentRootPath)
                             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
@@ -180,8 +182,6 @@ namespace Rnwood.Smtp4dev
 
                         if (cmdLineOptions.DebugSettings)
                         {
-                            
-
                             Console.WriteLine(JsonSerializer.Serialize(new SettingsDebugInfo
                             {
                                 CmdLineArgs = Environment.GetCommandLineArgs(),
@@ -192,7 +192,7 @@ namespace Rnwood.Smtp4dev
 
                                     return new SettingsSourceDebugInfo
                                     {
-                                        Description = s is JsonConfigurationSource js ? js.Path : s.ToString(),
+                                        Description = s is JsonConfigurationSource js ? js.FileProvider.GetFileInfo(js.Path).PhysicalPath : s.ToString(),
                                         ServerOptions = source.GetSection("ServerOptions").Get<ServerOptionsSource>(),
                                         RelayOption = source.GetSection("RelayOptions").Get<RelayOptionsSource>(),
                                         DesktopOptions = source.GetSection("DesktopOptions").Get<DesktopOptionsSource>()
