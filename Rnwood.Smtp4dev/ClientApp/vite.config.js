@@ -23,5 +23,15 @@ export default defineConfig({
     build: {
         outDir: "../wwwroot",
         emptyOutDir: true
+    },
+    css: {
+        preprocessorOptions: {
+            sass: {
+                api: 'modern'
+            },
+            scss: {
+                api: 'modern'
+            }
+        }
     }
 })

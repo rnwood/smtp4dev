@@ -1,6 +1,8 @@
-﻿using System.Net;
+﻿using System.Diagnostics.CodeAnalysis;
+using System.Net;
 using System.Net.Security;
 using System.Security.Authentication;
+using System.Text.Json.Serialization;
 using Esprima.Ast;
 
 namespace Rnwood.Smtp4dev.Server.Settings
@@ -21,7 +23,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public TlsMode TlsMode { get; set; } = TlsMode.None;
 
-        public string SslProtocols { get; set; } = "";
+        [AllowNull]
+        public string SslProtocols { get; set; } = null;
 
         public string TlsCipherSuites { get; set; } = "";
 
