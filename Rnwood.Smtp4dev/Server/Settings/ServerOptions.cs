@@ -46,7 +46,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public UserOptions[] Users { get; set; } = [];
 
         public bool WebAuthenticationRequired { get; set; } = false;
-        public bool DeliverMessagesToUsersDefaultMailbox { get; set; } = false;
+        public bool DeliverMessagesToUsersDefaultMailbox { get; set; } = true;
 
         public string SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; } = "PLAIN,LOGIN,CRAM-MD5";
 

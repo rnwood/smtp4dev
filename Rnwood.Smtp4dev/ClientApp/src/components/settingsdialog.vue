@@ -121,19 +121,11 @@
                             </el-select>
                         </el-form-item>
 
-
-
                         <el-form-item label="Allow Any Credentials (off = see 'Users')" prop="server.smtpAllowAnyCredentials">
                             <el-icon v-if="server.lockedSettings.smtpAllowAnyCredentials" :title="`Locked: ${server.lockedSettings.smtpAllowAnyCredentials}`"><Lock /></el-icon>
 
                             <el-switch v-model="server.smtpAllowAnyCredentials" :disabled="server.lockedSettings.smtpAllowAnyCredentials" />
                         </el-form-item>
-
-                      <el-form-item label="Deliver messages to user's default mailbox" prop="server.deliverMessagesToUsersDefaultMailbox">
-                        <el-icon v-if="server.lockedSettings.deliverMessagesToUsersDefaultMailbox" :title="`Locked: ${server.lockedSettings.deliverMessagesToUsersDefaultMailbox}`"><Lock /></el-icon>
-
-                        <el-switch v-model="server.deliverMessagesToUsersDefaultMailbox" :disabled="server.lockedSettings.deliverMessagesToUsersDefaultMailbox" />
-                      </el-form-item>
 
                         <el-form-item label="Credentials validation expression (see comments in appsettings.json)" prop="server.credentialsValidationExpression">
 
@@ -267,13 +259,10 @@
                     </el-tab-pane>
                     <el-tab-pane label="Users">
 
-
                         <el-form-item>
                             Web/API, SMTP, IMAP Users:       <el-icon v-if="server.lockedSettings.users" :title="`Locked: ${server.lockedSettings.users}`"><Lock /></el-icon>
 
                         </el-form-item>
-
-
 
                         <div v-for="(user, index) in server.users" :key="index">
                             <el-form-item :prop="'server.users[' + index + ']'" :rules="{validator: checkUsernameUnique}">
@@ -309,6 +298,11 @@
                     </el-tab-pane>
                     <el-tab-pane label="Mailboxes">
 
+                        <el-form-item label="Deliver messages to sending user's default mailbox" prop="server.deliverMessagesToUsersDefaultMailbox">
+                            <el-icon v-if="server.lockedSettings.deliverMessagesToUsersDefaultMailbox" :title="`Locked: ${server.lockedSettings.deliverMessagesToUsersDefaultMailbox}`"><Lock /></el-icon>
+
+                            <el-switch v-model="server.deliverMessagesToUsersDefaultMailbox" :disabled="server.lockedSettings.deliverMessagesToUsersDefaultMailbox" />
+                        </el-form-item>
 
                         <el-form-item>
                             Mailboxes:       <el-icon v-if="server.lockedSettings.mailboxes" :title="`Locked: ${server.lockedSettings.mailboxes}`"><Lock /></el-icon>
