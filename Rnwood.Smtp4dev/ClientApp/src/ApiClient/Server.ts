@@ -16,7 +16,8 @@ export default class Server {
         relaySenderAddress: string,
         relayLogin: string,
         relayPassword: string,
-        webAuthenticationRequired: boolean,
+        webAuthenticationRequired: boolean, 
+        deliverMessagesToUsersDefaultMailbox: boolean,
         smtpAllowAnyCredentials: boolean,
         lockedSettings: { [key: string]: string },
         minimiseToTrayIcon: boolean,
@@ -56,6 +57,7 @@ export default class Server {
         this.relayPassword = relayPassword;
         this.lockedSettings = lockedSettings;
         this.webAuthenticationRequired = webAuthenticationRequired;
+        this.deliverMessagesToUsersDefaultMailbox = deliverMessagesToUsersDefaultMailbox;
         this.smtpAllowAnyCredentials = smtpAllowAnyCredentials;
         this.minimiseToTrayIcon = minimiseToTrayIcon;
         this.isDesktopApp = isDesktopApp;
@@ -95,6 +97,7 @@ export default class Server {
     relayPassword: string;
     lockedSettings: { [key: string]: string };
     webAuthenticationRequired: boolean;
+    deliverMessagesToUsersDefaultMailbox: boolean;
     smtpAllowAnyCredentials: boolean;
     minimiseToTrayIcon: boolean;
     isDesktopApp: boolean;

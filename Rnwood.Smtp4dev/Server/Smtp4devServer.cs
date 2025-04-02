@@ -371,15 +371,15 @@ namespace Rnwood.Smtp4dev.Server
             log.Information("Message received. Client address {clientAddress}, From {messageFrom}, To {messageTo}, SecureConnection: {secure}.",
                 e.Message.Session.ClientAddress, e.Message.From, e.Message.Recipients, e.Message.SecureConnection);
 
-            var targetMailboxesWithMatchedRecipients = GetTargetMailboxes(e.Message.Recipients);
+            var targetMailboxes = GetTargetMailboxes(e.Message.Recipients, e.Message.Session);
 
-            if (!targetMailboxesWithMatchedRecipients.Any())
+            if (!targetMailboxes.Any())
             {
                 log.Warning("Message with recipients {recipients} will be delivered to 0 mailboxes.", e.Message.Recipients);
                 return;
             }
 
-            foreach (var targetMailboxWithMatchedRecipients in targetMailboxesWithMatchedRecipients)
+            foreach (var targetMailboxWithMatchedRecipients in targetMailboxes)
             {
                 Message message = new MessageConverter().ConvertAsync(e.Message, targetMailboxWithMatchedRecipients.ToArray()).Result;
                 message.IsUnread = true;
@@ -388,10 +388,16 @@ namespace Rnwood.Smtp4dev.Server
             }
         }
 
-        private ILookup<MailboxOptions, string> GetTargetMailboxes(IEnumerable<string> recipients)
+        private ILookup<MailboxOptions, string> GetTargetMailboxes(IEnumerable<string> recipients, ISession messageSession)
         {
-            List<(MailboxOptions,string)> targetMailboxesWithMatchedRecipient = new List<(MailboxOptions, string)>();
+            if (serverOptions.CurrentValue.DeliverMessagesToUsersDefaultMailbox && messageSession.Authenticated && messageSession.AuthenticationCredentials is IAuthenticationCredentialsCanValidateWithPassword credentials)
+            {
+                String defaultMailbox = serverOptions.CurrentValue.Users.First(u => u.Username.Equals(credentials.Username)).DefaultMailbox;
+                MailboxOptions mailboxOption = serverOptions.CurrentValue.Mailboxes.First(m => m.Name.Equals(defaultMailbox));
+                return recipients.ToLookup(_ => mailboxOption, recipient => recipient);
+            }
 
+            List<(MailboxOptions,string)> targetMailboxesWithMatchedRecipient = new List<(MailboxOptions, string)>();
             foreach (var to in recipients)
             {
                 MailboxOptions targetMailbox = null;

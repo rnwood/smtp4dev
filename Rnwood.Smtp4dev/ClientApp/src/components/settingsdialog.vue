@@ -129,6 +129,12 @@
                             <el-switch v-model="server.smtpAllowAnyCredentials" :disabled="server.lockedSettings.smtpAllowAnyCredentials" />
                         </el-form-item>
 
+                      <el-form-item label="Deliver messages to user's default mailbox" prop="server.deliverMessagesToUsersDefaultMailbox">
+                        <el-icon v-if="server.lockedSettings.deliverMessagesToUsersDefaultMailbox" :title="`Locked: ${server.lockedSettings.deliverMessagesToUsersDefaultMailbox}`"><Lock /></el-icon>
+
+                        <el-switch v-model="server.deliverMessagesToUsersDefaultMailbox" :disabled="server.lockedSettings.deliverMessagesToUsersDefaultMailbox" />
+                      </el-form-item>
+
                         <el-form-item label="Credentials validation expression (see comments in appsettings.json)" prop="server.credentialsValidationExpression">
 
                             <el-input v-model="server.credentialsValidationExpression" :disabled="server.lockedSettings.credentialsValidationExpression">

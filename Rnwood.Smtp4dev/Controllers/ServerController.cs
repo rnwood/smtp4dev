@@ -96,6 +96,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 MessageValidationExpression = serverOptionsCurrentValue.MessageValidationExpression,
                 DisableIPv6 = serverOptionsCurrentValue.DisableIPv6,
                 WebAuthenticationRequired = serverOptionsCurrentValue.WebAuthenticationRequired,
+                DeliverMessagesToUsersDefaultMailbox = serverOptionsCurrentValue.DeliverMessagesToUsersDefaultMailbox,
                 Users = serverOptionsCurrentValue.Users,
 				Mailboxes = serverOptionsCurrentValue.Mailboxes,
                 DesktopMinimiseToTrayIcon = desktopOptions.CurrentValue.MinimiseToTrayIcon,
@@ -225,6 +226,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.Users = serverUpdate.Users;
 			newSettings.Mailboxes = serverUpdate.Mailboxes;
             newSettings.WebAuthenticationRequired = serverUpdate.WebAuthenticationRequired;
+            newSettings.DeliverMessagesToUsersDefaultMailbox = serverUpdate.DeliverMessagesToUsersDefaultMailbox;
             newSettings.SmtpAllowAnyCredentials = serverUpdate.SmtpAllowAnyCredentials;
 			newSettings.SmtpEnabledAuthTypesWhenNotSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection);
 			newSettings.SmtpEnabledAuthTypesWhenSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection);
