@@ -35,30 +35,33 @@ public class StartTlsVerb : IVerb
             StandardSmtpResponseCode.ServiceReady,
             "Ready to start TLS")).ConfigureAwait(false);
 
-        SslProtocols sslProtos;
-
-        string ver = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
-        if (ver == null || !ver.StartsWith(".NETCoreApp,"))
-        {
-            sslProtos = SslProtocols.Tls12 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Ssl3 |
-                        SslProtocols.Ssl2;
-        }
-        else
-        {
-            sslProtos = SslProtocols.None;
-        }
+        SslServerAuthenticationOptions options = await GetSslAuthOptions(connection, certificate);
 
         await connection.ApplyStreamFilter(async stream =>
         {
             SslStream sslStream = new SslStream(stream);
-            await sslStream.AuthenticateAsServerAsync(
-                certificate,
-                false,
-                sslProtos,
-                false).ConfigureAwait(false);
+            await sslStream.AuthenticateAsServerAsync(options).ConfigureAwait(false);
             return sslStream;
         }).ConfigureAwait(false);
 
         connection.Session.SecureConnection = true;
+    }
+
+    private static async Task<SslServerAuthenticationOptions> GetSslAuthOptions(IConnection connection, X509Certificate certificate)
+    {
+        SslProtocols sslProtos = await connection.Server.Options.GetSSLProtocols(connection);
+        TlsCipherSuite[] tlsCipherSuites = await connection.Server.Options.GetTlsCipherSuites(connection);
+
+#pragma warning disable CA1416 // Validate platform compatibility
+        SslServerAuthenticationOptions options = new SslServerAuthenticationOptions
+        {
+            ServerCertificate = certificate,
+            CertificateRevocationCheckMode = X509RevocationMode.NoCheck,
+            ClientCertificateRequired = false,
+            EnabledSslProtocols = sslProtos,
+            CipherSuitesPolicy = tlsCipherSuites != null ? new CipherSuitesPolicy(tlsCipherSuites) : null
+        };
+#pragma warning restore CA1416 // Validate platform compatibility
+        return options;
     }
 }

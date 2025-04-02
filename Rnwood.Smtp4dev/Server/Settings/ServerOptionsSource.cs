@@ -1,6 +1,9 @@
 ﻿using System.Net;
+using System.Net.Security;
+using System.Security.Authentication;
 using Ardalis.GuardClauses;
 using Esprima.Ast;
+using LumiSoft.Net;
 
 namespace Rnwood.Smtp4dev.Server.Settings
 {
@@ -10,7 +13,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         private int? port;
 
-        public int? Port { get => port; set => port = value.HasValue ? Guard.Against.OutOfRange(value.Value, nameof(value), 0, 65535) : null; }
+        public int? Port { get; set; }
         public bool? AllowRemoteConnections { get; set; }
 
         public string Database { get; set; }
@@ -47,13 +50,18 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public bool? DisableIPv6 { get; set; }
 
         public UserOptions[] Users { get; set; }
+
         public bool? WebAuthenticationRequired { get; internal set; }
         public bool? DeliverMessagesToUsersDefaultMailbox { get; set; }
-        public string[] SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; }
+        public string SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; }
 
-        public string[] SmtpEnabledAuthTypesWhenSecureConnection { get; set; }
+        public string SmtpEnabledAuthTypesWhenSecureConnection { get; set; }
 
         public MailboxOptions[] Mailboxes { get; set; }
 
-    }
+        public SslProtocols[] SslProtocols { get; set; }
+
+		public string TlsCipherSuites { get; set; }
+
+	}
 }

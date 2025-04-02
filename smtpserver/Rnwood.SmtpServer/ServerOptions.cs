@@ -7,6 +7,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Net.Security;
+using System.Reflection;
+using System.Runtime.Versioning;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -28,6 +32,8 @@ public class ServerOptions : IServerOptions
     private readonly string[] secureAuthMechanismIds;
     private readonly X509Certificate implcitTlsCertificate;
     private readonly X509Certificate startTlsCertificate;
+    private readonly SslProtocols sslProtocols;
+    private readonly TlsCipherSuite[] tlsCipherSuites;
 
 
     /// <summary>
@@ -42,6 +48,8 @@ public class ServerOptions : IServerOptions
     /// <param name="secureAuthMechanismNamesIds">The identifier of AUTH mechanisms that will be allowed for secure connections.</param>
     /// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
     /// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
+    /// <param name="sslProtocols">The SSL protocol versions to allow</param>
+    ///     /// <param name="tlsCipherSuites">The TLS cipher suites to allow</param>
     public ServerOptions(
         bool allowRemoteConnections,
         bool enableIpV6,
@@ -51,7 +59,9 @@ public class ServerOptions : IServerOptions
         string[] nonSecureAuthMechanismIds,
         string[] secureAuthMechanismNamesIds,
         X509Certificate implcitTlsCertificate,
-        X509Certificate startTlsCertificate)
+        X509Certificate startTlsCertificate,
+        SslProtocols sslProtocols,
+        TlsCipherSuite[] tlsCipherSuites)
     {
         DomainName = domainName;
         PortNumber = portNumber;
@@ -62,6 +72,8 @@ public class ServerOptions : IServerOptions
         this.requireAuthentication = requireAuthentication;
         this.nonSecureAuthMechanismIds = nonSecureAuthMechanismIds;
         this.secureAuthMechanismIds = secureAuthMechanismNamesIds ?? throw new ArgumentNullException(nameof(secureAuthMechanismNamesIds));
+        this.sslProtocols = sslProtocols;
+        this.tlsCipherSuites = tlsCipherSuites;
     }
 
 
@@ -138,7 +150,8 @@ public class ServerOptions : IServerOptions
         if (connection.Session.SecureConnection)
         {
             return Task.FromResult(this.secureAuthMechanismIds.Contains(authMechanism.Identifier, StringComparer.InvariantCultureIgnoreCase));
-        } else
+        }
+        else
         {
 
             return Task.FromResult(this.nonSecureAuthMechanismIds.Contains(authMechanism.Identifier, StringComparer.InvariantCultureIgnoreCase));
@@ -218,6 +231,18 @@ public class ServerOptions : IServerOptions
         }
 
         return AuthenticationResult.Failure;
+    }
+
+    /// <inheritdoc/>
+    public Task<SslProtocols> GetSSLProtocols(IConnection connection)
+    {
+        return Task.FromResult(this.sslProtocols);
+    }
+
+    /// <inheritdoc/>
+    public Task<TlsCipherSuite[]> GetTlsCipherSuites(IConnection connection)
+    {
+        return Task.FromResult(this.tlsCipherSuites);
     }
 
     /// <summary>

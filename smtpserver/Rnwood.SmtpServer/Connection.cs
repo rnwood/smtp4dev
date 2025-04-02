@@ -159,6 +159,25 @@ public class Connection : IConnection
         return result;
     }
 
+    private async Task<SslServerAuthenticationOptions> GetSslAuthOptions()
+    {
+        SslProtocols sslProtos = await this.Server.Options.GetSSLProtocols(this);
+        TlsCipherSuite[] tlsCipherSuites = await this.Server.Options.GetTlsCipherSuites(this);
+        X509Certificate certificate = await this.Server.Options.GetSSLCertificate(this);
+
+#pragma warning disable CA1416 // Validate platform compatibility
+        SslServerAuthenticationOptions options = new SslServerAuthenticationOptions
+        {
+            ServerCertificate = certificate,
+            CertificateRevocationCheckMode = X509RevocationMode.NoCheck,
+            ClientCertificateRequired = false,
+            EnabledSslProtocols = sslProtos,
+            CipherSuitesPolicy = tlsCipherSuites != null ? new CipherSuitesPolicy(tlsCipherSuites) : null
+        };
+#pragma warning restore CA1416 // Validate platform compatibility
+        return options;
+    }
+
     /// <summary>
     ///     Start the Tls stream.
     /// </summary>
@@ -168,23 +187,9 @@ public class Connection : IConnection
     {
         SslStream sslStream = new SslStream(s);
 
-        SslProtocols sslProtos;
+        var options = await GetSslAuthOptions();
 
-        string ver = Assembly.GetEntryAssembly()?.GetCustomAttribute<TargetFrameworkAttribute>()?.FrameworkName;
-        if (ver == null || !ver.StartsWith(".NETCoreApp,"))
-        {
-            sslProtos = SslProtocols.Tls12 | SslProtocols.Tls | SslProtocols.Tls11 | SslProtocols.Ssl3 |
-                        SslProtocols.Ssl2;
-        }
-        else
-        {
-            sslProtos = SslProtocols.None;
-        }
-
-        X509Certificate cert =
-            await Server.Options.GetSSLCertificate(this).ConfigureAwait(false);
-
-        await sslStream.AuthenticateAsServerAsync(cert, false, sslProtos, false).ConfigureAwait(false);
+        await sslStream.AuthenticateAsServerAsync(options).ConfigureAwait(false);
         return sslStream;
     }
 

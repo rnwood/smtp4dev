@@ -24,19 +24,19 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="FluentAssertions" Version="7.0.0" />
-    <PackageReference Include="MailKit" Version="4.9.0" />
+    <PackageReference Include="FluentAssertions" Version="8.2.0" />
+    <PackageReference Include="MailKit" Version="4.11.0" />
     <PackageReference Include="MedallionShell" Version="1.6.2" />
     <PackageReference Include="NSubstitute" Version="5.3.0" />
     <PackageReference Include="ReflectionMagic" Version="5.0.1" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
-    <PackageReference Include="Selenium.Support" Version="4.27.0" />
-    <PackageReference Include="Selenium.WebDriver" Version="4.27.0" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.13.0" />
+    <PackageReference Include="Selenium.Support" Version="4.30.0" />
+    <PackageReference Include="Selenium.WebDriver" Version="4.30.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
-    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.5.1" />
-    <PackageReference Include="WebDriverManager" Version="2.17.4" />
-    <PackageReference Include="xunit" Version="2.9.2" />
-    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.1">
+    <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.0.2" />
+    <PackageReference Include="WebDriverManager" Version="2.17.5" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.0.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>

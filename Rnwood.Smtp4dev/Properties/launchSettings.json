@@ -2,7 +2,7 @@
   "profiles": {
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "--db=database2.db",
+      "commandLineArgs": "--db=database2.db --debugsettings",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",

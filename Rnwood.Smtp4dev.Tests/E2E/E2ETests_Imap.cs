@@ -33,7 +33,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 string messageSubject = Guid.NewGuid().ToString();
                 using (SmtpClient smtpClient = new SmtpClient())
                 {
-                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls13;
                     smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
                     smtpClient.CheckCertificateRevocation = false;
                     MimeMessage message = new MimeMessage();

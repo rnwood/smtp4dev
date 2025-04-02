@@ -6,6 +6,8 @@
 using System;
 using System.Collections.Generic;
 using System.Net;
+using System.Net.Security;
+using System.Security.Authentication;
 using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
@@ -85,6 +87,20 @@ public interface IServerOptions
     /// <param name="connection">The connection.</param>
     /// <returns>A <see cref="Task{T}" /> representing the async operation.</returns>
     Task<X509Certificate> GetSSLCertificate(IConnection connection);
+
+    /// <summary>
+    /// Gets the SSL protocols to be allowed for the specified connection
+    /// </summary>
+    /// <param name="connection">The connection</param>
+    /// <returns>The SSL protocols to be allowed</returns>
+    Task<SslProtocols> GetSSLProtocols(IConnection connection);
+
+    /// <summary>
+    /// Gets the TLS cipher suites to be allowed for the specified connection
+    /// </summary>
+    /// <param name="connection">The connection</param>
+    /// <returns>Gets the TLS cipher suites to be allowed</returns>
+    Task<TlsCipherSuite[]> GetTlsCipherSuites(IConnection connection);
 
     /// <summary>
     ///     Determines whether the specified auth mechanism should be enabled for the specified connection.

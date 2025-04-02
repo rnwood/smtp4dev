@@ -38,6 +38,16 @@ namespace Rnwood.Smtp4dev.Server
 
             logger.Information("TLS mode: {TLSMode}", options.TlsMode);
 
+            if (options.SslProtocols.Length > 0)
+            {
+                logger.Information("SSL protocols: {SslProtocols}", options.SslProtocols);
+            }
+
+            if (options.TlsCipherSuites.Length > 0)
+            {
+                logger.Information("TLS cipher suites: {TlsCipherSuites}", options.TlsCipherSuites);
+            }
+
             if (options.TlsMode != TlsMode.None)
             {
                 if (!string.IsNullOrEmpty(options.TlsCertificate))
