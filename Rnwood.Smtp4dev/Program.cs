@@ -154,7 +154,6 @@ namespace Rnwood.Smtp4dev
                 .ConfigureAppConfiguration(
                     (hostingContext, configBuilder) =>
                     {
-                        configBuilder.Sources.Clear();
                         var env = hostingContext.HostingEnvironment;
 
                         configBuilder.Sources.Clear();
