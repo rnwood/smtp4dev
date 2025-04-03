@@ -16,6 +16,7 @@ using System.Runtime.ConstrainedExecution;
 using Namotion.Reflection;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using DeepEqual.Syntax;
+using System.Text.Json.Serialization.Metadata;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -55,7 +56,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
             if (!string.IsNullOrEmpty(currentUserName))
             {
-               var user = serverOptions.CurrentValue.Users.FirstOrDefault(u => currentUserName.Equals(u.Username, StringComparison.CurrentCultureIgnoreCase));
+                var user = serverOptions.CurrentValue.Users.FirstOrDefault(u => currentUserName.Equals(u.Username, StringComparison.CurrentCultureIgnoreCase));
                 if (user != null)
                 {
                     currentUserDefaultMailbox = user.DefaultMailbox ?? MailboxOptions.DEFAULTNAME;
@@ -98,14 +99,14 @@ namespace Rnwood.Smtp4dev.Controllers
                 WebAuthenticationRequired = serverOptionsCurrentValue.WebAuthenticationRequired,
                 DeliverMessagesToUsersDefaultMailbox = serverOptionsCurrentValue.DeliverMessagesToUsersDefaultMailbox,
                 Users = serverOptionsCurrentValue.Users,
-				Mailboxes = serverOptionsCurrentValue.Mailboxes,
+                Mailboxes = serverOptionsCurrentValue.Mailboxes,
                 DesktopMinimiseToTrayIcon = desktopOptions.CurrentValue.MinimiseToTrayIcon,
                 IsDesktopApp = cmdLineOptions.IsDesktopApp,
-				SmtpEnabledAuthTypesWhenNotSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
-				SmtpEnabledAuthTypesWhenSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                SmtpEnabledAuthTypesWhenNotSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                SmtpEnabledAuthTypesWhenSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 CurrentUserName = currentUserName,
                 CurrentUserDefaultMailboxName = currentUserDefaultMailbox
-			};
+            };
         }
 
         private IDictionary<string, string> GetLockedSettings(bool toJsonCasing)
@@ -186,11 +187,11 @@ namespace Rnwood.Smtp4dev.Controllers
                 return Unauthorized("Settings are locked");
             }
 
+            var currentSettings = GetServer();
 
             var lockedSettings = GetLockedSettings(false);
             if (lockedSettings.Any())
             {
-                var currentSettings = GetServer();
                 foreach (var lockedSetting in lockedSettings)
                 {
                     var oldValue = currentSettings.TryGetPropertyValue<object>(lockedSetting.Key);
@@ -204,52 +205,64 @@ namespace Rnwood.Smtp4dev.Controllers
                 }
             }
 
+            SettingsFile defaultSettingsFile = JsonSerializer.Deserialize(System.IO.File.ReadAllText(hostingEnvironmentHelper.GetDefaultSettingsFilePath()), SettingsFileSerializationContext.Default.SettingsFile);
 
-            ServerOptions newSettings = serverOptions.CurrentValue with { };
-            RelayOptions newRelaySettings = relayOptions.CurrentValue with { };
-            DesktopOptions newDesktopSettings = desktopOptions.CurrentValue with { };
 
-            newSettings.Port = serverUpdate.Port;
-            newSettings.HostName = serverUpdate.HostName;
-            newSettings.AllowRemoteConnections = serverUpdate.AllowRemoteConnections;
-            newSettings.NumberOfMessagesToKeep = serverUpdate.NumberOfMessagesToKeep;
-            newSettings.NumberOfSessionsToKeep = serverUpdate.NumberOfSessionsToKeep;
-            newSettings.ImapPort = serverUpdate.ImapPort;
-            newSettings.DisableMessageSanitisation = serverUpdate.DisableMessageSanitisation;
-            newSettings.TlsMode = Enum.Parse<TlsMode>(serverUpdate.TlsMode);
-            newSettings.AuthenticationRequired = serverUpdate.AuthenticationRequired;
-            newSettings.SecureConnectionRequired = serverUpdate.SecureConnectionRequired;
-            newSettings.CredentialsValidationExpression = serverUpdate.CredentialsValidationExpression;
-            newSettings.RecipientValidationExpression = serverUpdate.RecipientValidationExpression;
-            newSettings.MessageValidationExpression = serverUpdate.MessageValidationExpression;
-            newSettings.DisableIPv6 = serverUpdate.DisableIPv6;
-            newSettings.Users = serverUpdate.Users;
-			newSettings.Mailboxes = serverUpdate.Mailboxes;
-            newSettings.WebAuthenticationRequired = serverUpdate.WebAuthenticationRequired;
-            newSettings.DeliverMessagesToUsersDefaultMailbox = serverUpdate.DeliverMessagesToUsersDefaultMailbox;
-            newSettings.SmtpAllowAnyCredentials = serverUpdate.SmtpAllowAnyCredentials;
-			newSettings.SmtpEnabledAuthTypesWhenNotSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection);
-			newSettings.SmtpEnabledAuthTypesWhenSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection);
+            string editableSettingsFilePath = hostingEnvironmentHelper.GetEditableSettingsFilePath();
 
-			newRelaySettings.SmtpServer = serverUpdate.RelaySmtpServer;
-            newRelaySettings.SmtpPort = serverUpdate.RelaySmtpPort;
-            newRelaySettings.TlsMode = Enum.Parse<SecureSocketOptions>(serverUpdate.RelayTlsMode);
-            newRelaySettings.SenderAddress = serverUpdate.RelaySenderAddress;
-            newRelaySettings.Login = serverUpdate.RelayLogin;
-            newRelaySettings.Password = serverUpdate.RelayPassword;
-            newRelaySettings.AutomaticEmails = serverUpdate.RelayAutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray();
-            newRelaySettings.AutomaticRelayExpression = serverUpdate.RelayAutomaticRelayExpression;
+            SettingsFile newSettingsFile = new SettingsFile();
+            if (editableSettingsFilePath != null && System.IO.File.Exists(editableSettingsFilePath))
+            {
+                newSettingsFile = JsonSerializer.Deserialize(System.IO.File.ReadAllText(hostingEnvironmentHelper.GetEditableSettingsFilePath()), SettingsFileSerializationContext.Default.SettingsFile);
+            }
+
+            ServerOptionsSource newSettings = newSettingsFile.ServerOptions = newSettingsFile.ServerOptions ?? new ServerOptionsSource();
+            RelayOptionsSource newRelaySettings = newSettingsFile.RelayOptions ?? newSettingsFile.RelayOptions ?? new RelayOptionsSource();
+            DesktopOptionsSource newDesktopSettings = newSettingsFile.DesktopOptions ?? newSettingsFile.DesktopOptions ?? new DesktopOptionsSource();
+
+            //Horrible without reflection! Maybe source generators can do this?
+            newSettings.Port = serverUpdate.Port != defaultSettingsFile.ServerOptions.Port ? serverUpdate.Port : null;
+            newSettings.HostName = serverUpdate.HostName != defaultSettingsFile.ServerOptions.HostName && serverUpdate.HostName != currentSettings.HostName ? serverUpdate.HostName : null;
+            newSettings.AllowRemoteConnections = serverUpdate.AllowRemoteConnections != defaultSettingsFile.ServerOptions.AllowRemoteConnections ? serverUpdate.AllowRemoteConnections : null;
+            newSettings.NumberOfMessagesToKeep = serverUpdate.NumberOfMessagesToKeep != defaultSettingsFile.ServerOptions.NumberOfMessagesToKeep ? serverUpdate.NumberOfMessagesToKeep : null;
+            newSettings.NumberOfSessionsToKeep = serverUpdate.NumberOfSessionsToKeep != defaultSettingsFile.ServerOptions.NumberOfSessionsToKeep ? serverUpdate.NumberOfSessionsToKeep : null;
+            newSettings.ImapPort = serverUpdate.ImapPort != defaultSettingsFile.ServerOptions.ImapPort ? serverUpdate.ImapPort : null;
+            newSettings.DisableMessageSanitisation = serverUpdate.DisableMessageSanitisation != defaultSettingsFile.ServerOptions.DisableMessageSanitisation ? serverUpdate.DisableMessageSanitisation : null;
+            newSettings.TlsMode =  Enum.Parse<TlsMode>(serverUpdate.TlsMode) != defaultSettingsFile.ServerOptions.TlsMode ? Enum.Parse<TlsMode>(serverUpdate.TlsMode) : null;
+            newSettings.AuthenticationRequired = serverUpdate.AuthenticationRequired != defaultSettingsFile.ServerOptions.AuthenticationRequired ? serverUpdate.AuthenticationRequired : null;
+            newSettings.SecureConnectionRequired = serverUpdate.SecureConnectionRequired != defaultSettingsFile.ServerOptions.SecureConnectionRequired ? serverUpdate.SecureConnectionRequired : null;
+            newSettings.CredentialsValidationExpression = serverUpdate.CredentialsValidationExpression != defaultSettingsFile.ServerOptions.CredentialsValidationExpression ? serverUpdate.CredentialsValidationExpression : null;
+            newSettings.RecipientValidationExpression = serverUpdate.RecipientValidationExpression != defaultSettingsFile.ServerOptions.RecipientValidationExpression ? serverUpdate.RecipientValidationExpression : null;
+            newSettings.MessageValidationExpression = serverUpdate.MessageValidationExpression != defaultSettingsFile.ServerOptions.MessageValidationExpression ? serverUpdate.MessageValidationExpression : null;
+            newSettings.DisableIPv6 = serverUpdate.DisableIPv6 != defaultSettingsFile.ServerOptions.DisableIPv6 ? serverUpdate.DisableIPv6 : null;
+            newSettings.Users = serverUpdate.Users != defaultSettingsFile.ServerOptions.Users ? serverUpdate.Users : null;
+            newSettings.Mailboxes = serverUpdate.Mailboxes != defaultSettingsFile.ServerOptions.Mailboxes ? serverUpdate.Mailboxes : null;
+            newSettings.WebAuthenticationRequired = serverUpdate.WebAuthenticationRequired != defaultSettingsFile.ServerOptions.WebAuthenticationRequired ? serverUpdate.WebAuthenticationRequired : null;
+            newSettings.DeliverMessagesToUsersDefaultMailbox = serverUpdate.DeliverMessagesToUsersDefaultMailbox != defaultSettingsFile.ServerOptions.DeliverMessagesToUsersDefaultMailbox ? serverUpdate.DeliverMessagesToUsersDefaultMailbox : null;
+            newSettings.SmtpAllowAnyCredentials = serverUpdate.SmtpAllowAnyCredentials != defaultSettingsFile.ServerOptions.SmtpAllowAnyCredentials ? serverUpdate.SmtpAllowAnyCredentials : null;
+            newSettings.SmtpEnabledAuthTypesWhenNotSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection) != defaultSettingsFile.ServerOptions.SmtpEnabledAuthTypesWhenNotSecureConnection ? string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection) : null;
+            newSettings.SmtpEnabledAuthTypesWhenSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection) != defaultSettingsFile.ServerOptions.SmtpEnabledAuthTypesWhenSecureConnection ? string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection) : null;
+
+            newRelaySettings.SmtpServer = serverUpdate.RelaySmtpServer != defaultSettingsFile.RelayOptions.SmtpServer ? serverUpdate.RelaySmtpServer : null;
+            newRelaySettings.SmtpPort = serverUpdate.RelaySmtpPort != defaultSettingsFile.RelayOptions.SmtpPort ? serverUpdate.RelaySmtpPort : null;
+            newRelaySettings.TlsMode = Enum.Parse<SecureSocketOptions>(serverUpdate.RelayTlsMode) != defaultSettingsFile.RelayOptions.TlsMode ? Enum.Parse<SecureSocketOptions>(serverUpdate.RelayTlsMode) : null;
+            newRelaySettings.SenderAddress = serverUpdate.RelaySenderAddress != defaultSettingsFile.RelayOptions.SenderAddress ? serverUpdate.RelaySenderAddress : null;
+            newRelaySettings.Login = serverUpdate.RelayLogin != defaultSettingsFile.RelayOptions.Login ? serverUpdate.RelayLogin : null;
+            newRelaySettings.Password = serverUpdate.RelayPassword != defaultSettingsFile.RelayOptions.Password ? serverUpdate.RelayPassword : null;
+            newRelaySettings.AutomaticEmails = serverUpdate.RelayAutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() != defaultSettingsFile.RelayOptions.AutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() ? serverUpdate.RelayAutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() : null;
+            newRelaySettings.AutomaticRelayExpression = serverUpdate.RelayAutomaticRelayExpression != defaultSettingsFile.RelayOptions.AutomaticRelayExpression ? serverUpdate.RelayAutomaticRelayExpression : null;
 
             newDesktopSettings.MinimiseToTrayIcon = serverUpdate.DesktopMinimiseToTrayIcon;
 
-            System.IO.File.WriteAllText(hostingEnvironmentHelper.GetEditableSettingsFilePath(),
-                JsonSerializer.Serialize(new SettingsFile {
+            System.IO.File.WriteAllText(editableSettingsFilePath,
+                JsonSerializer.Serialize(new SettingsFile
+                {
                     ServerOptions = newSettings,
                     RelayOptions = newRelaySettings,
                     DesktopOptions = newDesktopSettings
                 },
-                    SettingsFileSerializationContext.Default.SettingsFile)
-            );
+                    SettingsFileSerializationContext.Default.SettingsFile
+            ));
 
             if (!serverUpdate.IsRunning && this.server.IsRunning)
             {
@@ -276,17 +289,16 @@ namespace Rnwood.Smtp4dev.Controllers
 
     internal class SettingsFile
     {
-        public ServerOptions ServerOptions { get; set; }
-        public RelayOptions RelayOptions { get; set; }
+        public ServerOptionsSource ServerOptions { get; set; }
+        public RelayOptionsSource RelayOptions { get; set; }
 
-        public DesktopOptions DesktopOptions { get; set; }
+        public DesktopOptionsSource DesktopOptions { get; set; }
     }
 
-
-    [JsonSourceGenerationOptions(WriteIndented = true)]
+  
+    [JsonSourceGenerationOptions(WriteIndented = true, DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull, ReadCommentHandling =JsonCommentHandling.Skip, UseStringEnumConverter = true)]
     [JsonSerializable(typeof(SettingsFile))]
     internal partial class SettingsFileSerializationContext : JsonSerializerContext
     {
-
     }
 }

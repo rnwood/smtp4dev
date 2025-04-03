@@ -7,6 +7,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
     public record RelayOptions
     {
         private int smtpPort = 25;
+
+        [JsonIgnore]
         public bool IsEnabled => SmtpServer != string.Empty;
 
         public string SmtpServer { get; set; } = string.Empty;

@@ -11,6 +11,9 @@ namespace Rnwood.Smtp4dev.Service
     public interface IHostingEnvironmentHelper
     {
         string GetEditableSettingsFilePath();
+
+        string GetDefaultSettingsFilePath();
+
         bool IsRunningInContainer();
 
         bool SettingsAreEditable { get; }
@@ -105,6 +108,11 @@ namespace Rnwood.Smtp4dev.Service
             }
         }
 
+
+        public string GetDefaultSettingsFilePath()
+        {
+            return Path.Join(hostEnvironment.ContentRootPath, "appsettings.json");
+        }
 
         /// <summary>
         /// Get path to appsettings.json to which settings changed at runtime should be saved.
