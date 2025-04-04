@@ -50,12 +50,12 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public bool? DisableIPv6 { get; set; }
 
         public UserOptions[] Users { get; set; }
-
         public bool? WebAuthenticationRequired { get; set; }
-        public bool? DeliverMessagesToUsersDefaultMailbox { get; set; }
-        public string SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; }
 
-        public string SmtpEnabledAuthTypesWhenSecureConnection { get; set; }
+        public bool? DeliverMessagesToUsersDefaultMailbox { get; set; }
+        public string SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; }     
+
+        public string SmtpEnabledAuthTypesWhenSecureConnection { get; set; }  
 
         public MailboxOptions[] Mailboxes { get; set; }
 
