@@ -10,7 +10,6 @@ using Esprima.Ast;
 using Jint;
 using Jint.Native;
 using Jint.Runtime;
-using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Microsoft.Extensions.Options;
 using Rnwood.Smtp4dev.DbModel;
