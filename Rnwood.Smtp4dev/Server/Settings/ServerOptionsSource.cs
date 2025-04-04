@@ -52,11 +52,10 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public UserOptions[] Users { get; set; }
         public bool? WebAuthenticationRequired { get; set; }
 
-        public bool? WebAuthenticationRequired { get; set; }
         public bool? DeliverMessagesToUsersDefaultMailbox { get; set; }
-        public string SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; }        public string SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; }
+        public string SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; }     
 
-        public string SmtpEnabledAuthTypesWhenSecureConnection { get; set; }        public string SmtpEnabledAuthTypesWhenSecureConnection { get; set; }
+        public string SmtpEnabledAuthTypesWhenSecureConnection { get; set; }  
 
         public MailboxOptions[] Mailboxes { get; set; }
 
