@@ -7,6 +7,7 @@ import Home from '@/components/home/home.vue';
 import App from '@/components/app/app.vue';
 import useIcons from './icons';
 
+
 const supportedBrowser = typeof (document.createElement("p").style.flex) != "undefined" && Object.prototype.hasOwnProperty.call(window, "Reflect") && Object.prototype.hasOwnProperty.call(window, "Promise");
 
 if (!supportedBrowser) {
