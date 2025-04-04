@@ -8,6 +8,22 @@ html, body {
     font-size: 14px;
 }
 
+html.dark body {
+    background-color: black;
+}
+
+html.dark .logo {
+    filter: invert();
+}
+
+html.dark .textview {
+    filter: invert();
+}
+
+html.dark .htmlview {
+    filter: invert();
+}
+
 #app-root {
     width: 100%;
     height: 100%;
