@@ -20,7 +20,7 @@ namespace Rnwood.Smtp4dev.Tests
     public class ImapSearchTranslatorTests
     {
         [Fact]
-        public async Task Unsupported()
+        public void Unsupported()
         {
 
             ImapSearchTranslator imapSearchTranslator = new ImapSearchTranslator();

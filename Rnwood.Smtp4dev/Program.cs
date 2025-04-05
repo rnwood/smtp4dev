@@ -266,7 +266,9 @@ namespace Rnwood.Smtp4dev
     .ReadFrom.Configuration(configuration);
                 if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
                 {
+#pragma warning disable CA1416 // Validate platform compatibility
                     logConfigBuilder.WriteTo.EventLog("smtp4dev");
+#pragma warning restore CA1416 // Validate platform compatibility
                 }
                 Log.Logger = logConfigBuilder
                     .CreateLogger();
@@ -277,8 +279,11 @@ namespace Rnwood.Smtp4dev
                 var logConfigBuilder = new LoggerConfiguration();
                 if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
                 {
+#pragma warning disable CA1416 // Validate platform compatibility
                     logConfigBuilder.WriteTo.EventLog("smtp4dev");
-                }else
+#pragma warning restore CA1416 // Validate platform compatibility
+                }
+                else
                 {
                     logConfigBuilder.WriteTo.Console();
                 }
