@@ -3,7 +3,10 @@
         <el-header height="35" style="display:flex; flex-wrap:wrap; align-items: end; column-gap: 12px;">
             <div style="flex: 0 0 content">
                 <a href="https://github.com/rnwood/smtp4dev/" target="_blank">
-                    <img height="35" src="/logo.png" class="logo" alt="smtp4dev" />
+
+                    <UseDark v-slot="{ isDark, toggleDark }">
+                        <img height="35" :src="isDark ? '/logo-dark.png' : '/logo.png'" class="logo" alt="smtp4dev" />
+                    </UseDark>
                 </a>
             </div>
 
@@ -30,11 +33,11 @@
         </el-header>
         <settingsdialog v-model="settingsVisible" :connection="connection" v-on:closed="showSettings(false)" />
         <el-main class="fill vfillpanel">
-            <el-tabs id="maintabs" class="fill" v-model="activeTabId" type="border-card" >
+            <el-tabs id="maintabs" class="fill" v-model="activeTabId" type="border-card">
                 <el-tab-pane label="Messages" name="messages" class="vfillpanel">
                     <template #label>
                         <span>
-                            <el-icon><message/></el-icon> Messages
+                            <el-icon><message /></el-icon> Messages
                         </span>
                     </template>
 

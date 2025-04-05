@@ -12,22 +12,22 @@ html.dark body {
     background-color: black;
 }
 
-html.dark .logo {
-    filter: invert();
-}
-
 html.dark .textview {
     filter: invert();
 }
 
-html.dark .htmlview {
+html.dark .htmlview, html.dark .plaintextview {
     filter: invert();
 }
 
-#app-root {
-    width: 100%;
-    height: 100%;
+html.dark .splitpanes__splitter {
+    filter:invert();
 }
+
+    #app-root {
+        width: 100%;
+        height: 100%;
+    }
 
 .el-tabs {
     display: flex;
@@ -54,6 +54,10 @@ html.dark .htmlview {
 .messagelist, .messageview, .sessionlist, .headers {
     display: flex;
     flex-direction: column;
+}
+
+.messagelist, .sessionlist {
+    gap: 6px;
 }
 
 .el-table {
