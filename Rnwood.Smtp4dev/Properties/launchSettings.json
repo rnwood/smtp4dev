@@ -2,11 +2,11 @@
   "profiles": {
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "--db=database2.db --debugsettings",
+      "commandLineArgs": "--tlscertificate C:\\src\\smtp4dev\\Rnwood.Smtp4dev.Tests\\Resources\\smtp4dev.crt --tlsmode implicittls",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
-          "SERVEROPTIONS__URLS": "http://*:5000"
+        "SERVEROPTIONS__URLS": "http://*:5000"
       },
       "applicationUrl": "http://localhost:5000/"
     }
