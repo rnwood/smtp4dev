@@ -7,7 +7,7 @@
             <el-button v-on:click="loadMessage">Retry</el-button>
         </el-alert>
 
-        <iframe class="fill" ref="htmlframe"></iframe>
+        <iframe class="fill plaintextview" ref="htmlframe"></iframe>
     </div>
 </template>
 <script lang="ts">

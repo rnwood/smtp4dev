@@ -41,7 +41,7 @@
         </el-alert>
 
         <div class="fill" style="display: flex; flex-direction: column;">
-            <iframe :style="htmlFrameStyles" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
+            <iframe class="htmlview" :style="htmlFrameStyles" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
         </div>
     </div>
 </template>

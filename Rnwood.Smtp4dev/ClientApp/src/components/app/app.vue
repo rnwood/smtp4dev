@@ -10,6 +10,8 @@
     import { Component, Vue, toNative } from "vue-facing-decorator";
     import '@fortawesome/fontawesome-free/css/all.css'
     import '@fortawesome/fontawesome-free/js/all.js'
+    import 'element-plus/theme-chalk/dark/css-vars.css'
+
 
     @Component
     class LocalApp extends Vue {
