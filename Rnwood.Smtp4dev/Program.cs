@@ -230,6 +230,7 @@ namespace Rnwood.Smtp4dev
                     }
 
                     services.AddSingleton(cmdLineOptions);
+                    services.AddSingleton(commandLineOptions);
                     services.AddHostedService(sp => (Smtp4devServer)sp.GetRequiredService<ISmtp4devServer>());
                     services.AddHostedService(sp => sp.GetRequiredService<ImapServer>());
                 });

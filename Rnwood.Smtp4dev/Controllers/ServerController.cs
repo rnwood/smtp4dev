@@ -17,6 +17,9 @@ using Namotion.Reflection;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using DeepEqual.Syntax;
 using System.Text.Json.Serialization.Metadata;
+using Microsoft.Extensions.Configuration.EnvironmentVariables;
+using Microsoft.Extensions.Configuration;
+using CommandLiners;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -25,7 +28,7 @@ namespace Rnwood.Smtp4dev.Controllers
     public class ServerController : Controller
     {
         public ServerController(ISmtp4devServer server, ImapServer imapServer, IOptionsMonitor<ServerOptions> serverOptions,
-            IOptionsMonitor<RelayOptions> relayOptions, IOptionsMonitor<DesktopOptions> desktopOptions, CommandLineOptions cmdLineOptions, IHostingEnvironmentHelper hostingEnvironmentHelper)
+            IOptionsMonitor<RelayOptions> relayOptions, IOptionsMonitor<DesktopOptions> desktopOptions, MapOptions<CommandLineOptions> commandLineOptions, CommandLineOptions cmdLineOptions, IHostingEnvironmentHelper hostingEnvironmentHelper)
         {
             this.server = server;
             this.imapServer = imapServer;
@@ -34,6 +37,7 @@ namespace Rnwood.Smtp4dev.Controllers
             this.desktopOptions = desktopOptions;
             this.hostingEnvironmentHelper = hostingEnvironmentHelper;
             this.cmdLineOptions = cmdLineOptions;
+            this.commandLineOptions = commandLineOptions;
         }
 
         private readonly ISmtp4devServer server;
@@ -43,6 +47,7 @@ namespace Rnwood.Smtp4dev.Controllers
         private readonly IOptionsMonitor<DesktopOptions> desktopOptions;
         private readonly IHostingEnvironmentHelper hostingEnvironmentHelper;
         private readonly CommandLineOptions cmdLineOptions;
+        private readonly MapOptions<CommandLineOptions> commandLineOptions;
 
         /// <summary>
         /// Gets the current state and settings for the smtp4dev server.
@@ -124,33 +129,55 @@ namespace Rnwood.Smtp4dev.Controllers
             }
             else
             {
+                var fixedConfigSources = new ConfigurationBuilder().AddEnvironmentVariables()
+                            .AddCommandLineOptions(commandLineOptions).Build();
+
+                var fixedConfig = new SettingsFile
+                {
+                    ServerOptions = fixedConfigSources.GetSection("ServerOptions").Get<ServerOptionsSource>(),
+                    DesktopOptions = fixedConfigSources.GetSection("DesktopOptions").Get<DesktopOptionsSource>(),
+                    RelayOptions = fixedConfigSources.GetSection("RelayOptions").Get<RelayOptionsSource>()
+                };
+
+                if (fixedConfig.ServerOptions != null)
+                {
+                    foreach (var p in fixedConfig.ServerOptions.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
+                    {
+                        if (p.GetValue(fixedConfig.ServerOptions) != null)
+                        {
+                            lockedSettings[p.Name] = "Specified using command line option or environment variable";
+                        }
+                    }
+                }
+
+                if (fixedConfig.RelayOptions != null)
+                {
+                    foreach (var p in fixedConfig.RelayOptions.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
+                    {
+                        if (p.GetValue(fixedConfig.RelayOptions) != null)
+                        {
+                            lockedSettings["Relay" + p.Name] = "Specified using command line option or environment variable";
+                        }
+                    }
+                }
+
+                if (fixedConfig.DesktopOptions != null)
+                {
+                    foreach (var p in fixedConfig.DesktopOptions.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
+                    {
+                        if (p.GetValue(fixedConfig.DesktopOptions) != null)
+                        {
+                            lockedSettings["Desktop" + p.Name] = "Specified using command line option or environment variable";
+                        }
+                    }
+                }
+
+
                 if (this.hostingEnvironmentHelper.IsRunningInContainer())
                 {
                     lockedSettings.Add(nameof(ApiModel.Server.Port), "Running in a container. Change this port mapping in the container host.");
                     lockedSettings.Add(nameof(ApiModel.Server.ImapPort), "Running in a container. Change this port mapping in the container host.");
                     lockedSettings.Add(nameof(ApiModel.Server.AllowRemoteConnections), "Running in a container. Change this port mapping in the container host.");
-                }
-
-                if (cmdLineOptions.ServerOptions != null)
-                {
-                    foreach (var p in cmdLineOptions.ServerOptions.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
-                    {
-                        if (p.GetValue(cmdLineOptions.ServerOptions) != null)
-                        {
-                            lockedSettings[p.Name] = "Specified using command line option";
-                        }
-                    }
-                }
-
-                if (cmdLineOptions.RelayOptions != null)
-                {
-                    foreach (var p in cmdLineOptions.RelayOptions.GetType().GetProperties(System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.Public))
-                    {
-                        if (p.GetValue(cmdLineOptions.RelayOptions) != null)
-                        {
-                            lockedSettings["Relay" + p.Name] = "Specified using command line option";
-                        }
-                    }
                 }
             }
 
