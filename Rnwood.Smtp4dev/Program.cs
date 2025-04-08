@@ -148,6 +148,23 @@ namespace Rnwood.Smtp4dev
             _log.Information("DataDir: {dataDir}", dataDir);
             Directory.SetCurrentDirectory(dataDir);
 
+            var cb = new ConfigurationBuilder()
+                            .SetBasePath(contentRoot)
+                            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+
+            _log.Information("Default settings file: {file}", Path.Join(contentRoot, "appsettings.json"));
+
+            if (!cmdLineOptions.NoUserSettings)
+            {
+                cb = cb.AddJsonFile(Path.Join(dataDir, "appsettings.json"), optional: true, reloadOnChange: true);
+
+                _log.Information("User settings file: {file}", Path.Join(dataDir, "appsettings.json"));
+            }
+
+            cb.AddEnvironmentVariables()
+                .AddCommandLineOptions(commandLineOptions);
+            var config = cb.Build();
+
             IHostBuilder builder = Host.CreateDefaultBuilder(args)
                 .UseSerilog()
                 .UseContentRoot(contentRoot)
@@ -157,26 +174,10 @@ namespace Rnwood.Smtp4dev
                         var env = hostingContext.HostingEnvironment;
 
                         configBuilder.Sources.Clear();
-                        var cb = configBuilder
-                            .SetBasePath(env.ContentRootPath)
-                            .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-
-                        _log.Information("Default settings file: {file}", Path.Join(env.ContentRootPath, "appsettings.json"));
-                        
-                        if (!cmdLineOptions.NoUserSettings)
+                        foreach(var source in cb.Sources)
                         {
-                            cb = cb.AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true, reloadOnChange: true);
-                            cb = cb.AddJsonFile(Path.Join(dataDir, "appsettings.json"), optional: true, reloadOnChange: true);
-
-                            _log.Information("User settings file: {file}", Path.Join(dataDir, "appsettings.json"));
+                            configBuilder.Sources.Add(source);
                         }
-
-                        cb.AddEnvironmentVariables()
-                            .AddCommandLineOptions(commandLineOptions);
-
-                        var config = cb
-                            .Build();
-
                         hostingContext.HostingEnvironment.EnvironmentName = config["Environment"];
 
                         if (cmdLineOptions.DebugSettings)
@@ -210,25 +211,26 @@ namespace Rnwood.Smtp4dev
                     });
 
 
-            builder.ConfigureWebHostDefaults(c =>
+            builder.ConfigureWebHostDefaults((c) =>
             {
                 c.UseStartup<Startup>();
                 c.UseShutdownTimeout(TimeSpan.FromSeconds(10));
 
+                
+                ServerOptions serverOptions = config.GetSection("ServerOptions").Get<ServerOptions>();
+
+                if (!string.IsNullOrEmpty(cmdLineOptions.Urls))
+                {
+                    c.UseUrls(cmdLineOptions.Urls.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).ToArray());
+
+                }
+                else if (!string.IsNullOrEmpty(serverOptions.Urls))
+                {
+                    c.UseUrls(serverOptions.Urls.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).ToArray());
+                }
+
                 c.ConfigureServices((webBuilderContext, services) =>
                 {
-                    ServerOptions serverOptions = webBuilderContext.Configuration.GetSection("ServerOptions").Get<ServerOptions>();
-
-                    if (!string.IsNullOrEmpty(cmdLineOptions.Urls))
-                    {
-                        c.UseUrls(cmdLineOptions.Urls.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).ToArray());
-
-                    }
-                    else if (!string.IsNullOrEmpty(serverOptions.Urls))
-                    {
-                        c.UseUrls(serverOptions.Urls.Split(';', StringSplitOptions.RemoveEmptyEntries).Select(u => u.Trim()).ToArray());
-                    }
-
                     services.AddSingleton(cmdLineOptions);
                     services.AddSingleton(commandLineOptions);
                     services.AddHostedService(sp => (Smtp4devServer)sp.GetRequiredService<ISmtp4devServer>());
