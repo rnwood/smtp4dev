@@ -37,16 +37,16 @@ namespace Rnwood.Smtp4dev.Server
                                         .Pfx);
                         break;
                     }
-                case "":
+                case "1.2.840.10045.2.1":
                     {
-                        using var ecdsa = ECDiffieHellman.Create();
+                        using var ecdsa = ECDsa.Create();
                         ecdsa.ImportFromPem(File.ReadAllText(certificateKeyPath));
                         pfxData = certNoKey.CopyWithPrivateKey(ecdsa).Export(X509ContentType
                                         .Pfx);
                         break;
                     }
                 default:
-                    throw new Exception($"Unsupported cert key algo {keyAlgo}. Supported: RSA, DSA, ECRSA");
+                    throw new Exception($"Unsupported cert key algo {keyAlgo}. Supported: RSA, DSA, ECDsa");
             }
 
             
