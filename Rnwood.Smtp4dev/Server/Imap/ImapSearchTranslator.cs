@@ -116,8 +116,6 @@ namespace Rnwood.Smtp4dev.Server.Imap
         public ImapSearchCriteriaNotSupportedException() { }
         public ImapSearchCriteriaNotSupportedException(string message) : base(message) { }
         public ImapSearchCriteriaNotSupportedException(string message, Exception inner) : base(message, inner) { }
-        protected ImapSearchCriteriaNotSupportedException(
-          System.Runtime.Serialization.SerializationInfo info,
-          System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    
     }
 }

@@ -8,10 +8,26 @@ html, body {
     font-size: 14px;
 }
 
-#app-root {
-    width: 100%;
-    height: 100%;
+html.dark body {
+    background-color: black;
 }
+
+html.dark .textview {
+    filter: invert();
+}
+
+html.dark .htmlview, html.dark .plaintextview {
+    filter: invert();
+}
+
+html.dark .splitpanes__splitter {
+    filter:invert();
+}
+
+    #app-root {
+        width: 100%;
+        height: 100%;
+    }
 
 .el-tabs {
     display: flex;
@@ -38,6 +54,10 @@ html, body {
 .messagelist, .messageview, .sessionlist, .headers {
     display: flex;
     flex-direction: column;
+}
+
+.messagelist, .sessionlist {
+    gap: 6px;
 }
 
 .el-table {

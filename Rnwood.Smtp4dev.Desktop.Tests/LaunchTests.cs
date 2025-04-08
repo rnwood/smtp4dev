@@ -29,8 +29,8 @@ namespace Rnwood.Smtp4dev.Desktop.Tests
         protected void RunE2ETest(Action<E2ETestContext> test)
         {
 
-            string workingDir = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_WORKINGDIR");
-            string binary = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_BINARY");
+            string? workingDir = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_WORKINGDIR");
+            string? binary = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_BINARY");
             List<string> args = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_ARGS")?.Split("\n", StringSplitOptions.RemoveEmptyEntries)
                 ?.ToList() ?? new List<string>();
 
@@ -51,7 +51,7 @@ namespace Rnwood.Smtp4dev.Desktop.Tests
                 string framework = typeof(Rnwood.Smtp4dev.Desktop.Program)
                     .Assembly
                     .GetCustomAttribute<TargetFrameworkAttribute>()?
-                    .FrameworkName;
+                    .FrameworkName!;
 
                 //netcoreapp3.1
                 string folder = framework.TrimStart('.').Replace("CoreApp,Version=v", "").ToLower();
@@ -82,7 +82,7 @@ namespace Rnwood.Smtp4dev.Desktop.Tests
                 {
                     IEnumerator<string> serverOutput = serverProcess.GetOutputAndErrorLines().GetEnumerator();
 
-                    Uri baseUrl = null;
+                    Uri? baseUrl = null;
                     int? smtpPortNumber = null;
                     int? imapPortNumber = null;
 
@@ -134,9 +134,9 @@ namespace Rnwood.Smtp4dev.Desktop.Tests
 
                     test(new E2ETestContext
                     {
-                        BaseUrl = baseUrl,
-                        SmtpPortNumber = smtpPortNumber.Value,
-                        ImapPortNumber = imapPortNumber.Value
+                        BaseUrl = baseUrl!,
+                        SmtpPortNumber = smtpPortNumber!.Value,
+                        ImapPortNumber = imapPortNumber!.Value
                     });
                 }
                 finally
@@ -156,7 +156,7 @@ namespace Rnwood.Smtp4dev.Desktop.Tests
 
         public class E2ETestContext
         {
-            public Uri BaseUrl { get; set; }
+            public required Uri BaseUrl { get; set; }
             public int SmtpPortNumber { get; set; }
 
             public int ImapPortNumber { get; set; }

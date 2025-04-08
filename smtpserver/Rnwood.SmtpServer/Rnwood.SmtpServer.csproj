@@ -25,16 +25,15 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.13.0"/>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1"/>
-    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3"/>
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="8.0.3" />
 
-    <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0"/>
-    <PackageReference Include="System.Net.Security" Version="4.3.2"/>
+    <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
+    <PackageReference Include="System.Net.Security" Version="4.3.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <AdditionalFiles Include="../stylecop.json"/>
+    <AdditionalFiles Include="../stylecop.json" />
   </ItemGroup>
 
 </Project>
