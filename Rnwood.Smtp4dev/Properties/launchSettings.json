@@ -2,7 +2,7 @@
   "profiles": {
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "--tlscertificate C:\\src\\smtp4dev\\Rnwood.Smtp4dev.Tests\\Resources\\smtp4dev.crt --tlsmode implicittls",
+      "commandLineArgs": "--tlscertificate C:\\src\\smtp4dev\\Rnwood.Smtp4dev.Tests\\Resources\\smtp4dev.crt  --tlsmode implicittls",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",

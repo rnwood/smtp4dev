@@ -14,12 +14,42 @@ namespace Rnwood.Smtp4dev.Server
     {
         public static X509Certificate2 LoadCertificateWithKey(string certificatePath, string certificateKeyPath, string password)
         {
-            using var rsa = RSA.Create();
-
-            rsa.ImportFromPem(File.ReadAllText(certificateKeyPath));
             var certNoKey = new X509Certificate2(certificatePath);
-            var pfxData = certNoKey.CopyWithPrivateKey(rsa).Export(X509ContentType
-                            .Pfx);
+            string keyAlgo = certNoKey.GetKeyAlgorithm();
+
+            byte[] pfxData;
+
+            switch (keyAlgo)
+            {
+                case "1.2.840.113549.1.1.1":
+                    {
+                        using var rsa = RSA.Create();
+                        rsa.ImportFromPem(File.ReadAllText(certificateKeyPath));
+                        pfxData = certNoKey.CopyWithPrivateKey(rsa).Export(X509ContentType
+                                        .Pfx);
+                        break;
+                    }
+                case "1.2.840.10040.4.1":
+                    {
+                        using var dsa = DSA.Create();
+                        dsa.ImportFromPem(File.ReadAllText(certificateKeyPath));
+                        pfxData = certNoKey.CopyWithPrivateKey(dsa).Export(X509ContentType
+                                        .Pfx);
+                        break;
+                    }
+                case "":
+                    {
+                        using var ecdsa = ECDiffieHellman.Create();
+                        ecdsa.ImportFromPem(File.ReadAllText(certificateKeyPath));
+                        pfxData = certNoKey.CopyWithPrivateKey(ecdsa).Export(X509ContentType
+                                        .Pfx);
+                        break;
+                    }
+                default:
+                    throw new Exception($"Unsupported cert key algo {keyAlgo}. Supported: RSA, DSA, ECRSA");
+            }
+
+            
 
             if (string.IsNullOrEmpty(password))
             {
@@ -30,8 +60,8 @@ namespace Rnwood.Smtp4dev.Server
                 return new X509Certificate2(pfxData, password);
             }
         }
-        
-           public static X509Certificate2 GetTlsCertificate(ServerOptions options, ILogger logger)
+
+        public static X509Certificate2 GetTlsCertificate(ServerOptions options, ILogger logger)
         {
             X509Certificate2 cert = null;
 
@@ -61,6 +91,11 @@ namespace Rnwood.Smtp4dev.Server
                     {
                         cert = CertificateHelper.LoadCertificateWithKey(options.TlsCertificate,
                             options.TlsCertificatePrivateKey, pfxPassword);
+                    }
+
+                    if (!cert.HasPrivateKey)
+                    {
+                        throw new Exception($"Certificate at '{options.TlsCertificate}' has no private key.");
                     }
 
                     logger.Information("Using provided certificate with Subject {SubjectName}, expiry {ExpiryDate}", cert.SubjectName.Name,
@@ -116,7 +151,8 @@ namespace Rnwood.Smtp4dev.Server
             if (string.IsNullOrEmpty(password))
             {
                 return new X509Certificate2(certificatePath);
-            } else
+            }
+            else
             {
 
                 return new X509Certificate2(certificatePath, password);
