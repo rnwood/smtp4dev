@@ -29,7 +29,19 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             new DriverManager().SetUpDriver(new ChromeConfig(), VersionResolveStrategy.MatchingBrowser);
         }
 
-        [Theory]
+        [Fact]
+        public void CheckUrlEnvVarIsRespected()
+        {
+            UITestOptions options = new UITestOptions();
+            options.EnvironmentVariables["SERVEROPTIONS__URLS"] = "http://127.0.0.2:2345;";
+
+            RunUITest($"{nameof(CheckUrlEnvVarIsRespected)}", (browser, baseUrl, smtpPortNumber) =>
+            {
+                Assert.Equal(2345, baseUrl.Port);
+            }, options);
+        }
+
+            [Theory]
         [InlineData("/", false)]
         [InlineData("/", true)]
         [InlineData("/smtp4dev", true)]
@@ -143,7 +155,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         }
 
         class UITestOptions : E2ETestOptions
-        {
+    {
         }
 
         private void RunUITest(string testName, Action<IWebDriver, Uri, int> uitest, UITestOptions options = null)

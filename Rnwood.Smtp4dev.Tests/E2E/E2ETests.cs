@@ -27,6 +27,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         {
             public bool InMemoryDB { get; set; }
             public string BasePath { get; set; }
+            public IDictionary<string,string> EnvironmentVariables { get; set; } = new Dictionary<string,string>();
         }
 
         public class E2ETestContext
@@ -84,7 +85,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 "--tlsmode=StartTls"
             }.Where(a => a != ""));
 
-            if (!args.Any(a => a.StartsWith("--urls")))
+            if (!args.Any(a => a.StartsWith("--urls")) && (!options?.EnvironmentVariables.ContainsKey("SERVEROPTIONS__URLS") ?? true))
             {
                 args.Add("--urls=http://*:0");
             }
@@ -119,7 +120,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             output.WriteLine("Args: " + string.Join(" ", args.Select(a => $"\"{a}\"")));
 
             using (Command serverProcess = Command.Run(binary, args,
-                       o => o.DisposeOnExit(false).WorkingDirectory(workingDir).CancellationToken(timeout)))
+                       o => o.DisposeOnExit(false).WorkingDirectory(workingDir).EnvironmentVariables(options?.EnvironmentVariables ?? new Dictionary<string, string>()).CancellationToken(timeout)))
             {
                 CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
                 CancellationToken token = cancellationTokenSource.Token;
