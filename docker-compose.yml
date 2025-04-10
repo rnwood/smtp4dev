@@ -46,6 +46,9 @@ services:
       #Specifies the TLS certificate to use if TLS is enabled/requested. Specify "" to use an auto-generated self-signed certificate (then see console output on first startup)
       #- ServerOptions__TlsCertificate=
 
+      #Specifies a mailbox with name "Test" and recipient "hello@world.com". To add more, use the same format but replace the number at the end of the variable name.
+      #- ServerOptions__Mailboxes__0=Test=hello@world.com
+
       #Sets the name of the SMTP server that will be used to relay messages or "" if messages should not be relayed
       #- RelayOptions__SmtpServer=
 
