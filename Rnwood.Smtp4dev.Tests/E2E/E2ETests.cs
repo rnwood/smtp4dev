@@ -1,4 +1,6 @@
-﻿using Medallion.Shell;
+﻿using DotNet.Testcontainers.Builders;
+using DotNet.Testcontainers.Containers;
+using Medallion.Shell;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -138,8 +140,6 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 }
        private void RunWithNormalBinary(Action<E2ETestContext> test, E2ETestOptions options, string workingDir, string binary, List<string> args, CancellationToken timeout)
         {
-            CancellationTokenSource cancellationTokenSource = new CancellationTokenSource();
-            CancellationToken token = cancellationTokenSource.Token;
 
 
             using (Command serverProcess = Command.Run(binary, args,

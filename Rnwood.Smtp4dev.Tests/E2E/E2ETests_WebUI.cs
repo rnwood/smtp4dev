@@ -35,7 +35,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             UITestOptions options = new UITestOptions();
             options.EnvironmentVariables["SERVEROPTIONS__URLS"] = "http://127.0.0.2:2345;";
 
-            RunUITest($"{nameof(CheckUrlEnvVarIsRespected)}", (browser, baseUrl, smtpPortNumber) =>
+            RunUITest($"{nameof(CheckUrlEnvVarIsRespected)}", (browser, baseUrl, hostname, smtpPortNumber) =>
             {
                 Assert.Equal(2345, baseUrl.Port);
             }, options);
