@@ -28,7 +28,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
             string[] values = stringValue.Split('=', 2);
 
             if (values.Length != 2) {
-                throw new FormatException("User must be in format \"Username:Password\"");
+                throw new FormatException("User must be in format \"Username=Password\"");
             }
 
             return new UserOptions { Username = values[0], Password = values[1] };
