@@ -30,7 +30,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
             if (values.Length != 2)
             {
-                throw new FormatException("Mailbox must be in format \"Name:Recipients\"");
+                throw new FormatException("Mailbox must be in format \"Name=Recipients\"");
             }
 
             return new MailboxOptions { Name = values[0], Recipients = values[1]};
