@@ -415,7 +415,7 @@
                 return;
             }
             window.open(
-                new MessagesController().downrefresh_url(this.messageSummary.id)
+                new MessagesController().downloadMessage_url(this.messageSummary.id)
             );
         }
 
