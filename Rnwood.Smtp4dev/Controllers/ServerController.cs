@@ -20,6 +20,8 @@ using System.Text.Json.Serialization.Metadata;
 using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using Microsoft.Extensions.Configuration;
 using CommandLiners;
+using System.Text.Json.Nodes;
+using System.Dynamic;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -110,7 +112,8 @@ namespace Rnwood.Smtp4dev.Controllers
                 SmtpEnabledAuthTypesWhenNotSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 SmtpEnabledAuthTypesWhenSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 CurrentUserName = currentUserName,
-                CurrentUserDefaultMailboxName = currentUserDefaultMailbox
+                CurrentUserDefaultMailboxName = currentUserDefaultMailbox,
+                HtmlValidateConfig = serverOptionsCurrentValue.HtmlValidateConfig != null ? serverOptionsCurrentValue.HtmlValidateConfig : null
             };
         }
 
@@ -269,6 +272,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.SmtpAllowAnyCredentials = serverUpdate.SmtpAllowAnyCredentials != defaultSettingsFile.ServerOptions.SmtpAllowAnyCredentials ? serverUpdate.SmtpAllowAnyCredentials : null;
             newSettings.SmtpEnabledAuthTypesWhenNotSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection) != defaultSettingsFile.ServerOptions.SmtpEnabledAuthTypesWhenNotSecureConnection ? string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection) : null;
             newSettings.SmtpEnabledAuthTypesWhenSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection) != defaultSettingsFile.ServerOptions.SmtpEnabledAuthTypesWhenSecureConnection ? string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection) : null;
+            newSettings.HtmlValidateConfig = serverUpdate.HtmlValidateConfig != defaultSettingsFile.ServerOptions.HtmlValidateConfig ?  serverUpdate.HtmlValidateConfig : null;
 
             newRelaySettings.SmtpServer = serverUpdate.RelaySmtpServer != defaultSettingsFile.RelayOptions.SmtpServer ? serverUpdate.RelaySmtpServer : null;
             newRelaySettings.SmtpPort = serverUpdate.RelaySmtpPort != defaultSettingsFile.RelayOptions.SmtpPort ? serverUpdate.RelaySmtpPort : null;

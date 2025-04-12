@@ -48,7 +48,7 @@
                                          :connection="connection" />
                         </pane>
                         <pane class="hfillpanel" :size="100 - messageListPaneSize">
-                            <messageview class="fill" v-bind:message-summary="selectedMessage" />
+                            <messageview class="fill" :connection="connection" v-bind:message-summary="selectedMessage" />
                         </pane>
                     </splitpanes>
                 </el-tab-pane>

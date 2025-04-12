@@ -26,7 +26,8 @@ export default class Server {
         smtpEnabledAuthTypesWhenSecureConnection: string[],
         mailboxes: Mailbox[],
         currentUserName: string,
-        currentUserDefaultMailboxName: string
+        currentUserDefaultMailboxName: string,
+        htmlValidateConfig: string
     ) {
 
         this.isRunning = isRunning;
@@ -66,6 +67,7 @@ export default class Server {
         this.mailboxes = mailboxes;
         this.currentUserName = currentUserName;
         this.currentUserDefaultMailboxName = currentUserDefaultMailboxName;
+        this.htmlValidateConfig = htmlValidateConfig;
     }
 
 
@@ -104,4 +106,5 @@ export default class Server {
     smtpEnabledAuthTypesWhenNotSecureConnection: string[];
     smtpEnabledAuthTypesWhenSecureConnection: string[];
     mailboxes: Mailbox[];
+    htmlValidateConfig: string;
 }

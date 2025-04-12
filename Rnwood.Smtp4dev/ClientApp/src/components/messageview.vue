@@ -2,7 +2,7 @@
     <div class="messageview fill vfillpanel" v-loading.body="loading">
         <el-alert v-if="error" type="error">
             {{error.message}}
-            <el-button v-on:click="loadMessage">Retry</el-button>
+            <el-button v-on:click="refresh">Retry</el-button>
         </el-alert>
 
         <el-dialog v-model="replyDialogVisible" :title="replyAll ? 'Reply All' : 'Reply'" destroy-on-close append-to-body align-center width="80%">
@@ -100,7 +100,7 @@
                     </template>
                     <messageviewattachments :message="message" v-if="message && messageSummary.attachmentCount"></messageviewattachments>
 
-                    <messageview-html v-if="message && message.hasHtmlBody && !message.hasPlainTextBody" :message="message" class="fill messagepreview"></messageview-html>
+                    <messageview-html v-if="message && message.hasHtmlBody && !message.hasPlainTextBody" :connection="connection" :message="message" class="fill messagepreview"></messageview-html>
                     <messageview-plaintext v-if="message && !message.hasHtmlBody && message.hasPlainTextBody" :message="message" class="fill messageplaintext"></messageview-plaintext>
                     <div v-if="message && !message.hasHtmlBody && !message.hasPlainTextBody">This MIME message has no HTML or plain text body.</div>
 
@@ -137,7 +137,7 @@
                                 HTML Validation
                                 <el-tag v-if="analysisWarningCount.html" style="margin-left: 6px;" type="warning" size="small" effect="dark" round><el-icon><WarnTriangleFilled /></el-icon> {{analysisWarningCount.html ? analysisWarningCount.html : ''}}</el-tag>
                             </template>
-                            <messagehtmlvalidation class="fill" :message="message" @warning-count-changed="n => this.analysisWarningCount.html=n"></messagehtmlvalidation>
+                            <messagehtmlvalidation class="fill" :connection="connection" :message="message" @warning-count-changed="n => this.analysisWarningCount.html=n"></messagehtmlvalidation>
                         </el-tab-pane>
                     </el-tabs>
                 </el-tab-pane>
@@ -254,6 +254,9 @@
     })
     class MessageView extends Vue {
 
+        @Prop({ default: null })
+        connection: HubConnectionManager | null = null;
+
         @Prop({})
         messageSummary: MessageSummary | null = null;
         selectedTabId = "view";
@@ -261,6 +264,13 @@
         selectedPart: MessageEntitySummary | null = null;
         warnings: MessageWarning[] = [];
         analysisWarningCount = { clients: 0, html: 0 };
+
+        @Watch("connection")
+        async onConnectionChanged() {
+            if (this.connection) {
+                this.isRelayAvailable = !!await (await this.connection?.getServer())?.relaySmtpServer;
+            }
+        }
 
         get totalAnalysisWarningCount() { return Object.values(this.analysisWarningCount).reduce((a, c) => a + c) }
 
@@ -285,16 +295,17 @@
             value: MessageSummary | null,
             oldValue: MessageSummary | null
         ) {
-            await this.loadMessage();
+            await this.refresh();
         }
 
-        async loadMessage() {
+        async refresh() {
             this.error = null;
             this.loading = true;
             this.message = null;
             this.selectedPart = null;
 
             try {
+
                 if (this.messageSummary != null) {
                     this.message = await new MessagesController().getMessage(
                         this.messageSummary.id
@@ -404,13 +415,12 @@
                 return;
             }
             window.open(
-                new MessagesController().downloadMessage_url(this.messageSummary.id)
+                new MessagesController().downrefresh_url(this.messageSummary.id)
             );
         }
 
         async mounted() {
-            await this.loadMessage();
-            this.isRelayAvailable = !!await (await new ServerController().getServer()).relaySmtpServer;
+            await this.refresh();
         }
 
         async destroyed() { }

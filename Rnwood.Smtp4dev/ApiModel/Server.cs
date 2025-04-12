@@ -66,6 +66,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string CurrentUserName { get; set; }
 
         public string CurrentUserDefaultMailboxName { get; set; }
+        public string HtmlValidateConfig { get; set; }
     }
 
 }

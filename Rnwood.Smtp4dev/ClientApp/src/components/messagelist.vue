@@ -356,7 +356,7 @@
                 this.loading = !silent;
                 this.error = null;
 
-                const server = await new ServerController().getServer()
+                const server = await this.connection.getServer()
                 this.isRelayAvailable = !!server.relaySmtpServer;
 
                 this.availableMailboxes = await new MailboxesController().getAll();
@@ -460,7 +460,7 @@
                 this.connection.on("messageschanged", async () => {
                     await this.refresh(true, true);
                 });
-                this.connection.on("serverchanged", async () => {
+                this.connection.onServerChanged(async () => {
                     await this.refresh(true, true);
                 });
                 this.connection.on("mailboxeschanged", async () => {

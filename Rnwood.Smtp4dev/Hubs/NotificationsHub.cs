@@ -34,7 +34,7 @@ namespace Rnwood.Smtp4dev.Hubs
             }
         }
 
-        public async Task OnServerChanged()
+        public async Task onServerChanged()
         {
             if (Clients != null)
             {

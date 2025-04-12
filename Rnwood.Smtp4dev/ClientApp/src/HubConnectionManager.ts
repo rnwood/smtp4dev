@@ -1,4 +1,6 @@
 import { HubConnection, HubConnectionBuilder, LogLevel } from '@microsoft/signalr';
+import Server from './ApiClient/Server';
+import ServerController from './ApiClient/ServerController';
 
 export default class HubConnectionManager {
 
@@ -6,7 +8,7 @@ export default class HubConnectionManager {
     connected: boolean = false;
     private connectedCallbacks: (() => void)[] = [];
     started: boolean = false;
-    error: Error|null = null;
+    error: Error | null = null;
 
     constructor(url: string) {
         this._connection = new HubConnectionBuilder().withUrl(url, { logMessageContent: true }).configureLogging(LogLevel.Trace).build();
@@ -16,6 +18,7 @@ export default class HubConnectionManager {
                 connectedCallback();
             }
         });
+        this._connection.on("serverchanged", this.fireServerChanged.bind(this));
     }
 
     async addOnConnectedCallback(connectedCallback: () => void) {
@@ -39,10 +42,12 @@ export default class HubConnectionManager {
             await this._connection.start();
             this.connected = true;
 
+            this.fireServerChanged();
             for (const connectedCallback of this.connectedCallbacks) {
                 connectedCallback();
             }
-        } catch (e : any) {
+    
+        } catch (e: any) {
             this.error = e;
         }
     }
@@ -52,7 +57,7 @@ export default class HubConnectionManager {
         await this._connection.stop();
     }
 
-    onConnectionClosed(e: Error|undefined) {
+    onConnectionClosed(e: Error | undefined) {
         this.connected = false;
         this.started = false;
         this.error = e || null;
@@ -63,6 +68,31 @@ export default class HubConnectionManager {
         this._connection.on(eventName, handler);
     }
 
+    fireServerChanged(...args: any[]) {
+        this.serverPromise = null;
+
+        for (let handler of this.onServerChangedHandlers) {
+            handler.call(this);
+        }
+    }
+
+    onServerChanged(handler: (...args: any[]) => void) {
+        this.onServerChangedHandlers.push(handler);
+    }
+
+    private onServerChangedHandlers: ((...args: any[]) => void)[] = []
+
+    async getServer() {
+        if (!this.serverPromise) {
+            this.serverPromise = new ServerController().getServer();
+        }
+
+        return this.serverPromise;
+    }
+
+    serverPromise: Promise<Server> | null = null;
+
 
 
 }
+

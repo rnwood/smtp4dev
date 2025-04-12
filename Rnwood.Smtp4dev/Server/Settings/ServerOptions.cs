@@ -1,7 +1,12 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.ComponentModel;
+using System.Diagnostics.CodeAnalysis;
+using System.Dynamic;
 using System.Net;
 using System.Net.Security;
 using System.Security.Authentication;
+using System.Text.Json;
+using System.Text.Json.Nodes;
 using System.Text.Json.Serialization;
 using Esprima.Ast;
 
@@ -62,5 +67,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public string SmtpEnabledAuthTypesWhenSecureConnection { get; set; } = "PLAIN,LOGIN,CRAM-MD5";
 
         public MailboxOptions[] Mailboxes { get; set; } = [];
+
+        public string HtmlValidateConfig { get; set; }
     }
+
 }

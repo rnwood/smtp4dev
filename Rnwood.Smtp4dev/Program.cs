@@ -63,11 +63,13 @@ namespace Rnwood.Smtp4dev
                 else
                 {
                     Log.Fatal(ex.Message);
+                    Environment.Exit(1);
                 }
             }
             catch (Exception ex)
             {
                 Log.Fatal(ex, "A unhandled exception occurred.");
+                Environment.Exit(1);
             }
             finally
             {

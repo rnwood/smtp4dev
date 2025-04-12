@@ -1,6 +1,10 @@
-﻿using System.Net;
+﻿using System.ComponentModel;
+using System.Dynamic;
+using System.Net;
 using System.Net.Security;
 using System.Security.Authentication;
+using System.Text.Json.Nodes;
+using System.Text.Json.Serialization;
 using Ardalis.GuardClauses;
 using Esprima.Ast;
 using LumiSoft.Net;
@@ -61,5 +65,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
 		public string TlsCipherSuites { get; set; }
 
-	}
+        public string HtmlValidateConfig { get; set; }
+
+
+    }
 }
