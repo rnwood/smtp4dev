@@ -272,6 +272,10 @@ stages:
               zipAfterPublish: false
               modifyOutputPath: false
               arguments: '-c Release -p:version=$(tag) -o out'
+          - task: CmdLine@2
+            displayName: 'Install emulator'
+            inputs:
+              script: 'sudo apt-get install -y qemu qemu-user-static'
           - task: Docker@2
             displayName: Build image
             inputs:
