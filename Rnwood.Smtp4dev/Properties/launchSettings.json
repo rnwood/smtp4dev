@@ -2,12 +2,12 @@
   "profiles": {
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "",
+      "commandLineArgs": "-HtmlValidateConfigfile c:/temp/blah.json",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SERVEROPTIONS__URLS": "http://*:5005"
-      },
+      }
       //"applicationUrl": "http://localhost:5003/"
     }
   },

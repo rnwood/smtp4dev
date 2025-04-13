@@ -57,6 +57,22 @@
 
         warnings: HtmlValidateMessage[] = [];
 
+
+        @Prop({ default: null })
+        connection: HubConnectionManager | null = null;
+
+
+        @Watch("connection")
+        onConnectionChanged() {
+            if (this.connection) {
+                this.connection.onServerChanged( async () => {
+                    await this.refresh();
+                });
+
+                this.connection.addOnConnectedCallback(() => this.refresh());
+            }
+        }
+
         @Watch("message")
         async onMessageChanged(value: Message | null, oldValue: Message | null) {
 
@@ -87,8 +103,9 @@
                 if (this.message != null && this.message.hasHtmlBody) {
 
                     this.html = await new MessagesController().getMessageHtml(this.message.id);
+                    const config = JSON.parse((await this.connection.getServer()).htmlValidateConfig);
 
-                    const report = await new HtmlValidate().validateString(this.html, "messagebody");
+                    const report = await new HtmlValidate(config).validateString(this.html, "messagebody");
                     for (const r of report.results) {
                         newWarnings.push(...r.messages);
                     }

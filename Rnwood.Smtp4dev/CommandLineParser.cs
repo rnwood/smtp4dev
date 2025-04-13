@@ -63,8 +63,8 @@ namespace Rnwood.Smtp4dev
                 { "mailbox=", "Adds a mailbox in Name=Recipients format (Recipients can contain comma separated wildcards or regex)see appsettings for more details). This option can be repeated to add multiple users.", data =>
                        map.Add(data, x => x.ServerOptions.Mailboxes)},
                 {"sslprotocols=", "Specifies the SSL/TLS protocol version(s) that will be allowed. Separate with commas. See https://learn.microsoft.com/en-us/dotnet/api/system.security.authentication.sslprotocols?view=net-9.0", data => map.Add(data, x => x.ServerOptions.SslProtocols)  },
-                {"tlsciphersuites=", "Specifies the TLS cipher suites to be allowed. Not supported on Windows. Separate with commas. See https://learn.microsoft.com/en-us/dotnet/api/system.net.security.tlsciphersuite?view=net-9.0", data => map.Add(data, x => x.ServerOptions.TlsCipherSuites) }
-
+                {"tlsciphersuites=", "Specifies the TLS cipher suites to be allowed. Not supported on Windows. Separate with commas. See https://learn.microsoft.com/en-us/dotnet/api/system.net.security.tlsciphersuite?view=net-9.0", data => map.Add(data, x => x.ServerOptions.TlsCipherSuites) },
+                {"HtmlValidateConfigfile=", "Defines path to a config file used for HTML validation. See https://html-validate.org/usage/index.html#configuration", data => map.Add(File.ReadAllText(data), x => x.ServerOptions.HtmlValidateConfig) }
             };
 
             if (!isDesktopApp)

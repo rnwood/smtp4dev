@@ -34,7 +34,7 @@
                 this.error = null;
                 this.loading = !silent;
 
-                this.server = await new ServerController().getServer();
+                this.server = await this.connection.getServer();
             } catch (e: any) {
                 this.error = e;
             } finally {
@@ -63,7 +63,7 @@
         @Watch("connection")
         onConnectionChanged() {
             if (this.connection) {
-                this.connection.on("serverchanged", async () => {
+                this.connection.onServerChanged( async () => {
                     await this.refresh();
                 });
 

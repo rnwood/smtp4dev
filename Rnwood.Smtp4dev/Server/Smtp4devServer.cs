@@ -146,7 +146,7 @@ namespace Rnwood.Smtp4dev.Server
         {
             if (this.smtpServer.IsRunning) return;
             log.Information("SMTP server stopped.");
-            this.notificationsHub.OnServerChanged().Wait();
+            this.notificationsHub.onServerChanged().Wait();
         }
 
         private async Task OnMessageCompleted(object sender, ConnectionEventArgs e)
@@ -596,7 +596,7 @@ namespace Rnwood.Smtp4dev.Server
             }
             finally
             {
-                this.notificationsHub.OnServerChanged().Wait();
+                this.notificationsHub.onServerChanged().Wait();
             }
         }
 

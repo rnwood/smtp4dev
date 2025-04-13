@@ -34,7 +34,7 @@
         <el-alert v-if="error" type="error">
             {{error.message}}
 
-            <el-button v-on:click="loadMessage">Retry</el-button>
+            <el-button v-on:click="refresh">Retry</el-button>
         </el-alert>
         <el-alert v-if="wasSanitized" type="warning">
             Message HTML was sanitized for display. <el-button type="danger" size="small" v-on:click="disableSanitization">Disable (DANGER!)</el-button>
@@ -70,6 +70,9 @@
 
     @Component
     class MessageViewHtml extends Vue {
+        @Prop({ default: null })
+        connection: HubConnectionManager | null = null;
+
         @Prop({ default: null })
         message: Message | null | undefined;
         html: string | null = null;
@@ -114,11 +117,12 @@
         error: Error | null = null;
         loading = false;
 
+
         @Watch("message")
         async onMessageChanged(value: Message | null, oldValue: Message | null) {
 
             this.html = "";
-            await this.loadMessage();
+            await this.refresh();
 
         }
 
@@ -156,14 +160,19 @@
             doc.body.appendChild(baseElement);
         }
 
-        async loadMessage() {
+        @Watch("connection")
+        async onConnectionChanged() {
+            if (this.connection) {
+                this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
+            }
+        }
+
+        async refresh() {
 
             this.error = null;
             this.loading = true;
             this.html = null;
             this.wasSanitized = false;
-
-            this.enableSanitization = !(await new ServerController().getServer()).disableMessageSanitisation;
 
 
             try {
@@ -179,7 +188,7 @@
         }
 
         async created() {
-            this.loadMessage();
+            this.refresh();
         }
 
         async destroyed() {

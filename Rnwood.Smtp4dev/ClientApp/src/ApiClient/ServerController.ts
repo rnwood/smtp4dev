@@ -1,15 +1,12 @@
 ﻿
 
+import HubConnectionManager from '../HubConnectionManager';
 import Server from './Server';
 import axios from "axios";
 
 export default class ServerController {
                
-    constructor(){
-    }
         
-    
-    
     // get: api/Server  
     public getServer_url(): string {
         return `api/Server`;
