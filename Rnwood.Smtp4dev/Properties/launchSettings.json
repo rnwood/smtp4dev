@@ -2,7 +2,7 @@
   "profiles": {
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "-HtmlValidateConfigfile c:/temp/blah.json",
+      "commandLineArgs": "",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
