@@ -277,7 +277,7 @@ stages:
             inputs:
               command: build
               dockerfile: "**/Dockerfile.linux.arm64"
-              arguments: "--build-arg version=$(tag) -t $(docker_repo):linux-arm64-$(tag)"
+              arguments: "--platform linux/arm64 --build-arg version=$(tag) -t $(docker_repo):linux-arm64-$(tag)"
           - task: Docker@2
             displayName: Push image
             condition: or(variables['isreleasebuild'], variables['iscibuild'])
