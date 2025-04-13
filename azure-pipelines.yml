@@ -292,7 +292,7 @@ stages:
               tags: |
                 linux-arm64-$(tag)
       - job: DockerBuildWindows
-        displayName: DockerBuild - Windows
+        displayName: DockerBuild - Windows LTSC 2019
         pool:
           vmImage: "windows-2022"
         steps:
@@ -314,8 +314,14 @@ stages:
             displayName: Build image
             inputs:
               command: build
-              dockerfile: "**/Dockerfile.windows"
-              arguments: "--build-arg version=$(tag) -t $(docker_repo):windows-amd64-$(tag)"
+              dockerfile: "**/Dockerfile.windows.ltsc2019"
+              arguments: "--build-arg version=$(tag) -t $(docker_repo):windows-ltsc2019-amd64-$(tag)"
+          - task: Docker@2
+            displayName: Build image
+            inputs:
+              command: build
+              dockerfile: "**/Dockerfile.windows.ltsc2022"
+              arguments: "--build-arg version=$(tag) -t $(docker_repo):windows-ltsc2022-amd64-$(tag)"
           - task: Docker@2
             displayName: Push image
             condition: or(variables['isreleasebuild'], variables['iscibuild'])
@@ -324,7 +330,8 @@ stages:
               repository: $(docker_repo)
               command: push
               tags: |
-                windows-amd64-$(tag)
+                windows-ltsc2019-amd64-$(tag)
+                windows-ltsc2022-amd64-$(tag)
       - job: DockerManifest
         displayName: Docker Create Manifest
         condition: or(variables['isreleasebuild'], variables['iscibuild'])
@@ -348,7 +355,7 @@ stages:
             inputs:
               targetType: inline
               script: |
-                docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
+                docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-ltsc2022-amd64-$(tag) $(docker_repo):windows-ltsc2019-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
                 docker manifest push $(docker_repo):$(tag)
 
   - stage: Release
@@ -473,17 +480,20 @@ stages:
                     $dockertags = "prerelease"
                 }
                 write-host "Docker tags: $dockertags"
-                docker pull $(docker_repo):windows-amd64-$(tag)
+                docker pull $(docker_repo):windows-ltsc2019-amd64-$(tag)
+                docker pull $(docker_repo):windows-ltsc2022-amd64-$(tag)
 
                 ($dockertags.Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
-                  docker tag $(docker_repo):windows-amd64-$(tag) $(docker_repo):windows-amd64-$_
-                  docker push $(docker_repo):windows-amd64-$_
+                  docker tag $(docker_repo):windows-ltsc2019-amd64-$(tag) $(docker_repo):windows-ltsc2019-amd64-$_
+                  docker push $(docker_repo):windows-ltsc2019-amd64-$_
+                  docker tag $(docker_repo):windows-ltsc2022-amd64-$(tag) $(docker_repo):windows-ltsc2022-amd64-$_
+                  docker push $(docker_repo):windows-ltsc2022-amd64-$_
                 }
 
-                docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
+                docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-ltsc2019-amd64-$(tag) $(docker_repo):windows-ltsc2022-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
                 docker manifest push $(docker_repo):$(tag)
 
                 ($dockertags.Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
-                  docker manifest create $(docker_repo):$_ $(docker_repo):windows-amd64-$_ $(docker_repo):linux-amd64-$_ $(docker_repo):linux-arm64-$_
+                  docker manifest create $(docker_repo):$_ $(docker_repo):windows-ltsc2019-amd64-$_ $(docker_repo):windows-ltsc2022-amd64-$_ $(docker_repo):linux-amd64-$_ $(docker_repo):linux-arm64-$_
                   docker manifest push $(docker_repo):$_
                 }
