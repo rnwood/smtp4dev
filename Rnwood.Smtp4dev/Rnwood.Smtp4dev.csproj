@@ -52,7 +52,6 @@
     <PackageReference Include="MimeKit" Version="4.11.0" />
     <PackageReference Include="Mono.Options" Version="6.12.0.148" />
     <PackageReference Include="NSwag.AspNetCore" Version="14.3.0" />
-    <PackageReference Include="Rnwood.LumiSoft.Net" Version="1.0.2" />
 
 
     <PackageReference Include="Serilog" Version="4.2.0" />
@@ -186,6 +185,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\imapserver\New.LumiSoft.Net\Rnwood.LumiSoft.Net.csproj" />
     <ProjectReference Include="..\smtpserver\Rnwood.SmtpServer\Rnwood.SmtpServer.csproj" />
   </ItemGroup>
 
