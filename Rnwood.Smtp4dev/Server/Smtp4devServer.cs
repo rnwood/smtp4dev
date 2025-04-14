@@ -397,9 +397,24 @@ namespace Rnwood.Smtp4dev.Server
         {
             if (serverOptions.CurrentValue.DeliverMessagesToUsersDefaultMailbox && messageSession.Authenticated && messageSession.AuthenticationCredentials is IAuthenticationCredentialsCanValidateWithPassword credentials)
             {
-                String defaultMailbox = serverOptions.CurrentValue.Users.First(u => u.Username.Equals(credentials.Username)).DefaultMailbox;
-                MailboxOptions mailboxOption = serverOptions.CurrentValue.Mailboxes.First(m => m.Name.Equals(defaultMailbox));
-                return recipients.ToLookup(_ => mailboxOption, recipient => recipient);
+                UserOptions userOptions = serverOptions.CurrentValue.Users.FirstOrDefault(u => string.Equals(u.Username, credentials.Username, StringComparison.OrdinalIgnoreCase));
+                MailboxOptions defaultMailboxOptions = new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" };
+                MailboxOptions mailboxOption = defaultMailboxOptions;
+
+                if (userOptions != null)
+                {
+
+                    String userDefaultMailbox = userOptions.DefaultMailbox;
+                    mailboxOption = serverOptions.CurrentValue.Mailboxes.FirstOrDefault(m => string.Equals(m.Name, userDefaultMailbox, StringComparison.OrdinalIgnoreCase));
+
+                    if (mailboxOption == null)
+                    {
+                        log.Warning("Mailbox '{userDefaultMailbox}' was not found. Falling back to default mailbox", userDefaultMailbox);
+                        mailboxOption = defaultMailboxOptions;
+                    }
+                }
+
+                    return recipients.ToLookup(_ => mailboxOption, recipient => recipient);
             }
 
             List<(MailboxOptions,string)> targetMailboxesWithMatchedRecipient = new List<(MailboxOptions, string)>();
