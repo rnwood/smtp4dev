@@ -8,7 +8,7 @@
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SERVEROPTIONS__URLS": "http://*:5005"
       }
-      //"applicationUrl": "http://localhost:5003/"
+      "applicationUrl": "http://localhost:5005/"
     }
   },
   "iisSettings": {

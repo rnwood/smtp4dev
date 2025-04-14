@@ -1,7 +1,7 @@
 ﻿<template>
 
     
-        <aceeditor class="textview" v-model:value="textToShow" @init="editorInit" theme="chrome" lang="text" width="100%" :wrap="true" height="100%"></aceeditor>
+        <aceeditor class="textview" v-model:value="textToShow" @init="editorInit" theme="chrome" :lang="lang" :options="{ useWorker: true }"  width="100%" :wrap="true" height="100%"></aceeditor>
     
 </template>
 
@@ -11,7 +11,9 @@
     import { VAceEditor } from 'vue3-ace-editor';
     import { Editor } from 'brace';
     import "ace-builds/src-noconflict/mode-text";
+    import "ace-builds/src-noconflict/mode-html";
     import "ace-builds/src-noconflict/theme-chrome";
+
 
     
 
@@ -25,6 +27,9 @@
         
         @Prop()
         text: string | null = null;
+
+        @Prop()
+        lang: string = "text";
 
         editorInit(brace: Editor) {
             brace.setReadOnly(true);

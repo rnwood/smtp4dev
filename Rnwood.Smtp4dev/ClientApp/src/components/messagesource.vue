@@ -8,7 +8,7 @@
 
         <div class="toolbar"><el-button size="small" @click="download">Open</el-button></div>
         <div v-show="source" class="vfillpanel fill">
-            <textview :text="source" class="fill"></textview>
+            <textview :text="source" class="fill" :lang="sourceLang"></textview>
         </div>
     </div>
 </template>
@@ -31,6 +31,7 @@
 
         source: string | null = null;
         sourceurl: string | null = null;
+        sourceLang: string = "text";
         error: Error | null = null;
         loading = false;
 
@@ -56,6 +57,7 @@
             this.loading = true;
             this.source = null;
             this.sourceurl = null;
+            this.sourceLang = "text";
 
             try {
                 if (this.message != null) {
@@ -66,7 +68,7 @@
                     } else {
                         this.sourceurl = new MessagesController().getMessageSource_url(this.message.id);
                         this.source = await new MessagesController().getMessageSource(this.message.id);
-
+                        this.sourceLang = this.message.hasHtmlBody ? "html" : "text";
                     }
                 }
             } catch (e: any) {
