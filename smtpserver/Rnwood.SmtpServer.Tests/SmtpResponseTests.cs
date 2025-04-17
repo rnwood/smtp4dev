@@ -111,4 +111,14 @@ public class SmtpResponseTests
         SmtpResponse r = new SmtpResponse(200, "Single line message");
         Assert.Equal("200 Single line message\r\n", r.ToString());
     }
+
+    /// <summary>
+    ///     The ToString_EmptyMessage
+    /// </summary>
+    [Fact]
+    public void ToString_EmptyMessage()
+    {
+        SmtpResponse r = new SmtpResponse(200, string.Empty);
+        Assert.Equal("200\r\n", r.ToString());
+    }
 }

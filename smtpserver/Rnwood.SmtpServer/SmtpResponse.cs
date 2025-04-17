@@ -143,7 +143,14 @@ public sealed class SmtpResponse : IEquatable<SmtpResponse>
 
             if (l == lines.Length - 1)
             {
-                result.AppendLine(Code + " " + line);
+                if (line.Length > 0)
+                {
+                    result.AppendLine(Code + " " + line);
+                }
+                else
+                {
+                    result.AppendLine(Code.ToString());
+                }
             }
             else
             {
