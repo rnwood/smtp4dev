@@ -544,6 +544,7 @@ namespace Rnwood.Smtp4dev.Server
                             : apiMsg.From);
                     relaySmtpClient.Send(newEmail, sender, new[] { recipient });
                     result.RelayRecipients.Add(new RelayRecipientResult() { Email = recipient.Address, RelayDate = DateTime.UtcNow });
+                    relaySmtpClient.Disconnect(true);
                 }
                 catch (Exception e)
                 {
