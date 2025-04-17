@@ -178,9 +178,9 @@ namespace Rnwood.Smtp4dev.Controllers
 
                 if (this.hostingEnvironmentHelper.IsRunningInContainer())
                 {
-                    lockedSettings.Add(nameof(ApiModel.Server.Port), "Running in a container. Change this port mapping in the container host.");
-                    lockedSettings.Add(nameof(ApiModel.Server.ImapPort), "Running in a container. Change this port mapping in the container host.");
-                    lockedSettings.Add(nameof(ApiModel.Server.AllowRemoteConnections), "Running in a container. Change this port mapping in the container host.");
+                    lockedSettings[nameof(ApiModel.Server.Port)]= "Running in a container. Change this port mapping in the container host.";
+                    lockedSettings[nameof(ApiModel.Server.ImapPort)]= "Running in a container. Change this port mapping in the container host.";
+                    lockedSettings[nameof(ApiModel.Server.AllowRemoteConnections)]= "Running in a container. Change this port mapping in the container host.";
                 }
             }
 
