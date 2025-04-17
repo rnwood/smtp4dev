@@ -27,6 +27,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Rnwood.Smtp4dev.Server.Settings;
 using Microsoft.AspNetCore.Authorization;
 using AspNetCore.Authentication.Basic;
+using System.Text.RegularExpressions;
 
 namespace Rnwood.Smtp4dev
 {
@@ -236,7 +237,7 @@ namespace Rnwood.Smtp4dev
                     {
 
                         e.MapToVueCliProxy(
-                            "{*path}",
+                            serverOptions.BasePath != null ? $"{serverOptions.BasePath.Trim('/')}/{{*path}}" : "{*path}",
                             new SpaOptions { SourcePath = Path.Join(env.ContentRootPath, "ClientApp"), DevServerPort = 5173 },
                             npmScript: "dev",
                             regex: "VITE.*ready in",
@@ -251,10 +252,8 @@ namespace Rnwood.Smtp4dev
             if (!string.IsNullOrEmpty(serverOptions.BasePath) && serverOptions.BasePath != "/")
             {
                 RewriteOptions rewrites = new RewriteOptions();
-                rewrites.AddRedirect("^" + serverOptions.BasePath.TrimEnd('/') + "$", serverOptions.BasePath.TrimEnd('/') + "/");
-                ;
+                rewrites.AddRedirect($"^{Regex.Escape(serverOptions.BasePath.Trim('/'))}$", $"{serverOptions.BasePath.Trim('/')}/");
                 rewrites.AddRedirect("^(/)?$", serverOptions.BasePath.TrimEnd('/') + "/");
-                ;
                 app.UseRewriter(rewrites);
 
                 app.Map(serverOptions.BasePath, configure);

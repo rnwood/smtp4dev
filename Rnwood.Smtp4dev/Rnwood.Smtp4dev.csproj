@@ -179,9 +179,17 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Content Remove="wwwroot\favicon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Remove="ClientApp\src\ApiClient\MessageRelayOptions.ts" />
     <None Remove="ClientApp\src\ApiClient\Server.ts" />
     <None Remove="ClientApp\src\ApiClient\ServerController.ts" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="wwwroot\favicon.png" />
   </ItemGroup>
 
   <ItemGroup>
