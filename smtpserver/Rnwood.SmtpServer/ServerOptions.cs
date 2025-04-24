@@ -34,7 +34,7 @@ public class ServerOptions : IServerOptions
     private readonly X509Certificate startTlsCertificate;
     private readonly SslProtocols sslProtocols;
     private readonly TlsCipherSuite[] tlsCipherSuites;
-
+    private readonly long? maxMessageSize;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="ServerOptions" /> class.
@@ -49,7 +49,8 @@ public class ServerOptions : IServerOptions
     /// <param name="implcitTlsCertificate">The TLS certificate to use for implicit TLS.</param>
     /// <param name="startTlsCertificate">The TLS certificate to use for STARTTLS.</param>
     /// <param name="sslProtocols">The SSL protocol versions to allow</param>
-    ///     /// <param name="tlsCipherSuites">The TLS cipher suites to allow</param>
+    /// <param name="tlsCipherSuites">The TLS cipher suites to allow</param>
+    /// <param name="maxMessageSize">The maximum message size in bytes accepted by the server</param>
     public ServerOptions(
         bool allowRemoteConnections,
         bool enableIpV6,
@@ -61,7 +62,8 @@ public class ServerOptions : IServerOptions
         X509Certificate implcitTlsCertificate,
         X509Certificate startTlsCertificate,
         SslProtocols sslProtocols,
-        TlsCipherSuite[] tlsCipherSuites)
+        TlsCipherSuite[] tlsCipherSuites,
+        long? maxMessageSize)
     {
         DomainName = domainName;
         PortNumber = portNumber;
@@ -74,6 +76,7 @@ public class ServerOptions : IServerOptions
         this.secureAuthMechanismIds = secureAuthMechanismNamesIds ?? throw new ArgumentNullException(nameof(secureAuthMechanismNamesIds));
         this.sslProtocols = sslProtocols;
         this.tlsCipherSuites = tlsCipherSuites;
+        this.maxMessageSize = maxMessageSize;
     }
 
 
@@ -129,7 +132,8 @@ public class ServerOptions : IServerOptions
     }
 
     /// <inheritdoc />
-    public virtual Task<long?> GetMaximumMessageSize(IConnection connection) => Task.FromResult<long?>(null);
+    public virtual Task<long?> GetMaximumMessageSize(IConnection connection) =>
+        Task.FromResult(maxMessageSize >= 0 ? maxMessageSize : null);
 
     /// <inheritdoc />
     public virtual Task<TimeSpan> GetReceiveTimeout(IConnectionChannel connectionChannel) =>

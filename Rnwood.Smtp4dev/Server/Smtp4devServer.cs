@@ -97,8 +97,8 @@ namespace Rnwood.Smtp4dev.Server
                 serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
             serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null,
                 !string.IsNullOrWhiteSpace(serverOptionsValue.SslProtocols) ? serverOptionsValue.SslProtocols.Split(",", StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries).Select(s => Enum.Parse<SslProtocols>(s, true)).Aggregate((current, protocol) => current | protocol) : SslProtocols.None,
-                !string.IsNullOrWhiteSpace(serverOptionsValue.TlsCipherSuites) ? serverOptionsValue.TlsCipherSuites.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(s => Enum.Parse<TlsCipherSuite>(s, true)).ToArray() : null
-
+                !string.IsNullOrWhiteSpace(serverOptionsValue.TlsCipherSuites) ? serverOptionsValue.TlsCipherSuites.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(s => Enum.Parse<TlsCipherSuite>(s, true)).ToArray() : null,
+                serverOptionsValue.MaxMessageSize
             ));
             this.smtpServer.MessageCompletedEventHandler += OnMessageCompleted;
             this.smtpServer.MessageReceivedEventHandler += OnMessageReceived;

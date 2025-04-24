@@ -71,10 +71,8 @@ public class DataVerb : IVerb
         long? maxMessageSize =
             await connection.Server.Options.GetMaximumMessageSize(connection).ConfigureAwait(false);
 
-
-
-
-        if (maxMessageSize.HasValue && messageSize > maxMessageSize.Value)
+        bool shouldValidateMessageSize = maxMessageSize.HasValue && maxMessageSize > 0;
+        if (shouldValidateMessageSize && messageSize > maxMessageSize.Value)
         {
             await connection.WriteResponse(
                 new SmtpResponse(
@@ -82,9 +80,7 @@ public class DataVerb : IVerb
                     "Message exceeds fixed size limit")).ConfigureAwait(false);
             await connection.AbortMessage().ConfigureAwait(false);
             return;
-
         }
-
 
         try
         {
