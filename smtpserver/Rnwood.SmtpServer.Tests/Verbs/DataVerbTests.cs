@@ -166,6 +166,33 @@ public class DataVerbTests
     }
 
     /// <summary>
+    /// If the SMTP server reports a maximum message size of 0, the server should not block the message.
+    /// </summary>
+    [Fact]
+    public async Task Data_SizeLimitZero_Accepted()
+    {
+        TestMocks mocks = new TestMocks();
+
+        MemoryMessageBuilder messageBuilder = new MemoryMessageBuilder();
+        mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
+        mocks.ServerOptions.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>())).ReturnsAsync(0);
+
+        string[] messageData = { new('x', 10), "." };
+        int messageLine = 0;
+        mocks.Connection.Setup(c => c.ReadLineBytes())
+            .Returns(() => Task.FromResult(Encoding.UTF8.GetBytes(messageData[messageLine++])));
+
+        DataVerb verb = new DataVerb();
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
+
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+
+
+        mocks.Connection.Verify(c => c.CommitMessage());
+    }
+
+    /// <summary>
     /// </summary>
     /// <param name="messageData">The messageData<see cref="string" /></param>
     /// <param name="expectedData">The expectedData<see cref="string" /></param>
