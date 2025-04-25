@@ -35,6 +35,8 @@ public class AuthExtensionProcessor : IExtensionProcessor
         }
 
         connection.VerbMap.SetVerbProcessor("AUTH", new AuthVerb(this));
+
+        connection.MailVerb.FromSubVerb.ParameterProcessorMap.SetProcessor("AUTH", new AuthMailFromParameterProcessor());
     }
 
     /// <summary>
@@ -85,5 +87,18 @@ public class AuthExtensionProcessor : IExtensionProcessor
         }
 
         return result;
+    }
+
+    private class AuthMailFromParameterProcessor : IParameterProcessor
+    {
+        public Task SetParameter(IConnection connection, string key, string value)
+        {
+            if (string.IsNullOrEmpty(value))
+            {
+                throw new SmtpServerException(new SmtpResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments, "AUTH parameter must have a value or <>"));
+            }
+
+            return Task.CompletedTask;
+        }
     }
 }
