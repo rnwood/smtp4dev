@@ -67,6 +67,6 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public string HtmlValidateConfig { get; set; }
 
-
+        public long? MaxMessageSize { get; set; }
     }
 }

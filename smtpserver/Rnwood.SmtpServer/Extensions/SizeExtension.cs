@@ -10,8 +10,9 @@ using System.Threading.Tasks;
 namespace Rnwood.SmtpServer.Extensions;
 
 /// <summary>
-///     Defines the <see cref="SizeExtension" />.
+///     Defines the <see cref="SizeExtension" /> representing the SMTP Service Extension for Size Declaration.
 /// </summary>
+/// <seealso href="https://datatracker.ietf.org/doc/html/rfc1870"/>
 public class SizeExtension : IExtension
 {
     /// <inheritdoc />
@@ -47,7 +48,9 @@ public class SizeExtension : IExtension
             long? maxMessageSize =
                 await Connection.Server.Options.GetMaximumMessageSize(Connection).ConfigureAwait(false);
 
-            if (maxMessageSize.HasValue)
+            // If the max message size is non-negative, place it in the optional parameter of the SIZE keyword
+            bool shouldReportMaximumMessageSize = maxMessageSize.HasValue && maxMessageSize >= 0;
+            if (shouldReportMaximumMessageSize)
             {
                 return new[] { string.Format(CultureInfo.InvariantCulture, "SIZE={0}", maxMessageSize.Value) };
             }
@@ -62,11 +65,13 @@ public class SizeExtension : IExtension
             {
                 if (long.TryParse(value, out long messageSize) && messageSize > 0)
                 {
+                    connection.CurrentMessage.DeclaredMessageSize = messageSize;
+                    
                     long? maxMessageSize = await Connection.Server.Options.GetMaximumMessageSize(Connection)
                         .ConfigureAwait(false);
-                    connection.CurrentMessage.DeclaredMessageSize = messageSize;
 
-                    if (maxMessageSize.HasValue && messageSize > maxMessageSize)
+                    bool shouldValidateMessageSize = maxMessageSize.HasValue && maxMessageSize > 0;
+                    if (shouldValidateMessageSize && messageSize > maxMessageSize)
                     {
                         throw new SmtpServerException(
                             new SmtpResponse(
