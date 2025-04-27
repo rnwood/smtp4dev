@@ -152,6 +152,14 @@
                                 </template>
                             </el-input>
                         </el-form-item>
+
+                        <el-form-item label="Command validation expression (see comments in appsettings.json)" prop="server.commandValidationExpression">
+                            <el-input v-model="server.commandValidationExpression" :disabled="server.lockedSettings.commandValidationExpression">
+                                <template #prefix>
+                                    <el-icon v-if="server.lockedSettings.commandValidationExpression" :title="`Locked: ${server.lockedSettings.commandValidationExpression}`"><Lock /></el-icon>
+                                </template>
+                            </el-input>
+                        </el-form-item>
                     </el-tab-pane>
 
 

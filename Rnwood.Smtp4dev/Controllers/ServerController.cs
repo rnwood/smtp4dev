@@ -102,6 +102,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 CredentialsValidationExpression = serverOptionsCurrentValue.CredentialsValidationExpression,
                 RecipientValidationExpression = serverOptionsCurrentValue.RecipientValidationExpression,
                 MessageValidationExpression = serverOptionsCurrentValue.MessageValidationExpression,
+                CommandValidationExpression = serverOptionsCurrentValue.CommandValidationExpression,
                 DisableIPv6 = serverOptionsCurrentValue.DisableIPv6,
                 WebAuthenticationRequired = serverOptionsCurrentValue.WebAuthenticationRequired,
                 DeliverMessagesToUsersDefaultMailbox = serverOptionsCurrentValue.DeliverMessagesToUsersDefaultMailbox,
@@ -263,6 +264,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.SecureConnectionRequired = serverUpdate.SecureConnectionRequired != defaultSettingsFile.ServerOptions.SecureConnectionRequired ? serverUpdate.SecureConnectionRequired : null;
             newSettings.CredentialsValidationExpression = serverUpdate.CredentialsValidationExpression != defaultSettingsFile.ServerOptions.CredentialsValidationExpression ? serverUpdate.CredentialsValidationExpression : null;
             newSettings.RecipientValidationExpression = serverUpdate.RecipientValidationExpression != defaultSettingsFile.ServerOptions.RecipientValidationExpression ? serverUpdate.RecipientValidationExpression : null;
+            newSettings.CommandValidationExpression = serverUpdate.CommandValidationExpression != defaultSettingsFile.ServerOptions.CommandValidationExpression ? serverUpdate.CommandValidationExpression : null;
             newSettings.MessageValidationExpression = serverUpdate.MessageValidationExpression != defaultSettingsFile.ServerOptions.MessageValidationExpression ? serverUpdate.MessageValidationExpression : null;
             newSettings.DisableIPv6 = serverUpdate.DisableIPv6 != defaultSettingsFile.ServerOptions.DisableIPv6 ? serverUpdate.DisableIPv6 : null;
             newSettings.Users = serverUpdate.Users != defaultSettingsFile.ServerOptions.Users ? serverUpdate.Users : null;
