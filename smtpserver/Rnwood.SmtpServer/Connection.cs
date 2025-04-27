@@ -242,38 +242,45 @@ public class Connection : IConnection
     {
         bool badCommand = false;
         SmtpCommand command = new SmtpCommand(await ReadLine().ConfigureAwait(false));
-        await Server.Options.OnCommandReceived(this, command).ConfigureAwait(false);
 
-        if (command.IsValid)
+        try
         {
-            badCommand = !await TryProcessCommand(command).ConfigureAwait(false);
-        }
-        else if (!command.IsEmpty)
-        {
-            badCommand = true;
-        }
+            await Server.Options.OnCommandReceived(this, command).ConfigureAwait(false);
 
-        if (badCommand)
-        {
-            await Session.IncrementBadCommandCounter().ConfigureAwait(false);
-
-            if (Server.Options.MaximumNumberOfSequentialBadCommands > 0 &&
-                Session.NumberOfBadCommandsInARow >= Server.Options.MaximumNumberOfSequentialBadCommands)
+            if (command.IsValid)
             {
-                await WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel,
-                    "Too many bad commands. Bye!")).ConfigureAwait(false);
-                await CloseConnection().ConfigureAwait(false);
+                badCommand = !await TryProcessCommand(command).ConfigureAwait(false);
+            }
+            else if (!command.IsEmpty)
+            {
+                badCommand = true;
+            }
+
+            if (badCommand)
+            {
+                await Session.IncrementBadCommandCounter().ConfigureAwait(false);
+
+                if (Server.Options.MaximumNumberOfSequentialBadCommands > 0 &&
+                    Session.NumberOfBadCommandsInARow >= Server.Options.MaximumNumberOfSequentialBadCommands)
+                {
+                    await WriteResponse(new SmtpResponse(StandardSmtpResponseCode.ClosingTransmissionChannel,
+                        "Too many bad commands. Bye!")).ConfigureAwait(false);
+                    await CloseConnection().ConfigureAwait(false);
+                }
+                else
+                {
+                    await WriteResponse(new SmtpResponse(
+                        StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
+                        "Command unrecognised")).ConfigureAwait(false);
+                }
             }
             else
             {
-                await WriteResponse(new SmtpResponse(
-                    StandardSmtpResponseCode.SyntaxErrorCommandUnrecognised,
-                    "Command unrecognised")).ConfigureAwait(false);
+                await Session.ResetBadCommandCounter().ConfigureAwait(false);
             }
-        }
-        else
+        } catch (SmtpServerException e)
         {
-            await Session.ResetBadCommandCounter().ConfigureAwait(false);
+            await WriteResponse(e.SmtpResponse);
         }
     }
 

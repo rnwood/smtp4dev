@@ -16,10 +16,19 @@ public class CommandEventArgs : EventArgs
     ///     Initializes a new instance of the <see cref="CommandEventArgs" /> class.
     /// </summary>
     /// <param name="command">The command<see cref="SmtpCommand" />.</param>
-    public CommandEventArgs(SmtpCommand command) => Command = command;
+    public CommandEventArgs(SmtpCommand command, ISession session, IConnection connection)
+    {
+        this.Command = command;
+        this.Session = session;
+        this.Connection = connection;
+    }
 
     /// <summary>
     ///     Gets the Command.
     /// </summary>
     public SmtpCommand Command { get; private set; }
+
+    public ISession Session { get; private set; }
+
+    public IConnection Connection { get; private set; }
 }

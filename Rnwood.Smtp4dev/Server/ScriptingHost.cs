@@ -81,19 +81,27 @@ public class ScriptingHost
             ref recipValidationSource);
         ParseScript("MessageValidationExpression", serverOptionsCurrentValue.MessageValidationExpression, ref messageValidationScript,
             ref messageValidationSource);
+        ParseScript("CommandValidationExpression", serverOptionsCurrentValue.CommandValidationExpression, ref commandValidationScript,
+    ref commandValidationSource);
     }
 
     private string shouldRelaySource;
     private Script shouldRelayScript;
+    
     private string credValidationSource;
     private Script credValidationScript;
+    
     private string recipValidationSource;
     private Script recipValidationScript;
 
     private string messageValidationSource;
     private Script messageValidationScript;
 
+    private string commandValidationSource;
+    private Script commandValidationScript;
+
     public bool HasValidateMessageExpression { get => this.messageValidationScript != null; }
+    public bool HasValidateCommandExpression { get => this.commandValidationScript != null; }
 
     private void AddStandardApi(Engine jsEngine, IConnection connection)
     {
@@ -270,6 +278,67 @@ public class ScriptingHost
         {
             log.Error("Error executing RecipientValidationExpression : {error}", ex.ToString());
             return false;
+        }
+    }
+
+    internal SmtpResponse ValidateCommand(SmtpCommand command, ApiModel.Session session, IConnection connection)
+    {
+        if (commandValidationScript == null)
+        {
+            return null;
+        }
+
+        Engine jsEngine = CreateEngineWithStandardApi(connection);
+
+        jsEngine.SetValue("command", command);
+        jsEngine.SetValue("session", session);
+
+        try
+        {
+            JsValue result = jsEngine.Evaluate(commandValidationScript);
+
+            SmtpResponse response;
+
+            if (result.IsNull() || result.IsUndefined())
+            {
+                response = null;
+            }
+            else if (result.IsNumber())
+            {
+                response = new SmtpResponse((int)result.AsNumber(), "Command rejected by CommandValidationExpression");
+            }
+            else if (result.IsString())
+            {
+                response = new SmtpResponse(StandardSmtpResponseCode.TransactionFailed, result.AsString());
+            }
+            else
+            {
+                response = result.AsBoolean() ? null : new SmtpResponse(StandardSmtpResponseCode.TransactionFailed, "Message rejected by CommandValidationExpression");
+            }
+
+            log.Information("CommandValidationExpression: (command: {command}, session: {session.Id}) => {result} => {success}", command,
+                session.Id, result, response?.Code.ToString() ?? "Success");
+
+            return response;
+
+        }
+        catch (ConnectionUnexpectedlyClosedException)
+        {
+            throw;
+        }
+        catch (SmtpServerException ex)
+        {
+            return ex.SmtpResponse;
+        }
+        catch (JavaScriptException ex)
+        {
+            log.Error("Error executing CommandValidationExpression : {error}", ex.Error);
+            return new SmtpResponse(StandardSmtpResponseCode.TransactionFailed, "CommandValidationExpression failed");
+        }
+        catch (Exception ex)
+        {
+            log.Error("Error executing CommandValidationExpression : {error}", ex.ToString());
+            return new SmtpResponse(StandardSmtpResponseCode.TransactionFailed, "CommandValidationExpression failed");
         }
     }
 

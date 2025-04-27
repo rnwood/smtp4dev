@@ -109,6 +109,30 @@ namespace Rnwood.Smtp4dev.Server
             ((SmtpServer.ServerOptions)this.smtpServer.Options).MessageStartEventHandler += OnMessageStart;
 
             ((SmtpServer.ServerOptions)this.smtpServer.Options).MessageRecipientAddingEventHandler += OnMessageRecipientAddingEventHandler;
+            ((SmtpServer.ServerOptions)this.smtpServer.Options).CommandReceivedEventHandler += OnCommandReceived;
+        }
+
+        private Task OnCommandReceived(object sender, CommandEventArgs e)
+        {
+            if (!scriptingHost.HasValidateCommandExpression)
+            {
+                return Task.CompletedTask;
+            }
+
+            using var scope = serviceScopeFactory.CreateScope();
+            Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+            Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Connection.Session]);
+
+            var apiSession = new ApiModel.Session(dbSession);
+
+            var errorResponse = scriptingHost.ValidateCommand(e.Command, apiSession, e.Connection);
+
+            if (errorResponse != null)
+            {
+                throw new SmtpServerException(errorResponse);
+            }
+
+            return Task.CompletedTask;
         }
 
         private Task OnMessageRecipientAddingEventHandler(object sender, RecipientAddingEventArgs e)

@@ -18,7 +18,7 @@ public class CommandEventArgsTests
     public void Command()
     {
         SmtpCommand command = new SmtpCommand("BLAH");
-        CommandEventArgs args = new CommandEventArgs(command);
+        CommandEventArgs args = new CommandEventArgs(command, null,null);
 
         Assert.Same(command, args.Command);
     }

@@ -170,7 +170,7 @@ public class ServerOptions : IServerOptions
 
     /// <inheritdoc />
     public virtual Task OnCommandReceived(IConnection connection, SmtpCommand command) =>
-        CommandReceivedEventHandler?.Invoke(this, new CommandEventArgs(command)) ?? Task.CompletedTask;
+        CommandReceivedEventHandler?.Invoke(this, new CommandEventArgs(command, connection.Session, connection)) ?? Task.CompletedTask;
 
     /// <inheritdoc />
     public virtual Task<IMessageBuilder> OnCreateNewMessage(IConnection connection) =>
