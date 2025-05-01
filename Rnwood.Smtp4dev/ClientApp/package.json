@@ -69,6 +69,7 @@
   ],
   "dependencies": {
     "@vueuse/components": "^13.0.0",
+    "patch-package": "^8.0.0",
     "util": "^0.12.5"
   }
 }

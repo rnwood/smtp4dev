@@ -73,12 +73,12 @@
         private parseWarning(warning: string, isError: boolean) {
 
             const details = { message: warning, type: "", feature: "", browser: "", url: "", isError: false };
-            const detailsMatch = warning.match(/^`(.+)` is (.+) by `(.+)`$/);
+            const detailsMatch = warning.match(/^`(.+)` (support )?is (.+) (by|for) `(.+)`$/);
 
             if (detailsMatch) {
                 details.feature = detailsMatch[1] ?? null;
-                details.type = detailsMatch[2] ?? null;
-                details.browser = detailsMatch[3] ?? null;
+                details.type = detailsMatch[3] ?? null;
+                details.browser = detailsMatch[5] ?? null;
                 details.isError = isError;
 
                 if (details.feature.endsWith(" element")) {
@@ -87,6 +87,8 @@
                     details.url = `https://www.caniemail.com/features/css-${details.feature.replace(":", "-")}/`;
 
                 }
+            } else {
+                details.type = warning;
             }
 
             return details;
@@ -129,7 +131,7 @@
                             message: groupItems[0].message, 
                             
                             url: groupItems[0].url,
-                            browsers: groupItems.map(i => i.browser),
+                            browsers: groupItems.map(i => i.browser).filter((value, index, array) => array.indexOf(value) === index),
                             isError: groupItems[0].isError
                         })
                     }
