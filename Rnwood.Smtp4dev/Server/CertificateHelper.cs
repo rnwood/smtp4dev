@@ -79,7 +79,18 @@ namespace Rnwood.Smtp4dev.Server
 
             if (options.TlsMode != TlsMode.None)
             {
-                if (!string.IsNullOrEmpty(options.TlsCertificate))
+                if (!string.IsNullOrEmpty(options.TlsCertificateStoreThumbprint))
+                {
+                    cert = CertificateHelper.LoadCertificateWithThumbprint(options.TlsCertificateStoreThumbprint);
+
+                    if (cert == null)
+                    {
+                        throw new Exception($"No certificate found on local machine for thumbprint {options.TlsCertificateStoreThumbprint}");
+                    }
+                    logger.Information("Using provided certificate from Store with Subject {SubjectName}, expiry {ExpiryDate}", cert.SubjectName.Name,
+                        cert.GetExpirationDateString());
+                }
+                else if (!string.IsNullOrEmpty(options.TlsCertificate))
                 {
                     var pfxPassword = options.TlsCertificatePassword ?? "";
 
@@ -157,6 +168,17 @@ namespace Rnwood.Smtp4dev.Server
 
                 return new X509Certificate2(certificatePath, password);
             }
+        }
+
+        public static X509Certificate2 LoadCertificateWithThumbprint(string thumbprint)
+        {
+            var store = new X509Store(StoreName.My, StoreLocation.LocalMachine);
+            store.Open(OpenFlags.ReadOnly);
+
+            return store.Certificates
+                .Find(X509FindType.FindByThumbprint, thumbprint, false)
+                .OfType<X509Certificate2>()
+                .FirstOrDefault();
         }
     }
 }

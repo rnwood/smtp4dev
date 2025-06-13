@@ -27,6 +27,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public TlsMode? TlsMode { get; set; }
 
+        public string TlsCertificateStoreThumbprint { get; set; }
         public string TlsCertificate { get; set; }
         public string TlsCertificatePrivateKey { get; set; }
 

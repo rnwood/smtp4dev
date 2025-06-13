@@ -33,6 +33,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public string TlsCipherSuites { get; set; } = "";
 
+        public string TlsCertificateStoreThumbprint { get; set; }
         public string TlsCertificate { get; set; }
         public string TlsCertificatePrivateKey { get; set; }
 
