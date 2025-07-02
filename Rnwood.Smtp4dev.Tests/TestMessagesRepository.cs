@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.DbModel;
+using Rnwood.Smtp4dev.DbModel.Projections;
 
 namespace Rnwood.Smtp4dev.Tests
 {
@@ -38,6 +39,23 @@ namespace Rnwood.Smtp4dev.Tests
         public IQueryable<Message> GetMessages(string mailboxName, bool unTracked = true)
         {
             return Messages.AsQueryable();
+        }
+
+        public IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName)
+        {
+            return Messages
+                .Select(m => new MessageSummaryProjection()
+                {
+                    Id = m.Id,
+                    From = m.From,
+                    To = m.To,
+                    Subject = m.Subject,
+                    ReceivedDate = m.ReceivedDate,
+                    AttachmentCount = m.AttachmentCount,
+                    DeliveredTo = m.DeliveredTo,
+                    IsRelayed = m.Relays.Count > 0,
+                    IsUnread = m.IsUnread
+                }).AsQueryable();
         }
 
         public Task MarkAllMessagesRead(string mailboxName)
