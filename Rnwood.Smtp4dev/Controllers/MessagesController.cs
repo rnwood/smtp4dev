@@ -47,7 +47,7 @@ namespace Rnwood.Smtp4dev.Controllers
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(MessageSummary[]), Description = "")]
         public MessageSummary[] GetNewSummaries(Guid? lastSeenMessageId, string mailboxName = MailboxOptions.DEFAULTNAME, int pageSize = 50)
         {
-            return messagesRepository.GetMessages(mailboxName, true)
+            return messagesRepository.GetMessageSummaries(mailboxName)
                 .OrderByDescending(m => m.ReceivedDate)
                 .ThenByDescending(m => m.Id)
                 .AsEnumerable()
@@ -73,8 +73,7 @@ namespace Rnwood.Smtp4dev.Controllers
             bool sortIsDescending = true, int page = 1,
             int pageSize = 5)
         {
-            IEnumerable<DbModel.Message> query = messagesRepository.GetMessages(mailboxName, true)
-                .Include(m => m.Relays)
+            IEnumerable<DbModel.Projections.MessageSummaryProjection> query = messagesRepository.GetMessageSummaries(mailboxName)
                 .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""));
 
             if (!string.IsNullOrEmpty(searchTerms))
