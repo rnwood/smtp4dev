@@ -41,7 +41,7 @@
 
     import MessagesController from "../ApiClient/MessagesController";
     import Message from "../ApiClient/Message";
-    import { doIUseEmail } from '@jsx-email/doiuse-email';
+    import { caniemail, formatIssue } from 'caniemail';
 
     @Component
     class MessageClientAnalysis extends Vue {
@@ -70,30 +70,6 @@
             return this.warnings?.length ?? 0;
         }
 
-        private parseWarning(warning: string, isError: boolean) {
-
-            const details = { message: warning, type: "", feature: "", browser: "", url: "", isError: false };
-            const detailsMatch = warning.match(/^`(.+)` (support )?is (.+) (by|for) `(.+)`$/);
-
-            if (detailsMatch) {
-                details.feature = detailsMatch[1] ?? null;
-                details.type = detailsMatch[3] ?? null;
-                details.browser = detailsMatch[5] ?? null;
-                details.isError = isError;
-
-                if (details.feature.endsWith(" element")) {
-                    details.url = `https://www.caniemail.com/features/html-${details.feature.replace("<", "").replace("> element", "")}/`;
-                } else {
-                    details.url = `https://www.caniemail.com/features/css-${details.feature.replace(":", "-")}/`;
-
-                }
-            } else {
-                details.type = warning;
-            }
-
-            return details;
-        }
-
         async loadMessage() {
 
             this.warnings = [];
@@ -105,30 +81,16 @@
                 if (this.message != null && this.message.hasHtmlBody) {
 
                     const html = await new MessagesController().getMessageHtml(this.message.id);
-                    const doIUseResults = doIUseEmail(html, { emailClients: ["*"] });
+                    const doIUseResults = caniemail({ clients: ["*"], html });
 
-                    const allWarnings = [];
-                    for (const warning of doIUseResults.warnings) {
-                        const details = this.parseWarning(warning, false);
-                        allWarnings.push(details);
-                    }
-
-                    if (doIUseResults.success == false) {
-                        for (const warning of doIUseResults.errors) {
-                            const details = this.parseWarning(warning,true);
-                            allWarnings.push(details);
-                        }
-
-                    }
-
-                    const allGrouped = Object.groupBy(allWarnings, i => i.feature + " " + i.type);
+                    const allGrouped = Object.groupBy(doIUseResults.issues, i => i.feature + " " + i.issueType);
                     for (const groupKey in allGrouped) {
                         const groupItems = allGrouped[groupKey]!;
                         newWarnings.push({
                             type: groupItems[0].type, 
                             
                             feature: groupItems[0].feature,
-                            message: groupItems[0].message, 
+                            message: groupItems[0].issue, 
                             
                             url: groupItems[0].url,
                             browsers: groupItems.map(i => i.browser).filter((value, index, array) => array.indexOf(value) === index),
