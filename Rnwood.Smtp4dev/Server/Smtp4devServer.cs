@@ -215,9 +215,10 @@ namespace Rnwood.Smtp4dev.Server
             //Find mailboxes in config not in DB and create
             var serverOptionsCurrentValue = this.serverOptions.CurrentValue;
             var configuredMailboxesAndDefault = serverOptionsCurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME } });
+            var dbMailboxes = dbContext.Mailboxes.ToList();
             foreach (MailboxOptions mailbox in configuredMailboxesAndDefault)
             {
-                var dbMailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == mailbox.Name);
+                var dbMailbox = dbMailboxes.FirstOrDefault(m => m.Name == mailbox.Name);
                 if (dbMailbox == null)
                 {
                     log.Information("Creating mailbox {name}", mailbox.Name);
@@ -230,7 +231,7 @@ namespace Rnwood.Smtp4dev.Server
             }
 
             //Find configuredMailboxesAndDefault in DB not in config and delete
-            foreach (var dbMailbox in dbContext.Mailboxes)
+            foreach (var dbMailbox in dbMailboxes)
             {
                 if (!configuredMailboxesAndDefault.Any(m => m.Name == dbMailbox.Name))
                 {
@@ -247,7 +248,7 @@ namespace Rnwood.Smtp4dev.Server
             }
             dbContext.SaveChanges();
 
-            TrimMessages(dbContext);
+            TrimMessages(dbContext, dbMailboxes);
             dbContext.SaveChanges();
 
             TrimSessions(dbContext);
@@ -487,12 +488,12 @@ namespace Rnwood.Smtp4dev.Server
             log.Information("Processing received message for mailbox '{mailbox}' for recipients '{recipients}'", targetMailboxWithRecipients.Key.Name, targetMailboxWithRecipients.ToArray());
             using var scope = serviceScopeFactory.CreateScope();
             Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-
+            
             message.Session = dbContext.Sessions.Find(activeSessionsToDbId[session]);
             message.Mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == targetMailboxWithRecipients.Key.Name);
             var relayResult = TryRelayMessage(message, null);
             message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
-
+            
             ImapState imapState = dbContext.ImapState.Single();
             imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
             message.ImapUid = imapState.LastUid;
@@ -503,12 +504,12 @@ namespace Rnwood.Smtp4dev.Server
                     message.AddRelay(new MessageRelay { SendDate = DateTime.UtcNow, To = relay.Email });
                 }
             }
-
+            
             dbContext.Messages.Add(message);
-
+            
             dbContext.SaveChanges();
-
-            TrimMessages(dbContext);
+            
+            TrimMessages(dbContext, new List<Mailbox>() {message.Mailbox});
             dbContext.SaveChanges();
             notificationsHub.OnMessagesChanged(targetMailboxWithRecipients.Key.Name).Wait();
             log.Information("Processing received message DONE");
@@ -580,12 +581,15 @@ namespace Rnwood.Smtp4dev.Server
             return result;
         }
 
-        private void TrimMessages(Smtp4devDbContext dbContext)
+        private void TrimMessages(Smtp4devDbContext dbContext, IEnumerable<Mailbox> mailboxes)
         {
-            foreach (var mailbox in dbContext.Mailboxes)
+            foreach (var mailbox in mailboxes)
             {
-                dbContext.Messages.RemoveRange(dbContext.Messages.Where(m => m.Mailbox == mailbox).OrderByDescending(m => m.ReceivedDate)
-                    .Skip(serverOptions.CurrentValue.NumberOfMessagesToKeep));
+                dbContext.Messages
+                    .Where(m => m.Mailbox == mailbox)
+                    .OrderByDescending(m => m.ReceivedDate)
+                    .Skip(serverOptions.CurrentValue.NumberOfMessagesToKeep)
+                    .ExecuteDelete();
             }
         }
 

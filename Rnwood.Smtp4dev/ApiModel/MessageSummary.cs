@@ -18,6 +18,19 @@ namespace Rnwood.Smtp4dev.ApiModel
             IsRelayed = dbMessage.Relays.Count > 0;
             DeliveredTo = dbMessage.DeliveredTo;
         }
+        
+        public MessageSummary(DbModel.Projections.MessageSummaryProjection messagesSummaryProjection)
+        {
+            Id = messagesSummaryProjection.Id;
+            From = messagesSummaryProjection.From;
+            To = messagesSummaryProjection.To.Split(',');
+            ReceivedDate = messagesSummaryProjection.ReceivedDate;
+            Subject = messagesSummaryProjection.Subject;
+            AttachmentCount = messagesSummaryProjection.AttachmentCount;
+            IsUnread = messagesSummaryProjection.IsUnread;
+            IsRelayed = messagesSummaryProjection.IsRelayed;
+            DeliveredTo = messagesSummaryProjection.DeliveredTo;
+        }
 
         public bool IsRelayed { get; set; }
         public string DeliveredTo { get; set; }

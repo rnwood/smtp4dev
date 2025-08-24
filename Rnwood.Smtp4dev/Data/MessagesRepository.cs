@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Rnwood.Smtp4dev.DbModel;
+using Rnwood.Smtp4dev.DbModel.Projections;
 using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Server;
 
@@ -61,6 +62,23 @@ namespace Rnwood.Smtp4dev.Data
         {
             var query = dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName);
             return unTracked ? query.AsNoTracking() : query;
+        }
+
+        public IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName)
+        {
+            return dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName)
+                .Select(m => new MessageSummaryProjection()
+                {
+                    Id = m.Id,
+                    From = m.From,
+                    To = m.To,
+                    Subject = m.Subject,
+                    ReceivedDate = m.ReceivedDate,
+                    AttachmentCount = m.AttachmentCount,
+                    DeliveredTo = m.DeliveredTo,
+                    IsRelayed = m.Relays.Count > 0,
+                    IsUnread = m.IsUnread
+                }).AsNoTracking();
         }
 
         public Task DeleteMessage(Guid id)
