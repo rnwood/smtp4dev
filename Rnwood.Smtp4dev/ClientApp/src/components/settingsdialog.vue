@@ -96,7 +96,7 @@
                             <el-select v-model="server.smtpEnabledAuthTypesWhenNotSecureConnection"
                                        multiple
                                        style="width: 100%" :disabled="server.lockedSettings.smtpEnabledAuthTypesWhenNotSecureConnection">
-                                <el-option v-for="item in ['ANONYMOUS', 'PLAIN', 'LOGIN', 'CRAM-MD5']"
+                                <el-option v-for="item in ['ANONYMOUS', 'PLAIN', 'LOGIN', 'CRAM-MD5','XOAUTH2']"
                                            :key="item"
                                            :label="item"
                                            :value="item" />
@@ -111,7 +111,7 @@
                             <el-select v-model="server.smtpEnabledAuthTypesWhenSecureConnection"
                                        multiple
                                        style="width: 100%" :disabled="server.lockedSettings.smtpEnabledAuthTypesWhenSecureConnection">
-                                <el-option v-for="item in ['ANONYMOUS', 'PLAIN', 'LOGIN', 'CRAM-MD5']"
+                                <el-option v-for="item in ['ANONYMOUS', 'PLAIN', 'LOGIN', 'CRAM-MD5', 'XOAUTH2']"
                                            :key="item"
                                            :label="item"
                                            :value="item" />
