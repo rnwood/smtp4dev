@@ -57,7 +57,7 @@
                     </p>
 
                     <p v-if="message.cc.length" :class="{expanded: ccExpanded}" :title="message.cc?.join(', ')" @click="ccExpanded = !ccExpanded">
-                        To:
+                        Cc:
                         <span v-for="recip in message.cc" :key="recip">
                             <strong v-if="message.deliveredTo.includes(recip)">{{recip}}</strong>
                             <span v-if="!message.deliveredTo.includes(recip)">{{recip}}</span>
@@ -67,7 +67,7 @@
 
 
                     <p v-if="message.bcc.length" :class="{expanded: bccExpanded}" :title="message.bcc?.join(', ')" @click="bccExpanded = !bccExpanded">
-                        To:
+                        Bcc:
                         <span v-for="recip in message.bcc" :key="recip">
                             <strong v-if="message.deliveredTo.includes(recip)">{{recip}}</strong>
                             <span v-if="!message.deliveredTo.includes(recip)">{{recip}}</span>
