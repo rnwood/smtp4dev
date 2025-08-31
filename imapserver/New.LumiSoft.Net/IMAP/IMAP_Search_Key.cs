@@ -171,7 +171,11 @@ namespace LumiSoft.Net.IMAP
             // UNSEEN
             else if(r.StartsWith("UNSEEN",false)){
                 return IMAP_Search_Key_Unseen.Parse(r);
-			}            
+			}
+            // YOUNGER
+            else if(r.StartsWith("YOUNGER",false)){
+                return IMAP_Search_Key_Younger.Parse(r);
+            }            
             // ALL
 			else if (r.StartsWith("ALL", false))
 			{
