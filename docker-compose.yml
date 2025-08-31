@@ -1,9 +1,11 @@
 version: '3'
 
-# SECURITY NOTE: By default, smtp4dev is configured to bind to localhost only
-# for security. The ports below are forwarded from the host to the container.
-# This means smtp4dev will ONLY be accessible from the local machine unless
-# you explicitly change the ServerOptions__Urls setting below.
+# ⚠️  SECURITY WARNING: The port configuration below publishes smtp4dev to ALL network interfaces.
+# This means it may be accessible from outside your machine. For security, consider using:
+#   - '127.0.0.1:5000:80'   # Web interface (localhost only)
+#   - '127.0.0.1:25:25'     # SMTP server (localhost only)  
+#   - '127.0.0.1:143:143'   # IMAP server (localhost only)
+# See DOCKER_SECURITY.md for detailed security guidelines.
 
 services:
   smtp4dev:
@@ -11,10 +13,13 @@ services:
     restart: always
     ports:
       # Change the number before : to the port the web interface should be accessible on
+      # Add 127.0.0.1: prefix for localhost-only access (recommended for security)
       - '5000:80'
       # Change the number before : to the port the SMTP server should be accessible on
+      # Add 127.0.0.1: prefix for localhost-only access (recommended for security)
       - '25:25'
       # Change the number before : to the port the IMAP server should be accessible on
+      # Add 127.0.0.1: prefix for localhost-only access (recommended for security)
       - '143:143'
     volumes:
       # This is where smtp4dev stores the database..
@@ -28,9 +33,7 @@ services:
       #- ServerOptions__BasePath=/smtp4dev
 
       #Specifies the URLs the web UI will use inside the container.
-      #By default, smtp4dev binds to localhost only for security.
-      #Change to http://*:80 to allow access from any IP (ONLY if you want public access)
-      - ServerOptions__Urls=http://localhost:80
+      - ServerOptions__Urls=http://*:80
 
       #Specifies the server hostname. Used in auto-generated TLS certificate if enabled.
       - ServerOptions__HostName=smtp4dev

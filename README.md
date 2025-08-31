@@ -32,6 +32,9 @@ smtp4dev support many advanced features:
 
 [API] (https://github.com/rnwood/smtp4dev/wiki/API)
 
+## Security
+**⚠️ Docker Users**: Please read [Docker Security Guidelines](DOCKER_SECURITY.md) to prevent accidental public exposure of your smtp4dev instance.
+
 ## Screenshots
 
 ![Screenshot 1](screenshot1.png)
