@@ -24,13 +24,15 @@ smtp4dev support many advanced features:
 
 
 ## Getting Started
-[Installation Instructions](https://github.com/rnwood/smtp4dev/wiki/Installation)
+[Installation Instructions](docs/Installation.md)
 
-[Configuration](https://github.com/rnwood/smtp4dev/wiki/Configuration)
+[Configuration](docs/Configuration.md)
 
-[Configuring your programs to send mails to smtp4dev](https://github.com/rnwood/smtp4dev/wiki/Configuring-Clients)
+[Configuring your programs to send mails to smtp4dev](docs/Configuring-Clients.md)
 
-[API] (https://github.com/rnwood/smtp4dev/wiki/API)
+[API](docs/API.md)
+
+[📚 **View Full Documentation**](docs/README.md)
 
 ## Screenshots
 
