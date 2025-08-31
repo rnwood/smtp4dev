@@ -22,7 +22,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 
 		public void OpenSettings()
 		{
-			SettingsButton.Click();
+			try
+			{
+				SettingsButton.Click();
+			}
+			catch (NoSuchElementException ex)
+			{
+				throw new NoSuchElementException("Could not find the Settings button", ex);
+			}
 		}
 
 		public SettingsDialog SettingsDialog => new SettingsDialog(browser);

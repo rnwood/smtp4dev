@@ -51,12 +51,24 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 
         public void ToggleDisableMessageSanitisation()
         {
-            DisableMessageSanitisationSwitch.Click();
+            var switchElement = DisableMessageSanitisationSwitch;
+            if (switchElement == null)
+            {
+                throw new NoSuchElementException("Could not find the sanitization switch element to toggle");
+            }
+            switchElement.Click();
         }
 
         public void Save()
         {
-            SaveButton.Click();
+            try
+            {
+                SaveButton.Click();
+            }
+            catch (NoSuchElementException ex)
+            {
+                throw new NoSuchElementException("Could not find the Save/OK button in settings dialog", ex);
+            }
         }
 
         public bool IsVisible()
