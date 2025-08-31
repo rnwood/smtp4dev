@@ -12,7 +12,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
             this.browser = browser;
         }
 
-        public IWebElement ViewTab => browser.FindElement(By.XPath("//div[@id='view' and @role='tab']"));
+        public IWebElement ViewTab => browser.FindElement(By.XPath("//div[@id='tab-view']"));
         
         public IWebElement HtmlSubTab 
         {
@@ -20,7 +20,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
             {
                 try
                 {
-                    return browser.FindElement(By.XPath("//div[@id='html' and @role='tab']"));
+                    return browser.FindElement(By.XPath("//div[@id='tab-html']"));
                 }
                 catch (NoSuchElementException)
                 {

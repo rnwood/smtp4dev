@@ -12,9 +12,42 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
             this.browser = browser;
         }
 
-        public IWebElement DisableMessageSanitisationSwitch => browser.FindElement(By.XPath("//label[contains(text(), 'Disable HTML message sanitisation')]/following-sibling::div//input[@type='checkbox']"));
+        public IWebElement DisableMessageSanitisationSwitch 
+        {
+            get
+            {
+                try
+                {
+                    // Try multiple selectors for Element Plus switch
+                    var selectors = new[]
+                    {
+                        "//label[contains(text(), 'Disable HTML message sanitisation')]/following-sibling::div//div[contains(@class, 'el-switch')]",
+                        "//label[contains(text(), 'Disable HTML message sanitisation')]/following-sibling::div//input",
+                        "//div[contains(@class, 'el-form-item')]//label[contains(text(), 'Disable HTML message sanitisation')]/following-sibling::*//*[contains(@class, 'el-switch')]",
+                        "//div[contains(@class, 'el-form-item')]//label[contains(text(), 'Disable HTML message sanitisation')]/..//*[contains(@class, 'el-switch')]"
+                    };
 
-        public IWebElement SaveButton => browser.FindElement(By.XPath("//button/span[text()='OK']/.."));
+                    foreach (var selector in selectors)
+                    {
+                        try
+                        {
+                            return browser.FindElement(By.XPath(selector));
+                        }
+                        catch (NoSuchElementException)
+                        {
+                            continue;
+                        }
+                    }
+                    throw new NoSuchElementException("Could not find sanitization switch with any selector");
+                }
+                catch (NoSuchElementException)
+                {
+                    return null;
+                }
+            }
+        }
+
+        public IWebElement SaveButton => browser.FindElement(By.XPath("//span[text()='OK']/.."));
 
         public void ToggleDisableMessageSanitisation()
         {
