@@ -152,6 +152,7 @@ npm test -- --passWithNoTests
 - `Rnwood.Smtp4dev/ClientApp/package.json` - Frontend dependencies and scripts
 - `azure-pipelines.yml` - CI/CD pipeline configuration
 - `Rnwood.Smtp4dev/ClientApp/vite.config.js` - Frontend build configuration
+- `docs/` - Documentation for users
 
 ### Frontend Structure
 - Built with Vue.js 3, TypeScript, and Vite
