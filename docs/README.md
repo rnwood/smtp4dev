@@ -14,6 +14,7 @@ Welcome to the smtp4dev documentation! This documentation will help you get star
 
 ## Security & TLS
 
+- [Docker Security](Docker-Security.md) - Important security guidelines for Docker deployments
 - [SMTP TLS/SSL](TLS-SSL-for-SMTP.md) - Configure TLS/SSL for SMTP connections
 - [HTTPS for Web Interface](HTTPS-TLS-SSL-for-the-web-interface.md) - Enable HTTPS for the web interface
 
