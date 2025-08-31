@@ -12,7 +12,22 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
             this.browser = browser;
         }
 
-        public IWebElement HtmlTab => browser.FindElement(By.XPath("//div[@role='tab']//span[text()='HTML']"));
+        public IWebElement ViewTab => browser.FindElement(By.XPath("//div[@id='view' and @role='tab']"));
+        
+        public IWebElement HtmlSubTab 
+        {
+            get
+            {
+                try
+                {
+                    return browser.FindElement(By.XPath("//div[@id='html' and @role='tab']"));
+                }
+                catch (NoSuchElementException)
+                {
+                    return null;
+                }
+            }
+        }
 
         public IWebElement HtmlFrame
         {
@@ -49,9 +64,25 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
             }
         }
 
+        public void ClickViewTab()
+        {
+            ViewTab.Click();
+        }
+        
+        public void ClickHtmlSubTab()
+        {
+            if (HtmlSubTab != null)
+            {
+                HtmlSubTab.Click();
+            }
+        }
+
         public void ClickHtmlTab()
         {
-            HtmlTab.Click();
+            // First click on the View tab, then on HTML sub-tab if it exists
+            ClickViewTab();
+            Thread.Sleep(500); // Wait for content to load
+            ClickHtmlSubTab();
         }
 
         public string GetHtmlFrameContent()

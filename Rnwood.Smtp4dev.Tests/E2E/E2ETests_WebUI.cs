@@ -26,7 +26,15 @@ namespace Rnwood.Smtp4dev.Tests.E2E
     {
         public E2ETests_WebUI(ITestOutputHelper output) : base(output)
         {
-            // ChromeDriver is already installed in the system, no need to set up
+            try
+            {
+                new DriverManager().SetUpDriver(new ChromeConfig(), VersionResolveStrategy.MatchingBrowser);
+            }
+            catch (Exception ex)
+            {
+                // ChromeDriver may already be available in system PATH
+                output.WriteLine($"WebDriverManager setup failed, assuming ChromeDriver is already available: {ex.Message}");
+            }
         }
 
         [Fact]
@@ -167,7 +175,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                 // Send HTML message with unsafe content that should be sanitized
                 string messageSubject = Guid.NewGuid().ToString();
-                string dangerousHtml = "<script>alert('XSS')</script><p>Safe content</p>";
+                string dangerousHtml = "<script>document.write('<div style=\"background-color: red; color: white; padding: 10px; font-weight: bold;\">DANGEROUS SCRIPT EXECUTED!</div>')</script><p>Safe content</p>";
                 
                 using (var smtpClient = new SmtpClient())
                 {
@@ -180,9 +188,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     message.From.Add(MailboxAddress.Parse("from@from.com"));
                     message.Subject = messageSubject;
                     
-                    var builder = new BodyBuilder();
-                    builder.HtmlBody = dangerousHtml;
-                    message.Body = builder.ToMessageBody();
+                    // Create HTML-only message for clearer testing
+                    message.Body = new TextPart("html")
+                    {
+                        Text = dangerousHtml
+                    };
 
                     smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.StartTls,
                         new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
@@ -196,7 +206,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 Assert.Contains(messageRow.Cells, c => c.Text.Contains(messageSubject));
                 
                 messageRow.Click();
-                Thread.Sleep(1000); // Allow message to load
+                Thread.Sleep(2000); // Allow message to load completely
 
                 // Navigate to HTML view
                 var messageView = homePage.MessageView;
@@ -205,7 +215,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                 // Initially, sanitization should be enabled (script tags removed)
                 string initialContent = messageView.GetHtmlFrameContent();
-                Assert.DoesNotContain("<script>", initialContent);
+                Assert.DoesNotContain("DANGEROUS SCRIPT EXECUTED!", initialContent);
                 Assert.Contains("Safe content", initialContent);
                 Assert.True(messageView.IsSanitizationWarningVisible());
 
@@ -224,7 +234,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                 // Check that sanitization is now disabled without page refresh
                 string unsanitizedContent = messageView.GetHtmlFrameContent();
-                Assert.Contains("<script>", unsanitizedContent);
+                Assert.Contains("DANGEROUS SCRIPT EXECUTED!", unsanitizedContent);
                 Assert.Contains("Safe content", unsanitizedContent);
                 Assert.False(messageView.IsSanitizationWarningVisible());
 
@@ -240,7 +250,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                 // Verify sanitization is re-enabled
                 string sanitizedContent = messageView.GetHtmlFrameContent();
-                Assert.DoesNotContain("<script>", sanitizedContent);
+                Assert.DoesNotContain("DANGEROUS SCRIPT EXECUTED!", sanitizedContent);
                 Assert.Contains("Safe content", sanitizedContent);
                 Assert.True(messageView.IsSanitizationWarningVisible());
             });
