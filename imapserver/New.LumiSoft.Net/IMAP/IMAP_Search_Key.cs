@@ -88,6 +88,10 @@ namespace LumiSoft.Net.IMAP
             else if(r.StartsWith("NOT",false)){
                 return IMAP_Search_Key_Not.Parse(r);
             }
+            // OLDER
+            else if(r.StartsWith("OLDER",false)){
+                return IMAP_Search_Key_Older.Parse(r);
+            }
             // OLD
             else if(r.StartsWith("OLD",false)){
                 return IMAP_Search_Key_Old.Parse(r);
@@ -171,7 +175,11 @@ namespace LumiSoft.Net.IMAP
             // UNSEEN
             else if(r.StartsWith("UNSEEN",false)){
                 return IMAP_Search_Key_Unseen.Parse(r);
-			}            
+			}
+            // YOUNGER
+            else if(r.StartsWith("YOUNGER",false)){
+                return IMAP_Search_Key_Younger.Parse(r);
+            }            
             // ALL
 			else if (r.StartsWith("ALL", false))
 			{
