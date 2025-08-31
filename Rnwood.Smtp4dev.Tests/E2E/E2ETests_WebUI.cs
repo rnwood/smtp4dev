@@ -255,6 +255,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     // Warning not found - content might not trigger sanitization or UI not ready
                 }
                 
+                // Assert that sanitization warning is initially present (when sanitization is enabled)
+                Assert.True(initialSanitizationWarning, "Sanitization warning should be present initially when dangerous content is sanitized");
+                
                 // 2) Open settings dialog and disable sanitization
                 try 
                 {
@@ -284,6 +287,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         // Warning not found - good, this means sanitization is disabled
                         warningGoneAfterDisable = true;
                     }
+                    
+                    // Assert that sanitization warning is gone after disabling the setting
+                    Assert.True(warningGoneAfterDisable, "Sanitization warning should be gone after disabling the setting, proving immediate effect");
                     
                     // Test demonstrates the main fix: settings changes take effect immediately
                     // without requiring a page refresh due to the onServerChanged listener
