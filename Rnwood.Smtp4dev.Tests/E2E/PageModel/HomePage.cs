@@ -47,14 +47,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 				this.webElement = webElement;
 			}
 
-			public void SelectFirstMessage()
-			{
-				var firstRow = Grid.Rows.FirstOrDefault();
-				if (firstRow != null)
-				{
-					firstRow.Click();
-				}
-			}
+
 		}
 
 		public class Grid

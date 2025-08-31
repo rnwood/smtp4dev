@@ -206,7 +206,10 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 Assert.Contains(messageRow.Cells, c => c.Text.Contains(messageSubject));
                 
                 messageRow.Click();
-                Thread.Sleep(3000); // Allow message to load completely
+                
+                // Wait for message view to load instead of using fixed delay
+                var messageView = new MessageView(browser);
+                messageView.WaitForHtmlFrame();
 
                 // Test demonstrates the core fix: the Vue component now includes 
                 // the onServerChanged listener that ensures immediate response to
