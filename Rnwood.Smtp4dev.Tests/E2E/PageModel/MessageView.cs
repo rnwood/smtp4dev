@@ -12,7 +12,22 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
             this.browser = browser;
         }
 
-        public IWebElement ViewTab => browser.FindElement(By.XPath("//div[@id='tab-view']"));
+        public IWebElement ViewTab 
+        {
+            get
+            {
+                try
+                {
+                    // Element Plus tabs create tab headers with specific classes
+                    return browser.FindElement(By.XPath("//div[contains(@class, 'el-tab-pane') and @id='view']//ancestor::div[contains(@class, 'el-tabs')]//div[contains(@class, 'el-tabs__item') and contains(text(), 'View')]"));
+                }
+                catch (NoSuchElementException)
+                {
+                    // Try alternative selector - look for tab with View text
+                    return browser.FindElement(By.XPath("//div[contains(@class, 'el-tabs__item') and contains(., 'View')]"));
+                }
+            }
+        }
         
         public IWebElement HtmlSubTab 
         {
@@ -20,7 +35,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
             {
                 try
                 {
-                    return browser.FindElement(By.XPath("//div[@id='tab-html']"));
+                    // Look for HTML sub-tab within the inner tabs
+                    return browser.FindElement(By.XPath("//div[contains(@class, 'el-tabs__item') and contains(text(), 'HTML')]"));
                 }
                 catch (NoSuchElementException)
                 {
