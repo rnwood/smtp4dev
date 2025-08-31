@@ -30,6 +30,8 @@ namespace Rnwood.Smtp4dev.Server.Imap
                 IMAP_Search_Key_Flagged => HandleNone(),
                 IMAP_Search_Key_Deleted => HandleNone(),
                 IMAP_Search_Key_Since since => HandleSince(since),
+                IMAP_Search_Key_Younger younger => HandleYounger(younger),
+                IMAP_Search_Key_Older older => HandleOlder(older),
                 { } unknown => throw new ImapSearchCriteriaNotSupportedException($"The criteria '{unknown} is not supported'")
             };
         }
@@ -37,6 +39,18 @@ namespace Rnwood.Smtp4dev.Server.Imap
         private Expression<Func<Message, bool>> HandleSince(IMAP_Search_Key_Since since)
         {
             return m => m.ReceivedDate >= since.Date;
+        }
+
+        private Expression<Func<Message, bool>> HandleYounger(IMAP_Search_Key_Younger younger)
+        {
+            DateTime cutoffTime = DateTime.Now.AddSeconds(-younger.Interval);
+            return m => m.ReceivedDate >= cutoffTime;
+        }
+
+        private Expression<Func<Message, bool>> HandleOlder(IMAP_Search_Key_Older older)
+        {
+            DateTime cutoffTime = DateTime.Now.AddSeconds(-older.Interval);
+            return m => m.ReceivedDate < cutoffTime;
         }
 
         private Expression<Func<Message, bool>> HandleNone()
