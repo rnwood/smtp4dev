@@ -302,6 +302,42 @@ namespace Rnwood.Smtp4dev.Tests
             Assert.Empty(results);
         }
 
+        [Fact]
+        public async Task Older()
+        {
+            SqliteInMemory m = new SqliteInMemory();
+
+            // Create test messages with different received dates
+            DbModel.Message oldMessage = await GetTestMessage("Old message", receivedDate: DateTime.Now.AddHours(-2));
+            DbModel.Message recentMessage = await GetTestMessage("Recent message", receivedDate: DateTime.Now.AddMinutes(-30));
+            DbModel.Message veryRecentMessage = await GetTestMessage("Very recent message", receivedDate: DateTime.Now.AddMinutes(-5));
+            
+            var sqlLiteForTesting = new SqliteInMemory();
+            var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
+
+            context.AddRange(oldMessage, recentMessage, veryRecentMessage);
+            context.SaveChanges();
+
+            ImapSearchTranslator imapSearchTranslator = new ImapSearchTranslator();
+
+            // Test OLDER 3600 (1 hour) - should return messages older than 1 hour
+            var criteria = imapSearchTranslator.Translate(new IMAP_Search_Key_Older(3600));
+            var results = context.Messages.Where(criteria);
+            results.Should().Contain([oldMessage]);
+            results.Should().NotContain([recentMessage, veryRecentMessage]);
+
+            // Test OLDER 600 (10 minutes) - should return messages older than 10 minutes
+            criteria = imapSearchTranslator.Translate(new IMAP_Search_Key_Older(600));
+            results = context.Messages.Where(criteria);
+            results.Should().Contain([oldMessage, recentMessage]);
+            results.Should().NotContain([veryRecentMessage]);
+
+            // Test OLDER 10800 (3 hours) - should return no messages
+            criteria = imapSearchTranslator.Translate(new IMAP_Search_Key_Older(10800));
+            results = context.Messages.Where(criteria);
+            Assert.Empty(results);
+        }
+
         private static async Task<DbModel.Message> GetTestMessage(string subject, string from = "from@from.com", string to = "to@to.com", Boolean unread = true, DateTime? receivedDate = null)
         {
             MimeMessage mimeMessage = new MimeMessage();

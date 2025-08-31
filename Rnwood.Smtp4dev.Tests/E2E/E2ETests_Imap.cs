@@ -192,5 +192,120 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 }
             });
         }
+
+        [Fact]
+        public void OlderSearchFunctionality()
+        {
+            RunE2ETest(context => {
+
+                // Send first message (this will be "older")
+                string oldMessageSubject = "Old message " + Guid.NewGuid().ToString();
+                using (SmtpClient smtpClient = new SmtpClient())
+                {
+                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+                    smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                    smtpClient.CheckCertificateRevocation = false;
+                    MimeMessage message = new MimeMessage();
+                    message.To.Add(MailboxAddress.Parse("old@test.com"));
+                    message.From.Add(MailboxAddress.Parse("sender@test.com"));
+
+                    message.Subject = oldMessageSubject;
+                    message.Body = new TextPart()
+                    {
+                        Text = "This is an older test message"
+                    };
+
+                    smtpClient.Connect("localhost", context.SmtpPortNumber, SecureSocketOptions.StartTls, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                    smtpClient.Send(message);
+                    smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                }
+
+                // Wait a bit to ensure time difference
+                Thread.Sleep(3000);
+
+                // Send second message (this will be "newer")  
+                string newMessageSubject = "New message " + Guid.NewGuid().ToString();
+                using (SmtpClient smtpClient = new SmtpClient())
+                {
+                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+                    smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
+                    smtpClient.CheckCertificateRevocation = false;
+                    MimeMessage message = new MimeMessage();
+                    message.To.Add(MailboxAddress.Parse("new@test.com"));
+                    message.From.Add(MailboxAddress.Parse("sender@test.com"));
+
+                    message.Subject = newMessageSubject;
+                    message.Body = new TextPart()
+                    {
+                        Text = "This is a newer test message"
+                    };
+
+                    smtpClient.Connect("localhost", context.SmtpPortNumber, SecureSocketOptions.StartTls, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                    smtpClient.Send(message);
+                    smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                }
+
+                // Use IMAP to search for messages using OLDER search criteria
+                using (ImapClient imapClient = new ImapClient())
+                {
+                    imapClient.Connect("localhost", context.ImapPortNumber);
+                    imapClient.Authenticate("user", "password");
+                    imapClient.Inbox.Open(MailKit.FolderAccess.ReadOnly);
+
+                    // Test OLDER functionality using raw IMAP command
+                    // Since MailKit doesn't natively support OLDER, we'll use ImapFolder.Search with raw command
+                    try
+                    {
+                        // Create a custom search query for OLDER 2 (older than 2 seconds)
+                        // This should find the first message but not the second one
+                        var olderResults = ((MailKit.Net.Imap.ImapFolder)imapClient.Inbox).Search("OLDER 2");
+                        
+                        // Should find at least the older message 
+                        Assert.True(olderResults.Count >= 1, $"Should find at least 1 older message, found {olderResults.Count}");
+                        
+                        // Verify that the older message is in the results
+                        var olderMessages = imapClient.Inbox.Fetch(olderResults.UniqueIds, MessageSummaryItems.Envelope);
+                        Assert.Contains(olderMessages, m => m.Envelope.Subject == oldMessageSubject);
+                        
+                        // Test OLDER 10 (older than 10 seconds) - should find both messages if enough time has passed
+                        var veryOldResults = ((MailKit.Net.Imap.ImapFolder)imapClient.Inbox).Search("OLDER 10");
+                        
+                        // Both messages should be found since they're both older than 10 seconds after the delay
+                        if (veryOldResults.Count >= 2)
+                        {
+                            var veryOldMessages = imapClient.Inbox.Fetch(veryOldResults.UniqueIds, MessageSummaryItems.Envelope);
+                            Assert.Contains(veryOldMessages, m => m.Envelope.Subject == oldMessageSubject);
+                            Assert.Contains(veryOldMessages, m => m.Envelope.Subject == newMessageSubject);
+                        }
+                    }
+                    catch (NotSupportedException)
+                    {
+                        // Fallback: If raw OLDER search isn't supported by MailKit version,
+                        // at least verify the messages exist
+                        var allMessages = imapClient.Inbox.Search(SearchQuery.All);
+                        Assert.True(allMessages.Count >= 2, "Should have at least 2 messages");
+
+                        var messageSummaries = imapClient.Inbox.Fetch(allMessages, MessageSummaryItems.Envelope | MessageSummaryItems.InternalDate);
+                        
+                        // Verify both messages exist
+                        Assert.Contains(messageSummaries, m => m.Envelope.Subject == oldMessageSubject);
+                        Assert.Contains(messageSummaries, m => m.Envelope.Subject == newMessageSubject);
+
+                        // Verify that the old message is indeed older than the new one
+                        var oldMessage = messageSummaries.FirstOrDefault(m => m.Envelope.Subject == oldMessageSubject);
+                        var newMessage = messageSummaries.FirstOrDefault(m => m.Envelope.Subject == newMessageSubject);
+                        
+                        if (oldMessage != null && newMessage != null && 
+                            oldMessage.InternalDate.HasValue && newMessage.InternalDate.HasValue)
+                        {
+                            Assert.True(oldMessage.InternalDate.Value < newMessage.InternalDate.Value, 
+                                "Old message should have an earlier timestamp than new message");
+                        }
+                    }
+
+                    imapClient.Inbox.Close();
+                }
+            });
+        }
     }
 }

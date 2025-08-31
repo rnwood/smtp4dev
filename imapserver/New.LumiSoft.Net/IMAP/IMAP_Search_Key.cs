@@ -88,6 +88,10 @@ namespace LumiSoft.Net.IMAP
             else if(r.StartsWith("NOT",false)){
                 return IMAP_Search_Key_Not.Parse(r);
             }
+            // OLDER
+            else if(r.StartsWith("OLDER",false)){
+                return IMAP_Search_Key_Older.Parse(r);
+            }
             // OLD
             else if(r.StartsWith("OLD",false)){
                 return IMAP_Search_Key_Old.Parse(r);
