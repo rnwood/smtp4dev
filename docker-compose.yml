@@ -5,7 +5,7 @@ version: '3'
 #   - '127.0.0.1:5000:80'   # Web interface (localhost only)
 #   - '127.0.0.1:25:25'     # SMTP server (localhost only)  
 #   - '127.0.0.1:143:143'   # IMAP server (localhost only)
-# See DOCKER_SECURITY.md for detailed security guidelines.
+# See docs/Docker-Security.md for detailed security guidelines.
 
 services:
   smtp4dev:

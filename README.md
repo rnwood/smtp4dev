@@ -35,7 +35,7 @@ smtp4dev support many advanced features:
 [📚 **View Full Documentation**](docs/README.md)
 
 ## Security
-**⚠️ Docker Users**: Please read [Docker Security Guidelines](DOCKER_SECURITY.md) to prevent accidental public exposure of your smtp4dev instance.
+**⚠️ Docker Users**: Please read [Docker Security Guidelines](docs/Docker-Security.md) to prevent accidental public exposure of your smtp4dev instance.
 
 ## Screenshots
 
