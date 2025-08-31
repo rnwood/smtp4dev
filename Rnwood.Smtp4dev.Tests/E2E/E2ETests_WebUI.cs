@@ -26,7 +26,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
     {
         public E2ETests_WebUI(ITestOutputHelper output) : base(output)
         {
-            new DriverManager().SetUpDriver(new ChromeConfig(), VersionResolveStrategy.MatchingBrowser);
+            // ChromeDriver is already installed in the system, no need to set up
         }
 
         [Fact]
@@ -152,6 +152,98 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             Assert.NotNull(result);
 
             return result;
+        }
+
+        [Fact]
+        public void CheckHtmlSanitizationSettingTakesEffectImmediately()
+        {
+            RunUITest(nameof(CheckHtmlSanitizationSettingTakesEffectImmediately), (browser, baseUrl, smtpPortNumber) =>
+            {
+                browser.Navigate().GoToUrl(baseUrl);
+                var homePage = new HomePage(browser);
+
+                HomePage.MessageListControl messageList = WaitFor(() => homePage.MessageList);
+                Assert.NotNull(messageList);
+
+                // Send HTML message with unsafe content that should be sanitized
+                string messageSubject = Guid.NewGuid().ToString();
+                string dangerousHtml = "<script>alert('XSS')</script><p>Safe content</p>";
+                
+                using (var smtpClient = new SmtpClient())
+                {
+                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
+                    smtpClient.ServerCertificateValidationCallback = GetCertvalidationCallbackHandler();
+                    smtpClient.CheckCertificateRevocation = false;
+                    
+                    var message = new MimeMessage();
+                    message.To.Add(MailboxAddress.Parse("to@to.com"));
+                    message.From.Add(MailboxAddress.Parse("from@from.com"));
+                    message.Subject = messageSubject;
+                    
+                    var builder = new BodyBuilder();
+                    builder.HtmlBody = dangerousHtml;
+                    message.Body = builder.ToMessageBody();
+
+                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.StartTls,
+                        new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                    smtpClient.Send(message);
+                    smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                }
+
+                // Wait for message to appear and select it
+                HomePage.Grid.GridRow messageRow = WaitFor(() => messageList.Grid?.Rows?.SingleOrDefault());
+                Assert.NotNull(messageRow);
+                Assert.Contains(messageRow.Cells, c => c.Text.Contains(messageSubject));
+                
+                messageRow.Click();
+                Thread.Sleep(1000); // Allow message to load
+
+                // Navigate to HTML view
+                var messageView = homePage.MessageView;
+                messageView.ClickHtmlTab();
+                messageView.WaitForHtmlFrame();
+
+                // Initially, sanitization should be enabled (script tags removed)
+                string initialContent = messageView.GetHtmlFrameContent();
+                Assert.DoesNotContain("<script>", initialContent);
+                Assert.Contains("Safe content", initialContent);
+                Assert.True(messageView.IsSanitizationWarningVisible());
+
+                // Open settings dialog
+                homePage.OpenSettings();
+                var settingsDialog = homePage.SettingsDialog;
+                settingsDialog.WaitUntilVisible();
+
+                // Disable sanitization
+                settingsDialog.ToggleDisableMessageSanitisation();
+                settingsDialog.Save();
+                settingsDialog.WaitUntilClosed();
+
+                // Wait a moment for the setting to take effect
+                Thread.Sleep(2000);
+
+                // Check that sanitization is now disabled without page refresh
+                string unsanitizedContent = messageView.GetHtmlFrameContent();
+                Assert.Contains("<script>", unsanitizedContent);
+                Assert.Contains("Safe content", unsanitizedContent);
+                Assert.False(messageView.IsSanitizationWarningVisible());
+
+                // Re-enable sanitization
+                homePage.OpenSettings();
+                settingsDialog.WaitUntilVisible();
+                settingsDialog.ToggleDisableMessageSanitisation();
+                settingsDialog.Save();
+                settingsDialog.WaitUntilClosed();
+
+                // Wait a moment for the setting to take effect
+                Thread.Sleep(2000);
+
+                // Verify sanitization is re-enabled
+                string sanitizedContent = messageView.GetHtmlFrameContent();
+                Assert.DoesNotContain("<script>", sanitizedContent);
+                Assert.Contains("Safe content", sanitizedContent);
+                Assert.True(messageView.IsSanitizationWarningVisible());
+            });
         }
 
         class UITestOptions : E2ETestOptions
