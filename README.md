@@ -40,8 +40,33 @@ smtp4dev support many advanced features:
 
 ## Screenshots
 
-![Screenshot 1](screenshot1.png)
-![Screenshot 2](screenshot2.png)
+### Main Message Interface
+The main interface showing received emails with sender, recipient, subject, and timestamps.
+![Message List Interface](message-list-interface.png)
+
+### HTML Email Rendering & Viewport Simulation
+View HTML emails with rich formatting, including viewport size simulation for testing responsive email designs.
+![Message Detail View](message-detail-view.png)
+
+### HTML Compatibility Analysis
+Comprehensive email client compatibility reports showing which HTML/CSS features are supported across different email clients.
+![HTML Analysis View](html-analysis-view.png)
+
+### Message Source & Raw Content
+Inspect the raw message source with syntax highlighting and line numbers for debugging.
+![Message Source View](message-source-view.png)
+
+### SMTP Session Logging
+View detailed SMTP session logs to debug email delivery issues and protocol interactions.
+![SMTP Sessions View](smtp-sessions-view.png)
+
+### MIME Parts Inspector
+Analyze multipart emails with attachments using the built-in MIME inspector.
+![MIME Parts Inspector](mime-parts-inspector.png)
+
+### Dark Mode Support
+Full dark mode support for comfortable viewing in low-light environments.
+![Dark Mode Interface](dark-mode-interface.png)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Frnwood%2Fsmtp4dev.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Frnwood%2Fsmtp4dev?ref=badge_shield)
 
 
