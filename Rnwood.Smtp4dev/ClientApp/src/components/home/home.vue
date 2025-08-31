@@ -134,7 +134,7 @@
                     window.open("/api");
                     break;
                 case "help":
-                    window.open("https://github.com/rnwood/smtp4dev/wiki");
+                    window.open("https://github.com/rnwood/smtp4dev/blob/master/docs/README.md");
                     break;
                 case "issues":
                     window.open("https://github.com/rnwood/smtp4dev/issues");
