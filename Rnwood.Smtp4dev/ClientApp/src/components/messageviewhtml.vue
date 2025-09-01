@@ -164,6 +164,10 @@
         async onConnectionChanged() {
             if (this.connection) {
                 this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
+                this.connection.onServerChanged(async () => {
+                    this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
+                    this.updateIframe();
+                });
             }
         }
 

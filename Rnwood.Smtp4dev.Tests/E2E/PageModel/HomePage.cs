@@ -18,6 +18,24 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 			this.browser = browser;
 		}
 
+		public IWebElement SettingsButton => browser.FindElement(By.XPath("//button[@title='Settings']"));
+
+		public void OpenSettings()
+		{
+			try
+			{
+				SettingsButton.Click();
+			}
+			catch (NoSuchElementException ex)
+			{
+				throw new NoSuchElementException("Could not find the Settings button", ex);
+			}
+		}
+
+		public SettingsDialog SettingsDialog => new SettingsDialog(browser);
+
+		public MessageView MessageView => new MessageView(browser);
+
 		public class MessageListControl
 		{
 			public Grid Grid => new Grid(webElement.FindElement(By.CssSelector("table.el-table__body")));
@@ -28,6 +46,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 			{
 				this.webElement = webElement;
 			}
+
+
 		}
 
 		public class Grid
@@ -52,6 +72,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 				}
 
 				public IReadOnlyCollection<IWebElement> Cells => webElement.FindElements(By.CssSelector("td div.cell"));
+
+				public void Click()
+				{
+					webElement.Click();
+				}
 			}
 		}
 	}
