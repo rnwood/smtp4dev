@@ -1,15 +1,25 @@
 version: '3'
 
+# ⚠️  SECURITY WARNING: The port configuration below publishes smtp4dev to ALL network interfaces.
+# This means it may be accessible from outside your machine. For security, consider using:
+#   - '127.0.0.1:5000:80'   # Web interface (localhost only)
+#   - '127.0.0.1:25:25'     # SMTP server (localhost only)  
+#   - '127.0.0.1:143:143'   # IMAP server (localhost only)
+# See docs/Docker-Security.md for detailed security guidelines.
+
 services:
   smtp4dev:
     image: rnwood/smtp4dev:v3
     restart: always
     ports:
       # Change the number before : to the port the web interface should be accessible on
+      # Add 127.0.0.1: prefix for localhost-only access (recommended for security)
       - '5000:80'
       # Change the number before : to the port the SMTP server should be accessible on
+      # Add 127.0.0.1: prefix for localhost-only access (recommended for security)
       - '25:25'
       # Change the number before : to the port the IMAP server should be accessible on
+      # Add 127.0.0.1: prefix for localhost-only access (recommended for security)
       - '143:143'
     volumes:
       # This is where smtp4dev stores the database..
@@ -45,6 +55,9 @@ services:
 
       #Specifies the TLS certificate to use if TLS is enabled/requested. Specify "" to use an auto-generated self-signed certificate (then see console output on first startup)
       #- ServerOptions__TlsCertificate=
+
+      #Uncomment to disable IPv6 if your Docker environment doesn't support it (helps avoid startup errors in some Docker configurations)
+      #- ServerOptions__DisableIPv6=true
 
       #Specifies a mailbox with name "Test" and recipient "hello@world.com". To add more, use the same format but replace the number at the end of the variable name.
       #- ServerOptions__Mailboxes__0=Test=hello@world.com

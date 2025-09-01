@@ -232,6 +232,8 @@ namespace Rnwood.Smtp4dev
                          }
                      });
                     e.MapControllers();
+
+#if DEBUG
                     if (env.IsDevelopment())
                     {
 
@@ -245,6 +247,7 @@ namespace Rnwood.Smtp4dev
                         );
 
                     }
+#endif
                 });
             };
 
