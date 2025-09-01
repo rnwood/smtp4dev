@@ -78,7 +78,10 @@ namespace Rnwood.Smtp4dev.Server
             {
                 if (!serverOptions.CurrentValue.DisableIPv6)
                 {
+                    // Add IPv6 binding first, IPv4 fallback will be handled by the LumiSoft TCP_Server error handling
                     bindings.Add(new IPBindInfo(serverOptions.CurrentValue.HostName, BindInfoProtocol.TCP, System.Net.IPAddress.IPv6Any, serverOptions.CurrentValue.ImapPort.Value));
+                    // Add IPv4 as fallback in case IPv6 fails
+                    bindings.Add(new IPBindInfo(serverOptions.CurrentValue.HostName, BindInfoProtocol.TCP, System.Net.IPAddress.Any, serverOptions.CurrentValue.ImapPort.Value));
                 }
                 else
                 {
@@ -92,6 +95,7 @@ namespace Rnwood.Smtp4dev.Server
 
                 if (!serverOptions.CurrentValue.DisableIPv6)
                 {
+                    // Add IPv6 loopback first, IPv4 loopback already added above as fallback
                     bindings.Add(new IPBindInfo(serverOptions.CurrentValue.HostName, BindInfoProtocol.TCP, System.Net.IPAddress.IPv6Loopback, serverOptions.CurrentValue.ImapPort.Value));
                 }
             }
