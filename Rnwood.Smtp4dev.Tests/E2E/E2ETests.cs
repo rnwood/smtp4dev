@@ -43,6 +43,23 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         {
             options ??= new E2ETestOptions();
 
+            RunE2ETestCore(context => 
+            {
+                test(context);
+                return Task.CompletedTask;
+            }, options).Wait();
+        }
+
+        protected async Task RunE2ETest(Func<E2ETestContext, Task> test, E2ETestOptions options = null)
+        {
+            options ??= new E2ETestOptions();
+            await RunE2ETestCore(test, options);
+        }
+
+        private async Task RunE2ETestCore(Func<E2ETestContext, Task> test, E2ETestOptions options)
+        {
+            options ??= new E2ETestOptions();
+
             string workingDir = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_WORKINGDIR");
             string binary = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_BINARY");
             bool useDefaultDBPath = Environment.GetEnvironmentVariable("SMTP4DEV_E2E_USEDEFAULTDBPATH") == "1";
@@ -179,7 +196,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     Assert.False(serverProcess.Process.HasExited, "Server process failed");
 
 
-                    test(new E2ETestContext
+                    await test(new E2ETestContext
                     {
                         BaseUrl = baseUrl,
                         SmtpPortNumber = smtpPortNumber.Value,
