@@ -43,14 +43,16 @@ namespace Rnwood.Smtp4dev.Server.Imap
 
         private Expression<Func<Message, bool>> HandleYounger(IMAP_Search_Key_Younger younger)
         {
-            DateTime cutoffTime = DateTime.Now.AddSeconds(-younger.Interval);
-            return m => m.ReceivedDate >= cutoffTime;
+            // Capture the current time as a parameter that EF can properly translate
+            var now = DateTime.Now;
+            return m => m.ReceivedDate >= now.AddSeconds(-younger.Interval);
         }
 
         private Expression<Func<Message, bool>> HandleOlder(IMAP_Search_Key_Older older)
         {
-            DateTime cutoffTime = DateTime.Now.AddSeconds(-older.Interval);
-            return m => m.ReceivedDate < cutoffTime;
+            // Capture the current time as a parameter that EF can properly translate
+            var now = DateTime.Now;
+            return m => m.ReceivedDate < now.AddSeconds(-older.Interval);
         }
 
         private Expression<Func<Message, bool>> HandleNone()
