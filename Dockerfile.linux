@@ -2,6 +2,7 @@ FROM mcr.microsoft.com/dotnet/aspnet:8.0.15 AS runtime
 RUN apt update
 RUN apt install -y curl
 COPY out /app
+RUN mkdir -p /smtp4dev && chown -R app:app /smtp4dev
 VOLUME ["/smtp4dev"]
 WORKDIR /
 ENV XDG_CONFIG_HOME /
