@@ -127,10 +127,19 @@ stages:
                 # Build the test project to ensure Playwright CLI is available
                 dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release
                 
-                # Install Playwright browsers using cross-platform path handling
-                $playwrightScript = Join-Path "Rnwood.Smtp4dev.Tests" "bin" "Release" "net8.0" "playwright.ps1"
+                # Install Playwright browsers using proper path resolution
+                $currentDir = Get-Location
+                $playwrightScript = Join-Path $currentDir "Rnwood.Smtp4dev.Tests" "bin" "Release" "net8.0" "playwright.ps1"
+                Write-Host "Current directory: $currentDir"
                 Write-Host "Installing Playwright browsers using script: $playwrightScript"
-                & $playwrightScript install --with-deps
+                
+                if (Test-Path $playwrightScript) {
+                  & $playwrightScript install --with-deps
+                } else {
+                  Write-Error "Playwright script not found at: $playwrightScript"
+                  Get-ChildItem "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/" -Name
+                  exit 1
+                }
           - task: DotNetCoreCLI@2
             condition: eq(variables['runTests'], true)
             displayName: Run Tests
