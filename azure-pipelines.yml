@@ -7,6 +7,15 @@ trigger:
     exclude:
       - refs/tags/*-ci*
 
+pr:
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - docs/*
+      - README.md
+
 resources:
   - repo: self
 
@@ -26,6 +35,9 @@ variables:
   docker_repo: "rnwood/smtp4dev"
   docker_registry: "dockerhub-rnwood"
   netcoresdk_version: "8.0.201"
+  
+  # GitHub API token for PR notifications - should be configured as secret variable
+  # GITHUB_TOKEN: $(GITHUB_API_TOKEN)
 
 stages:
   - stage: Init
@@ -498,4 +510,62 @@ stages:
                 ($dockertags.Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
                   docker manifest create $(docker_repo):$_ $(docker_repo):windows-ltsc2019-amd64-$_ $(docker_repo):windows-ltsc2022-amd64-$_ $(docker_repo):linux-amd64-$_ $(docker_repo):linux-arm64-$_
                   docker manifest push $(docker_repo):$_
+                }
+
+  - stage: NotifyOnFailure
+    displayName: Notify on Build Failure
+    condition: and(failed(), eq(variables['Build.Reason'], 'PullRequest'))
+    dependsOn: 
+      - Build
+    jobs:
+      - job: NotifyCopilot
+        displayName: Notify Copilot of Build Failure
+        pool:
+          vmImage: "ubuntu-22.04"
+        steps:
+          - checkout: none
+          - task: PowerShell@2
+            displayName: Comment on PR to notify Copilot
+            env:
+              GITHUB_TOKEN: $(GITHUB_TOKEN)
+            inputs:
+              targetType: inline
+              script: |
+                $repoOwner = "rnwood"
+                $repoName = "smtp4dev"
+                $prNumber = "$(System.PullRequest.PullRequestNumber)"
+                $buildUrl = "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+                
+                $commentBody = @"
+                @copilot The build triggered by this PR has failed. Please investigate and fix the issues.
+                
+                **Build Details:**
+                - Build ID: $(Build.BuildId)
+                - Build URL: $buildUrl
+                - Commit: $(Build.SourceVersion)
+                
+                Please check the build logs and address any compilation errors, test failures, or other issues.
+                "@
+                
+                $headers = @{
+                  'Authorization' = "token $env:GITHUB_TOKEN"
+                  'Accept' = 'application/vnd.github.v3+json'
+                  'User-Agent' = 'Azure-DevOps-Pipeline'
+                }
+                
+                $body = @{
+                  body = $commentBody
+                } | ConvertTo-Json
+                
+                $uri = "https://api.github.com/repos/$repoOwner/$repoName/issues/$prNumber/comments"
+                
+                try {
+                  $response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body -ContentType 'application/json'
+                  Write-Host "Successfully posted comment to PR #$prNumber"
+                  Write-Host "Comment URL: $($response.html_url)"
+                } catch {
+                  Write-Error "Failed to post comment to PR #$prNumber : $_"
+                  Write-Host "URI: $uri"
+                  Write-Host "PR Number: $prNumber"
+                  exit 1
                 }
