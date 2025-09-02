@@ -125,19 +125,46 @@ stages:
               targetType: inline
               script: |
                 # Build the test project to ensure Playwright CLI is available
-                dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release
+                dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release $(buildArgs)
                 
-                # Install Playwright browsers using proper path resolution
+                # Find the Playwright script dynamically
                 $currentDir = Get-Location
-                $playwrightScript = Join-Path $currentDir "Rnwood.Smtp4dev.Tests" "bin" "Release" "net8.0" "playwright.ps1"
+                $platformName = "$(platformName)"
                 Write-Host "Current directory: $currentDir"
-                Write-Host "Installing Playwright browsers using script: $playwrightScript"
+                Write-Host "Platform: $platformName"
                 
-                if (Test-Path $playwrightScript) {
+                # Search for playwright.ps1 in all possible locations under the test project
+                $searchPaths = @(
+                  "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1",
+                  "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/$platformName/playwright.ps1",
+                  "Rnwood.Smtp4dev.Tests/bin/$platformName/Release/net8.0/playwright.ps1"
+                )
+                
+                $playwrightScript = $null
+                foreach ($path in $searchPaths) {
+                  $fullPath = Join-Path $currentDir $path
+                  Write-Host "Checking: $fullPath"
+                  if (Test-Path $fullPath) {
+                    $playwrightScript = $fullPath
+                    Write-Host "Found Playwright script at: $playwrightScript"
+                    break
+                  }
+                }
+                
+                if ($playwrightScript -and (Test-Path $playwrightScript)) {
+                  Write-Host "Installing Playwright browsers..."
                   & $playwrightScript install --with-deps
+                  Write-Host "Playwright browsers installed successfully"
                 } else {
-                  Write-Error "Playwright script not found at: $playwrightScript"
-                  Get-ChildItem "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/" -Name
+                  Write-Error "Playwright script not found in any expected location"
+                  Write-Host "Search attempted in:"
+                  foreach ($path in $searchPaths) {
+                    Write-Host "  $path"
+                  }
+                  Write-Host "Directory structure:"
+                  if (Test-Path "Rnwood.Smtp4dev.Tests/bin") {
+                    Get-ChildItem "Rnwood.Smtp4dev.Tests/bin" -Recurse -Name "playwright.ps1" | ForEach-Object { Write-Host "  $_" }
+                  }
                   exit 1
                 }
           - task: DotNetCoreCLI@2
