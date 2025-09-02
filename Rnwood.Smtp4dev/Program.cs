@@ -31,10 +31,6 @@ using Serilog;
 
 namespace Rnwood.Smtp4dev
 {
-    //Below is a deliberate error introduced to test the pipeline changes that report errors to copilot
-    dslkjsdlakjfsdakljf
-    fdlkjgkgljdkljgd
-
     public class Program
     {
         public static bool IsService { get; private set; }
