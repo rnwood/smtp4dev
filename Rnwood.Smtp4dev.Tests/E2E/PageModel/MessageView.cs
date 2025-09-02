@@ -1,137 +1,128 @@
-using OpenQA.Selenium;
-using System.Threading;
+using Microsoft.Playwright;
+using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 {
     public class MessageView
     {
-        private IWebDriver browser;
+        private IPage page;
 
-        public MessageView(IWebDriver browser)
+        public MessageView(IPage page)
         {
-            this.browser = browser;
+            this.page = page;
         }
 
-        public IWebElement ViewTab 
+        public async Task<IElementHandle> GetViewTabAsync()
         {
-            get
+            try
             {
-                try
-                {
-                    // Element Plus tabs create tab headers with specific classes
-                    return browser.FindElement(By.XPath("//div[contains(@class, 'el-tab-pane') and @id='view']//ancestor::div[contains(@class, 'el-tabs')]//div[contains(@class, 'el-tabs__item') and contains(text(), 'View')]"));
-                }
-                catch (NoSuchElementException)
-                {
-                    // Try alternative selector - look for tab with View text
-                    return browser.FindElement(By.XPath("//div[contains(@class, 'el-tabs__item') and contains(., 'View')]"));
-                }
+                // Element Plus tabs create tab headers with specific classes
+                var element = await page.QuerySelectorAsync("//div[contains(@class, 'el-tab-pane') and @id='view']//ancestor::div[contains(@class, 'el-tabs')]//div[contains(@class, 'el-tabs__item') and contains(text(), 'View')]");
+                if (element != null) return element;
+                
+                // Try alternative selector - look for tab with View text
+                return await page.QuerySelectorAsync("//div[contains(@class, 'el-tabs__item') and contains(., 'View')]");
+            }
+            catch
+            {
+                return null;
             }
         }
         
-        public IWebElement HtmlSubTab 
+        public async Task<IElementHandle> GetHtmlSubTabAsync()
         {
-            get
+            try
             {
-                try
-                {
-                    // Look for HTML sub-tab within the inner tabs
-                    return browser.FindElement(By.XPath("//div[contains(@class, 'el-tabs__item') and contains(text(), 'HTML')]"));
-                }
-                catch (NoSuchElementException)
-                {
-                    return null;
-                }
+                // Look for HTML sub-tab within the inner tabs
+                return await page.QuerySelectorAsync("//div[contains(@class, 'el-tabs__item') and contains(text(), 'HTML')]");
+            }
+            catch
+            {
+                return null;
             }
         }
 
-        public IWebElement HtmlFrame
+        public async Task<IElementHandle> GetHtmlFrameAsync()
         {
-            get
+            try
             {
-                var timeout = new CancellationTokenSource(System.TimeSpan.FromSeconds(10));
-                while (!timeout.IsCancellationRequested)
-                {
-                    try
-                    {
-                        return browser.FindElement(By.CssSelector("iframe.htmlview"));
-                    }
-                    catch (NoSuchElementException)
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
-                throw new NoSuchElementException("HTML iframe not found");
+                return await page.WaitForSelectorAsync("iframe.htmlview", new PageWaitForSelectorOptions { Timeout = 10000 });
+            }
+            catch
+            {
+                throw new System.TimeoutException("HTML iframe not found");
             }
         }
 
-        public IWebElement SanitizationWarning
+        public async Task<IElementHandle> GetSanitizationWarningAsync()
         {
-            get
+            try
             {
-                try
-                {
-                    return browser.FindElement(By.XPath("//div[contains(@class, 'el-alert--warning')]//p[contains(text(), 'Message HTML was sanitized')]"));
-                }
-                catch (NoSuchElementException)
-                {
-                    return null;
-                }
+                return await page.QuerySelectorAsync("//div[contains(@class, 'el-alert--warning')]//p[contains(text(), 'Message HTML was sanitized')]");
+            }
+            catch
+            {
+                return null;
             }
         }
 
-        public void ClickViewTab()
+        public async Task ClickViewTabAsync()
         {
-            ViewTab.Click();
+            var viewTab = await GetViewTabAsync();
+            if (viewTab != null)
+            {
+                await viewTab.ClickAsync();
+            }
         }
         
-        public void ClickHtmlSubTab()
+        public async Task ClickHtmlSubTabAsync()
         {
-            if (HtmlSubTab != null)
+            var htmlSubTab = await GetHtmlSubTabAsync();
+            if (htmlSubTab != null)
             {
-                HtmlSubTab.Click();
+                await htmlSubTab.ClickAsync();
             }
         }
 
-        public void ClickHtmlTab()
+        public async Task ClickHtmlTabAsync()
         {
             // First click on the View tab, then on HTML sub-tab if it exists
-            ClickViewTab();
-            Thread.Sleep(500); // Wait for content to load
-            ClickHtmlSubTab();
+            await ClickViewTabAsync();
+            await Task.Delay(500); // Wait for content to load
+            await ClickHtmlSubTabAsync();
         }
 
-        public string GetHtmlFrameContent()
+        public async Task<string> GetHtmlFrameContentAsync()
         {
-            browser.SwitchTo().Frame(HtmlFrame);
-            var content = browser.FindElement(By.TagName("body")).GetAttribute("innerHTML");
-            browser.SwitchTo().DefaultContent();
-            return content;
+            var htmlFrame = await GetHtmlFrameAsync();
+            if (htmlFrame == null) return "";
+            
+            // Switch to frame and get content
+            var frame = await htmlFrame.ContentFrameAsync();
+            if (frame == null) return "";
+            
+            var bodyElement = await frame.QuerySelectorAsync("body");
+            if (bodyElement == null) return "";
+            
+            return await bodyElement.GetAttributeAsync("innerHTML") ?? "";
         }
 
-        public bool IsSanitizationWarningVisible()
+        public async Task<bool> IsSanitizationWarningVisibleAsync()
         {
-            return SanitizationWarning != null && SanitizationWarning.Displayed;
+            var warning = await GetSanitizationWarningAsync();
+            return warning != null && await warning.IsVisibleAsync();
         }
 
-        public void WaitForHtmlFrame()
+        public async Task WaitForHtmlFrameAsync()
         {
-            var timeout = new CancellationTokenSource(System.TimeSpan.FromSeconds(10));
-            while (!timeout.IsCancellationRequested)
+            try
             {
-                try
-                {
-                    var frame = HtmlFrame;
-                    if (frame.Displayed)
-                        return;
-                }
-                catch (NoSuchElementException)
-                {
-                    // Frame not found yet, continue waiting
-                }
-                Thread.Sleep(100);
+                await page.WaitForSelectorAsync("iframe.htmlview", new PageWaitForSelectorOptions { Timeout = 10000 });
             }
-            throw new System.TimeoutException("HTML frame did not appear within timeout");
+            catch
+            {
+                throw new System.TimeoutException("HTML frame did not appear within timeout");
+            }
         }
     }
 }

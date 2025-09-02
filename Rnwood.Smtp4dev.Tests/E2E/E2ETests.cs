@@ -88,7 +88,12 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 //netcoreapp3.1
                 string folder = framework.TrimStart('.').Replace("CoreApp,Version=v", "").ToLower();
 
-                string mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/Debug/{folder}/Rnwood.Smtp4dev.dll");
+                // Use the same configuration as the test build
+                string configuration = "Debug";
+#if RELEASE
+                configuration = "Release";
+#endif
+                string mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/{configuration}/{folder}/Rnwood.Smtp4dev.dll");
                 args.Insert(0, mainModule);
 
             }
