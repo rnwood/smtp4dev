@@ -260,30 +260,32 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
             RunE2ETest(context =>
             {
-                Task.Run(async () =>
-                {
-                    using var playwright = await Playwright.CreateAsync();
-                    await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
-                    {
-                        Headless = !System.Diagnostics.Debugger.IsAttached
-                    });
-
-                    var page = await browser.NewPageAsync();
-                    try
-                    {
-                        await uitest(page, context.BaseUrl, context.SmtpPortNumber);
-                    }
-                    catch
-                    {
-                        // Take screenshot on failure
-                        string screenshotPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"{testName}_{Guid.NewGuid()}.png");
-                        await page.ScreenshotAsync(new PageScreenshotOptions { Path = screenshotPath, FullPage = true });
-                        
-                        Console.WriteLine($"##vso[artifact.upload containerfolder=e2eerror;artifactname={testName}.png]{screenshotPath}");
-                        throw;
-                    }
-                }).GetAwaiter().GetResult();
+                RunPlaywrightTestAsync(testName, uitest, context).GetAwaiter().GetResult();
             }, options);
+        }
+
+        private async Task RunPlaywrightTestAsync(string testName, Func<IPage, Uri, int, Task> uitest, E2ETestContext context)
+        {
+            using var playwright = await Playwright.CreateAsync();
+            await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+            {
+                Headless = !System.Diagnostics.Debugger.IsAttached
+            });
+
+            var page = await browser.NewPageAsync();
+            try
+            {
+                await uitest(page, context.BaseUrl, context.SmtpPortNumber);
+            }
+            catch
+            {
+                // Take screenshot on failure
+                string screenshotPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"{testName}_{Guid.NewGuid()}.png");
+                await page.ScreenshotAsync(new PageScreenshotOptions { Path = screenshotPath, FullPage = true });
+                
+                Console.WriteLine($"##vso[artifact.upload containerfolder=e2eerror;artifactname={testName}.png]{screenshotPath}");
+                throw;
+            }
         }
     }
 }
