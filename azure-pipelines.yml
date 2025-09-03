@@ -136,7 +136,7 @@ stages:
             inputs:
               command: build
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
-              arguments: '-c Release'
+              arguments: '-c Release -o bin/playwright'
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright Browsers
@@ -148,8 +148,8 @@ stages:
                 Write-Host "Starting Playwright browser installation process..."
                 Write-Host "Current working directory: $(Get-Location)"
                 
-                # Find playwright.ps1 in the generic location (test project built without runtime identifier)
-                $baseDir = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0"
+                # Find playwright.ps1 in the forced output directory
+                $baseDir = "bin/playwright"
                 $playwrightScript = "$baseDir/playwright.ps1"
                 
                 Write-Host "Searching for playwright.ps1 script..."
