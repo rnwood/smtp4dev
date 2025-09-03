@@ -1,105 +1,103 @@
-using OpenQA.Selenium;
-using System.Threading;
+using Microsoft.Playwright;
+using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 {
     public class SettingsDialog
     {
-        private IWebDriver browser;
+        private readonly IPage page;
 
-        public SettingsDialog(IWebDriver browser)
+        public SettingsDialog(IPage page)
         {
-            this.browser = browser;
+            this.page = page;
         }
 
-        public IWebElement DisableMessageSanitisationSwitch 
+        public async Task<ILocator> GetDisableMessageSanitisationSwitchAsync()
         {
-            get
+            try
             {
-                try
+                // Try multiple selectors for Element Plus switch
+                var selectors = new[]
                 {
-                    // Try multiple selectors for Element Plus switch
-                    var selectors = new[]
-                    {
-                        "//label[contains(text(), 'Disable HTML message sanitisation')]/following-sibling::div//div[contains(@class, 'el-switch')]",
-                        "//label[contains(text(), 'Disable HTML message sanitisation')]/following-sibling::div//input",
-                        "//div[contains(@class, 'el-form-item')]//label[contains(text(), 'Disable HTML message sanitisation')]/following-sibling::*//*[contains(@class, 'el-switch')]",
-                        "//div[contains(@class, 'el-form-item')]//label[contains(text(), 'Disable HTML message sanitisation')]/..//*[contains(@class, 'el-switch')]"
-                    };
+                    "label:has-text('Disable HTML message sanitisation') ~ div .el-switch",
+                    "label:has-text('Disable HTML message sanitisation') ~ div input",
+                    ".el-form-item:has(label:has-text('Disable HTML message sanitisation')) .el-switch",
+                    ".el-form-item:has(label:has-text('Disable HTML message sanitisation')) .el-switch input"
+                };
 
-                    foreach (var selector in selectors)
-                    {
-                        try
-                        {
-                            return browser.FindElement(By.XPath(selector));
-                        }
-                        catch (NoSuchElementException)
-                        {
-                            continue;
-                        }
-                    }
-                    throw new NoSuchElementException("Could not find sanitization switch with any selector");
-                }
-                catch (NoSuchElementException)
+                foreach (var selector in selectors)
                 {
-                    return null;
+                    try
+                    {
+                        var element = page.Locator(selector);
+                        await element.WaitForAsync(new LocatorWaitForOptions { Timeout = 1000 });
+                        return element;
+                    }
+                    catch
+                    {
+                        continue;
+                    }
                 }
+                
+                throw new PlaywrightException("Could not find sanitization switch with any selector");
+            }
+            catch
+            {
+                return null;
             }
         }
 
-        public IWebElement SaveButton => browser.FindElement(By.XPath("//span[text()='OK']/.."));
-
-        public void ToggleDisableMessageSanitisation()
+        public ILocator GetSaveButton()
         {
-            var switchElement = DisableMessageSanitisationSwitch;
+            return page.Locator("span:has-text('OK')").Locator("..");
+        }
+
+        public async Task ToggleDisableMessageSanitisationAsync()
+        {
+            var switchElement = await GetDisableMessageSanitisationSwitchAsync();
             if (switchElement == null)
             {
-                throw new NoSuchElementException("Could not find the sanitization switch element to toggle");
+                throw new PlaywrightException("Could not find the sanitization switch element to toggle");
             }
-            switchElement.Click();
+            await switchElement.ClickAsync();
         }
 
-        public void Save()
+        public async Task SaveAsync()
         {
             try
             {
-                SaveButton.Click();
+                var saveButton = GetSaveButton();
+                await saveButton.ClickAsync();
             }
-            catch (NoSuchElementException ex)
+            catch
             {
-                throw new NoSuchElementException("Could not find the Save/OK button in settings dialog", ex);
+                throw new PlaywrightException("Could not find the Save/OK button in settings dialog");
             }
         }
 
-        public bool IsVisible()
+        public async Task<bool> IsVisibleAsync()
         {
             try
             {
-                var dialog = browser.FindElement(By.XPath("//div[contains(@class, 'el-dialog')]//span[text()='Settings']/.."));
-                return dialog.Displayed;
+                var dialog = page.Locator("div[class*='el-dialog']:has(span:has-text('Settings'))");
+                return await dialog.IsVisibleAsync();
             }
-            catch (NoSuchElementException)
+            catch
             {
                 return false;
             }
         }
 
-        public void WaitUntilVisible()
+        public async Task WaitUntilVisibleAsync()
         {
-            var timeout = new CancellationTokenSource(System.TimeSpan.FromSeconds(10));
-            while (!IsVisible() && !timeout.IsCancellationRequested)
-            {
-                Thread.Sleep(100);
-            }
+            await page.WaitForSelectorAsync("div[class*='el-dialog']:has(span:has-text('Settings'))", 
+                new PageWaitForSelectorOptions { Timeout = 10000 });
         }
 
-        public void WaitUntilClosed()
+        public async Task WaitUntilClosedAsync()
         {
-            var timeout = new CancellationTokenSource(System.TimeSpan.FromSeconds(10));
-            while (IsVisible() && !timeout.IsCancellationRequested)
-            {
-                Thread.Sleep(100);
-            }
+            await page.WaitForSelectorAsync("div[class*='el-dialog']:has(span:has-text('Settings'))", 
+                new PageWaitForSelectorOptions { State = WaitForSelectorState.Hidden, Timeout = 10000 });
         }
     }
 }

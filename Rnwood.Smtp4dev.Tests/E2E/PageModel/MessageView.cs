@@ -1,137 +1,119 @@
-using OpenQA.Selenium;
-using System.Threading;
+using Microsoft.Playwright;
+using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 {
     public class MessageView
     {
-        private IWebDriver browser;
+        private readonly IPage page;
 
-        public MessageView(IWebDriver browser)
+        public MessageView(IPage page)
         {
-            this.browser = browser;
+            this.page = page;
         }
 
-        public IWebElement ViewTab 
+        public async Task<ILocator> GetViewTabAsync()
         {
-            get
+            // Try primary selector first
+            try
             {
-                try
-                {
-                    // Element Plus tabs create tab headers with specific classes
-                    return browser.FindElement(By.XPath("//div[contains(@class, 'el-tab-pane') and @id='view']//ancestor::div[contains(@class, 'el-tabs')]//div[contains(@class, 'el-tabs__item') and contains(text(), 'View')]"));
-                }
-                catch (NoSuchElementException)
-                {
-                    // Try alternative selector - look for tab with View text
-                    return browser.FindElement(By.XPath("//div[contains(@class, 'el-tabs__item') and contains(., 'View')]"));
-                }
+                var tab = page.Locator("div[contains(@class, 'el-tab-pane')][id='view']//ancestor::div[contains(@class, 'el-tabs')]//div[contains(@class, 'el-tabs__item')]:has-text('View')");
+                await tab.WaitForAsync(new LocatorWaitForOptions { Timeout = 1000 });
+                return tab;
             }
-        }
-        
-        public IWebElement HtmlSubTab 
-        {
-            get
+            catch
             {
-                try
-                {
-                    // Look for HTML sub-tab within the inner tabs
-                    return browser.FindElement(By.XPath("//div[contains(@class, 'el-tabs__item') and contains(text(), 'HTML')]"));
-                }
-                catch (NoSuchElementException)
-                {
-                    return null;
-                }
+                // Fallback selector
+                return page.Locator("div[class*='el-tabs__item']:has-text('View')");
             }
         }
 
-        public IWebElement HtmlFrame
+        public async Task<ILocator> GetHtmlSubTabAsync()
         {
-            get
+            try
             {
-                var timeout = new CancellationTokenSource(System.TimeSpan.FromSeconds(10));
-                while (!timeout.IsCancellationRequested)
-                {
-                    try
-                    {
-                        return browser.FindElement(By.CssSelector("iframe.htmlview"));
-                    }
-                    catch (NoSuchElementException)
-                    {
-                        Thread.Sleep(100);
-                    }
-                }
-                throw new NoSuchElementException("HTML iframe not found");
+                var htmlTab = page.Locator("div[class*='el-tabs__item']:has-text('HTML')");
+                await htmlTab.WaitForAsync(new LocatorWaitForOptions { Timeout = 1000 });
+                return htmlTab;
+            }
+            catch
+            {
+                return null;
             }
         }
 
-        public IWebElement SanitizationWarning
+        public async Task<ILocator> GetHtmlFrameAsync()
         {
-            get
+            await page.WaitForSelectorAsync("iframe.htmlview", new PageWaitForSelectorOptions { Timeout = 10000 });
+            return page.Locator("iframe.htmlview");
+        }
+
+        public async Task<ILocator> GetSanitizationWarningAsync()
+        {
+            try
             {
-                try
-                {
-                    return browser.FindElement(By.XPath("//div[contains(@class, 'el-alert--warning')]//p[contains(text(), 'Message HTML was sanitized')]"));
-                }
-                catch (NoSuchElementException)
-                {
-                    return null;
-                }
+                var warning = page.Locator("div[class*='el-alert--warning'] p:has-text('Message HTML was sanitized')");
+                await warning.WaitForAsync(new LocatorWaitForOptions { Timeout = 1000 });
+                return warning;
+            }
+            catch
+            {
+                return null;
             }
         }
 
-        public void ClickViewTab()
+        public async Task ClickViewTabAsync()
         {
-            ViewTab.Click();
+            var viewTab = await GetViewTabAsync();
+            await viewTab.ClickAsync();
         }
-        
-        public void ClickHtmlSubTab()
+
+        public async Task ClickHtmlSubTabAsync()
         {
-            if (HtmlSubTab != null)
+            var htmlSubTab = await GetHtmlSubTabAsync();
+            if (htmlSubTab != null)
             {
-                HtmlSubTab.Click();
+                await htmlSubTab.ClickAsync();
             }
         }
 
-        public void ClickHtmlTab()
+        public async Task ClickHtmlTabAsync()
         {
             // First click on the View tab, then on HTML sub-tab if it exists
-            ClickViewTab();
-            Thread.Sleep(500); // Wait for content to load
-            ClickHtmlSubTab();
+            await ClickViewTabAsync();
+            await page.WaitForTimeoutAsync(500); // Wait for content to load
+            await ClickHtmlSubTabAsync();
         }
 
-        public string GetHtmlFrameContent()
+        public async Task<string> GetHtmlFrameContentAsync()
         {
-            browser.SwitchTo().Frame(HtmlFrame);
-            var content = browser.FindElement(By.TagName("body")).GetAttribute("innerHTML");
-            browser.SwitchTo().DefaultContent();
-            return content;
-        }
-
-        public bool IsSanitizationWarningVisible()
-        {
-            return SanitizationWarning != null && SanitizationWarning.Displayed;
-        }
-
-        public void WaitForHtmlFrame()
-        {
-            var timeout = new CancellationTokenSource(System.TimeSpan.FromSeconds(10));
-            while (!timeout.IsCancellationRequested)
+            var frame = await GetHtmlFrameAsync();
+            var frameHandle = await frame.ElementHandleAsync();
+            
+            if (frameHandle != null)
             {
-                try
+                var frameContent = await frameHandle.ContentFrameAsync();
+                if (frameContent != null)
                 {
-                    var frame = HtmlFrame;
-                    if (frame.Displayed)
-                        return;
+                    var body = frameContent.Locator("body");
+                    return await body.InnerHTMLAsync();
                 }
-                catch (NoSuchElementException)
-                {
-                    // Frame not found yet, continue waiting
-                }
-                Thread.Sleep(100);
             }
-            throw new System.TimeoutException("HTML frame did not appear within timeout");
+            
+            return "";
+        }
+
+        public async Task<bool> IsSanitizationWarningVisibleAsync()
+        {
+            var warning = await GetSanitizationWarningAsync();
+            return warning != null && await warning.IsVisibleAsync();
+        }
+
+        public async Task WaitForHtmlFrameAsync()
+        {
+            await page.WaitForSelectorAsync("iframe.htmlview", new PageWaitForSelectorOptions { Timeout = 10000 });
+            var frame = page.Locator("iframe.htmlview");
+            await frame.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Visible, Timeout = 10000 });
         }
     }
 }
