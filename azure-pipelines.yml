@@ -141,7 +141,32 @@ stages:
                 dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release
                 
                 # Use the generated playwright.ps1 script (works on both Windows and Linux)
-                pwsh Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1 install chromium
+                # On Linux, use --with-deps to install system dependencies
+                if ($IsLinux) {
+                  pwsh Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1 install chromium --with-deps
+                } else {
+                  pwsh Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1 install chromium
+                }
+                
+                # Verify installation by checking if the browser executable exists
+                Write-Host "Verifying Playwright browser installation..."
+                if ($IsLinux) {
+                  $chromiumPath = "$env:HOME/.cache/ms-playwright/chromium-*/chrome-linux/chrome"
+                  if (Test-Path $chromiumPath -PathType Leaf) {
+                    Write-Host "✓ Chromium browser found at: $chromiumPath"
+                  } else {
+                    Write-Error "✗ Chromium browser not found at expected path: $chromiumPath"
+                    exit 1
+                  }
+                } else {
+                  $chromiumPath = "$env:USERPROFILE\.cache\ms-playwright\chromium-*\chrome-win\chrome.exe"
+                  if (Test-Path $chromiumPath -PathType Leaf) {
+                    Write-Host "✓ Chromium browser found at: $chromiumPath"
+                  } else {
+                    Write-Error "✗ Chromium browser not found at expected path: $chromiumPath"
+                    exit 1
+                  }
+                }
           - task: DotNetCoreCLI@2
             condition: eq(variables['runTests'], true)
             displayName: Run Tests
