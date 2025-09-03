@@ -130,6 +130,15 @@ stages:
               command: test
               projects: Rnwood.SmtpServer.Tests
               configuration: release
+          - task: PowerShell@2
+            condition: eq(variables['runTests'], true)
+            displayName: Install Playwright Browsers
+            inputs:
+              targetType: inline
+              script: |
+                # Install Playwright CLI and browsers for E2E tests
+                dotnet tool install --global Microsoft.Playwright.CLI
+                playwright install chromium
           - task: DotNetCoreCLI@2
             condition: eq(variables['runTests'], true)
             displayName: Run Tests

@@ -26,9 +26,10 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             UITestOptions options = new UITestOptions();
             options.EnvironmentVariables["SERVEROPTIONS__URLS"] = "http://127.0.0.2:2345;";
 
-            RunUITestAsync($"{nameof(CheckUrlEnvVarIsRespected)}", async (page, baseUrl, smtpPortNumber) =>
+            RunUITestAsync($"{nameof(CheckUrlEnvVarIsRespected)}", (page, baseUrl, smtpPortNumber) =>
             {
                 Assert.Equal(2345, baseUrl.Port);
+                return Task.CompletedTask;
             }, options);
         }
 
@@ -68,7 +69,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
                 }
 
-                var grid = await WaitForAsync(async () => messageList.GetGrid());
+                var grid = await WaitForAsync(() => Task.FromResult(messageList.GetGrid()));
                 var messageRow = await WaitForAsync(async () =>
                 {
                     var rows = await grid.GetRowsAsync();
@@ -131,7 +132,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
                 }
 
-                var grid = await WaitForAsync(async () => messageList.GetGrid());
+                var grid = await WaitForAsync(() => Task.FromResult(messageList.GetGrid()));
                 var messageRow = await WaitForAsync(async () =>
                 {
                     var rows = await grid.GetRowsAsync();
@@ -212,7 +213,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 }
 
                 // Wait for message to appear and select it
-                var grid = await WaitForAsync(async () => messageList.GetGrid());
+                var grid = await WaitForAsync(() => Task.FromResult(messageList.GetGrid()));
                 var messageRow = await WaitForAsync(async () =>
                 {
                     var rows = await grid.GetRowsAsync();
