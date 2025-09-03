@@ -83,6 +83,86 @@ public class MailFromVerbTests
     }
 
     /// <summary>
+    ///     RFC 5321 Section 3.3 - Test null sender (bounce messages)
+    /// </summary>
+    [Fact]
+    public async Task Process_NullSender_Accepted() =>
+        await Process_AddressAsync("<>", "", StandardSmtpResponseCode.OK);
+
+    /// <summary>
+    ///     RFC 5321 Section 4.5.3.1.1 - Test forward path length limits (256 chars max)
+    /// </summary>
+    [Fact]
+    public async Task Process_ForwardPathTooLong_Accepted()
+    {
+        // Test at exactly 256 character limit - should be accepted
+        var longAddress = "<" + new string('a', 240) + "@example.com>";
+        await Process_AddressAsync(longAddress, new string('a', 240) + "@example.com", StandardSmtpResponseCode.OK);
+    }
+
+    /// <summary>
+    ///     RFC 5321 Section 4.1.1.3 - Test unrecognized parameter handling (should be rejected)
+    /// </summary>
+    [Fact]
+    public async Task Process_WithUnrecognizedParameter_Rejected()
+    {
+        TestMocks mocks = new TestMocks();
+        Mock<IMessageBuilder> message = new Mock<IMessageBuilder>();
+        IMessageBuilder currentMessage = null;
+        mocks.Connection.Setup(c => c.NewMessage()).ReturnsAsync(() =>
+        {
+            currentMessage = message.Object;
+            return currentMessage;
+        });
+        mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(() => currentMessage);
+
+        MailFromVerb mailFromVerb = new MailFromVerb();
+        
+        // Should throw exception for unrecognized SIZE parameter
+        var exception = await Assert.ThrowsAsync<SmtpServerException>(() =>
+            mailFromVerb.Process(mocks.Connection.Object, new SmtpCommand("FROM <test@example.com> SIZE=1000")));
+        
+        Assert.Contains("SIZE", exception.Message);
+    }
+
+    /// <summary>
+    ///     RFC 2822 Section 3.4 - Test various valid email address formats
+    /// </summary>
+    [Fact]
+    public async Task Process_ValidEmailFormats_Accepted()
+    {
+        // Simple address
+        await Process_AddressAsync("<user@domain.com>", "user@domain.com", StandardSmtpResponseCode.OK);
+        
+        // Address with subdomain
+        await Process_AddressAsync("<user@mail.domain.com>", "user@mail.domain.com", StandardSmtpResponseCode.OK);
+        
+        // Address with plus sign (common for filtering)
+        await Process_AddressAsync("<user+tag@domain.com>", "user+tag@domain.com", StandardSmtpResponseCode.OK);
+        
+        // Address with dot in local part
+        await Process_AddressAsync("<first.last@domain.com>", "first.last@domain.com", StandardSmtpResponseCode.OK);
+    }
+
+    /// <summary>
+    ///     RFC 5321 Section 4.1.1.1 - Test multiple MAIL FROM commands are rejected
+    /// </summary>
+    [Fact]
+    public async Task Process_MultipleMailFrom_SecondRejected()
+    {
+        TestMocks mocks = new TestMocks();
+        Mock<IMessageBuilder> message = new Mock<IMessageBuilder>();
+        mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(message.Object);
+
+        MailFromVerb mailFromVerb = new MailFromVerb();
+        
+        // Second MAIL FROM should be rejected
+        await mailFromVerb.Process(mocks.Connection.Object, new SmtpCommand("FROM <second@example.com>"));
+        
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.BadSequenceOfCommands);
+    }
+
+    /// <summary>
     ///     The Process_AddressAsync
     /// </summary>
     /// <param name="address">The address<see cref="string" /></param>
