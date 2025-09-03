@@ -28,186 +28,39 @@
   </ItemGroup>
 
   <ItemGroup>
-    <Compile Remove="ABNF\ABFN.cs" />
-    <Compile Remove="ABNF\ABFN_Group.cs" />
-    <Compile Remove="ABNF\ABNF_Alternation.cs" />
-    <Compile Remove="ABNF\ABNF_BinVal.cs" />
-    <Compile Remove="ABNF\ABNF_CharVal.cs" />
-    <Compile Remove="ABNF\ABNF_Concatenation.cs" />
-    <Compile Remove="ABNF\ABNF_DecVal.cs" />
-    <Compile Remove="ABNF\ABNF_Element.cs" />
-    <Compile Remove="ABNF\ABNF_HexVal.cs" />
-    <Compile Remove="ABNF\ABNF_Option.cs" />
-    <Compile Remove="ABNF\ABNF_ProseVal.cs" />
-    <Compile Remove="ABNF\ABNF_Repetition.cs" />
-    <Compile Remove="ABNF\ABNF_Rule.cs" />
-    <Compile Remove="ABNF\ABNF_RuleName.cs" />
-    <Compile Remove="HTTP\Server\HTTP_Server.cs" />
-    <Compile Remove="HTTP\Server\HTTP_Session.cs" />
-    <Compile Remove="IMAP\IMAP_t_Capabilities.cs" />
-    <Compile Remove="Media\Codec\Audio\ILBC.cs" />
-    <Compile Remove="POP3\POP3_ExtendedCapabilities.cs" />
-    <Compile Remove="SNTP\Client\SNTP_Client.cs" />
+    <!-- Exclude removed protocol directories -->
+    <Compile Remove="ABNF\**" />
+    <Compile Remove="SMTP\**" />
+    <Compile Remove="SIP\**" />
+    <Compile Remove="POP3\**" />
+    <Compile Remove="FTP\**" />
+    <Compile Remove="HTTP\**" />
+    <Compile Remove="DNS\**" />
+    <Compile Remove="NNTP\**" />
+    <Compile Remove="WebDav\**" />
+    <Compile Remove="RTP\**" />
+    <Compile Remove="STUN\**" />
+    <Compile Remove="UPnP\**" />
+    <Compile Remove="SNTP\**" />
+    <Compile Remove="SDP\**" />
+    <Compile Remove="ICMP\**" />
+    <Compile Remove="Media\**" />
+    <Compile Remove="vCard\**" />
+    <Compile Remove="_Debug\**" />
+    <Compile Remove="_Obsolete\**" />
+    <Compile Remove="URI\SIP_Uri.cs" />
     <Compile Remove="URI\TEL_Uri.cs" />
-    <Compile Remove="_Obsolete\IMAP\IMAP_BODY.cs" />
-    <Compile Remove="_Obsolete\IMAP\IMAP_BODY_Entity.cs" />
+    <Compile Remove="IMAP\Client\**" />
   </ItemGroup>
 
-  <ItemGroup>
-    <None Include="ABNF\ABFN.cs" />
-    <None Include="ABNF\ABFN_Group.cs" />
-    <None Include="ABNF\ABNF_Alternation.cs" />
-    <None Include="ABNF\ABNF_BinVal.cs" />
-    <None Include="ABNF\ABNF_CharVal.cs" />
-    <None Include="ABNF\ABNF_Concatenation.cs" />
-    <None Include="ABNF\ABNF_DecVal.cs" />
-    <None Include="ABNF\ABNF_Element.cs" />
-    <None Include="ABNF\ABNF_HexVal.cs" />
-    <None Include="ABNF\ABNF_Option.cs" />
-    <None Include="ABNF\ABNF_ProseVal.cs" />
-    <None Include="ABNF\ABNF_Repetition.cs" />
-    <None Include="ABNF\ABNF_Rule.cs" />
-    <None Include="ABNF\ABNF_RuleName.cs" />
-    <None Include="HTTP\Server\HTTP_Server.cs" />
-    <None Include="HTTP\Server\HTTP_Session.cs" />
-    <None Include="IMAP\IMAP_t_Capabilities.cs" />
-    <None Include="Media\Codec\Audio\ILBC.cs" />
-    <None Include="POP3\POP3_ExtendedCapabilities.cs" />
-    <None Include="SNTP\Client\SNTP_Client.cs" />
-    <None Include="URI\TEL_Uri.cs" />
-    <None Include="_Obsolete\IMAP\IMAP_BODY.cs" />
-    <None Include="_Obsolete\IMAP\IMAP_BODY_Entity.cs" />
-  </ItemGroup>
+  <!-- Removed None includes for deleted directories -->
+  
 
-  <ItemGroup>
-    <Compile Update="DNS\Client\DnsServerResponse.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="DNS\Client\DNS_Client.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="DNS\DNS_rr.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="DNS\DNS_rr_A.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="DNS\DNS_rr_CNAME.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="DNS\DNS_rr_HINFO.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="DNS\DNS_rr_MX.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="DNS\DNS_rr_NS.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="DNS\DNS_rr_PTR.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="DNS\DNS_rr_SOA.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="DNS\DNS_rr_TXT.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="FTP\Client\FTP_Client.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="FTP\Server\FTP_Session.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="ICMP\Icmp.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="IMAP\IMAP_ACL_Flags.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="IMAP\IMAP_Flags_SetType.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="IMAP\IMAP_Utils.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="POP3\Client\POP3_Client.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="RTP\Debug\wfrm_RTP_Debug.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="SIP\Debug\wfrm_SIP_Debug.cs">
-      <SubType>Form</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\DnsCache.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\IMAP\IMAP_MessageFlags.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\IMAP\IMAP_SequenceSet.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\Address.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\AddressList.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\ContentDisposition_enum.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\ContentTransferEncoding_enum.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\GroupAddress.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\HeaderField.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\HeaderFieldCollection.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\HeaderFieldParameter.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\HeaderFieldParameterCollection.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\MailboxAddress.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\MailboxAddressCollection.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\MediaType_enum.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\Mime.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\MimeEntity.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\MimeEntityCollection.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\MimeUtils.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\MIME\ParametizedHeaderField.cs">
-      <SubType>Code</SubType>
-    </Compile>
-    <Compile Update="_Obsolete\Net_Core.cs">
-      <SubType>Code</SubType>
-    </Compile>
-  </ItemGroup>
+  <!-- Removed Compile Update entries for deleted directories -->
+  
 
-  <ItemGroup>
-    <Folder Include="SPF\" />
-  </ItemGroup>
+  <!-- Removed SPF folder -->
+  
   
   
 </Project>
