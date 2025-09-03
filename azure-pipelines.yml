@@ -180,16 +180,20 @@ stages:
                 try {
                   if ($IsLinux) {
                     Write-Host "Installing Chromium with system dependencies (this may take several minutes)..."
-                    $installOutput = pwsh $playwrightScript install chromium --with-deps 2>&1
+                    Write-Host "Running command: pwsh $playwrightScript install chromium --with-deps"
+                    # Don't capture output - let it stream directly to avoid hanging
+                    pwsh $playwrightScript install chromium --with-deps
+                    $exitCode = $LASTEXITCODE
                   } else {
                     Write-Host "Installing Chromium..."
-                    $installOutput = pwsh $playwrightScript install chromium 2>&1
+                    Write-Host "Running command: pwsh $playwrightScript install chromium"
+                    # Don't capture output - let it stream directly to avoid hanging
+                    pwsh $playwrightScript install chromium
+                    $exitCode = $LASTEXITCODE
                   }
                   
-                  if ($LASTEXITCODE -ne 0) {
-                    Write-Error "Playwright installation failed with exit code $LASTEXITCODE"
-                    Write-Host "Installation output:"
-                    Write-Host $installOutput
+                  if ($exitCode -ne 0) {
+                    Write-Error "Playwright installation failed with exit code $exitCode"
                     exit 1
                   }
                   Write-Host "✓ Playwright browser installation completed successfully"
