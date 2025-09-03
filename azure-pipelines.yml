@@ -171,7 +171,7 @@ stages:
                 if (-not $playwrightScript) {
                   Write-Error "✗ Playwright script not found in either platform-specific or generic locations"
                   # List contents for debugging
-                  Write-Host "Contents of $baseDir:"
+                  Write-Host "Contents of $($baseDir):"
                   Get-ChildItem -Path $baseDir -Recurse -Name "playwright.ps1" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  Found: $baseDir/$_" }
                   exit 1
                 }
