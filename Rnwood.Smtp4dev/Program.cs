@@ -39,7 +39,6 @@ namespace Rnwood.Smtp4dev
 
         public static async Task Main(string[] args)
         {
-
             try
             {
                 var host = await StartApp(args, false, null);

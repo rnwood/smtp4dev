@@ -7,6 +7,15 @@ trigger:
     exclude:
       - refs/tags/*-ci*
 
+pr:
+  branches:
+    include:
+      - master
+  paths:
+    exclude:
+      - docs/*
+      - README.md
+
 resources:
   - repo: self
 
@@ -26,6 +35,9 @@ variables:
   docker_repo: "rnwood/smtp4dev"
   docker_registry: "dockerhub-rnwood"
   netcoresdk_version: "8.0.201"
+  
+  # GitHub API token for PR notifications - should be configured as secret variable
+  # GITHUB_TOKEN: $(GITHUB_API_TOKEN)
 
 stages:
   - stage: Init
@@ -498,4 +510,219 @@ stages:
                 ($dockertags.Split(" ", [StringSplitOptions]::RemoveEmptyEntries)) | foreach-object {
                   docker manifest create $(docker_repo):$_ $(docker_repo):windows-ltsc2019-amd64-$_ $(docker_repo):windows-ltsc2022-amd64-$_ $(docker_repo):linux-amd64-$_ $(docker_repo):linux-arm64-$_
                   docker manifest push $(docker_repo):$_
+                }
+
+  - stage: NotifyOnFailure
+    displayName: Notify on Build Failure
+    condition: and(failed(), eq(variables['Build.Reason'], 'PullRequest'))
+    dependsOn: 
+      - Build
+    jobs:
+      - job: NotifyCopilot
+        displayName: Notify Copilot of Build Failure
+        pool:
+          vmImage: "ubuntu-22.04"
+        variables:
+          - name: System.Debug
+            value: true
+        steps:
+          - checkout: none
+          - task: PowerShell@2
+            displayName: Comment on PR to notify Copilot
+            env:
+              GITHUB_TOKEN: $(GITHUB_TOKEN)
+              SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+            inputs:
+              targetType: inline
+              script: |
+                $repoOwner = "rnwood"
+                $repoName = "smtp4dev"
+                $prNumber = "$(System.PullRequest.PullRequestNumber)"
+                $buildUrl = "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+                $buildId = "$(Build.BuildId)"
+                $organizationUri = "$(System.TeamFoundationCollectionUri)"
+                $projectName = "$(System.TeamProject)"
+                
+                # Check if PR is assigned to copilot before proceeding
+                $headers = @{
+                  'Authorization' = "token $env:GITHUB_TOKEN"
+                  'Accept' = 'application/vnd.github.v3+json'
+                  'User-Agent' = 'Azure-DevOps-Pipeline'
+                }
+                
+                try {
+                  $prUri = "https://api.github.com/repos/$repoOwner/$repoName/pulls/$prNumber"
+                  $prDetails = Invoke-RestMethod -Uri $prUri -Headers $headers -Method Get
+                  
+                  # Check if copilot is assigned to this PR
+                  $copilotAssigned = $prDetails.assignees | Where-Object { $_.login -eq "copilot" }
+                  
+                  if (-not $copilotAssigned) {
+                    Write-Host "PR #$prNumber is not assigned to @copilot. Skipping notification."
+                    exit 0
+                  }
+                  
+                  Write-Host "PR #$prNumber is assigned to @copilot. Proceeding with notification."
+                } catch {
+                  Write-Error "Failed to check PR assignees: $_"
+                  Write-Host "Proceeding with notification as fallback."
+                }
+                
+                # Get build logs using Azure DevOps REST API
+                $buildErrors = ""
+                try {
+                  $azureDevOpsHeaders = @{
+                    'Authorization' = "Bearer $env:SYSTEM_ACCESSTOKEN"
+                    'Accept' = 'application/json'
+                  }
+                  
+                  # Get build timeline to identify failed tasks
+                  $timelineUri = "$organizationUri$projectName/_apis/build/builds/$buildId/timeline?api-version=6.0"
+                  $timeline = Invoke-RestMethod -Uri $timelineUri -Headers $azureDevOpsHeaders -Method Get
+                  
+                  $failedRecords = $timeline.records | Where-Object { $_.result -eq "failed" -and $_.type -eq "Task" }
+                  
+                  if ($failedRecords) {
+                    $buildErrors = "`n`n**Build Error Details:**`n"
+                    
+                    foreach ($record in $failedRecords) {
+                      $buildErrors += "`n**Failed Task: $($record.name)**`n"
+                      
+                      # Get detailed logs for this task
+                      if ($record.log -and $record.log.id) {
+                        try {
+                          $logUri = "$organizationUri$projectName/_apis/build/builds/$buildId/logs/$($record.log.id)?api-version=6.0"
+                          
+                          # Get log data - Azure DevOps returns JSON with count and value array
+                          $logResponse = Invoke-RestMethod -Uri $logUri -Headers $azureDevOpsHeaders -Method Get
+                          
+                          Write-Host "Retrieved log data for task $($record.name), count: $($logResponse.count)"
+                          Write-Host "Log URI: $logUri"
+                          
+                          # Extract log lines from the value array
+                          $logLines = $logResponse.value
+                          
+                          Write-Host "Total log lines: $($logLines.Count)"
+                          
+                          # Use simple string concatenation instead of ArrayList
+                          $errorContent = ""
+                          $errorCount = 0
+                          
+                          # Enhanced pattern matching for various error types
+                          foreach ($line in $logLines) {
+                            $trimmedLine = $line.Trim()
+                            if ($trimmedLine -match "(?i)(error|fail|exception|\bCS\d{4}\b|\bMSB\d{4}\b|compilation\s*failed|build\s*failed|\berror\s*:|\(\d+,\d+\):\s*error|\.cs\(\d+,\d+\):\s*error)") {
+                              if ($errorContent -ne "") { $errorContent += [Environment]::NewLine }
+                              $errorContent += $trimmedLine
+                              $errorCount++
+                              Write-Host "Found error line: $trimmedLine"
+                            }
+                          }
+                          
+                          # If no specific errors found, get more context around build failures
+                          if ($errorCount -eq 0) {
+                            Write-Host "No specific error patterns found, looking for build context..."
+                            
+                            # Look for lines containing file references, compilation info, or build commands
+                            foreach ($line in $logLines) {
+                              $trimmedLine = $line.Trim()
+                              if ($trimmedLine -match "(?i)(\.cs\(|\.csproj|dotnet\s+(build|publish|restore)|msbuild|compilation|warning|info.*error)" -and $trimmedLine.Length -gt 10) {
+                                if ($errorContent -ne "") { $errorContent += [Environment]::NewLine }
+                                $errorContent += $trimmedLine
+                                $errorCount++
+                              }
+                            }
+                            
+                            # If still no relevant lines, show the last substantial log entries
+                            if ($errorCount -eq 0) {
+                              Write-Host "No build-specific content found, extracting substantial log entries..."
+                              
+                              # Collect last substantial lines
+                              $substantialLines = @()
+                              foreach ($line in $logLines) {
+                                $trimmedLine = $line.Trim()
+                                if ($trimmedLine.Length -gt 10) {
+                                  $substantialLines += $trimmedLine
+                                }
+                              }
+                              
+                              # Keep only last 30 entries if too many
+                              if ($substantialLines.Count -gt 30) {
+                                $substantialLines = $substantialLines[-30..-1]
+                              }
+                              
+                              # Add them to error content
+                              foreach ($line in $substantialLines) {
+                                if ($errorContent -ne "") { $errorContent += [Environment]::NewLine }
+                                $errorContent += $line
+                                $errorCount++
+                              }
+                              Write-Host "Showing last $errorCount substantial log entries"
+                            } else {
+                              Write-Host "Found $errorCount build context lines"
+                            }
+                          } else {
+                            Write-Host "Found $errorCount error lines with specific patterns"
+                          }
+                          
+                          if ($errorCount -gt 0) {
+                            $buildErrors += [Environment]::NewLine + '```' + [Environment]::NewLine
+                            $buildErrors += $errorContent
+                            $buildErrors += [Environment]::NewLine + '```'
+                          } else {
+                            $buildErrors += [Environment]::NewLine + "No log content available"
+                            Write-Host "No log content found for task $($record.name)"
+                          }
+                        } catch {
+                          $buildErrors += "Could not retrieve detailed logs for this task: $($_.Exception.Message)"
+                          Write-Host "Error retrieving logs for task $($record.name): $_"
+                        }
+                      } else {
+                        $buildErrors += "No log available for this task."
+                      }
+                      $buildErrors += "`n"
+                    }
+                  }
+                } catch {
+                  Write-Host "Warning: Could not retrieve detailed build logs: $_"
+                  $buildErrors = "`n`n**Note:** Detailed error logs could not be retrieved. Please check the build logs manually."
+                }
+                
+                $commentBody = @"
+                @copilot The build triggered by this PR has failed. **Please use the error details provided below to investigate and fix the issues. Do not attempt to reproduce the build locally first - consult these error details directly.**
+                
+                **Build Details:**
+                - Build ID: $buildId
+                - Build URL: $buildUrl
+                - Commit: $(Build.SourceVersion)$buildErrors
+                
+                **Instructions for @copilot:**
+                1. **Analyze the error details above first** - do not try to reproduce the build locally
+                2. Focus on the specific compilation errors, test failures, or other issues shown
+                3. Make targeted fixes based on the error messages provided
+                4. Only build locally after making fixes to verify the solution
+                "@
+                
+                $headers = @{
+                  'Authorization' = "token $env:GITHUB_TOKEN"
+                  'Accept' = 'application/vnd.github.v3+json'
+                  'User-Agent' = 'Azure-DevOps-Pipeline'
+                }
+                
+                $body = @{
+                  body = $commentBody
+                } | ConvertTo-Json -Depth 10
+                
+                $uri = "https://api.github.com/repos/$repoOwner/$repoName/issues/$prNumber/comments"
+                
+                try {
+                  $response = Invoke-RestMethod -Uri $uri -Method Post -Headers $headers -Body $body -ContentType 'application/json'
+                  Write-Host "Successfully posted comment to PR #$prNumber"
+                  Write-Host "Comment URL: $($response.html_url)"
+                } catch {
+                  Write-Error "Failed to post comment to PR #$prNumber : $_"
+                  Write-Host "URI: $uri"
+                  Write-Host "PR Number: $prNumber"
+                  Write-Host "Error Body Length: $($commentBody.Length)"
+                  exit 1
                 }
