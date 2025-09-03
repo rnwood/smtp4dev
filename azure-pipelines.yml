@@ -151,19 +151,21 @@ stages:
                 # Verify installation by checking if the browser executable exists
                 Write-Host "Verifying Playwright browser installation..."
                 if ($IsLinux) {
-                  $chromiumPath = "$env:HOME/.cache/ms-playwright/chromium-*/chrome-linux/chrome"
-                  if (Test-Path $chromiumPath -PathType Leaf) {
+                  $chromiumPaths = Get-ChildItem -Path "$env:HOME/.cache/ms-playwright/chromium-*/chrome-linux/chrome" -ErrorAction SilentlyContinue
+                  if ($chromiumPaths) {
+                    $chromiumPath = $chromiumPaths[0].FullName
                     Write-Host "✓ Chromium browser found at: $chromiumPath"
                   } else {
-                    Write-Error "✗ Chromium browser not found at expected path: $chromiumPath"
+                    Write-Error "✗ Chromium browser not found in $env:HOME/.cache/ms-playwright/chromium-*/chrome-linux/"
                     exit 1
                   }
                 } else {
-                  $chromiumPath = "$env:USERPROFILE\.cache\ms-playwright\chromium-*\chrome-win\chrome.exe"
-                  if (Test-Path $chromiumPath -PathType Leaf) {
+                  $chromiumPaths = Get-ChildItem -Path "$env:USERPROFILE\.cache\ms-playwright\chromium-*\chrome-win\chrome.exe" -ErrorAction SilentlyContinue
+                  if ($chromiumPaths) {
+                    $chromiumPath = $chromiumPaths[0].FullName
                     Write-Host "✓ Chromium browser found at: $chromiumPath"
                   } else {
-                    Write-Error "✗ Chromium browser not found at expected path: $chromiumPath"
+                    Write-Error "✗ Chromium browser not found in $env:USERPROFILE\.cache\ms-playwright\chromium-*\chrome-win\"
                     exit 1
                   }
                 }
