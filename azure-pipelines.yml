@@ -585,7 +585,7 @@ stages:
                   if ($failedRecords) {
                     $buildErrors = "`n`n**Build Error Details:**`n"
                     
-                    foreach ($record in $failedRecords | Select-Object -First 3) {
+                    foreach ($record in $failedRecords) {
                       $buildErrors += "`n**Failed Task: $($record.name)**`n"
                       
                       # Get detailed logs for this task
@@ -597,7 +597,7 @@ stages:
                           # Extract error lines from log content
                           $errorLines = $logContent -split "`n" | Where-Object { 
                             $_ -match "error|Error|ERROR|failed|Failed|FAILED|\bCS\d{4}\b|\bMSB\d{4}\b" 
-                          } | Select-Object -First 10
+                          }
                           
                           if ($errorLines) {
                             $buildErrors += '```'
@@ -609,10 +609,6 @@ stages:
                         }
                       }
                       $buildErrors += "`n"
-                    }
-                    
-                    if ($failedRecords.Count -gt 3) {
-                      $buildErrors += "`n*($($failedRecords.Count - 3) additional failed tasks not shown)*`n"
                     }
                   }
                 } catch {
