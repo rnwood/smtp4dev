@@ -519,7 +519,7 @@ stages:
               targetPath: '$(System.DefaultWorkingDirectory)/CoverageReports'
             continueOnError: true
           - task: PowerShell@2
-            displayName: Comment Coverage Summary on PR
+            displayName: Enhanced Coverage Report to PR
             condition: and(succeeded(), ne(variables['GITHUB_TOKEN'], ''))
             env:
               GITHUB_TOKEN: $(GITHUB_TOKEN)
@@ -538,16 +538,117 @@ stages:
                   exit 0
                 }
                 
+                Write-Host "Enhanced Coverage Reporter"
+                Write-Host "========================="
+                
                 # Read coverage summary
                 $summary = Get-Content $summaryFile | ConvertFrom-Json
                 $lineCoverage = [math]::Round($summary.summary.linecoverage, 1)
                 $branchCoverage = [math]::Round($summary.summary.branchcoverage, 1)
                 $methodCoverage = [math]::Round($summary.summary.methodcoverage, 1)
                 
-                # Determine coverage badges based on thresholds
-                $lineBadge = if ($lineCoverage -ge 80) { "🟢" } elseif ($lineCoverage -ge 60) { "🟡" } else { "🔴" }
-                $branchBadge = if ($branchCoverage -ge 80) { "🟢" } elseif ($branchCoverage -ge 60) { "🟡" } else { "🔴" }
-                $methodBadge = if ($methodCoverage -ge 80) { "🟢" } elseif ($methodCoverage -ge 60) { "🟡" } else { "🔴" }
+                Write-Host "Overall Coverage: Line: $lineCoverage%, Branch: $branchCoverage%, Method: $methodCoverage%"
+                
+                # For now, we don't have base coverage comparison (can be added later)
+                # Future enhancement: Download base branch coverage for comparison
+                # To implement PR deltas:
+                # 1. Get base branch name: $(System.PullRequest.TargetBranch)
+                # 2. Download artifact from latest successful build on base branch
+                # 3. Compare current vs base coverage using enhanced script logic
+                # 4. Add delta columns to namespace table and overall summary
+                $showDeltas = $false
+                
+                # Group classes by namespace
+                $namespaceGroups = @{}
+                foreach ($assembly in $summary.coverage.assemblies) {
+                    foreach ($class in $assembly.classesinassembly) {
+                        $className = $class.name
+                        
+                        # Extract namespace from class name (handle nested classes)
+                        $namespace = ""
+                        if ($className -match '^([^<]+?)\.([^\.]+)$') {
+                            # Simple case: Namespace.ClassName
+                            $namespace = $matches[1]
+                        } elseif ($className -match '^([^<]+?)\.([^\.]+?)\/') {
+                            # Nested class case: Namespace.ClassName/NestedClass  
+                            $namespace = $matches[1]
+                        } elseif ($className -match '^([^<]+?)\.([^\.]+?)\.([^\.\/]+)$') {
+                            # Two-level namespace: Namespace.SubNamespace.ClassName
+                            $namespace = $matches[1] + "." + $matches[2]
+                        } else {
+                            # Fallback - use the part before the last component
+                            $parts = $className -split '\.'
+                            if ($parts.Length -gt 1) {
+                                $namespace = ($parts[0..($parts.Length-2)] -join ".")
+                            } else {
+                                $namespace = "Global"
+                            }
+                        }
+                        
+                        if (-not $namespaceGroups.ContainsKey($namespace)) {
+                            $namespaceGroups[$namespace] = @{
+                                Classes = @()
+                                TotalCoverableLines = 0
+                                TotalCoveredLines = 0
+                                TotalBranches = 0
+                                TotalCoveredBranches = 0
+                                TotalMethods = 0
+                                TotalCoveredMethods = 0
+                                ClassCount = 0
+                            }
+                        }
+                        
+                        $namespaceGroups[$namespace].Classes += $class
+                        $namespaceGroups[$namespace].TotalCoverableLines += $class.coverablelines
+                        $namespaceGroups[$namespace].TotalCoveredLines += $class.coveredlines
+                        $namespaceGroups[$namespace].TotalBranches += $class.totalbranches
+                        $namespaceGroups[$namespace].TotalCoveredBranches += $class.coveredbranches
+                        $namespaceGroups[$namespace].TotalMethods += $class.totalmethods
+                        $namespaceGroups[$namespace].TotalCoveredMethods += $class.coveredmethods
+                        $namespaceGroups[$namespace].ClassCount += 1
+                    }
+                }
+                
+                # Calculate namespace-level coverage percentages
+                $namespaceStats = @()
+                foreach ($namespace in $namespaceGroups.Keys | Sort-Object) {
+                    $group = $namespaceGroups[$namespace]
+                    
+                    $lineCov = if ($group.TotalCoverableLines -gt 0) { [math]::Round(($group.TotalCoveredLines / $group.TotalCoverableLines) * 100, 1) } else { 0 }
+                    $branchCov = if ($group.TotalBranches -gt 0) { [math]::Round(($group.TotalCoveredBranches / $group.TotalBranches) * 100, 1) } else { 0 }
+                    $methodCov = if ($group.TotalMethods -gt 0) { [math]::Round(($group.TotalCoveredMethods / $group.TotalMethods) * 100, 1) } else { 0 }
+                    
+                    $namespaceStats += [PSCustomObject]@{
+                        Namespace = $namespace
+                        LinePercent = $lineCov
+                        BranchPercent = $branchCov
+                        MethodPercent = $methodCov
+                        ClassCount = $group.ClassCount
+                        CoveredLines = $group.TotalCoveredLines
+                        CoverableLines = $group.TotalCoverableLines
+                        CoveredBranches = $group.TotalCoveredBranches
+                        TotalBranches = $group.TotalBranches
+                        CoveredMethods = $group.TotalCoveredMethods
+                        TotalMethods = $group.TotalMethods
+                    }
+                }
+                
+                Write-Host "`nNamespace Coverage Breakdown:"
+                Write-Host "============================="
+                foreach ($ns in $namespaceStats) {
+                    Write-Host "$($ns.Namespace): Line: $($ns.LinePercent)%, Branch: $($ns.BranchPercent)%, Method: $($ns.MethodPercent)% ($($ns.ClassCount) classes)"
+                }
+                
+                # Generate enhanced GitHub comment
+                function Get-CoverageBadge($percentage) {
+                    if ($percentage -ge 80) { return "🟢" }
+                    elseif ($percentage -ge 60) { return "🟡" }
+                    else { return "🔴" }
+                }
+                
+                $lineBadge = Get-CoverageBadge $lineCoverage
+                $branchBadge = Get-CoverageBadge $branchCoverage
+                $methodBadge = Get-CoverageBadge $methodCoverage
                 
                 $commentBody = @"
                 ## 📊 Code Coverage Report
@@ -558,19 +659,39 @@ stages:
                 | Branch Coverage | ${branchCoverage}% | ${branchBadge} |
                 | Method Coverage | ${methodCoverage}% | ${methodBadge} |
                 
-                **Coverage Details:**
+                ### 📁 Coverage by Namespace
+                
+                | Namespace | Line Coverage | Branch Coverage | Method Coverage | Classes |
+                |-----------|---------------|-----------------|-----------------|---------|
+                "@
+                
+                foreach ($ns in $namespaceStats | Sort-Object Namespace) {
+                    $lineBadgeNs = Get-CoverageBadge $ns.LinePercent
+                    $branchBadgeNs = Get-CoverageBadge $ns.BranchPercent 
+                    $methodBadgeNs = Get-CoverageBadge $ns.MethodPercent
+                    
+                    $commentBody += "| ``$($ns.Namespace)`` | $($ns.LinePercent)% $lineBadgeNs | $($ns.BranchPercent)% $branchBadgeNs | $($ns.MethodPercent)% $methodBadgeNs | $($ns.ClassCount) |`n"
+                }
+                
+                $commentBody += @"
+                
+                **Overall Coverage Details:**
                 - **Covered Lines:** $($summary.summary.coveredlines) / $($summary.summary.coverablelines)
-                - **Covered Branches:** $($summary.summary.coveredbranches) / $($summary.summary.totalbranches)
+                - **Covered Branches:** $($summary.summary.coveredbranches) / $($summary.summary.totalbranches) 
                 - **Covered Methods:** $($summary.summary.coveredmethods) / $($summary.summary.totalmethods)
                 - **Assemblies Tested:** $($summary.summary.assemblies)
-                - **Classes Tested:** $($summary.summary.classes)
+                - **Total Classes:** $($summary.summary.classes)
                 
                 📈 [View Full Coverage Report]($buildUrl&view=codecoverage-tab)
                 
-                *Coverage report generated by Azure DevOps Build #$(Build.BuildNumber)*
+                *Enhanced coverage report with namespace breakdown - Azure DevOps Build #$(Build.BuildNumber)*
                 "@
                 
-                # Check if PR is assigned to copilot before proceeding
+                Write-Host "`nGenerated GitHub Comment:"
+                Write-Host "========================="
+                Write-Host $commentBody
+                
+                # GitHub API integration
                 $headers = @{
                   'Authorization' = "token $env:GITHUB_TOKEN"
                   'Accept' = 'application/vnd.github.v3+json'
@@ -582,7 +703,7 @@ stages:
                   $commentsUri = "https://api.github.com/repos/$repoOwner/$repoName/issues/$prNumber/comments"
                   $existingComments = Invoke-RestMethod -Uri $commentsUri -Headers $headers -Method Get
                   
-                  $coverageComment = $existingComments | Where-Object { $_.body -like "*Code Coverage Report*" -and $_.user.login -eq "github-actions[bot]" }
+                  $coverageComment = $existingComments | Where-Object { $_.body -like "*Code Coverage Report*" }
                   
                   $body = @{
                     body = $commentBody
