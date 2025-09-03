@@ -643,66 +643,27 @@ stages:
                           
                           Write-Host "Total log lines: $($logLines.Count)"
                           
-                          # Use simple string concatenation instead of ArrayList
+                          # For failing steps, include ALL output instead of just lines that look like errors
+                          # This provides complete context to understand issues like missing files
                           $errorContent = ""
                           $errorCount = 0
-                          
-                          # Enhanced pattern matching for various error types
-                          foreach ($line in $logLines) {
+                          # Include all log lines, but limit to reasonable size for comment
+                          $maxLines = 100  # Limit to last 100 lines to avoid excessively long comments
+                          $startIndex = [Math]::Max(0, $logLines.Count - $maxLines)
+
+                          for ($i = $startIndex; $i -lt $logLines.Count; $i++) {
+                            $line = $logLines[$i]
                             $trimmedLine = $line.Trim()
-                            if ($trimmedLine -match "(?i)(error|fail|exception|\bCS\d{4}\b|\bMSB\d{4}\b|compilation\s*failed|build\s*failed|\berror\s*:|\(\d+,\d+\):\s*error|\.cs\(\d+,\d+\):\s*error)") {
+
+                            # Skip empty lines to reduce noise
+                            if ($trimmedLine.Length -gt 0) {
                               if ($errorContent -ne "") { $errorContent += [Environment]::NewLine }
                               $errorContent += $trimmedLine
                               $errorCount++
-                              Write-Host "Found error line: $trimmedLine"
                             }
                           }
                           
-                          # If no specific errors found, get more context around build failures
-                          if ($errorCount -eq 0) {
-                            Write-Host "No specific error patterns found, looking for build context..."
-                            
-                            # Look for lines containing file references, compilation info, or build commands
-                            foreach ($line in $logLines) {
-                              $trimmedLine = $line.Trim()
-                              if ($trimmedLine -match "(?i)(\.cs\(|\.csproj|dotnet\s+(build|publish|restore)|msbuild|compilation|warning|info.*error)" -and $trimmedLine.Length -gt 10) {
-                                if ($errorContent -ne "") { $errorContent += [Environment]::NewLine }
-                                $errorContent += $trimmedLine
-                                $errorCount++
-                              }
-                            }
-                            
-                            # If still no relevant lines, show the last substantial log entries
-                            if ($errorCount -eq 0) {
-                              Write-Host "No build-specific content found, extracting substantial log entries..."
-                              
-                              # Collect last substantial lines
-                              $substantialLines = @()
-                              foreach ($line in $logLines) {
-                                $trimmedLine = $line.Trim()
-                                if ($trimmedLine.Length -gt 10) {
-                                  $substantialLines += $trimmedLine
-                                }
-                              }
-                              
-                              # Keep only last 30 entries if too many
-                              if ($substantialLines.Count -gt 30) {
-                                $substantialLines = $substantialLines[-30..-1]
-                              }
-                              
-                              # Add them to error content
-                              foreach ($line in $substantialLines) {
-                                if ($errorContent -ne "") { $errorContent += [Environment]::NewLine }
-                                $errorContent += $line
-                                $errorCount++
-                              }
-                              Write-Host "Showing last $errorCount substantial log entries"
-                            } else {
-                              Write-Host "Found $errorCount build context lines"
-                            }
-                          } else {
-                            Write-Host "Found $errorCount error lines with specific patterns"
-                          }
+                          Write-Host "Including last $errorCount non-empty log lines from failing task"
                           
                           if ($errorCount -gt 0) {
                             $buildErrors += [Environment]::NewLine + '```' + [Environment]::NewLine
