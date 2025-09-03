@@ -130,7 +130,7 @@ stages:
               command: test
               projects: Rnwood.SmtpServer.Tests
               configuration: release
-              arguments: '--collect:"XPlat Code Coverage" --results-directory "$(Agent.TempDirectory)/TestResults/SmtpServer" --logger trx'
+              arguments: '--collect:"XPlat Code Coverage" --results-directory "$(Agent.TempDirectory)/TestResults/SmtpServer"'
               publishTestResults: true
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), eq(variables['runTests'], true))
@@ -214,7 +214,7 @@ stages:
               command: test
               projects: Rnwood.Smtp4dev.Tests
               configuration: release
-              arguments: '--collect:"XPlat Code Coverage" --results-directory "$(Agent.TempDirectory)/TestResults/Smtp4dev" --logger trx'
+              arguments: '--collect:"XPlat Code Coverage" --results-directory "$(Agent.TempDirectory)/TestResults/Smtp4dev"'
               publishTestResults: true
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), eq(variables['runTests'], true))
@@ -322,7 +322,7 @@ stages:
               command: test
               projects: Rnwood.Smtp4dev.Desktop.Tests
               configuration: release
-              arguments: '--collect:"XPlat Code Coverage" --results-directory "$(Agent.TempDirectory)/TestResults/Desktop" --logger trx'
+              arguments: '--collect:"XPlat Code Coverage" --results-directory "$(Agent.TempDirectory)/TestResults/Desktop"'
               publishTestResults: true
           - powershell: move-item $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip
             displayName: Rename artifact
