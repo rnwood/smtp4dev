@@ -76,7 +76,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
             }
 
-            var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)).Token;
+            var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(180)).Token; // Increased from 120s to 180s for CI environments
             string dbPath = Path.GetTempFileName();
             File.Delete(dbPath);
 

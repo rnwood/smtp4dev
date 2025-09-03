@@ -1,4 +1,4 @@
-﻿using OpenQA.Selenium;
+using Microsoft.Playwright;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -6,78 +6,101 @@ using System.Threading.Tasks;
 
 namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 {
-	public class HomePage
-	{
+    public class HomePage
+    {
+        private readonly IPage page;
 
-		public MessageListControl MessageList => new MessageListControl(browser.FindElement(By.ClassName("messagelist")));
+        public HomePage(IPage page)
+        {
+            this.page = page;
+        }
 
-		private IWebDriver browser;
+        public async Task<MessageListControl> GetMessageListAsync()
+        {
+            var messageListElement = page.Locator(".messagelist").First;
+            await messageListElement.WaitForAsync();
+            return new MessageListControl(messageListElement);
+        }
 
-		public HomePage(IWebDriver browser)
-		{
-			this.browser = browser;
-		}
+        public ILocator GetSettingsButton()
+        {
+            return page.Locator("button[title='Settings']");
+        }
 
-		public IWebElement SettingsButton => browser.FindElement(By.XPath("//button[@title='Settings']"));
+        public async Task OpenSettingsAsync()
+        {
+            var settingsButton = GetSettingsButton();
+            await settingsButton.ClickAsync();
+        }
 
-		public void OpenSettings()
-		{
-			try
-			{
-				SettingsButton.Click();
-			}
-			catch (NoSuchElementException ex)
-			{
-				throw new NoSuchElementException("Could not find the Settings button", ex);
-			}
-		}
+        public SettingsDialog SettingsDialog => new SettingsDialog(page);
 
-		public SettingsDialog SettingsDialog => new SettingsDialog(browser);
+        public MessageView MessageView => new MessageView(page);
 
-		public MessageView MessageView => new MessageView(browser);
+        public class MessageListControl
+        {
+            private readonly ILocator element;
 
-		public class MessageListControl
-		{
-			public Grid Grid => new Grid(webElement.FindElement(By.CssSelector("table.el-table__body")));
+            public MessageListControl(ILocator element)
+            {
+                this.element = element;
+            }
 
-			private IWebElement webElement;
+            public Grid GetGrid()
+            {
+                var gridElement = element.Locator("table.el-table__body");
+                return new Grid(gridElement);
+            }
+        }
 
-			public MessageListControl(IWebElement webElement)
-			{
-				this.webElement = webElement;
-			}
+        public class Grid
+        {
+            private readonly ILocator element;
 
+            public Grid(ILocator element)
+            {
+                this.element = element;
+            }
 
-		}
+            public async Task<IReadOnlyList<GridRow>> GetRowsAsync()
+            {
+                var rowElements = await element.Locator("tr").AllAsync();
+                return rowElements.Select(e => new GridRow(e)).ToList();
+            }
 
-		public class Grid
-		{
-			private IWebElement webElement;
+            public class GridRow
+            {
+                private readonly ILocator element;
 
-			public Grid(IWebElement webElement)
-			{
-				this.webElement = webElement;
-			}
+                public GridRow(ILocator element)
+                {
+                    this.element = element;
+                }
 
-			public IReadOnlyCollection<GridRow> Rows => webElement.FindElements(By.TagName("tr")).Select(e => new GridRow(e)).ToList();
+                public async Task<IReadOnlyList<ILocator>> GetCellsAsync()
+                {
+                    return await element.Locator("td div.cell").AllAsync();
+                }
 
+                public async Task ClickAsync()
+                {
+                    await element.ClickAsync();
+                }
 
-			public class GridRow
-			{
-				private IWebElement webElement;
-
-				public GridRow(IWebElement webElement)
-				{
-					this.webElement = webElement;
-				}
-
-				public IReadOnlyCollection<IWebElement> Cells => webElement.FindElements(By.CssSelector("td div.cell"));
-
-				public void Click()
-				{
-					webElement.Click();
-				}
-			}
-		}
-	}
+                public async Task<bool> ContainsTextAsync(string text)
+                {
+                    var cells = await GetCellsAsync();
+                    foreach (var cell in cells)
+                    {
+                        var cellText = await cell.TextContentAsync();
+                        if (cellText?.Contains(text) == true)
+                        {
+                            return true;
+                        }
+                    }
+                    return false;
+                }
+            }
+        }
+    }
 }
