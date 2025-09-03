@@ -196,51 +196,12 @@ stages:
                     Write-Error "Playwright installation failed with exit code $exitCode"
                     exit 1
                   }
-                  Write-Host "✓ Playwright browser installation completed successfully"
                 } catch {
                   Write-Error "Playwright installation failed with exception: $_"
                   exit 1
                 }
                 
-                # Verify installation by checking if the browser executable exists
-                Write-Host "Verifying Playwright browser installation..."
-                if ($IsLinux) {
-                  $chromiumPaths = Get-ChildItem -Path "$env:HOME/.cache/ms-playwright/chromium-*/chrome-linux/chrome" -ErrorAction SilentlyContinue
-                  if ($chromiumPaths) {
-                    $chromiumPath = $chromiumPaths[0].FullName
-                    Write-Host "✓ Chromium browser found at: $chromiumPath"
-                    Write-Host "File size: $((Get-Item $chromiumPath).Length) bytes"
-                  } else {
-                    Write-Error "✗ Chromium browser not found in $env:HOME/.cache/ms-playwright/chromium-*/chrome-linux/"
-                    # List what's actually in the playwright cache for debugging
-                    Write-Host "Contents of $env:HOME/.cache/ms-playwright/:"
-                    if (Test-Path "$env:HOME/.cache/ms-playwright/") {
-                      Get-ChildItem -Path "$env:HOME/.cache/ms-playwright/" -ErrorAction SilentlyContinue | Format-Table
-                    } else {
-                      Write-Host "Playwright cache directory does not exist"
-                    }
-                    exit 1
-                  }
-                } else {
-                  $chromiumPaths = Get-ChildItem -Path "$env:USERPROFILE\.cache\ms-playwright\chromium-*\chrome-win\chrome.exe" -ErrorAction SilentlyContinue
-                  if ($chromiumPaths) {
-                    $chromiumPath = $chromiumPaths[0].FullName
-                    Write-Host "✓ Chromium browser found at: $chromiumPath"
-                    Write-Host "File size: $((Get-Item $chromiumPath).Length) bytes"
-                  } else {
-                    Write-Error "✗ Chromium browser not found in $env:USERPROFILE\.cache\ms-playwright\chromium-*\chrome-win\"
-                    # List what's actually in the playwright cache for debugging
-                    Write-Host "Contents of $env:USERPROFILE\.cache\ms-playwright\:"
-                    if (Test-Path "$env:USERPROFILE\.cache\ms-playwright\") {
-                      Get-ChildItem -Path "$env:USERPROFILE\.cache\ms-playwright\" -ErrorAction SilentlyContinue | Format-Table
-                    } else {
-                      Write-Host "Playwright cache directory does not exist"
-                    }
-                    exit 1
-                  }
-                }
-                
-                Write-Host "✓ Playwright browser installation and verification completed successfully"
+                Write-Host "✓ Playwright browser installation completed successfully"
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Run Tests
