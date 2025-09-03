@@ -130,6 +130,8 @@ stages:
               command: test
               projects: Rnwood.SmtpServer.Tests
               configuration: release
+              arguments: '--collect:"XPlat Code Coverage" --results-directory "$(Agent.TempDirectory)/TestResults/SmtpServer" --logger trx'
+              publishTestResults: true
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Build Test Project for Playwright
@@ -212,6 +214,58 @@ stages:
               command: test
               projects: Rnwood.Smtp4dev.Tests
               configuration: release
+              arguments: '--collect:"XPlat Code Coverage" --results-directory "$(Agent.TempDirectory)/TestResults/Smtp4dev" --logger trx'
+              publishTestResults: true
+          - task: DotNetCoreCLI@2
+            condition: and(succeeded(), eq(variables['runTests'], true))
+            displayName: Install ReportGenerator Tool
+            inputs:
+              command: custom
+              custom: tool
+              arguments: 'install --global dotnet-reportgenerator-globaltool'
+          - task: PowerShell@2
+            condition: and(succeeded(), eq(variables['runTests'], true))
+            displayName: Generate Coverage Reports
+            inputs:
+              targetType: inline
+              script: |
+                Write-Host "Generating coverage reports..."
+                $coverageFiles = Get-ChildItem -Path "$(Agent.TempDirectory)/TestResults" -Recurse -Include "coverage.cobertura.xml" | ForEach-Object { $_.FullName }
+                Write-Host "Found coverage files: $($coverageFiles -join ', ')"
+                
+                if ($coverageFiles.Count -gt 0) {
+                  $reportsArg = $coverageFiles -join ";"
+                  $targetDir = "$(Agent.TempDirectory)/CoverageReports"
+                  
+                  reportgenerator -reports:"$reportsArg" -targetdir:"$targetDir" -reporttypes:"Cobertura;HtmlInline_AzurePipelines;JsonSummary;Badges" -verbosity:Info
+                  
+                  Write-Host "Coverage reports generated in: $targetDir"
+                  
+                  # Display summary
+                  if (Test-Path "$targetDir/Summary.json") {
+                    $summary = Get-Content "$targetDir/Summary.json" | ConvertFrom-Json
+                    Write-Host "Line Coverage: $($summary.summary.linecoverage)%"
+                    Write-Host "Branch Coverage: $($summary.summary.branchcoverage)%"
+                    Write-Host "Method Coverage: $($summary.summary.methodcoverage)%"
+                  }
+                } else {
+                  Write-Host "No coverage files found."
+                }
+          - task: PublishCodeCoverageResults@1
+            condition: and(succeeded(), eq(variables['runTests'], true))
+            displayName: Publish Code Coverage Results
+            inputs:
+              codeCoverageTool: 'Cobertura'
+              summaryFileLocation: '$(Agent.TempDirectory)/CoverageReports/Cobertura.xml'
+              reportDirectory: '$(Agent.TempDirectory)/CoverageReports'
+              failIfCoverageEmpty: false
+          - task: PublishPipelineArtifact@1
+            condition: and(succeeded(), eq(variables['runTests'], true), eq(variables['platformName'], 'linux-x64'))
+            displayName: Publish Coverage Reports as Artifact
+            inputs:
+              targetPath: '$(Agent.TempDirectory)/CoverageReports'
+              artifact: 'CoverageReports'
+              publishLocation: 'pipeline'
           - powershell: move-item $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev-$(platformName)-$(tag).zip
             displayName: Rename artifact
           - publish: $(Build.ArtifactStagingDirectory)/$(platformName)
@@ -268,6 +322,8 @@ stages:
               command: test
               projects: Rnwood.Smtp4dev.Desktop.Tests
               configuration: release
+              arguments: '--collect:"XPlat Code Coverage" --results-directory "$(Agent.TempDirectory)/TestResults/Desktop" --logger trx'
+              publishTestResults: true
           - powershell: move-item $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip
             displayName: Rename artifact
           - publish: $(Build.ArtifactStagingDirectory)/win-x64-desktop
@@ -441,6 +497,111 @@ stages:
               script: |
                 docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-ltsc2022-amd64-$(tag) $(docker_repo):windows-ltsc2019-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
                 docker manifest push $(docker_repo):$(tag)
+
+  - stage: ReportCoverage
+    displayName: Report Coverage to GitHub
+    condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
+    dependsOn: 
+      - Build
+    jobs:
+      - job: ReportToGitHub
+        displayName: Report Coverage to GitHub
+        pool:
+          vmImage: "ubuntu-22.04"
+        steps:
+          - checkout: self
+            fetchDepth: 1
+          - task: DownloadPipelineArtifact@2
+            displayName: Download Coverage Reports
+            inputs:
+              buildType: 'current'
+              artifactName: 'CoverageReports'
+              targetPath: '$(System.DefaultWorkingDirectory)/CoverageReports'
+            continueOnError: true
+          - task: PowerShell@2
+            displayName: Comment Coverage Summary on PR
+            condition: and(succeeded(), ne(variables['GITHUB_TOKEN'], ''))
+            env:
+              GITHUB_TOKEN: $(GITHUB_TOKEN)
+            inputs:
+              targetType: inline
+              script: |
+                $repoOwner = "rnwood"
+                $repoName = "smtp4dev"
+                $prNumber = "$(System.PullRequest.PullRequestNumber)"
+                $buildUrl = "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+                
+                # Check if coverage reports exist
+                $summaryFile = "$(System.DefaultWorkingDirectory)/CoverageReports/Summary.json"
+                if (-not (Test-Path $summaryFile)) {
+                  Write-Host "No coverage summary found. Skipping GitHub coverage report."
+                  exit 0
+                }
+                
+                # Read coverage summary
+                $summary = Get-Content $summaryFile | ConvertFrom-Json
+                $lineCoverage = [math]::Round($summary.summary.linecoverage, 1)
+                $branchCoverage = [math]::Round($summary.summary.branchcoverage, 1)
+                $methodCoverage = [math]::Round($summary.summary.methodcoverage, 1)
+                
+                # Determine coverage badges based on thresholds
+                $lineBadge = if ($lineCoverage -ge 80) { "🟢" } elseif ($lineCoverage -ge 60) { "🟡" } else { "🔴" }
+                $branchBadge = if ($branchCoverage -ge 80) { "🟢" } elseif ($branchCoverage -ge 60) { "🟡" } else { "🔴" }
+                $methodBadge = if ($methodCoverage -ge 80) { "🟢" } elseif ($methodCoverage -ge 60) { "🟡" } else { "🔴" }
+                
+                $commentBody = @"
+                ## 📊 Code Coverage Report
+                
+                | Coverage Type | Percentage | Status |
+                |---------------|------------|--------|
+                | Line Coverage | ${lineCoverage}% | ${lineBadge} |
+                | Branch Coverage | ${branchCoverage}% | ${branchBadge} |
+                | Method Coverage | ${methodCoverage}% | ${methodBadge} |
+                
+                **Coverage Details:**
+                - **Covered Lines:** $($summary.summary.coveredlines) / $($summary.summary.coverablelines)
+                - **Covered Branches:** $($summary.summary.coveredbranches) / $($summary.summary.totalbranches)
+                - **Covered Methods:** $($summary.summary.coveredmethods) / $($summary.summary.totalmethods)
+                - **Assemblies Tested:** $($summary.summary.assemblies)
+                - **Classes Tested:** $($summary.summary.classes)
+                
+                📈 [View Full Coverage Report]($buildUrl&view=codecoverage-tab)
+                
+                *Coverage report generated by Azure DevOps Build #$(Build.BuildNumber)*
+                "@
+                
+                # Check if PR is assigned to copilot before proceeding
+                $headers = @{
+                  'Authorization' = "token $env:GITHUB_TOKEN"
+                  'Accept' = 'application/vnd.github.v3+json'
+                  'User-Agent' = 'Azure-DevOps-Pipeline'
+                }
+                
+                try {
+                  # Find and update existing coverage comment, or create new one
+                  $commentsUri = "https://api.github.com/repos/$repoOwner/$repoName/issues/$prNumber/comments"
+                  $existingComments = Invoke-RestMethod -Uri $commentsUri -Headers $headers -Method Get
+                  
+                  $coverageComment = $existingComments | Where-Object { $_.body -like "*Code Coverage Report*" -and $_.user.login -eq "github-actions[bot]" }
+                  
+                  $body = @{
+                    body = $commentBody
+                  } | ConvertTo-Json -Depth 10
+                  
+                  if ($coverageComment) {
+                    # Update existing comment
+                    $updateUri = "https://api.github.com/repos/$repoOwner/$repoName/issues/comments/$($coverageComment.id)"
+                    $response = Invoke-RestMethod -Uri $updateUri -Method Patch -Headers $headers -Body $body -ContentType 'application/json'
+                    Write-Host "Updated existing coverage comment: $($response.html_url)"
+                  } else {
+                    # Create new comment
+                    $response = Invoke-RestMethod -Uri $commentsUri -Method Post -Headers $headers -Body $body -ContentType 'application/json'
+                    Write-Host "Created new coverage comment: $($response.html_url)"
+                  }
+                } catch {
+                  Write-Warning "Failed to post coverage comment to GitHub: $_"
+                  # Don't fail the build for this
+                }
 
   - stage: Release
     condition: and(succeeded(), or(variables['isreleasebuild'], variables['iscibuild']))

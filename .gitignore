@@ -40,6 +40,11 @@ Rnwood.Smtp4dev/wwwroot/*
 [Tt]est[Rr]esult*/
 [Bb]uild[Ll]og.*
 
+# Code Coverage
+TestResults/
+CoverageReports/
+coverage.*.xml
+
 # NUNIT
 *.VisualState.xml
 TestResult.xml
