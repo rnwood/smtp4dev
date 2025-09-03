@@ -2,17 +2,45 @@ using System;
 
 namespace LumiSoft.Net.IMAP
 {
-    /// <summary>
-    /// Obsolete IMAP message flags. This is a stub implementation for compatibility.
-    /// </summary>
-    [Obsolete("This class is obsolete")]
-    public enum IMAP_MessageFlags
-    {
+	/// <summary>
+	/// IMAP message flags.
+	/// </summary>
+    [Obsolete("Use IMAP_t_MsgFlags instead.")]
+	public enum IMAP_MessageFlags
+	{
+        /// <summary>
+        /// No flags defined.
+        /// </summary>
         None = 0,
-        Seen = 1,
-        Answered = 2,
-        Flagged = 4,
-        Deleted = 8,
-        Draft = 16
-    }
+
+		/// <summary>
+		/// Message has been read.
+		/// </summary>
+		Seen = 2,
+
+		/// <summary>
+		/// Message has been answered.
+		/// </summary>
+		Answered = 4,
+
+		/// <summary>
+		/// Message is "flagged" for urgent/special attention.
+		/// </summary>
+		Flagged = 8,
+
+		/// <summary>
+		/// Message is "deleted" for removal by later EXPUNGE.
+		/// </summary>
+		Deleted = 16,
+
+		/// <summary>
+		/// Message has not completed composition.
+		/// </summary>
+		Draft = 32,
+
+		/// <summary>
+		/// Message is "recently" arrived in this mailbox.
+		/// </summary>
+		Recent = 64,
+	}
 }

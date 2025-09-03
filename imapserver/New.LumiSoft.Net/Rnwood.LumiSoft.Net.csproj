@@ -50,7 +50,7 @@
     <Compile Remove="_Obsolete\**" />
     <Compile Remove="URI\SIP_Uri.cs" />
     <Compile Remove="URI\TEL_Uri.cs" />
-    <Compile Remove="IMAP\Client\**" />
+
   </ItemGroup>
 
   <!-- Removed None includes for deleted directories -->
