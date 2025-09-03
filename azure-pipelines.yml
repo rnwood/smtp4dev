@@ -600,9 +600,9 @@ stages:
                           } | Select-Object -First 10
                           
                           if ($errorLines) {
-                            $buildErrors += "```"
+                            $buildErrors += '```'
                             $buildErrors += [Environment]::NewLine + ($errorLines -join [Environment]::NewLine)
-                            $buildErrors += [Environment]::NewLine + "```"
+                            $buildErrors += [Environment]::NewLine + '```'
                           }
                         } catch {
                           $buildErrors += "Could not retrieve detailed logs for this task.`n"
