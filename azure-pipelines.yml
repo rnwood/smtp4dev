@@ -601,8 +601,8 @@ stages:
                           
                           if ($errorLines) {
                             $buildErrors += "```"
-                            $buildErrors += "`n$($errorLines -join "`n")"
-                            $buildErrors += "`n```"
+                            $buildErrors += [Environment]::NewLine + ($errorLines -join [Environment]::NewLine)
+                            $buildErrors += [Environment]::NewLine + "```"
                           }
                         } catch {
                           $buildErrors += "Could not retrieve detailed logs for this task.`n"
