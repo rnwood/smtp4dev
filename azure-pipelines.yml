@@ -626,9 +626,20 @@ stages:
                             
                             # If still no relevant lines, show the last substantial log entries
                             if ($errorLines.Count -eq 0) {
-                              $substantialLines = $logLines | Where-Object { $_.Trim().Length -gt 10 } | Select-Object -Last 30
-                              $errorLines = $substantialLines | ForEach-Object { $_.Trim() }
-                              Write-Host "No build-specific content found, showing last $($errorLines.Count) substantial log entries"
+                              Write-Host "No build-specific content found, extracting substantial log entries..."
+                              $substantialLines = @()
+                              foreach ($line in $logLines) {
+                                if ($line.Trim().Length -gt 10) {
+                                  $substantialLines += $line.Trim()
+                                }
+                              }
+                              # Get last 30 entries
+                              if ($substantialLines.Count -gt 30) {
+                                $errorLines = $substantialLines[($substantialLines.Count - 30)..($substantialLines.Count - 1)]
+                              } else {
+                                $errorLines = $substantialLines
+                              }
+                              Write-Host "Showing last $($errorLines.Count) substantial log entries"
                             } else {
                               Write-Host "Found $($errorLines.Count) build context lines"
                             }
