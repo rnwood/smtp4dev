@@ -136,9 +136,12 @@ stages:
             inputs:
               targetType: inline
               script: |
-                # Install Playwright CLI and browsers for E2E tests
-                dotnet tool install --global Microsoft.Playwright.CLI
-                playwright install chromium
+                # Install Playwright browsers using the project's installation method
+                # First ensure the test project is built so playwright.ps1 is available
+                dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release
+                
+                # Use the generated playwright.ps1 script (works on both Windows and Linux)
+                pwsh Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1 install chromium
           - task: DotNetCoreCLI@2
             condition: eq(variables['runTests'], true)
             displayName: Run Tests
