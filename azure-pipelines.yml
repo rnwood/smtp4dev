@@ -595,41 +595,54 @@ stages:
                           $logContent = Invoke-RestMethod -Uri $logUri -Headers $azureDevOpsHeaders -Method Get
                           
                           Write-Host "Retrieved log content for task $($record.name), length: $($logContent.Length)"
+                          Write-Host "Log URI: $logUri"
                           
-                          # Extract error lines from log content with improved patterns
+                          # Extract error lines from log content with comprehensive patterns
                           $errorLines = @()
                           $logLines = $logContent -split "`r?`n"
                           
-                          # Look for compilation errors, build errors, and failure messages
+                          Write-Host "Total log lines: $($logLines.Count)"
+                          
+                          # Enhanced pattern matching for various error types
                           foreach ($line in $logLines) {
-                            if ($line -match "error|Error|ERROR|\bCS\d{4}\b|\bMSB\d{4}\b|fail|Fail|FAIL|\berror\s*:|Build\s*FAILED|compilation\s*failed") {
-                              $errorLines += $line.Trim()
+                            $trimmedLine = $line.Trim()
+                            if ($trimmedLine -match "(?i)(error|fail|exception|\bCS\d{4}\b|\bMSB\d{4}\b|compilation\s*failed|build\s*failed|\berror\s*:|\(\d+,\d+\):\s*error|\.cs\(\d+,\d+\):\s*error)") {
+                              $errorLines += $trimmedLine
+                              Write-Host "Found error line: $trimmedLine"
                             }
                           }
                           
-                          # If no specific errors found, look for the last lines that might contain relevant info
+                          # If no specific errors found, get more context around build failures
                           if ($errorLines.Count -eq 0) {
-                            $lastLines = $logLines | Where-Object { $_.Trim() -ne "" } | Select-Object -Last 20
-                            foreach ($line in $lastLines) {
-                              if ($line -match "\.cs\(|\.csproj|dotnet|build|publish|test") {
-                                $errorLines += $line.Trim()
+                            Write-Host "No specific error patterns found, looking for build context..."
+                            
+                            # Look for lines containing file references, compilation info, or build commands
+                            foreach ($line in $logLines) {
+                              $trimmedLine = $line.Trim()
+                              if ($trimmedLine -match "(?i)(\.cs\(|\.csproj|dotnet\s+(build|publish|restore)|msbuild|compilation|warning|info.*error)" -and $trimmedLine.Length -gt 10) {
+                                $errorLines += $trimmedLine
                               }
                             }
+                            
+                            # If still no relevant lines, show the last substantial log entries
+                            if ($errorLines.Count -eq 0) {
+                              $substantialLines = $logLines | Where-Object { $_.Trim().Length -gt 10 } | Select-Object -Last 30
+                              $errorLines = $substantialLines | ForEach-Object { $_.Trim() }
+                              Write-Host "No build-specific content found, showing last $($errorLines.Count) substantial log entries"
+                            } else {
+                              Write-Host "Found $($errorLines.Count) build context lines"
+                            }
+                          } else {
+                            Write-Host "Found $($errorLines.Count) error lines with specific patterns"
                           }
                           
                           if ($errorLines.Count -gt 0) {
-                            $buildErrors += '```'
+                            $buildErrors += [Environment]::NewLine + '```'
                             $buildErrors += [Environment]::NewLine + ($errorLines -join [Environment]::NewLine)
                             $buildErrors += [Environment]::NewLine + '```'
-                            Write-Host "Found $($errorLines.Count) error lines for task $($record.name)"
                           } else {
-                            # Show a sample of the log content to understand the format
-                            $sampleLines = $logLines | Where-Object { $_.Trim() -ne "" } | Select-Object -Last 10
-                            $buildErrors += "No specific errors found. Last log entries:"
-                            $buildErrors += [Environment]::NewLine + '```'
-                            $buildErrors += [Environment]::NewLine + ($sampleLines -join [Environment]::NewLine)
-                            $buildErrors += [Environment]::NewLine + '```'
-                            Write-Host "No errors found for task $($record.name), showing sample log"
+                            $buildErrors += [Environment]::NewLine + "No log content available"
+                            Write-Host "No log content found for task $($record.name)"
                           }
                         } catch {
                           $buildErrors += "Could not retrieve detailed logs for this task: $($_.Exception.Message)"
