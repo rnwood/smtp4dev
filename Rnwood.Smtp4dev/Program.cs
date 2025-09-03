@@ -27,7 +27,7 @@ using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Server;
 using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.Smtp4dev.Service;
-using Serilog
+using Serilog;
 
 namespace Rnwood.Smtp4dev
 {
