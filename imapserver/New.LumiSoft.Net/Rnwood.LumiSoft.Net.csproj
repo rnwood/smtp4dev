@@ -47,7 +47,14 @@
     <Compile Remove="Media\**" />
     <Compile Remove="vCard\**" />
     <Compile Remove="_Debug\**" />
+    <!-- Include _Obsolete\IMAP\** for IMAP client dependencies -->
     <Compile Remove="_Obsolete\**" />
+    <Compile Include="_Obsolete\IMAP\**" />
+    <!-- Include specific obsolete files needed by IMAP and MIME -->
+    <Compile Include="_Obsolete\StreamLineReader.cs" />
+    <!-- Exclude specific obsolete files that depend on removed MIME library -->
+    <Compile Remove="_Obsolete\IMAP\IMAP_BODY.cs" />
+    <Compile Remove="_Obsolete\IMAP\IMAP_BODY_Entity.cs" />
     <Compile Remove="URI\SIP_Uri.cs" />
     <Compile Remove="URI\TEL_Uri.cs" />
 
