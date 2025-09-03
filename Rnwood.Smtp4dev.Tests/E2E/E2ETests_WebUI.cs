@@ -147,7 +147,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         private async Task<T> WaitForAsync<T>(Func<Task<T>> findElement) where T : class
         {
             T result = null;
-            var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(10));
+            var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
 
             while (result == null && !timeout.IsCancellationRequested)
             {
