@@ -652,17 +652,18 @@ stages:
                 
                 $commentBody = @"
                 ## 📊 Code Coverage Report
-                
+
                 | Coverage Type | Percentage | Status |
                 |---------------|------------|--------|
                 | Line Coverage | ${lineCoverage}% | ${lineBadge} |
                 | Branch Coverage | ${branchCoverage}% | ${branchBadge} |
                 | Method Coverage | ${methodCoverage}% | ${methodBadge} |
-                
+
                 ### 📁 Coverage by Namespace
-                
+
                 | Namespace | Line Coverage | Branch Coverage | Method Coverage | Classes |
                 |-----------|---------------|-----------------|-----------------|---------|
+
                 "@
                 
                 foreach ($ns in $namespaceStats | Sort-Object Namespace) {
