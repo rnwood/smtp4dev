@@ -592,15 +592,16 @@ stages:
                       if ($record.log -and $record.log.id) {
                         try {
                           $logUri = "$organizationUri$projectName/_apis/build/builds/$buildId/logs/$($record.log.id)?api-version=6.0"
-                          $logContent = Invoke-RestMethod -Uri $logUri -Headers $azureDevOpsHeaders -Method Get
                           
-                          # Ensure log content is treated as string
-                          $logContentString = [string]$logContent
+                          # Use Invoke-WebRequest to get raw text content instead of parsed JSON
+                          $logResponse = Invoke-WebRequest -Uri $logUri -Headers $azureDevOpsHeaders -Method Get
+                          $logContentString = $logResponse.Content
+                          
                           Write-Host "Retrieved log content for task $($record.name), length: $($logContentString.Length)"
                           Write-Host "Log URI: $logUri"
                           
                           # Split into lines and process as plain strings
-                          $logLines = $logContentString -split "`r?`n" | ForEach-Object { [string]$_ }
+                          $logLines = $logContentString -split "`r?`n"
                           
                           Write-Host "Total log lines: $($logLines.Count)"
                           
