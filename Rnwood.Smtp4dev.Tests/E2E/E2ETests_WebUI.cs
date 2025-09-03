@@ -147,7 +147,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         private async Task<T> WaitForAsync<T>(Func<Task<T>> findElement) where T : class
         {
             T result = null;
-            var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(30));
+            var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)); // Increased from 30s to 60s for CI
 
             while (result == null && !timeout.IsCancellationRequested)
             {
@@ -269,10 +269,17 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             using var playwright = await Playwright.CreateAsync();
             await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
             {
-                Headless = !System.Diagnostics.Debugger.IsAttached
+                Headless = !System.Diagnostics.Debugger.IsAttached,
+                // Increase timeout for CI environments
+                Timeout = 60000 // 60 seconds for browser launch
             });
 
             var page = await browser.NewPageAsync();
+            
+            // Set longer timeouts for CI environments
+            page.SetDefaultTimeout(60000); // 60 seconds for page operations
+            page.SetDefaultNavigationTimeout(60000); // 60 seconds for navigation
+            
             try
             {
                 await uitest(page, context.BaseUrl, context.SmtpPortNumber);
