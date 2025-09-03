@@ -260,7 +260,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
             RunE2ETest(context =>
             {
-                RunPlaywrightTestAsync(testName, uitest, context).GetAwaiter().GetResult();
+                RunPlaywrightTestAsync(testName, uitest, context).ConfigureAwait(false).GetAwaiter().GetResult();
             }, options);
         }
 
