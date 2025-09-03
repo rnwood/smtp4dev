@@ -130,21 +130,31 @@ stages:
               command: test
               projects: Rnwood.SmtpServer.Tests
               configuration: release
+          - task: DotNetCoreCLI@2
+            condition: eq(variables['runTests'], true)
+            displayName: Build Test Project for Playwright
+            inputs:
+              command: build
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
+              arguments: '-c Release $(buildArgs)'
           - task: PowerShell@2
             condition: eq(variables['runTests'], true)
             displayName: Install Playwright Browsers
-            timeoutInMinutes: 10
+            timeoutInMinutes: 15
             inputs:
               targetType: inline
               script: |
                 # Install Playwright browsers using the project's installation method
-                # First ensure the test project is built so playwright.ps1 is available
-                Write-Host "Building test project to generate playwright.ps1..."
-                dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release $(buildArgs)
+                Write-Host "Starting Playwright browser installation process..."
+                Write-Host "Build arguments: $(buildArgs)"
+                Write-Host "Current working directory: $(Get-Location)"
                 
                 # Find playwright.ps1 in the correct location based on build args
                 $playwrightScript = $null
                 $baseDir = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0"
+                
+                Write-Host "Searching for playwright.ps1 script..."
+                Write-Host "Base directory: $baseDir"
                 
                 # Check if buildArgs contains a runtime identifier
                 $buildArgsStr = "$(buildArgs)"
@@ -155,7 +165,11 @@ stages:
                   if (Test-Path $platformSpecificPath) {
                     $playwrightScript = $platformSpecificPath
                     Write-Host "✓ Found playwright.ps1 at platform-specific path: $playwrightScript"
+                  } else {
+                    Write-Host "⚠ Platform-specific playwright.ps1 not found at: $platformSpecificPath"
                   }
+                } else {
+                  Write-Host "No runtime identifier found in build args, checking generic path only"
                 }
                 
                 # Fallback to generic path if not found in platform-specific location
@@ -165,28 +179,51 @@ stages:
                   if (Test-Path $genericPath) {
                     $playwrightScript = $genericPath
                     Write-Host "✓ Found playwright.ps1 at generic path: $playwrightScript"
+                  } else {
+                    Write-Host "⚠ Generic playwright.ps1 not found at: $genericPath"
                   }
                 }
                 
                 if (-not $playwrightScript) {
                   Write-Error "✗ Playwright script not found in either platform-specific or generic locations"
-                  # List contents for debugging
-                  Write-Host "Contents of $($baseDir):"
-                  Get-ChildItem -Path $baseDir -Recurse -Name "playwright.ps1" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  Found: $baseDir/$_" }
+                  # Enhanced debugging - list all contents
+                  Write-Host "Detailed directory listing for debugging:"
+                  if (Test-Path $baseDir) {
+                    Write-Host "Contents of $($baseDir):"
+                    Get-ChildItem -Path $baseDir -Recurse | ForEach-Object { Write-Host "  $($_.FullName)" }
+                    Write-Host ""
+                    Write-Host "Searching for any playwright.ps1 files:"
+                    Get-ChildItem -Path $baseDir -Recurse -Name "playwright.ps1" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  Found: $baseDir/$_" }
+                  } else {
+                    Write-Host "Base directory $baseDir does not exist!"
+                  }
                   exit 1
                 }
                 
                 # Use the generated playwright.ps1 script (works on both Windows and Linux)
-                # On Linux, use --with-deps to install system dependencies
                 Write-Host "Installing Playwright browser using script: $playwrightScript"
-                if ($IsLinux) {
-                  Write-Host "Installing Chromium with system dependencies (this may take several minutes)..."
-                  pwsh $playwrightScript install chromium --with-deps
-                } else {
-                  Write-Host "Installing Chromium..."
-                  pwsh $playwrightScript install chromium
+                Write-Host "File exists check: $(Test-Path $playwrightScript)"
+                
+                try {
+                  if ($IsLinux) {
+                    Write-Host "Installing Chromium with system dependencies (this may take several minutes)..."
+                    $installOutput = pwsh $playwrightScript install chromium --with-deps 2>&1
+                  } else {
+                    Write-Host "Installing Chromium..."
+                    $installOutput = pwsh $playwrightScript install chromium 2>&1
+                  }
+                  
+                  if ($LASTEXITCODE -ne 0) {
+                    Write-Error "Playwright installation failed with exit code $LASTEXITCODE"
+                    Write-Host "Installation output:"
+                    Write-Host $installOutput
+                    exit 1
+                  }
+                  Write-Host "✓ Playwright browser installation completed successfully"
+                } catch {
+                  Write-Error "Playwright installation failed with exception: $_"
+                  exit 1
                 }
-                Write-Host "✓ Playwright browser installation completed"
                 
                 # Verify installation by checking if the browser executable exists
                 Write-Host "Verifying Playwright browser installation..."
@@ -195,11 +232,16 @@ stages:
                   if ($chromiumPaths) {
                     $chromiumPath = $chromiumPaths[0].FullName
                     Write-Host "✓ Chromium browser found at: $chromiumPath"
+                    Write-Host "File size: $((Get-Item $chromiumPath).Length) bytes"
                   } else {
                     Write-Error "✗ Chromium browser not found in $env:HOME/.cache/ms-playwright/chromium-*/chrome-linux/"
                     # List what's actually in the playwright cache for debugging
                     Write-Host "Contents of $env:HOME/.cache/ms-playwright/:"
-                    Get-ChildItem -Path "$env:HOME/.cache/ms-playwright/" -ErrorAction SilentlyContinue | Format-Table
+                    if (Test-Path "$env:HOME/.cache/ms-playwright/") {
+                      Get-ChildItem -Path "$env:HOME/.cache/ms-playwright/" -ErrorAction SilentlyContinue | Format-Table
+                    } else {
+                      Write-Host "Playwright cache directory does not exist"
+                    }
                     exit 1
                   }
                 } else {
@@ -207,14 +249,21 @@ stages:
                   if ($chromiumPaths) {
                     $chromiumPath = $chromiumPaths[0].FullName
                     Write-Host "✓ Chromium browser found at: $chromiumPath"
+                    Write-Host "File size: $((Get-Item $chromiumPath).Length) bytes"
                   } else {
                     Write-Error "✗ Chromium browser not found in $env:USERPROFILE\.cache\ms-playwright\chromium-*\chrome-win\"
                     # List what's actually in the playwright cache for debugging
                     Write-Host "Contents of $env:USERPROFILE\.cache\ms-playwright\:"
-                    Get-ChildItem -Path "$env:USERPROFILE\.cache\ms-playwright\" -ErrorAction SilentlyContinue | Format-Table
+                    if (Test-Path "$env:USERPROFILE\.cache\ms-playwright\") {
+                      Get-ChildItem -Path "$env:USERPROFILE\.cache\ms-playwright\" -ErrorAction SilentlyContinue | Format-Table
+                    } else {
+                      Write-Host "Playwright cache directory does not exist"
+                    }
                     exit 1
                   }
                 }
+                
+                Write-Host "✓ Playwright browser installation and verification completed successfully"
           - task: DotNetCoreCLI@2
             condition: eq(variables['runTests'], true)
             displayName: Run Tests
