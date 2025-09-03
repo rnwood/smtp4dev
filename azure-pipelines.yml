@@ -136,7 +136,7 @@ stages:
             inputs:
               command: build
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
-              arguments: '-c Release $(buildArgs)'
+              arguments: '-c Release'
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright Browsers
@@ -146,46 +146,17 @@ stages:
               script: |
                 # Install Playwright browsers using the project's installation method
                 Write-Host "Starting Playwright browser installation process..."
-                Write-Host "Build arguments: $(buildArgs)"
                 Write-Host "Current working directory: $(Get-Location)"
                 
-                # Find playwright.ps1 in the correct location based on build args
-                $playwrightScript = $null
+                # Find playwright.ps1 in the generic location (test project built without runtime identifier)
                 $baseDir = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0"
+                $playwrightScript = "$baseDir/playwright.ps1"
                 
                 Write-Host "Searching for playwright.ps1 script..."
-                Write-Host "Base directory: $baseDir"
+                Write-Host "Expected path: $playwrightScript"
                 
-                # Check if buildArgs contains a runtime identifier
-                $buildArgsStr = "$(buildArgs)"
-                if ($buildArgsStr -match "-r\s+(\S+)") {
-                  $runtime = $matches[1]
-                  $platformSpecificPath = "$baseDir/$runtime/playwright.ps1"
-                  Write-Host "Checking for playwright.ps1 at platform-specific path: $platformSpecificPath"
-                  if (Test-Path $platformSpecificPath) {
-                    $playwrightScript = $platformSpecificPath
-                    Write-Host "✓ Found playwright.ps1 at platform-specific path: $playwrightScript"
-                  } else {
-                    Write-Host "⚠ Platform-specific playwright.ps1 not found at: $platformSpecificPath"
-                  }
-                } else {
-                  Write-Host "No runtime identifier found in build args, checking generic path only"
-                }
-                
-                # Fallback to generic path if not found in platform-specific location
-                if (-not $playwrightScript) {
-                  $genericPath = "$baseDir/playwright.ps1"
-                  Write-Host "Checking for playwright.ps1 at generic path: $genericPath"
-                  if (Test-Path $genericPath) {
-                    $playwrightScript = $genericPath
-                    Write-Host "✓ Found playwright.ps1 at generic path: $playwrightScript"
-                  } else {
-                    Write-Host "⚠ Generic playwright.ps1 not found at: $genericPath"
-                  }
-                }
-                
-                if (-not $playwrightScript) {
-                  Write-Error "✗ Playwright script not found in either platform-specific or generic locations"
+                if (-not (Test-Path $playwrightScript)) {
+                  Write-Error "✗ Playwright script not found at expected path: $playwrightScript"
                   # Enhanced debugging - list all contents
                   Write-Host "Detailed directory listing for debugging:"
                   if (Test-Path $baseDir) {
@@ -199,6 +170,8 @@ stages:
                   }
                   exit 1
                 }
+                
+                Write-Host "✓ Found playwright.ps1 at: $playwrightScript"
                 
                 # Use the generated playwright.ps1 script (works on both Windows and Linux)
                 Write-Host "Installing Playwright browser using script: $playwrightScript"
