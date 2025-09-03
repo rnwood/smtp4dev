@@ -133,20 +133,34 @@ stages:
           - task: PowerShell@2
             condition: eq(variables['runTests'], true)
             displayName: Install Playwright Browsers
+            timeoutInMinutes: 10
             inputs:
               targetType: inline
               script: |
                 # Install Playwright browsers using the project's installation method
                 # First ensure the test project is built so playwright.ps1 is available
+                Write-Host "Building test project to generate playwright.ps1..."
                 dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release
+                
+                # Verify playwright.ps1 was generated
+                $playwrightScript = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
+                if (-not (Test-Path $playwrightScript)) {
+                  Write-Error "✗ Playwright script not found at $playwrightScript"
+                  exit 1
+                }
+                Write-Host "✓ Playwright script found at $playwrightScript"
                 
                 # Use the generated playwright.ps1 script (works on both Windows and Linux)
                 # On Linux, use --with-deps to install system dependencies
+                Write-Host "Installing Playwright browser..."
                 if ($IsLinux) {
-                  pwsh Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1 install chromium --with-deps
+                  Write-Host "Installing Chromium with system dependencies (this may take several minutes)..."
+                  pwsh $playwrightScript install chromium --with-deps
                 } else {
-                  pwsh Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1 install chromium
+                  Write-Host "Installing Chromium..."
+                  pwsh $playwrightScript install chromium
                 }
+                Write-Host "✓ Playwright browser installation completed"
                 
                 # Verify installation by checking if the browser executable exists
                 Write-Host "Verifying Playwright browser installation..."
@@ -157,6 +171,9 @@ stages:
                     Write-Host "✓ Chromium browser found at: $chromiumPath"
                   } else {
                     Write-Error "✗ Chromium browser not found in $env:HOME/.cache/ms-playwright/chromium-*/chrome-linux/"
+                    # List what's actually in the playwright cache for debugging
+                    Write-Host "Contents of $env:HOME/.cache/ms-playwright/:"
+                    Get-ChildItem -Path "$env:HOME/.cache/ms-playwright/" -ErrorAction SilentlyContinue | Format-Table
                     exit 1
                   }
                 } else {
@@ -166,6 +183,9 @@ stages:
                     Write-Host "✓ Chromium browser found at: $chromiumPath"
                   } else {
                     Write-Error "✗ Chromium browser not found in $env:USERPROFILE\.cache\ms-playwright\chromium-*\chrome-win\"
+                    # List what's actually in the playwright cache for debugging
+                    Write-Host "Contents of $env:USERPROFILE\.cache\ms-playwright\:"
+                    Get-ChildItem -Path "$env:USERPROFILE\.cache\ms-playwright\" -ErrorAction SilentlyContinue | Format-Table
                     exit 1
                   }
                 }
