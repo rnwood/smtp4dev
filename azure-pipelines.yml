@@ -543,6 +543,31 @@ stages:
                 $organizationUri = "$(System.TeamFoundationCollectionUri)"
                 $projectName = "$(System.TeamProject)"
                 
+                # Check if PR is assigned to copilot before proceeding
+                $headers = @{
+                  'Authorization' = "token $env:GITHUB_TOKEN"
+                  'Accept' = 'application/vnd.github.v3+json'
+                  'User-Agent' = 'Azure-DevOps-Pipeline'
+                }
+                
+                try {
+                  $prUri = "https://api.github.com/repos/$repoOwner/$repoName/pulls/$prNumber"
+                  $prDetails = Invoke-RestMethod -Uri $prUri -Headers $headers -Method Get
+                  
+                  # Check if copilot is assigned to this PR
+                  $copilotAssigned = $prDetails.assignees | Where-Object { $_.login -eq "copilot" }
+                  
+                  if (-not $copilotAssigned) {
+                    Write-Host "PR #$prNumber is not assigned to @copilot. Skipping notification."
+                    exit 0
+                  }
+                  
+                  Write-Host "PR #$prNumber is assigned to @copilot. Proceeding with notification."
+                } catch {
+                  Write-Error "Failed to check PR assignees: $_"
+                  Write-Host "Proceeding with notification as fallback."
+                }
+                
                 # Get build logs using Azure DevOps REST API
                 $buildErrors = ""
                 try {

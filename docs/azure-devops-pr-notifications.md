@@ -7,12 +7,20 @@ This document explains how the Azure DevOps pipeline automatically notifies @cop
 The Azure DevOps pipeline (`azure-pipelines.yml`) includes a special stage called `NotifyOnFailure` that:
 
 1. **Triggers only on PR build failures**: Uses condition `and(failed(), eq(variables['Build.Reason'], 'PullRequest'))`
-2. **Fetches detailed build error information**: Uses Azure DevOps REST API to retrieve build logs and error details
-3. **Posts a comprehensive GitHub comment**: Calls the GitHub API to comment on the PR with error details
-4. **Mentions @copilot with specific instructions**: The comment includes `@copilot` and instructs it to use the provided error details first
-5. **Provides build details**: Includes build ID, URL, commit information, and actual error messages
+2. **Checks PR assignees**: Verifies that @copilot is assigned to the PR before posting notifications (supports multiple assignees)
+3. **Fetches detailed build error information**: Uses Azure DevOps REST API to retrieve build logs and error details
+4. **Posts a comprehensive GitHub comment**: Calls the GitHub API to comment on the PR with error details
+5. **Mentions @copilot with specific instructions**: The comment includes `@copilot` and instructs it to use the provided error details first
+6. **Provides build details**: Includes build ID, URL, commit information, and actual error messages
 
-## Setup Requirements
+## Assignment Requirement
+
+**Important**: The notification system only posts comments to PRs that are assigned to @copilot. This prevents unnecessary notifications on PRs that are not being worked on by the automated assistant.
+
+The system checks the PR assignees before posting any comments:
+- If @copilot is among the assignees (there may be multiple assignees), the notification will be posted
+- If @copilot is not assigned to the PR, no notification will be sent
+- If the assignee check fails due to API issues, the notification will proceed as a fallback
 
 ### 1. GitHub Personal Access Token
 
@@ -123,6 +131,7 @@ To test the notification system:
 3. **Stage not triggered**:
    - Confirm the build actually failed (not cancelled or skipped)
    - Verify the build was triggered by a PR (`Build.Reason` = 'PullRequest')
+   - **Check that @copilot is assigned to the PR** - notifications only go to PRs assigned to copilot
 
 4. **No error details in comment**:
    - Check that the build service has read permissions for build logs
