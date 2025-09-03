@@ -140,19 +140,45 @@ stages:
                 # Install Playwright browsers using the project's installation method
                 # First ensure the test project is built so playwright.ps1 is available
                 Write-Host "Building test project to generate playwright.ps1..."
-                dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release
+                dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release $(buildArgs)
                 
-                # Verify playwright.ps1 was generated
-                $playwrightScript = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
-                if (-not (Test-Path $playwrightScript)) {
-                  Write-Error "✗ Playwright script not found at $playwrightScript"
+                # Find playwright.ps1 in the correct location based on build args
+                $playwrightScript = $null
+                $baseDir = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0"
+                
+                # Check if buildArgs contains a runtime identifier
+                $buildArgsStr = "$(buildArgs)"
+                if ($buildArgsStr -match "-r\s+(\S+)") {
+                  $runtime = $matches[1]
+                  $platformSpecificPath = "$baseDir/$runtime/playwright.ps1"
+                  Write-Host "Checking for playwright.ps1 at platform-specific path: $platformSpecificPath"
+                  if (Test-Path $platformSpecificPath) {
+                    $playwrightScript = $platformSpecificPath
+                    Write-Host "✓ Found playwright.ps1 at platform-specific path: $playwrightScript"
+                  }
+                }
+                
+                # Fallback to generic path if not found in platform-specific location
+                if (-not $playwrightScript) {
+                  $genericPath = "$baseDir/playwright.ps1"
+                  Write-Host "Checking for playwright.ps1 at generic path: $genericPath"
+                  if (Test-Path $genericPath) {
+                    $playwrightScript = $genericPath
+                    Write-Host "✓ Found playwright.ps1 at generic path: $playwrightScript"
+                  }
+                }
+                
+                if (-not $playwrightScript) {
+                  Write-Error "✗ Playwright script not found in either platform-specific or generic locations"
+                  # List contents for debugging
+                  Write-Host "Contents of $baseDir:"
+                  Get-ChildItem -Path $baseDir -Recurse -Name "playwright.ps1" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  Found: $baseDir/$_" }
                   exit 1
                 }
-                Write-Host "✓ Playwright script found at $playwrightScript"
                 
                 # Use the generated playwright.ps1 script (works on both Windows and Linux)
                 # On Linux, use --with-deps to install system dependencies
-                Write-Host "Installing Playwright browser..."
+                Write-Host "Installing Playwright browser using script: $playwrightScript"
                 if ($IsLinux) {
                   Write-Host "Installing Chromium with system dependencies (this may take several minutes)..."
                   pwsh $playwrightScript install chromium --with-deps
