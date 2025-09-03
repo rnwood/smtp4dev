@@ -119,26 +119,26 @@ stages:
               arguments: '-c Release $(buildArgs) -p:version=$(tag) -o "$(Build.ArtifactStagingDirectory)/$(platformName)"'
           - task: ExtractFiles@1
             displayName: Extract files for E2E tests
-            condition: eq(variables['runTests'], true)
+            condition: and(succeeded(), eq(variables['runTests'], true))
             inputs:
               archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip'
               destinationFolder: $(Agent.TempDirectory)/e2e
           - task: DotNetCoreCLI@2
-            condition: eq(variables['runTests'], true)
+            condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Run SmtpServer Tests
             inputs:
               command: test
               projects: Rnwood.SmtpServer.Tests
               configuration: release
           - task: DotNetCoreCLI@2
-            condition: eq(variables['runTests'], true)
+            condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Build Test Project for Playwright
             inputs:
               command: build
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
               arguments: '-c Release $(buildArgs)'
           - task: PowerShell@2
-            condition: eq(variables['runTests'], true)
+            condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright Browsers
             timeoutInMinutes: 15
             inputs:
@@ -265,7 +265,7 @@ stages:
                 
                 Write-Host "✓ Playwright browser installation and verification completed successfully"
           - task: DotNetCoreCLI@2
-            condition: eq(variables['runTests'], true)
+            condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Run Tests
             env:
               SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
