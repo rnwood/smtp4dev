@@ -69,8 +69,12 @@ Full dark mode support for comfortable viewing in low-light environments.
 ![Dark Mode Interface](dark-mode-interface.png)
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Frnwood%2Fsmtp4dev.svg?type=shield)](https://app.fossa.com/projects/git%2Bgithub.com%2Frnwood%2Fsmtp4dev?ref=badge_shield)
 
+## Contributing
 
+We welcome contributions! Before submitting a pull request, please:
 
+1. Read our [Contributing Guide](CONTRIBUTING.md)
+2. Sign the [Contributor License Agreement](CLA.md)
 
 ## License
 [![FOSSA Status](https://app.fossa.com/api/projects/git%2Bgithub.com%2Frnwood%2Fsmtp4dev.svg?type=large)](https://app.fossa.com/projects/git%2Bgithub.com%2Frnwood%2Fsmtp4dev?ref=badge_large)
