@@ -22,7 +22,10 @@ param(
     [string]$OutputDir = ".winget/generated",
     
     [Parameter(Mandatory = $false)]
-    [string]$TemplateFile = ".winget/smtp4dev.yaml"
+    [string]$TemplateFile = ".winget/smtp4dev.yaml",
+    
+    [Parameter(Mandatory = $false)]
+    [switch]$SkipHashValidation
 )
 
 $ErrorActionPreference = "Stop"
@@ -40,7 +43,15 @@ $baseUrl = "https://github.com/rnwood/smtp4dev/releases/download"
 $x64Url = "$baseUrl/$Version/Rnwood.Smtp4dev-win-x64-$Version.zip"
 $arm64Url = "$baseUrl/$Version/Rnwood.Smtp4dev-win-arm64-$Version.zip"
 
-Write-Host "Downloading and computing SHA256 hashes..." -ForegroundColor Yellow
+# Detect if this is a CI build (contains -ci in version)
+$isCiBuild = $Version -match "-ci"
+if ($isCiBuild) {
+    Write-Host "Detected CI build version: $Version" -ForegroundColor Yellow
+    Write-Host "Skipping hash computation for CI builds (binaries not yet published)" -ForegroundColor Yellow
+} else {
+    Write-Host "Detected release build version: $Version" -ForegroundColor Yellow
+    Write-Host "Downloading and computing SHA256 hashes..." -ForegroundColor Yellow
+}
 
 # Function to get SHA256 hash from URL
 function Get-UrlSha256 {
@@ -69,13 +80,23 @@ function Get-UrlSha256 {
     }
 }
 
-# Get SHA256 hashes
-$x64Hash = Get-UrlSha256 -Url $x64Url
-$arm64Hash = Get-UrlSha256 -Url $arm64Url
-
-Write-Host "SHA256 Hashes computed:" -ForegroundColor Green
-Write-Host "  x64:   $x64Hash"
-Write-Host "  arm64: $arm64Hash"
+# Get SHA256 hashes (skip for CI builds or if requested)
+if ($isCiBuild -or $SkipHashValidation) {
+    if ($isCiBuild) {
+        Write-Host "Using placeholder hashes for CI build" -ForegroundColor Yellow
+    } else {
+        Write-Host "Skipping hash validation as requested" -ForegroundColor Yellow
+    }
+    $x64Hash = "PLACEHOLDER_SHA256_X64_CI_BUILD"
+    $arm64Hash = "PLACEHOLDER_SHA256_ARM64_CI_BUILD"
+} else {
+    $x64Hash = Get-UrlSha256 -Url $x64Url
+    $arm64Hash = Get-UrlSha256 -Url $arm64Url
+    
+    Write-Host "SHA256 Hashes computed:" -ForegroundColor Green
+    Write-Host "  x64:   $x64Hash"
+    Write-Host "  arm64: $arm64Hash"
+}
 
 # Read template
 if (!(Test-Path $TemplateFile)) {
