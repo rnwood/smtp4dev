@@ -684,6 +684,12 @@ stages:
                 -Arm64Url "$(ARM64_INSTALLER_URL)"
             env:
               POWERSHELL_TELEMETRY_OPTOUT: 1
+          - task: PublishPipelineArtifact@1
+            displayName: Publish Winget Manifest
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/winget'
+              artifact: 'winget-manifests'
+              publishLocation: 'pipeline'
         variables:
           # Build URLs based on build type
           ${{ if eq(variables['isreleasebuild'], true) }}:
@@ -695,12 +701,6 @@ stages:
           ${{ if and(ne(variables['isreleasebuild'], true), ne(variables['iscibuild'], true)) }}:
             X64_INSTALLER_URL: "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_apis/build/builds/$(Build.BuildId)/artifacts?artifactName=win-x64&api-version=6.0&%24format=zip"
             ARM64_INSTALLER_URL: "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_apis/build/builds/$(Build.BuildId)/artifacts?artifactName=win-arm64&api-version=6.0&%24format=zip"
-          - task: PublishPipelineArtifact@1
-            displayName: Publish Winget Manifest
-            inputs:
-              targetPath: '$(Build.ArtifactStagingDirectory)/winget'
-              artifact: 'winget-manifests'
-              publishLocation: 'pipeline'
 
   - stage: ReportCoverage
     displayName: Report Coverage to GitHub
