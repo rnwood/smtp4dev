@@ -61,7 +61,6 @@ stages:
         pool:
           vmImage: $(vmImage)
         strategy:
-          failFast: true
           matrix:
             noruntime:
               platformName: noruntime
