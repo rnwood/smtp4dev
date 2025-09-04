@@ -1,0 +1,30 @@
+---
+name: "Conventional Commits"
+"on":
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - master
+
+# explicitly configure permissions
+permissions:
+  contents: read
+  pull-requests: read
+  statuses: write
+
+jobs:
+  conventional-commits:
+    name: Validate Conventional Commits
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate Conventional Commits
+        uses: wagoid/commitlint-github-action@v6.0.1
+        with:
+          configFile: .commitlintrc.yml
+          failOnWarnings: true

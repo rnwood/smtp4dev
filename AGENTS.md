@@ -162,11 +162,53 @@ npm test -- --passWithNoTests
 
 ## Development Workflow
 
+### Commit Message Requirements
+
+**All commits MUST follow Conventional Commits format.** This is enforced by CI and required for PR acceptance.
+
+#### Format
+```
+<type>[optional scope]: <description>
+
+[optional body]
+
+[optional footer(s)]
+```
+
+#### Required Types
+- **feat**: New feature or enhancement
+- **fix**: Bug fixes
+- **docs**: Documentation changes
+- **style**: Code style changes (formatting, whitespace)
+- **refactor**: Code restructuring without feature changes
+- **test**: Test additions or modifications
+- **chore**: Build process, dependency updates, maintenance
+- **perf**: Performance improvements
+- **ci**: CI/CD configuration changes
+- **build**: Build system changes
+- **revert**: Revert previous changes
+
+#### Examples
+```
+feat: add IMAP folder management
+fix: resolve memory leak in SMTP session handling
+docs: update API documentation for message endpoints
+chore(deps): update .NET SDK to 8.0.201
+ci: add conventional commit validation workflow
+test: add unit tests for email parsing
+```
+
+#### Scope Guidelines
+- Use component names: `smtp`, `imap`, `ui`, `api`, `docs`, `deps`
+- Keep scopes lowercase and concise
+- Scope is optional but recommended for larger changes
+
 ### Making Changes
 1. **Always build and test first** to establish a baseline
 2. Make minimal, focused changes
-3. **Always run validation scenarios** after changes
-4. Test both development and published modes
+3. **Use conventional commit format** for all commits
+4. **Always run validation scenarios** after changes
+5. Test both development and published modes
 
 ### Frontend Development
 ```bash

@@ -1,0 +1,57 @@
+---
+extends:
+  - '@commitlint/config-conventional'
+
+rules:
+  # Override default types to match our requirements
+  type-enum:
+    - 2
+    - always
+    - [
+      'feat',      # New feature
+      'fix',       # Bug fix
+      'docs',      # Documentation changes
+      'style',     # Code style changes (formatting, whitespace)
+      'refactor',  # Code restructuring without feature changes
+      'test',      # Test additions or modifications
+      'chore',     # Build process, dependency updates, maintenance
+      'perf',      # Performance improvements
+      'ci',        # CI/CD configuration changes
+      'build',     # Build system changes
+      'revert'     # Revert previous changes
+    ]
+
+  # Subject should not be empty
+  subject-empty:
+    - 2
+    - never
+
+  # Subject should not end with a period
+  subject-full-stop:
+    - 2
+    - never
+    - '.'
+
+  # Subject should be lowercase (except for proper nouns)
+  subject-case:
+    - 2
+    - always
+    - 'lower-case'
+
+  # Header should not be longer than 72 characters
+  header-max-length:
+    - 2
+    - always
+    - 72
+
+  # Body should be wrapped at 72 characters
+  body-max-line-length:
+    - 2
+    - always
+    - 72
+
+  # Scope should be lowercase
+  scope-case:
+    - 2
+    - always
+    - 'lower-case'
