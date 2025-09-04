@@ -6,12 +6,17 @@
 .DESCRIPTION
     This script generates winget package manifest files for smtp4dev by downloading
     release information from GitHub and computing SHA256 hashes for the Windows binaries.
+    Can also use local artifact files from Azure Pipeline builds.
 .PARAMETER Version
     The version/tag of the release to generate manifests for
 .PARAMETER OutputDir
     Directory to write the generated manifest files (default: .winget/generated)
 .PARAMETER TemplateFile
     Path to the template manifest file (default: .winget/smtp4dev.yaml)
+.PARAMETER X64ArtifactPath
+    Path to the local x64 Windows artifact file (if available from pipeline)
+.PARAMETER Arm64ArtifactPath
+    Path to the local ARM64 Windows artifact file (if available from pipeline)
 #>
 
 param(
@@ -25,7 +30,13 @@ param(
     [string]$TemplateFile = ".winget/smtp4dev.yaml",
     
     [Parameter(Mandatory = $false)]
-    [switch]$SkipHashValidation
+    [switch]$SkipHashValidation,
+    
+    [Parameter(Mandatory = $false)]
+    [string]$X64ArtifactPath,
+    
+    [Parameter(Mandatory = $false)]
+    [string]$Arm64ArtifactPath
 )
 
 $ErrorActionPreference = "Stop"
@@ -38,19 +49,28 @@ if (!(Test-Path $OutputDir)) {
     New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 }
 
-# GitHub release URLs
+# GitHub release URLs (used when local artifacts are not available)
 $baseUrl = "https://github.com/rnwood/smtp4dev/releases/download"
 $x64Url = "$baseUrl/$Version/Rnwood.Smtp4dev-win-x64-$Version.zip"
 $arm64Url = "$baseUrl/$Version/Rnwood.Smtp4dev-win-arm64-$Version.zip"
 
-# Detect if this is a CI build (contains -ci in version)
-$isCiBuild = $Version -match "-ci"
-if ($isCiBuild) {
-    Write-Host "Detected CI build version: $Version" -ForegroundColor Yellow
-    Write-Host "Skipping hash computation for CI builds (binaries not yet published)" -ForegroundColor Yellow
+# Check if local artifacts are provided
+$useLocalArtifacts = ($X64ArtifactPath -and (Test-Path $X64ArtifactPath)) -and ($Arm64ArtifactPath -and (Test-Path $Arm64ArtifactPath))
+
+if ($useLocalArtifacts) {
+    Write-Host "Using local artifacts from pipeline build" -ForegroundColor Green
+    Write-Host "  x64 artifact: $X64ArtifactPath"
+    Write-Host "  arm64 artifact: $Arm64ArtifactPath"
 } else {
-    Write-Host "Detected release build version: $Version" -ForegroundColor Yellow
-    Write-Host "Downloading and computing SHA256 hashes..." -ForegroundColor Yellow
+    # Detect if this is a CI build (contains -ci in version)
+    $isCiBuild = $Version -match "-ci"
+    if ($isCiBuild) {
+        Write-Host "Detected CI build version: $Version" -ForegroundColor Yellow
+        Write-Host "No local artifacts provided - skipping hash computation for CI builds (binaries not yet published)" -ForegroundColor Yellow
+    } else {
+        Write-Host "Detected release build version: $Version" -ForegroundColor Yellow
+        Write-Host "No local artifacts provided - downloading and computing SHA256 hashes..." -ForegroundColor Yellow
+    }
 }
 
 # Function to get SHA256 hash from URL
@@ -80,8 +100,39 @@ function Get-UrlSha256 {
     }
 }
 
-# Get SHA256 hashes (skip for CI builds or if requested)
-if ($isCiBuild -or $SkipHashValidation) {
+# Function to get SHA256 hash from local file
+function Get-FileSha256 {
+    param([string]$FilePath)
+    
+    Write-Host "  Computing hash for: $FilePath"
+    
+    try {
+        if (!(Test-Path $FilePath)) {
+            Write-Error "File not found: $FilePath"
+            throw
+        }
+        
+        # Compute hash
+        $hash = Get-FileHash -Path $FilePath -Algorithm SHA256
+        
+        return $hash.Hash
+    }
+    catch {
+        Write-Error "Failed to compute hash for file $FilePath : $_"
+        throw
+    }
+}
+
+# Get SHA256 hashes
+if ($useLocalArtifacts) {
+    Write-Host "Computing SHA256 hashes from local artifacts..." -ForegroundColor Yellow
+    $x64Hash = Get-FileSha256 -FilePath $X64ArtifactPath
+    $arm64Hash = Get-FileSha256 -FilePath $Arm64ArtifactPath
+    
+    Write-Host "SHA256 Hashes computed from local artifacts:" -ForegroundColor Green
+    Write-Host "  x64:   $x64Hash"
+    Write-Host "  arm64: $arm64Hash"
+} elseif ($isCiBuild -or $SkipHashValidation) {
     if ($isCiBuild) {
         Write-Host "Using placeholder hashes for CI build" -ForegroundColor Yellow
     } else {
@@ -93,7 +144,7 @@ if ($isCiBuild -or $SkipHashValidation) {
     $x64Hash = Get-UrlSha256 -Url $x64Url
     $arm64Hash = Get-UrlSha256 -Url $arm64Url
     
-    Write-Host "SHA256 Hashes computed:" -ForegroundColor Green
+    Write-Host "SHA256 Hashes computed from GitHub release:" -ForegroundColor Green
     Write-Host "  x64:   $x64Hash"
     Write-Host "  arm64: $arm64Hash"
 }

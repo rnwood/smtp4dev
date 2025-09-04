@@ -644,17 +644,31 @@ stages:
 
       - job: GenerateWingetManifest
         displayName: Generate Winget Package Manifest
+        dependsOn: BuildMatrix
+        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "windows-2022"
         steps:
           - checkout: self
             fetchDepth: 1
+          - task: DownloadPipelineArtifact@2
+            displayName: Download win-x64 artifact
+            inputs:
+              buildType: 'current'
+              artifactName: 'win-x64'
+              targetPath: '$(Pipeline.Workspace)/artifacts/win-x64'
+          - task: DownloadPipelineArtifact@2
+            displayName: Download win-arm64 artifact
+            inputs:
+              buildType: 'current'
+              artifactName: 'win-arm64'
+              targetPath: '$(Pipeline.Workspace)/artifacts/win-arm64'
           - task: PowerShell@2
             displayName: Generate Winget Manifest
             inputs:
               targetType: 'filePath'
               filePath: '.winget/generate-manifest.ps1'
-              arguments: '-Version "$(tag)" -OutputDir "$(Build.ArtifactStagingDirectory)/winget"'
+              arguments: '-Version "$(tag)" -OutputDir "$(Build.ArtifactStagingDirectory)/winget" -X64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-x64/Rnwood.Smtp4dev-win-x64-$(tag).zip" -Arm64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-arm64/Rnwood.Smtp4dev-win-arm64-$(tag).zip"'
             env:
               POWERSHELL_TELEMETRY_OPTOUT: 1
           - task: PublishPipelineArtifact@1
