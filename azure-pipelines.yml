@@ -112,9 +112,7 @@ stages:
               restoreKeys: |
                 nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
                 nuget | "$(Agent.OS)"
-              path: $(NUGET_PACKAGES)
-            env:
-              NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+              path: $(Pipeline.Workspace)/.nuget/packages
             condition: ne(variables['Agent.OS'], 'Windows_NT')
           
           # Windows-specific NuGet cache (different default path)
@@ -144,7 +142,8 @@ stages:
               publishWebProjects: false
               arguments: '-c Release $(buildArgs) -p:version=$(tag)'
             env:
-              NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+              ${{ if ne(variables['Agent.OS'], 'Windows_NT') }}:
+                NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
           - task: DotNetCoreCLI@2
             displayName: Publish $(platformName)
             inputs:
@@ -153,7 +152,8 @@ stages:
               publishWebProjects: false
               arguments: '-c Release $(buildArgs) -p:version=$(tag) -o "$(Build.ArtifactStagingDirectory)/$(platformName)"'
             env:
-              NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+              ${{ if ne(variables['Agent.OS'], 'Windows_NT') }}:
+                NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
           - task: ExtractFiles@1
             displayName: Extract files for E2E tests
             condition: and(succeeded(), eq(variables['runTests'], true))
@@ -184,9 +184,7 @@ stages:
               key: 'playwright | "$(Agent.OS)" | Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj'
               restoreKeys: |
                 playwright | "$(Agent.OS)"
-              path: $(PLAYWRIGHT_BROWSERS_PATH)
-            env:
-              PLAYWRIGHT_BROWSERS_PATH: $(Pipeline.Workspace)/.cache/ms-playwright
+              path: $(Pipeline.Workspace)/.cache/ms-playwright
             condition: and(succeeded(), eq(variables['runTests'], true), ne(variables['Agent.OS'], 'Windows_NT'))
           
           # Windows-specific Playwright cache (different default path)
@@ -456,9 +454,7 @@ stages:
               restoreKeys: |
                 nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
                 nuget | "$(Agent.OS)"
-              path: $(NUGET_PACKAGES)
-            env:
-              NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+              path: $(Pipeline.Workspace)/.nuget/packages
           
           # Cache npm packages
           - task: Cache@2
@@ -530,9 +526,7 @@ stages:
               restoreKeys: |
                 nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
                 nuget | "$(Agent.OS)"
-              path: $(NUGET_PACKAGES)
-            env:
-              NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+              path: $(Pipeline.Workspace)/.nuget/packages
           
           # Cache npm packages
           - task: Cache@2
