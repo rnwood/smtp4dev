@@ -644,7 +644,6 @@ stages:
 
       - job: GenerateWingetManifest
         displayName: Generate Winget Package Manifest
-        condition: or(variables['isreleasebuild'], variables['iscibuild'])
         pool:
           vmImage: "windows-2022"
         steps:
