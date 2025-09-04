@@ -5,6 +5,7 @@
 
 using System.Threading.Tasks;
 using Moq;
+using Rnwood.SmtpServer.Verbs;
 using Xunit;
 
 namespace Rnwood.SmtpServer.Tests.Verbs;

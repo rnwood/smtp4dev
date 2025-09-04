@@ -6,9 +6,8 @@
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Rnwood.SmtpServer.Verbs;
 
-namespace Rnwood.SmtpServer;
+namespace Rnwood.SmtpServer.Verbs;
 
 /// <summary>
 ///     Defines the <see cref="RcptToVerb" />.

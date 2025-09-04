@@ -4,6 +4,7 @@
 // </copyright>
 
 using System.Threading.Tasks;
+using Rnwood.SmtpServer.Verbs;
 
 namespace Rnwood.SmtpServer.Extensions;
 
