@@ -176,42 +176,17 @@ stages:
               command: build
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
               arguments: '-c Release -o bin/playwright'
-          
-          # Cache Playwright browsers based on test project file
-          - task: Cache@2
-            displayName: Cache Playwright browsers
-            inputs:
-              key: 'playwright | "$(Agent.OS)" | Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj'
-              restoreKeys: |
-                playwright | "$(Agent.OS)"
-              path: $(Agent.HomeDirectory)/.cache/ms-playwright
-            condition: and(succeeded(), eq(variables['runTests'], true), ne(variables['Agent.OS'], 'Windows_NT'))
-          
-          # Windows-specific Playwright cache (different default path)
-          - task: Cache@2
-            displayName: Cache Playwright browsers (Windows)
-            inputs:
-              key: 'playwright | "$(Agent.OS)" | Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj'
-              restoreKeys: |
-                playwright | "$(Agent.OS)"
-              path: $(UserProfile)\.cache\ms-playwright
-            condition: and(succeeded(), eq(variables['runTests'], true), eq(variables['Agent.OS'], 'Windows_NT'))
+
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright Browsers
             timeoutInMinutes: 15
-            env:
-              ${{ if ne(variables['Agent.OS'], 'Windows_NT') }}:
-                PLAYWRIGHT_BROWSERS_PATH: $(Agent.HomeDirectory)/.cache/ms-playwright
-              ${{ if eq(variables['Agent.OS'], 'Windows_NT') }}:
-                PLAYWRIGHT_BROWSERS_PATH: $(UserProfile)\.cache\ms-playwright
             inputs:
               targetType: inline
               script: |
                 # Install Playwright browsers using the project's installation method
                 Write-Host "Starting Playwright browser installation process..."
                 Write-Host "Current working directory: $(Get-Location)"
-                Write-Host "PLAYWRIGHT_BROWSERS_PATH: $env:PLAYWRIGHT_BROWSERS_PATH"
                 
                 # Find playwright.ps1 in the forced output directory
                 $baseDir = "bin/playwright"
@@ -273,10 +248,6 @@ stages:
             env:
               SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
               SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev
-              ${{ if ne(variables['Agent.OS'], 'Windows_NT') }}:
-                PLAYWRIGHT_BROWSERS_PATH: $(Agent.HomeDirectory)/.cache/ms-playwright
-              ${{ if eq(variables['Agent.OS'], 'Windows_NT') }}:
-                PLAYWRIGHT_BROWSERS_PATH: $(UserProfile)\.cache\ms-playwright
             inputs:
               command: test
               projects: Rnwood.Smtp4dev.Tests
