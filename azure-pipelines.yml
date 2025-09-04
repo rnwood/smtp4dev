@@ -108,7 +108,7 @@ stages:
           - task: Cache@2
             displayName: Cache NuGet packages
             inputs:
-              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj'
               restoreKeys: |
                 nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
                 nuget | "$(Agent.OS)"
@@ -119,7 +119,7 @@ stages:
           - task: Cache@2
             displayName: Cache NuGet packages (Windows)
             inputs:
-              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj'
               restoreKeys: |
                 nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
                 nuget | "$(Agent.OS)"
@@ -344,7 +344,7 @@ stages:
           - task: Cache@2
             displayName: Cache NuGet packages
             inputs:
-              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj'
               restoreKeys: |
                 nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
                 nuget | "$(Agent.OS)"
@@ -382,7 +382,7 @@ stages:
           - task: Cache@2
             displayName: Cache NuGet packages
             inputs:
-              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj'
               restoreKeys: |
                 nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
                 nuget | "$(Agent.OS)"
@@ -450,7 +450,7 @@ stages:
           - task: Cache@2
             displayName: Cache NuGet packages
             inputs:
-              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj'
               restoreKeys: |
                 nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
                 nuget | "$(Agent.OS)"
@@ -522,7 +522,7 @@ stages:
           - task: Cache@2
             displayName: Cache NuGet packages
             inputs:
-              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj'
               restoreKeys: |
                 nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
                 nuget | "$(Agent.OS)"
@@ -579,7 +579,7 @@ stages:
           - task: Cache@2
             displayName: Cache NuGet packages
             inputs:
-              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj'
               restoreKeys: |
                 nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
                 nuget | "$(Agent.OS)"
