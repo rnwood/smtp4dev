@@ -678,8 +678,8 @@ stages:
                 -OutputDir "$(Build.ArtifactStagingDirectory)/winget" 
                 -X64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-x64/Rnwood.Smtp4dev-win-x64-$(tag).zip" 
                 -Arm64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-arm64/Rnwood.Smtp4dev-win-arm64-$(tag).zip" 
-                -IsReleaseBuild $$([bool]::Parse("$(isreleasebuild)"))
-                -IsCiBuild $$([bool]::Parse("$(iscibuild)"))
+                -IsReleaseBuild $(isreleasebuild)
+                -IsCiBuild $(iscibuild)
                 -X64Url "$(X64_INSTALLER_URL)"
                 -Arm64Url "$(ARM64_INSTALLER_URL)"
             env:
