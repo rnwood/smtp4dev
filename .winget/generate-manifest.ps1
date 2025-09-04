@@ -17,9 +17,9 @@
 .PARAMETER Arm64ArtifactPath
     Path to the local ARM64 Windows artifact file (required)
 .PARAMETER IsReleaseBuild
-    Whether this is a release build (true/false)
+    Whether this is a release build (boolean)
 .PARAMETER IsCiBuild
-    Whether this is a CI build (true/false)
+    Whether this is a CI build (boolean)
 .PARAMETER X64Url
     The complete URL for the x64 installer (GitHub release or Azure DevOps artifact URL)
 .PARAMETER Arm64Url
@@ -43,10 +43,10 @@ param(
     [string]$Arm64ArtifactPath,
     
     [Parameter(Mandatory = $true)]
-    [string]$IsReleaseBuild,
+    [bool]$IsReleaseBuild,
     
     [Parameter(Mandatory = $true)]
-    [string]$IsCiBuild,
+    [bool]$IsCiBuild,
     
     [Parameter(Mandatory = $true)]
     [string]$X64Url,
@@ -57,9 +57,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Convert string parameters to boolean values
-$IsReleaseBuildBool = [bool]::Parse($IsReleaseBuild)
-$IsCiBuildBool = [bool]::Parse($IsCiBuild)
+# Boolean parameters are already the correct type
+$IsReleaseBuildBool = $IsReleaseBuild
+$IsCiBuildBool = $IsCiBuild
 
 Write-Host "Generating winget manifest for smtp4dev version: $Version" -ForegroundColor Green
 Write-Host "Build type: Release=$IsReleaseBuildBool, CI=$IsCiBuildBool" -ForegroundColor Yellow
@@ -87,6 +87,37 @@ Write-Host "  arm64 artifact: $Arm64ArtifactPath"
 Write-Host "Installer URLs:" -ForegroundColor Green
 Write-Host "  x64 URL: $X64Url"
 Write-Host "  arm64 URL: $Arm64Url"
+
+# Function to upload file to filebin.net and get download URL
+function Upload-ToFilebin {
+    param([string]$FilePath, [string]$FileName)
+    
+    Write-Host "  Uploading $FileName to filebin.net..."
+    
+    try {
+        # Generate a random bin name
+        $binName = [System.Guid]::NewGuid().ToString("N").Substring(0, 8)
+        
+        # Upload file to filebin.net using the correct API format /{bin}/{filename}
+        $uri = "https://filebin.net/$binName/$FileName"
+        $fileContent = [System.IO.File]::ReadAllBytes($FilePath)
+        
+        $response = Invoke-RestMethod -Uri $uri -Method Post -Body $fileContent -ContentType "application/octet-stream"
+        
+        if ($response) {
+            $downloadUrl = "https://filebin.net/$binName/$FileName"
+            Write-Host "    Uploaded successfully: $downloadUrl" -ForegroundColor Green
+            return $downloadUrl
+        } else {
+            Write-Error "Failed to upload to filebin.net - no response received"
+            throw
+        }
+    }
+    catch {
+        Write-Error "Failed to upload file $FilePath to filebin.net: $_"
+        throw
+    }
+}
 
 # Function to get SHA256 hash from local file
 function Get-FileSha256 {
@@ -120,6 +151,34 @@ Write-Host "SHA256 Hashes computed:" -ForegroundColor Green
 Write-Host "  x64:   $x64Hash"
 Write-Host "  arm64: $arm64Hash"
 
+# For non-CI and non-release builds, upload to filebin.net to work around AzDO double zipping
+$finalX64Url = $X64Url
+$finalArm64Url = $Arm64Url
+
+if (-not $IsReleaseBuildBool -and -not $IsCiBuildBool) {
+    Write-Host "Non-CI and non-release build detected. Uploading to filebin.net to avoid AzDO double zipping..." -ForegroundColor Yellow
+    
+    try {
+        # Extract filenames for filebin
+        $x64FileName = Split-Path $X64ArtifactPath -Leaf
+        $arm64FileName = Split-Path $Arm64ArtifactPath -Leaf
+        
+        # Upload files and get download URLs
+        $finalX64Url = Upload-ToFilebin -FilePath $X64ArtifactPath -FileName $x64FileName
+        $finalArm64Url = Upload-ToFilebin -FilePath $Arm64ArtifactPath -FileName $arm64FileName
+        
+        Write-Host "Updated URLs from filebin.net:" -ForegroundColor Green
+        Write-Host "  x64 URL: $finalX64Url"
+        Write-Host "  arm64 URL: $finalArm64Url"
+    }
+    catch {
+        Write-Warning "Failed to upload to filebin.net. Falling back to original URLs: $_"
+        Write-Host "Using original URLs:" -ForegroundColor Yellow
+        Write-Host "  x64 URL: $finalX64Url"
+        Write-Host "  arm64 URL: $finalArm64Url"
+    }
+}
+
 # Read template
 if (!(Test-Path $TemplateFile)) {
     Write-Error "Template file not found: $TemplateFile"
@@ -133,8 +192,8 @@ $manifestContent = $templateContent `
     -replace "PLACEHOLDER_VERSION", $Version `
     -replace "PLACEHOLDER_SHA256_X64", $x64Hash `
     -replace "PLACEHOLDER_SHA256_ARM64", $arm64Hash `
-    -replace "PLACEHOLDER_X64_URL", $X64Url `
-    -replace "PLACEHOLDER_ARM64_URL", $Arm64Url
+    -replace "PLACEHOLDER_X64_URL", $finalX64Url `
+    -replace "PLACEHOLDER_ARM64_URL", $finalArm64Url
 
 # Write manifest file
 $outputFile = Join-Path $OutputDir "smtp4dev-$Version.yaml"
