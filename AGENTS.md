@@ -185,6 +185,42 @@ dotnet watch run --project Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
 - Environment variables: Use `ServerOptions__PropertyName` format
 - Command line arguments: Use `--propertyname=value` format
 
+### Pull Request Requirements for AI Agents
+
+**MANDATORY: All pull requests must have titles that follow the [Conventional Commits](https://www.conventionalcommits.org/) specification.**
+
+#### Required Format
+```
+type(optional-scope): description
+```
+
+#### Valid Types for smtp4dev
+- `feat`: New features (e.g., `feat: add IMAP search functionality`)
+- `fix`: Bug fixes (e.g., `fix(smtp): resolve memory leak in session handling`)
+- `docs`: Documentation changes (e.g., `docs: update API documentation`)
+- `refactor`: Code refactoring (e.g., `refactor(api): simplify message endpoint logic`)
+- `test`: Test additions/fixes (e.g., `test: add unit tests for email parsing`)
+- `chore`: Maintenance tasks (e.g., `chore(deps): update npm dependencies`)
+- `ci`: CI/CD changes (e.g., `ci: add conventional commit validation`)
+- `build`: Build system changes (e.g., `build: update .NET SDK to 8.0.119`)
+- `perf`: Performance improvements (e.g., `perf: optimize message list rendering`)
+- `style`: Code style changes (e.g., `style: fix linting issues`)
+
+#### Examples for Common Tasks
+- Adding new functionality: `feat(web): add dark mode toggle`
+- Fixing bugs: `fix(smtp): handle malformed email headers gracefully`
+- Updating documentation: `docs(api): add examples for message endpoints`
+- Dependency updates: `chore(deps): update Vue.js to latest version`
+- CI improvements: `ci: add automated security scanning`
+
+#### AI Agent Guidelines
+- Always use lowercase for type and description
+- Use imperative mood ("add" not "added" or "adds")
+- Keep descriptions concise but descriptive
+- Don't end with a period
+- Include scope when the change affects a specific component
+- The GitHub Actions workflow will automatically validate PR titles
+
 ## Common Issues and Solutions
 
 ### Build Issues
