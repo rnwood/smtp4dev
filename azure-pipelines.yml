@@ -103,6 +103,39 @@ stages:
             inputs:
               packageType: sdk
               version: $(netcoresdk_version)
+          
+          # Cache NuGet packages based on all project files and solution
+          - task: Cache@2
+            displayName: Cache NuGet packages
+            inputs:
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              restoreKeys: |
+                nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
+                nuget | "$(Agent.OS)"
+              path: $(NUGET_PACKAGES)
+            env:
+              NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+            condition: ne(variables['Agent.OS'], 'Windows_NT')
+          
+          # Windows-specific NuGet cache (different default path)
+          - task: Cache@2
+            displayName: Cache NuGet packages (Windows)
+            inputs:
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              restoreKeys: |
+                nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
+                nuget | "$(Agent.OS)"
+              path: $(UserProfile)\.nuget\packages
+            condition: eq(variables['Agent.OS'], 'Windows_NT')
+          
+          # Cache npm packages based on package-lock.json
+          - task: Cache@2
+            displayName: Cache npm packages
+            inputs:
+              key: 'npm | "$(Agent.OS)" | Rnwood.Smtp4dev/ClientApp/package-lock.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: Rnwood.Smtp4dev/ClientApp/node_modules
           - task: DotNetCoreCLI@2
             displayName: Build $(platformName)
             inputs:
@@ -110,6 +143,8 @@ stages:
               projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
               publishWebProjects: false
               arguments: '-c Release $(buildArgs) -p:version=$(tag)'
+            env:
+              NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
           - task: DotNetCoreCLI@2
             displayName: Publish $(platformName)
             inputs:
@@ -117,6 +152,8 @@ stages:
               projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
               publishWebProjects: false
               arguments: '-c Release $(buildArgs) -p:version=$(tag) -o "$(Build.ArtifactStagingDirectory)/$(platformName)"'
+            env:
+              NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
           - task: ExtractFiles@1
             displayName: Extract files for E2E tests
             condition: and(succeeded(), eq(variables['runTests'], true))
@@ -139,6 +176,28 @@ stages:
               command: build
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
               arguments: '-c Release -o bin/playwright'
+          
+          # Cache Playwright browsers based on test project file
+          - task: Cache@2
+            displayName: Cache Playwright browsers
+            inputs:
+              key: 'playwright | "$(Agent.OS)" | Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj'
+              restoreKeys: |
+                playwright | "$(Agent.OS)"
+              path: $(PLAYWRIGHT_BROWSERS_PATH)
+            env:
+              PLAYWRIGHT_BROWSERS_PATH: $(Pipeline.Workspace)/.cache/ms-playwright
+            condition: and(succeeded(), eq(variables['runTests'], true), ne(variables['Agent.OS'], 'Windows_NT'))
+          
+          # Windows-specific Playwright cache (different default path)
+          - task: Cache@2
+            displayName: Cache Playwright browsers (Windows)
+            inputs:
+              key: 'playwright | "$(Agent.OS)" | Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj'
+              restoreKeys: |
+                playwright | "$(Agent.OS)"
+              path: $(UserProfile)\.cache\ms-playwright
+            condition: and(succeeded(), eq(variables['runTests'], true), eq(variables['Agent.OS'], 'Windows_NT'))
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright Browsers
@@ -282,6 +341,25 @@ stages:
             inputs:
               packageType: sdk
               version: $(netcoresdk_version)
+          
+          # Cache NuGet packages for Windows
+          - task: Cache@2
+            displayName: Cache NuGet packages
+            inputs:
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              restoreKeys: |
+                nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
+                nuget | "$(Agent.OS)"
+              path: $(UserProfile)\.nuget\packages
+          
+          # Cache npm packages
+          - task: Cache@2
+            displayName: Cache npm packages
+            inputs:
+              key: 'npm | "$(Agent.OS)" | Rnwood.Smtp4dev/ClientApp/package-lock.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: Rnwood.Smtp4dev/ClientApp/node_modules
           - task: DotNetCoreCLI@2
             displayName: Build .NET Core Global Tool
             inputs:
@@ -301,6 +379,25 @@ stages:
             inputs:
               packageType: sdk
               version: $(netcoresdk_version)
+          
+          # Cache NuGet packages for Windows
+          - task: Cache@2
+            displayName: Cache NuGet packages
+            inputs:
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              restoreKeys: |
+                nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
+                nuget | "$(Agent.OS)"
+              path: $(UserProfile)\.nuget\packages
+          
+          # Cache npm packages
+          - task: Cache@2
+            displayName: Cache npm packages
+            inputs:
+              key: 'npm | "$(Agent.OS)" | Rnwood.Smtp4dev/ClientApp/package-lock.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: Rnwood.Smtp4dev/ClientApp/node_modules
           - task: DotNetCoreCLI@2
             displayName: Build .NET Core - win-x64-desktop
             inputs:
@@ -350,6 +447,27 @@ stages:
             inputs:
               packageType: sdk
               version: $(netcoresdk_version)
+          
+          # Cache NuGet packages
+          - task: Cache@2
+            displayName: Cache NuGet packages
+            inputs:
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              restoreKeys: |
+                nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
+                nuget | "$(Agent.OS)"
+              path: $(NUGET_PACKAGES)
+            env:
+              NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+          
+          # Cache npm packages
+          - task: Cache@2
+            displayName: Cache npm packages
+            inputs:
+              key: 'npm | "$(Agent.OS)" | Rnwood.Smtp4dev/ClientApp/package-lock.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: Rnwood.Smtp4dev/ClientApp/node_modules
           - task: DotNetCoreCLI@2
             displayName: Publish
             inputs:
@@ -403,6 +521,27 @@ stages:
             inputs:
               packageType: sdk
               version: $(netcoresdk_version)
+          
+          # Cache NuGet packages
+          - task: Cache@2
+            displayName: Cache NuGet packages
+            inputs:
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              restoreKeys: |
+                nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
+                nuget | "$(Agent.OS)"
+              path: $(NUGET_PACKAGES)
+            env:
+              NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
+          
+          # Cache npm packages
+          - task: Cache@2
+            displayName: Cache npm packages
+            inputs:
+              key: 'npm | "$(Agent.OS)" | Rnwood.Smtp4dev/ClientApp/package-lock.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: Rnwood.Smtp4dev/ClientApp/node_modules
           - task: DotNetCoreCLI@2
             displayName: Publish
             inputs:
@@ -441,6 +580,25 @@ stages:
             inputs:
               packageType: sdk
               version: $(netcoresdk_version)
+          
+          # Cache NuGet packages for Windows
+          - task: Cache@2
+            displayName: Cache NuGet packages
+            inputs:
+              key: 'nuget | "$(Agent.OS)" | "$(netcoresdk_version)" | **/*.csproj | **/packages.lock.json'
+              restoreKeys: |
+                nuget | "$(Agent.OS)" | "$(netcoresdk_version)"
+                nuget | "$(Agent.OS)"
+              path: $(UserProfile)\.nuget\packages
+          
+          # Cache npm packages
+          - task: Cache@2
+            displayName: Cache npm packages
+            inputs:
+              key: 'npm | "$(Agent.OS)" | Rnwood.Smtp4dev/ClientApp/package-lock.json'
+              restoreKeys: |
+                npm | "$(Agent.OS)"
+              path: Rnwood.Smtp4dev/ClientApp/node_modules
           - task: DotNetCoreCLI@2
             displayName: Publish
             inputs:
