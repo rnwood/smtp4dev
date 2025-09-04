@@ -17,6 +17,12 @@
     Path to the local x64 Windows artifact file (if available from pipeline)
 .PARAMETER Arm64ArtifactPath
     Path to the local ARM64 Windows artifact file (if available from pipeline)
+.PARAMETER BuildId
+    Azure DevOps Build ID (used for constructing artifact URLs for non-release builds)
+.PARAMETER OrganizationUri
+    Azure DevOps Organization URI (used for constructing artifact URLs for non-release builds)
+.PARAMETER ProjectName
+    Azure DevOps Project Name (used for constructing artifact URLs for non-release builds)
 #>
 
 param(
@@ -36,7 +42,16 @@ param(
     [string]$X64ArtifactPath,
     
     [Parameter(Mandatory = $false)]
-    [string]$Arm64ArtifactPath
+    [string]$Arm64ArtifactPath,
+    
+    [Parameter(Mandatory = $false)]
+    [string]$BuildId,
+    
+    [Parameter(Mandatory = $false)]
+    [string]$OrganizationUri,
+    
+    [Parameter(Mandatory = $false)]
+    [string]$ProjectName
 )
 
 $ErrorActionPreference = "Stop"
@@ -49,7 +64,12 @@ if (!(Test-Path $OutputDir)) {
     New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 }
 
-# GitHub release URLs (used when local artifacts are not available)
+# Determine build type and URL strategy
+$isCiBuild = $Version -match "-ci"
+$isReleaseBuild = $Version -notmatch "-ci" -and ($BuildId -eq $null -or $BuildId -eq "")
+
+# For manifest URLs, always use GitHub release URLs regardless of build type
+# The artifacts will be published to GitHub releases for all builds
 $baseUrl = "https://github.com/rnwood/smtp4dev/releases/download"
 $x64Url = "$baseUrl/$Version/Rnwood.Smtp4dev-win-x64-$Version.zip"
 $arm64Url = "$baseUrl/$Version/Rnwood.Smtp4dev-win-arm64-$Version.zip"
@@ -62,14 +82,16 @@ if ($useLocalArtifacts) {
     Write-Host "  x64 artifact: $X64ArtifactPath"
     Write-Host "  arm64 artifact: $Arm64ArtifactPath"
 } else {
-    # Detect if this is a CI build (contains -ci in version)
-    $isCiBuild = $Version -match "-ci"
+    # For builds without local artifacts, determine hash computation strategy
     if ($isCiBuild) {
         Write-Host "Detected CI build version: $Version" -ForegroundColor Yellow
-        Write-Host "No local artifacts provided - skipping hash computation for CI builds (binaries not yet published)" -ForegroundColor Yellow
-    } else {
+        Write-Host "No local artifacts provided - using placeholders (artifacts will be published to GitHub releases)" -ForegroundColor Yellow
+    } elseif ($isReleaseBuild) {
         Write-Host "Detected release build version: $Version" -ForegroundColor Yellow
-        Write-Host "No local artifacts provided - downloading and computing SHA256 hashes..." -ForegroundColor Yellow
+        Write-Host "No local artifacts provided - attempting to download from GitHub releases..." -ForegroundColor Yellow
+    } else {
+        Write-Host "Detected PR/branch build version: $Version" -ForegroundColor Yellow
+        Write-Host "No local artifacts provided - using placeholders (artifacts will be published to GitHub releases)" -ForegroundColor Yellow
     }
 }
 
@@ -132,21 +154,26 @@ if ($useLocalArtifacts) {
     Write-Host "SHA256 Hashes computed from local artifacts:" -ForegroundColor Green
     Write-Host "  x64:   $x64Hash"
     Write-Host "  arm64: $arm64Hash"
-} elseif ($isCiBuild -or $SkipHashValidation) {
-    if ($isCiBuild) {
-        Write-Host "Using placeholder hashes for CI build" -ForegroundColor Yellow
-    } else {
-        Write-Host "Skipping hash validation as requested" -ForegroundColor Yellow
-    }
-    $x64Hash = "PLACEHOLDER_SHA256_X64_CI_BUILD"
-    $arm64Hash = "PLACEHOLDER_SHA256_ARM64_CI_BUILD"
-} else {
+} elseif ($isReleaseBuild -and !$SkipHashValidation) {
+    # Only try to download for actual release builds where artifacts are already published
+    Write-Host "Computing SHA256 hashes from GitHub releases..." -ForegroundColor Yellow
     $x64Hash = Get-UrlSha256 -Url $x64Url
     $arm64Hash = Get-UrlSha256 -Url $arm64Url
     
     Write-Host "SHA256 Hashes computed from GitHub release:" -ForegroundColor Green
     Write-Host "  x64:   $x64Hash"
     Write-Host "  arm64: $arm64Hash"
+} else {
+    # Use placeholders for CI builds, PR builds, and when SkipHashValidation is set
+    if ($isCiBuild) {
+        Write-Host "Using placeholder hashes for CI build" -ForegroundColor Yellow
+    } elseif (!$isReleaseBuild) {
+        Write-Host "Using placeholder hashes for PR/branch build" -ForegroundColor Yellow
+    } else {
+        Write-Host "Skipping hash validation as requested" -ForegroundColor Yellow
+    }
+    $x64Hash = "PLACEHOLDER_SHA256_X64_BUILD"
+    $arm64Hash = "PLACEHOLDER_SHA256_ARM64_BUILD"
 }
 
 # Read template

@@ -668,7 +668,7 @@ stages:
             inputs:
               targetType: 'filePath'
               filePath: '.winget/generate-manifest.ps1'
-              arguments: '-Version "$(tag)" -OutputDir "$(Build.ArtifactStagingDirectory)/winget" -X64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-x64/Rnwood.Smtp4dev-win-x64-$(tag).zip" -Arm64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-arm64/Rnwood.Smtp4dev-win-arm64-$(tag).zip"'
+              arguments: '-Version "$(tag)" -OutputDir "$(Build.ArtifactStagingDirectory)/winget" -X64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-x64/Rnwood.Smtp4dev-win-x64-$(tag).zip" -Arm64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-arm64/Rnwood.Smtp4dev-win-arm64-$(tag).zip" -BuildId "$(Build.BuildId)" -OrganizationUri "$(System.TeamFoundationCollectionUri)" -ProjectName "$(System.TeamProject)"'
             env:
               POWERSHELL_TELEMETRY_OPTOUT: 1
           - task: PublishPipelineArtifact@1
