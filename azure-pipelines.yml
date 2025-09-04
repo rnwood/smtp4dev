@@ -347,7 +347,7 @@ stages:
       - job: DockerBuildLinux
         displayName: DockerBuild - Linux
         dependsOn: BuildMatrix
-        condition: succeededOrFailed('BuildMatrix')
+        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "ubuntu-22.04"
         steps:
@@ -402,7 +402,7 @@ stages:
       - job: DockerBuildLinuxArm64
         displayName: DockerBuild - Linux - ARM64
         dependsOn: BuildMatrix
-        condition: succeededOrFailed('BuildMatrix')
+        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "ubuntu-22.04"
         steps:
@@ -442,7 +442,7 @@ stages:
       - job: DockerBuildWindows
         displayName: DockerBuild - Windows LTSC 2019
         dependsOn: BuildMatrix
-        condition: succeededOrFailed('BuildMatrix')
+        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "windows-2022"
         steps:
