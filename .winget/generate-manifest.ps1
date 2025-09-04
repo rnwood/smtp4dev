@@ -99,19 +99,19 @@ Write-Host "Generated winget manifest: $outputFile" -ForegroundColor Green
 
 # Create directory structure for winget-pkgs submission
 $wingetPkgsDir = Join-Path $OutputDir "winget-pkgs-submission"
-$packageDir = Join-Path $wingetPkgsDir "manifests/r/RnwoodLtd/smtp4dev/$Version"
+$packageDir = Join-Path $wingetPkgsDir "manifests/r/Rnwood/smtp4dev/$Version"
 
 if (!(Test-Path $packageDir)) {
     New-Item -ItemType Directory -Path $packageDir -Force | Out-Null
 }
 
 # Copy manifest to winget-pkgs structure
-Copy-Item $outputFile (Join-Path $packageDir "RnwoodLtd.smtp4dev.yaml")
+Copy-Item $outputFile (Join-Path $packageDir "Rnwood.smtp4dev.yaml")
 
 Write-Host "Created winget-pkgs submission structure at: $wingetPkgsDir" -ForegroundColor Green
 Write-Host "To submit to winget-pkgs repository:" -ForegroundColor Cyan
 Write-Host "  1. Fork https://github.com/microsoft/winget-pkgs"
-Write-Host "  2. Copy the contents of $packageDir to manifests/r/RnwoodLtd/smtp4dev/$Version"
+Write-Host "  2. Copy the contents of $packageDir to manifests/r/Rnwood/smtp4dev/$Version"
 Write-Host "  3. Create a pull request"
 
 Write-Host "Winget manifest generation completed successfully!" -ForegroundColor Green

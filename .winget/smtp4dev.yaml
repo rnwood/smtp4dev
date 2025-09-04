@@ -1,6 +1,6 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.singleton.1.4.0.schema.json
 
-PackageIdentifier: RnwoodLtd.smtp4dev
+PackageIdentifier: Rnwood.smtp4dev
 PackageVersion: PLACEHOLDER_VERSION
 PackageLocale: en-US
 Publisher: Robert N Wood
