@@ -32,6 +32,11 @@ variables:
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
     tag: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
 
+  # Default values for build type flags when not explicitly set (e.g., PR builds)
+  ${{ if and(ne(variables['Build.SourceBranch'], 'refs/heads/master'), not(startsWith(variables['Build.SourceBranch'], 'refs/tags/'))) }}:
+    iscibuild: ${{ false }}
+    isreleasebuild: ${{ false }}
+
   docker_repo: "rnwood/smtp4dev"
   docker_registry: "dockerhub-rnwood"
   netcoresdk_version: "8.0.201"
@@ -642,6 +647,61 @@ stages:
                 docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-ltsc2022-amd64-$(tag) $(docker_repo):windows-ltsc2019-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
                 docker manifest push $(docker_repo):$(tag)
 
+      - job: GenerateWingetManifest
+        displayName: Generate Winget Package Manifest
+        dependsOn: BuildMatrix
+        condition: succeeded('BuildMatrix')
+        pool:
+          vmImage: "windows-2022"
+        steps:
+          - checkout: self
+            fetchDepth: 1
+          - task: DownloadPipelineArtifact@2
+            displayName: Download win-x64 artifact
+            inputs:
+              buildType: 'current'
+              artifactName: 'win-x64'
+              targetPath: '$(Pipeline.Workspace)/artifacts/win-x64'
+          - task: DownloadPipelineArtifact@2
+            displayName: Download win-arm64 artifact
+            inputs:
+              buildType: 'current'
+              artifactName: 'win-arm64'
+              targetPath: '$(Pipeline.Workspace)/artifacts/win-arm64'
+          - task: PowerShell@2
+            displayName: Generate Winget Manifest
+            inputs:
+              targetType: 'filePath'
+              filePath: '.winget/generate-manifest.ps1'
+              arguments: >-
+                -Version "$(tag)" 
+                -OutputDir "$(Build.ArtifactStagingDirectory)/winget" 
+                -X64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-x64/Rnwood.Smtp4dev-win-x64-$(tag).zip" 
+                -Arm64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-arm64/Rnwood.Smtp4dev-win-arm64-$(tag).zip" 
+                -IsReleaseBuild $(isreleasebuild)
+                -IsCiBuild $(iscibuild)
+                -X64Url "$(X64_INSTALLER_URL)"
+                -Arm64Url "$(ARM64_INSTALLER_URL)"
+            env:
+              POWERSHELL_TELEMETRY_OPTOUT: 1
+          - task: PublishPipelineArtifact@1
+            displayName: Publish Winget Manifest
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/winget'
+              artifact: 'winget-manifests'
+              publishLocation: 'pipeline'
+        variables:
+          # Build URLs based on build type
+          ${{ if eq(variables['isreleasebuild'], true) }}:
+            X64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip"
+            ARM64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip"
+          ${{ if eq(variables['iscibuild'], true) }}:
+            X64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip"
+            ARM64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip"
+          ${{ if and(ne(variables['isreleasebuild'], true), ne(variables['iscibuild'], true)) }}:
+            X64_INSTALLER_URL: "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_apis/build/builds/$(Build.BuildId)/artifacts?artifactName=win-x64&api-version=6.0&%24format=zip"
+            ARM64_INSTALLER_URL: "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_apis/build/builds/$(Build.BuildId)/artifacts?artifactName=win-arm64&api-version=6.0&%24format=zip"
+
   - stage: ReportCoverage
     displayName: Report Coverage to GitHub
     condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
@@ -887,7 +947,17 @@ stages:
               packagesToPush: "$(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg"
               nuGetFeedType: "external"
               publishFeedCredentials: "nuget_rnwood"
-
+      
+      - job: GitHubRelease
+        displayName: Create GitHub Release
+        condition: or(variables['isreleasebuild'], variables['iscibuild'])
+        pool:
+          vmImage: "windows-2022"
+        steps:
+          - checkout: none
+          - task: DownloadPipelineArtifact@2
+            inputs:
+              path: $(Build.ArtifactStagingDirectory)
           - task: GitHubRelease@1
             inputs:
               gitHubConnection: github.com_rnwood
@@ -924,6 +994,109 @@ stages:
                 changeLogCompareToRelease: lastNonDraftRelease
 
               assets: $(Build.ArtifactStagingDirectory)/**/*.zip
+
+      - job: WingetSubmission
+        displayName: Submit to Windows Package Manager
+        condition: variables['isreleasebuild']
+        dependsOn: GitHubRelease
+        pool:
+          vmImage: "windows-2022"
+        steps:
+          - checkout: self
+            fetchDepth: 1
+          - task: DownloadPipelineArtifact@2
+            displayName: Download Winget Manifests
+            inputs:
+              buildType: 'current'
+              artifactName: 'winget-manifests'
+              targetPath: '$(Pipeline.Workspace)/winget-manifests'
+          - task: PowerShell@2
+            displayName: Automate Winget Package Submission
+            inputs:
+              targetType: 'inline'
+              script: |
+                $ErrorActionPreference = "Stop"
+                
+                Write-Host "==================================================" -ForegroundColor Green
+                Write-Host "Automating Windows Package Manager Submission" -ForegroundColor Green
+                Write-Host "==================================================" -ForegroundColor Green
+                
+                # Set up variables
+                $packageVersion = "$(tag)"
+                $wingetRepoUrl = "https://github.com/microsoft/winget-pkgs.git"
+                $forkRepoUrl = "https://github.com/rnwood/winget-pkgs.git"
+                $branchName = "smtp4dev-$packageVersion"
+                $manifestPath = "manifests/r/Rnwood/smtp4dev/$packageVersion"
+                
+                Write-Host "📦 Package Version: $packageVersion" -ForegroundColor Cyan
+                Write-Host "🌿 Branch Name: $branchName" -ForegroundColor Cyan
+                
+                # Configure Git
+                git config --global user.email "noreply@github.com"
+                git config --global user.name "Azure Pipeline (smtp4dev)"
+                
+                try {
+                  # Try to clone existing fork first
+                  Write-Host "🔍 Checking for existing fork..." -ForegroundColor Yellow
+                  git clone $forkRepoUrl winget-pkgs-fork
+                  cd winget-pkgs-fork
+                  
+                  # Add upstream remote and fetch latest
+                  git remote add upstream $wingetRepoUrl
+                  git fetch upstream
+                  git checkout main
+                  git merge upstream/main
+                  git push origin main
+                  
+                  Write-Host "✅ Using existing fork and updated with upstream" -ForegroundColor Green
+                } catch {
+                  Write-Host "ℹ️ Fork doesn't exist or failed to clone, will need manual forking" -ForegroundColor Yellow
+                  
+                  # Clone the original repo instead
+                  git clone $wingetRepoUrl winget-pkgs-fork
+                  cd winget-pkgs-fork
+                }
+                
+                # Create new branch
+                Write-Host "🌿 Creating branch: $branchName" -ForegroundColor Yellow
+                git checkout -b $branchName
+                
+                # Create directory structure
+                Write-Host "📁 Creating directory structure..." -ForegroundColor Yellow
+                $targetDir = Join-Path (Get-Location) $manifestPath
+                New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
+                
+                # Copy manifest files
+                Write-Host "📄 Copying manifest files..." -ForegroundColor Yellow
+                $sourceManifests = Get-ChildItem "$(Pipeline.Workspace)/winget-manifests/winget-pkgs-submission/manifests/r/Rnwood/smtp4dev/$packageVersion" -Filter "*.yaml"
+                foreach ($manifest in $sourceManifests) {
+                  Copy-Item $manifest.FullName $targetDir
+                  Write-Host "  Copied: $($manifest.Name)" -ForegroundColor Gray
+                }
+                
+                # Commit changes
+                Write-Host "💾 Committing changes..." -ForegroundColor Yellow
+                git add .
+                git commit -m "Add Rnwood.smtp4dev $packageVersion"
+                
+                # Display status
+                Write-Host ""
+                Write-Host "✅ Local preparation completed!" -ForegroundColor Green
+                Write-Host ""
+                Write-Host "📋 Summary:" -ForegroundColor Cyan
+                Write-Host "  - Package: Rnwood.smtp4dev $packageVersion" -ForegroundColor Gray
+                Write-Host "  - Branch: $branchName" -ForegroundColor Gray
+                Write-Host "  - Manifest Path: $manifestPath" -ForegroundColor Gray
+                Write-Host ""
+                Write-Host "🔄 Next Steps (Manual):" -ForegroundColor Yellow
+                Write-Host "  1. Ensure the fork exists at: $forkRepoUrl" -ForegroundColor Gray
+                Write-Host "  2. Push the branch to the fork" -ForegroundColor Gray
+                Write-Host "  3. Create PR from the fork to microsoft/winget-pkgs" -ForegroundColor Gray
+                Write-Host ""
+                Write-Host "🤖 For full automation, configure GitHub token with fork and PR permissions" -ForegroundColor Magenta
+                Write-Host "==================================================" -ForegroundColor Green
+            env:
+              POWERSHELL_TELEMETRY_OPTOUT: 1
 
       - job: DockerReleaseTagLinux
         displayName: Docker Release Tag - Linux
