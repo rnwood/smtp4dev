@@ -32,9 +32,9 @@ rules:
     - never
     - '.'
 
-  # Subject should be lowercase (except for proper nouns)
+  # Subject should be lowercase (but allow sentence case for better readability)
   subject-case:
-    - 2
+    - 0
     - always
     - 'lower-case'
 

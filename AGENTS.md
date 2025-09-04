@@ -203,6 +203,11 @@ test: add unit tests for email parsing
 - Keep scopes lowercase and concise
 - Scope is optional but recommended for larger changes
 
+#### Enforcement
+- **Conventional commit format is enforced by GitHub Actions on all PRs**
+- PRs with non-conventional commits will fail validation and cannot be merged
+- Use `git commit --amend` or `git rebase -i` to fix commit messages if needed
+
 ### Making Changes
 1. **Always build and test first** to establish a baseline
 2. Make minimal, focused changes

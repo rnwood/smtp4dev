@@ -68,6 +68,20 @@ ci: add conventional commit validation
 
 All commit messages are automatically validated when you create a pull request. If your commits don't follow the conventional format, the validation will fail and you'll need to update your commit messages.
 
+**The conventional commit validation is enforced by GitHub Actions and must pass before PRs can be merged.**
+
+#### Fixing Non-Conventional Commits
+
+If you have commits that don't follow the conventional format, you can fix them using:
+
+```bash
+# For the last commit
+git commit --amend -m "feat: your corrected commit message"
+
+# For multiple commits (interactive rebase)
+git rebase -i HEAD~n  # where n is the number of commits to edit
+```
+
 ## Development Setup
 
 Please refer to the [developer documentation](./AGENTS.md) for detailed setup instructions.
