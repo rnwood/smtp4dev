@@ -43,10 +43,10 @@ param(
     [string]$Arm64ArtifactPath,
     
     [Parameter(Mandatory = $true)]
-    [bool]$IsReleaseBuild,
+    [string]$IsReleaseBuild,
     
     [Parameter(Mandatory = $true)]
-    [bool]$IsCiBuild,
+    [string]$IsCiBuild,
     
     [Parameter(Mandatory = $true)]
     [string]$X64Url,
@@ -57,9 +57,9 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Boolean parameters are already the correct type
-$IsReleaseBuildBool = $IsReleaseBuild
-$IsCiBuildBool = $IsCiBuild
+# Convert string parameters to boolean
+$IsReleaseBuildBool = [System.Convert]::ToBoolean($IsReleaseBuild)
+$IsCiBuildBool = [System.Convert]::ToBoolean($IsCiBuild)
 
 Write-Host "Generating winget manifest for smtp4dev version: $Version" -ForegroundColor Green
 Write-Host "Build type: Release=$IsReleaseBuildBool, CI=$IsCiBuildBool" -ForegroundColor Yellow
