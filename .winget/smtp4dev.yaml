@@ -54,13 +54,13 @@ ManifestVersion: 1.4.0
 Installers:
 - Architecture: x64
   InstallerType: portable
-  InstallerUrl: https://github.com/rnwood/smtp4dev/releases/download/PLACEHOLDER_VERSION/Rnwood.Smtp4dev-win-x64-PLACEHOLDER_VERSION.zip
+  InstallerUrl: PLACEHOLDER_X64_URL
   InstallerSha256: PLACEHOLDER_SHA256_X64
   Commands:
   - smtp4dev
 - Architecture: arm64  
   InstallerType: portable
-  InstallerUrl: https://github.com/rnwood/smtp4dev/releases/download/PLACEHOLDER_VERSION/Rnwood.Smtp4dev-win-arm64-PLACEHOLDER_VERSION.zip
+  InstallerUrl: PLACEHOLDER_ARM64_URL
   InstallerSha256: PLACEHOLDER_SHA256_ARM64
   Commands:
   - smtp4dev

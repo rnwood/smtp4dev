@@ -32,6 +32,11 @@ variables:
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
     tag: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
 
+  # Default values for build type flags when not explicitly set (e.g., PR builds)
+  ${{ if and(ne(variables['Build.SourceBranch'], 'refs/heads/master'), not(startsWith(variables['Build.SourceBranch'], 'refs/tags/'))) }}:
+    iscibuild: ${{ false }}
+    isreleasebuild: ${{ false }}
+
   docker_repo: "rnwood/smtp4dev"
   docker_registry: "dockerhub-rnwood"
   netcoresdk_version: "8.0.201"
@@ -668,9 +673,28 @@ stages:
             inputs:
               targetType: 'filePath'
               filePath: '.winget/generate-manifest.ps1'
-              arguments: '-Version "$(tag)" -OutputDir "$(Build.ArtifactStagingDirectory)/winget" -X64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-x64/Rnwood.Smtp4dev-win-x64-$(tag).zip" -Arm64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-arm64/Rnwood.Smtp4dev-win-arm64-$(tag).zip" -BuildId "$(Build.BuildId)" -OrganizationUri "$(System.TeamFoundationCollectionUri)" -ProjectName "$(System.TeamProject)"'
+              arguments: >-
+                -Version "$(tag)" 
+                -OutputDir "$(Build.ArtifactStagingDirectory)/winget" 
+                -X64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-x64/Rnwood.Smtp4dev-win-x64-$(tag).zip" 
+                -Arm64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-arm64/Rnwood.Smtp4dev-win-arm64-$(tag).zip" 
+                -IsReleaseBuild $$([bool]::Parse("$(isreleasebuild)"))
+                -IsCiBuild $$([bool]::Parse("$(iscibuild)"))
+                -X64Url "$(X64_INSTALLER_URL)"
+                -Arm64Url "$(ARM64_INSTALLER_URL)"
             env:
               POWERSHELL_TELEMETRY_OPTOUT: 1
+        variables:
+          # Build URLs based on build type
+          ${{ if eq(variables['isreleasebuild'], true) }}:
+            X64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip"
+            ARM64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip"
+          ${{ if eq(variables['iscibuild'], true) }}:
+            X64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip"
+            ARM64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip"
+          ${{ if and(ne(variables['isreleasebuild'], true), ne(variables['iscibuild'], true)) }}:
+            X64_INSTALLER_URL: "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_apis/build/builds/$(Build.BuildId)/artifacts?artifactName=win-x64&api-version=6.0&%24format=zip"
+            ARM64_INSTALLER_URL: "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_apis/build/builds/$(Build.BuildId)/artifacts?artifactName=win-arm64&api-version=6.0&%24format=zip"
           - task: PublishPipelineArtifact@1
             displayName: Publish Winget Manifest
             inputs:

@@ -4,9 +4,8 @@
 .SYNOPSIS
     Generates winget manifest files for smtp4dev releases
 .DESCRIPTION
-    This script generates winget package manifest files for smtp4dev by downloading
-    release information from GitHub and computing SHA256 hashes for the Windows binaries.
-    Can also use local artifact files from Azure Pipeline builds.
+    This script generates winget package manifest files for smtp4dev by computing
+    SHA256 hashes for the Windows binaries from local artifact files.
 .PARAMETER Version
     The version/tag of the release to generate manifests for
 .PARAMETER OutputDir
@@ -14,15 +13,17 @@
 .PARAMETER TemplateFile
     Path to the template manifest file (default: .winget/smtp4dev.yaml)
 .PARAMETER X64ArtifactPath
-    Path to the local x64 Windows artifact file (if available from pipeline)
+    Path to the local x64 Windows artifact file (required)
 .PARAMETER Arm64ArtifactPath
-    Path to the local ARM64 Windows artifact file (if available from pipeline)
-.PARAMETER BuildId
-    Azure DevOps Build ID (used for constructing artifact URLs for non-release builds)
-.PARAMETER OrganizationUri
-    Azure DevOps Organization URI (used for constructing artifact URLs for non-release builds)
-.PARAMETER ProjectName
-    Azure DevOps Project Name (used for constructing artifact URLs for non-release builds)
+    Path to the local ARM64 Windows artifact file (required)
+.PARAMETER IsReleaseBuild
+    Whether this is a release build (true/false)
+.PARAMETER IsCiBuild
+    Whether this is a CI build (true/false)
+.PARAMETER X64Url
+    The complete URL for the x64 installer (GitHub release or Azure DevOps artifact URL)
+.PARAMETER Arm64Url
+    The complete URL for the ARM64 installer (GitHub release or Azure DevOps artifact URL)
 #>
 
 param(
@@ -35,28 +36,29 @@ param(
     [Parameter(Mandatory = $false)]
     [string]$TemplateFile = ".winget/smtp4dev.yaml",
     
-    [Parameter(Mandatory = $false)]
-    [switch]$SkipHashValidation,
-    
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $true)]
     [string]$X64ArtifactPath,
     
-    [Parameter(Mandatory = $false)]
+    [Parameter(Mandatory = $true)]
     [string]$Arm64ArtifactPath,
     
-    [Parameter(Mandatory = $false)]
-    [string]$BuildId,
+    [Parameter(Mandatory = $true)]
+    [bool]$IsReleaseBuild,
     
-    [Parameter(Mandatory = $false)]
-    [string]$OrganizationUri,
+    [Parameter(Mandatory = $true)]
+    [bool]$IsCiBuild,
     
-    [Parameter(Mandatory = $false)]
-    [string]$ProjectName
+    [Parameter(Mandatory = $true)]
+    [string]$X64Url,
+    
+    [Parameter(Mandatory = $true)]
+    [string]$Arm64Url
 )
 
 $ErrorActionPreference = "Stop"
 
 Write-Host "Generating winget manifest for smtp4dev version: $Version" -ForegroundColor Green
+Write-Host "Build type: Release=$IsReleaseBuild, CI=$IsCiBuild" -ForegroundColor Yellow
 
 # Ensure output directory exists
 if (!(Test-Path $OutputDir)) {
@@ -64,63 +66,23 @@ if (!(Test-Path $OutputDir)) {
     New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
 }
 
-# Determine build type and URL strategy
-$isCiBuild = $Version -match "-ci"
-$isReleaseBuild = $Version -notmatch "-ci" -and ($BuildId -eq $null -or $BuildId -eq "")
-
-# For manifest URLs, always use GitHub release URLs regardless of build type
-# The artifacts will be published to GitHub releases for all builds
-$baseUrl = "https://github.com/rnwood/smtp4dev/releases/download"
-$x64Url = "$baseUrl/$Version/Rnwood.Smtp4dev-win-x64-$Version.zip"
-$arm64Url = "$baseUrl/$Version/Rnwood.Smtp4dev-win-arm64-$Version.zip"
-
-# Check if local artifacts are provided
-$useLocalArtifacts = ($X64ArtifactPath -and (Test-Path $X64ArtifactPath)) -and ($Arm64ArtifactPath -and (Test-Path $Arm64ArtifactPath))
-
-if ($useLocalArtifacts) {
-    Write-Host "Using local artifacts from pipeline build" -ForegroundColor Green
-    Write-Host "  x64 artifact: $X64ArtifactPath"
-    Write-Host "  arm64 artifact: $Arm64ArtifactPath"
-} else {
-    # For builds without local artifacts, determine hash computation strategy
-    if ($isCiBuild) {
-        Write-Host "Detected CI build version: $Version" -ForegroundColor Yellow
-        Write-Host "No local artifacts provided - using placeholders (artifacts will be published to GitHub releases)" -ForegroundColor Yellow
-    } elseif ($isReleaseBuild) {
-        Write-Host "Detected release build version: $Version" -ForegroundColor Yellow
-        Write-Host "No local artifacts provided - attempting to download from GitHub releases..." -ForegroundColor Yellow
-    } else {
-        Write-Host "Detected PR/branch build version: $Version" -ForegroundColor Yellow
-        Write-Host "No local artifacts provided - using placeholders (artifacts will be published to GitHub releases)" -ForegroundColor Yellow
-    }
+# Validate required artifacts exist
+if (!(Test-Path $X64ArtifactPath)) {
+    Write-Error "x64 artifact file not found: $X64ArtifactPath"
+    exit 1
 }
 
-# Function to get SHA256 hash from URL
-function Get-UrlSha256 {
-    param([string]$Url)
-    
-    Write-Host "  Downloading: $Url"
-    
-    try {
-        $tempFile = [System.IO.Path]::GetTempFileName()
-        
-        # Download file
-        $webClient = New-Object System.Net.WebClient
-        $webClient.DownloadFile($Url, $tempFile)
-        
-        # Compute hash
-        $hash = Get-FileHash -Path $tempFile -Algorithm SHA256
-        
-        # Cleanup
-        Remove-Item $tempFile -Force
-        
-        return $hash.Hash
-    }
-    catch {
-        Write-Error "Failed to download or hash file from $Url : $_"
-        throw
-    }
+if (!(Test-Path $Arm64ArtifactPath)) {
+    Write-Error "ARM64 artifact file not found: $Arm64ArtifactPath"
+    exit 1
 }
+
+Write-Host "Using artifacts:" -ForegroundColor Green
+Write-Host "  x64 artifact: $X64ArtifactPath"
+Write-Host "  arm64 artifact: $Arm64ArtifactPath"
+Write-Host "Installer URLs:" -ForegroundColor Green
+Write-Host "  x64 URL: $X64Url"
+Write-Host "  arm64 URL: $Arm64Url"
 
 # Function to get SHA256 hash from local file
 function Get-FileSha256 {
@@ -145,36 +107,14 @@ function Get-FileSha256 {
     }
 }
 
-# Get SHA256 hashes
-if ($useLocalArtifacts) {
-    Write-Host "Computing SHA256 hashes from local artifacts..." -ForegroundColor Yellow
-    $x64Hash = Get-FileSha256 -FilePath $X64ArtifactPath
-    $arm64Hash = Get-FileSha256 -FilePath $Arm64ArtifactPath
-    
-    Write-Host "SHA256 Hashes computed from local artifacts:" -ForegroundColor Green
-    Write-Host "  x64:   $x64Hash"
-    Write-Host "  arm64: $arm64Hash"
-} elseif ($isReleaseBuild -and !$SkipHashValidation) {
-    # Only try to download for actual release builds where artifacts are already published
-    Write-Host "Computing SHA256 hashes from GitHub releases..." -ForegroundColor Yellow
-    $x64Hash = Get-UrlSha256 -Url $x64Url
-    $arm64Hash = Get-UrlSha256 -Url $arm64Url
-    
-    Write-Host "SHA256 Hashes computed from GitHub release:" -ForegroundColor Green
-    Write-Host "  x64:   $x64Hash"
-    Write-Host "  arm64: $arm64Hash"
-} else {
-    # Use placeholders for CI builds, PR builds, and when SkipHashValidation is set
-    if ($isCiBuild) {
-        Write-Host "Using placeholder hashes for CI build" -ForegroundColor Yellow
-    } elseif (!$isReleaseBuild) {
-        Write-Host "Using placeholder hashes for PR/branch build" -ForegroundColor Yellow
-    } else {
-        Write-Host "Skipping hash validation as requested" -ForegroundColor Yellow
-    }
-    $x64Hash = "PLACEHOLDER_SHA256_X64_BUILD"
-    $arm64Hash = "PLACEHOLDER_SHA256_ARM64_BUILD"
-}
+# Compute SHA256 hashes from local artifacts
+Write-Host "Computing SHA256 hashes from local artifacts..." -ForegroundColor Yellow
+$x64Hash = Get-FileSha256 -FilePath $X64ArtifactPath
+$arm64Hash = Get-FileSha256 -FilePath $Arm64ArtifactPath
+
+Write-Host "SHA256 Hashes computed:" -ForegroundColor Green
+Write-Host "  x64:   $x64Hash"
+Write-Host "  arm64: $arm64Hash"
 
 # Read template
 if (!(Test-Path $TemplateFile)) {
@@ -184,11 +124,13 @@ if (!(Test-Path $TemplateFile)) {
 
 $templateContent = Get-Content $TemplateFile -Raw
 
-# Replace placeholders
+# Replace placeholders in template
 $manifestContent = $templateContent `
     -replace "PLACEHOLDER_VERSION", $Version `
     -replace "PLACEHOLDER_SHA256_X64", $x64Hash `
-    -replace "PLACEHOLDER_SHA256_ARM64", $arm64Hash
+    -replace "PLACEHOLDER_SHA256_ARM64", $arm64Hash `
+    -replace "PLACEHOLDER_X64_URL", $X64Url `
+    -replace "PLACEHOLDER_ARM64_URL", $Arm64Url
 
 # Write manifest file
 $outputFile = Join-Path $OutputDir "smtp4dev-$Version.yaml"
