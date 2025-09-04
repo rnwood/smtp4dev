@@ -22,6 +22,10 @@ Welcome to the smtp4dev documentation! This documentation will help you get star
 
 - [API](API.md) - REST API documentation for automated testing and integration
 
+## Developer Documentation
+
+- [Developer Docs](dev/README.md) - Documentation for developers working on smtp4dev itself (CI/CD pipelines, development workflows)
+
 ## Additional Resources
 
 - [GitHub Repository](https://github.com/rnwood/smtp4dev)
