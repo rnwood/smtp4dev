@@ -1,6 +1,5 @@
 ﻿using LumiSoft.Net;
 using LumiSoft.Net.IMAP.Server;
-using LumiSoft.Net.Mime;
 using LumiSoft.Net.MIME;
 using Microsoft.Extensions.Options;
 using Rnwood.Smtp4dev.DbModel;

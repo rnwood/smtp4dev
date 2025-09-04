@@ -38,18 +38,11 @@ namespace LumiSoft.Net
             }
             
             string[] scheme_value = value.Split(new char[]{':'},2);
-            if(scheme_value[0].ToLower() == UriSchemes.sip || scheme_value[0].ToLower() == UriSchemes.sips){
-                SIP_Uri uri = new SIP_Uri();
-                uri.ParseInternal(value);
+            // Removed SIP URI support since SIP protocol was removed
+            AbsoluteUri uri = new AbsoluteUri();
+            uri.ParseInternal(value);
 
-                return uri;
-            }
-            else{
-                AbsoluteUri uri = new AbsoluteUri();
-                uri.ParseInternal(value);
-
-                return uri;
-            }
+            return uri;
         }
 
         #endregion

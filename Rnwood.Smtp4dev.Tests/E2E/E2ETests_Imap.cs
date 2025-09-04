@@ -1,5 +1,4 @@
-﻿using LumiSoft.Net.Mime;
-using MailKit;
+﻿using MailKit;
 using MailKit.Net.Imap;
 using MailKit.Net.Smtp;
 using MailKit.Search;
