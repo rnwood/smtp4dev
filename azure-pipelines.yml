@@ -61,6 +61,7 @@ stages:
         pool:
           vmImage: $(vmImage)
         strategy:
+          failFast: true
           matrix:
             noruntime:
               platformName: noruntime
@@ -274,6 +275,8 @@ stages:
             
       - job: BuildGlobalTool
         displayName: Build - .NET Global Tool
+        dependsOn: BuildMatrix
+        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "windows-2022"
         steps:
@@ -293,6 +296,8 @@ stages:
 
       - job: BuildDesktop
         displayName: Build - Desktop
+        dependsOn: BuildMatrix
+        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "windows-2022"
         steps:
@@ -342,6 +347,8 @@ stages:
           #   artifact: linux-x64-desktop
       - job: DockerBuildLinux
         displayName: DockerBuild - Linux
+        dependsOn: BuildMatrix
+        condition: succeededOrFailed('BuildMatrix')
         pool:
           vmImage: "ubuntu-22.04"
         steps:
@@ -395,6 +402,8 @@ stages:
                 linux-amd64-$(tag)
       - job: DockerBuildLinuxArm64
         displayName: DockerBuild - Linux - ARM64
+        dependsOn: BuildMatrix
+        condition: succeededOrFailed('BuildMatrix')
         pool:
           vmImage: "ubuntu-22.04"
         steps:
@@ -433,6 +442,8 @@ stages:
                 linux-arm64-$(tag)
       - job: DockerBuildWindows
         displayName: DockerBuild - Windows LTSC 2019
+        dependsOn: BuildMatrix
+        condition: succeededOrFailed('BuildMatrix')
         pool:
           vmImage: "windows-2022"
         steps:
