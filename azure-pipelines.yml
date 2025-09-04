@@ -38,6 +38,7 @@ variables:
   
   # GitHub API token for PR notifications - should be configured as secret variable
   # GITHUB_TOKEN: $(GITHUB_API_TOKEN)
+  # Build includes NuGet and npm package caching for improved performance
 
 stages:
   - stage: Init
