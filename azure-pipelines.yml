@@ -887,6 +887,50 @@ stages:
               packagesToPush: "$(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg"
               nuGetFeedType: "external"
               publishFeedCredentials: "nuget_rnwood"
+      
+      - job: GenerateWingetManifest
+        displayName: Generate Winget Package Manifest
+        condition: variables['isreleasebuild']
+        pool:
+          vmImage: "windows-2022"
+        steps:
+          - checkout: self
+            fetchDepth: 1
+          - task: PowerShell@2
+            displayName: Generate Winget Manifest
+            inputs:
+              targetType: 'filePath'
+              filePath: '.winget/generate-manifest.ps1'
+              arguments: '-Version "$(tag)" -OutputDir "$(Build.ArtifactStagingDirectory)/winget"'
+            env:
+              POWERSHELL_TELEMETRY_OPTOUT: 1
+          - task: PublishPipelineArtifact@1
+            displayName: Publish Winget Manifest
+            inputs:
+              targetPath: '$(Build.ArtifactStagingDirectory)/winget'
+              artifact: 'winget-manifests'
+              publishLocation: 'pipeline'
+          - task: PowerShell@2
+            displayName: Display Winget Instructions
+            inputs:
+              targetType: 'inline'
+              script: |
+                Write-Host "================================================" -ForegroundColor Green
+                Write-Host "Winget Package Manifest Generated Successfully!" -ForegroundColor Green
+                Write-Host "================================================" -ForegroundColor Green
+                Write-Host ""
+                Write-Host "📦 Package: smtp4dev $(tag)" -ForegroundColor Cyan
+                Write-Host "📁 Artifacts: Available in 'winget-manifests' artifact" -ForegroundColor Cyan
+                Write-Host ""
+                Write-Host "To publish to Windows Package Manager:" -ForegroundColor Yellow
+                Write-Host "1. Download the 'winget-manifests' artifact from this build"
+                Write-Host "2. Extract the winget-pkgs-submission folder"
+                Write-Host "3. Fork https://github.com/microsoft/winget-pkgs"
+                Write-Host "4. Copy the manifest files to the appropriate location in your fork"
+                Write-Host "5. Create a pull request to the winget-pkgs repository"
+                Write-Host ""
+                Write-Host "📖 Documentation: https://docs.microsoft.com/en-us/windows/package-manager/package/"
+                Write-Host "================================================" -ForegroundColor Green
 
           - task: GitHubRelease@1
             inputs:
