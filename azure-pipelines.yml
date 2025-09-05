@@ -425,8 +425,6 @@ stages:
           #   artifact: linux-x64-desktop
       - job: DockerBuildLinux
         displayName: DockerBuild - Linux
-        dependsOn: BuildMatrix
-        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "ubuntu-22.04"
         steps:
@@ -490,7 +488,7 @@ stages:
           #       --imapport=110
           - task: Docker@2
             displayName: Push image
-            condition: or(variables['isreleasebuild'], variables['iscibuild'])
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -499,8 +497,6 @@ stages:
                 linux-amd64-$(tag)
       - job: DockerBuildLinuxArm64
         displayName: DockerBuild - Linux - ARM64
-        dependsOn: BuildMatrix
-        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "ubuntu-22.04"
         steps:
@@ -549,7 +545,7 @@ stages:
               arguments: "--platform linux/arm64 --build-arg version=$(tag) -t $(docker_repo):linux-arm64-$(tag)"
           - task: Docker@2
             displayName: Push image
-            condition: or(variables['isreleasebuild'], variables['iscibuild'])
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -558,8 +554,6 @@ stages:
                 linux-arm64-$(tag)
       - job: DockerBuildWindows
         displayName: DockerBuild - Windows LTSC 2019
-        dependsOn: BuildMatrix
-        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "windows-2022"
         steps:
@@ -610,7 +604,7 @@ stages:
               arguments: "--build-arg version=$(tag) -t $(docker_repo):windows-ltsc2022-amd64-$(tag)"
           - task: Docker@2
             displayName: Push image
-            condition: or(variables['isreleasebuild'], variables['iscibuild'])
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -620,7 +614,7 @@ stages:
                 windows-ltsc2022-amd64-$(tag)
       - job: DockerManifest
         displayName: Docker Create Manifest
-        condition: or(variables['isreleasebuild'], variables['iscibuild'])
+        condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true))
         dependsOn:
           - DockerBuildLinux
           - DockerBuildLinuxArm64
@@ -935,7 +929,7 @@ stages:
                 }
 
   - stage: Release
-    condition: and(succeeded(), or(variables['isreleasebuild'], variables['iscibuild']))
+    condition: and(succeeded(), or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true)))
     displayName: Release
     jobs:
       - job: Release
@@ -955,7 +949,7 @@ stages:
       
       - job: WingetSubmission
         displayName: Prepare Winget Submission
-        condition: and(succeeded(), variables['isreleasebuild'])
+        condition: and(succeeded(), eq(variables['isreleasebuild'], true))
         pool:
           vmImage: "windows-2022"
         steps:
