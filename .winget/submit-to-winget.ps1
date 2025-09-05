@@ -6,20 +6,17 @@
 .DESCRIPTION
     This script automates the complete process of submitting smtp4dev to the Windows Package Manager repository.
     It handles forking, cloning, updating the fork, creating branches, committing manifests, and creating pull requests.
+    Uses GitHub CLI (gh) which must be already authenticated.
 .PARAMETER Version
     The version of smtp4dev to submit (used for branch name and commit message)
 .PARAMETER ManifestDir
     Directory containing the winget manifest files to submit (default: current directory)
-.PARAMETER GitHubToken
-    GitHub personal access token with repo and workflow permissions (required for forking and PR creation)
-.PARAMETER ForkOwner
-    GitHub username/organization that will own the fork (default: current authenticated user)
 .PARAMETER DryRun
     If specified, performs all steps except pushing to GitHub and creating the PR
 .EXAMPLE
-    .\submit-to-winget.ps1 -Version "3.8.7" -GitHubToken $env:GITHUB_TOKEN
+    .\submit-to-winget.ps1 -Version "3.8.7"
 .EXAMPLE
-    .\submit-to-winget.ps1 -Version "3.8.7" -ManifestDir ".\manifests" -GitHubToken $env:GITHUB_TOKEN -DryRun
+    .\submit-to-winget.ps1 -Version "3.8.7" -ManifestDir ".\manifests" -DryRun
 #>
 
 param(
@@ -28,12 +25,6 @@ param(
     
     [Parameter(Mandatory = $false)]
     [string]$ManifestDir = ".",
-    
-    [Parameter(Mandatory = $true)]
-    [string]$GitHubToken,
-    
-    [Parameter(Mandatory = $false)]
-    [string]$ForkOwner = "",
     
     [Parameter(Mandatory = $false)]
     [switch]$DryRun
@@ -44,6 +35,7 @@ $ErrorActionPreference = "Stop"
 # Constants
 $WINGET_REPO = "microsoft/winget-pkgs"
 $WINGET_REPO_URL = "https://github.com/microsoft/winget-pkgs.git"
+$FORK_OWNER = "rnwood"
 $PACKAGE_PATH = "manifests/r/Rnwood/smtp4dev"
 $BRANCH_NAME = "smtp4dev-$Version"
 
@@ -52,66 +44,35 @@ Write-Host "=========================================" -ForegroundColor Green
 Write-Host "Version: $Version" -ForegroundColor Cyan
 Write-Host "Manifest Directory: $ManifestDir" -ForegroundColor Cyan
 Write-Host "Branch Name: $BRANCH_NAME" -ForegroundColor Cyan
+Write-Host "Fork Owner: $FORK_OWNER" -ForegroundColor Cyan
 if ($DryRun) {
     Write-Host "DRY RUN MODE - No changes will be pushed to GitHub" -ForegroundColor Yellow
 }
 Write-Host ""
 
-# Function to make GitHub API calls
-function Invoke-GitHubApi {
-    param(
-        [string]$Uri,
-        [string]$Method = "GET",
-        [object]$Body = $null
-    )
-    
-    $headers = @{
-        'Authorization' = "token $GitHubToken"
-        'Accept' = 'application/vnd.github.v3+json'
-        'User-Agent' = 'smtp4dev-winget-automation'
+# Verify GitHub CLI is available and authenticated
+Write-Host "🔍 Verifying GitHub CLI..." -ForegroundColor Yellow
+try {
+    $authStatus = gh auth status 2>&1
+    if ($LASTEXITCODE -ne 0) {
+        Write-Error "GitHub CLI is not authenticated. Please run 'gh auth login' first."
+        exit 1
     }
-    
-    $params = @{
-        Uri = $Uri
-        Method = $Method
-        Headers = $headers
-    }
-    
-    if ($Body) {
-        $params.Body = ($Body | ConvertTo-Json -Depth 10)
-        $params.ContentType = 'application/json'
-    }
-    
-    try {
-        return Invoke-RestMethod @params
-    }
-    catch {
-        Write-Error "GitHub API call failed: $($_.Exception.Message)"
-        throw
-    }
+    Write-Host "✅ GitHub CLI is authenticated" -ForegroundColor Green
 }
-
-# Get current authenticated user
-Write-Host "🔍 Getting GitHub user information..." -ForegroundColor Yellow
-$currentUser = Invoke-GitHubApi -Uri "https://api.github.com/user"
-$authenticatedUser = $currentUser.login
-
-if (-not $ForkOwner) {
-    $ForkOwner = $authenticatedUser
+catch {
+    Write-Error "GitHub CLI (gh) is not available. Please install it first."
+    exit 1
 }
-
-Write-Host "✅ Authenticated as: $authenticatedUser" -ForegroundColor Green
-Write-Host "📍 Fork will be created under: $ForkOwner" -ForegroundColor Cyan
 
 # Check if fork already exists
 Write-Host "🔍 Checking if fork exists..." -ForegroundColor Yellow
-$forkUrl = "https://api.github.com/repos/$ForkOwner/winget-pkgs"
 $forkExists = $false
 
 try {
-    $forkRepo = Invoke-GitHubApi -Uri $forkUrl
+    gh repo view "$FORK_OWNER/winget-pkgs" --json url | Out-Null
     $forkExists = $true
-    Write-Host "✅ Fork exists: $($forkRepo.html_url)" -ForegroundColor Green
+    Write-Host "✅ Fork exists: https://github.com/$FORK_OWNER/winget-pkgs" -ForegroundColor Green
 }
 catch {
     Write-Host "ℹ️ Fork does not exist, will create it" -ForegroundColor Yellow
@@ -121,13 +82,9 @@ catch {
 if (-not $forkExists -and -not $DryRun) {
     Write-Host "🍴 Creating fork of $WINGET_REPO..." -ForegroundColor Yellow
     
-    $forkBody = @{
-        owner = $ForkOwner
-    }
-    
     try {
-        $forkRepo = Invoke-GitHubApi -Uri "https://api.github.com/repos/$WINGET_REPO/forks" -Method "POST" -Body $forkBody
-        Write-Host "✅ Fork created: $($forkRepo.html_url)" -ForegroundColor Green
+        gh repo fork $WINGET_REPO --org $FORK_OWNER --clone=false
+        Write-Host "✅ Fork created: https://github.com/$FORK_OWNER/winget-pkgs" -ForegroundColor Green
         
         # Wait a moment for fork to be ready
         Write-Host "⏳ Waiting for fork to be ready..." -ForegroundColor Yellow
@@ -139,7 +96,7 @@ if (-not $forkExists -and -not $DryRun) {
     }
 }
 elseif (-not $forkExists -and $DryRun) {
-    Write-Host "🔸 DRY RUN: Would create fork of $WINGET_REPO under $ForkOwner" -ForegroundColor Yellow
+    Write-Host "🔸 DRY RUN: Would create fork of $WINGET_REPO under $FORK_OWNER" -ForegroundColor Yellow
 }
 
 # Configure Git
@@ -149,7 +106,7 @@ git config --global user.name "smtp4dev-automation"
 
 # Clone the fork (or original repo for dry run)
 $workDir = "winget-pkgs-work-$([System.Guid]::NewGuid().ToString('N')[0..7] -join '')"
-$cloneUrl = if ($DryRun) { $WINGET_REPO_URL } else { "https://github.com/$ForkOwner/winget-pkgs.git" }
+$cloneUrl = if ($DryRun) { $WINGET_REPO_URL } else { "https://github.com/$FORK_OWNER/winget-pkgs.git" }
 
 Write-Host "📥 Cloning repository..." -ForegroundColor Yellow
 Write-Host "  Clone URL: $cloneUrl" -ForegroundColor Gray
@@ -254,18 +211,11 @@ smtp4dev is a dummy SMTP email server for development and testing. It provides S
 For more information: https://github.com/rnwood/smtp4dev
 "@
         
-        $prBody_obj = @{
-            title = $prTitle
-            body = $prBody
-            head = "$ForkOwner`:$BRANCH_NAME"
-            base = "main"
-        }
-        
         try {
-            $pr = Invoke-GitHubApi -Uri "https://api.github.com/repos/$WINGET_REPO/pulls" -Method "POST" -Body $prBody_obj
+            # Create PR using GitHub CLI
+            $prUrl = gh pr create --title $prTitle --body $prBody --head "$FORK_OWNER`:$BRANCH_NAME" --base "main" --repo $WINGET_REPO
             Write-Host "✅ Pull request created successfully!" -ForegroundColor Green
-            Write-Host "🔗 PR URL: $($pr.html_url)" -ForegroundColor Cyan
-            Write-Host "📋 PR Number: #$($pr.number)" -ForegroundColor Cyan
+            Write-Host "🔗 PR URL: $prUrl" -ForegroundColor Cyan
         }
         catch {
             Write-Error "Failed to create pull request: $_"

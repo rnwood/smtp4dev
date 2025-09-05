@@ -17,15 +17,16 @@ The Azure Pipelines automatically generates winget manifests for every build and
 
 1. Download the `winget-manifests` artifact from the Azure DevOps build
 2. Extract the contents to a local directory
-3. Run the submission script:
+3. Ensure GitHub CLI is authenticated: `gh auth login`
+4. Run the submission script:
 
 ```powershell
-.\submit-to-winget.ps1 -Version "3.8.7" -GitHubToken $env:GITHUB_TOKEN
+.\submit-to-winget.ps1 -Version "3.8.7"
 ```
 
 ### Prerequisites
 
-- **GitHub Personal Access Token** with `repo` and `workflow` permissions
+- **GitHub CLI (gh)** installed and authenticated (`gh auth login`)
 - **PowerShell 7+** or Windows PowerShell 5.1+
 - **Git** installed and accessible from PATH
 
@@ -33,37 +34,40 @@ The Azure Pipelines automatically generates winget manifests for every build and
 
 The `submit-to-winget.ps1` script fully automates the submission process:
 
-1. **Fork Management**: Creates a fork of `microsoft/winget-pkgs` if it doesn't exist
-2. **Repository Setup**: Clones the fork and syncs with upstream
-3. **Branch Creation**: Creates a version-specific branch for the submission
-4. **Manifest Deployment**: Copies manifest files to the correct winget-pkgs directory structure
-5. **Commit & Push**: Commits changes and pushes the branch to the fork
-6. **Pull Request**: Creates a pull request with proper title and description
+1. **Authentication Check**: Verifies GitHub CLI is authenticated
+2. **Fork Management**: Creates a fork of `microsoft/winget-pkgs` under `rnwood` organization if it doesn't exist
+3. **Repository Setup**: Clones the fork and syncs with upstream
+4. **Branch Creation**: Creates a version-specific branch for the submission
+5. **Manifest Deployment**: Copies manifest files to the correct winget-pkgs directory structure
+6. **Commit & Push**: Commits changes and pushes the branch to the fork
+7. **Pull Request**: Creates a pull request using GitHub CLI with proper title and description
 
 ### Testing Before Submission
 
 You can test the script without making actual changes:
 
 ```powershell
-.\submit-to-winget.ps1 -Version "3.8.7" -GitHubToken $env:GITHUB_TOKEN -DryRun
+.\submit-to-winget.ps1 -Version "3.8.7" -DryRun
 ```
 
-### GitHub Token Setup
+### GitHub CLI Setup
 
-Create a GitHub Personal Access Token with these permissions:
-- `repo` - For forking and creating pull requests
-- `workflow` - For automated GitHub Actions if needed
+Install and authenticate with GitHub CLI:
+```bash
+# Install GitHub CLI (if not already installed)
+# On Windows: winget install GitHub.cli
+# On macOS: brew install gh
+# On Linux: see https://github.com/cli/cli#installation
 
-Set the token as an environment variable:
-```powershell
-$env:GITHUB_TOKEN = "your_token_here"
+# Authenticate with GitHub
+gh auth login
 ```
 
 ## Build Artifact Contents
 
 The `winget-manifests` artifact contains:
 - **Generated manifest files** with real SHA256 hashes computed from build artifacts
-- **submit-to-winget.ps1** - The submission automation script
+- **submit-to-winget.ps1** - The submission automation script using GitHub CLI
 - **Directory structure** ready for winget-pkgs submission
 
 ## Manual Process (Alternative)
@@ -71,7 +75,7 @@ The `winget-manifests` artifact contains:
 If you prefer manual submission:
 
 1. Download the `winget-manifests` artifact
-2. Fork `microsoft/winget-pkgs` on GitHub
+2. Fork `microsoft/winget-pkgs` on GitHub (to `rnwood` organization)
 3. Clone your fork locally
 4. Copy manifest files to `manifests/r/Rnwood/smtp4dev/{version}/`
 5. Commit and push to a new branch
