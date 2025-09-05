@@ -10,8 +10,12 @@
     The version/tag of the release to generate manifests for
 .PARAMETER OutputDir
     Directory to write the generated manifest files (default: .winget/generated)
-.PARAMETER TemplateFile
-    Path to the template manifest file (default: .winget/smtp4dev.yaml)
+.PARAMETER InstallerTemplateFile
+    Path to the installer template manifest file (default: .winget/smtp4dev.installer.yaml)
+.PARAMETER LocaleTemplateFile
+    Path to the locale template manifest file (default: .winget/smtp4dev.locale.en-US.yaml)
+.PARAMETER VersionTemplateFile
+    Path to the version template manifest file (default: .winget/smtp4dev.version.yaml)
 .PARAMETER X64ArtifactPath
     Path to the local x64 Windows artifact file (required)
 .PARAMETER Arm64ArtifactPath
@@ -34,7 +38,13 @@ param(
     [string]$OutputDir = ".winget/generated",
     
     [Parameter(Mandatory = $false)]
-    [string]$TemplateFile = ".winget/smtp4dev.yaml",
+    [string]$InstallerTemplateFile = ".winget/smtp4dev.installer.yaml",
+    
+    [Parameter(Mandatory = $false)]
+    [string]$LocaleTemplateFile = ".winget/smtp4dev.locale.en-US.yaml",
+    
+    [Parameter(Mandatory = $false)]
+    [string]$VersionTemplateFile = ".winget/smtp4dev.version.yaml",
     
     [Parameter(Mandatory = $true)]
     [string]$X64ArtifactPath,
@@ -88,36 +98,7 @@ Write-Host "Installer URLs:" -ForegroundColor Green
 Write-Host "  x64 URL: $X64Url"
 Write-Host "  arm64 URL: $Arm64Url"
 
-# Function to upload file to filebin.net and get download URL
-function Upload-ToFilebin {
-    param([string]$FilePath, [string]$FileName)
-    
-    Write-Host "  Uploading $FileName to filebin.net..."
-    
-    try {
-        # Generate a random bin name
-        $binName = [System.Guid]::NewGuid().ToString("N").Substring(0, 8)
-        
-        # Upload file to filebin.net using the correct API format /{bin}/{filename}
-        $uri = "https://filebin.net/$binName/$FileName"
-        $fileContent = [System.IO.File]::ReadAllBytes($FilePath)
-        
-        $response = Invoke-RestMethod -Uri $uri -Method Post -Body $fileContent -ContentType "application/octet-stream"
-        
-        if ($response) {
-            $downloadUrl = "https://filebin.net/$binName/$FileName"
-            Write-Host "    Uploaded successfully: $downloadUrl" -ForegroundColor Green
-            return $downloadUrl
-        } else {
-            Write-Error "Failed to upload to filebin.net - no response received"
-            throw
-        }
-    }
-    catch {
-        Write-Error "Failed to upload file $FilePath to filebin.net: $_"
-        throw
-    }
-}
+
 
 # Function to get SHA256 hash from local file
 function Get-FileSha256 {
@@ -151,55 +132,62 @@ Write-Host "SHA256 Hashes computed:" -ForegroundColor Green
 Write-Host "  x64:   $x64Hash"
 Write-Host "  arm64: $arm64Hash"
 
-# For non-CI and non-release builds, upload to filebin.net to work around AzDO double zipping
+# Always use the provided URLs (GitHub release URLs regardless of build type)
 $finalX64Url = $X64Url
 $finalArm64Url = $Arm64Url
 
-if (-not $IsReleaseBuildBool -and -not $IsCiBuildBool) {
-    Write-Host "Non-CI and non-release build detected. Uploading to filebin.net to avoid AzDO double zipping..." -ForegroundColor Yellow
-    
-    try {
-        # Extract filenames for filebin
-        $x64FileName = Split-Path $X64ArtifactPath -Leaf
-        $arm64FileName = Split-Path $Arm64ArtifactPath -Leaf
-        
-        # Upload files and get download URLs
-        $finalX64Url = Upload-ToFilebin -FilePath $X64ArtifactPath -FileName $x64FileName
-        $finalArm64Url = Upload-ToFilebin -FilePath $Arm64ArtifactPath -FileName $arm64FileName
-        
-        Write-Host "Updated URLs from filebin.net:" -ForegroundColor Green
-        Write-Host "  x64 URL: $finalX64Url"
-        Write-Host "  arm64 URL: $finalArm64Url"
-    }
-    catch {
-        Write-Warning "Failed to upload to filebin.net. Falling back to original URLs: $_"
-        Write-Host "Using original URLs:" -ForegroundColor Yellow
-        Write-Host "  x64 URL: $finalX64Url"
-        Write-Host "  arm64 URL: $finalArm64Url"
-    }
-}
-
-# Read template
-if (!(Test-Path $TemplateFile)) {
-    Write-Error "Template file not found: $TemplateFile"
+# Read templates
+if (!(Test-Path $InstallerTemplateFile)) {
+    Write-Error "Installer template file not found: $InstallerTemplateFile"
     exit 1
 }
 
-$templateContent = Get-Content $TemplateFile -Raw
+if (!(Test-Path $LocaleTemplateFile)) {
+    Write-Error "Locale template file not found: $LocaleTemplateFile"
+    exit 1
+}
 
-# Replace placeholders in template
-$manifestContent = $templateContent `
+if (!(Test-Path $VersionTemplateFile)) {
+    Write-Error "Version template file not found: $VersionTemplateFile"
+    exit 1
+}
+
+$installerTemplate = Get-Content $InstallerTemplateFile -Raw
+$localeTemplate = Get-Content $LocaleTemplateFile -Raw
+$versionTemplate = Get-Content $VersionTemplateFile -Raw
+
+# Replace placeholders in templates
+$installerContent = $installerTemplate `
     -replace "PLACEHOLDER_VERSION", $Version `
     -replace "PLACEHOLDER_SHA256_X64", $x64Hash `
     -replace "PLACEHOLDER_SHA256_ARM64", $arm64Hash `
     -replace "PLACEHOLDER_X64_URL", $finalX64Url `
     -replace "PLACEHOLDER_ARM64_URL", $finalArm64Url
 
-# Write manifest file
-$outputFile = Join-Path $OutputDir "smtp4dev-$Version.yaml"
-$manifestContent | Set-Content $outputFile -Encoding UTF8
+$localeContent = $localeTemplate `
+    -replace "PLACEHOLDER_VERSION", $Version
 
-Write-Host "Generated winget manifest: $outputFile" -ForegroundColor Green
+$versionContent = $versionTemplate `
+    -replace "PLACEHOLDER_VERSION", $Version
+
+# Create output directory
+if (!(Test-Path $OutputDir)) {
+    New-Item -ItemType Directory -Path $OutputDir -Force | Out-Null
+}
+
+# Write manifest files
+$installerFile = Join-Path $OutputDir "Rnwood.smtp4dev.installer.yaml"
+$localeFile = Join-Path $OutputDir "Rnwood.smtp4dev.locale.en-US.yaml"
+$versionFile = Join-Path $OutputDir "Rnwood.smtp4dev.yaml"
+
+$installerContent | Set-Content $installerFile -Encoding UTF8
+$localeContent | Set-Content $localeFile -Encoding UTF8
+$versionContent | Set-Content $versionFile -Encoding UTF8
+
+Write-Host "Generated winget manifests:" -ForegroundColor Green
+Write-Host "  Installer: $installerFile"
+Write-Host "  Locale: $localeFile"
+Write-Host "  Version: $versionFile"
 
 # Create directory structure for winget-pkgs submission
 $wingetPkgsDir = Join-Path $OutputDir "winget-pkgs-submission"
@@ -209,8 +197,10 @@ if (!(Test-Path $packageDir)) {
     New-Item -ItemType Directory -Path $packageDir -Force | Out-Null
 }
 
-# Copy manifest to winget-pkgs structure
-Copy-Item $outputFile (Join-Path $packageDir "Rnwood.smtp4dev.yaml")
+# Copy manifests to winget-pkgs structure
+Copy-Item $installerFile (Join-Path $packageDir "Rnwood.smtp4dev.installer.yaml")
+Copy-Item $localeFile (Join-Path $packageDir "Rnwood.smtp4dev.locale.en-US.yaml")
+Copy-Item $versionFile (Join-Path $packageDir "Rnwood.smtp4dev.yaml")
 
 Write-Host "Created winget-pkgs submission structure at: $wingetPkgsDir" -ForegroundColor Green
 Write-Host "To submit to winget-pkgs repository:" -ForegroundColor Cyan

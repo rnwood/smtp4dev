@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.singleton.1.4.0.schema.json
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.7.0.schema.json
 
 PackageIdentifier: Rnwood.smtp4dev
 PackageVersion: PLACEHOLDER_VERSION
@@ -49,18 +49,5 @@ Documentations:
   DocumentUrl: https://github.com/rnwood/smtp4dev/blob/master/docs/Installation.md
 - DocumentLabel: Getting Started
   DocumentUrl: https://github.com/rnwood/smtp4dev/blob/master/docs/Getting-Started.md
-ManifestType: singleton
-ManifestVersion: 1.4.0
-Installers:
-- Architecture: x64
-  InstallerType: portable
-  InstallerUrl: PLACEHOLDER_X64_URL
-  InstallerSha256: PLACEHOLDER_SHA256_X64
-  Commands:
-  - smtp4dev
-- Architecture: arm64  
-  InstallerType: portable
-  InstallerUrl: PLACEHOLDER_ARM64_URL
-  InstallerSha256: PLACEHOLDER_SHA256_ARM64
-  Commands:
-  - smtp4dev
+ManifestType: defaultLocale
+ManifestVersion: 1.7.0
