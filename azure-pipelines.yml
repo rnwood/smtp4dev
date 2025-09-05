@@ -684,6 +684,14 @@ stages:
                 -Arm64Url "$(ARM64_INSTALLER_URL)"
             env:
               POWERSHELL_TELEMETRY_OPTOUT: 1
+          - task: PowerShell@2
+            displayName: Copy submission script to artifacts
+            inputs:
+              targetType: 'inline'
+              script: |
+                # Copy the submission script to the artifact directory
+                Copy-Item '.winget/submit-to-winget.ps1' '$(Build.ArtifactStagingDirectory)/winget/submit-to-winget.ps1'
+                Write-Host "Copied submission script to artifact directory"
           - task: PublishPipelineArtifact@1
             displayName: Publish Winget Manifest
             inputs:
@@ -996,14 +1004,13 @@ stages:
               assets: $(Build.ArtifactStagingDirectory)/**/*.zip
 
       - job: WingetSubmission
-        displayName: Submit to Windows Package Manager
+        displayName: Prepare Winget Submission
         condition: variables['isreleasebuild']
         dependsOn: GitHubRelease
         pool:
           vmImage: "windows-2022"
         steps:
-          - checkout: self
-            fetchDepth: 1
+          - checkout: none
           - task: DownloadPipelineArtifact@2
             displayName: Download Winget Manifests
             inputs:
@@ -1011,92 +1018,32 @@ stages:
               artifactName: 'winget-manifests'
               targetPath: '$(Pipeline.Workspace)/winget-manifests'
           - task: PowerShell@2
-            displayName: Automate Winget Package Submission
+            displayName: Prepare Winget Submission
             inputs:
               targetType: 'inline'
               script: |
-                $ErrorActionPreference = "Stop"
-                
-                Write-Host "==================================================" -ForegroundColor Green
-                Write-Host "Automating Windows Package Manager Submission" -ForegroundColor Green
-                Write-Host "==================================================" -ForegroundColor Green
-                
-                # Set up variables
-                $packageVersion = "$(tag)"
-                $wingetRepoUrl = "https://github.com/microsoft/winget-pkgs.git"
-                $forkRepoUrl = "https://github.com/rnwood/winget-pkgs.git"
-                $branchName = "smtp4dev-$packageVersion"
-                $manifestPath = "manifests/r/Rnwood/smtp4dev/$packageVersion"
-                
-                Write-Host "📦 Package Version: $packageVersion" -ForegroundColor Cyan
-                Write-Host "🌿 Branch Name: $branchName" -ForegroundColor Cyan
-                
-                # Configure Git
-                git config --global user.email "noreply@github.com"
-                git config --global user.name "Azure Pipeline (smtp4dev)"
-                
-                try {
-                  # Try to clone existing fork first
-                  Write-Host "🔍 Checking for existing fork..." -ForegroundColor Yellow
-                  git clone $forkRepoUrl winget-pkgs-fork
-                  cd winget-pkgs-fork
-                  
-                  # Add upstream remote and fetch latest
-                  git remote add upstream $wingetRepoUrl
-                  git fetch upstream
-                  git checkout main
-                  git merge upstream/main
-                  git push origin main
-                  
-                  Write-Host "✅ Using existing fork and updated with upstream" -ForegroundColor Green
-                } catch {
-                  Write-Host "ℹ️ Fork doesn't exist or failed to clone, will need manual forking" -ForegroundColor Yellow
-                  
-                  # Clone the original repo instead
-                  git clone $wingetRepoUrl winget-pkgs-fork
-                  cd winget-pkgs-fork
-                }
-                
-                # Create new branch
-                Write-Host "🌿 Creating branch: $branchName" -ForegroundColor Yellow
-                git checkout -b $branchName
-                
-                # Create directory structure
-                Write-Host "📁 Creating directory structure..." -ForegroundColor Yellow
-                $targetDir = Join-Path (Get-Location) $manifestPath
-                New-Item -ItemType Directory -Path $targetDir -Force | Out-Null
-                
-                # Copy manifest files
-                Write-Host "📄 Copying manifest files..." -ForegroundColor Yellow
-                $sourceManifests = Get-ChildItem "$(Pipeline.Workspace)/winget-manifests/winget-pkgs-submission/manifests/r/Rnwood/smtp4dev/$packageVersion" -Filter "*.yaml"
-                foreach ($manifest in $sourceManifests) {
-                  Copy-Item $manifest.FullName $targetDir
-                  Write-Host "  Copied: $($manifest.Name)" -ForegroundColor Gray
-                }
-                
-                # Commit changes
-                Write-Host "💾 Committing changes..." -ForegroundColor Yellow
-                git add .
-                git commit -m "Add Rnwood.smtp4dev $packageVersion"
-                
-                # Display status
+                Write-Host "🎯 Winget Submission Preparation Complete!" -ForegroundColor Green
+                Write-Host "==========================================" -ForegroundColor Green
                 Write-Host ""
-                Write-Host "✅ Local preparation completed!" -ForegroundColor Green
+                Write-Host "📦 Package Version: $(tag)" -ForegroundColor Cyan
+                Write-Host "📁 Manifest files ready in build artifacts" -ForegroundColor Green
                 Write-Host ""
-                Write-Host "📋 Summary:" -ForegroundColor Cyan
-                Write-Host "  - Package: Rnwood.smtp4dev $packageVersion" -ForegroundColor Gray
-                Write-Host "  - Branch: $branchName" -ForegroundColor Gray
-                Write-Host "  - Manifest Path: $manifestPath" -ForegroundColor Gray
+                Write-Host "🔧 To submit to Windows Package Manager:" -ForegroundColor Yellow
+                Write-Host "  1. Download the 'winget-manifests' artifact from this build" -ForegroundColor Gray
+                Write-Host "  2. Run the included submit-to-winget.ps1 script:" -ForegroundColor Gray
+                Write-Host "     .\submit-to-winget.ps1 -Version '$(tag)' -GitHubToken `$env:GITHUB_TOKEN" -ForegroundColor Cyan
                 Write-Host ""
-                Write-Host "🔄 Next Steps (Manual):" -ForegroundColor Yellow
-                Write-Host "  1. Ensure the fork exists at: $forkRepoUrl" -ForegroundColor Gray
-                Write-Host "  2. Push the branch to the fork" -ForegroundColor Gray
-                Write-Host "  3. Create PR from the fork to microsoft/winget-pkgs" -ForegroundColor Gray
+                Write-Host "🔑 Requirements:" -ForegroundColor Yellow
+                Write-Host "  - GitHub Personal Access Token with 'repo' and 'workflow' permissions" -ForegroundColor Gray
+                Write-Host "  - PowerShell 7+ or Windows PowerShell 5.1+" -ForegroundColor Gray
+                Write-Host "  - Git installed and accessible from PATH" -ForegroundColor Gray
                 Write-Host ""
-                Write-Host "🤖 For full automation, configure GitHub token with fork and PR permissions" -ForegroundColor Magenta
-                Write-Host "==================================================" -ForegroundColor Green
-            env:
-              POWERSHELL_TELEMETRY_OPTOUT: 1
+                Write-Host "✨ The script will automatically:" -ForegroundColor Green
+                Write-Host "  - Fork microsoft/winget-pkgs (if needed)" -ForegroundColor Gray
+                Write-Host "  - Create and push the submission branch" -ForegroundColor Gray
+                Write-Host "  - Create the pull request with proper description" -ForegroundColor Gray
+                Write-Host ""
+                Write-Host "==========================================" -ForegroundColor Green
 
       - job: DockerReleaseTagLinux
         displayName: Docker Release Tag - Linux
