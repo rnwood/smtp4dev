@@ -22,12 +22,14 @@ resources:
 variables:
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
     iscibuild: ${{ true }}
-    isreleasebuild: ${{ false }}
+  ${{ else }}:
+    iscibuild: ${{ false }}
 
   ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
-    iscibuild: ${{ false }}
     isreleasebuild: ${{ true }}
     tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
+  ${{ else }}:
+    isreleasebuild: ${{ false }}
 
   ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
     tag: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
