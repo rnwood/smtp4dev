@@ -22,21 +22,24 @@ resources:
 variables:
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
     iscibuild: ${{ true }}
-    tag: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
-  ${{ else }}:
-    iscibuild: ${{ false }}
-
-  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
-    isreleasebuild: ${{ true }}
-    tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
-  ${{ else }}:
     isreleasebuild: ${{ false }}
-
-  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+    isprbuild: ${{ false }}
+    tag: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
+  ${{ elseif startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
+    isreleasebuild: ${{ true }}
+    iscibuild: ${{ false }}
+    isprbuild: ${{ false }}
+    tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
+  ${{ elseif eq(variables['Build.Reason'], 'PullRequest') }}:
     isprbuild: ${{ true }}
+    iscibuild: ${{ false }}
+    isreleasebuild: ${{ false }}
     tag: $[ format('{0}{1:yyyyMMdd}{2}+pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), variables['System.PullRequest.PullRequestNumber']) ]
   ${{ else }}:
     isprbuild: ${{ false }}
+    isreleasebuild: ${{ false }}
+    iscirebuild: ${{ false }}
+    tag: $[ format('{0}{1:yyyyMMdd}{2}+{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(variables['Build.SourceBranch'], 'refs/heads/', '')) ] 
 
     
   docker_repo: "rnwood/smtp4dev"
