@@ -946,13 +946,7 @@ stages:
           - task: DownloadPipelineArtifact@2
             inputs:
               path: $(Build.ArtifactStagingDirectory)
-          - task: NuGetCommand@2
-            inputs:
-              command: "push"
-              packagesToPush: "$(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg"
-              nuGetFeedType: "external"
-              publishFeedCredentials: "nuget_rnwood"
-
+              
           - task: GitHubRelease@1
             inputs:
               gitHubConnection: github.com_rnwood
