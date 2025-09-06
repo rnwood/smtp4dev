@@ -42,8 +42,8 @@ variables:
     isprbuild: ${{ false }}
     isreleasebuild: ${{ false }}
     iscibuild: ${{ false }}
-    tag: $[ format('{0}{1:yyyyMMdd}{2}_{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '_')) ] 
-    version: $[ format('{0}{1:yyyyMMdd}{2}+{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '_')) ] 
+    tag: $[ format('{0}{1:yyyyMMdd}{2}_{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '-')) ] 
+    version: $[ format('{0}{1:yyyyMMdd}{2}+{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '-')) ] 
 
     
   docker_repo: "rnwood/smtp4dev"
