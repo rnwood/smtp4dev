@@ -1017,7 +1017,7 @@ stages:
                 if ([bool]::Parse("$(isreleasebuild)")) {
                     $version = [version] "$(version)"
                     $dockertags = "latest v$($version.Major) v$($version.Major).$($version.Minor)"
-                } else if ([bool]::Parse("$(iscibuild)")) {
+                } elseif ([bool]::Parse("$(iscibuild)")) {
                     $dockertags = "prerelease"
                 } else {
                     $dockertags = ""
