@@ -32,12 +32,12 @@ variables:
     isprbuild: ${{ false }}
     tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
     version: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
-  ${{ elseif startsWith(variables['Build.SourceBranch'], 'refs/heads/pull/') }}:
+  ${{ elseif startsWith(variables['Build.SourceBranch'], 'refs/pull/') }}:
     isprbuild: ${{ true }}
     iscibuild: ${{ false }}
     isreleasebuild: ${{ false }}
-    tag: $[ format('{0}{1:yyyyMMdd}{2}_pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(variables['Build.SourceBranch'], 'refs/heads/pull/', '')) ]
-    version: $[ format('{0}{1:yyyyMMdd}{2}+pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(variables['Build.SourceBranch'], 'refs/heads/pull/', '')) ]
+    tag: $[ format('{0}{1:yyyyMMdd}{2}_pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(variables['Build.SourceBranch'], 'refs/pull/', '')) ]
+    version: $[ format('{0}{1:yyyyMMdd}{2}+pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(variables['Build.SourceBranch'], 'refs/pull/', '')) ]
   ${{ else }}:
     isprbuild: ${{ false }}
     isreleasebuild: ${{ false }}
