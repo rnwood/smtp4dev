@@ -53,12 +53,6 @@ param(
     [string]$Arm64ArtifactPath,
     
     [Parameter(Mandatory = $true)]
-    [string]$IsReleaseBuild,
-    
-    [Parameter(Mandatory = $true)]
-    [string]$IsCiBuild,
-    
-    [Parameter(Mandatory = $true)]
     [string]$X64Url,
     
     [Parameter(Mandatory = $true)]
@@ -67,12 +61,7 @@ param(
 
 $ErrorActionPreference = "Stop"
 
-# Convert string parameters to boolean
-$IsReleaseBuildBool = [System.Convert]::ToBoolean($IsReleaseBuild)
-$IsCiBuildBool = [System.Convert]::ToBoolean($IsCiBuild)
-
 Write-Host "Generating winget manifest for smtp4dev version: $Version" -ForegroundColor Green
-Write-Host "Build type: Release=$IsReleaseBuildBool, CI=$IsCiBuildBool" -ForegroundColor Yellow
 
 # Ensure output directory exists
 if (!(Test-Path $OutputDir)) {
@@ -188,24 +177,5 @@ Write-Host "Generated winget manifests:" -ForegroundColor Green
 Write-Host "  Installer: $installerFile"
 Write-Host "  Locale: $localeFile"
 Write-Host "  Version: $versionFile"
-
-# Create directory structure for winget-pkgs submission
-$wingetPkgsDir = Join-Path $OutputDir "winget-pkgs-submission"
-$packageDir = Join-Path $wingetPkgsDir "manifests/r/Rnwood/smtp4dev/$Version"
-
-if (!(Test-Path $packageDir)) {
-    New-Item -ItemType Directory -Path $packageDir -Force | Out-Null
-}
-
-# Copy manifests to winget-pkgs structure
-Copy-Item $installerFile (Join-Path $packageDir "Rnwood.smtp4dev.installer.yaml")
-Copy-Item $localeFile (Join-Path $packageDir "Rnwood.smtp4dev.locale.en-US.yaml")
-Copy-Item $versionFile (Join-Path $packageDir "Rnwood.smtp4dev.yaml")
-
-Write-Host "Created winget-pkgs submission structure at: $wingetPkgsDir" -ForegroundColor Green
-Write-Host "To submit to winget-pkgs repository:" -ForegroundColor Cyan
-Write-Host "  1. Fork https://github.com/microsoft/winget-pkgs"
-Write-Host "  2. Copy the contents of $packageDir to manifests/r/Rnwood/smtp4dev/$Version"
-Write-Host "  3. Create a pull request"
 
 Write-Host "Winget manifest generation completed successfully!" -ForegroundColor Green

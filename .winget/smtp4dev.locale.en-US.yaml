@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.7.0.schema.json
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.10.0.schema.json
 
 PackageIdentifier: Rnwood.smtp4dev
 PackageVersion: PLACEHOLDER_VERSION
@@ -11,7 +11,7 @@ PackageName: smtp4dev
 PackageUrl: https://github.com/rnwood/smtp4dev
 License: BSD-3-Clause
 LicenseUrl: https://github.com/rnwood/smtp4dev/blob/master/LICENSE.md
-Copyright: Copyright © Robert N Wood 2009-2016
+Copyright: Copyright © Robert N Wood 2009-2025
 CopyrightUrl: https://github.com/rnwood/smtp4dev/blob/master/LICENSE.md
 ShortDescription: A dummy SMTP email server for Windows, Linux, Mac OS-X (and maybe elsewhere where .NET Core is available). Lets you test your application without spamming your real customers.
 Description: |-
@@ -50,4 +50,4 @@ Documentations:
 - DocumentLabel: Getting Started
   DocumentUrl: https://github.com/rnwood/smtp4dev/blob/master/docs/Getting-Started.md
 ManifestType: defaultLocale
-ManifestVersion: 1.7.0
+ManifestVersion: 1.10.0

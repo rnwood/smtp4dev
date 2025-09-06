@@ -11,7 +11,7 @@ jobs:
     steps:
       - uses: dev-drprasad/delete-older-releases@v0.3.4
         with:
-          keep_latest: 10
+          keep_latest: 20
           delete_tag_pattern: -ci
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

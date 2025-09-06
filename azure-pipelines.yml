@@ -22,6 +22,7 @@ resources:
 variables:
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
     iscibuild: ${{ true }}
+    tag: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
   ${{ else }}:
     iscibuild: ${{ false }}
 
@@ -31,9 +32,13 @@ variables:
   ${{ else }}:
     isreleasebuild: ${{ false }}
 
-  ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
-    tag: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
+  ${{ if eq(variables['Build.Reason'], 'PullRequest') }}:
+    isprbuild: ${{ true }}
+    tag: $[ format('{0}{1:yyyyMMdd}{2}+pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), variables['System.PullRequest.PullRequestNumber']) ]
+  ${{ else }}:
+    isprbuild: ${{ false }}
 
+    
   docker_repo: "rnwood/smtp4dev"
   docker_registry: "dockerhub-rnwood"
   netcoresdk_version: "8.0.201"
@@ -51,10 +56,10 @@ stages:
           vmImage: "ubuntu-22.04"
         steps:
           - checkout: none
-          - powershell: Write-Host "$(tag) $(Build.BuildNumber)"
-            displayName: Display build number
+          - powershell: Write-Host "Tag=$(tag) BuildNumber=$(Build.BuildNumber) IsReleaseBuild=$(isreleasebuild) IsCIBuild=$(iscibuild) isprbuild=$(isprbuild)"
+            displayName: Display build details
           - powershell: Write-Host "##vso[build.updatebuildnumber]$(tag) $(Build.BuildNumber)"
-            displayName: Update build number
+            displayName: Update build details
   - stage: Build
     displayName: Build
     condition: succeeded()
@@ -488,7 +493,7 @@ stages:
           #       --imapport=110
           - task: Docker@2
             displayName: Push image
-            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true))
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -545,7 +550,7 @@ stages:
               arguments: "--platform linux/arm64 --build-arg version=$(tag) -t $(docker_repo):linux-arm64-$(tag)"
           - task: Docker@2
             displayName: Push image
-            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true))
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -604,7 +609,7 @@ stages:
               arguments: "--build-arg version=$(tag) -t $(docker_repo):windows-ltsc2022-amd64-$(tag)"
           - task: Docker@2
             displayName: Push image
-            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true))
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -614,7 +619,7 @@ stages:
                 windows-ltsc2022-amd64-$(tag)
       - job: DockerManifest
         displayName: Docker Create Manifest
-        condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true))
+        condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
         dependsOn:
           - DockerBuildLinux
           - DockerBuildLinuxArm64
@@ -669,8 +674,6 @@ stages:
                 -OutputDir "$(Build.ArtifactStagingDirectory)/winget" 
                 -X64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-x64/Rnwood.Smtp4dev-win-x64-$(tag).zip" 
                 -Arm64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-arm64/Rnwood.Smtp4dev-win-arm64-$(tag).zip" 
-                -IsReleaseBuild "$(isreleasebuild)"
-                -IsCiBuild "$(iscibuild)"
                 -X64Url "$(X64_INSTALLER_URL)"
                 -Arm64Url "$(ARM64_INSTALLER_URL)"
             env:
@@ -690,17 +693,9 @@ stages:
               artifact: 'winget-manifests'
               publishLocation: 'pipeline'
         variables:
-          # Build URLs based on build type
-          ${{ if eq(variables['isreleasebuild'], true) }}:
-            X64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip"
-            ARM64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip"
-          ${{ if eq(variables['iscibuild'], true) }}:
-            X64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip"
-            ARM64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip"
-          ${{ if and(ne(variables['isreleasebuild'], true), ne(variables['iscibuild'], true)) }}:
-            X64_INSTALLER_URL: "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_apis/build/builds/$(Build.BuildId)/artifacts?artifactName=win-x64&api-version=6.0&%24format=zip"
-            ARM64_INSTALLER_URL: "$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_apis/build/builds/$(Build.BuildId)/artifacts?artifactName=win-arm64&api-version=6.0&%24format=zip"
-
+          X64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip"
+          ARM64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip"
+         
   - stage: ReportCoverage
     displayName: Report Coverage to GitHub
     condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
@@ -929,7 +924,7 @@ stages:
                 }
 
   - stage: Release
-    condition: and(succeeded(), or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true)))
+    condition: and(succeeded(), or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true)))
     displayName: Release
     jobs:
       - job: Release
@@ -946,48 +941,6 @@ stages:
               packagesToPush: "$(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg"
               nuGetFeedType: "external"
               publishFeedCredentials: "nuget_rnwood"
-      
-      - job: WingetSubmission
-        displayName: Prepare Winget Submission
-        condition: and(succeeded(), eq(variables['isreleasebuild'], true))
-        pool:
-          vmImage: "windows-2022"
-        steps:
-          - checkout: none
-          - task: DownloadPipelineArtifact@2
-            displayName: Download Winget Manifests
-            inputs:
-              buildType: 'current'
-              artifactName: 'winget-manifests'
-              targetPath: '$(Pipeline.Workspace)/winget-manifests'
-          - task: PowerShell@2
-            displayName: Prepare Winget Submission
-            inputs:
-              targetType: 'inline'
-              script: |
-                Write-Host "🎯 Winget Submission Preparation Complete!" -ForegroundColor Green
-                Write-Host "==========================================" -ForegroundColor Green
-                Write-Host ""
-                Write-Host "📦 Package Version: $(tag)" -ForegroundColor Cyan
-                Write-Host "📁 Manifest files ready in build artifacts" -ForegroundColor Green
-                Write-Host ""
-                Write-Host "🔧 To submit to Windows Package Manager:" -ForegroundColor Yellow
-                Write-Host "  1. Download the 'winget-manifests' artifact from this build" -ForegroundColor Gray
-                Write-Host "  2. Run the included submit-to-winget.ps1 script:" -ForegroundColor Gray
-                Write-Host "     .\submit-to-winget.ps1 -Version '$(tag)' -GitHubToken `$env:GITHUB_TOKEN" -ForegroundColor Cyan
-                Write-Host ""
-                Write-Host "🔑 Requirements:" -ForegroundColor Yellow
-                Write-Host "  - GitHub Personal Access Token with 'repo' and 'workflow' permissions" -ForegroundColor Gray
-                Write-Host "  - PowerShell 7+ or Windows PowerShell 5.1+" -ForegroundColor Gray
-                Write-Host "  - Git installed and accessible from PATH" -ForegroundColor Gray
-                Write-Host ""
-                Write-Host "✨ The script will automatically:" -ForegroundColor Green
-                Write-Host "  - Fork microsoft/winget-pkgs (if needed)" -ForegroundColor Gray
-                Write-Host "  - Create and push the submission branch" -ForegroundColor Gray
-                Write-Host "  - Create the pull request with proper description" -ForegroundColor Gray
-                Write-Host ""
-                Write-Host "==========================================" -ForegroundColor Green
-
       - job: DockerReleaseTagLinux
         displayName: Docker Release Tag - Linux
         variables:
