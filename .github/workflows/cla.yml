@@ -26,7 +26,7 @@ jobs:
           path-to-signatures: 'signatures/version1/cla.json'
           path-to-document: 'https://github.com/rnwood/smtp4dev/blob/master/CLA.md'
           # branch should not be protected
-          branch: 'master'
+          branch: 'clas'
           allowlist: rnwood,dependabot[bot],copilot
           
           # Custom messages for better user experience
