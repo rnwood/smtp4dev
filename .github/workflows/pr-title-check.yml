@@ -1,0 +1,86 @@
+---
+name: "PR Title Check"
+
+'on':
+  pull_request:
+    types: [opened, edited, synchronize]
+
+# explicitly configure permissions
+permissions:
+  pull-requests: write
+  statuses: write
+
+jobs:
+  pr-title-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check PR title follows conventional commit format
+        uses: amannn/action-semantic-pull-request@v5.4.0
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          # Configure types that are allowed
+          types: |
+            feat
+            fix
+            docs
+            style
+            refactor
+            perf
+            test
+            build
+            ci
+            chore
+            revert
+          # Require a scope for certain types (optional)
+          requireScope: false
+          # Disallow specific scopes
+          disallowScopes: |
+            release
+          # Configure custom error messages
+          subjectPattern: ^(?![A-Z]).+$
+          subjectPatternError: |
+            The subject "{subject}" found in the pull request title
+            "{title}" didn't match the configured pattern. Please ensure
+            that the subject doesn't start with an uppercase character.
+        id: lint_pr_title
+
+      - name: Comment on PR if title validation fails
+        if: failure()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: pr-title-check
+          message: |
+            ## ❌ PR Title Validation Failed
+
+            Your pull request title doesn't follow the
+            [Conventional Commits](https://www.conventionalcommits.org/)
+            specification.
+
+            **Required format:** `type(optional-scope): description`
+
+            **Valid types:** `feat`, `fix`, `docs`, `style`, `refactor`,
+            `perf`, `test`, `build`, `ci`, `chore`, `revert`
+
+            **Examples:**
+            - `feat: add email template support`
+            - `fix(smtp): resolve connection timeout issue`
+            - `docs: update installation guide`
+            - `chore(deps): update dependencies`
+
+            **Your current title:** `${{ github.event.pull_request.title }}`
+
+            Please update your PR title to match the conventional commit
+            format. You can edit the title by clicking the "Edit" button
+            next to the title at the top of this PR.
+
+            For more details, see our
+            [Contributing Guidelines](https://github.com/rnwood/smtp4dev/blob/master/CONTRIBUTING.md).
+
+      - name: Remove comment if title validation passes
+        if: success()
+        uses: marocchino/sticky-pull-request-comment@v2
+        with:
+          header: pr-title-check
+          delete: true

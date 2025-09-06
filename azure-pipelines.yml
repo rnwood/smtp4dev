@@ -629,7 +629,8 @@ stages:
                 windows-ltsc2022-amd64-$(tag)
       - job: DockerManifest
         displayName: Docker Create Manifest
-        condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
+        condition: and(or(variables['isreleasebuild'], variables['iscibuild'], eq(variables['isprbuild'], true)), succeeded('DockerBuildLinux'), succeeded('DockerBuildLinuxArm64'), succeeded('DockerBuildWindows'))
+
         dependsOn:
           - DockerBuildLinux
           - DockerBuildLinuxArm64
