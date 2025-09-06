@@ -32,12 +32,12 @@ variables:
     isprbuild: ${{ false }}
     tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
     version: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
-  ${{ elseif ne(variables['System.PullRequest.PullRequestNumber'], '') }}:
+  ${{ elseif startsWith(variables['Build.SourceBranch'], 'refs/heads/pull/') }}:
     isprbuild: ${{ true }}
     iscibuild: ${{ false }}
     isreleasebuild: ${{ false }}
-    tag: $[ format('{0}{1:yyyyMMdd}{2}_pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), variables['System.PullRequest.PullRequestNumber']) ]
-    version: $[ format('{0}{1:yyyyMMdd}{2}+pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), , variables['System.PullRequest.PullRequestNumber']) ]
+    tag: $[ format('{0}{1:yyyyMMdd}{2}_pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(variables['Build.SourceBranch'], 'refs/heads/pull/', '')) ]
+    version: $[ format('{0}{1:yyyyMMdd}{2}+pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(variables['Build.SourceBranch'], 'refs/heads/pull/', '')) ]
   ${{ else }}:
     isprbuild: ${{ false }}
     isreleasebuild: ${{ false }}
@@ -629,7 +629,7 @@ stages:
                 windows-ltsc2022-amd64-$(tag)
       - job: DockerManifest
         displayName: Docker Create Manifest
-        condition: and(or(variables['isreleasebuild'], variables['iscibuild'], eq(variables['isprbuild'], true)), succeeded('DockerBuildLinux'), succeeded('DockerBuildLinuxArm64'), succeeded('DockerBuildWindows'))
+        condition: and(or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true)), succeeded('DockerBuildLinux'), succeeded('DockerBuildLinuxArm64'), succeeded('DockerBuildWindows'))
 
         dependsOn:
           - DockerBuildLinux
