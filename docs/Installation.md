@@ -1,9 +1,48 @@
 smtp4dev is available via the following distribution methods:
+- [Windows Package Manager (winget)](#how-to-install-smtp4dev-with-winget) - *recommended for Windows users* - install with `winget install smtp4dev`.
 - [Docker/OCI container images](#how-to-run-smtp4dev-in-docker) - Linux and Windows images available.
 - [.net SDK tool](#how-to-run-smtp4dev-as-a-dotnet-global-tool) - *recommended for Mac OS users* and available on any platform where .NET SDK is available.
 - [Download from Github releases](#downloading-from-github-releases) - binaries available for Windows and Linux, and platform independent download avalable for any platform where .NET runtime is available.
 
 See [Getting started](Getting-Started.md) for info on how to use it once you have installed and started smtp4dev.
+
+## How to install smtp4dev with winget
+
+**Windows Package Manager (winget)** is the easiest way to install smtp4dev on Windows 10/11.
+
+```
+winget install smtp4dev
+```
+
+Or use the full package identifier:
+
+```
+winget install RnwoodLtd.smtp4dev
+```
+
+After installation, you can start smtp4dev by running:
+
+```
+smtp4dev
+```
+
+To update smtp4dev to the latest version:
+
+```
+winget upgrade smtp4dev
+```
+
+To uninstall:
+
+```
+winget uninstall smtp4dev
+```
+
+**Note:** The winget package provides the portable console version of smtp4dev. For the desktop GUI version, download it from [GitHub releases](#downloading-from-github-releases).
+
+**System Requirements:**
+- Windows 10 1809 (build 17763) or newer
+- Windows Package Manager (winget) - usually pre-installed on Windows 11, available from Microsoft Store on Windows 10
 
 
 ## Downloading from github releases 
