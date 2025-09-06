@@ -56,7 +56,9 @@ stages:
           vmImage: "ubuntu-22.04"
         steps:
           - checkout: none
-          - powershell: Write-Host "Tag=$(tag) BuildNumber=$(Build.BuildNumber) IsReleaseBuild=$(isreleasebuild) IsCIBuild=$(iscibuild) isprbuild=$(isprbuild)"
+          - powershell: |
+              Write-Host "IsReleaseBuild=$(isreleasebuild) IsCIBuild=$(iscibuild) isprbuild=$(isprbuild)"
+              Write-Host "Tag=$(tag)"
             displayName: Display build details
           - powershell: Write-Host "##vso[build.updatebuildnumber]$(tag) $(Build.BuildNumber)"
             displayName: Update build details
