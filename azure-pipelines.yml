@@ -306,7 +306,7 @@ stages:
                   }
                 } else {
                   Write-Host "No coverage files found."
-                }
+                } 
           - task: PublishCodeCoverageResults@1
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Publish Code Coverage Results
