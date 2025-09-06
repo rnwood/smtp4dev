@@ -38,7 +38,7 @@ variables:
   ${{ else }}:
     isprbuild: ${{ false }}
     isreleasebuild: ${{ false }}
-    iscirebuild: ${{ false }}
+    iscibuild: ${{ false }}
     tag: $[ format('{0}{1:yyyyMMdd}{2}+{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(variables['Build.SourceBranch'], 'refs/heads/', '')) ] 
 
     
