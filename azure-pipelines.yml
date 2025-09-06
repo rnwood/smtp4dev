@@ -36,14 +36,14 @@ variables:
     isprbuild: ${{ true }}
     iscibuild: ${{ false }}
     isreleasebuild: ${{ false }}
-    tag: $[ format('{0}{1:yyyyMMdd}{2}+pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), variables['System.PullRequest.PullRequestNumber']) ]
-    version: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
+    tag: $[ format('{0}{1:yyyyMMdd}{2}_pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), variables['System.PullRequest.PullRequestNumber']) ]
+    version: $[ format('{0}{1:yyyyMMdd}{2}+pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), , variables['System.PullRequest.PullRequestNumber']) ]
   ${{ else }}:
     isprbuild: ${{ false }}
     isreleasebuild: ${{ false }}
     iscibuild: ${{ false }}
-    tag: $[ format('{0}{1:yyyyMMdd}{2}+{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '_')) ] 
-    version: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ] 
+    tag: $[ format('{0}{1:yyyyMMdd}{2}_{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '_')) ] 
+    version: $[ format('{0}{1:yyyyMMdd}{2}+{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '_')) ] 
 
     
   docker_repo: "rnwood/smtp4dev"
@@ -66,6 +66,7 @@ stages:
           - powershell: |
               Write-Host "IsReleaseBuild=$(isreleasebuild) IsCIBuild=$(iscibuild) isprbuild=$(isprbuild)"
               Write-Host "Tag=$(tag)"
+              Write-Host "Version=$(version)"
             displayName: Display build details
           - powershell: Write-Host "##vso[build.updatebuildnumber]$(tag) $(Build.BuildNumber)"
             displayName: Update build details
