@@ -32,7 +32,7 @@ variables:
     isprbuild: ${{ false }}
     tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
     version: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
-  ${{ elseif eq(variables['Build.Reason'], 'PullRequest') }}:
+  ${{ elseif ne(variables['System.PullRequest.PullRequestNumber'], '') }}:
     isprbuild: ${{ true }}
     iscibuild: ${{ false }}
     isreleasebuild: ${{ false }}
