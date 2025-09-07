@@ -41,7 +41,7 @@
         </el-alert>
 
         <div class="fill" style="display: flex; flex-direction: column;">
-            <iframe class="htmlview" :style="htmlFrameStyles" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
+            <iframe :class="htmlFrameClasses" :style="htmlFrameStyles" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
         </div>
     </div>
 </template>
@@ -79,6 +79,7 @@
         enableSanitization = true;
         sanitizedHtml: string | null = null;
         wasSanitized: boolean = false;
+        emailSupportsDarkMode: boolean = false;
 
         availableViewportSizes: ViewPortSize[] = [{ name: "Normal", fill: true }].concat(Object.values(deviceSizes).map(d => ({
             name: `${Brand[d.brand]} ${d.name} (${d.size}")`, fill: false, width: d.width / d.scale, height: d.height / d.scale
@@ -113,6 +114,13 @@
             };
         }
 
+        get htmlFrameClasses() {
+            return {
+                'htmlview': true,
+                'supports-dark-mode': this.emailSupportsDarkMode
+            };
+        }
+
 
         error: Error | null = null;
         loading = false;
@@ -136,6 +144,9 @@
             this.sanitizedHtml = "";
 
             if (this.html) {
+                // Check if email supports dark mode before sanitization
+                this.emailSupportsDarkMode = this.detectDarkModeSupport(this.html);
+
                 if (!this.enableSanitization) {
                     this.sanitizedHtml = this.html;
                 } else {
@@ -143,9 +154,61 @@
                     let normalizedOriginalHtml = sanitizeHtml(this.html, { allowedAttributes: false, allowedTags: false, allowVulnerableTags: true });
                     this.wasSanitized = normalizedOriginalHtml !== this.sanitizedHtml;
                 }
+            } else {
+                this.emailSupportsDarkMode = false;
             }
 
             srcDoc.set(this.$refs.htmlframe as HTMLIFrameElement, this.sanitizedHtml);
+        }
+
+        private detectDarkModeSupport(html: string): boolean {
+            try {
+                // Use DOMParser to safely parse HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Check for supported-color-schemes meta tag
+                const supportedColorSchemesMeta = doc.querySelector('meta[name="supported-color-schemes"]');
+                if (supportedColorSchemesMeta) {
+                    const content = supportedColorSchemesMeta.getAttribute('content') || '';
+                    if (content.toLowerCase().includes('dark')) {
+                        return true;
+                    }
+                }
+
+                // Check for color-scheme meta tag
+                const colorSchemeMeta = doc.querySelector('meta[name="color-scheme"]');
+                if (colorSchemeMeta) {
+                    const content = colorSchemeMeta.getAttribute('content') || '';
+                    if (content.toLowerCase().includes('dark')) {
+                        return true;
+                    }
+                }
+
+                // Check for CSS media queries that indicate dark mode support
+                const styleElements = doc.querySelectorAll('style');
+                for (const styleElement of styleElements) {
+                    const cssText = styleElement.textContent || '';
+                    if (cssText.match(/@media[^{]*\(prefers-color-scheme:\s*dark\)/i)) {
+                        return true;
+                    }
+                }
+
+                // Also check for dark mode media queries in linked stylesheets or inline styles
+                // Note: We can't access external stylesheets due to CORS, but we can check style attributes
+                const elementsWithStyle = doc.querySelectorAll('[style]');
+                for (const element of elementsWithStyle) {
+                    const styleAttr = element.getAttribute('style') || '';
+                    if (styleAttr.match(/@media[^{]*\(prefers-color-scheme:\s*dark\)/i)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            } catch (error) {
+                console.warn('Error parsing HTML for dark mode detection:', error);
+                return false;
+            }
         }
 
         async onHtmlFrameLoaded() {
