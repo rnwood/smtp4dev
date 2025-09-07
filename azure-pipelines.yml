@@ -653,60 +653,7 @@ stages:
               script: |
                 docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-ltsc2022-amd64-$(tag) $(docker_repo):windows-ltsc2019-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
                 docker manifest push $(docker_repo):$(tag)
-
-      - job: GenerateWingetManifest
-        displayName: Generate Winget Package Manifest
-        dependsOn: BuildMatrix
-        condition: succeeded('BuildMatrix')
-        pool:
-          vmImage: "windows-2022"
-        steps:
-          - checkout: self
-            fetchDepth: 1
-          - task: DownloadPipelineArtifact@2
-            displayName: Download win-x64 artifact
-            inputs:
-              buildType: 'current'
-              artifactName: 'win-x64'
-              targetPath: '$(Pipeline.Workspace)/artifacts/win-x64'
-          - task: DownloadPipelineArtifact@2
-            displayName: Download win-arm64 artifact
-            inputs:
-              buildType: 'current'
-              artifactName: 'win-arm64'
-              targetPath: '$(Pipeline.Workspace)/artifacts/win-arm64'
-          - task: PowerShell@2
-            displayName: Generate Winget Manifest
-            inputs:
-              targetType: 'filePath'
-              filePath: '.winget/generate-manifest.ps1'
-              arguments: >-
-                -Version "$(tag)" 
-                -OutputDir "$(Build.ArtifactStagingDirectory)/winget" 
-                -X64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-x64/Rnwood.Smtp4dev-win-x64-$(tag).zip" 
-                -Arm64ArtifactPath "$(Pipeline.Workspace)/artifacts/win-arm64/Rnwood.Smtp4dev-win-arm64-$(tag).zip" 
-                -X64Url "$(X64_INSTALLER_URL)"
-                -Arm64Url "$(ARM64_INSTALLER_URL)"
-            env:
-              POWERSHELL_TELEMETRY_OPTOUT: 1
-          - task: PowerShell@2
-            displayName: Copy submission script to artifacts
-            inputs:
-              targetType: 'inline'
-              script: |
-                # Copy the submission script to the artifact directory
-                Copy-Item '.winget/submit-to-winget.ps1' '$(Build.ArtifactStagingDirectory)/winget/submit-to-winget.ps1'
-                Write-Host "Copied submission script to artifact directory"
-          - task: PublishPipelineArtifact@1
-            displayName: Publish Winget Manifest
-            inputs:
-              targetPath: '$(Build.ArtifactStagingDirectory)/winget'
-              artifact: 'winget-manifests'
-              publishLocation: 'pipeline'
-        variables:
-          X64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip"
-          ARM64_INSTALLER_URL: "https://github.com/rnwood/smtp4dev/releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip"
-         
+   
   - stage: ReportCoverage
     displayName: Report Coverage to GitHub
     condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
