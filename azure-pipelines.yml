@@ -266,12 +266,20 @@ stages:
             env:
               SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
               SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev
+              PLAYWRIGHT_HTML_REPORT: $(Agent.TempDirectory)/playwright-report
             inputs:
               command: test
               projects: Rnwood.Smtp4dev.Tests
               configuration: release
               arguments: '--collect:"XPlat Code Coverage"'
               publishTestResults: true
+          - task: PublishPipelineArtifact@1
+            condition: and(always(), eq(variables['runTests'], true))
+            displayName: Publish Playwright HTML Report
+            inputs:
+              targetPath: '$(Agent.TempDirectory)/playwright-report'
+              artifact: 'PlaywrightReport_$(platformName)'
+              publishLocation: 'pipeline'
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install ReportGenerator Tool

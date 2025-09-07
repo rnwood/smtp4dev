@@ -37,6 +37,35 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 
         public MessageView MessageView => new MessageView(page);
 
+        public ILocator GetDarkModeToggleButton()
+        {
+            return page.Locator("button[icon='sunny'], button[icon='moon']");
+        }
+
+        public async Task ToggleDarkModeAsync()
+        {
+            var darkModeButton = GetDarkModeToggleButton();
+            await darkModeButton.ClickAsync();
+        }
+
+        public async Task<bool> IsDarkModeActiveAsync()
+        {
+            // Check if the html element has the 'dark' class
+            var htmlElement = page.Locator("html");
+            var classes = await htmlElement.GetAttributeAsync("class");
+            return classes?.Contains("dark") == true;
+        }
+
+        public async Task SetDarkModeAsync(bool isDarkMode)
+        {
+            bool currentDarkMode = await IsDarkModeActiveAsync();
+            if (currentDarkMode != isDarkMode)
+            {
+                await ToggleDarkModeAsync();
+                await page.WaitForTimeoutAsync(1000); // Allow UI to update
+            }
+        }
+
         public class MessageListControl
         {
             private readonly ILocator element;
