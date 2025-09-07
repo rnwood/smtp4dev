@@ -306,8 +306,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 FullPage = true 
             });
             
-            // Also log for Azure DevOps artifact collection
-            Console.WriteLine($"##vso[artifact.upload containerfolder=e2e-screenshots;artifactname={name}]{screenshotPath}");
+            Console.WriteLine($"Screenshot saved: {screenshotPath}");
             
             return screenshotPath;
         }
