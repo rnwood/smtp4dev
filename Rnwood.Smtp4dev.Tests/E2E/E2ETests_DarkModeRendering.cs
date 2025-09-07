@@ -190,44 +190,46 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             // Wait for iframe to be ready
             await page.WaitForSelectorAsync("iframe.htmlview", new PageWaitForSelectorOptions { Timeout = 10000 });
             
-            // Wait for dark mode detection to complete by waiting for the expected CSS class state
-            // This is more reliable than a fixed timeout
-            try
-            {
-                if (emailSupportsDarkMode)
-                {
-                    // Wait for the supports-dark-mode class to be applied
-                    await page.WaitForSelectorAsync("iframe.htmlview.supports-dark-mode", new PageWaitForSelectorOptions { Timeout = 10000 });
-                    Console.WriteLine("✅ Successfully waited for 'supports-dark-mode' class to be applied");
-                }
-                else
-                {
-                    // Wait a bit for Vue to process, then verify the class is NOT present
-                    await page.WaitForTimeoutAsync(2000);
-                    
-                    // Verify the supports-dark-mode class is NOT present
-                    var hasClass = await page.QuerySelectorAsync("iframe.htmlview.supports-dark-mode") != null;
-                    if (hasClass)
-                    {
-                        await page.WaitForTimeoutAsync(3000); // Give more time if the class appeared unexpectedly
-                    }
-                    Console.WriteLine("✅ Successfully verified 'supports-dark-mode' class timing for email without dark mode support");
-                }
-            }
-            catch (TimeoutException)
-            {
-                Console.WriteLine($"⚠️ Timeout waiting for expected CSS class state. EmailSupportsDarkMode: {emailSupportsDarkMode}");
-                // Continue with verification to get detailed error information
-            }
+            // Get the iframe content frame
+            var frameLocator = page.FrameLocator("iframe.htmlview");
             
-            // Verify the iframe has the correct CSS class based on dark mode support
+            // Wait for the test sections to be available in the iframe
+            await frameLocator.Locator(".red-section").WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
+            
+            // Wait for dark mode processing to complete by giving time for Vue reactivity
+            await page.WaitForTimeoutAsync(3000);
+            
+            // Debug: Check the iframe CSS classes and filter to understand what's happening
             var iframe = await page.QuerySelectorAsync("iframe.htmlview");
             Assert.NotNull(iframe);
-            
             var iframeClasses = await iframe.GetAttributeAsync("class") ?? "";
-            bool hasSupportsDarkModeClass = iframeClasses.Contains("supports-dark-mode");
+            var iframeFilter = await iframe.EvaluateAsync<string>("el => getComputedStyle(el).filter");
             
-            // Check that the CSS class matches the email's dark mode support
+            Console.WriteLine($"📋 Test scenario: UI Mode = {(isDarkMode ? "Dark" : "Light")}, Email Dark Mode Support = {emailSupportsDarkMode}");
+            Console.WriteLine($"🎨 Iframe CSS classes: '{iframeClasses}'");
+            Console.WriteLine($"🎨 Iframe computed filter: '{iframeFilter}'");
+            Console.WriteLine($"🔍 Should have 'supports-dark-mode' class: {emailSupportsDarkMode}");
+            Console.WriteLine($"🔍 Should have invert filter: {isDarkMode && !emailSupportsDarkMode}");
+            
+            // Verify the iframe has the correct CSS filter based on the scenario
+            bool shouldInvert = isDarkMode && !emailSupportsDarkMode;
+            bool hasInvertFilter = iframeFilter.Contains("invert");
+            
+            Console.WriteLine($"📊 Filter verification: expected={shouldInvert}, actual={hasInvertFilter}");
+            
+            if (shouldInvert)
+            {
+                Assert.True(hasInvertFilter, $"Dark UI + Email without dark support should have invert filter. Computed filter: {iframeFilter}");
+                Console.WriteLine("✅ Invert filter correctly applied - email colors will be visually inverted");
+            }
+            else
+            {
+                Assert.False(hasInvertFilter, $"Light UI OR Dark UI + Email with dark support should NOT have invert filter. Computed filter: {iframeFilter}");
+                Console.WriteLine("✅ Invert filter correctly NOT applied - email colors will be shown as original");
+            }
+            
+            // Verify the CSS class application is correct
+            bool hasSupportsDarkModeClass = iframeClasses.Contains("supports-dark-mode");
             if (emailSupportsDarkMode)
             {
                 Assert.True(hasSupportsDarkModeClass, $"Email with dark mode support should have 'supports-dark-mode' class. Current classes: {iframeClasses}");
@@ -239,41 +241,16 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 Console.WriteLine($"✅ Email without dark mode support correctly does NOT have 'supports-dark-mode' class");
             }
             
-            // Get the iframe element and check if invert filter is applied
-            var computedStyle = await iframe.EvaluateAsync<string>("el => getComputedStyle(el).filter");
-            Console.WriteLine($"Iframe computed filter style: '{computedStyle}'");
+            Console.WriteLine($"✅ Dark mode behavior verification completed successfully");
             
-            bool hasInvertFilter = computedStyle.Contains("invert");
-            bool shouldInvert = isDarkMode && !emailSupportsDarkMode;
-            
-            Console.WriteLine($"Should have invert filter: {shouldInvert} (isDarkMode: {isDarkMode}, emailSupportsDarkMode: {emailSupportsDarkMode})");
-            Console.WriteLine($"Actually has invert filter: {hasInvertFilter}");
-            
-            if (shouldInvert)
-            {
-                Assert.True(hasInvertFilter, $"Dark UI + Email without dark support should have invert filter. Computed style: {computedStyle}");
-                Console.WriteLine("✅ Invert filter correctly applied");
-            }
-            else
-            {
-                Assert.False(hasInvertFilter, $"Light UI OR Dark UI + Email with dark support should NOT have invert filter. Computed style: {computedStyle}");
-                Console.WriteLine("✅ Invert filter correctly NOT applied");
-            }
-            
-            // Get the iframe content frame for additional verification
-            var frameLocator = page.FrameLocator("iframe.htmlview");
-            
-            // Verify iframe content loads properly
+            // Verify email content loaded correctly
             try
             {
                 await frameLocator.Locator("body").WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
                 var bodyContent = await frameLocator.Locator("body").InnerHTMLAsync();
                 Console.WriteLine($"✅ Iframe content loaded successfully (length: {bodyContent.Length})");
                 
-                // Verify the dark mode detection logic is working by checking if the correct email type was loaded
-                bool bodyContainsDarkModeText = bodyContent.ToLower().Contains("dark mode support");
-                Assert.True(bodyContainsDarkModeText, "Email content should contain dark mode support information");
-                
+                // Verify the correct email type was loaded
                 if (emailSupportsDarkMode)
                 {
                     Assert.True(bodyContent.Contains("WITH Dark Mode Support"), "Email with dark mode support should contain 'WITH Dark Mode Support'");
