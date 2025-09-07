@@ -143,10 +143,12 @@
         private updateIframe() {
             this.wasSanitized = false;
             this.sanitizedHtml = "";
+            this.emailSupportsDarkMode = false; // Reset first
 
             if (this.html) {
                 // Check if email supports dark mode before sanitization
                 this.emailSupportsDarkMode = this.detectDarkModeSupport(this.html);
+                console.log('Dark mode detection result:', this.emailSupportsDarkMode, 'for HTML length:', this.html.length);
 
                 if (!this.enableSanitization) {
                     this.sanitizedHtml = this.html;
@@ -155,8 +157,6 @@
                     let normalizedOriginalHtml = sanitizeHtml(this.html, { allowedAttributes: false, allowedTags: false, allowVulnerableTags: true });
                     this.wasSanitized = normalizedOriginalHtml !== this.sanitizedHtml;
                 }
-            } else {
-                this.emailSupportsDarkMode = false;
             }
 
             srcDoc.set(this.$refs.htmlframe as HTMLIFrameElement, this.sanitizedHtml);
@@ -164,6 +164,8 @@
 
         private detectDarkModeSupport(html: string): boolean {
             try {
+                console.log('Detecting dark mode support in HTML...');
+                
                 // Use DOMParser to safely parse HTML
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
@@ -172,7 +174,9 @@
                 const supportedColorSchemesMeta = doc.querySelector('meta[name="supported-color-schemes"]');
                 if (supportedColorSchemesMeta) {
                     const content = supportedColorSchemesMeta.getAttribute('content') || '';
+                    console.log('Found supported-color-schemes meta tag with content:', content);
                     if (this.parseColorSchemeValues(content).includes('dark')) {
+                        console.log('✅ Dark mode detected via supported-color-schemes meta tag');
                         return true;
                     }
                 }
@@ -181,16 +185,20 @@
                 const colorSchemeMeta = doc.querySelector('meta[name="color-scheme"]');
                 if (colorSchemeMeta) {
                     const content = colorSchemeMeta.getAttribute('content') || '';
+                    console.log('Found color-scheme meta tag with content:', content);
                     if (this.parseColorSchemeValues(content).includes('dark')) {
+                        console.log('✅ Dark mode detected via color-scheme meta tag');
                         return true;
                     }
                 }
 
                 // Check for CSS media queries that indicate dark mode support
                 const styleElements = doc.querySelectorAll('style');
+                console.log('Found', styleElements.length, 'style elements');
                 for (const styleElement of styleElements) {
                     const cssText = styleElement.textContent || '';
-                    if (this.parseCSSForDarkModeQueries(cssText)) {
+                    if (cssText && this.parseCSSForDarkModeQueries(cssText)) {
+                        console.log('✅ Dark mode detected via CSS media query');
                         return true;
                     }
                 }
@@ -201,10 +209,12 @@
                 for (const element of elementsWithStyle) {
                     const styleAttr = element.getAttribute('style') || '';
                     if (this.parseCSSForDarkModeQueries(styleAttr)) {
+                        console.log('✅ Dark mode detected via inline style');
                         return true;
                     }
                 }
 
+                console.log('❌ No dark mode support detected');
                 return false;
             } catch (error) {
                 console.warn('Error parsing HTML for dark mode detection:', error);
@@ -225,18 +235,25 @@
         private parseCSSForDarkModeQueries(cssText: string): boolean {
             if (!cssText) return false;
 
+            // First try simple string search as it's more reliable for this use case
+            const simpleCheck = cssText.toLowerCase().includes('prefers-color-scheme') && cssText.toLowerCase().includes('dark');
+            if (simpleCheck) {
+                console.log('✅ Found dark mode media query via simple string search');
+                return true;
+            }
+
             try {
-                // Parse CSS using css-tree
+                // Try css-tree parsing as a secondary check
                 const ast = csstree.parse(cssText, { parseRulePrelude: false });
                 
-                // Walk through the AST to find @media rules
                 let foundDarkModeQuery = false;
                 
                 csstree.walk(ast, function(node) {
                     if (node.type === 'Atrule' && node.name === 'media') {
-                        // Convert the prelude to string and check for dark mode
                         const mediaQueryText = csstree.generate(node.prelude);
+                        console.log('Found @media rule:', mediaQueryText);
                         if (mediaQueryText.includes('prefers-color-scheme') && mediaQueryText.includes('dark')) {
+                            console.log('✅ Found dark mode media query via css-tree:', mediaQueryText);
                             foundDarkModeQuery = true;
                         }
                     }
@@ -244,9 +261,8 @@
 
                 return foundDarkModeQuery;
             } catch (error) {
-                console.warn('Error parsing CSS for dark mode queries:', error);
-                // Fallback to simple string search if css-tree parsing fails
-                return cssText.toLowerCase().includes('prefers-color-scheme') && cssText.toLowerCase().includes('dark');
+                console.warn('Error parsing CSS with css-tree, using fallback:', error);
+                return simpleCheck;
             }
         }
 
