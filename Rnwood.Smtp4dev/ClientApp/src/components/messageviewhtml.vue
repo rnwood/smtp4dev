@@ -41,12 +41,13 @@
         </el-alert>
 
         <div class="fill" style="display: flex; flex-direction: column;">
-            <iframe class="htmlview" :style="htmlFrameStyles" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
+            <iframe :class="htmlFrameClasses" :style="htmlFrameStyles" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
         </div>
     </div>
 </template>
 <script lang="ts">
     import { Component, Vue, Prop, Watch, toNative } from 'vue-facing-decorator'
+    import { useDark } from '@vueuse/core'
 
     import MessagesController from "../ApiClient/MessagesController";
     import ServerController from "../ApiClient/ServerController";
@@ -54,6 +55,7 @@
     import * as srcDoc from 'srcdoc-polyfill';
     import sanitizeHtml from 'sanitize-html';
     import { deviceSizes, Brand } from 'device-sizes'
+    import * as csstree from 'css-tree';
 
     type ViewPortSize = {
         name: string
@@ -79,6 +81,10 @@
         enableSanitization = true;
         sanitizedHtml: string | null = null;
         wasSanitized: boolean = false;
+        emailSupportsDarkMode: boolean = false;
+        
+        // Use VueUse dark mode composable
+        isDark = useDark();
 
         availableViewportSizes: ViewPortSize[] = [{ name: "Normal", fill: true }].concat(Object.values(deviceSizes).map(d => ({
             name: `${Brand[d.brand]} ${d.name} (${d.size}")`, fill: false, width: d.width / d.scale, height: d.height / d.scale
@@ -113,6 +119,13 @@
             };
         }
 
+        get htmlFrameClasses() {
+            return {
+                'htmlview': true,
+                'supports-dark-mode': this.emailSupportsDarkMode
+            };
+        }
+
 
         error: Error | null = null;
         loading = false;
@@ -134,18 +147,216 @@
         private updateIframe() {
             this.wasSanitized = false;
             this.sanitizedHtml = "";
+            this.emailSupportsDarkMode = false; // Reset first
 
             if (this.html) {
+                // Check if email supports dark mode before sanitization
+                const originalDarkModeSupport = this.detectDarkModeSupport(this.html);
+                console.log('Dark mode detection on original HTML:', originalDarkModeSupport, 'for HTML length:', this.html.length);
+
                 if (!this.enableSanitization) {
                     this.sanitizedHtml = this.html;
+                    this.emailSupportsDarkMode = originalDarkModeSupport;
                 } else {
-                    this.sanitizedHtml = sanitizeHtml(this.html, { allowedTags: sanitizeHtml.defaults.allowedTags.concat("img"), allowedSchemesByTag: { "img": ["cid", "data"] } });
+                    // Allow additional tags and attributes needed for dark mode detection
+                    const sanitizeOptions = {
+                        allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+                            "img", "style", "meta", "head", "html", "body"
+                        ]),
+                        allowedAttributes: {
+                            ...sanitizeHtml.defaults.allowedAttributes,
+                            "meta": ["name", "content", "charset", "http-equiv"],
+                            "html": ["lang", "dir"],
+                            "body": ["class"],
+                            "*": ["style", "class", "id"] // Allow style, class, and id on all elements for better CSS support
+                        },
+                        allowedSchemesByTag: { 
+                            "img": ["cid", "data"] 
+                        }
+                    };
+                    
+                    this.sanitizedHtml = sanitizeHtml(this.html, sanitizeOptions);
                     let normalizedOriginalHtml = sanitizeHtml(this.html, { allowedAttributes: false, allowedTags: false, allowVulnerableTags: true });
                     this.wasSanitized = normalizedOriginalHtml !== this.sanitizedHtml;
+                    
+                    // Check dark mode support on sanitized HTML
+                    this.emailSupportsDarkMode = this.detectDarkModeSupport(this.sanitizedHtml);
+                    console.log('Dark mode detection on sanitized HTML:', this.emailSupportsDarkMode, 'for sanitized HTML length:', this.sanitizedHtml.length);
+                    
+                    if (originalDarkModeSupport !== this.emailSupportsDarkMode) {
+                        console.warn('⚠️ Dark mode detection result changed after sanitization!', 
+                                   'Original:', originalDarkModeSupport, 'Sanitized:', this.emailSupportsDarkMode);
+                    }
+                }
+                
+                // If the parent UI is in dark mode and the email supports dark mode,
+                // inject CSS to activate the email's dark mode media queries
+                if (this.isDark && this.emailSupportsDarkMode && this.sanitizedHtml) {
+                    console.log('💉 Injecting dark mode CSS activation for email with dark mode support');
+                    this.sanitizedHtml = this.injectDarkModeActivation(this.sanitizedHtml);
                 }
             }
 
             srcDoc.set(this.$refs.htmlframe as HTMLIFrameElement, this.sanitizedHtml);
+        }
+
+        private injectDarkModeActivation(html: string): string {
+            try {
+                // Parse the HTML to inject CSS that forces dark mode styles to apply
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Create a style element that forces dark mode styles by duplicating the media query rules
+                // without the media query condition
+                const darkModeStyle = doc.createElement('style');
+                darkModeStyle.textContent = `
+                    /* Injected by smtp4dev to force email dark mode styles when UI is in dark mode */
+                    /* This duplicates the email's @media (prefers-color-scheme: dark) rules but without the media query */
+                    .dark-section { 
+                        background-color: #2d2d2d !important; 
+                        color: #ffffff !important; 
+                    }
+                    .email-content { 
+                        background-color: #1a1a1a !important; 
+                    }
+                    
+                    /* Set color-scheme to help with browser behavior */
+                    :root {
+                        color-scheme: dark;
+                    }
+                    
+                    html {
+                        color-scheme: dark;
+                    }
+                `;
+                
+                // Try to add to <head> first, fallback to <body>
+                const head = doc.querySelector('head');
+                if (head) {
+                    head.appendChild(darkModeStyle);
+                } else {
+                    // If no head, create one or add to body
+                    const body = doc.querySelector('body');
+                    if (body) {
+                        body.insertBefore(darkModeStyle, body.firstChild);
+                    }
+                }
+                
+                console.log('✅ Successfully injected dark mode activation CSS with forced styles');
+                return doc.documentElement.outerHTML;
+            } catch (error) {
+                console.warn('❌ Failed to inject dark mode activation CSS:', error);
+                return html; // Return original HTML if injection fails
+            }
+        }
+
+        private detectDarkModeSupport(html: string): boolean {
+            try {
+                console.log('Detecting dark mode support in HTML...');
+                
+                // Use DOMParser to safely parse HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+
+                // Check for supported-color-schemes meta tag
+                const supportedColorSchemesMeta = doc.querySelector('meta[name="supported-color-schemes"]');
+                if (supportedColorSchemesMeta) {
+                    const content = supportedColorSchemesMeta.getAttribute('content') || '';
+                    console.log('Found supported-color-schemes meta tag with content:', content);
+                    if (this.parseColorSchemeValues(content).includes('dark')) {
+                        console.log('✅ Dark mode detected via supported-color-schemes meta tag');
+                        return true;
+                    }
+                }
+
+                // Check for color-scheme meta tag
+                const colorSchemeMeta = doc.querySelector('meta[name="color-scheme"]');
+                if (colorSchemeMeta) {
+                    const content = colorSchemeMeta.getAttribute('content') || '';
+                    console.log('Found color-scheme meta tag with content:', content);
+                    if (this.parseColorSchemeValues(content).includes('dark')) {
+                        console.log('✅ Dark mode detected via color-scheme meta tag');
+                        return true;
+                    }
+                }
+
+                // Check for CSS media queries that indicate dark mode support
+                const styleElements = doc.querySelectorAll('style');
+                console.log('Found', styleElements.length, 'style elements');
+                for (const styleElement of styleElements) {
+                    const cssText = styleElement.textContent || '';
+                    if (cssText && this.parseCSSForDarkModeQueries(cssText)) {
+                        console.log('✅ Dark mode detected via CSS media query');
+                        return true;
+                    }
+                }
+
+                // Also check for dark mode media queries in linked stylesheets or inline styles
+                // Note: We can't access external stylesheets due to CORS, but we can check style attributes
+                const elementsWithStyle = doc.querySelectorAll('[style]');
+                for (const element of elementsWithStyle) {
+                    const styleAttr = element.getAttribute('style') || '';
+                    if (this.parseCSSForDarkModeQueries(styleAttr)) {
+                        console.log('✅ Dark mode detected via inline style');
+                        return true;
+                    }
+                }
+
+                console.log('❌ No dark mode support detected');
+                return false;
+            } catch (error) {
+                console.warn('Error parsing HTML for dark mode detection:', error);
+                return false;
+            }
+        }
+
+        private parseColorSchemeValues(content: string): string[] {
+            if (!content) return [];
+            
+            // Split by both spaces and commas, trim each value, and filter out empty values
+            return content
+                .split(/[\s,]+/)
+                .map(value => value.trim().toLowerCase())
+                .filter(value => value.length > 0);
+        }
+
+        private parseCSSForDarkModeQueries(cssText: string): boolean {
+            if (!cssText) return false;
+
+            // First try simple string search as it's more reliable for this use case
+            const simpleCheck = cssText.toLowerCase().includes('prefers-color-scheme') && cssText.toLowerCase().includes('dark');
+            if (simpleCheck) {
+                console.log('✅ Found dark mode media query via simple string search');
+                return true;
+            }
+
+            try {
+                // Try css-tree parsing as a secondary check
+                const ast = csstree.parse(cssText, { parseRulePrelude: false });
+                
+                let foundDarkModeQuery = false;
+                
+                csstree.walk(ast, function(node) {
+                    if (node.type === 'Atrule' && node.name === 'media') {
+                        const mediaQueryText = csstree.generate(node.prelude);
+                        console.log('Found @media rule:', mediaQueryText);
+                        if (mediaQueryText.includes('prefers-color-scheme') && mediaQueryText.includes('dark')) {
+                            console.log('✅ Found dark mode media query via css-tree:', mediaQueryText);
+                            foundDarkModeQuery = true;
+                        }
+                    }
+                });
+
+                return foundDarkModeQuery;
+            } catch (error) {
+                console.warn('Error parsing CSS with css-tree, using fallback:', error);
+                return simpleCheck;
+            }
+        }
+
+        private checkMediaQueryForDarkMode(mediaQuery: any): boolean {
+            // This method is no longer used, keeping for compatibility
+            return false;
         }
 
         async onHtmlFrameLoaded() {
