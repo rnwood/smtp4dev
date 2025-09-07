@@ -1,18 +1,40 @@
 {
     "appPort": [
         2525,
-        8080
+        5000,
+        1143
     ],
     "extensions": [
-        "ms-vscode.csharp",
-        "formulahendry.dotnet-test-explorer",
-        "ms-azuretools.vscode-docker",
-        "dbaeumer.vscode-eslint",
-        "octref.vetur",
-        "ms-azure-devops.azure-pipelines",
-        "ms-dotnettools.vscode-dotnet-runtime",
+        // .NET development
         "ms-dotnettools.csdevkit",
-        "ms-vscode.PowerShell"
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "formulahendry.dotnet-test-explorer",
+        
+        // Frontend development (Vue.js 3, TypeScript, Vite)
+        "Vue.volar",
+        "Vue.vscode-typescript-vue-plugin",
+        "bradlc.vscode-tailwindcss",
+        "ms-vscode.vscode-typescript-next",
+        
+        // JavaScript/Node.js
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "christian-kohler.npm-intellisense",
+        
+        // General development
+        "EditorConfig.EditorConfig",
+        "ms-vscode.PowerShell",
+        "ms-azuretools.vscode-docker",
+        "ms-azure-devops.azure-pipelines",
+        
+        // Git and source control
+        "mhutchie.git-graph",
+        "GitLab.gitlab-workflow",
+        
+        // Markdown and documentation
+        "yzhang.markdown-all-in-one",
+        "DavidAnson.vscode-markdownlint"
     ],
     
     "build": {
@@ -21,6 +43,14 @@
     },
     
     "containerEnv": {
-        "SERVEROPTIONS__PORT": "2525"
+        "SERVEROPTIONS__PORT": "2525",
+        "SERVEROPTIONS__IMAPPORT": "1143"
+    },
+    
+    "postCreateCommand": "echo 'Devcontainer setup complete. Node.js version:' $(node --version) 'npm version:' $(npm --version) '.NET version:' $(dotnet --version)",
+    
+    "features": {
+        "ghcr.io/devcontainers/features/git:1": {},
+        "ghcr.io/devcontainers/features/github-cli:1": {}
     }
 }
