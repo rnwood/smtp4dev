@@ -41,7 +41,7 @@
         </el-alert>
 
         <div class="fill" style="display: flex; flex-direction: column;">
-            <iframe class="htmlview" :style="htmlFrameStyles" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
+            <iframe :class="htmlFrameClasses" :style="htmlFrameStyles" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
         </div>
     </div>
 </template>
@@ -79,6 +79,7 @@
         enableSanitization = true;
         sanitizedHtml: string | null = null;
         wasSanitized: boolean = false;
+        emailSupportsDarkMode: boolean = false;
 
         availableViewportSizes: ViewPortSize[] = [{ name: "Normal", fill: true }].concat(Object.values(deviceSizes).map(d => ({
             name: `${Brand[d.brand]} ${d.name} (${d.size}")`, fill: false, width: d.width / d.scale, height: d.height / d.scale
@@ -113,6 +114,13 @@
             };
         }
 
+        get htmlFrameClasses() {
+            return {
+                'htmlview': true,
+                'supports-dark-mode': this.emailSupportsDarkMode
+            };
+        }
+
 
         error: Error | null = null;
         loading = false;
@@ -136,6 +144,9 @@
             this.sanitizedHtml = "";
 
             if (this.html) {
+                // Check if email supports dark mode before sanitization
+                this.emailSupportsDarkMode = this.detectDarkModeSupport(this.html);
+
                 if (!this.enableSanitization) {
                     this.sanitizedHtml = this.html;
                 } else {
@@ -143,9 +154,33 @@
                     let normalizedOriginalHtml = sanitizeHtml(this.html, { allowedAttributes: false, allowedTags: false, allowVulnerableTags: true });
                     this.wasSanitized = normalizedOriginalHtml !== this.sanitizedHtml;
                 }
+            } else {
+                this.emailSupportsDarkMode = false;
             }
 
             srcDoc.set(this.$refs.htmlframe as HTMLIFrameElement, this.sanitizedHtml);
+        }
+
+        private detectDarkModeSupport(html: string): boolean {
+            // Check for supported-color-schemes meta tag
+            const supportedColorSchemesRegex = /<meta[^>]+name\s*=\s*["']supported-color-schemes["'][^>]*content\s*=\s*["'][^"']*dark[^"']*["']/i;
+            if (supportedColorSchemesRegex.test(html)) {
+                return true;
+            }
+
+            // Check for color-scheme meta tag
+            const colorSchemeRegex = /<meta[^>]+name\s*=\s*["']color-scheme["'][^>]*content\s*=\s*["'][^"']*dark[^"']*["']/i;
+            if (colorSchemeRegex.test(html)) {
+                return true;
+            }
+
+            // Check for CSS media queries that indicate dark mode support
+            const darkModeMediaQueryRegex = /@media[^{]*\(prefers-color-scheme:\s*dark\)/i;
+            if (darkModeMediaQueryRegex.test(html)) {
+                return true;
+            }
+
+            return false;
         }
 
         async onHtmlFrameLoaded() {
