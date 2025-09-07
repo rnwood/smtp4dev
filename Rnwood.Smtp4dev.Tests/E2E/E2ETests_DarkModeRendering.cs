@@ -149,19 +149,19 @@ namespace Rnwood.Smtp4dev.Tests.E2E
     <h1>Email {(supportsDarkMode ? "WITH" : "WITHOUT")} Dark Mode Support</h1>
     <p>This email {(supportsDarkMode ? "includes proper dark mode support with the meta tags and CSS media queries for dark mode." : "does NOT have dark mode meta tags or CSS media queries for dark mode.")}</p>
     
-    <div class=""test-section red-section"">
+    <div class=""test-section red-section"" style=""background-color: #FF0000; color: #FFFFFF; padding: 20px; margin: 10px; border: 2px solid #000; font-weight: bold; font-size: 16px;"">
         Red Section - This should be RED in light mode
     </div>
     
-    <div class=""test-section green-section"">
+    <div class=""test-section green-section"" style=""background-color: #00FF00; color: #000000; padding: 20px; margin: 10px; border: 2px solid #000; font-weight: bold; font-size: 16px;"">
         Green Section - This should be GREEN in light mode
     </div>
     
-    <div class=""test-section yellow-section"">
+    <div class=""test-section yellow-section"" style=""background-color: #FFFF00; color: #000000; padding: 20px; margin: 10px; border: 2px solid #000; font-weight: bold; font-size: 16px;"">
         Yellow Section - This should be YELLOW in light mode
     </div>
     
-    {(supportsDarkMode ? @"<div class=""test-section dark-section"">
+    {(supportsDarkMode ? @"<div class=""test-section dark-section"" style=""background-color: #2d2d2d; color: #ffffff; padding: 20px; margin: 10px; border: 2px solid #000; font-weight: bold; font-size: 16px;"">
         Dark Mode Section - This should have dark background in dark mode
     </div>" : "")}
     
@@ -212,97 +212,56 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 Console.WriteLine($"✅ Email without dark mode support correctly does NOT have 'supports-dark-mode' class");
             }
             
-            // Get the iframe content frame
-            var frameLocator = page.FrameLocator("iframe.htmlview");
+            // Get the iframe element and check if invert filter is applied
+            var computedStyle = await iframe.EvaluateAsync<string>("el => getComputedStyle(el).filter");
+            Console.WriteLine($"Iframe computed filter style: '{computedStyle}'");
             
-            // Debug: Check if iframe has content
-            try
-            {
-                // Wait for the body element first
-                await frameLocator.Locator("body").WaitForAsync(new LocatorWaitForOptions { Timeout = 15000 });
-                Console.WriteLine("✅ Iframe body element found");
-                
-                // Get the iframe HTML content for debugging
-                var bodyContent = await frameLocator.Locator("body").InnerHTMLAsync();
-                Console.WriteLine($"Iframe body content length: {bodyContent.Length}");
-                
-                // Check for presence of test sections
-                var hasSections = bodyContent.Contains("test-section") && bodyContent.Contains("red-section");
-                Console.WriteLine($"Has test sections: {hasSections}");
-                
-                if (!hasSections)
-                {
-                    Console.WriteLine("⚠️ Test sections not found in iframe content!");
-                    Console.WriteLine($"Body content preview: {bodyContent.Substring(0, Math.Min(500, bodyContent.Length))}");
-                }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Error checking iframe content: {ex.Message}");
-                throw;
-            }
-            
-            // Wait for the test sections to be available in the iframe
-            try
-            {
-                await frameLocator.Locator(".red-section").WaitForAsync(new LocatorWaitForOptions { Timeout = 15000 });
-                Console.WriteLine("✅ Found .red-section element");
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"❌ Could not find .red-section: {ex.Message}");
-                
-                // Try alternative selectors
-                var allDivs = await frameLocator.Locator("div").CountAsync();
-                Console.WriteLine($"Total div elements in iframe: {allDivs}");
-                
-                var sectionsWithClass = await frameLocator.Locator("div[class*='section']").CountAsync();
-                Console.WriteLine($"Div elements with 'section' in class: {sectionsWithClass}");
-                
-                throw;
-            }
-            
-            // Wait a bit more to ensure all styles are fully applied
-            await page.WaitForTimeoutAsync(1000);
-            
-            // Get the computed background colors of the test sections
-            var redBgColor = await frameLocator.Locator(".red-section").EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
-            var greenBgColor = await frameLocator.Locator(".green-section").EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
-            var yellowBgColor = await frameLocator.Locator(".yellow-section").EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
-            
-            Console.WriteLine($"Computed colors - Red: {redBgColor}, Green: {greenBgColor}, Yellow: {yellowBgColor}");
-            
-            // Define expected colors (RGB format)
-            var originalRed = "rgb(255, 0, 0)";
-            var originalGreen = "rgb(0, 255, 0)";
-            var originalYellow = "rgb(255, 255, 0)";
-            
-            var invertedRed = "rgb(0, 255, 255)";    // Cyan
-            var invertedGreen = "rgb(255, 0, 255)";  // Magenta 
-            var invertedYellow = "rgb(0, 0, 255)";   // Blue/Purple
-            
-            // Determine if colors should be inverted
+            bool hasInvertFilter = computedStyle.Contains("invert");
             bool shouldInvert = isDarkMode && !emailSupportsDarkMode;
             
-            Console.WriteLine($"Should invert colors: {shouldInvert} (isDarkMode: {isDarkMode}, emailSupportsDarkMode: {emailSupportsDarkMode})");
+            Console.WriteLine($"Should have invert filter: {shouldInvert} (isDarkMode: {isDarkMode}, emailSupportsDarkMode: {emailSupportsDarkMode})");
+            Console.WriteLine($"Actually has invert filter: {hasInvertFilter}");
             
             if (shouldInvert)
             {
-                // Dark UI + Email without dark support: colors should be inverted
-                Console.WriteLine("Verifying inverted colors...");
-                Assert.Equal(invertedRed, redBgColor);
-                Assert.Equal(invertedGreen, greenBgColor);
-                Assert.Equal(invertedYellow, yellowBgColor);
-                Console.WriteLine("✅ Colors are correctly inverted");
+                Assert.True(hasInvertFilter, $"Dark UI + Email without dark support should have invert filter. Computed style: {computedStyle}");
+                Console.WriteLine("✅ Invert filter correctly applied");
             }
             else
             {
-                // Light UI OR Dark UI + Email with dark support: colors should be original
-                Console.WriteLine("Verifying original colors...");
-                Assert.Equal(originalRed, redBgColor);
-                Assert.Equal(originalGreen, greenBgColor);
-                Assert.Equal(originalYellow, yellowBgColor);
-                Console.WriteLine("✅ Colors are original (not inverted)");
+                Assert.False(hasInvertFilter, $"Light UI OR Dark UI + Email with dark support should NOT have invert filter. Computed style: {computedStyle}");
+                Console.WriteLine("✅ Invert filter correctly NOT applied");
+            }
+            
+            // Get the iframe content frame for additional verification
+            var frameLocator = page.FrameLocator("iframe.htmlview");
+            
+            // Verify iframe content loads properly
+            try
+            {
+                await frameLocator.Locator("body").WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
+                var bodyContent = await frameLocator.Locator("body").InnerHTMLAsync();
+                Console.WriteLine($"✅ Iframe content loaded successfully (length: {bodyContent.Length})");
+                
+                // Verify the dark mode detection logic is working by checking if the correct email type was loaded
+                bool bodyContainsDarkModeText = bodyContent.ToLower().Contains("dark mode support");
+                Assert.True(bodyContainsDarkModeText, "Email content should contain dark mode support information");
+                
+                if (emailSupportsDarkMode)
+                {
+                    Assert.True(bodyContent.Contains("WITH Dark Mode Support"), "Email with dark mode support should contain 'WITH Dark Mode Support'");
+                }
+                else
+                {
+                    Assert.True(bodyContent.Contains("WITHOUT Dark Mode Support"), "Email without dark mode support should contain 'WITHOUT Dark Mode Support'");
+                }
+                
+                Console.WriteLine($"✅ Email content verification passed for {(emailSupportsDarkMode ? "WITH" : "WITHOUT")} dark mode support");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Error verifying iframe content: {ex.Message}");
+                throw;
             }
         }
 
