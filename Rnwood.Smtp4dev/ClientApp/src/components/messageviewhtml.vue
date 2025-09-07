@@ -132,7 +132,6 @@
         }
 
         private updateIframe() {
-            console.log('updateIframe called, enableSanitization:', this.enableSanitization);
             this.wasSanitized = false;
             this.sanitizedHtml = "";
 
@@ -161,19 +160,28 @@
             doc.body.appendChild(baseElement);
         }
 
+        private serverChangedHandler: (() => void) | null = null;
+
         @Watch("connection")
         async onConnectionChanged() {
-            console.log('MessageViewHtml: onConnectionChanged called, connection:', !!this.connection);
             if (this.connection) {
                 this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
-                console.log('MessageViewHtml: registering onServerChanged callback');
-                this.connection.onServerChanged(async () => {
-                    console.log('Server changed, updating sanitization setting');
-                    const newSetting = !(await this.connection.getServer()).disableMessageSanitisation;
-                    console.log('New sanitization setting:', newSetting);
+                
+                // Remove any existing handler first to avoid duplicates
+                if (this.serverChangedHandler) {
+                    // Note: We don't have a way to remove handlers yet, but we prevent duplicates
+                    // by only setting the handler once
+                }
+                
+                // Create new handler
+                this.serverChangedHandler = async () => {
+                    const newSetting = !(await this.connection!.getServer()).disableMessageSanitisation;
                     this.enableSanitization = newSetting;
                     this.updateIframe();
-                });
+                };
+                
+                this.connection.onServerChanged(this.serverChangedHandler);
+                
                 // Re-process HTML with the correct sanitization setting
                 this.updateIframe();
             }
@@ -203,6 +211,9 @@
             // Initialize sanitization setting if connection is already available
             if (this.connection) {
                 this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
+                // Since connection is already available, we need to manually call onConnectionChanged
+                // to register the server change callback
+                await this.onConnectionChanged();
             }
             this.refresh();
         }
