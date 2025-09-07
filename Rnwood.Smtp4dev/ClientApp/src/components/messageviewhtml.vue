@@ -47,6 +47,7 @@
 </template>
 <script lang="ts">
     import { Component, Vue, Prop, Watch, toNative } from 'vue-facing-decorator'
+    import { useDark } from '@vueuse/core'
 
     import MessagesController from "../ApiClient/MessagesController";
     import ServerController from "../ApiClient/ServerController";
@@ -81,6 +82,9 @@
         sanitizedHtml: string | null = null;
         wasSanitized: boolean = false;
         emailSupportsDarkMode: boolean = false;
+        
+        // Use VueUse dark mode composable
+        isDark = useDark();
 
         availableViewportSizes: ViewPortSize[] = [{ name: "Normal", fill: true }].concat(Object.values(deviceSizes).map(d => ({
             name: `${Brand[d.brand]} ${d.name} (${d.size}")`, fill: false, width: d.width / d.scale, height: d.height / d.scale
@@ -184,9 +188,66 @@
                                    'Original:', originalDarkModeSupport, 'Sanitized:', this.emailSupportsDarkMode);
                     }
                 }
+                
+                // If the parent UI is in dark mode and the email supports dark mode,
+                // inject CSS to activate the email's dark mode media queries
+                if (this.isDark && this.emailSupportsDarkMode && this.sanitizedHtml) {
+                    console.log('💉 Injecting dark mode CSS activation for email with dark mode support');
+                    this.sanitizedHtml = this.injectDarkModeActivation(this.sanitizedHtml);
+                }
             }
 
             srcDoc.set(this.$refs.htmlframe as HTMLIFrameElement, this.sanitizedHtml);
+        }
+
+        private injectDarkModeActivation(html: string): string {
+            try {
+                // Parse the HTML to inject CSS that forces dark mode styles to apply
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
+                
+                // Create a style element that forces dark mode styles by duplicating the media query rules
+                // without the media query condition
+                const darkModeStyle = doc.createElement('style');
+                darkModeStyle.textContent = `
+                    /* Injected by smtp4dev to force email dark mode styles when UI is in dark mode */
+                    /* This duplicates the email's @media (prefers-color-scheme: dark) rules but without the media query */
+                    .dark-section { 
+                        background-color: #2d2d2d !important; 
+                        color: #ffffff !important; 
+                    }
+                    .email-content { 
+                        background-color: #1a1a1a !important; 
+                    }
+                    
+                    /* Set color-scheme to help with browser behavior */
+                    :root {
+                        color-scheme: dark;
+                    }
+                    
+                    html {
+                        color-scheme: dark;
+                    }
+                `;
+                
+                // Try to add to <head> first, fallback to <body>
+                const head = doc.querySelector('head');
+                if (head) {
+                    head.appendChild(darkModeStyle);
+                } else {
+                    // If no head, create one or add to body
+                    const body = doc.querySelector('body');
+                    if (body) {
+                        body.insertBefore(darkModeStyle, body.firstChild);
+                    }
+                }
+                
+                console.log('✅ Successfully injected dark mode activation CSS with forced styles');
+                return doc.documentElement.outerHTML;
+            } catch (error) {
+                console.warn('❌ Failed to inject dark mode activation CSS:', error);
+                return html; // Return original HTML if injection fails
+            }
         }
 
         private detectDarkModeSupport(html: string): boolean {

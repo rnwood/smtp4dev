@@ -199,6 +199,38 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             // Wait for dark mode processing to complete by giving time for Vue reactivity
             await page.WaitForTimeoutAsync(3000);
             
+            // DEBUG: Check if our dark mode CSS injection worked by examining iframe content
+            if (isDarkMode && emailSupportsDarkMode) {
+                var iframeElement = await page.QuerySelectorAsync("iframe.htmlview");
+                var iframeContent = await iframeElement.EvaluateAsync<string>(@"
+                    (iframe) => {
+                        const doc = iframe.contentDocument;
+                        if (!doc) return 'No content document';
+                        
+                        // Check if our injected style exists
+                        const injectedStyles = doc.querySelectorAll('style');
+                        let foundInjectedStyle = false;
+                        for (const style of injectedStyles) {
+                            if (style.textContent && style.textContent.includes('smtp4dev')) {
+                                foundInjectedStyle = true;
+                                break;
+                            }
+                        }
+                        
+                        // Check computed color-scheme
+                        const htmlElement = doc.documentElement;
+                        const computedStyle = getComputedStyle(htmlElement);
+                        
+                        return JSON.stringify({
+                            injectedStyleFound: foundInjectedStyle,
+                            computedColorScheme: computedStyle.colorScheme,
+                            htmlInnerHTML: doc.documentElement.innerHTML.substring(0, 500)
+                        }, null, 2);
+                    }
+                ");
+                Console.WriteLine($"🔍 DEBUG iframe content analysis: {iframeContent}");
+            }
+            
             // Get the iframe element for filter inspection
             var iframe = await page.QuerySelectorAsync("iframe.htmlview");
             Assert.NotNull(iframe);
@@ -231,20 +263,32 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             // IMPORTANT: CSS filter inversion happens at the iframe container level,
             // so computed styles from inside the iframe always return the original values,
             // even when the colors are visually inverted for the user.
-            await VerifyEmailSectionColors(frameLocator, shouldInvert);
+            await VerifyEmailSectionColors(frameLocator, shouldInvert, emailSupportsDarkMode, isDarkMode);
             
             Console.WriteLine($"✅ Dark mode behavior and color verification completed successfully");
         }
         
-        private async Task VerifyEmailSectionColors(IFrameLocator frameLocator, bool shouldInvert)
+        private async Task VerifyEmailSectionColors(IFrameLocator frameLocator, bool shouldInvert, bool emailSupportsDarkMode, bool isDarkMode)
         {
-            // Define expected colors
-            var expectedColors = new Dictionary<string, (string original, string inverted)>
+            // Determine if dark mode media query colors should be active
+            bool expectDarkModeMediaQueryColors = emailSupportsDarkMode && isDarkMode && !shouldInvert;
+            
+            Console.WriteLine($"🔍 Dark mode media query colors expected: {expectDarkModeMediaQueryColors}");
+            
+            // Define expected colors - different sets based on whether dark mode media query should be active
+            var baseColors = new Dictionary<string, (string original, string inverted)>
             {
                 ["overall-background"] = ("rgb(255, 255, 255)", "rgb(0, 0, 0)"), // White -> Black
                 ["red-section"] = ("rgb(255, 0, 0)", "rgb(0, 255, 255)"),         // Red -> Cyan  
                 ["green-section"] = ("rgb(0, 255, 0)", "rgb(255, 0, 255)"),       // Green -> Magenta
                 ["yellow-section"] = ("rgb(255, 255, 0)", "rgb(0, 0, 255)")       // Yellow -> Blue
+            };
+            
+            // For emails with dark mode support in dark UI, some colors should be different due to media query
+            var darkModeMediaQueryColors = new Dictionary<string, string>
+            {
+                ["overall-background"] = "rgb(26, 26, 26)", // #1a1a1a from dark mode CSS
+                ["dark-section"] = "rgb(45, 45, 45)"        // #2d2d2d from dark mode CSS
             };
             
             // Check overall background (body or email-content)
@@ -255,22 +299,34 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             }
             
             Console.WriteLine($"🎨 Overall background color: {overallBackground}");
-            VerifyColorMatch("overall-background", overallBackground, expectedColors["overall-background"], shouldInvert);
             
-            // Check red section
+            if (expectDarkModeMediaQueryColors && darkModeMediaQueryColors.ContainsKey("overall-background"))
+            {
+                // For emails with dark mode support in dark UI, expect the dark mode media query background color
+                var expectedDarkBg = darkModeMediaQueryColors["overall-background"];
+                Console.WriteLine($"🔍 Expecting dark mode media query background: {expectedDarkBg}");
+                VerifyExactColorMatch("overall-background (dark mode media query)", overallBackground, expectedDarkBg);
+            }
+            else
+            {
+                // Use regular color matching logic for other cases
+                VerifyColorMatch("overall-background", overallBackground, baseColors["overall-background"], shouldInvert);
+            }
+            
+            // Check red section (always follows base color rules - no dark mode override)
             var redBackground = await GetComputedBackgroundColor(frameLocator, ".red-section");
             Console.WriteLine($"🎨 Red section background color: {redBackground}");
-            VerifyColorMatch("red-section", redBackground, expectedColors["red-section"], shouldInvert);
+            VerifyColorMatch("red-section", redBackground, baseColors["red-section"], shouldInvert);
             
-            // Check green section  
+            // Check green section (always follows base color rules - no dark mode override) 
             var greenBackground = await GetComputedBackgroundColor(frameLocator, ".green-section");
             Console.WriteLine($"🎨 Green section background color: {greenBackground}");
-            VerifyColorMatch("green-section", greenBackground, expectedColors["green-section"], shouldInvert);
+            VerifyColorMatch("green-section", greenBackground, baseColors["green-section"], shouldInvert);
             
-            // Check yellow section
+            // Check yellow section (always follows base color rules - no dark mode override)
             var yellowBackground = await GetComputedBackgroundColor(frameLocator, ".yellow-section");
             Console.WriteLine($"🎨 Yellow section background color: {yellowBackground}");
-            VerifyColorMatch("yellow-section", yellowBackground, expectedColors["yellow-section"], shouldInvert);
+            VerifyColorMatch("yellow-section", yellowBackground, baseColors["yellow-section"], shouldInvert);
             
             // Check dark section if it exists (only in emails with dark mode support)
             try
@@ -281,9 +337,23 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     var darkBackground = await GetComputedBackgroundColor(frameLocator, ".dark-section");
                     Console.WriteLine($"🎨 Dark section background color: {darkBackground}");
                     
-                    // Dark section should be dark gray (#2d2d2d) originally
-                    var darkSectionColors = ("rgb(45, 45, 45)", "rgb(210, 210, 210)"); // Dark gray -> Light gray when inverted
-                    VerifyColorMatch("dark-section", darkBackground, darkSectionColors, shouldInvert);
+                    if (expectDarkModeMediaQueryColors)
+                    {
+                        // For emails with dark mode support in dark UI, expect the dark mode media query color
+                        var expectedDarkSectionBg = darkModeMediaQueryColors["dark-section"];
+                        Console.WriteLine($"🔍 Expecting dark mode media query dark section: {expectedDarkSectionBg}");
+                        VerifyExactColorMatch("dark-section (dark mode media query)", darkBackground, expectedDarkSectionBg);
+                    }
+                    else
+                    {
+                        // Use regular color matching logic - dark section should be dark gray originally
+                        var darkSectionColors = ("rgb(45, 45, 45)", "rgb(210, 210, 210)"); // Dark gray -> Light gray when inverted
+                        VerifyColorMatch("dark-section", darkBackground, darkSectionColors, shouldInvert);
+                    }
+                }
+                else if (emailSupportsDarkMode)
+                {
+                    Console.WriteLine($"⚠️ Dark section expected but not found for email with dark mode support");
                 }
             }
             catch (Exception ex)
@@ -302,6 +372,24 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             {
                 Console.WriteLine($"⚠️ Could not get background color for {selector}: {ex.Message}");
                 return "";
+            }
+        }
+        
+        private void VerifyExactColorMatch(string sectionName, string actualColor, string expectedColor)
+        {
+            Console.WriteLine($"🔍 {sectionName}: expected={expectedColor}, actual={actualColor}");
+            
+            // Normalize color values for comparison (handle different RGB formats)
+            var normalizedActual = NormalizeRgbColor(actualColor);
+            var normalizedExpected = NormalizeRgbColor(expectedColor);
+            
+            if (normalizedActual == normalizedExpected)
+            {
+                Console.WriteLine($"✅ {sectionName} color matches expected value");
+            }
+            else
+            {
+                Assert.Fail($"{sectionName} color mismatch - got {actualColor} but expected {expectedColor}");
             }
         }
         
