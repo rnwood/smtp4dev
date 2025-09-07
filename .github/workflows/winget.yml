@@ -1,7 +1,7 @@
 name: Publish to WinGet
 on:
   release:
-    types: [released]
+    types: [published]
 jobs:
   publish:
     runs-on: windows-latest
