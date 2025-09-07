@@ -207,18 +207,31 @@ type(optional-scope): description
 - `style`: Code style changes (e.g., `style: fix linting issues`)
 
 #### Examples for Common Tasks
-- Adding new functionality: `feat(web): add dark mode toggle`
-- Fixing bugs: `fix(smtp): handle malformed email headers gracefully`
-- Updating documentation: `docs(api): add examples for message endpoints`
+- Adding new functionality: `feat(web): add dark mode toggle` (focuses on user feature, not technical implementation)
+- Fixing bugs: `fix(smtp): handle malformed email headers gracefully` (describes the problem solved)
+- Updating documentation: `docs(api): add examples for message endpoints` (describes what users gain)
 - Dependency updates: `chore(deps): update Vue.js to latest version`
 - CI improvements: `ci: add automated security scanning`
 
+#### Examples of Good vs Poor Titles
+✅ **Good (user-focused):**
+- `feat: enable email filtering by date range`
+- `fix: prevent email list from freezing on large messages`
+- `docs: add troubleshooting guide for connection issues`
+
+❌ **Poor (technical-focused):**
+- `feat: implement DateRange component with Vue3 composition API`
+- `fix: refactor MessageService.GetMessages() method to use async patterns`
+- `docs: update API.md file with new endpoint documentation`
+
 #### AI Agent Guidelines
-- Always use lowercase for type and description
+- **Focus on user impact**: Describe what the change does for users from a functional perspective, not technical implementation details
+- **Always use lowercase after the type**: The description must start with a lowercase letter (e.g., `fix: resolve issue` not `fix: Resolve issue`)
 - Use imperative mood ("add" not "added" or "adds")
 - Keep descriptions concise but descriptive
 - Don't end with a period
 - Include scope when the change affects a specific component
+- Avoid technical jargon; focus on the functional benefit or problem solved
 - The GitHub Actions workflow will automatically validate PR titles
 
 ## Common Issues and Solutions
