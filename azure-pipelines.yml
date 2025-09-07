@@ -23,15 +23,29 @@ variables:
   ${{ if eq(variables['Build.SourceBranch'], 'refs/heads/master') }}:
     iscibuild: ${{ true }}
     isreleasebuild: ${{ false }}
-
-  ${{ if startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
-    iscibuild: ${{ false }}
-    isreleasebuild: ${{ true }}
-    tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
-
-  ${{ if not(startsWith(variables['Build.SourceBranch'], 'refs/tags/')) }}:
+    isprbuild: ${{ false }}
     tag: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
+    version: $[ format('{0}{1:yyyyMMdd}{2}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100)) ]
+  ${{ elseif startsWith(variables['Build.SourceBranch'], 'refs/tags/') }}:
+    isreleasebuild: ${{ true }}
+    iscibuild: ${{ false }}
+    isprbuild: ${{ false }}
+    tag: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
+    version: $[ replace(variables['Build.SourceBranch'], 'refs/tags/', '') ]
+  ${{ elseif startsWith(variables['Build.SourceBranch'], 'refs/pull/') }}:
+    isprbuild: ${{ true }}
+    iscibuild: ${{ false }}
+    isreleasebuild: ${{ false }}
+    tag: $[ format('{0}{1:yyyyMMdd}{2}_pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(replace(variables['Build.SourceBranch'], 'refs/pull/', ''), '/merge', '')) ]
+    version: $[ format('{0}{1:yyyyMMdd}{2}+pr{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(replace(variables['Build.SourceBranch'], 'refs/pull/', ''), '/merge', '')) ]
+  ${{ else }}:
+    isprbuild: ${{ false }}
+    isreleasebuild: ${{ false }}
+    iscibuild: ${{ false }}
+    tag: $[ format('{0}{1:yyyyMMdd}{2}_{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '-')) ] 
+    version: $[ format('{0}{1:yyyyMMdd}{2}+{3}', variables['CIBUILDVERSIONPREFIX'], pipeline.startTime, counter(format('{0:yyyyMMdd}', pipeline.startTime), 100), replace(replace(variables['Build.SourceBranch'], 'refs/heads/', ''), '/', '-')) ] 
 
+    
   docker_repo: "rnwood/smtp4dev"
   docker_registry: "dockerhub-rnwood"
   netcoresdk_version: "8.0.201"
@@ -49,10 +63,13 @@ stages:
           vmImage: "ubuntu-22.04"
         steps:
           - checkout: none
-          - powershell: Write-Host "$(tag) $(Build.BuildNumber)"
-            displayName: Display build number
+          - powershell: |
+              Write-Host "IsReleaseBuild=$(isreleasebuild) IsCIBuild=$(iscibuild) isprbuild=$(isprbuild)"
+              Write-Host "Tag=$(tag)"
+              Write-Host "Version=$(version)"
+            displayName: Display build details
           - powershell: Write-Host "##vso[build.updatebuildnumber]$(tag) $(Build.BuildNumber)"
-            displayName: Update build number
+            displayName: Update build details
   - stage: Build
     displayName: Build
     condition: succeeded()
@@ -141,7 +158,7 @@ stages:
               command: build
               projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
               publishWebProjects: false
-              arguments: '-c Release $(buildArgs) -p:version=$(tag)'
+              arguments: '-c Release $(buildArgs) -p:version=$(version)'
             env:
               ${{ if ne(variables['Agent.OS'], 'Windows_NT') }}:
                 NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
@@ -151,7 +168,7 @@ stages:
               command: publish
               projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
               publishWebProjects: false
-              arguments: '-c Release $(buildArgs) -p:version=$(tag) -o "$(Build.ArtifactStagingDirectory)/$(platformName)"'
+              arguments: '-c Release $(buildArgs) -p:version=$(version) -o "$(Build.ArtifactStagingDirectory)/$(platformName)"'
             env:
               ${{ if ne(variables['Agent.OS'], 'Windows_NT') }}:
                 NUGET_PACKAGES: $(Pipeline.Workspace)/.nuget/packages
@@ -289,7 +306,7 @@ stages:
                   }
                 } else {
                   Write-Host "No coverage files found."
-                }
+                } 
           - task: PublishCodeCoverageResults@1
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Publish Code Coverage Results
@@ -347,7 +364,7 @@ stages:
             inputs:
               command: custom
               custom: pack
-              arguments: '-c Release -p:PackAsTool=true -p:version=$(tag) -o "$(Build.ArtifactStagingDirectory)/dotnetglobaltool" Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj'
+              arguments: '-c Release -p:PackAsTool=true -p:version=$(version) -o "$(Build.ArtifactStagingDirectory)/dotnetglobaltool" Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj'
           - publish: $(Build.ArtifactStagingDirectory)/dotnetglobaltool
             artifact: dotnetglobaltool
 
@@ -388,7 +405,7 @@ stages:
               command: publish
               projects: "Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj"
               publishWebProjects: false
-              arguments: '-c Release -r win-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
+              arguments: '-c Release -r win-x64 -p:version=$(version) --self-contained -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
           - task: ExtractFiles@1
             displayName: Extract files for E2E tests
             inputs:
@@ -416,15 +433,13 @@ stages:
           #     command: publish
           #     projects: 'Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj'
           #     publishWebProjects: false
-          #     arguments: '-c Release -r linux-x64 -p:version=$(tag) --self-contained -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
+          #     arguments: '-c Release -r linux-x64 -p:version=$(version) --self-contained -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/linux-x64-desktop"'
           # - powershell: move-item $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/linux-x64-desktop/Rnwood.Smtp4dev.Desktop-linux-x64-$(tag).zip
           #   displayName: Rename artifact
           # - publish: $(Build.ArtifactStagingDirectory)/linux-x64-desktop
           #   artifact: linux-x64-desktop
       - job: DockerBuildLinux
         displayName: DockerBuild - Linux
-        dependsOn: BuildMatrix
-        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "ubuntu-22.04"
         steps:
@@ -460,13 +475,13 @@ stages:
               publishWebProjects: false
               zipAfterPublish: false
               modifyOutputPath: false
-              arguments: '-c Release -p:version=$(tag) -o out'
+              arguments: '-c Release -p:version=$(version) -o out'
           - task: Docker@2
             displayName: Build image
             inputs:
               command: build
               dockerfile: "**/Dockerfile.linux"
-              arguments: "--build-arg version=$(tag) -t $(docker_repo):linux-amd64-$(tag)"
+              arguments: "--build-arg version=$(version) -t $(docker_repo):linux-amd64-$(tag)"
           # - task: DotNetCoreCLI@2
           #   displayName: Run Tests
           #   env:
@@ -488,7 +503,7 @@ stages:
           #       --imapport=110
           - task: Docker@2
             displayName: Push image
-            condition: or(variables['isreleasebuild'], variables['iscibuild'])
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -497,8 +512,6 @@ stages:
                 linux-amd64-$(tag)
       - job: DockerBuildLinuxArm64
         displayName: DockerBuild - Linux - ARM64
-        dependsOn: BuildMatrix
-        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "ubuntu-22.04"
         steps:
@@ -534,7 +547,7 @@ stages:
               publishWebProjects: false
               zipAfterPublish: false
               modifyOutputPath: false
-              arguments: '-c Release -p:version=$(tag) -o out'
+              arguments: '-c Release -p:version=$(version) -o out'
           - task: CmdLine@2
             displayName: 'Install emulator'
             inputs:
@@ -544,10 +557,10 @@ stages:
             inputs:
               command: build
               dockerfile: "**/Dockerfile.linux.arm64"
-              arguments: "--platform linux/arm64 --build-arg version=$(tag) -t $(docker_repo):linux-arm64-$(tag)"
+              arguments: "--platform linux/arm64 --build-arg version=$(version) -t $(docker_repo):linux-arm64-$(tag)"
           - task: Docker@2
             displayName: Push image
-            condition: or(variables['isreleasebuild'], variables['iscibuild'])
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -556,8 +569,6 @@ stages:
                 linux-arm64-$(tag)
       - job: DockerBuildWindows
         displayName: DockerBuild - Windows LTSC 2019
-        dependsOn: BuildMatrix
-        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "windows-2022"
         steps:
@@ -593,22 +604,22 @@ stages:
               publishWebProjects: false
               zipAfterPublish: false
               modifyOutputPath: false
-              arguments: '-c Release -p:version=$(tag) -r win-x64 --self-contained -o out'
+              arguments: '-c Release -p:version=$(version) -r win-x64 --self-contained -o out'
           - task: Docker@2
             displayName: Build image
             inputs:
               command: build
               dockerfile: "**/Dockerfile.windows.ltsc2019"
-              arguments: "--build-arg version=$(tag) -t $(docker_repo):windows-ltsc2019-amd64-$(tag)"
+              arguments: "--build-arg version=$(version) -t $(docker_repo):windows-ltsc2019-amd64-$(tag)"
           - task: Docker@2
             displayName: Build image
             inputs:
               command: build
               dockerfile: "**/Dockerfile.windows.ltsc2022"
-              arguments: "--build-arg version=$(tag) -t $(docker_repo):windows-ltsc2022-amd64-$(tag)"
+              arguments: "--build-arg version=$(version) -t $(docker_repo):windows-ltsc2022-amd64-$(tag)"
           - task: Docker@2
             displayName: Push image
-            condition: or(variables['isreleasebuild'], variables['iscibuild'])
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -618,7 +629,8 @@ stages:
                 windows-ltsc2022-amd64-$(tag)
       - job: DockerManifest
         displayName: Docker Create Manifest
-        condition: and(or(variables['isreleasebuild'], variables['iscibuild']), succeeded('DockerBuildLinux'), succeeded('DockerBuildLinuxArm64'), succeeded('DockerBuildWindows'))
+        condition: and(or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true)), succeeded('DockerBuildLinux'), succeeded('DockerBuildLinuxArm64'), succeeded('DockerBuildWindows'))
+
         dependsOn:
           - DockerBuildLinux
           - DockerBuildLinuxArm64
@@ -641,7 +653,7 @@ stages:
               script: |
                 docker manifest create $(docker_repo):$(tag) $(docker_repo):windows-ltsc2022-amd64-$(tag) $(docker_repo):windows-ltsc2019-amd64-$(tag) $(docker_repo):linux-amd64-$(tag) $(docker_repo):linux-arm64-$(tag)
                 docker manifest push $(docker_repo):$(tag)
-
+   
   - stage: ReportCoverage
     displayName: Report Coverage to GitHub
     condition: and(succeeded(), eq(variables['Build.Reason'], 'PullRequest'))
@@ -870,7 +882,7 @@ stages:
                 }
 
   - stage: Release
-    condition: and(succeeded(), or(variables['isreleasebuild'], variables['iscibuild']))
+    condition: and(succeeded(), or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true)))
     displayName: Release
     jobs:
       - job: Release
@@ -881,13 +893,7 @@ stages:
           - task: DownloadPipelineArtifact@2
             inputs:
               path: $(Build.ArtifactStagingDirectory)
-          - task: NuGetCommand@2
-            inputs:
-              command: "push"
-              packagesToPush: "$(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg"
-              nuGetFeedType: "external"
-              publishFeedCredentials: "nuget_rnwood"
-
+              
           - task: GitHubRelease@1
             inputs:
               gitHubConnection: github.com_rnwood
@@ -912,7 +918,7 @@ stages:
                 [Rnwood.Smtp4dev-noruntime-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-noruntime-$(tag).zip) | Architecture independent version. Should run on any platform where the .NET 8.0 (or greater) runtime is installed
                 [Docker images for Windows and Linux](https://hub.docker.com/layers/rnwood/smtp4dev/$(tag)) - [How to use Docker image](https://github.com/rnwood/smtp4dev/blob/master/docs/Installation.md#how-to-run-smtp4dev-in-docker)
                 [.NET tool Rnwood.Smtp4dev $(tag)](https://www.nuget.org/packages/Rnwood.Smtp4dev/$(tag)) | .NET tool (recommended option for Mac OS) - [How to use dotnet tool](https://github.com/rnwood/smtp4dev/blob/master/docs/Installation.md#how-to-run-smtp4dev-as-a-dotnet-global-tool)
-                
+                [Winget package](https://winget.run/pkg/rnwood/smtp4dev)| Winget package (recommended easy option for Win10/11)
 
               ${{ if eq(variables['isreleasebuild'], true) }}:
                 action: edit
@@ -924,7 +930,12 @@ stages:
                 changeLogCompareToRelease: lastNonDraftRelease
 
               assets: $(Build.ArtifactStagingDirectory)/**/*.zip
-
+          - task: NuGetCommand@2
+            inputs:
+              command: "push"
+              packagesToPush: "$(Build.ArtifactStagingDirectory)/dotnetglobaltool/*.nupkg"
+              nuGetFeedType: "external"
+              publishFeedCredentials: "nuget_rnwood"
       - job: DockerReleaseTagLinux
         displayName: Docker Release Tag - Linux
         variables:
@@ -945,10 +956,12 @@ stages:
               targetType: inline
               script: | 
                 if ([bool]::Parse("$(isreleasebuild)")) {
-                    $version = [version] "$(tag)"
+                    $version = [version] "$(version)"
                     $dockertags = "latest v$($version.Major) v$($version.Major).$($version.Minor)"
-                } else {
+                } elseif ([bool]::Parse("$(iscibuild)")) {
                     $dockertags = "prerelease"
+                } else {
+                    $dockertags = ""
                 }
                 write-host "Docker tags: $dockertags"
 
@@ -987,7 +1000,7 @@ stages:
               targetType: inline
               script: |
                 if ([bool]::Parse("$(isreleasebuild)")) {
-                    $version = [version] "$(tag)"
+                    $version = [version] "$(version)"
                     $dockertags = "latest v$($version.Major) v$($version.Major).$($version.Minor)"
                 } else {
                     $dockertags = "prerelease"
