@@ -168,6 +168,8 @@
                     this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
                     this.updateIframe();
                 });
+                // Re-process HTML with the correct sanitization setting
+                this.updateIframe();
             }
         }
 
@@ -192,6 +194,10 @@
         }
 
         async created() {
+            // Initialize sanitization setting if connection is already available
+            if (this.connection) {
+                this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
+            }
             this.refresh();
         }
 
