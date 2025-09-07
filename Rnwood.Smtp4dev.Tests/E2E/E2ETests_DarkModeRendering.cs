@@ -228,6 +228,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             }
             
             // Now check actual background colors of email sections
+            // IMPORTANT: CSS filter inversion happens at the iframe container level,
+            // so computed styles from inside the iframe always return the original values,
+            // even when the colors are visually inverted for the user.
             await VerifyEmailSectionColors(frameLocator, shouldInvert);
             
             Console.WriteLine($"✅ Dark mode behavior and color verification completed successfully");
@@ -304,9 +307,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         
         private void VerifyColorMatch(string sectionName, string actualColor, (string original, string inverted) expectedColors, bool shouldInvert)
         {
-            var expectedColor = shouldInvert ? expectedColors.inverted : expectedColors.original;
+            // IMPORTANT: When CSS filter: invert() is applied to the iframe container,
+            // the colors are visually inverted for the user, but computed styles from 
+            // inside the iframe still return the ORIGINAL values.
+            // So we always expect the original colors from inside the iframe.
+            var expectedColor = expectedColors.original;
             
             Console.WriteLine($"🔍 {sectionName}: expected={expectedColor}, actual={actualColor}, shouldInvert={shouldInvert}");
+            Console.WriteLine($"ℹ️  Note: CSS filter inversion happens at container level, so computed styles inside iframe always return original values");
             
             // Normalize color values for comparison (handle different RGB formats)
             var normalizedActual = NormalizeRgbColor(actualColor);
@@ -314,25 +322,12 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             
             if (normalizedActual == normalizedExpected)
             {
-                Console.WriteLine($"✅ {sectionName} color matches expected value");
+                Console.WriteLine($"✅ {sectionName} color matches expected value (original color from inside iframe)");
             }
             else
             {
-                // For debugging, also check if it matches the opposite expectation
-                var oppositeExpected = shouldInvert ? expectedColors.original : expectedColors.inverted;
-                var normalizedOpposite = NormalizeRgbColor(oppositeExpected);
-                
-                if (normalizedActual == normalizedOpposite)
-                {
-                    Assert.Fail($"{sectionName} color mismatch - got {actualColor} but expected {expectedColor}. " +
-                                     $"The actual color matches the {'('}{ (shouldInvert ? "non-inverted" : "inverted")} expectation, " +
-                                     $"suggesting the inversion logic is reversed.");
-                }
-                else
-                {
-                    Assert.Fail($"{sectionName} color mismatch - got {actualColor} but expected {expectedColor}. " +
-                                     $"The color doesn't match either inverted or non-inverted expectations.");
-                }
+                Assert.Fail($"{sectionName} color mismatch - got {actualColor} but expected {expectedColor}. " +
+                                 $"Note: We expect original colors from inside iframe even when CSS filter is applied to container.");
             }
         }
         
