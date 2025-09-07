@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RunSettings>
+  <RunConfiguration>
+    <EnvironmentVariables>
+      <!-- Playwright configuration for HTML reports -->
+      <PLAYWRIGHT_HTML_REPORT>$(Agent.TempDirectory)/playwright-report</PLAYWRIGHT_HTML_REPORT>
+      <PLAYWRIGHT_HTML_OPEN>never</PLAYWRIGHT_HTML_OPEN>
+    </EnvironmentVariables>
+  </RunConfiguration>
+</RunSettings>
