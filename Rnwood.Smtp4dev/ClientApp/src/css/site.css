@@ -16,7 +16,7 @@ html.dark .textview {
     filter: invert();
 }
 
-html.dark .htmlview, html.dark .plaintextview {
+html.dark .htmlview:not(.supports-dark-mode), html.dark .plaintextview {
     filter: invert();
 }
 
