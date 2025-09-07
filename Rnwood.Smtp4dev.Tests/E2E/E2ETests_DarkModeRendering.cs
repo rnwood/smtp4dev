@@ -75,8 +75,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 // Take screenshot of the HTML view
                 testResults.Screenshots.Add(await TakeNamedScreenshotAsync(page, $"{testName}_2_HTMLView"));
 
-                // Verify the iframe has correct CSS classes based on dark mode support
-                await VerifyHtmlFrameClasses(page, emailSupportsDarkMode, isDarkMode);
+                // Verify the email colors are correct based on dark mode support and UI mode
+                await VerifyEmailColors(page, emailSupportsDarkMode, isDarkMode);
                 testResults.Passed = true;
                 
                 // Take final verification screenshot
@@ -185,28 +185,48 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             await homePage.SetDarkModeAsync(isDarkMode);
         }
 
-        private async Task VerifyHtmlFrameClasses(IPage page, bool emailSupportsDarkMode, bool isDarkMode)
+        private async Task VerifyEmailColors(IPage page, bool emailSupportsDarkMode, bool isDarkMode)
         {
             // Wait for iframe to be ready
             await page.WaitForSelectorAsync("iframe.htmlview", new PageWaitForSelectorOptions { Timeout = 10000 });
             
-            // Check if iframe has the correct CSS classes
-            var iframe = page.Locator("iframe.htmlview");
-            var classes = await iframe.GetAttributeAsync("class");
+            // Get the iframe content frame
+            var iframe = page.FrameLocator("iframe.htmlview");
             
-            if (isDarkMode && !emailSupportsDarkMode)
+            // Wait for the test sections to be available in the iframe
+            await iframe.Locator(".red-section").WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
+            
+            // Get the computed background colors of the test sections
+            var redBgColor = await iframe.Locator(".red-section").EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
+            var greenBgColor = await iframe.Locator(".green-section").EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
+            var yellowBgColor = await iframe.Locator(".yellow-section").EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
+            
+            // Define expected colors (RGB format)
+            var originalRed = "rgb(255, 0, 0)";
+            var originalGreen = "rgb(0, 255, 0)";
+            var originalYellow = "rgb(255, 255, 0)";
+            
+            var invertedRed = "rgb(0, 255, 255)";    // Cyan
+            var invertedGreen = "rgb(255, 0, 255)";  // Magenta 
+            var invertedYellow = "rgb(0, 0, 255)";   // Blue/Purple
+            
+            // Determine if colors should be inverted
+            bool shouldInvert = isDarkMode && !emailSupportsDarkMode;
+            
+            if (shouldInvert)
             {
-                // Dark UI + Email without dark support: iframe should NOT have 'supports-dark-mode' class
-                Assert.False(classes?.Contains("supports-dark-mode") == true, 
-                    "Email without dark mode support should be inverted in dark UI");
+                // Dark UI + Email without dark support: colors should be inverted
+                Assert.Equal(invertedRed, redBgColor);
+                Assert.Equal(invertedGreen, greenBgColor);
+                Assert.Equal(invertedYellow, yellowBgColor);
             }
-            else if (isDarkMode && emailSupportsDarkMode)
+            else
             {
-                // Dark UI + Email with dark support: iframe should have 'supports-dark-mode' class
-                Assert.True(classes?.Contains("supports-dark-mode") == true, 
-                    "Email with dark mode support should NOT be inverted in dark UI");
+                // Light UI OR Dark UI + Email with dark support: colors should be original
+                Assert.Equal(originalRed, redBgColor);
+                Assert.Equal(originalGreen, greenBgColor);
+                Assert.Equal(originalYellow, yellowBgColor);
             }
-            // In light mode, inversion behavior doesn't matter as much
         }
 
         private async Task<string> TakeNamedScreenshotAsync(IPage page, string name)
