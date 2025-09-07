@@ -194,8 +194,8 @@ public class SmtpServer : ISmtpServer
         {
             //https://stackoverflow.com/questions/37729475/create-dual-stack-socket-on-all-loopback-interfaces-on-windows
             listeners = TryCreateListenersWithFallback(
-                () => new TcpListener(IPAddress.IPv6Loopback, Options.PortNumber),
-                () => new TcpListener(IPAddress.Loopback, Options.PortNumber)
+                () =>new[] { new TcpListener(IPAddress.IPv6Loopback, Options.PortNumber), new TcpListener(IPAddress.Loopback, Options.PortNumber) },
+                () => new[] { new TcpListener(IPAddress.Loopback, Options.PortNumber) }
             );
         }
         else
@@ -205,8 +205,8 @@ public class SmtpServer : ISmtpServer
                 // Try IPv6 first, fallback to IPv4 if IPv6 is not supported
                 IPAddress fallbackAddress = Options.IpAddress == IPAddress.IPv6Any ? IPAddress.Any : IPAddress.Loopback;
                 listeners = TryCreateListenersWithFallback(
-                    () => CreateTcpListenerWithDualMode(Options.IpAddress, Options.PortNumber),
-                    () => new TcpListener(fallbackAddress, Options.PortNumber)
+                    () => new[] { CreateTcpListenerWithDualMode(Options.IpAddress, Options.PortNumber) },
+                    () => new[] { new TcpListener(fallbackAddress, Options.PortNumber) }
                 );
             }
             else
@@ -435,24 +435,20 @@ public class SmtpServer : ISmtpServer
     /// <summary>
     /// Tries to create listeners with IPv6, falls back to IPv4 if IPv6 is not supported
     /// </summary>
-    private TcpListener[] TryCreateListenersWithFallback(Func<TcpListener> primaryFactory, Func<TcpListener> fallbackFactory)
+    private TcpListener[] TryCreateListenersWithFallback(Func<IEnumerable<TcpListener>> primaryFactory, Func<IEnumerable<TcpListener>> fallbackFactory)
     {
         try
         {
-            logger.LogDebug("Attempting to create IPv6 listener");
+            logger.LogDebug("Attempting to create listeners");
             var primaryListener = primaryFactory();
-            return new[] { primaryListener };
+            return primaryListener.ToArray();
         }
         catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressFamilyNotSupported)
         {
-            logger.LogWarning("IPv6 not supported during listener creation (AddressFamilyNotSupported), falling back to IPv4");
-        }
-        catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressNotAvailable)
-        {
-            logger.LogWarning("IPv6 address not available during listener creation, falling back to IPv4");
+            logger.LogWarning("Error during listener creation (AddressFamilyNotSupported), falling back to IPv4 only");
         }
 
-        logger.LogInformation("Creating IPv4 fallback listener");
-        return new[] { fallbackFactory() };
+        logger.LogInformation("Creating fallback listeners");
+        return fallbackFactory().ToArray();
     }
 }

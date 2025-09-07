@@ -48,11 +48,42 @@ public class ServerTests
                 ipAddress = (testIpV6 ? IPAddress.IPv6Loopback : IPAddress.Loopback);
             }
 
-            int port = server.ListeningEndpoints.First().Port;
+            int port = (server.ListeningEndpoints.SingleOrDefault(e =>e.AddressFamily == ipAddress.AddressFamily) ?? server.ListeningEndpoints.Single()).Port;
             using (TcpClient client = new TcpClient(testIpV6 ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork))
             { 
                 await client.ConnectAsync(testRemoteConnection ? Dns.GetHostName() : "localhost", port);
                 Assert.True(client.Connected);
+            }
+
+            server.Stop();
+        }
+
+    }
+
+    [Theory]
+    [InlineData(false, true, false, false)]
+    [InlineData(false, true, true, false)]
+    [InlineData(false, true, true, true)]
+    public async Task Start_CanNotConnect(bool allowRemoteConnections, bool testRemoteConnection, bool enableIpV6, bool testIpV6)
+    {
+
+        using (SmtpServer server = StartServer(allowRemoteConnections, enableIpV6))
+        {
+            IPAddress ipAddress;
+            if (allowRemoteConnections)
+            {
+                ipAddress = (enableIpV6 ? IPAddress.IPv6Any : IPAddress.Any);
+            }
+            else
+            {
+
+                ipAddress = (testIpV6 ? IPAddress.IPv6Loopback : IPAddress.Loopback);
+            }
+
+            int port = server.ListeningEndpoints.First(p => p.Address.ToString() == ipAddress.ToString()).Port;
+            using (TcpClient client = new TcpClient(testIpV6 ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork))
+            {
+                await Assert.ThrowsAsync<SocketException>(async () => { await client.ConnectAsync(testRemoteConnection ? Dns.GetHostName() : "localhost", port); });
             }
 
             server.Stop();
