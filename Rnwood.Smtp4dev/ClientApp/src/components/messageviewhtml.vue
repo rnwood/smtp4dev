@@ -229,14 +229,13 @@
                 // Parse CSS using css-tree
                 const ast = csstree.parse(cssText, { parseRulePrelude: false });
                 
-                // Walk through the AST to find @media rules
+                // Walk through the AST to find @media rules with MediaQuery nodes
                 let foundDarkModeQuery = false;
                 
                 csstree.walk(ast, function(node) {
-                    if (node.type === 'Atrule' && node.name === 'media' && node.prelude) {
-                        // Convert the media query prelude to string and check for dark mode
-                        const mediaQueryText = csstree.generate(node.prelude);
-                        if (this.containsColorSchemeQuery(mediaQueryText, 'dark')) {
+                    if (node.type === 'MediaQuery') {
+                        // Check if this MediaQuery contains prefers-color-scheme: dark
+                        if (this.checkMediaQueryForDarkMode(node)) {
                             foundDarkModeQuery = true;
                         }
                     }
@@ -250,20 +249,21 @@
             }
         }
 
-        private containsColorSchemeQuery(mediaQuery: string, scheme: string): boolean {
-            // Parse media query conditions more carefully
-            // Handle various formats like:
-            // - (prefers-color-scheme: dark)
-            // - (prefers-color-scheme:dark)
-            // - ( prefers-color-scheme : dark )
-            // - screen and (prefers-color-scheme: dark)
+        private checkMediaQueryForDarkMode(mediaQuery: any): boolean {
+            // Walk through the MediaQuery node to find prefers-color-scheme: dark features
+            let foundDarkColorScheme = false;
             
-            const normalizedQuery = mediaQuery.toLowerCase().trim();
+            csstree.walk(mediaQuery, function(node) {
+                if (node.type === 'Feature' && 
+                    node.name === 'prefers-color-scheme' && 
+                    node.value && 
+                    node.value.type === 'Identifier' && 
+                    node.value.name === 'dark') {
+                    foundDarkColorScheme = true;
+                }
+            });
             
-            // Look for prefers-color-scheme with the specified scheme
-            // This handles the css-tree generated format as well as manual formats
-            const regex = new RegExp(`prefers-color-scheme\\s*:\\s*${scheme}\\b`, 'i');
-            return regex.test(normalizedQuery);
+            return foundDarkColorScheme;
         }
 
         async onHtmlFrameLoaded() {
