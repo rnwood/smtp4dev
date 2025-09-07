@@ -882,6 +882,8 @@ stages:
                 }
 
   - stage: Release
+    dependsOn: 
+    - Build
     condition: and(succeeded(), or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true)))
     displayName: Release
     jobs:
