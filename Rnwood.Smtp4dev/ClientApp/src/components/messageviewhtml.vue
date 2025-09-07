@@ -189,76 +189,69 @@
                     }
                 }
                 
-                // If the parent UI is in dark mode and the email supports dark mode,
-                // inject CSS to activate the email's dark mode media queries
-                if (this.isDark && this.emailSupportsDarkMode && this.sanitizedHtml) {
-                    console.log('💉 Injecting dark mode CSS activation for email with dark mode support');
-                    this.sanitizedHtml = this.injectDarkModeActivation(this.sanitizedHtml);
+                // If the email supports dark mode, override the meta color-scheme tag
+                // to match the UI dark mode state
+                if (this.emailSupportsDarkMode && this.sanitizedHtml) {
+                    console.log('🎨 Overriding meta color-scheme for email with dark mode support');
+                    this.sanitizedHtml = this.overrideColorScheme(this.sanitizedHtml);
                 }
             }
 
             srcDoc.set(this.$refs.htmlframe as HTMLIFrameElement, this.sanitizedHtml);
         }
 
-        private injectDarkModeActivation(html: string): string {
+        private overrideColorScheme(html: string): string {
             try {
-                // Parse the HTML to extract and apply CSS dark mode media query rules
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 
-                // Find all style elements and extract dark mode media query rules
-                const styleElements = doc.querySelectorAll('style');
-                let darkModeRules = '';
+                // Determine the desired color scheme order based on UI dark mode state
+                const colorSchemeContent = this.isDark ? 'dark light' : 'light dark';
                 
-                styleElements.forEach(styleElement => {
-                    const cssText = styleElement.textContent || '';
-                    
-                    // Use simple parsing to find @media (prefers-color-scheme: dark) rules
-                    const mediaQueryRegex = /@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/gi;
-                    let match;
-                    
-                    while ((match = mediaQueryRegex.exec(cssText)) !== null) {
-                        const rules = match[1];
-                        if (rules && rules.trim()) {
-                            darkModeRules += rules.trim() + '\n';
-                            console.log('📋 Found dark mode media query rules:', rules.trim());
-                        }
-                    }
-                });
+                // Look for existing color-scheme meta tag
+                let colorSchemeMeta = doc.querySelector('meta[name="color-scheme"]');
                 
-                // Create a style element that applies the dark mode rules directly
-                const darkModeStyle = doc.createElement('style');
-                darkModeStyle.textContent = `
-                    /* Injected by smtp4dev to activate email dark mode media queries when UI is in dark mode */
-                    :root {
-                        color-scheme: dark;
-                    }
-                    
-                    html {
-                        color-scheme: dark;
-                    }
-                    
-                    /* Extracted dark mode media query rules applied directly */
-                    ${darkModeRules}
-                `;
-                
-                // Try to add to <head> first, fallback to <body>
-                const head = doc.querySelector('head');
-                if (head) {
-                    head.appendChild(darkModeStyle);
+                if (colorSchemeMeta) {
+                    // Update existing meta tag
+                    colorSchemeMeta.setAttribute('content', colorSchemeContent);
+                    console.log('✅ Updated existing color-scheme meta tag to:', colorSchemeContent);
                 } else {
-                    // If no head, create one or add to body
-                    const body = doc.querySelector('body');
-                    if (body) {
-                        body.insertBefore(darkModeStyle, body.firstChild);
+                    // Create new meta tag
+                    colorSchemeMeta = doc.createElement('meta');
+                    colorSchemeMeta.setAttribute('name', 'color-scheme');
+                    colorSchemeMeta.setAttribute('content', colorSchemeContent);
+                    
+                    // Add to head if available, otherwise create head
+                    let head = doc.querySelector('head');
+                    if (!head) {
+                        head = doc.createElement('head');
+                        doc.documentElement.insertBefore(head, doc.body);
                     }
+                    head.appendChild(colorSchemeMeta);
+                    console.log('✅ Created new color-scheme meta tag with content:', colorSchemeContent);
                 }
                 
-                console.log('✅ Successfully injected dark mode CSS with extracted media query rules');
+                // Also set CSS color-scheme property to ensure browser respects the preference
+                const style = doc.createElement('style');
+                style.textContent = `
+                    :root {
+                        color-scheme: ${colorSchemeContent};
+                    }
+                `;
+                
+                // Add CSS to head
+                let head = doc.querySelector('head');
+                if (!head) {
+                    head = doc.createElement('head');
+                    doc.documentElement.insertBefore(head, doc.body);
+                }
+                head.appendChild(style);
+                console.log('✅ Added CSS color-scheme property:', colorSchemeContent);
+                
                 return doc.documentElement.outerHTML;
             } catch (error) {
-                console.warn('❌ Failed to inject dark mode activation CSS:', error);
-                return html; // Return original HTML if injection fails
+                console.warn('❌ Failed to override color-scheme meta tag:', error);
+                return html; // Return original HTML if override fails
             }
         }
 
