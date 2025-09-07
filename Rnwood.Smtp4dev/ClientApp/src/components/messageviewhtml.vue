@@ -162,25 +162,53 @@
         }
 
         private detectDarkModeSupport(html: string): boolean {
-            // Check for supported-color-schemes meta tag
-            const supportedColorSchemesRegex = /<meta[^>]+name\s*=\s*["']supported-color-schemes["'][^>]*content\s*=\s*["'][^"']*dark[^"']*["']/i;
-            if (supportedColorSchemesRegex.test(html)) {
-                return true;
-            }
+            try {
+                // Use DOMParser to safely parse HTML
+                const parser = new DOMParser();
+                const doc = parser.parseFromString(html, 'text/html');
 
-            // Check for color-scheme meta tag
-            const colorSchemeRegex = /<meta[^>]+name\s*=\s*["']color-scheme["'][^>]*content\s*=\s*["'][^"']*dark[^"']*["']/i;
-            if (colorSchemeRegex.test(html)) {
-                return true;
-            }
+                // Check for supported-color-schemes meta tag
+                const supportedColorSchemesMeta = doc.querySelector('meta[name="supported-color-schemes"]');
+                if (supportedColorSchemesMeta) {
+                    const content = supportedColorSchemesMeta.getAttribute('content') || '';
+                    if (content.toLowerCase().includes('dark')) {
+                        return true;
+                    }
+                }
 
-            // Check for CSS media queries that indicate dark mode support
-            const darkModeMediaQueryRegex = /@media[^{]*\(prefers-color-scheme:\s*dark\)/i;
-            if (darkModeMediaQueryRegex.test(html)) {
-                return true;
-            }
+                // Check for color-scheme meta tag
+                const colorSchemeMeta = doc.querySelector('meta[name="color-scheme"]');
+                if (colorSchemeMeta) {
+                    const content = colorSchemeMeta.getAttribute('content') || '';
+                    if (content.toLowerCase().includes('dark')) {
+                        return true;
+                    }
+                }
 
-            return false;
+                // Check for CSS media queries that indicate dark mode support
+                const styleElements = doc.querySelectorAll('style');
+                for (const styleElement of styleElements) {
+                    const cssText = styleElement.textContent || '';
+                    if (cssText.match(/@media[^{]*\(prefers-color-scheme:\s*dark\)/i)) {
+                        return true;
+                    }
+                }
+
+                // Also check for dark mode media queries in linked stylesheets or inline styles
+                // Note: We can't access external stylesheets due to CORS, but we can check style attributes
+                const elementsWithStyle = doc.querySelectorAll('[style]');
+                for (const element of elementsWithStyle) {
+                    const styleAttr = element.getAttribute('style') || '';
+                    if (styleAttr.match(/@media[^{]*\(prefers-color-scheme:\s*dark\)/i)) {
+                        return true;
+                    }
+                }
+
+                return false;
+            } catch (error) {
+                console.warn('Error parsing HTML for dark mode detection:', error);
+                return false;
+            }
         }
 
         async onHtmlFrameLoaded() {
