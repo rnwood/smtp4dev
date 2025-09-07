@@ -48,7 +48,7 @@ public class ServerTests
                 ipAddress = (testIpV6 ? IPAddress.IPv6Loopback : IPAddress.Loopback);
             }
 
-            int port = server.ListeningEndpoints.Single(p => p.Address.ToString() == ipAddress.ToString()).Port;
+            int port = server.ListeningEndpoints.First().Port;
             using (TcpClient client = new TcpClient(testIpV6 ? AddressFamily.InterNetworkV6 : AddressFamily.InterNetwork))
             { 
                 await client.ConnectAsync(testRemoteConnection ? Dns.GetHostName() : "localhost", port);
