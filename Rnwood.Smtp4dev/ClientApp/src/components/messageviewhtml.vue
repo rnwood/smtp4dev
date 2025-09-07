@@ -158,7 +158,7 @@
 
                 if (!this.enableSanitization) {
                     this.sanitizedHtml = this.html;
-                    this.emailSupportsDarkMode = originalDarkModeSupport;
+                    this.emailSupportsDarkMode = this.detectDarkModeSupport(this.html);
                 } else {
                     // Allow additional tags and attributes needed for dark mode detection
                     const sanitizeOptions = {
@@ -351,8 +351,11 @@
 
                 return foundDarkModeQuery;
             } catch (error) {
-                console.warn('Error parsing CSS with css-tree, using fallback:', error);
-                return simpleCheck;
+                console.warn('Error parsing CSS with css-tree, falling back to simple text search:', error);
+                // Fallback: simple text search for dark mode media queries
+                return cssText.includes('@media') && 
+                       cssText.includes('prefers-color-scheme') && 
+                       cssText.includes('dark');
             }
         }
 

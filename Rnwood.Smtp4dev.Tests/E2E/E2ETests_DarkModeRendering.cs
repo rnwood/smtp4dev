@@ -176,8 +176,20 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
         private async Task SetUIMode(IPage page, bool isDarkMode)
         {
+            // Set browser color scheme emulation to match UI dark mode state
+            // This is essential for CSS @media (prefers-color-scheme: dark) to work in tests
+            await page.EmulateMediaAsync(new PageEmulateMediaOptions
+            {
+                ColorScheme = isDarkMode ? ColorScheme.Dark : ColorScheme.Light
+            });
+            
             var homePage = new HomePage(page);
             await homePage.SetDarkModeAsync(isDarkMode);
+            
+            // Give time for both UI change and browser emulation to take effect
+            await page.WaitForTimeoutAsync(2000);
+            
+            Console.WriteLine($"🌈 Set browser color scheme emulation to: {(isDarkMode ? "dark" : "light")}");
         }
 
         private async Task VerifyEmailColors(IPage page, bool emailSupportsDarkMode, bool isDarkMode)
