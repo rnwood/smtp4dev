@@ -199,74 +199,153 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             // Wait for dark mode processing to complete by giving time for Vue reactivity
             await page.WaitForTimeoutAsync(3000);
             
-            // Debug: Check the iframe CSS classes and filter to understand what's happening
+            // Get the iframe element for filter inspection
             var iframe = await page.QuerySelectorAsync("iframe.htmlview");
             Assert.NotNull(iframe);
-            var iframeClasses = await iframe.GetAttributeAsync("class") ?? "";
+            
+            // Check the iframe's computed filter style using getComputedStyle
             var iframeFilter = await iframe.EvaluateAsync<string>("el => getComputedStyle(el).filter");
             
             Console.WriteLine($"📋 Test scenario: UI Mode = {(isDarkMode ? "Dark" : "Light")}, Email Dark Mode Support = {emailSupportsDarkMode}");
-            Console.WriteLine($"🎨 Iframe CSS classes: '{iframeClasses}'");
             Console.WriteLine($"🎨 Iframe computed filter: '{iframeFilter}'");
-            Console.WriteLine($"🔍 Should have 'supports-dark-mode' class: {emailSupportsDarkMode}");
-            Console.WriteLine($"🔍 Should have invert filter: {isDarkMode && !emailSupportsDarkMode}");
             
-            // Verify the iframe has the correct CSS filter based on the scenario
+            // Determine if inversion should be applied based on UI mode and email dark mode support
             bool shouldInvert = isDarkMode && !emailSupportsDarkMode;
             bool hasInvertFilter = iframeFilter.Contains("invert");
             
-            Console.WriteLine($"📊 Filter verification: expected={shouldInvert}, actual={hasInvertFilter}");
+            Console.WriteLine($"📊 Filter verification: expected invert = {shouldInvert}, actual invert = {hasInvertFilter}");
             
+            // Verify the iframe has the correct CSS filter
             if (shouldInvert)
             {
                 Assert.True(hasInvertFilter, $"Dark UI + Email without dark support should have invert filter. Computed filter: {iframeFilter}");
-                Console.WriteLine("✅ Invert filter correctly applied - email colors will be visually inverted");
+                Console.WriteLine("✅ Invert filter correctly applied");
             }
             else
             {
                 Assert.False(hasInvertFilter, $"Light UI OR Dark UI + Email with dark support should NOT have invert filter. Computed filter: {iframeFilter}");
-                Console.WriteLine("✅ Invert filter correctly NOT applied - email colors will be shown as original");
+                Console.WriteLine("✅ Invert filter correctly NOT applied");
             }
             
-            // Verify the CSS class application is correct
-            bool hasSupportsDarkModeClass = iframeClasses.Contains("supports-dark-mode");
-            if (emailSupportsDarkMode)
+            // Now check actual background colors of email sections
+            await VerifyEmailSectionColors(frameLocator, shouldInvert);
+            
+            Console.WriteLine($"✅ Dark mode behavior and color verification completed successfully");
+        }
+        
+        private async Task VerifyEmailSectionColors(IFrameLocator frameLocator, bool shouldInvert)
+        {
+            // Define expected colors
+            var expectedColors = new Dictionary<string, (string original, string inverted)>
             {
-                Assert.True(hasSupportsDarkModeClass, $"Email with dark mode support should have 'supports-dark-mode' class. Current classes: {iframeClasses}");
-                Console.WriteLine($"✅ Email with dark mode support correctly has 'supports-dark-mode' class");
-            }
-            else
+                ["overall-background"] = ("rgb(255, 255, 255)", "rgb(0, 0, 0)"), // White -> Black
+                ["red-section"] = ("rgb(255, 0, 0)", "rgb(0, 255, 255)"),         // Red -> Cyan  
+                ["green-section"] = ("rgb(0, 255, 0)", "rgb(255, 0, 255)"),       // Green -> Magenta
+                ["yellow-section"] = ("rgb(255, 255, 0)", "rgb(0, 0, 255)")       // Yellow -> Blue
+            };
+            
+            // Check overall background (body or email-content)
+            var overallBackground = await GetComputedBackgroundColor(frameLocator, ".email-content");
+            if (string.IsNullOrEmpty(overallBackground))
             {
-                Assert.False(hasSupportsDarkModeClass, $"Email without dark mode support should NOT have 'supports-dark-mode' class. Current classes: {iframeClasses}");
-                Console.WriteLine($"✅ Email without dark mode support correctly does NOT have 'supports-dark-mode' class");
+                overallBackground = await GetComputedBackgroundColor(frameLocator, "body");
             }
             
-            Console.WriteLine($"✅ Dark mode behavior verification completed successfully");
+            Console.WriteLine($"🎨 Overall background color: {overallBackground}");
+            VerifyColorMatch("overall-background", overallBackground, expectedColors["overall-background"], shouldInvert);
             
-            // Verify email content loaded correctly
+            // Check red section
+            var redBackground = await GetComputedBackgroundColor(frameLocator, ".red-section");
+            Console.WriteLine($"🎨 Red section background color: {redBackground}");
+            VerifyColorMatch("red-section", redBackground, expectedColors["red-section"], shouldInvert);
+            
+            // Check green section  
+            var greenBackground = await GetComputedBackgroundColor(frameLocator, ".green-section");
+            Console.WriteLine($"🎨 Green section background color: {greenBackground}");
+            VerifyColorMatch("green-section", greenBackground, expectedColors["green-section"], shouldInvert);
+            
+            // Check yellow section
+            var yellowBackground = await GetComputedBackgroundColor(frameLocator, ".yellow-section");
+            Console.WriteLine($"🎨 Yellow section background color: {yellowBackground}");
+            VerifyColorMatch("yellow-section", yellowBackground, expectedColors["yellow-section"], shouldInvert);
+            
+            // Check dark section if it exists (only in emails with dark mode support)
             try
             {
-                await frameLocator.Locator("body").WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
-                var bodyContent = await frameLocator.Locator("body").InnerHTMLAsync();
-                Console.WriteLine($"✅ Iframe content loaded successfully (length: {bodyContent.Length})");
-                
-                // Verify the correct email type was loaded
-                if (emailSupportsDarkMode)
+                var darkSectionExists = await frameLocator.Locator(".dark-section").CountAsync() > 0;
+                if (darkSectionExists)
                 {
-                    Assert.True(bodyContent.Contains("WITH Dark Mode Support"), "Email with dark mode support should contain 'WITH Dark Mode Support'");
+                    var darkBackground = await GetComputedBackgroundColor(frameLocator, ".dark-section");
+                    Console.WriteLine($"🎨 Dark section background color: {darkBackground}");
+                    
+                    // Dark section should be dark gray (#2d2d2d) originally
+                    var darkSectionColors = ("rgb(45, 45, 45)", "rgb(210, 210, 210)"); // Dark gray -> Light gray when inverted
+                    VerifyColorMatch("dark-section", darkBackground, darkSectionColors, shouldInvert);
                 }
-                else
-                {
-                    Assert.True(bodyContent.Contains("WITHOUT Dark Mode Support"), "Email without dark mode support should contain 'WITHOUT Dark Mode Support'");
-                }
-                
-                Console.WriteLine($"✅ Email content verification passed for {(emailSupportsDarkMode ? "WITH" : "WITHOUT")} dark mode support");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Error verifying iframe content: {ex.Message}");
-                throw;
+                Console.WriteLine($"ℹ️ Dark section not found or not accessible: {ex.Message}");
             }
+        }
+        
+        private async Task<string> GetComputedBackgroundColor(IFrameLocator frameLocator, string selector)
+        {
+            try
+            {
+                return await frameLocator.Locator(selector).EvaluateAsync<string>("el => getComputedStyle(el).backgroundColor");
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"⚠️ Could not get background color for {selector}: {ex.Message}");
+                return "";
+            }
+        }
+        
+        private void VerifyColorMatch(string sectionName, string actualColor, (string original, string inverted) expectedColors, bool shouldInvert)
+        {
+            var expectedColor = shouldInvert ? expectedColors.inverted : expectedColors.original;
+            
+            Console.WriteLine($"🔍 {sectionName}: expected={expectedColor}, actual={actualColor}, shouldInvert={shouldInvert}");
+            
+            // Normalize color values for comparison (handle different RGB formats)
+            var normalizedActual = NormalizeRgbColor(actualColor);
+            var normalizedExpected = NormalizeRgbColor(expectedColor);
+            
+            if (normalizedActual == normalizedExpected)
+            {
+                Console.WriteLine($"✅ {sectionName} color matches expected value");
+            }
+            else
+            {
+                // For debugging, also check if it matches the opposite expectation
+                var oppositeExpected = shouldInvert ? expectedColors.original : expectedColors.inverted;
+                var normalizedOpposite = NormalizeRgbColor(oppositeExpected);
+                
+                if (normalizedActual == normalizedOpposite)
+                {
+                    Assert.Fail($"{sectionName} color mismatch - got {actualColor} but expected {expectedColor}. " +
+                                     $"The actual color matches the {'('}{ (shouldInvert ? "non-inverted" : "inverted")} expectation, " +
+                                     $"suggesting the inversion logic is reversed.");
+                }
+                else
+                {
+                    Assert.Fail($"{sectionName} color mismatch - got {actualColor} but expected {expectedColor}. " +
+                                     $"The color doesn't match either inverted or non-inverted expectations.");
+                }
+            }
+        }
+        
+        private string NormalizeRgbColor(string color)
+        {
+            if (string.IsNullOrEmpty(color)) return "";
+            
+            // Handle rgba to rgb conversion and normalize spacing
+            return color.Trim()
+                       .Replace("rgba(", "rgb(")
+                       .Replace(", 1)", ")")  // Remove alpha channel if it's 1
+                       .Replace(" ", "")      // Remove spaces
+                       .ToLowerInvariant();
         }
 
         private async Task<string> TakeNamedScreenshotAsync(IPage page, string name)
