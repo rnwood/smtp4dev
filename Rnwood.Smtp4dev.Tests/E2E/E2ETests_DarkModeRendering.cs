@@ -85,7 +85,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 // Generate HTML report
                 await GenerateTestReport(testResults);
 
-            }, new UITestOptions());
+            }, new UITestOptions(), isDarkMode);
         }
 
         private async Task SendTestEmailAsync(int smtpPortNumber, string subject, bool supportsDarkMode)
@@ -556,17 +556,17 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         {
         }
 
-        private void RunUITestAsync(string testName, Func<IPage, Uri, int, Task> uitest, UITestOptions options = null)
+        private void RunUITestAsync(string testName, Func<IPage, Uri, int, Task> uitest, UITestOptions options = null, bool? browserDarkMode = null)
         {
             options ??= new UITestOptions();
 
             RunE2ETest(context =>
             {
-                RunPlaywrightTestAsync(testName, uitest, context).GetAwaiter().GetResult();
+                RunPlaywrightTestAsync(testName, uitest, context, browserDarkMode).GetAwaiter().GetResult();
             }, options);
         }
 
-        private async Task RunPlaywrightTestAsync(string testName, Func<IPage, Uri, int, Task> uitest, E2ETestContext context)
+        private async Task RunPlaywrightTestAsync(string testName, Func<IPage, Uri, int, Task> uitest, E2ETestContext context, bool? browserDarkMode = null)
         {
             using var playwright = await Playwright.CreateAsync();
             await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
@@ -576,6 +576,16 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             });
 
             var page = await browser.NewPageAsync();
+            
+            // Set browser color scheme to match the test scenario if specified
+            if (browserDarkMode.HasValue)
+            {
+                await page.EmulateMediaAsync(new PageEmulateMediaOptions
+                {
+                    ColorScheme = browserDarkMode.Value ? ColorScheme.Dark : ColorScheme.Light
+                });
+                Console.WriteLine($"🌙 Set browser color scheme to: {(browserDarkMode.Value ? "dark" : "light")}");
+            }
             
             page.SetDefaultTimeout(60000);
             page.SetDefaultNavigationTimeout(60000);
