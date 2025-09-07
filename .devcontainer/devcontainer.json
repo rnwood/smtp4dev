@@ -39,7 +39,7 @@
     
     "build": {
         "dockerfile": "Dockerfile",
-        "context": "."
+        "context": ".."
     },
     
     "containerEnv": {

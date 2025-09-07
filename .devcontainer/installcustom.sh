@@ -21,7 +21,7 @@ echo "npm version: $(npm --version)"
 # Install Playwright browsers for E2E testing
 echo "Installing Playwright browsers..."
 # Extract Playwright version from the test project file
-PLAYWRIGHT_VERSION=$(grep 'Microsoft\.Playwright.*Version=' ../Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj | head -1 | sed 's/.*Version="\([^"]*\)".*/\1/')
+PLAYWRIGHT_VERSION=$(grep 'Microsoft\.Playwright.*Version=' /Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj | head -1 | sed 's/.*Version="\([^"]*\)".*/\1/')
 if [ -z "$PLAYWRIGHT_VERSION" ]; then
     echo "Warning: Could not detect Playwright version, falling back to latest"
     PLAYWRIGHT_VERSION="latest"
