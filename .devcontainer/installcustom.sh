@@ -18,6 +18,7 @@ echo ".NET version: $(dotnet --version)"
 echo "Node.js version: $(node --version)"
 echo "npm version: $(npm --version)"
 
-# Install Chrome for E2E testing
-wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-sudo apt install -y ./google-chrome-stable_current_amd64.deb
+# Install Playwright browsers for E2E testing
+echo "Installing Playwright browsers..."
+npx --yes playwright@1.47.0 install chromium
+npx --yes playwright@1.47.0 install-deps chromium
