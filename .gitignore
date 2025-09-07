@@ -257,3 +257,4 @@ node_modules
 /Rnwood.Smtp4dev/ClientApp/.idea/*
 /Rnwood.Smtp4dev.Desktop/server
 /Rnwood.Smtp4dev.Desktop/wwwroot/*
+published/
