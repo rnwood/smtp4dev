@@ -69,14 +69,17 @@ export default class HubConnectionManager {
     }
 
     fireServerChanged(...args: any[]) {
+        console.log('HubConnectionManager: fireServerChanged called, handlers count:', this.onServerChangedHandlers.length);
         this.serverPromise = null;
 
         for (let handler of this.onServerChangedHandlers) {
+            console.log('HubConnectionManager: calling handler');
             handler.call(this);
         }
     }
 
     onServerChanged(handler: (...args: any[]) => void) {
+        console.log('HubConnectionManager: registering onServerChanged handler, total handlers will be:', this.onServerChangedHandlers.length + 1);
         this.onServerChangedHandlers.push(handler);
     }
 

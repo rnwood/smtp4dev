@@ -132,6 +132,7 @@
         }
 
         private updateIframe() {
+            console.log('updateIframe called, enableSanitization:', this.enableSanitization);
             this.wasSanitized = false;
             this.sanitizedHtml = "";
 
@@ -162,10 +163,15 @@
 
         @Watch("connection")
         async onConnectionChanged() {
+            console.log('MessageViewHtml: onConnectionChanged called, connection:', !!this.connection);
             if (this.connection) {
                 this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
+                console.log('MessageViewHtml: registering onServerChanged callback');
                 this.connection.onServerChanged(async () => {
-                    this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
+                    console.log('Server changed, updating sanitization setting');
+                    const newSetting = !(await this.connection.getServer()).disableMessageSanitisation;
+                    console.log('New sanitization setting:', newSetting);
+                    this.enableSanitization = newSetting;
                     this.updateIframe();
                 });
                 // Re-process HTML with the correct sanitization setting
