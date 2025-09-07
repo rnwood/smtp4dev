@@ -54,6 +54,7 @@
     import * as srcDoc from 'srcdoc-polyfill';
     import sanitizeHtml from 'sanitize-html';
     import { deviceSizes, Brand } from 'device-sizes'
+    import * as csstree from 'css-tree';
 
     type ViewPortSize = {
         name: string
@@ -225,35 +226,27 @@
             if (!cssText) return false;
 
             try {
-                // Remove comments and normalize whitespace
-                const normalizedCSS = cssText
-                    .replace(/\/\*.*?\*\//gs, '') // Remove CSS comments
-                    .replace(/\s+/g, ' ') // Normalize whitespace
-                    .toLowerCase();
-
-                // Look for @media rules with prefers-color-scheme: dark
-                // This is a more robust approach than regex for parsing CSS
-                let index = 0;
-                while ((index = normalizedCSS.indexOf('@media', index)) !== -1) {
-                    // Find the opening brace for this @media rule
-                    const openBrace = normalizedCSS.indexOf('{', index);
-                    if (openBrace === -1) break;
-
-                    // Extract the media query conditions
-                    const mediaQuery = normalizedCSS.substring(index + 6, openBrace).trim();
-                    
-                    // Check if this media query contains prefers-color-scheme: dark
-                    if (this.containsColorSchemeQuery(mediaQuery, 'dark')) {
-                        return true;
+                // Parse CSS using css-tree
+                const ast = csstree.parse(cssText, { parseRulePrelude: false });
+                
+                // Walk through the AST to find @media rules
+                let foundDarkModeQuery = false;
+                
+                csstree.walk(ast, function(node) {
+                    if (node.type === 'Atrule' && node.name === 'media' && node.prelude) {
+                        // Convert the media query prelude to string and check for dark mode
+                        const mediaQueryText = csstree.generate(node.prelude);
+                        if (this.containsColorSchemeQuery(mediaQueryText, 'dark')) {
+                            foundDarkModeQuery = true;
+                        }
                     }
+                }.bind(this));
 
-                    index = openBrace + 1;
-                }
-
-                return false;
+                return foundDarkModeQuery;
             } catch (error) {
                 console.warn('Error parsing CSS for dark mode queries:', error);
-                return false;
+                // Fallback to simple string search if css-tree parsing fails
+                return cssText.toLowerCase().includes('prefers-color-scheme') && cssText.toLowerCase().includes('dark');
             }
         }
 
@@ -265,27 +258,12 @@
             // - ( prefers-color-scheme : dark )
             // - screen and (prefers-color-scheme: dark)
             
-            // Remove parentheses and split by 'and' to get individual conditions
-            const conditions = mediaQuery
-                .replace(/[()]/g, ' ') // Replace parentheses with spaces
-                .split(/\s+and\s+/i)   // Split by 'and' (case insensitive)
-                .map(condition => condition.trim());
-
-            for (const condition of conditions) {
-                // Check if this condition is about prefers-color-scheme
-                if (condition.includes('prefers-color-scheme')) {
-                    // Extract the value part after the colon
-                    const colonIndex = condition.indexOf(':');
-                    if (colonIndex !== -1) {
-                        const value = condition.substring(colonIndex + 1).trim();
-                        if (value === scheme) {
-                            return true;
-                        }
-                    }
-                }
-            }
-
-            return false;
+            const normalizedQuery = mediaQuery.toLowerCase().trim();
+            
+            // Look for prefers-color-scheme with the specified scheme
+            // This handles the css-tree generated format as well as manual formats
+            const regex = new RegExp(`prefers-color-scheme\\s*:\\s*${scheme}\\b`, 'i');
+            return regex.test(normalizedQuery);
         }
 
         async onHtmlFrameLoaded() {
