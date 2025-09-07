@@ -85,7 +85,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 // Generate HTML report
                 await GenerateTestReport(testResults);
 
-            }, new UITestOptions(), isDarkMode);
+            }, new UITestOptions());
         }
 
         private async Task SendTestEmailAsync(int smtpPortNumber, string subject, bool supportsDarkMode)
@@ -117,8 +117,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
             string darkModeCSS = supportsDarkMode ? 
                 @"@media (prefers-color-scheme: dark) {
-                    .dark-section { background-color: #2d2d2d; color: #ffffff; }
-                    .email-content { background-color: #1a1a1a; }
+                    .email-content { background-color: #1a1a1a; color: #ffffff;}
                   }" : "";
 
             return $@"
@@ -160,11 +159,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
     <div class=""test-section yellow-section"" style=""background-color: #FFFF00; color: #000000; padding: 20px; margin: 10px; border: 2px solid #000; font-weight: bold; font-size: 16px;"">
         Yellow Section - This should be YELLOW in light mode
     </div>
-    
-    {(supportsDarkMode ? @"<div class=""test-section dark-section"" style=""background-color: #2d2d2d; color: #ffffff; padding: 20px; margin: 10px; border: 2px solid #000; font-weight: bold; font-size: 16px;"">
-        Dark Mode Section - This should have dark background in dark mode
-    </div>" : "")}
-    
+        
     <p><strong>Expected behavior:</strong></p>
     <ul>
         <li><strong>Light UI:</strong> Both email types display with their original colors</li>
@@ -556,17 +551,17 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         {
         }
 
-        private void RunUITestAsync(string testName, Func<IPage, Uri, int, Task> uitest, UITestOptions options = null, bool? browserDarkMode = null)
+        private void RunUITestAsync(string testName, Func<IPage, Uri, int, Task> uitest, UITestOptions options = null)
         {
             options ??= new UITestOptions();
 
             RunE2ETest(context =>
             {
-                RunPlaywrightTestAsync(testName, uitest, context, browserDarkMode).GetAwaiter().GetResult();
+                RunPlaywrightTestAsync(testName, uitest, context).GetAwaiter().GetResult();
             }, options);
         }
 
-        private async Task RunPlaywrightTestAsync(string testName, Func<IPage, Uri, int, Task> uitest, E2ETestContext context, bool? browserDarkMode = null)
+        private async Task RunPlaywrightTestAsync(string testName, Func<IPage, Uri, int, Task> uitest, E2ETestContext context)
         {
             using var playwright = await Playwright.CreateAsync();
             await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
@@ -577,15 +572,6 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
             var page = await browser.NewPageAsync();
             
-            // Set browser color scheme to match the test scenario if specified
-            if (browserDarkMode.HasValue)
-            {
-                await page.EmulateMediaAsync(new PageEmulateMediaOptions
-                {
-                    ColorScheme = browserDarkMode.Value ? ColorScheme.Dark : ColorScheme.Light
-                });
-                Console.WriteLine($"🌙 Set browser color scheme to: {(browserDarkMode.Value ? "dark" : "light")}");
-            }
             
             page.SetDefaultTimeout(60000);
             page.SetDefaultNavigationTimeout(60000);

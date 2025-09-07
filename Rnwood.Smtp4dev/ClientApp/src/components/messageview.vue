@@ -100,7 +100,9 @@
                     </template>
                     <messageviewattachments :message="message" v-if="message && messageSummary.attachmentCount"></messageviewattachments>
 
-                    <messageview-html v-if="message && message.hasHtmlBody && !message.hasPlainTextBody" :connection="connection" :message="message" class="fill messagepreview"></messageview-html>
+                    <UseDark v-slot="{isDark}">
+                        <messageview-html v-if="message && message.hasHtmlBody && !message.hasPlainTextBody" :isDark="isDark" :connection="connection" :message="message" class="fill messagepreview"></messageview-html>
+                    </UseDark>
                     <messageview-plaintext v-if="message && !message.hasHtmlBody && message.hasPlainTextBody" :message="message" class="fill messageplaintext"></messageview-plaintext>
                     <div v-if="message && !message.hasHtmlBody && !message.hasPlainTextBody">This MIME message has no HTML or plain text body.</div>
 
@@ -238,6 +240,7 @@
     import ServerController from '../ApiClient/ServerController';
     import MessageViewPlainText from "./messageviewplaintext.vue";
     import MessageCompose from "@/components/messagecompose.vue";
+    import { UseDark } from '@vueuse/components';
 
     @Component({
         components: {
@@ -249,7 +252,8 @@
             messagesource: MessageSource,
             messageclientanalysis: MessageClientAnalysis,
             messagehtmlvalidation: MessageHtmlValidation,
-            messagecompose: MessageCompose
+            messagecompose: MessageCompose,
+            UseDark
         }
     })
     class MessageView extends Vue {

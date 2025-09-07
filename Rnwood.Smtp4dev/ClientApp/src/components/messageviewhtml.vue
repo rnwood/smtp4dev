@@ -41,13 +41,12 @@
         </el-alert>
 
         <div class="fill" style="display: flex; flex-direction: column;">
-            <iframe :class="htmlFrameClasses" :style="htmlFrameStyles" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
+           <iframe :class="htmlFrameClasses" :style="htmlFrameStyles" @load="onHtmlFrameLoaded" ref="htmlframe"></iframe>
         </div>
     </div>
 </template>
 <script lang="ts">
-    import { Component, Vue, Prop, Watch, toNative } from 'vue-facing-decorator'
-    import { useDark } from '@vueuse/core'
+    import { Component, Vue, Prop, Watch, toNative, Inject } from 'vue-facing-decorator'
 
     import MessagesController from "../ApiClient/MessagesController";
     import ServerController from "../ApiClient/ServerController";
@@ -82,9 +81,9 @@
         sanitizedHtml: string | null = null;
         wasSanitized: boolean = false;
         emailSupportsDarkMode: boolean = false;
-        
-        // Use VueUse dark mode composable
-        isDark = useDark();
+
+        @Prop()
+        isDark = false;
 
         availableViewportSizes: ViewPortSize[] = [{ name: "Normal", fill: true }].concat(Object.values(deviceSizes).map(d => ({
             name: `${Brand[d.brand]} ${d.name} (${d.size}")`, fill: false, width: d.width / d.scale, height: d.height / d.scale
@@ -92,7 +91,7 @@
         selectedViewportSizeName = "Normal";
         viewportRotate = false;
 
-        availableZoomLevels: ZoomLevel[] = [{ name: "150%", scale: 1.5 },{ name: "125%", scale: 1.25 },{ name: "100%", scale: 1 }, { name: "75%", scale: 0.75 }, { name: "50%", scale: 0.5 }]
+        availableZoomLevels: ZoomLevel[] = [{ name: "150%", scale: 1.5 }, { name: "125%", scale: 1.25 }, { name: "100%", scale: 1 }, { name: "75%", scale: 0.75 }, { name: "50%", scale: 0.5 }]
         selectedZoomLevelName = "100%";
 
         get selectedViewportSize(): ViewPortSize {
@@ -144,15 +143,18 @@
             this.updateIframe();
         }
 
+        @Watch("isDark")
+        async onIsDarkChanged() {
+            this.updateIframe();
+        }
+
         private updateIframe() {
             this.wasSanitized = false;
             this.sanitizedHtml = "";
             this.emailSupportsDarkMode = false; // Reset first
 
             if (this.html) {
-                // Check if email supports dark mode before sanitization
-                const originalDarkModeSupport = this.detectDarkModeSupport(this.html);
-                console.log('Dark mode detection on original HTML:', originalDarkModeSupport, 'for HTML length:', this.html.length);
+
 
                 if (!this.enableSanitization) {
                     this.sanitizedHtml = this.html;
@@ -170,33 +172,35 @@
                             "body": ["class"],
                             "*": ["style", "class", "id"] // Allow style, class, and id on all elements for better CSS support
                         },
-                        allowedSchemesByTag: { 
-                            "img": ["cid", "data"] 
+                        allowedSchemesByTag: {
+                            "img": ["cid", "data"]
                         }
                     };
-                    
+
                     this.sanitizedHtml = sanitizeHtml(this.html, sanitizeOptions);
                     let normalizedOriginalHtml = sanitizeHtml(this.html, { allowedAttributes: false, allowedTags: false, allowVulnerableTags: true });
                     this.wasSanitized = normalizedOriginalHtml !== this.sanitizedHtml;
-                    
+
                     // Check dark mode support on sanitized HTML
                     this.emailSupportsDarkMode = this.detectDarkModeSupport(this.sanitizedHtml);
                     console.log('Dark mode detection on sanitized HTML:', this.emailSupportsDarkMode, 'for sanitized HTML length:', this.sanitizedHtml.length);
-                    
-                    if (originalDarkModeSupport !== this.emailSupportsDarkMode) {
-                        console.warn('⚠️ Dark mode detection result changed after sanitization!', 
-                                   'Original:', originalDarkModeSupport, 'Sanitized:', this.emailSupportsDarkMode);
-                    }
+
                 }
-                
-                // If the email supports dark mode, override the meta color-scheme tag
-                // to match the UI dark mode state
-                if (this.emailSupportsDarkMode && this.sanitizedHtml) {
-                    console.log('🎨 Overriding meta color-scheme for email with dark mode support');
-                    this.sanitizedHtml = this.overrideColorScheme(this.sanitizedHtml);
-                }
+
+                this.updateDarkMode();
             }
 
+        }
+
+        private updateDarkMode() {
+            // If the email supports dark mode, override the meta color-scheme tag
+            // to match the UI dark mode state
+            if (this.emailSupportsDarkMode && this.sanitizedHtml) {
+                console.log('🎨 Overriding meta color-scheme for email with dark mode support');
+                this.sanitizedHtml = this.overrideColorScheme(this.sanitizedHtml);
+            }
+
+            
             srcDoc.set(this.$refs.htmlframe as HTMLIFrameElement, this.sanitizedHtml);
         }
 
@@ -204,13 +208,13 @@
             try {
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
-                
+
                 // Determine the desired color scheme order based on UI dark mode state
                 const colorSchemeContent = this.isDark ? 'dark light' : 'light dark';
-                
+
                 // Look for existing color-scheme meta tag
                 let colorSchemeMeta = doc.querySelector('meta[name="color-scheme"]');
-                
+
                 if (colorSchemeMeta) {
                     // Update existing meta tag
                     colorSchemeMeta.setAttribute('content', colorSchemeContent);
@@ -220,7 +224,7 @@
                     colorSchemeMeta = doc.createElement('meta');
                     colorSchemeMeta.setAttribute('name', 'color-scheme');
                     colorSchemeMeta.setAttribute('content', colorSchemeContent);
-                    
+
                     // Add to head if available, otherwise create head
                     let head = doc.querySelector('head');
                     if (!head) {
@@ -230,7 +234,7 @@
                     head.appendChild(colorSchemeMeta);
                     console.log('✅ Created new color-scheme meta tag with content:', colorSchemeContent);
                 }
-                
+
                 // Also set CSS color-scheme property to ensure browser respects the preference
                 const style = doc.createElement('style');
                 style.textContent = `
@@ -238,7 +242,7 @@
                         color-scheme: ${colorSchemeContent};
                     }
                 `;
-                
+
                 // Add CSS to head
                 let head = doc.querySelector('head');
                 if (!head) {
@@ -247,7 +251,7 @@
                 }
                 head.appendChild(style);
                 console.log('✅ Added CSS color-scheme property:', colorSchemeContent);
-                
+
                 return doc.documentElement.outerHTML;
             } catch (error) {
                 console.warn('❌ Failed to override color-scheme meta tag:', error);
@@ -258,7 +262,7 @@
         private detectDarkModeSupport(html: string): boolean {
             try {
                 console.log('Detecting dark mode support in HTML...');
-                
+
                 // Use DOMParser to safely parse HTML
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
@@ -317,7 +321,7 @@
 
         private parseColorSchemeValues(content: string): string[] {
             if (!content) return [];
-            
+
             // Split by both spaces and commas, trim each value, and filter out empty values
             return content
                 .split(/[\s,]+/)
@@ -328,20 +332,13 @@
         private parseCSSForDarkModeQueries(cssText: string): boolean {
             if (!cssText) return false;
 
-            // First try simple string search as it's more reliable for this use case
-            const simpleCheck = cssText.toLowerCase().includes('prefers-color-scheme') && cssText.toLowerCase().includes('dark');
-            if (simpleCheck) {
-                console.log('✅ Found dark mode media query via simple string search');
-                return true;
-            }
-
             try {
                 // Try css-tree parsing as a secondary check
                 const ast = csstree.parse(cssText, { parseRulePrelude: false });
-                
+
                 let foundDarkModeQuery = false;
-                
-                csstree.walk(ast, function(node) {
+
+                csstree.walk(ast, function (node) {
                     if (node.type === 'Atrule' && node.name === 'media') {
                         const mediaQueryText = csstree.generate(node.prelude);
                         console.log('Found @media rule:', mediaQueryText);
