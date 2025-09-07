@@ -171,7 +171,7 @@
                 const supportedColorSchemesMeta = doc.querySelector('meta[name="supported-color-schemes"]');
                 if (supportedColorSchemesMeta) {
                     const content = supportedColorSchemesMeta.getAttribute('content') || '';
-                    if (content.toLowerCase().includes('dark')) {
+                    if (this.parseColorSchemeValues(content).includes('dark')) {
                         return true;
                     }
                 }
@@ -180,7 +180,7 @@
                 const colorSchemeMeta = doc.querySelector('meta[name="color-scheme"]');
                 if (colorSchemeMeta) {
                     const content = colorSchemeMeta.getAttribute('content') || '';
-                    if (content.toLowerCase().includes('dark')) {
+                    if (this.parseColorSchemeValues(content).includes('dark')) {
                         return true;
                     }
                 }
@@ -189,7 +189,7 @@
                 const styleElements = doc.querySelectorAll('style');
                 for (const styleElement of styleElements) {
                     const cssText = styleElement.textContent || '';
-                    if (cssText.match(/@media[^{]*\(prefers-color-scheme:\s*dark\)/i)) {
+                    if (this.parseCSSForDarkModeQueries(cssText)) {
                         return true;
                     }
                 }
@@ -199,7 +199,7 @@
                 const elementsWithStyle = doc.querySelectorAll('[style]');
                 for (const element of elementsWithStyle) {
                     const styleAttr = element.getAttribute('style') || '';
-                    if (styleAttr.match(/@media[^{]*\(prefers-color-scheme:\s*dark\)/i)) {
+                    if (this.parseCSSForDarkModeQueries(styleAttr)) {
                         return true;
                     }
                 }
@@ -209,6 +209,83 @@
                 console.warn('Error parsing HTML for dark mode detection:', error);
                 return false;
             }
+        }
+
+        private parseColorSchemeValues(content: string): string[] {
+            if (!content) return [];
+            
+            // Split by both spaces and commas, trim each value, and filter out empty values
+            return content
+                .split(/[\s,]+/)
+                .map(value => value.trim().toLowerCase())
+                .filter(value => value.length > 0);
+        }
+
+        private parseCSSForDarkModeQueries(cssText: string): boolean {
+            if (!cssText) return false;
+
+            try {
+                // Remove comments and normalize whitespace
+                const normalizedCSS = cssText
+                    .replace(/\/\*.*?\*\//gs, '') // Remove CSS comments
+                    .replace(/\s+/g, ' ') // Normalize whitespace
+                    .toLowerCase();
+
+                // Look for @media rules with prefers-color-scheme: dark
+                // This is a more robust approach than regex for parsing CSS
+                let index = 0;
+                while ((index = normalizedCSS.indexOf('@media', index)) !== -1) {
+                    // Find the opening brace for this @media rule
+                    const openBrace = normalizedCSS.indexOf('{', index);
+                    if (openBrace === -1) break;
+
+                    // Extract the media query conditions
+                    const mediaQuery = normalizedCSS.substring(index + 6, openBrace).trim();
+                    
+                    // Check if this media query contains prefers-color-scheme: dark
+                    if (this.containsColorSchemeQuery(mediaQuery, 'dark')) {
+                        return true;
+                    }
+
+                    index = openBrace + 1;
+                }
+
+                return false;
+            } catch (error) {
+                console.warn('Error parsing CSS for dark mode queries:', error);
+                return false;
+            }
+        }
+
+        private containsColorSchemeQuery(mediaQuery: string, scheme: string): boolean {
+            // Parse media query conditions more carefully
+            // Handle various formats like:
+            // - (prefers-color-scheme: dark)
+            // - (prefers-color-scheme:dark)
+            // - ( prefers-color-scheme : dark )
+            // - screen and (prefers-color-scheme: dark)
+            
+            // Remove parentheses and split by 'and' to get individual conditions
+            const conditions = mediaQuery
+                .replace(/[()]/g, ' ') // Replace parentheses with spaces
+                .split(/\s+and\s+/i)   // Split by 'and' (case insensitive)
+                .map(condition => condition.trim());
+
+            for (const condition of conditions) {
+                // Check if this condition is about prefers-color-scheme
+                if (condition.includes('prefers-color-scheme')) {
+                    // Extract the value part after the colon
+                    const colonIndex = condition.indexOf(':');
+                    if (colonIndex !== -1) {
+                        const value = condition.substring(colonIndex + 1).trim();
+                        if (value === scheme) {
+                            return true;
+                        }
+                    }
+                }
+            }
+
+            return false;
         }
 
         async onHtmlFrameLoaded() {
