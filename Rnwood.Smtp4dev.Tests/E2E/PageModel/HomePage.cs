@@ -39,7 +39,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 
         public ILocator GetDarkModeToggleButton()
         {
-            return page.Locator("button[icon='sunny'], button[icon='moon']");
+            // The dark mode toggle is the first circular button in the header
+            // Since it's the only icon-only circular button in the header after the logo
+            return page.Locator("header button.el-button.is-circle").First;
         }
 
         public async Task ToggleDarkModeAsync()

@@ -147,15 +147,42 @@
 
             if (this.html) {
                 // Check if email supports dark mode before sanitization
-                this.emailSupportsDarkMode = this.detectDarkModeSupport(this.html);
-                console.log('Dark mode detection result:', this.emailSupportsDarkMode, 'for HTML length:', this.html.length);
+                const originalDarkModeSupport = this.detectDarkModeSupport(this.html);
+                console.log('Dark mode detection on original HTML:', originalDarkModeSupport, 'for HTML length:', this.html.length);
 
                 if (!this.enableSanitization) {
                     this.sanitizedHtml = this.html;
+                    this.emailSupportsDarkMode = originalDarkModeSupport;
                 } else {
-                    this.sanitizedHtml = sanitizeHtml(this.html, { allowedTags: sanitizeHtml.defaults.allowedTags.concat("img"), allowedSchemesByTag: { "img": ["cid", "data"] } });
+                    // Allow additional tags and attributes needed for dark mode detection
+                    const sanitizeOptions = {
+                        allowedTags: sanitizeHtml.defaults.allowedTags.concat([
+                            "img", "style", "meta", "head", "html", "body"
+                        ]),
+                        allowedAttributes: {
+                            ...sanitizeHtml.defaults.allowedAttributes,
+                            "meta": ["name", "content", "charset", "http-equiv"],
+                            "html": ["lang", "dir"],
+                            "body": ["class"],
+                            "*": ["style", "class", "id"] // Allow style, class, and id on all elements for better CSS support
+                        },
+                        allowedSchemesByTag: { 
+                            "img": ["cid", "data"] 
+                        }
+                    };
+                    
+                    this.sanitizedHtml = sanitizeHtml(this.html, sanitizeOptions);
                     let normalizedOriginalHtml = sanitizeHtml(this.html, { allowedAttributes: false, allowedTags: false, allowVulnerableTags: true });
                     this.wasSanitized = normalizedOriginalHtml !== this.sanitizedHtml;
+                    
+                    // Check dark mode support on sanitized HTML
+                    this.emailSupportsDarkMode = this.detectDarkModeSupport(this.sanitizedHtml);
+                    console.log('Dark mode detection on sanitized HTML:', this.emailSupportsDarkMode, 'for sanitized HTML length:', this.sanitizedHtml.length);
+                    
+                    if (originalDarkModeSupport !== this.emailSupportsDarkMode) {
+                        console.warn('⚠️ Dark mode detection result changed after sanitization!', 
+                                   'Original:', originalDarkModeSupport, 'Sanitized:', this.emailSupportsDarkMode);
+                    }
                 }
             }
 

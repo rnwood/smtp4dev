@@ -190,8 +190,35 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             // Wait for iframe to be ready
             await page.WaitForSelectorAsync("iframe.htmlview", new PageWaitForSelectorOptions { Timeout = 10000 });
             
-            // Wait for dark mode detection to complete - give Vue time to apply the CSS classes
-            await page.WaitForTimeoutAsync(3000);
+            // Wait for dark mode detection to complete by waiting for the expected CSS class state
+            // This is more reliable than a fixed timeout
+            try
+            {
+                if (emailSupportsDarkMode)
+                {
+                    // Wait for the supports-dark-mode class to be applied
+                    await page.WaitForSelectorAsync("iframe.htmlview.supports-dark-mode", new PageWaitForSelectorOptions { Timeout = 10000 });
+                    Console.WriteLine("✅ Successfully waited for 'supports-dark-mode' class to be applied");
+                }
+                else
+                {
+                    // Wait a bit for Vue to process, then verify the class is NOT present
+                    await page.WaitForTimeoutAsync(2000);
+                    
+                    // Verify the supports-dark-mode class is NOT present
+                    var hasClass = await page.QuerySelectorAsync("iframe.htmlview.supports-dark-mode") != null;
+                    if (hasClass)
+                    {
+                        await page.WaitForTimeoutAsync(3000); // Give more time if the class appeared unexpectedly
+                    }
+                    Console.WriteLine("✅ Successfully verified 'supports-dark-mode' class timing for email without dark mode support");
+                }
+            }
+            catch (TimeoutException)
+            {
+                Console.WriteLine($"⚠️ Timeout waiting for expected CSS class state. EmailSupportsDarkMode: {emailSupportsDarkMode}");
+                // Continue with verification to get detailed error information
+            }
             
             // Verify the iframe has the correct CSS class based on dark mode support
             var iframe = await page.QuerySelectorAsync("iframe.htmlview");
