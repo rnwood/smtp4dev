@@ -183,7 +183,7 @@ stages:
             displayName: Run SmtpServer Tests
             inputs:
               command: test
-              projects: Rnwood.SmtpServer.Tests
+              projects: smtpserver/Rnwood.SmtpServer.Tests
               configuration: release
               arguments: '--collect:"XPlat Code Coverage"'
               publishTestResults: true
