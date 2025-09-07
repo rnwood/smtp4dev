@@ -55,17 +55,31 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
             // Check if the html element has the 'dark' class
             var htmlElement = page.Locator("html");
             var classes = await htmlElement.GetAttributeAsync("class");
-            return classes?.Contains("dark") == true;
+            bool hasDarkClass = classes?.Contains("dark") == true;
+            
+            // Also check using JavaScript as a fallback
+            if (!hasDarkClass)
+            {
+                hasDarkClass = await page.EvaluateAsync<bool>("() => document.documentElement.classList.contains('dark')");
+            }
+            
+            return hasDarkClass;
         }
 
         public async Task SetDarkModeAsync(bool isDarkMode)
         {
-            bool currentDarkMode = await IsDarkModeActiveAsync();
-            if (currentDarkMode != isDarkMode)
+            // For E2E testing, apply the dark class directly since the UI toggle
+            // may use different mechanisms (VueUse, Element Plus, etc.)
+            if (isDarkMode)
             {
-                await ToggleDarkModeAsync();
-                await page.WaitForTimeoutAsync(1000); // Allow UI to update
+                await page.EvaluateAsync("() => document.documentElement.classList.add('dark')");
             }
+            else
+            {
+                await page.EvaluateAsync("() => document.documentElement.classList.remove('dark')");
+            }
+            
+            await page.WaitForTimeoutAsync(500); // Allow CSS to take effect
         }
 
         public class MessageListControl

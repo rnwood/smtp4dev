@@ -108,7 +108,9 @@
 
                     <el-tabs v-if="message && message.hasPlainTextBody && message.hasHtmlBody" value="html" style="height: 100%; width:100%" class="fill">
                         <el-tab-pane id="html" label="HTML" class="hfillpanel">
-                            <messageview-html :message="message" class="fill messagepreview"></messageview-html>
+                            <UseDark v-slot="{isDark}">
+                                <messageview-html :isDark="isDark" :connection="connection" :message="message" class="fill messagepreview"></messageview-html>
+                            </UseDark>
                         </el-tab-pane>
                         <el-tab-pane id="plaintext" label="Plain text" class="hfillpanel">
                             <messageview-plaintext :message="message" class="fill messageplaintext"></messageview-plaintext>
