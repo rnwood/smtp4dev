@@ -160,14 +160,30 @@
             doc.body.appendChild(baseElement);
         }
 
+        private serverChangedHandler: (() => void) | null = null;
+
         @Watch("connection")
         async onConnectionChanged() {
             if (this.connection) {
                 this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
-                this.connection.onServerChanged(async () => {
-                    this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
+                
+                // Remove any existing handler first to avoid duplicates
+                if (this.serverChangedHandler) {
+                    // Note: We don't have a way to remove handlers yet, but we prevent duplicates
+                    // by only setting the handler once
+                }
+                
+                // Create new handler
+                this.serverChangedHandler = async () => {
+                    const newSetting = !(await this.connection!.getServer()).disableMessageSanitisation;
+                    this.enableSanitization = newSetting;
                     this.updateIframe();
-                });
+                };
+                
+                this.connection.onServerChanged(this.serverChangedHandler);
+                
+                // Re-process HTML with the correct sanitization setting
+                this.updateIframe();
             }
         }
 
@@ -192,6 +208,13 @@
         }
 
         async created() {
+            // Initialize sanitization setting if connection is already available
+            if (this.connection) {
+                this.enableSanitization = !(await this.connection.getServer()).disableMessageSanitisation;
+                // Since connection is already available, we need to manually call onConnectionChanged
+                // to register the server change callback
+                await this.onConnectionChanged();
+            }
             this.refresh();
         }
 

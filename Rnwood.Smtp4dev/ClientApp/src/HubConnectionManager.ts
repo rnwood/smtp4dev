@@ -80,6 +80,13 @@ export default class HubConnectionManager {
         this.onServerChangedHandlers.push(handler);
     }
 
+    removeServerChangedHandler(handler: (...args: any[]) => void) {
+        const index = this.onServerChangedHandlers.indexOf(handler);
+        if (index > -1) {
+            this.onServerChangedHandlers.splice(index, 1);
+        }
+    }
+
     private onServerChangedHandlers: ((...args: any[]) => void)[] = []
 
     async getServer() {
