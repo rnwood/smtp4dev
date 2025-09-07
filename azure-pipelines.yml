@@ -329,9 +329,8 @@ stages:
           
             
       - job: BuildGlobalTool
+        dependsOn:
         displayName: Build - .NET Global Tool
-        dependsOn: BuildMatrix
-        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "windows-2022"
         steps:
@@ -369,9 +368,8 @@ stages:
             artifact: dotnetglobaltool
 
       - job: BuildDesktop
+        dependsOn:
         displayName: Build - Desktop
-        dependsOn: BuildMatrix
-        condition: succeeded('BuildMatrix')
         pool:
           vmImage: "windows-2022"
         steps:
