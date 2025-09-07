@@ -202,25 +202,34 @@
 
         private injectDarkModeActivation(html: string): string {
             try {
-                // Parse the HTML to inject CSS that forces dark mode styles to apply
+                // Parse the HTML to extract and apply CSS dark mode media query rules
                 const parser = new DOMParser();
                 const doc = parser.parseFromString(html, 'text/html');
                 
-                // Create a style element that forces dark mode styles by duplicating the media query rules
-                // without the media query condition
+                // Find all style elements and extract dark mode media query rules
+                const styleElements = doc.querySelectorAll('style');
+                let darkModeRules = '';
+                
+                styleElements.forEach(styleElement => {
+                    const cssText = styleElement.textContent || '';
+                    
+                    // Use simple parsing to find @media (prefers-color-scheme: dark) rules
+                    const mediaQueryRegex = /@media\s*\(\s*prefers-color-scheme\s*:\s*dark\s*\)\s*\{([^{}]*(?:\{[^{}]*\}[^{}]*)*)\}/gi;
+                    let match;
+                    
+                    while ((match = mediaQueryRegex.exec(cssText)) !== null) {
+                        const rules = match[1];
+                        if (rules && rules.trim()) {
+                            darkModeRules += rules.trim() + '\n';
+                            console.log('📋 Found dark mode media query rules:', rules.trim());
+                        }
+                    }
+                });
+                
+                // Create a style element that applies the dark mode rules directly
                 const darkModeStyle = doc.createElement('style');
                 darkModeStyle.textContent = `
-                    /* Injected by smtp4dev to force email dark mode styles when UI is in dark mode */
-                    /* This duplicates the email's @media (prefers-color-scheme: dark) rules but without the media query */
-                    .dark-section { 
-                        background-color: #2d2d2d !important; 
-                        color: #ffffff !important; 
-                    }
-                    .email-content { 
-                        background-color: #1a1a1a !important; 
-                    }
-                    
-                    /* Set color-scheme to help with browser behavior */
+                    /* Injected by smtp4dev to activate email dark mode media queries when UI is in dark mode */
                     :root {
                         color-scheme: dark;
                     }
@@ -228,6 +237,9 @@
                     html {
                         color-scheme: dark;
                     }
+                    
+                    /* Extracted dark mode media query rules applied directly */
+                    ${darkModeRules}
                 `;
                 
                 // Try to add to <head> first, fallback to <body>
@@ -242,7 +254,7 @@
                     }
                 }
                 
-                console.log('✅ Successfully injected dark mode activation CSS with forced styles');
+                console.log('✅ Successfully injected dark mode CSS with extracted media query rules');
                 return doc.documentElement.outerHTML;
             } catch (error) {
                 console.warn('❌ Failed to inject dark mode activation CSS:', error);
