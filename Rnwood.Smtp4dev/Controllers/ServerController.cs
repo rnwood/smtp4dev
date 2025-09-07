@@ -253,7 +253,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
             //Horrible without reflection! Maybe source generators can do this?
             newSettings.Port = serverUpdate.Port != defaultSettingsFile.ServerOptions.Port ? serverUpdate.Port : null;
-            newSettings.HostName = serverUpdate.HostName != defaultSettingsFile.ServerOptions.HostName && serverUpdate.HostName != currentSettings.HostName ? serverUpdate.HostName : null;
+            newSettings.HostName = serverUpdate.HostName != defaultSettingsFile.ServerOptions.HostName ? serverUpdate.HostName : null;
             newSettings.AllowRemoteConnections = serverUpdate.AllowRemoteConnections != defaultSettingsFile.ServerOptions.AllowRemoteConnections ? serverUpdate.AllowRemoteConnections : null;
             newSettings.NumberOfMessagesToKeep = serverUpdate.NumberOfMessagesToKeep != defaultSettingsFile.ServerOptions.NumberOfMessagesToKeep ? serverUpdate.NumberOfMessagesToKeep : null;
             newSettings.NumberOfSessionsToKeep = serverUpdate.NumberOfSessionsToKeep != defaultSettingsFile.ServerOptions.NumberOfSessionsToKeep ? serverUpdate.NumberOfSessionsToKeep : null;
