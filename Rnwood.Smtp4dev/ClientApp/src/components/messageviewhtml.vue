@@ -229,17 +229,18 @@
                 // Parse CSS using css-tree
                 const ast = csstree.parse(cssText, { parseRulePrelude: false });
                 
-                // Walk through the AST to find @media rules with MediaQuery nodes
+                // Walk through the AST to find @media rules
                 let foundDarkModeQuery = false;
                 
                 csstree.walk(ast, function(node) {
-                    if (node.type === 'MediaQuery') {
-                        // Check if this MediaQuery contains prefers-color-scheme: dark
-                        if (this.checkMediaQueryForDarkMode(node)) {
+                    if (node.type === 'Atrule' && node.name === 'media') {
+                        // Convert the prelude to string and check for dark mode
+                        const mediaQueryText = csstree.generate(node.prelude);
+                        if (mediaQueryText.includes('prefers-color-scheme') && mediaQueryText.includes('dark')) {
                             foundDarkModeQuery = true;
                         }
                     }
-                }.bind(this));
+                });
 
                 return foundDarkModeQuery;
             } catch (error) {
@@ -250,20 +251,8 @@
         }
 
         private checkMediaQueryForDarkMode(mediaQuery: any): boolean {
-            // Walk through the MediaQuery node to find prefers-color-scheme: dark features
-            let foundDarkColorScheme = false;
-            
-            csstree.walk(mediaQuery, function(node) {
-                if (node.type === 'Feature' && 
-                    node.name === 'prefers-color-scheme' && 
-                    node.value && 
-                    node.value.type === 'Identifier' && 
-                    node.value.name === 'dark') {
-                    foundDarkColorScheme = true;
-                }
-            });
-            
-            return foundDarkColorScheme;
+            // This method is no longer used, keeping for compatibility
+            return false;
         }
 
         async onHtmlFrameLoaded() {

@@ -190,6 +190,21 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             // Wait for iframe to be ready
             await page.WaitForSelectorAsync("iframe.htmlview", new PageWaitForSelectorOptions { Timeout = 10000 });
             
+            // If the email supports dark mode, wait for the supports-dark-mode class to be applied
+            if (emailSupportsDarkMode)
+            {
+                await page.WaitForSelectorAsync("iframe.htmlview.supports-dark-mode", new PageWaitForSelectorOptions { Timeout = 10000 });
+            }
+            else
+            {
+                // Wait a bit for the Vue reactivity to complete and ensure the class is not present
+                await page.WaitForTimeoutAsync(1000);
+                
+                // Verify the class is not present
+                var iframeElement = await page.QuerySelectorAsync("iframe.htmlview.supports-dark-mode");
+                Assert.Null(iframeElement); // Should not have the supports-dark-mode class
+            }
+            
             // Get the iframe content frame
             var iframe = page.FrameLocator("iframe.htmlview");
             
