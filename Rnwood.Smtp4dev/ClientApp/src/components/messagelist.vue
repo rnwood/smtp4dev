@@ -378,12 +378,25 @@
                 // Refresh the message list
                 await this.refresh(false);
                 
-                // Select the first imported message by its specific ID
+                // Select the first imported message by its specific ID with retry logic
                 if (importedIds.length > 0) {
                     const firstImportedId = importedIds[0];
-                    const importedMessage = this.messages.find(m => m.id === firstImportedId);
-                    if (importedMessage) {
-                        this.selectMessage(importedMessage);
+                    
+                    // Retry mechanism to wait for the imported message to appear in the list
+                    let retryCount = 0;
+                    const maxRetries = 10;
+                    const retryDelay = 200; // 200ms between retries
+                    
+                    while (retryCount < maxRetries) {
+                        const importedMessage = this.messages.find(m => m.id === firstImportedId);
+                        if (importedMessage) {
+                            this.selectMessage(importedMessage);
+                            break;
+                        }
+                        
+                        // Wait before retrying
+                        await new Promise(resolve => setTimeout(resolve, retryDelay));
+                        retryCount++;
                     }
                 }
             }
