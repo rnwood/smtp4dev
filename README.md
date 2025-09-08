@@ -19,6 +19,41 @@ smtp4dev support many advanced features:
 
 *If you're looking for the older v2 Windows only GUI version. [Grab it here](https://github.com/rnwood/smtp4dev/releases/tag/v2.0.10).*
 
+## How smtp4dev Compares
+
+There are several fake SMTP servers available for development and testing. Here's how smtp4dev stacks up against other popular options:
+
+| Feature | smtp4dev | MailHog | MailCatcher | MailDev | FakeSMTP |
+|---------|----------|---------|-------------|---------|----------|
+| **Web Interface** | ✅ Advanced | ✅ Basic | ✅ Basic | ✅ Basic | ❌ |
+| **SMTP Server** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **IMAP Server** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **API (REST/OpenAPI)** | ✅ Swagger docs | ✅ Basic | ❌ | ✅ Basic | ❌ |
+| **HTML Email Rendering** | ✅ Advanced | ✅ Basic | ✅ Basic | ✅ Basic | ❌ |
+| **HTML Compatibility Reports** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Responsive Email Testing** | ✅ Viewport switcher | ❌ | ❌ | ❌ | ❌ |
+| **MIME Parts Inspector** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **SMTP Session Logging** | ✅ Detailed | ❌ | ❌ | ❌ | ❌ |
+| **TLS/SSL Support** | ✅ Auto-cert generation | ❌ | ❌ | ❌ | ❌ |
+| **Authentication** | ✅ | ✅ Basic | ❌ | ❌ | ❌ |
+| **Multiple Mailboxes** | ✅ With rules | ❌ | ❌ | ❌ | ❌ |
+| **Message Relay** | ✅ With rules | ❌ | ❌ | ✅ Basic | ❌ |
+| **Message Composition** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Scripting & Error Simulation** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Dark Mode** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Cross-Platform** | ✅ .NET 8 | ✅ Go | ✅ Ruby | ✅ Node.js | ✅ Java |
+| **Docker Support** | ✅ | ✅ | ✅ | ✅ | ❌ |
+
+### Why Choose smtp4dev?
+
+**For Advanced Development & Testing**: If you need comprehensive email testing capabilities, smtp4dev offers features not found in other tools like HTML compatibility analysis, responsive design testing, and detailed SMTP session logging.
+
+**For Production-Like Testing**: With IMAP support, TLS/SSL, authentication, and multiple mailboxes, smtp4dev can simulate real email server behavior more accurately.
+
+**For Team Workflows**: The advanced web interface, API documentation, and message relay capabilities make smtp4dev ideal for development teams and CI/CD pipelines.
+
+**For Modern Email Development**: Responsive email testing, HTML validation, and compatibility reports help ensure your emails work across all clients and devices.
+
 > <a style="float: right" href="https://www.patreon.com/bePatron?u=38204828" data-patreon-widget-type="become-patron-button"><img alt='Become a Patreon' src='https://c5.patreon.com/external/logo/become_a_patron_button.png' height="30px"></a> <a  style="float: right" href='https://www.paypal.me/rnwood'><img alt='Donate' src='https://www.paypalobjects.com/webstatic/en_US/btn/btn_donate_pp_142x27.png'/></a> *If you find smtp4dev useful, please consider supporting further development by making a donation*
 > .
 
