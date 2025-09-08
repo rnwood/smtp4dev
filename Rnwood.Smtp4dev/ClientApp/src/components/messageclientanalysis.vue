@@ -12,7 +12,11 @@
             <div>Message has no HTML body</div>
         </div>
 
-        <el-table class="fill table" stripe :data="warnings" v-if="message?.hasHtmlBody" empty-text="There are no warnings">
+        <div v-if="message?.hasHtmlBody && isHtmlCompatibilityCheckDisabled" class="fill nodetails centrecontents">
+            <div>HTML compatibility check is disabled</div>
+        </div>
+
+        <el-table class="fill table" stripe :data="warnings" v-if="message?.hasHtmlBody && !isHtmlCompatibilityCheckDisabled" empty-text="There are no warnings">
             <el-table-column prop="feature" label="Feature" width="180">
                 <template #default="scope">
                     <span style="font-family: Courier New, Courier, monospace">{{scope.row.feature}}</span>
@@ -42,6 +46,7 @@
     import MessagesController from "../ApiClient/MessagesController";
     import Message from "../ApiClient/Message";
     import { doIUseEmail } from '@jsx-email/doiuse-email';
+    import HubConnectionManager from "../ApiClient/HubConnectionManager";
 
     @Component
     class MessageClientAnalysis extends Vue {
@@ -49,8 +54,12 @@
         @Prop({ default: null })
         message: Message | null | undefined;
 
+        @Prop({ default: null })
+        connection: HubConnectionManager | null = null;
+
         error: Error | null = null;
         loading = false;
+        isHtmlCompatibilityCheckDisabled = false;
 
         warnings: { message: string, feature: string, type: string, browsers: string[], url: string, isError: boolean }[] =[];
 
@@ -58,6 +67,15 @@
         async onMessageChanged(value: Message | null, oldValue: Message | null) {
 
             await this.loadMessage();
+        }
+
+        @Watch("connection")
+        onConnectionChanged() {
+            if (this.connection) {
+                this.connection.onServerChanged( async () => {
+                    await this.loadMessage();
+                });
+            }
         }
 
         @Watch("warnings")
@@ -102,29 +120,32 @@
 
             try {
                 const newWarnings = [];
-                if (this.message != null && this.message.hasHtmlBody) {
+                if (this.message != null && this.message.hasHtmlBody && this.connection) {
+                    const server = await this.connection.getServer();
+                    this.isHtmlCompatibilityCheckDisabled = server.disableHtmlCompatibilityCheck;
+                    
+                    if (!this.isHtmlCompatibilityCheckDisabled) {
+                        const html = await new MessagesController().getMessageHtml(this.message.id);
+                        const doIUseResults = doIUseEmail(html, { emailClients: ["*"] });
 
-                    const html = await new MessagesController().getMessageHtml(this.message.id);
-                    const doIUseResults = doIUseEmail(html, { emailClients: ["*"] });
-
-                    const allWarnings = [];
-                    for (const warning of doIUseResults.warnings) {
-                        const details = this.parseWarning(warning, false);
-                        allWarnings.push(details);
-                    }
-
-                    if (doIUseResults.success == false) {
-                        for (const warning of doIUseResults.errors) {
-                            const details = this.parseWarning(warning,true);
+                        const allWarnings = [];
+                        for (const warning of doIUseResults.warnings) {
+                            const details = this.parseWarning(warning, false);
                             allWarnings.push(details);
                         }
 
-                    }
+                        if (doIUseResults.success == false) {
+                            for (const warning of doIUseResults.errors) {
+                                const details = this.parseWarning(warning,true);
+                                allWarnings.push(details);
+                            }
 
-                    const allGrouped = Object.groupBy(allWarnings, i => i.feature + " " + i.type);
-                    for (const groupKey in allGrouped) {
-                        const groupItems = allGrouped[groupKey]!;
-                        newWarnings.push({
+                        }
+
+                        const allGrouped = Object.groupBy(allWarnings, i => i.feature + " " + i.type);
+                        for (const groupKey in allGrouped) {
+                            const groupItems = allGrouped[groupKey]!;
+                            newWarnings.push({
                             type: groupItems[0].type, 
                             
                             feature: groupItems[0].feature,
@@ -137,7 +158,7 @@
                     }
 
                     this.warnings = newWarnings;
-
+                    }
                 }
             } catch (e: any) {
                 this.error = e;
