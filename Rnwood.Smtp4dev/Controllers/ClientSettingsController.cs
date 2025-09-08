@@ -27,7 +27,8 @@ namespace Rnwood.Smtp4dev.Controllers
             var clientProps = clientOptions.Value;
             return new ApiModel.ClientSettings
             {
-                PageSize = clientProps.PageSize
+                PageSize = clientProps.PageSize,
+                AutoViewNewMessages = clientProps.AutoViewNewMessages
             };
         }
     }

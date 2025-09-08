@@ -74,6 +74,10 @@
 
                             <el-switch v-model="server.disableHtmlCompatibilityCheck" :disabled="server.lockedSettings.disableHtmlCompatibilityCheck" />
                         </el-form-item>
+
+                        <el-form-item label="Auto view new messages as they arrive">
+                            <el-switch v-model="autoViewNewMessages" />
+                        </el-form-item>
                     </el-tab-pane>
                     <el-tab-pane label="SMTP Server">
 
@@ -473,6 +477,15 @@
                 this.server.relaySmtpServer = "";
                 this.server.relayAutomaticEmails.splice(0, this.server.relayAutomaticEmails.length);
             }
+        }
+
+        get autoViewNewMessages(): boolean {
+            const stored = window.localStorage.getItem("auto-view-new-messages");
+            return stored === "true";
+        }
+
+        set autoViewNewMessages(value: boolean) {
+            window.localStorage.setItem("auto-view-new-messages", value.toString());
         }
 
         async save() {
