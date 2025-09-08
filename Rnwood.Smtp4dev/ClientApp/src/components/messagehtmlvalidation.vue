@@ -12,7 +12,11 @@
             <div>Message has no HTML body</div>
         </div>
 
-        <el-table class="fill table" stripe :data="warnings" v-if="message?.hasHtmlBody" empty-text="There are no warnings">
+        <div v-if="message?.hasHtmlBody && isHtmlValidationDisabled" class="fill nodetails centrecontents">
+            <div>HTML validation is disabled</div>
+        </div>
+
+        <el-table class="fill table" stripe :data="warnings" v-if="message?.hasHtmlBody && !isHtmlValidationDisabled" empty-text="There are no warnings">
             <el-table-column prop="message" label="Message" width="200">
                 <template #default="scope">
                     <a target="_blank" :href="scope.row.ruleUrl">{{scope.row.message}}</a>
@@ -43,7 +47,9 @@
 
     import MessagesController from "../ApiClient/MessagesController";
     import Message from "../ApiClient/Message";
-    import { HtmlValidate, Message as HtmlValidateMessage } from "html-validate";
+    import { Message as HtmlValidateMessage } from "html-validate";
+    import HubConnectionManager from "../ApiClient/HubConnectionManager";
+    import { HtmlValidationWorkerManager } from "../workers/HtmlValidationWorkerManager";
 
     @Component
     class MessageHtmlValidation extends Vue {
@@ -54,8 +60,10 @@
         error: Error | null = null;
         loading = false;
         html = "";
-
+        
         warnings: HtmlValidateMessage[] = [];
+        isHtmlValidationDisabled = false;
+        private workerManager = new HtmlValidationWorkerManager();
 
 
         @Prop({ default: null })
@@ -89,6 +97,12 @@
             return this.warnings?.length ?? 0;
         }
 
+        async refresh() {
+            if (this.connection) {
+                await this.loadMessage();
+            }
+        }
+
 
 
         async loadMessage() {
@@ -100,17 +114,18 @@
 
             try {
                 const newWarnings = [];
-                if (this.message != null && this.message.hasHtmlBody) {
+                if (this.message != null && this.message.hasHtmlBody && this.connection) {
+                    const server = await this.connection.getServer();
+                    this.isHtmlValidationDisabled = server.disableHtmlValidation;
+                    
+                    if (!this.isHtmlValidationDisabled) {
+                        this.html = await new MessagesController().getMessageHtml(this.message.id);
+                        const config = JSON.parse(server.htmlValidateConfig);
 
-                    this.html = await new MessagesController().getMessageHtml(this.message.id);
-                    const config = JSON.parse((await this.connection.getServer()).htmlValidateConfig);
-
-                    const report = await new HtmlValidate(config).validateString(this.html, "messagebody");
-                    for (const r of report.results) {
-                        newWarnings.push(...r.messages);
+                        // Use web worker for validation
+                        const validationResults = await this.workerManager.validateHtml(this.html, config);
+                        newWarnings.push(...validationResults);
                     }
-
-
                 }
                 this.warnings = newWarnings;
             } catch (e: any) {
@@ -126,7 +141,7 @@
         }
 
         async destroyed() {
-
+            this.workerManager.destroy();
         }
 
     }

@@ -24,6 +24,9 @@ export default defineConfig({
         outDir: "../wwwroot",
         emptyOutDir: true
     },
+    worker: {
+        format: 'es'
+    },
     css: {
         preprocessorOptions: {
             sass: {
