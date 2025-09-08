@@ -62,86 +62,99 @@ namespace Rnwood.Smtp4dev.Server
 
                 try
                 {
-                    // Get the message stream and parse it
-                    if (e.Stream == null)
-                    {
-                        e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "No message data provided");
-                        return;
-                    }
+                    // Provide a memory stream for the IMAP session to write message data to
+                    var messageStream = new MemoryStream();
+                    e.Stream = messageStream;
 
-                    using (var scope = this.serviceScopeFactory.CreateScope())
+                    // Handle the completion when the message data has been received
+                    e.Completed += (completedSender, completedArgs) =>
                     {
-                        var dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
-                        
-                        // Read the message data
-                        byte[] messageData = new byte[e.Size];
-                        e.Stream.Read(messageData, 0, e.Size);
-                        
-                        // Parse the MIME message to extract headers
-                        string subject = "";
-                        string from = "";
-                        string to = "";
-                        string mimeParseError = null;
-                        
                         try
                         {
-                            using (var messageStream = new MemoryStream(messageData))
-                            {
-                                var mimeMessage = MimeMessage.Load(messageStream);
-                                subject = mimeMessage.Subject ?? "";
-                                from = mimeMessage.From.FirstOrDefault()?.ToString() ?? "";
-                                to = string.Join(", ", mimeMessage.To.Select(addr => addr.ToString()));
-                            }
+                            ProcessAppendedMessage(e, messageStream);
                         }
                         catch (Exception ex)
                         {
-                            mimeParseError = ex.Message;
-                            log.Warning("Failed to parse MIME message for APPEND: {error}", ex.Message);
+                            log.Error(ex, "APPEND completion failed");
+                            e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "APPEND failed: " + ex.Message);
                         }
-
-                        // Create a new Message entity
-                        var message = new DbModel.Message
-                        {
-                            Id = Guid.NewGuid(),
-                            From = from,
-                            To = to,
-                            Subject = subject,
-                            Data = messageData,
-                            ReceivedDate = e.InternalDate != DateTime.MinValue ? e.InternalDate : DateTime.Now,
-                            MimeParseError = mimeParseError,
-                            AttachmentCount = 0,
-                            IsUnread = !e.Flags.Contains("\\Seen", StringComparer.OrdinalIgnoreCase),
-                            SecureConnection = false,
-                            SessionEncoding = System.Text.Encoding.UTF8.WebName
-                        };
-
-                        // Get or create the Sent mailbox
-                        var sentMailboxName = GetFolderMailboxName(SENT_FOLDER);
-                        var mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == sentMailboxName);
-                        if (mailbox == null)
-                        {
-                            mailbox = new DbModel.Mailbox { Id = Guid.NewGuid(), Name = sentMailboxName };
-                            dbContext.Mailboxes.Add(mailbox);
-                        }
-                        message.Mailbox = mailbox;
-
-                        // Assign IMAP UID
-                        var imapState = dbContext.ImapState.Single();
-                        imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
-                        message.ImapUid = imapState.LastUid;
-
-                        // Save the message
-                        dbContext.Messages.Add(message);
-                        dbContext.SaveChanges();
-
-                        log.Information("APPEND successful: saved message to {folder} folder with UID {uid}", e.Folder, message.ImapUid);
-                        e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "OK", "APPEND completed");
-                    }
+                    };
                 }
                 catch (Exception ex)
                 {
-                    log.Error(ex, "APPEND operation failed");
+                    log.Error(ex, "APPEND initialization failed");
                     e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "APPEND failed: " + ex.Message);
+                }
+            }
+
+            private void ProcessAppendedMessage(IMAP_e_Append e, MemoryStream messageStream)
+            {
+                using (var scope = this.serviceScopeFactory.CreateScope())
+                {
+                    var dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
+                    
+                    // Get the message data
+                    byte[] messageData = messageStream.ToArray();
+                    
+                    // Parse the MIME message to extract headers
+                    string subject = "";
+                    string from = "";
+                    string to = "";
+                    string mimeParseError = null;
+                    
+                    try
+                    {
+                        using (var parseStream = new MemoryStream(messageData))
+                        {
+                            var mimeMessage = MimeMessage.Load(parseStream);
+                            subject = mimeMessage.Subject ?? "";
+                            from = mimeMessage.From.FirstOrDefault()?.ToString() ?? "";
+                            to = string.Join(", ", mimeMessage.To.Select(addr => addr.ToString()));
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        mimeParseError = ex.Message;
+                        log.Warning("Failed to parse MIME message for APPEND: {error}", ex.Message);
+                    }
+
+                    // Create a new Message entity
+                    var message = new DbModel.Message
+                    {
+                        Id = Guid.NewGuid(),
+                        From = from,
+                        To = to,
+                        Subject = subject,
+                        Data = messageData,
+                        ReceivedDate = e.InternalDate != DateTime.MinValue ? e.InternalDate : DateTime.Now,
+                        MimeParseError = mimeParseError,
+                        AttachmentCount = 0,
+                        IsUnread = !e.Flags.Contains("\\Seen", StringComparer.OrdinalIgnoreCase),
+                        SecureConnection = false,
+                        SessionEncoding = System.Text.Encoding.UTF8.WebName
+                    };
+
+                    // Get or create the Sent mailbox
+                    var sentMailboxName = GetFolderMailboxName(SENT_FOLDER);
+                    var mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == sentMailboxName);
+                    if (mailbox == null)
+                    {
+                        mailbox = new DbModel.Mailbox { Id = Guid.NewGuid(), Name = sentMailboxName };
+                        dbContext.Mailboxes.Add(mailbox);
+                    }
+                    message.Mailbox = mailbox;
+
+                    // Assign IMAP UID
+                    var imapState = dbContext.ImapState.Single();
+                    imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
+                    message.ImapUid = imapState.LastUid;
+
+                    // Save the message
+                    dbContext.Messages.Add(message);
+                    dbContext.SaveChanges();
+
+                    log.Information("APPEND successful: saved message to {folder} folder with UID {uid}", e.Folder, message.ImapUid);
+                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "OK", "APPEND completed");
                 }
             }
 
