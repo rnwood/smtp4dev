@@ -71,11 +71,13 @@ namespace Rnwood.Smtp4dev.Tests.DBMigrations
             validateMethod.Should().NotBeNull();
             Action act = () => validateMethod.Invoke(null, new object[] { context });
             
-            act.Should().Throw<TargetInvocationException>()
-                .WithInnerException<InvalidOperationException>()
-                .And.InnerException.Message.Should().Contain("Database version mismatch detected")
-                .And.Should().Contain(fakeMigrationId)
-                .And.Should().Contain("upgrade to a newer version");
+            var exceptionResult = act.Should().Throw<TargetInvocationException>();
+            exceptionResult.Which.InnerException.Should().BeOfType<InvalidOperationException>();
+            
+            var innerException = exceptionResult.Which.InnerException as InvalidOperationException;
+            innerException.Message.Should().Contain("Database version mismatch detected");
+            innerException.Message.Should().Contain(fakeMigrationId);
+            innerException.Message.Should().Contain("Upgrade to a newer version");
         }
 
         public void Dispose()
