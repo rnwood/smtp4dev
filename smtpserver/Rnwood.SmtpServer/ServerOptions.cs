@@ -35,6 +35,7 @@ public class ServerOptions : IServerOptions
     private readonly SslProtocols sslProtocols;
     private readonly TlsCipherSuite[] tlsCipherSuites;
     private readonly long? maxMessageSize;
+    private readonly IPAddress bindAddress;
 
     /// <summary>
     ///     Initializes a new instance of the <see cref="ServerOptions" /> class.
@@ -51,6 +52,7 @@ public class ServerOptions : IServerOptions
     /// <param name="sslProtocols">The SSL protocol versions to allow</param>
     /// <param name="tlsCipherSuites">The TLS cipher suites to allow</param>
     /// <param name="maxMessageSize">The maximum message size in bytes accepted by the server</param>
+    /// <param name="bindAddress">The specific IP address to bind to, or null to use default behavior</param>
     public ServerOptions(
         bool allowRemoteConnections,
         bool enableIpV6,
@@ -63,7 +65,8 @@ public class ServerOptions : IServerOptions
         X509Certificate startTlsCertificate,
         SslProtocols sslProtocols,
         TlsCipherSuite[] tlsCipherSuites,
-        long? maxMessageSize)
+        long? maxMessageSize,
+        IPAddress bindAddress = null)
     {
         DomainName = domainName;
         PortNumber = portNumber;
@@ -77,6 +80,7 @@ public class ServerOptions : IServerOptions
         this.sslProtocols = sslProtocols;
         this.tlsCipherSuites = tlsCipherSuites;
         this.maxMessageSize = maxMessageSize;
+        this.bindAddress = bindAddress;
     }
 
 
@@ -89,6 +93,11 @@ public class ServerOptions : IServerOptions
     {
         get
         {
+            // If a specific bind address is provided, use it
+            if (this.bindAddress != null)
+            {
+                return this.bindAddress;
+            }
 
             if (this.enableIpV6)
             {
