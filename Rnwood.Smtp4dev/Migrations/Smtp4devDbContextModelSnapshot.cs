@@ -66,6 +66,9 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.Property<string>("From")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("HasBareLineFeed")
+                        .HasColumnType("INTEGER");
+
                     b.Property<long>("ImapUid")
                         .HasColumnType("INTEGER");
 
