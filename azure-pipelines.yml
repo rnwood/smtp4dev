@@ -197,69 +197,52 @@ stages:
 
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
+            displayName: Install Playwright System Dependencies (Linux)
+            inputs:
+              targetType: inline
+              script: |
+                if ($IsLinux) {
+                  Write-Host "Installing system dependencies for Playwright on Linux..."
+                  try {
+                    sudo apt-get update
+                    sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2t64 libatk-bridge2.0-0t64 libdrm2 libgtk-3-0t64 libatspi2.0-0t64
+                    Write-Host "✓ System dependencies installed successfully"
+                  } catch {
+                    Write-Error "Failed to install system dependencies: $_"
+                    exit 1
+                  }
+                } else {
+                  Write-Host "Skipping system dependencies installation on Windows"
+                }
+          - task: DotNetCoreCLI@2
+            condition: and(succeeded(), eq(variables['runTests'], true))
+            displayName: Install Playwright CLI Tool
+            inputs:
+              command: custom
+              custom: tool
+              arguments: 'install --global Microsoft.Playwright.CLI'
+          - task: PowerShell@2
+            condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright Browsers
             timeoutInMinutes: 15
             inputs:
               targetType: inline
               script: |
-                # Install Playwright browsers using the project's installation method
-                Write-Host "Starting Playwright browser installation process..."
-                Write-Host "Current working directory: $(Get-Location)"
-                
-                # Find playwright.ps1 in the forced output directory
-                $baseDir = "bin/playwright"
-                $playwrightScript = "$baseDir/playwright.ps1"
-                
-                Write-Host "Searching for playwright.ps1 script..."
-                Write-Host "Expected path: $playwrightScript"
-                
-                if (-not (Test-Path $playwrightScript)) {
-                  Write-Error "✗ Playwright script not found at expected path: $playwrightScript"
-                  # Enhanced debugging - list all contents
-                  Write-Host "Detailed directory listing for debugging:"
-                  if (Test-Path $baseDir) {
-                    Write-Host "Contents of $($baseDir):"
-                    Get-ChildItem -Path $baseDir -Recurse | ForEach-Object { Write-Host "  $($_.FullName)" }
-                    Write-Host ""
-                    Write-Host "Searching for any playwright.ps1 files:"
-                    Get-ChildItem -Path $baseDir -Recurse -Name "playwright.ps1" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  Found: $baseDir/$_" }
-                  } else {
-                    Write-Host "Base directory $baseDir does not exist!"
-                  }
-                  exit 1
-                }
-                
-                Write-Host "✓ Found playwright.ps1 at: $playwrightScript"
-                
-                # Use the generated playwright.ps1 script (works on both Windows and Linux)
-                Write-Host "Installing Playwright browser using script: $playwrightScript"
-                Write-Host "File exists check: $(Test-Path $playwrightScript)"
-                
+                Write-Host "Installing Playwright Chromium browser..."
                 try {
-                  if ($IsLinux) {
-                    Write-Host "Installing Chromium with system dependencies (this may take several minutes)..."
-                    Write-Host "Running command: pwsh $playwrightScript install chromium --with-deps"
-                    # Don't capture output - let it stream directly to avoid hanging
-                    pwsh $playwrightScript install chromium --with-deps
-                    $exitCode = $LASTEXITCODE
-                  } else {
-                    Write-Host "Installing Chromium..."
-                    Write-Host "Running command: pwsh $playwrightScript install chromium"
-                    # Don't capture output - let it stream directly to avoid hanging
-                    pwsh $playwrightScript install chromium
-                    $exitCode = $LASTEXITCODE
-                  }
+                  playwright install chromium
+                  $exitCode = $LASTEXITCODE
                   
                   if ($exitCode -ne 0) {
-                    Write-Error "Playwright installation failed with exit code $exitCode"
+                    Write-Error "Playwright browser installation failed with exit code $exitCode"
                     exit 1
                   }
+                  
+                  Write-Host "✓ Playwright browser installation completed successfully"
                 } catch {
-                  Write-Error "Playwright installation failed with exception: $_"
+                  Write-Error "Playwright browser installation failed with exception: $_"
                   exit 1
                 }
-                
-                Write-Host "✓ Playwright browser installation completed successfully"
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Run Tests
