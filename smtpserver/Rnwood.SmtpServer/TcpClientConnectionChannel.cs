@@ -31,6 +31,11 @@ public class TcpClientConnectionChannel : IConnectionChannel
     private SmtpStreamWriter writer;
 
     /// <summary>
+    ///     Gets a value indicating whether the last line read had a bare line feed (LF without CR).
+    /// </summary>
+    public bool LastLineHadBareLineFeed => reader?.LastLineHadBareLineFeed ?? false;
+
+    /// <summary>
     ///     Initializes a new instance of the <see cref="TcpClientConnectionChannel" /> class.
     /// </summary>
     /// <param name="tcpClient">The tcpClient<see cref="TcpClient" />.</param>

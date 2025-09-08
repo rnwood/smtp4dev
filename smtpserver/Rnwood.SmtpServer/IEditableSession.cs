@@ -87,4 +87,9 @@ public interface IEditableSession : ISession
     /// </summary>
     /// <returns>A <see cref="Task" /> representing the asynchronous operation.</returns>
     Task ResetBadCommandCounter();
+
+    /// <summary>
+    ///     Gets or sets a value indicating whether the current message contains bare line feeds.
+    /// </summary>
+    bool CurrentMessageHasBareLineFeed { get; set; }
 }
