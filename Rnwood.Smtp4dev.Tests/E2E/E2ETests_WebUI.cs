@@ -14,9 +14,97 @@ using Xunit.Abstractions;
 
 namespace Rnwood.Smtp4dev.Tests.E2E
 {
-    public class E2ETests_WebUI : E2ETests
+    public abstract class E2ETestsWebUIBase : E2ETests
     {
-        public E2ETests_WebUI(ITestOutputHelper output) : base(output)
+        protected E2ETestsWebUIBase(ITestOutputHelper output) : base(output)
+        {
+        }
+
+        protected class UITestOptions : E2ETestOptions
+        {
+        }
+
+        protected void RunUITestAsync(string testName, Func<IPage, Uri, int, Task> uitest, UITestOptions options = null)
+        {
+            options ??= new UITestOptions();
+
+            RunE2ETest(context =>
+            {
+                RunPlaywrightTestAsync(testName, uitest, context).GetAwaiter().GetResult();
+            }, options);
+        }
+
+        protected async Task RunPlaywrightTestAsync(string testName, Func<IPage, Uri, int, Task> uitest, E2ETestContext context)
+        {
+            using var playwright = await Playwright.CreateAsync();
+            await using var browser = await playwright.Chromium.LaunchAsync(new BrowserTypeLaunchOptions
+            {
+                Headless = !System.Diagnostics.Debugger.IsAttached,
+                // Increase timeout for CI environments
+                Timeout = 60000 // 60 seconds for browser launch
+            });
+
+            var page = await browser.NewPageAsync();
+            
+            // Set longer timeouts for CI environments
+            page.SetDefaultTimeout(60000); // 60 seconds for page operations
+            page.SetDefaultNavigationTimeout(60000); // 60 seconds for navigation
+            
+            try
+            {
+                await uitest(page, context.BaseUrl, context.SmtpPortNumber);
+            }
+            catch
+            {
+                // Take screenshot on failure
+                string screenshotPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"{testName}_{Guid.NewGuid()}.png");
+                await page.ScreenshotAsync(new PageScreenshotOptions { Path = screenshotPath, FullPage = true });
+                
+                Console.WriteLine($"##vso[artifact.upload containerfolder=e2eerror;artifactname={testName}.png]{screenshotPath}");
+                throw;
+            }
+        }
+
+        protected async Task<T> WaitForAsync<T>(Func<Task<T>> getValue, int timeoutSeconds = 60) where T : class
+        {
+            using var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(timeoutSeconds));
+            T result = null;
+
+            while (result == null && !timeout.Token.IsCancellationRequested)
+            {
+                try
+                {
+                    result = await getValue();
+                }
+                catch
+                {
+                    result = null;
+                }
+                
+                if (result == null)
+                {
+                    await Task.Delay(100, timeout.Token);
+                }
+            }
+
+            Assert.NotNull(result);
+            return result;
+        }
+
+        protected static RemoteCertificateValidationCallback GetCertvalidationCallbackHandler()
+        {
+            return (s, c, h, e) => 
+            {
+                var cert = new X509Certificate2(c.GetRawCertData());
+                // Simple validation - check if certificate subject contains localhost
+                return cert.Subject.Contains("localhost");
+            };
+        }
+    }
+
+    public class E2ETests_WebUI_CheckUrlEnvVarIsRespected : E2ETestsWebUIBase
+    {
+        public E2ETests_WebUI_CheckUrlEnvVarIsRespected(ITestOutputHelper output) : base(output)
         {
         }
 
@@ -84,15 +172,12 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 BasePath = basePath
             });
         }
+    }
 
-        private static RemoteCertificateValidationCallback GetCertvalidationCallbackHandler()
+    public class E2ETests_WebUI_CheckUTF8MessageIsReceivedAndDisplayed : E2ETestsWebUIBase
+    {
+        public E2ETests_WebUI_CheckUTF8MessageIsReceivedAndDisplayed(ITestOutputHelper output) : base(output)
         {
-            return (s, c, h, e) => 
-            {
-                var cert = new X509Certificate2(c.GetRawCertData());
-                // Simple validation - check if certificate subject contains localhost
-                return cert.Subject.Contains("localhost");
-            };
         }
 
         [Fact]
@@ -143,31 +228,12 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 Assert.True(await messageRow.ContainsTextAsync("ñఛ@example.com"));
             });
         }
+    }
 
-        private async Task<T> WaitForAsync<T>(Func<Task<T>> findElement) where T : class
+    public class E2ETests_WebUI_CheckHtmlSanitizationSettingTakesEffectImmediately : E2ETestsWebUIBase
+    {
+        public E2ETests_WebUI_CheckHtmlSanitizationSettingTakesEffectImmediately(ITestOutputHelper output) : base(output)
         {
-            T result = null;
-            var timeout = new CancellationTokenSource(TimeSpan.FromSeconds(60)); // Increased from 30s to 60s for CI
-
-            while (result == null && !timeout.IsCancellationRequested)
-            {
-                try
-                {
-                    result = await findElement();
-                }
-                catch
-                {
-                    result = null;
-                }
-                
-                if (result == null)
-                {
-                    await Task.Delay(100, timeout.Token);
-                }
-            }
-
-            Assert.NotNull(result);
-            return result;
         }
 
         [Fact]
@@ -249,6 +315,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 }
             });
         }
+
 
         [Fact]
         public void CheckEmlImportWorksCorrectly()

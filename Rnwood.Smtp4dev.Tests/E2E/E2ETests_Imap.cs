@@ -15,9 +15,9 @@ using MailboxAddress = MimeKit.MailboxAddress;
 
 namespace Rnwood.Smtp4dev.Tests.E2E
 {
-    public class E2ETests_Imap : E2ETests
+    public class E2ETests_Imap_MessagesAvailable : E2ETests
     {
-        public E2ETests_Imap(ITestOutputHelper output) : base(output)
+        public E2ETests_Imap_MessagesAvailable(ITestOutputHelper output) : base(output)
         {
 
 
@@ -80,8 +80,15 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
             });
         }
+    }
+
+    public class E2ETests_Imap_OlderSearchFunctionality : E2ETests
+    {
+        public E2ETests_Imap_OlderSearchFunctionality(ITestOutputHelper output) : base(output)
+        {
 
 
+        }
 
         [Fact]
         public void OlderSearchFunctionality()

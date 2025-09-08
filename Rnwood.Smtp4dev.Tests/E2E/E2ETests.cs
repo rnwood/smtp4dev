@@ -13,7 +13,6 @@ using Xunit.Abstractions;
 
 namespace Rnwood.Smtp4dev.Tests.E2E
 {
-    [Collection("E2E")]
     public class E2ETests
     {
         private readonly ITestOutputHelper output;
