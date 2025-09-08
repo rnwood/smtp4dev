@@ -12,7 +12,11 @@
             <div>Message has no HTML body</div>
         </div>
 
-        <el-table class="fill table" stripe :data="warnings" v-if="message?.hasHtmlBody" empty-text="There are no warnings">
+        <div v-if="message?.hasHtmlBody && isHtmlCompatibilityCheckDisabled" class="fill nodetails centrecontents">
+            <div>HTML compatibility check is disabled</div>
+        </div>
+
+        <el-table class="fill table" stripe :data="warnings" v-if="message?.hasHtmlBody && !isHtmlCompatibilityCheckDisabled" empty-text="There are no warnings">
             <el-table-column prop="feature" label="Feature" width="180">
                 <template #default="scope">
                     <span style="font-family: Courier New, Courier, monospace">{{scope.row.feature}}</span>
@@ -41,7 +45,8 @@
 
     import MessagesController from "../ApiClient/MessagesController";
     import Message from "../ApiClient/Message";
-    import { doIUseEmail } from '@jsx-email/doiuse-email';
+    import HubConnectionManager from "../ApiClient/HubConnectionManager";
+    import { HtmlCompatibilityWorkerManager, type CompatibilityWarning } from "../workers/HtmlCompatibilityWorkerManager";
 
     @Component
     class MessageClientAnalysis extends Vue {
@@ -49,15 +54,29 @@
         @Prop({ default: null })
         message: Message | null | undefined;
 
+        @Prop({ default: null })
+        connection: HubConnectionManager | null = null;
+
         error: Error | null = null;
         loading = false;
+        isHtmlCompatibilityCheckDisabled = false;
+        private workerManager = new HtmlCompatibilityWorkerManager();
 
-        warnings: { message: string, feature: string, type: string, browsers: string[], url: string, isError: boolean }[] =[];
+        warnings: CompatibilityWarning[] = [];
 
         @Watch("message")
         async onMessageChanged(value: Message | null, oldValue: Message | null) {
 
             await this.loadMessage();
+        }
+
+        @Watch("connection")
+        onConnectionChanged() {
+            if (this.connection) {
+                this.connection.onServerChanged( async () => {
+                    await this.loadMessage();
+                });
+            }
         }
 
         @Watch("warnings")
@@ -70,30 +89,6 @@
             return this.warnings?.length ?? 0;
         }
 
-        private parseWarning(warning: string, isError: boolean) {
-
-            const details = { message: warning, type: "", feature: "", browser: "", url: "", isError: false };
-            const detailsMatch = warning.match(/^`(.+)` (support )?is (.+) (by|for) `(.+)`$/);
-
-            if (detailsMatch) {
-                details.feature = detailsMatch[1] ?? null;
-                details.type = detailsMatch[3] ?? null;
-                details.browser = detailsMatch[5] ?? null;
-                details.isError = isError;
-
-                if (details.feature.endsWith(" element")) {
-                    details.url = `https://www.caniemail.com/features/html-${details.feature.replace("<", "").replace("> element", "")}/`;
-                } else {
-                    details.url = `https://www.caniemail.com/features/css-${details.feature.replace(":", "-")}/`;
-
-                }
-            } else {
-                details.type = warning;
-            }
-
-            return details;
-        }
-
         async loadMessage() {
 
             this.warnings = [];
@@ -101,43 +96,17 @@
             this.loading = true;
 
             try {
-                const newWarnings = [];
-                if (this.message != null && this.message.hasHtmlBody) {
-
-                    const html = await new MessagesController().getMessageHtml(this.message.id);
-                    const doIUseResults = doIUseEmail(html, { emailClients: ["*"] });
-
-                    const allWarnings = [];
-                    for (const warning of doIUseResults.warnings) {
-                        const details = this.parseWarning(warning, false);
-                        allWarnings.push(details);
+                if (this.message != null && this.message.hasHtmlBody && this.connection) {
+                    const server = await this.connection.getServer();
+                    this.isHtmlCompatibilityCheckDisabled = server.disableHtmlCompatibilityCheck;
+                    
+                    if (!this.isHtmlCompatibilityCheckDisabled) {
+                        const html = await new MessagesController().getMessageHtml(this.message.id);
+                        
+                        // Use web worker for compatibility checking
+                        const compatibilityResults = await this.workerManager.checkCompatibility(html);
+                        this.warnings = compatibilityResults;
                     }
-
-                    if (doIUseResults.success == false) {
-                        for (const warning of doIUseResults.errors) {
-                            const details = this.parseWarning(warning,true);
-                            allWarnings.push(details);
-                        }
-
-                    }
-
-                    const allGrouped = Object.groupBy(allWarnings, i => i.feature + " " + i.type);
-                    for (const groupKey in allGrouped) {
-                        const groupItems = allGrouped[groupKey]!;
-                        newWarnings.push({
-                            type: groupItems[0].type, 
-                            
-                            feature: groupItems[0].feature,
-                            message: groupItems[0].message, 
-                            
-                            url: groupItems[0].url,
-                            browsers: groupItems.map(i => i.browser).filter((value, index, array) => array.indexOf(value) === index),
-                            isError: groupItems[0].isError
-                        })
-                    }
-
-                    this.warnings = newWarnings;
-
                 }
             } catch (e: any) {
                 this.error = e;
@@ -152,7 +121,7 @@
         }
 
         async destroyed() {
-
+            this.workerManager.destroy();
         }
 
     }
