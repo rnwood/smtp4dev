@@ -26,6 +26,14 @@
 
                         </el-form-item>
 
+                        <el-form-item label="Bind Address (SMTP, IMAP)" prop="server.bindAddress">
+                            <el-input v-model="server.bindAddress" :disabled="server.lockedSettings.bindAddress" placeholder="Leave empty to use default (0.0.0.0 when remote connections allowed, 127.0.0.1 when not)">
+                                <template #prefix>
+                                    <el-icon v-if="server.lockedSettings.bindAddress" :title="`Locked: ${server.lockedSettings.bindAddress}`"><Lock /></el-icon>
+                                </template>
+                            </el-input>
+                        </el-form-item>
+
                         <el-form-item label="Disable IPv6 (SMTP, IMAP)" prop="server.disableIPv6">
                             <el-icon v-if="server.lockedSettings.disableIPv6" :title="`Locked: ${server.lockedSettings.disableIPv6}`"><Lock /></el-icon>
 
