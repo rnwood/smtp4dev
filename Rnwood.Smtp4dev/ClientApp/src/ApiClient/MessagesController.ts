@@ -180,4 +180,22 @@ export default class MessagesController {
 
         return (await axios.delete(this.deleteAll_url(mailboxName), null || undefined)).data as void;
     }
+
+    // post: api/Messages/import
+    public import_url(mailboxName: string): string {
+        return `${this.apiBaseUrl}/import?mailboxName=${encodeURIComponent(mailboxName)}`;
+    }
+
+    public async import(files: File[], mailboxName: string): Promise<any> {
+        const formData = new FormData();
+        for (let i = 0; i < files.length; i++) {
+            formData.append('files', files[i]);
+        }
+        
+        return (await axios.post(this.import_url(mailboxName), formData, {
+            headers: { 
+                'Content-Type': 'multipart/form-data' 
+            }
+        })).data;
+    }
 }
