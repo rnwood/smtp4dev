@@ -13,6 +13,12 @@
                        :disabled="!isRelayAvailable"
                        title="Compose">Compose</el-button>
 
+            <el-button
+                       v-on:click="showFileSelector"
+                       icon="Upload"
+                       :disabled="!selectedMailbox"
+                       title="Import EML files">Import</el-button>
+
             <el-button-group>
                 <el-button icon="Delete"
                            v-on:click="deleteSelected"
@@ -298,6 +304,111 @@
             } finally {
                 this.loading = false;
             }
+        }
+
+        showFileSelector() {
+            // Create a hidden file input element
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.eml';
+            fileInput.multiple = true;
+            fileInput.style.display = 'none';
+            
+            // Handle file selection
+            fileInput.addEventListener('change', (event: any) => {
+                const files = event.target.files;
+                if (files && files.length > 0) {
+                    this.importFiles(Array.from(files));
+                }
+                // Clean up the temporary element
+                document.body.removeChild(fileInput);
+            });
+            
+            // Add to DOM and trigger click
+            document.body.appendChild(fileInput);
+            fileInput.click();
+        }
+
+        async importFiles(files: File[]) {
+            if (files.length === 0) {
+                return;
+            }
+
+            let successCount = 0;
+            let failCount = 0;
+            const importedIds: string[] = [];
+
+            // Show initial progress notification
+            ElNotification.info({
+                title: "Import in Progress",
+                message: `Importing ${files.length} file(s)...`,
+                duration: 3000
+            });
+
+            for (const file of files) {
+                try {
+                    // Read file content as text
+                    const emlContent = await this.readFileAsText(file);
+                    
+                    // Call the import API for this single file
+                    const messageId = await new MessagesController().import(emlContent, this.selectedMailbox);
+                    
+                    successCount++;
+                    importedIds.push(messageId);
+                    
+                } catch (e: any) {
+                    failCount++;
+                    const message = e.response?.data ?? e.message;
+                    ElNotification.error({ 
+                        title: "Import Failed", 
+                        message: `${file.name}: ${message}`,
+                        duration: 5000
+                    });
+                }
+            }
+
+            // Show final success notification
+            if (successCount > 0) {
+                ElNotification.success({
+                    title: "Import Complete",
+                    message: `Successfully imported ${successCount} of ${files.length} files`,
+                    duration: 4000
+                });
+
+                // Refresh the message list
+                await this.refresh(false);
+                
+                // Select the first imported message by its specific ID with retry logic
+                if (importedIds.length > 0) {
+                    const firstImportedId = importedIds[0];
+                    
+                    // Retry mechanism to wait for the imported message to appear in the list
+                    let retryCount = 0;
+                    const maxRetries = 10;
+                    const retryDelay = 200; // 200ms between retries
+                    
+                    while (retryCount < maxRetries) {
+                        const importedMessage = this.messages.find(m => m.id === firstImportedId);
+                        if (importedMessage) {
+                            this.selectMessage(importedMessage);
+                            break;
+                        }
+                        
+                        // Wait before retrying
+                        await new Promise(resolve => setTimeout(resolve, retryDelay));
+                        retryCount++;
+                    }
+                }
+            }
+        }
+
+        readFileAsText(file: File): Promise<string> {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target?.result as string);
+                reader.onerror = (e) => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
         }
 
         async clear() {
