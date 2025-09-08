@@ -73,15 +73,15 @@ namespace Rnwood.Smtp4dev.Controllers
             bool sortIsDescending = true, int page = 1,
             int pageSize = 5)
         {
-            IEnumerable<DbModel.Projections.MessageSummaryProjection> query = messagesRepository.GetMessageSummaries(mailboxName)
+            IQueryable<DbModel.Projections.MessageSummaryProjection> query = messagesRepository.GetMessageSummaries(mailboxName)
                 .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""));
 
             if (!string.IsNullOrEmpty(searchTerms))
             {
-
-                query = query.ToList().Where(m => m.Subject.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
-                                         || m.From.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
-                                         || m.To.Contains(searchTerms, StringComparison.CurrentCultureIgnoreCase)
+                var searchTermsLower = searchTerms.ToLower();
+                query = query.Where(m => m.Subject.ToLower().Contains(searchTermsLower)
+                                         || m.From.ToLower().Contains(searchTermsLower)
+                                         || m.To.ToLower().Contains(searchTermsLower)
                 );
             }
 
