@@ -105,6 +105,9 @@ public abstract class AbstractSession : IEditableSession
         GC.SuppressFinalize(this);
     }
 
+    /// <inheritdoc />
+    public bool CurrentMessageHasBareLineFeed { get; set; }
+
     /// <summary>
     ///     Releases unmanaged and - optionally - managed resources.
     /// </summary>
