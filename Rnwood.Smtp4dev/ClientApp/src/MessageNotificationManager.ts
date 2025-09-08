@@ -21,6 +21,11 @@ export default class MessageNotificationManager {
     
     refresh = debounce(this.refreshInternal, 500);
     
+    private get autoViewNewMessages(): boolean {
+        const stored = window.localStorage.getItem("auto-view-new-messages");
+        return stored === "true";
+    }
+    
     async refreshInternal(suppressNotifications: boolean) {
 
         if (!this.mailboxName) {
@@ -35,6 +40,11 @@ export default class MessageNotificationManager {
 
             this.unnotifiedMessages = messagesToAdd.concat(this.unnotifiedMessages);
             this.lastNotifiedMessage = this.unnotifiedMessages[0];
+
+            // Auto-view the latest message if the setting is enabled
+            if (!suppressNotifications && this.autoViewNewMessages) {
+                this.onClick(this.unnotifiedMessages[0]);
+            }
 
             if (!suppressNotifications && Notification.permission == "granted") {
                 if (this.visibleNotificationCloseTimeout) {
