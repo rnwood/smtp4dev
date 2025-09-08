@@ -27,6 +27,7 @@ using Microsoft.AspNetCore.ResponseCompression;
 using Rnwood.Smtp4dev.Server.Settings;
 using Microsoft.AspNetCore.Authorization;
 using AspNetCore.Authentication.Basic;
+using System.Reflection;
 
 namespace Rnwood.Smtp4dev
 {
@@ -41,6 +42,40 @@ namespace Rnwood.Smtp4dev
         }
 
         public IConfiguration Configuration { get; }
+
+        /// <summary>
+        /// Validates that the database version is compatible with the current application version.
+        /// Throws an exception if the database has migrations that are newer than what this application knows about.
+        /// </summary>
+        /// <param name="context">The database context to check</param>
+        private static void ValidateDatabaseVersionCompatibility(Smtp4devDbContext context)
+        {
+            // Skip check for in-memory databases as they're always created fresh
+            if (context.Database.IsInMemory())
+            {
+                return;
+            }
+
+            // Get all migrations that have been applied to the database
+            var appliedMigrations = context.Database.GetAppliedMigrations().ToList();
+            
+            // Get all migrations available in the current application
+            var availableMigrations = context.Database.GetMigrations().ToList();
+
+            // Find any applied migrations that are not available in the current code
+            var unknownMigrations = appliedMigrations.Except(availableMigrations).ToList();
+
+            if (unknownMigrations.Any())
+            {
+                var unknownMigrationsList = string.Join(", ", unknownMigrations);
+                throw new InvalidOperationException(
+                    $"Database version mismatch detected. The database contains migrations that are not recognized by this version of smtp4dev: {unknownMigrationsList}. " +
+                    "This usually happens when you're running an older version of smtp4dev against a database that was upgraded by a newer version. " +
+                    "To resolve this issue: " +
+                    "1. Upgrade to a newer version of smtp4dev that supports these migrations, or " +
+                    "2. If you want to use this version and don't need to preserve existing data, delete the database file and restart smtp4dev to create a new one.");
+            }
+        }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -94,6 +129,10 @@ namespace Rnwood.Smtp4dev
 
 
                         using var context = new Smtp4devDbContext((DbContextOptions<Smtp4devDbContext>)opt.Options);
+                        
+                        // Validate database version compatibility before attempting any operations
+                        ValidateDatabaseVersionCompatibility(context);
+                        
                         if (string.IsNullOrEmpty(serverOptions.Database))
                         {
                             context.Database.Migrate();
