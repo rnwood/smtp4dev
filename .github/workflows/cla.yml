@@ -27,7 +27,7 @@ jobs:
           path-to-document: 'https://github.com/rnwood/smtp4dev/blob/master/CLA.md'
           # branch should not be protected
           branch: 'clas'
-          allowlist: rnwood,dependabot[bot],copilot,copilot-swe-agent[bot]
+          allowlist: rnwood,dependabot[bot],copilot,Copilot,copilot-swe-agent[bot]
           
           # Custom messages for better user experience
           create-file-commit-message: 'docs: create CLA signature storage file'
