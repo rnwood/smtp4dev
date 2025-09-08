@@ -100,13 +100,17 @@
                     </template>
                     <messageviewattachments :message="message" v-if="message && messageSummary.attachmentCount"></messageviewattachments>
 
-                    <messageview-html v-if="message && message.hasHtmlBody && !message.hasPlainTextBody" :connection="connection" :message="message" class="fill messagepreview"></messageview-html>
+                    <UseDark v-slot="{isDark}">
+                        <messageview-html v-if="message && message.hasHtmlBody && !message.hasPlainTextBody" :isDark="isDark" :connection="connection" :message="message" class="fill messagepreview"></messageview-html>
+                    </UseDark>
                     <messageview-plaintext v-if="message && !message.hasHtmlBody && message.hasPlainTextBody" :message="message" class="fill messageplaintext"></messageview-plaintext>
                     <div v-if="message && !message.hasHtmlBody && !message.hasPlainTextBody">This MIME message has no HTML or plain text body.</div>
 
                     <el-tabs v-if="message && message.hasPlainTextBody && message.hasHtmlBody" value="html" style="height: 100%; width:100%" class="fill">
                         <el-tab-pane id="html" label="HTML" class="hfillpanel">
-                            <messageview-html :message="message" class="fill messagepreview"></messageview-html>
+                            <UseDark v-slot="{isDark}">
+                                <messageview-html :isDark="isDark" :connection="connection" :message="message" class="fill messagepreview"></messageview-html>
+                            </UseDark>
                         </el-tab-pane>
                         <el-tab-pane id="plaintext" label="Plain text" class="hfillpanel">
                             <messageview-plaintext :message="message" class="fill messageplaintext"></messageview-plaintext>
@@ -238,6 +242,7 @@
     import ServerController from '../ApiClient/ServerController';
     import MessageViewPlainText from "./messageviewplaintext.vue";
     import MessageCompose from "@/components/messagecompose.vue";
+    import { UseDark } from '@vueuse/components';
 
     @Component({
         components: {
@@ -249,7 +254,8 @@
             messagesource: MessageSource,
             messageclientanalysis: MessageClientAnalysis,
             messagehtmlvalidation: MessageHtmlValidation,
-            messagecompose: MessageCompose
+            messagecompose: MessageCompose,
+            UseDark
         }
     })
     class MessageView extends Vue {
