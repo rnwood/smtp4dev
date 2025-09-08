@@ -133,7 +133,7 @@
                                 <el-tag v-if="analysisWarningCount.clients" style="margin-left: 6px;" type="warning" size="small" effect="dark" round><el-icon><WarnTriangleFilled /></el-icon> {{analysisWarningCount.clients ? analysisWarningCount.clients : ''}}</el-tag>
 
                             </template>
-                            <messageclientanalysis class="fill" :message="message" @warning-count-changed="n => this.analysisWarningCount.clients=n"></messageclientanalysis>
+                            <messageclientanalysis class="fill" :connection="connection" :message="message" @warning-count-changed="n => this.analysisWarningCount.clients=n"></messageclientanalysis>
                         </el-tab-pane>
 
                         <el-tab-pane label="HTML Validation" id="html" class="hfillpanel">

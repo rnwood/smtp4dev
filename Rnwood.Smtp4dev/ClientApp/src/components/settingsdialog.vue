@@ -62,6 +62,18 @@
 
                             <el-switch v-model="server.disableMessageSanitisation" :disabled="server.lockedSettings.disableMessageSanitisation" />
                         </el-form-item>
+
+                        <el-form-item label="Disable HTML validation in Analysis tab" prop="server.disableHtmlValidation">
+                            <el-icon v-if="server.lockedSettings.disableHtmlValidation" :title="`Locked: ${server.lockedSettings.disableHtmlValidation}`"><Lock /></el-icon>
+
+                            <el-switch v-model="server.disableHtmlValidation" :disabled="server.lockedSettings.disableHtmlValidation" />
+                        </el-form-item>
+
+                        <el-form-item label="Disable HTML compatibility checks in Analysis tab" prop="server.disableHtmlCompatibilityCheck">
+                            <el-icon v-if="server.lockedSettings.disableHtmlCompatibilityCheck" :title="`Locked: ${server.lockedSettings.disableHtmlCompatibilityCheck}`"><Lock /></el-icon>
+
+                            <el-switch v-model="server.disableHtmlCompatibilityCheck" :disabled="server.lockedSettings.disableHtmlCompatibilityCheck" />
+                        </el-form-item>
                     </el-tab-pane>
                     <el-tab-pane label="SMTP Server">
 
