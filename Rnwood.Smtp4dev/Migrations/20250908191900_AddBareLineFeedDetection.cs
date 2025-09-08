@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Rnwood.Smtp4dev.Migrations
 {
     /// <inheritdoc />
-    [Migration("20240515191816_AddBareLineFeedDetection")]
+    [Migration("20250908191900_AddBareLineFeedDetection")]
     public partial class AddBareLineFeedDetection : Migration
     {
         /// <inheritdoc />
