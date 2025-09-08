@@ -44,6 +44,12 @@
           
             srcDoc.set(this.$refs.htmlframe as HTMLIFrameElement, this.html ?? "");
         }
+
+        private escapeHtml(text: string): string {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
         async loadMessage() {
 
             this.error = null;
@@ -53,7 +59,8 @@
             try {
                 if (this.message != null) {
 
-                    this.html = "<pre>" + await new MessagesController().getMessagePlainText(this.message.id) + "</pre>"
+                    const plainText = await new MessagesController().getMessagePlainText(this.message.id);
+                    this.html = "<pre>" + this.escapeHtml(plainText) + "</pre>";
                 }
             } catch (e: any) {
                 this.error = e;
