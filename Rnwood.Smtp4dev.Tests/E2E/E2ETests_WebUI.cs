@@ -250,7 +250,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             });
         }
 
-        [Fact(Skip = "E2E test needs debugging - import functionality works but test is flaky")]
+        [Fact]
         public void CheckEmlImportWorksCorrectly()
         {
             RunUITestAsync(nameof(CheckEmlImportWorksCorrectly), async (page, baseUrl, smtpPortNumber) =>
@@ -298,30 +298,26 @@ E2E Test";
 
                 try
                 {
-                    // Click Import button (should be enabled now)
+                    // Prepare to intercept the file chooser event triggered by the Import button click
+                    var fileChooserTask = page.WaitForFileChooserAsync();
+                    
+                    // Click Import button - this should trigger the file chooser directly (no dialog)
                     await importButton.ClickAsync();
+                    
+                    // Handle the file chooser that appears
+                    var fileChooser = await fileChooserTask;
+                    await fileChooser.SetFilesAsync(tempEmlFile);
 
-                    // Wait for import dialog to appear
-                    var importDialog = page.Locator("dialog", new PageLocatorOptions { HasText = "Import EML Files" });
-                    await importDialog.WaitForAsync();
+                    // Wait for progress notification to appear
+                    var progressNotification = page.Locator(".el-notification", new PageLocatorOptions { HasText = "Import in Progress" });
+                    await progressNotification.WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
 
-                    // Click Select Files button and upload the EML file
-                    var fileInput = page.Locator("input[type='file']");
-                    await fileInput.SetInputFilesAsync(tempEmlFile);
-
-                    // Wait for file to be selected (import button should show "Import 1 file(s)")
-                    var importFileButton = page.Locator("button", new PageLocatorOptions { HasText = "Import 1 file(s)" });
-                    await importFileButton.WaitForAsync();
-
-                    // Click the import button
-                    await importFileButton.ClickAsync();
-
-                    // Wait for success notification
+                    // Wait for success notification to appear
                     var successNotification = page.Locator(".el-notification", new PageLocatorOptions { HasText = "Import Complete" });
-                    await successNotification.WaitForAsync();
+                    await successNotification.WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
 
-                    // Dialog should close automatically
-                    await importDialog.WaitForAsync(new LocatorWaitForOptions { State = WaitForSelectorState.Hidden });
+                    // Wait a moment for the message list to refresh
+                    await page.WaitForTimeoutAsync(1000);
 
                     // Check that the imported message appears in the message list
                     var grid = messageList.GetGrid();
@@ -335,6 +331,11 @@ E2E Test";
                     Assert.True(await messageRow.ContainsTextAsync("E2E Test Email Import"));
                     Assert.True(await messageRow.ContainsTextAsync("test-import@example.com"));
                     Assert.True(await messageRow.ContainsTextAsync("recipient@example.com"));
+                    
+                    // Verify that the imported message is selected (should be highlighted/current)
+                    // Check if the row has the current-row class or similar indicator
+                    var isSelected = await messageRow.IsSelectedAsync();
+                    Assert.True(isSelected, "Imported message should be selected");
                 }
                 finally
                 {
