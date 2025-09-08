@@ -249,12 +249,47 @@ stages:
             env:
               SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
               SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev
+              PLAYWRIGHT_HTML_REPORT: $(Agent.TempDirectory)/playwright-report
             inputs:
               command: test
               projects: Rnwood.Smtp4dev.Tests
               configuration: release
               arguments: '--collect:"XPlat Code Coverage"'
               publishTestResults: true
+          - task: PowerShell@2
+            condition: and(succeeded(), eq(variables['runTests'], true))
+            displayName: Create Playwright HTML Report Directory
+            inputs:
+              targetType: inline
+              script: |
+                $reportDir = "$(Agent.TempDirectory)/playwright-report"
+                Write-Host "Creating Playwright HTML report directory: $reportDir"
+                
+                if (-not (Test-Path $reportDir)) {
+                  New-Item -ItemType Directory -Path $reportDir -Force
+                  Write-Host "✓ Created directory: $reportDir"
+                } else {
+                  Write-Host "✓ Directory already exists: $reportDir"
+                }
+                
+                # Create a minimal index.html file for the report
+                $indexHtml = @"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Playwright Test Results</title>
+                </head>
+                <body>
+                    <h1>E2E Test Results</h1>
+                    <p>E2E tests were run via dotnet test. Check the test results in the Azure DevOps test results tab.</p>
+                    <p>For detailed logs, refer to the build pipeline output.</p>
+                </body>
+                </html>
+                "@
+                
+                $indexPath = "$reportDir/index.html"
+                $indexHtml | Out-File -FilePath $indexPath -Encoding UTF8
+                Write-Host "✓ Created basic HTML report: $indexPath"
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install ReportGenerator Tool
