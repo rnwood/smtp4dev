@@ -5,34 +5,6 @@
             <messagecompose @closed="() => composeDialogVisible=false" />
         </el-dialog>
 
-        <el-dialog v-model="importDialogVisible" title="Import EML Files" destroy-on-close append-to-body align-center width="60%">
-            <div class="import-dialog">
-                <p>Select one or more EML files to import:</p>
-                <el-upload
-                    ref="uploadRef"
-                    :auto-upload="false"
-                    multiple
-                    accept=".eml"
-                    :on-change="handleFileChange"
-                    :file-list="fileList">
-                    <template #trigger>
-                        <el-button type="primary">Select Files</el-button>
-                    </template>
-                </el-upload>
-                
-                <div class="dialog-footer" style="margin-top: 20px;">
-                    <el-button @click="importDialogVisible = false">Cancel</el-button>
-                    <el-button 
-                        type="primary" 
-                        @click="importFiles" 
-                        :disabled="fileList.length === 0"
-                        :loading="isImportInProgress">
-                        Import {{ fileList.length }} file(s)
-                    </el-button>
-                </div>
-            </div>
-        </el-dialog>
-
         <div class="toolbar">
 
 
@@ -42,7 +14,7 @@
                        title="Compose">Compose</el-button>
 
             <el-button
-                       v-on:click="importDialogVisible=true"
+                       v-on:click="showFileSelector"
                        icon="Upload"
                        :disabled="!selectedMailbox"
                        title="Import EML files">Import</el-button>
@@ -210,9 +182,6 @@
         isRelayAvailable: boolean = false;
 
         composeDialogVisible = false;
-        importDialogVisible = false;
-        isImportInProgress = false;
-        fileList: any[] = [];
 
         get emptyText() {
             if (this.loading) {
@@ -337,65 +306,96 @@
             }
         }
 
-        handleFileChange(file: any, fileList: any[]) {
-            this.fileList = fileList;
+        showFileSelector() {
+            // Create a hidden file input element
+            const fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = '.eml';
+            fileInput.multiple = true;
+            fileInput.style.display = 'none';
+            
+            // Handle file selection
+            fileInput.addEventListener('change', (event: any) => {
+                const files = event.target.files;
+                if (files && files.length > 0) {
+                    this.importFiles(Array.from(files));
+                }
+                // Clean up the temporary element
+                document.body.removeChild(fileInput);
+            });
+            
+            // Add to DOM and trigger click
+            document.body.appendChild(fileInput);
+            fileInput.click();
         }
 
-        async importFiles() {
-            if (this.fileList.length === 0) {
+        async importFiles(files: File[]) {
+            if (files.length === 0) {
                 return;
             }
 
-            try {
-                this.isImportInProgress = true;
-                
-                // Convert file list to actual File objects
-                const files = this.fileList.map(item => item.raw);
-                
-                // Call the import API
-                const result = await new MessagesController().import(files, this.selectedMailbox);
-                
-                // Show success notification
+            let successCount = 0;
+            let failCount = 0;
+            const importedIds: string[] = [];
+
+            // Show initial progress notification
+            ElNotification.info({
+                title: "Import in Progress",
+                message: `Importing ${files.length} file(s)...`,
+                duration: 3000
+            });
+
+            for (const file of files) {
+                try {
+                    // Read file content as text
+                    const emlContent = await this.readFileAsText(file);
+                    
+                    // Call the import API for this single file
+                    const messageId = await new MessagesController().import(emlContent, this.selectedMailbox);
+                    
+                    successCount++;
+                    importedIds.push(messageId);
+                    
+                } catch (e: any) {
+                    failCount++;
+                    const message = e.response?.data ?? e.message;
+                    ElNotification.error({ 
+                        title: "Import Failed", 
+                        message: `${file.name}: ${message}`,
+                        duration: 5000
+                    });
+                }
+            }
+
+            // Show final success notification
+            if (successCount > 0) {
                 ElNotification.success({
                     title: "Import Complete",
-                    message: `Successfully imported ${result.successfulImports} of ${result.totalFiles} files`,
+                    message: `Successfully imported ${successCount} of ${files.length} files`,
+                    duration: 4000
                 });
 
-                // Show error notifications for failed imports
-                for (const fileResult of result.fileResults) {
-                    if (!fileResult.success) {
-                        ElNotification.error({
-                            title: "Import Failed",
-                            message: `${fileResult.fileName}: ${fileResult.errorMessage}`,
-                        });
-                    }
-                }
-
-                // Refresh the message list and select the first imported message
+                // Refresh the message list
                 await this.refresh(false);
                 
-                if (result.importedMessageIds.length > 0) {
-                    // Find and select the first imported message
-                    const firstImportedId = result.importedMessageIds[0];
+                // Select the first imported message by its specific ID
+                if (importedIds.length > 0) {
+                    const firstImportedId = importedIds[0];
                     const importedMessage = this.messages.find(m => m.id === firstImportedId);
                     if (importedMessage) {
                         this.selectMessage(importedMessage);
                     }
                 }
-
-                // Close dialog and reset file list
-                this.importDialogVisible = false;
-                this.fileList = [];
-                
-            } catch (e: any) {
-                const message = e.response?.data?.detail ?? e.message;
-                ElNotification.error({ 
-                    title: "Import Failed", 
-                    message: message 
-                });
-            } finally {
-                this.isImportInProgress = false;
             }
+        }
+
+        readFileAsText(file: File): Promise<string> {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.onload = (e) => resolve(e.target?.result as string);
+                reader.onerror = (e) => reject(new Error('Failed to read file'));
+                reader.readAsText(file);
+            });
         }
 
         async clear() {

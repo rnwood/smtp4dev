@@ -181,20 +181,15 @@ export default class MessagesController {
         return (await axios.delete(this.deleteAll_url(mailboxName), null || undefined)).data as void;
     }
 
-    // post: api/Messages/import
+    // put: api/Messages
     public import_url(mailboxName: string): string {
-        return `${this.apiBaseUrl}/import?mailboxName=${encodeURIComponent(mailboxName)}`;
+        return `${this.apiBaseUrl}?mailboxName=${encodeURIComponent(mailboxName)}`;
     }
 
-    public async import(files: File[], mailboxName: string): Promise<any> {
-        const formData = new FormData();
-        for (let i = 0; i < files.length; i++) {
-            formData.append('files', files[i]);
-        }
-        
-        return (await axios.post(this.import_url(mailboxName), formData, {
+    public async import(emlContent: string, mailboxName: string): Promise<string> {
+        return (await axios.put(this.import_url(mailboxName), emlContent, {
             headers: { 
-                'Content-Type': 'multipart/form-data' 
+                'Content-Type': 'message/rfc822' 
             }
         })).data;
     }

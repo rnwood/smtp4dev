@@ -429,109 +429,93 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         /// <summary>
-        /// Imports one or more EML files as new messages.
+        /// Imports a single EML file as a new message.
         /// </summary>
-        /// <param name="files">EML files to import</param>
-        /// <param name="mailboxName">Mailbox name to import messages into</param>
-        /// <returns></returns>
-        [HttpPost("import")]
-        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(MessageImportResult), Description = "Import results")]
-        public async Task<ActionResult<MessageImportResult>> ImportMessages(IFormFileCollection files, string mailboxName = MailboxOptions.DEFAULTNAME)
+        /// <param name="mailboxName">Mailbox name to import the message into</param>
+        /// <returns>The ID of the imported message</returns>
+        [HttpPut]
+        [Consumes("message/rfc822")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(Guid), Description = "ID of the imported message")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, typeof(void), Description = "If the EML content is invalid")]
+        public async Task<ActionResult<Guid>> ImportMessage(string mailboxName = MailboxOptions.DEFAULTNAME)
         {
-            var result = new MessageImportResult
+            try
             {
-                TotalFiles = files.Count
-            };
-
-            foreach (var file in files)
-            {
-                var fileResult = new MessageImportFileResult
+                // Read EML content from request body
+                byte[] emlData;
+                using (var stream = new MemoryStream())
                 {
-                    FileName = file.FileName
-                };
+                    await HttpContext.Request.Body.CopyToAsync(stream);
+                    emlData = stream.ToArray();
+                }
 
-                try
+                if (emlData.Length == 0)
                 {
-                    // Read EML file content
-                    byte[] emlData;
-                    using (var stream = new MemoryStream())
-                    {
-                        await file.CopyToAsync(stream);
-                        emlData = stream.ToArray();
-                    }
+                    return BadRequest("EML content is empty");
+                }
 
-                    // Parse EML file using MimeKit to extract basic info  
-                    using var emlStream = new MemoryStream(emlData);
-                    var mimeMessage = await MimeMessage.LoadAsync(emlStream);
-                    
-                    // Create ImportedMessage instance
-                    var importedMessage = new ImportedMessage(emlData);
+                // Parse EML file using MimeKit to extract basic info  
+                using var emlStream = new MemoryStream(emlData);
+                var mimeMessage = await MimeMessage.LoadAsync(emlStream);
+                
+                // Create ImportedMessage instance
+                var importedMessage = new ImportedMessage(emlData);
 
-                    // Extract recipients from the EML file
-                    var recipients = new List<string>();
-                    if (mimeMessage.To?.Any() == true)
-                    {
-                        recipients.AddRange(mimeMessage.To.OfType<MailboxAddress>().Select(a => a.Address));
-                    }
-                    if (mimeMessage.Cc?.Any() == true)
-                    {
-                        recipients.AddRange(mimeMessage.Cc.OfType<MailboxAddress>().Select(a => a.Address));
-                    }
-                    if (mimeMessage.Bcc?.Any() == true)
-                    {
-                        recipients.AddRange(mimeMessage.Bcc.OfType<MailboxAddress>().Select(a => a.Address));
-                    }
+                // Extract recipients from the EML file
+                var recipients = new List<string>();
+                if (mimeMessage.To?.Any() == true)
+                {
+                    recipients.AddRange(mimeMessage.To.OfType<MailboxAddress>().Select(a => a.Address));
+                }
+                if (mimeMessage.Cc?.Any() == true)
+                {
+                    recipients.AddRange(mimeMessage.Cc.OfType<MailboxAddress>().Select(a => a.Address));
+                }
+                if (mimeMessage.Bcc?.Any() == true)
+                {
+                    recipients.AddRange(mimeMessage.Bcc.OfType<MailboxAddress>().Select(a => a.Address));
+                }
 
-                    // If no recipients found, use a default one
-                    if (!recipients.Any())
-                    {
-                        recipients.Add("imported@localhost");
-                    }
+                // If no recipients found, use a default one
+                if (!recipients.Any())
+                {
+                    recipients.Add("imported@localhost");
+                }
 
-                    // Set up the ImportedMessage properties
-                    foreach (var recipient in recipients)
-                    {
-                        importedMessage.AddRecipient(recipient);
-                    }
-                    importedMessage.From = mimeMessage.From?.OfType<MailboxAddress>().FirstOrDefault()?.Address ?? "imported@localhost";
+                // Set up the ImportedMessage properties
+                foreach (var recipient in recipients)
+                {
+                    importedMessage.AddRecipient(recipient);
+                }
+                importedMessage.From = mimeMessage.From?.OfType<MailboxAddress>().FirstOrDefault()?.Address ?? "imported@localhost";
 
-                    // Convert using existing MessageConverter
-                    var messageConverter = new MessageConverter();
-                    var dbMessage = await messageConverter.ConvertAsync(importedMessage, recipients.ToArray());
+                // Convert using existing MessageConverter
+                var messageConverter = new MessageConverter();
+                var dbMessage = await messageConverter.ConvertAsync(importedMessage, recipients.ToArray());
 
-                    // Set the mailbox
-                    var dbContext = messagesRepository.DbContext;
-                    var mailbox = await dbContext.Mailboxes.FirstOrDefaultAsync(m => m.Name == mailboxName);
-                    if (mailbox == null)
-                    {
-                        mailbox = new Mailbox { Name = mailboxName };
-                        dbContext.Mailboxes.Add(mailbox);
-                        await dbContext.SaveChangesAsync();
-                    }
-
-                    dbMessage.Mailbox = mailbox;
-                    dbMessage.IsUnread = true;
-
-                    // Add to database
-                    dbContext.Messages.Add(dbMessage);
+                // Set the mailbox
+                var dbContext = messagesRepository.DbContext;
+                var mailbox = await dbContext.Mailboxes.FirstOrDefaultAsync(m => m.Name == mailboxName);
+                if (mailbox == null)
+                {
+                    mailbox = new Mailbox { Name = mailboxName };
+                    dbContext.Mailboxes.Add(mailbox);
                     await dbContext.SaveChangesAsync();
-
-                    fileResult.Success = true;
-                    fileResult.MessageId = dbMessage.Id;
-                    result.SuccessfulImports++;
-                    result.ImportedMessageIds.Add(dbMessage.Id);
-                }
-                catch (Exception ex)
-                {
-                    fileResult.Success = false;
-                    fileResult.ErrorMessage = ex.Message;
-                    result.FailedImports++;
                 }
 
-                result.FileResults.Add(fileResult);
+                dbMessage.Mailbox = mailbox;
+                dbMessage.IsUnread = true;
+
+                // Add to database
+                dbContext.Messages.Add(dbMessage);
+                await dbContext.SaveChangesAsync();
+
+                return Ok(dbMessage.Id);
             }
-
-            return Ok(result);
+            catch (Exception ex)
+            {
+                return BadRequest($"Failed to import EML: {ex.Message}");
+            }
         }
 
 
