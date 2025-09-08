@@ -61,8 +61,9 @@
 
     import MessagesController from "../ApiClient/MessagesController";
     import Message from "../ApiClient/Message";
-    import { HtmlValidate, Message as HtmlValidateMessage } from "html-validate";
+    import { Message as HtmlValidateMessage } from "html-validate";
     import HubConnectionManager from "../ApiClient/HubConnectionManager";
+    import { HtmlValidationWorkerManager } from "../workers/HtmlValidationWorkerManager";
 
     @Component
     class MessageHtmlValidation extends Vue {
@@ -78,6 +79,7 @@
         currentPage = 1;
         pageSize = 25;
         isHtmlValidationDisabled = false;
+        private workerManager = new HtmlValidationWorkerManager();
 
 
         @Prop({ default: null })
@@ -152,10 +154,9 @@
                         this.html = await new MessagesController().getMessageHtml(this.message.id);
                         const config = JSON.parse(server.htmlValidateConfig);
 
-                        const report = await new HtmlValidate(config).validateString(this.html, "messagebody");
-                        for (const r of report.results) {
-                            newWarnings.push(...r.messages);
-                        }
+                        // Use web worker for validation
+                        const validationResults = await this.workerManager.validateHtml(this.html, config);
+                        newWarnings.push(...validationResults);
                     }
                 }
                 this.warnings = newWarnings;
@@ -172,7 +173,7 @@
         }
 
         async destroyed() {
-
+            this.workerManager.destroy();
         }
 
     }
