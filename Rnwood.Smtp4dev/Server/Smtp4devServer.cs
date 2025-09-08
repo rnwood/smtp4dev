@@ -92,13 +92,23 @@ namespace Rnwood.Smtp4dev.Server
             X509Certificate2 cert = CertificateHelper.GetTlsCertificate(serverOptions.CurrentValue, log);
 
             Settings.ServerOptions serverOptionsValue = serverOptions.CurrentValue;
+            IPAddress bindAddress = null;
+            if (!string.IsNullOrWhiteSpace(serverOptionsValue.BindAddress))
+            {
+                if (!IPAddress.TryParse(serverOptionsValue.BindAddress, out bindAddress))
+                {
+                    throw new ArgumentException($"Invalid bind address: {serverOptionsValue.BindAddress}");
+                }
+            }
+
             this.smtpServer = new Rnwood.SmtpServer.SmtpServer(new SmtpServer.ServerOptions(serverOptionsValue.AllowRemoteConnections, !serverOptionsValue.DisableIPv6, serverOptionsValue.HostName, serverOptionsValue.Port, serverOptionsValue.AuthenticationRequired,
                 serverOptionsValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries), serverOptionsValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
             serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null,
                 !string.IsNullOrWhiteSpace(serverOptionsValue.SslProtocols) ? serverOptionsValue.SslProtocols.Split(",", StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries).Select(s => Enum.Parse<SslProtocols>(s, true)).Aggregate((current, protocol) => current | protocol) : SslProtocols.None,
                 !string.IsNullOrWhiteSpace(serverOptionsValue.TlsCipherSuites) ? serverOptionsValue.TlsCipherSuites.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(s => Enum.Parse<TlsCipherSuite>(s, true)).ToArray() : null,
-                serverOptionsValue.MaxMessageSize
+                serverOptionsValue.MaxMessageSize,
+                bindAddress
             ));
             this.smtpServer.MessageCompletedEventHandler += OnMessageCompleted;
             this.smtpServer.MessageReceivedEventHandler += OnMessageReceived;
