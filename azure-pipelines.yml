@@ -205,19 +205,62 @@ stages:
               script: |
                 Write-Host "Installing Playwright browsers for test project..."
                 
-                # Use the test project's playwright installation script
-                $playwrightScript = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
+                # Enhanced debugging information
+                Write-Host "Current working directory: $(Get-Location)"
+                Write-Host "Build.SourcesDirectory: $(Build.SourcesDirectory)"
+                
+                # Use absolute path for more reliability
+                $testProjectDir = Join-Path "$(Build.SourcesDirectory)" "Rnwood.Smtp4dev.Tests/bin/Release/net8.0"
+                $playwrightScript = Join-Path $testProjectDir "playwright.ps1"
+                
+                Write-Host "Looking for playwright script at: $playwrightScript"
+                Write-Host "Test project directory: $testProjectDir"
+                
+                # Check if the directory exists first
+                if (-not (Test-Path $testProjectDir)) {
+                  Write-Error "Test project build directory not found at $testProjectDir"
+                  Write-Host "Available directories in Rnwood.Smtp4dev.Tests/bin/:"
+                  Get-ChildItem "$(Build.SourcesDirectory)/Rnwood.Smtp4dev.Tests/bin/" -Directory -ErrorAction SilentlyContinue | Select-Object Name
+                  exit 1
+                }
+                
+                # List contents of the build directory for debugging
+                Write-Host "Contents of test project build directory:"
+                Get-ChildItem $testProjectDir -ErrorAction SilentlyContinue | Select-Object Name, Length | Format-Table
                 
                 if (-not (Test-Path $playwrightScript)) {
                   Write-Error "Playwright script not found at $playwrightScript"
-                  Write-Host "Available files in Rnwood.Smtp4dev.Tests/bin/Release/net8.0/:"
-                  Get-ChildItem "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/" -ErrorAction SilentlyContinue | Select-Object Name
-                  exit 1
+                  
+                  # Check if there are any .ps1 files in the directory
+                  $ps1Files = Get-ChildItem $testProjectDir -Filter "*.ps1" -ErrorAction SilentlyContinue
+                  if ($ps1Files) {
+                    Write-Host "Found PowerShell files in directory:"
+                    $ps1Files | Select-Object Name, Length | Format-Table
+                  } else {
+                    Write-Host "No PowerShell files found in directory"
+                  }
+                  
+                  # Try alternative approach: use dotnet tool to install playwright
+                  Write-Host "Attempting alternative approach using dotnet tool..."
+                  try {
+                    Write-Host "Installing Playwright CLI tool globally..."
+                    dotnet tool install --global Microsoft.Playwright.CLI --version 1.47.0
+                    
+                    Write-Host "Installing Playwright browsers..."
+                    playwright install chromium
+                    
+                    Write-Host "✓ Playwright browsers installed successfully using dotnet tool"
+                    exit 0
+                  } catch {
+                    Write-Error "Alternative approach also failed: $_"
+                    exit 1
+                  }
                 }
                 
                 try {
                   Write-Host "Installing Playwright browsers using project script..."
-                  pwsh $playwrightScript install chromium
+                  Set-Location $testProjectDir
+                  pwsh ./playwright.ps1 install chromium
                   $exitCode = $LASTEXITCODE
                   
                   if ($exitCode -ne 0) {
@@ -239,13 +282,15 @@ stages:
                 if ($IsLinux) {
                   Write-Host "Installing system dependencies for Playwright on Linux..."
                   
-                  # Use the test project's playwright installation script for system dependencies
-                  $playwrightScript = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
+                  # Use absolute path for more reliability
+                  $testProjectDir = Join-Path "$(Build.SourcesDirectory)" "Rnwood.Smtp4dev.Tests/bin/Release/net8.0"
+                  $playwrightScript = Join-Path $testProjectDir "playwright.ps1"
                   
                   if (Test-Path $playwrightScript) {
                     try {
                       Write-Host "Installing Playwright system dependencies using project script..."
-                      pwsh $playwrightScript install-deps chromium
+                      Set-Location $testProjectDir
+                      pwsh ./playwright.ps1 install-deps chromium
                       Write-Host "✓ Playwright system dependencies installed successfully"
                     } catch {
                       Write-Host "Project script install-deps failed, trying manual installation..."
@@ -259,9 +304,22 @@ stages:
                       }
                     }
                   } else {
-                    Write-Host "Playwright script not found at $playwrightScript, skipping system dependencies installation"
-                    Write-Host "Available files in Rnwood.Smtp4dev.Tests/bin/Release/net8.0/:"
-                    Get-ChildItem "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/" -ErrorAction SilentlyContinue | Select-Object Name
+                    Write-Host "Playwright script not found, trying alternative dependency installation..."
+                    try {
+                      # Use the global playwright CLI tool if available
+                      playwright install-deps chromium
+                      Write-Host "✓ Playwright system dependencies installed using global CLI"
+                    } catch {
+                      Write-Host "Global CLI not available, trying manual installation..."
+                      try {
+                        sudo apt-get update -qq
+                        sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
+                        Write-Host "✓ Manual system dependencies installed successfully"
+                      } catch {
+                        Write-Error "Failed to install system dependencies: $_"
+                        exit 1
+                      }
+                    }
                   }
                 } else {
                   Write-Host "Skipping system dependencies installation on Windows"
