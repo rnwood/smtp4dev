@@ -79,6 +79,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public bool DisableHtmlCompatibilityCheck { get; set; } = false;
 
         public long? MaxMessageSize { get; set; }
+        
+        public bool ValidateBareLineFeed { get; set; } = false;
     }
 
 }

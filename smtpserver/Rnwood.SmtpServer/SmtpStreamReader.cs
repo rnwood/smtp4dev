@@ -45,11 +45,17 @@ public class SmtpStreamReader : IDisposable
         GC.SuppressFinalize(this);
     }
 
+    /// <summary>
+    ///     Gets or sets a value indicating whether the last line read had a bare line feed (LF without CR).
+    /// </summary>
+    public bool LastLineHadBareLineFeed { get; private set; }
+
     /// <param name="cancellationToken">The cancellation token.</param>
     /// <returns>A Task representing the asynchronous operation.</returns>
     public async Task<byte[]> ReadLineBytesAsync(CancellationToken cancellationToken)
     {
         lineBytes.Clear();
+        bool foundCr = false;
 
         while (true)
         {
@@ -59,10 +65,15 @@ public class SmtpStreamReader : IDisposable
 
                 if (bufferByte == '\n')
                 {
+                    LastLineHadBareLineFeed = !foundCr;
                     return lineBytes.ToArray();
                 }
 
-                if (bufferByte != '\r')
+                if (bufferByte == '\r')
+                {
+                    foundCr = true;
+                }
+                else
                 {
                     lineBytes.Add(bufferByte);
                 }

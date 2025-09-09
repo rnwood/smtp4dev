@@ -116,6 +116,19 @@
                     </el-tooltip>
                 </template>
             </el-table-column>
+            <el-table-column property="hasWarnings"
+                             label=""
+                             width="28">
+                <template #default="scope">
+                    <el-tooltip effect="light"
+                                content="Message contains bare line feeds (LF without CR). RFC 5321 requires CRLF line endings."
+                                placement="top-start">
+                        <el-icon v-if="scope.row.hasWarnings" style="color: orange;">
+                            <Warning />
+                        </el-icon>
+                    </el-tooltip>
+                </template>
+            </el-table-column>
             <el-table-column property="subject" label="Subject" sortable="custom">
                 <template #default="scope">
                     {{ scope.row.subject }}

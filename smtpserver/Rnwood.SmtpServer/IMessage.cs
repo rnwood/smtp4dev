@@ -53,6 +53,11 @@ public interface IMessage : IDisposable
     IReadOnlyCollection<string> Recipients { get; }
 
     /// <summary>
+    ///     Gets a value indicating whether the current message contains bare line feeds.
+    /// </summary>
+    bool HasBareLineFeed { get; }
+
+    /// <summary>
     ///     Gets a stream which returns the message data.
     /// </summary>
     /// <returns>A <see cref="Task{T}" /> representing the async operation.</returns>

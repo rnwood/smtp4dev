@@ -82,6 +82,14 @@ public class MemoryMessageBuilder : IMessageBuilder
     }
 
     /// <inheritdoc />
+    public bool HasBareLineFeed
+    {
+        get => message.HasBareLineFeed;
+
+        set => message.HasBareLineFeed = value;
+    }
+
+    /// <inheritdoc />
     public ICollection<string> Recipients => message.RecipientsList;
 
     /// <inheritdoc />

@@ -348,6 +348,11 @@
             var result: MessageWarning[] = [];
 
             if (this.message != null) {
+                // Add main message warnings (e.g., bare line feed warnings)
+                for (let warning of this.message.warnings) {
+                    result.push(warning);
+                }
+                
                 var parts = this.message.parts;
                 this.getWarnings(parts, result);
             }

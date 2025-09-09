@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using Rnwood.Smtp4dev.Data;
 
@@ -10,9 +11,10 @@ using Rnwood.Smtp4dev.Data;
 namespace Rnwood.Smtp4dev.Migrations
 {
     [DbContext(typeof(Smtp4devDbContext))]
-    partial class Smtp4devDbContextModelSnapshot : ModelSnapshot
+    partial class AddBareLineFeedDetection
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
@@ -148,14 +150,14 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("HasWarnings")
-                        .HasColumnType("INTEGER");
-
                     b.Property<string>("Log")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("NumberOfMessages")
                         .HasColumnType("INTEGER");
+
+                    b.Property<string>("SessionEncoding")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("SessionError")
                         .HasColumnType("TEXT");

@@ -517,6 +517,12 @@ namespace Rnwood.Smtp4dev.Server
             
             dbContext.Messages.Add(message);
             
+            // Update session warnings if message has bare line feeds
+            if (message.HasBareLineFeed)
+            {
+                message.Session.HasWarnings = true;
+            }
+            
             dbContext.SaveChanges();
             
             TrimMessages(dbContext, new List<Mailbox>() {message.Mailbox});
