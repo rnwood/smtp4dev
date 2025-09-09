@@ -105,7 +105,7 @@ namespace Rnwood.Smtp4dev
                     {
                         if (string.IsNullOrEmpty(serverOptions.Database))
                         {
-                            Log.Logger.Information("Using in memory database.");
+                            Log.Logger.Debug("Using in memory database.");
 
                             //Must be held open to keep the memory DB alive
                             keepAliveConnection = new SqliteConnection(InMemoryDbConnString);
@@ -117,11 +117,11 @@ namespace Rnwood.Smtp4dev
                             var dbLocation = Path.GetFullPath(serverOptions.Database);
                             if (serverOptions.RecreateDb && File.Exists(dbLocation))
                             {
-                                Log.Logger.Information("Deleting Sqlite database.");
+                                Log.Logger.Debug("Deleting Sqlite database.");
                                 File.Delete(dbLocation);
                             }
 
-                            Log.Logger.Information("Using Sqlite database at {dbLocation}", dbLocation);
+                            Log.Logger.Debug("Using Sqlite database at {dbLocation}", dbLocation);
 
                             opt.UseSqlite($"Data Source={dbLocation}");
                         }
@@ -144,7 +144,7 @@ namespace Rnwood.Smtp4dev
                             var pendingMigrations = context.Database.GetPendingMigrations();
                             if (pendingMigrations.Any())
                             {
-                                Log.Logger.Information("Updating DB schema with migrations: {migrations}", string.Join(", ", pendingMigrations));
+                                Log.Logger.Debug("Updating DB schema with migrations: {migrations}", string.Join(", ", pendingMigrations));
                                 context.Database.Migrate();
                                 context.SaveChanges();
                             }
