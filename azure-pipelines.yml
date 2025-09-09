@@ -196,13 +196,40 @@ stages:
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
               arguments: '-c Release -o bin/playwright'
 
-          - task: DotNetCoreCLI@2
+          - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
-            displayName: Install Playwright CLI Tool
+            displayName: Install Playwright Browsers for Test Project
+            timeoutInMinutes: 15
             inputs:
-              command: custom
-              custom: tool
-              arguments: 'install --global Microsoft.Playwright.CLI'
+              targetType: inline
+              script: |
+                Write-Host "Installing Playwright browsers for test project..."
+                
+                # Use the test project's playwright installation script
+                $playwrightScript = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
+                
+                if (-not (Test-Path $playwrightScript)) {
+                  Write-Error "Playwright script not found at $playwrightScript"
+                  Write-Host "Available files in Rnwood.Smtp4dev.Tests/bin/Release/net8.0/:"
+                  Get-ChildItem "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/" -ErrorAction SilentlyContinue | Select-Object Name
+                  exit 1
+                }
+                
+                try {
+                  Write-Host "Installing Playwright browsers using project script..."
+                  pwsh $playwrightScript install chromium
+                  $exitCode = $LASTEXITCODE
+                  
+                  if ($exitCode -ne 0) {
+                    Write-Error "Playwright browser installation failed with exit code $exitCode"
+                    exit 1
+                  }
+                  
+                  Write-Host "✓ Playwright browsers installed successfully for test project"
+                } catch {
+                  Write-Error "Playwright browser installation failed with exception: $_"
+                  exit 1
+                }
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright System Dependencies (Linux)
@@ -211,46 +238,31 @@ stages:
               script: |
                 if ($IsLinux) {
                   Write-Host "Installing system dependencies for Playwright on Linux..."
-                  try {
-                    # Use Playwright's own dependency installation
-                    Write-Host "Installing Playwright system dependencies using built-in command..."
-                    playwright install-deps chromium
-                    Write-Host "✓ Playwright dependencies installed successfully"
-                  } catch {
-                    Write-Host "Playwright install-deps failed, trying manual installation..."
+                  
+                  # Use the test project's playwright installation script for system dependencies
+                  $playwrightScript = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
+                  
+                  if (Test-Path $playwrightScript) {
                     try {
-                      sudo apt-get update -qq
-                      sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
-                      Write-Host "✓ Manual system dependencies installed successfully"
+                      Write-Host "Installing Playwright system dependencies using project script..."
+                      pwsh $playwrightScript install-deps chromium
+                      Write-Host "✓ Playwright system dependencies installed successfully"
                     } catch {
-                      Write-Error "Failed to install system dependencies: $_"
-                      exit 1
+                      Write-Host "Project script install-deps failed, trying manual installation..."
+                      try {
+                        sudo apt-get update -qq
+                        sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
+                        Write-Host "✓ Manual system dependencies installed successfully"
+                      } catch {
+                        Write-Error "Failed to install system dependencies: $_"
+                        exit 1
+                      }
                     }
+                  } else {
+                    Write-Host "Playwright script not found, skipping system dependencies installation"
                   }
                 } else {
                   Write-Host "Skipping system dependencies installation on Windows"
-                }
-          - task: PowerShell@2
-            condition: and(succeeded(), eq(variables['runTests'], true))
-            displayName: Install Playwright Browsers
-            timeoutInMinutes: 15
-            inputs:
-              targetType: inline
-              script: |
-                Write-Host "Installing Playwright Chromium browser..."
-                try {
-                  playwright install chromium
-                  $exitCode = $LASTEXITCODE
-                  
-                  if ($exitCode -ne 0) {
-                    Write-Error "Playwright browser installation failed with exit code $exitCode"
-                    exit 1
-                  }
-                  
-                  Write-Host "✓ Playwright browser installation completed successfully"
-                } catch {
-                  Write-Error "Playwright browser installation failed with exception: $_"
-                  exit 1
                 }
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
