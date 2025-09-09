@@ -194,7 +194,7 @@ stages:
             inputs:
               command: build
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
-              arguments: '-c Release -o bin/playwright'
+              arguments: '-c Release'
 
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
@@ -259,7 +259,9 @@ stages:
                       }
                     }
                   } else {
-                    Write-Host "Playwright script not found, skipping system dependencies installation"
+                    Write-Host "Playwright script not found at $playwrightScript, skipping system dependencies installation"
+                    Write-Host "Available files in Rnwood.Smtp4dev.Tests/bin/Release/net8.0/:"
+                    Get-ChildItem "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/" -ErrorAction SilentlyContinue | Select-Object Name
                   }
                 } else {
                   Write-Host "Skipping system dependencies installation on Windows"
