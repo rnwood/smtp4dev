@@ -199,7 +199,7 @@ stages:
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright Browsers for Test Project
-            timeoutInMinutes: 10
+            timeoutInMinutes: 15
             inputs:
               targetType: inline
               script: |
@@ -215,23 +215,54 @@ stages:
                   $playwrightVersion = playwright --version
                   Write-Host "Playwright CLI version: $playwrightVersion"
                   
-                  # Install Chromium browser for tests
-                  Write-Host "Installing Chromium browser..."
-                  playwright install chromium
+                  # Install Chromium browser with explicit timeout handling
+                  Write-Host "Installing Chromium browser (this may take several minutes)..."
+                  Write-Host "Starting browser download at: $(Get-Date)"
+                  
+                  # Use a background job with timeout to handle potential hanging
+                  $installJob = Start-Job -ScriptBlock {
+                    playwright install chromium 2>&1
+                  }
+                  
+                  # Wait for the job with a reasonable timeout (8 minutes)
+                  $completed = Wait-Job $installJob -Timeout 480
+                  
+                  if ($completed) {
+                    $output = Receive-Job $installJob
+                    Write-Host "Browser installation output:"
+                    Write-Host $output
+                    Write-Host "Browser installation completed at: $(Get-Date)"
+                  } else {
+                    Write-Host "Browser installation timed out after 8 minutes, stopping job..."
+                    Stop-Job $installJob
+                    Remove-Job $installJob -Force
+                    throw "Browser installation timed out"
+                  }
+                  
+                  Remove-Job $installJob -Force
                   
                   # Verify browser installation
                   Write-Host "Verifying browser installation..."
-                  $chromiumPath = ~/.cache/ms-playwright/chromium-*/chrome-linux/chrome
-                  if (Test-Path $chromiumPath) {
+                  $chromiumPath = "~/.cache/ms-playwright/chromium-*/chrome-linux/chrome"
+                  $resolvedPath = Resolve-Path $chromiumPath -ErrorAction SilentlyContinue
+                  if ($resolvedPath) {
                     Write-Host "✓ Chromium browser installed successfully"
-                    Write-Host "Browser location: $chromiumPath"
+                    Write-Host "Browser location: $resolvedPath"
                   } else {
-                    Write-Host "Warning: Could not verify Chromium installation path, but installation command completed"
+                    Write-Host "Warning: Could not verify Chromium installation path at $chromiumPath"
+                    # Try alternative verification
+                    $playwrightCache = "~/.cache/ms-playwright"
+                    if (Test-Path $playwrightCache) {
+                      Write-Host "Playwright cache directory exists, listing contents:"
+                      Get-ChildItem $playwrightCache -Recurse | Select-Object Name, FullName | Format-Table -AutoSize
+                    }
                   }
                   
                   Write-Host "✓ Playwright browser installation completed successfully"
                 } catch {
                   Write-Error "Failed to install Playwright browsers: $_"
+                  Write-Host "Error details: $($_.Exception.Message)"
+                  Write-Host "Error at: $(Get-Date)"
                   exit 1
                 }
           - task: PowerShell@2
