@@ -145,6 +145,12 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
                     }
                     return false;
                 }
+
+                public async Task<bool> IsSelectedAsync()
+                {
+                    var className = await element.GetAttributeAsync("class");
+                    return className?.Contains("current-row") == true;
+                }
             }
         }
     }
