@@ -66,7 +66,7 @@ namespace Rnwood.Smtp4dev.Desktop.Tests
             File.Delete(dbPath);
 
             args.AddRange(new[] {
-                "--debugsettings", $"--db={dbPath}", "--nousersettings"
+                $"--db={dbPath}", "--nousersettings"
             }.Where(a => a != ""));
 
 
