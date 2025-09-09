@@ -1,10 +1,18 @@
 <?xml version="1.0" encoding="utf-8"?>
 <RunSettings>
   <RunConfiguration>
+    <!-- Disable parallel test execution to reduce resource contention in CI -->
+    <MaxCpuCount>1</MaxCpuCount>
+    <!-- Set overall test timeout for CI reliability -->
+    <TestSessionTimeout>2700000</TestSessionTimeout><!-- 45 minutes in milliseconds -->
     <EnvironmentVariables>
       <!-- Playwright configuration for HTML reports -->
       <PLAYWRIGHT_HTML_REPORT>$(Agent.TempDirectory)/playwright-report</PLAYWRIGHT_HTML_REPORT>
       <PLAYWRIGHT_HTML_OPEN>never</PLAYWRIGHT_HTML_OPEN>
     </EnvironmentVariables>
   </RunConfiguration>
+  <MSTest>
+    <!-- Individual test timeout - 10 minutes per test -->
+    <TestTimeout>600000</TestTimeout>
+  </MSTest>
 </RunSettings>

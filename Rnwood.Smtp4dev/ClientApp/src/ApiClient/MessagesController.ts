@@ -180,4 +180,17 @@ export default class MessagesController {
 
         return (await axios.delete(this.deleteAll_url(mailboxName), null || undefined)).data as void;
     }
+
+    // put: api/Messages
+    public import_url(mailboxName: string): string {
+        return `${this.apiBaseUrl}?mailboxName=${encodeURIComponent(mailboxName)}`;
+    }
+
+    public async import(emlContent: string, mailboxName: string): Promise<string> {
+        return (await axios.put(this.import_url(mailboxName), emlContent, {
+            headers: { 
+                'Content-Type': 'message/rfc822' 
+            }
+        })).data;
+    }
 }
