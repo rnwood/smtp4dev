@@ -29,6 +29,8 @@ namespace Rnwood.Smtp4dev.Server
 
         public IReadOnlyCollection<string> Recipients => recipients.AsReadOnly();
 
+        public bool HasBareLineFeed => false;
+
         public void AddRecipient(string recipient)
         {
             recipients.Add(recipient);
