@@ -2,7 +2,7 @@
 
 export default class SessionSummary {
  
-    constructor(clientAddress: string, clientName: string, numberOfMessages: number, id: string, endDate: Date, startDate: Date, terminatedWithError: boolean, size: number, ) {
+    constructor(clientAddress: string, clientName: string, numberOfMessages: number, id: string, endDate: Date, startDate: Date, terminatedWithError: boolean, size: number, hasWarnings: boolean, ) {
          
         this.clientAddress = clientAddress; 
         this.clientName = clientName; 
@@ -12,6 +12,7 @@ export default class SessionSummary {
         this.startDate = startDate; 
         this.terminatedWithError = terminatedWithError; 
         this.size = size;
+        this.hasWarnings = hasWarnings;
     }
 
      
@@ -23,4 +24,5 @@ export default class SessionSummary {
     startDate: Date; 
     terminatedWithError: boolean; 
     size: number;
+    hasWarnings: boolean;
 }

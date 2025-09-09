@@ -85,7 +85,7 @@ namespace Rnwood.Smtp4dev.Server
                 AttachmentCount = 0,
                 SecureConnection = message.SecureConnection,
                 SessionEncoding = message.EightBitTransport ? Encoding.UTF8.WebName : Encoding.Latin1.WebName,
-                HasBareLineFeed = message.Session is IEditableSession editableSession && editableSession.CurrentMessageHasBareLineFeed
+                HasBareLineFeed = message.HasBareLineFeed
             };
 
             var parts = new Message(result).Parts;

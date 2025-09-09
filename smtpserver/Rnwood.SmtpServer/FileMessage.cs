@@ -77,6 +77,11 @@ public class FileMessage : IMessage
     public ISession Session { get; internal set; }
 
     /// <summary>
+    ///     Gets a value indicating whether the current message contains bare line feeds.
+    /// </summary>
+    public bool HasBareLineFeed { get; internal set; }
+
+    /// <summary>
     ///     Gets the To.
     /// </summary>
     public IReadOnlyCollection<string> Recipients => RecipientsList.AsReadOnly();

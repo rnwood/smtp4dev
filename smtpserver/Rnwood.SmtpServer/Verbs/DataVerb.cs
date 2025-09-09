@@ -28,7 +28,7 @@ public class DataVerb : IVerb
         }
 
         // Reset bare line feed tracking for this message
-        connection.Session.CurrentMessageHasBareLineFeed = false;
+        connection.CurrentMessage.HasBareLineFeed = false;
 
         connection.CurrentMessage.SecureConnection = connection.Session.SecureConnection;
 
@@ -54,7 +54,7 @@ public class DataVerb : IVerb
                     // Check for bare line feed
                     if (connection.LastLineHadBareLineFeed)
                     {
-                        connection.Session.CurrentMessageHasBareLineFeed = true;
+                        connection.CurrentMessage.HasBareLineFeed = true;
                     }
 
                     if (!firstLine)

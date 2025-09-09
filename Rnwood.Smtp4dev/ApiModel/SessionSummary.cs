@@ -18,6 +18,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             this.StartDate = dbSession.StartDate;
             this.TerminatedWithError = dbSession.SessionError != null;
             this.Size = dbSession.Log?.Length ?? 0;
+            this.HasWarnings = dbSession.HasWarnings;
         }
 
         public string ClientAddress { get; private set; }
@@ -29,6 +30,8 @@ namespace Rnwood.Smtp4dev.ApiModel
         public bool TerminatedWithError { get; private set; }
 
         public int Size { get; private set; }
+
+        public bool HasWarnings { get; private set; }
 
 
         [JsonIgnore]

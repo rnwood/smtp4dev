@@ -24,5 +24,6 @@ namespace Rnwood.Smtp4dev.DbModel
         public int NumberOfMessages { get; internal set; }
         public string SessionError { get; internal set; }
         public SessionErrorType? SessionErrorType { get; internal set; }
+        public bool HasWarnings { get; internal set; }
     }
 }

@@ -10,7 +10,7 @@
     attachmentCount: number,
     isUnread: boolean,
     isRelayed: boolean,
-    hasBareLineFeed: boolean,
+    hasWarnings: boolean,
   ) {
     this.id = id;
     this.from = from;
@@ -21,7 +21,7 @@
     this.attachmentCount = attachmentCount;
     this.isUnread = isUnread;
     this.isRelayed = isRelayed;
-    this.hasBareLineFeed = hasBareLineFeed;
+    this.hasWarnings = hasWarnings;
   }
 
   id: string;
@@ -32,5 +32,5 @@
   attachmentCount: number;
   isUnread: boolean;
   isRelayed: boolean;
-  hasBareLineFeed: boolean;
+  hasWarnings: boolean;
 }

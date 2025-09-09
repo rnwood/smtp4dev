@@ -17,7 +17,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             IsUnread = dbMessage.IsUnread;
             IsRelayed = dbMessage.Relays.Count > 0;
             DeliveredTo = dbMessage.DeliveredTo;
-            HasBareLineFeed = dbMessage.HasBareLineFeed;
+            HasWarnings = dbMessage.HasBareLineFeed;
         }
         
         public MessageSummary(DbModel.Projections.MessageSummaryProjection messagesSummaryProjection)
@@ -31,7 +31,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             IsUnread = messagesSummaryProjection.IsUnread;
             IsRelayed = messagesSummaryProjection.IsRelayed;
             DeliveredTo = messagesSummaryProjection.DeliveredTo;
-            HasBareLineFeed = messagesSummaryProjection.HasBareLineFeed;
+            HasWarnings = messagesSummaryProjection.HasBareLineFeed;
         }
 
         public bool IsRelayed { get; set; }
@@ -48,9 +48,9 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public bool IsUnread { get; set; }
 
-        public bool HasBareLineFeed { get; set; }
+        public bool HasWarnings { get; set; }
 
         [JsonIgnore]
-        string ICacheByKey.CacheKey => Id.ToString() + IsUnread + IsRelayed + HasBareLineFeed + "v4";
+        string ICacheByKey.CacheKey => Id.ToString() + IsUnread + IsRelayed + HasWarnings + "v4";
     }
 }
