@@ -208,19 +208,46 @@ stages:
                 # Enhanced debugging information
                 Write-Host "Current working directory: $(Get-Location)"
                 Write-Host "Build.SourcesDirectory: $(Build.SourcesDirectory)"
+                Write-Host "All Environment Variables for debugging:"
+                Get-ChildItem Env: | Where-Object { $_.Name -like "*BUILD*" -or $_.Name -like "*SOURCES*" -or $_.Name -like "*AGENT*" } | Format-Table Name, Value
                 
-                # Use absolute path for more reliability
-                $testProjectDir = Join-Path "$(Build.SourcesDirectory)" "Rnwood.Smtp4dev.Tests/bin/Release/net8.0"
+                # Ensure we have a proper source directory
+                $sourceDir = "$(Build.SourcesDirectory)"
+                if ([string]::IsNullOrEmpty($sourceDir) -or $sourceDir -eq '$(Build.SourcesDirectory)') {
+                  # Fallback to working directory if Build.SourcesDirectory is not expanded
+                  $sourceDir = Get-Location
+                  Write-Host "Build.SourcesDirectory not available, using current directory: $sourceDir"
+                }
+                
+                # Use absolute path for more reliability with explicit path construction
+                $testProjectRelativePath = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0"
+                $testProjectDir = Join-Path $sourceDir $testProjectRelativePath
+                $testProjectDir = [System.IO.Path]::GetFullPath($testProjectDir)  # Normalize path
                 $playwrightScript = Join-Path $testProjectDir "playwright.ps1"
                 
+                Write-Host "Source directory: $sourceDir"
+                Write-Host "Test project relative path: $testProjectRelativePath"
+                Write-Host "Full test project directory: $testProjectDir"
                 Write-Host "Looking for playwright script at: $playwrightScript"
-                Write-Host "Test project directory: $testProjectDir"
                 
                 # Check if the directory exists first
                 if (-not (Test-Path $testProjectDir)) {
                   Write-Error "Test project build directory not found at $testProjectDir"
-                  Write-Host "Available directories in Rnwood.Smtp4dev.Tests/bin/:"
-                  Get-ChildItem "$(Build.SourcesDirectory)/Rnwood.Smtp4dev.Tests/bin/" -Directory -ErrorAction SilentlyContinue | Select-Object Name
+                  
+                  # More comprehensive debugging
+                  $binDir = Join-Path $sourceDir "Rnwood.Smtp4dev.Tests/bin"
+                  Write-Host "Checking bin directory: $binDir"
+                  if (Test-Path $binDir) {
+                    Write-Host "Available directories in $binDir"
+                    Get-ChildItem $binDir -Directory -ErrorAction SilentlyContinue | Select-Object Name, FullName | Format-Table
+                  } else {
+                    Write-Host "Bin directory does not exist: $binDir"
+                    Write-Host "Contents of Rnwood.Smtp4dev.Tests:"
+                    $testDir = Join-Path $sourceDir "Rnwood.Smtp4dev.Tests"
+                    if (Test-Path $testDir) {
+                      Get-ChildItem $testDir -ErrorAction SilentlyContinue | Select-Object Name, PSIsContainer | Format-Table
+                    }
+                  }
                   exit 1
                 }
                 
@@ -229,13 +256,13 @@ stages:
                 Get-ChildItem $testProjectDir -ErrorAction SilentlyContinue | Select-Object Name, Length | Format-Table
                 
                 if (-not (Test-Path $playwrightScript)) {
-                  Write-Error "Playwright script not found at $playwrightScript"
+                  Write-Host "Playwright script not found at: $playwrightScript"
                   
                   # Check if there are any .ps1 files in the directory
                   $ps1Files = Get-ChildItem $testProjectDir -Filter "*.ps1" -ErrorAction SilentlyContinue
                   if ($ps1Files) {
                     Write-Host "Found PowerShell files in directory:"
-                    $ps1Files | Select-Object Name, Length | Format-Table
+                    $ps1Files | Select-Object Name, Length, FullName | Format-Table
                   } else {
                     Write-Host "No PowerShell files found in directory"
                   }
@@ -259,7 +286,11 @@ stages:
                 
                 try {
                   Write-Host "Installing Playwright browsers using project script..."
+                  Write-Host "Changing to directory: $testProjectDir"
                   Set-Location $testProjectDir
+                  Write-Host "Current location after change: $(Get-Location)"
+                  
+                  Write-Host "Executing: pwsh ./playwright.ps1 install chromium"
                   pwsh ./playwright.ps1 install chromium
                   $exitCode = $LASTEXITCODE
                   
