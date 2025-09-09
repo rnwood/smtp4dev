@@ -324,6 +324,9 @@ public class Connection : IConnection
         await ConnectionChannel.Flush().ConfigureAwait(false);
     }
 
+    /// <inheritdoc />
+    public bool LastLineHadBareLineFeed => ConnectionChannel.LastLineHadBareLineFeed;
+
     private async Task OnConnectionChannelClosed(object sender, EventArgs eventArgs)
     {
         ConnectionEventArgs connEventArgs = new ConnectionEventArgs(this);

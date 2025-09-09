@@ -103,4 +103,9 @@ public interface IConnection
     /// </summary>
     /// <returns></returns>
     Task<byte[]> ReadLineBytes();
+
+    /// <summary>
+    ///     Gets a value indicating whether the last line read had a bare line feed (LF without CR).
+    /// </summary>
+    bool LastLineHadBareLineFeed { get; }
 }

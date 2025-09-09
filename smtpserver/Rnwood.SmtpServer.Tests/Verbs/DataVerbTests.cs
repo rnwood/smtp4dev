@@ -359,4 +359,73 @@ public class DataVerbTests
             new StreamReader(await messageBuilder.GetData(), Encoding.UTF8);
         Assert.Equal(expectedData, dataReader.ReadToEnd());
     }
+
+    /// <summary>
+    /// Tests that bare line feeds are detected and tracked in the session.
+    /// </summary>
+    [Fact]
+    public async Task Data_BareLineFeed_TrackedInSession()
+    {
+        TestMocks mocks = new TestMocks();
+
+        MemoryMessageBuilder messageBuilder = new MemoryMessageBuilder();
+        mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
+        mocks.ServerOptions.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>()))
+            .ReturnsAsync((long?)null);
+
+        string[] messageData = { "line1", "line2", "." };
+        int messageLine = 0;
+        bool[] bareLineFeedFlags = { true, false, false }; // First line has bare LF, others don't
+        
+        mocks.Connection.Setup(c => c.ReadLineBytes())
+            .Returns(() => Task.FromResult(Encoding.UTF8.GetBytes(messageData[messageLine++])));
+        
+        mocks.Connection.SetupGet(c => c.LastLineHadBareLineFeed)
+            .Returns(() => bareLineFeedFlags[messageLine - 1]);
+
+        DataVerb verb = new DataVerb();
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
+
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+
+        mocks.Connection.Verify(c => c.CommitMessage());
+        
+        // Verify that bare line feed was detected and tracked in session
+        Assert.True(mocks.Session.Object.CurrentMessageHasBareLineFeed);
+    }
+
+    /// <summary>
+    /// Tests that no bare line feeds are detected when all lines have proper CRLF.
+    /// </summary>
+    [Fact]
+    public async Task Data_ProperCRLF_NotTrackedInSession()
+    {
+        TestMocks mocks = new TestMocks();
+
+        MemoryMessageBuilder messageBuilder = new MemoryMessageBuilder();
+        mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(messageBuilder);
+        mocks.ServerOptions.Setup(b => b.GetMaximumMessageSize(It.IsAny<IConnection>()))
+            .ReturnsAsync((long?)null);
+
+        string[] messageData = { "line1", "line2", "." };
+        int messageLine = 0;
+        
+        mocks.Connection.Setup(c => c.ReadLineBytes())
+            .Returns(() => Task.FromResult(Encoding.UTF8.GetBytes(messageData[messageLine++])));
+        
+        mocks.Connection.SetupGet(c => c.LastLineHadBareLineFeed)
+            .Returns(false); // No bare line feeds
+
+        DataVerb verb = new DataVerb();
+        await verb.Process(mocks.Connection.Object, new SmtpCommand("DATA"));
+
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.StartMailInputEndWithDot);
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
+
+        mocks.Connection.Verify(c => c.CommitMessage());
+        
+        // Verify that no bare line feed was detected
+        Assert.False(mocks.Session.Object.CurrentMessageHasBareLineFeed);
+    }
 }
