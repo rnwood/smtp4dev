@@ -266,7 +266,7 @@ stages:
               command: test
               projects: Rnwood.Smtp4dev.Tests
               configuration: release
-              arguments: '--collect:"XPlat Code Coverage" --settings:playwright.runsettings'
+              arguments: '--collect:"XPlat Code Coverage" --settings:Rnwood.Smtp4dev.Tests/playwright.runsettings'
               publishTestResults: true
           - task: PowerShell@2
             condition: and(always(), eq(variables['runTests'], true))
