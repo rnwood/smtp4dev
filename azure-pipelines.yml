@@ -207,19 +207,45 @@ stages:
                 
                 try {
                   Write-Host "Current directory: $(Get-Location)"
-                  Write-Host "Installing Chromium browser via Playwright script..."
                   Write-Host "Starting browser installation at: $(Get-Date)"
+                  
+                  # Debug filesystem state
+                  Write-Host "Debugging filesystem state..."
+                  Write-Host "Contents of Rnwood.Smtp4dev.Tests/bin/:"
+                  if (Test-Path "Rnwood.Smtp4dev.Tests/bin") {
+                    Get-ChildItem "Rnwood.Smtp4dev.Tests/bin" -Recurse | Select-Object FullName | ForEach-Object { Write-Host "  $($_.FullName)" }
+                  } else {
+                    Write-Host "  Rnwood.Smtp4dev.Tests/bin directory does not exist"
+                  }
                   
                   # Use the test project's playwright.ps1 script directly
                   # This ensures the same execution context as the tests
                   $scriptPath = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
+                  Write-Host "Looking for Playwright script at: $scriptPath"
+                  Write-Host "Full path resolved: $(Resolve-Path $scriptPath -ErrorAction SilentlyContinue)"
                   
                   if (Test-Path $scriptPath) {
-                    Write-Host "Found playwright script at: $scriptPath"
+                    Write-Host "✓ Found playwright script at: $scriptPath"
+                    Write-Host "Installing Chromium browser via Playwright script..."
                     pwsh $scriptPath install chromium
                     Write-Host "Browser installation completed at: $(Get-Date)"
                   } else {
-                    throw "Playwright script not found at: $scriptPath"
+                    Write-Host "Script not found. Checking alternate locations..."
+                    
+                    # Try to find the script in any location
+                    $foundScripts = Get-ChildItem -Path "." -Name "playwright.ps1" -Recurse -ErrorAction SilentlyContinue
+                    if ($foundScripts) {
+                      Write-Host "Found playwright.ps1 scripts at:"
+                      $foundScripts | ForEach-Object { Write-Host "  $_" }
+                      
+                      # Use the first found script
+                      $scriptPath = $foundScripts[0]
+                      Write-Host "Using script at: $scriptPath"
+                      pwsh $scriptPath install chromium
+                      Write-Host "Browser installation completed at: $(Get-Date)"
+                    } else {
+                      throw "Playwright script not found at: $scriptPath. Make sure the test project was built first."
+                    }
                   }
                   
                   # Verify browser installation with detailed checking
