@@ -60,7 +60,7 @@
                 if (this.message != null) {
 
                     const plainText = await new MessagesController().getMessagePlainText(this.message.id);
-                    this.html = "<pre>" + this.escapeHtml(plainText) + "</pre>";
+                    this.html = "<pre style=\"white-space: pre-wrap;\">" + this.escapeHtml(plainText) + "</pre>";
                 }
             } catch (e: any) {
                 this.error = e;
