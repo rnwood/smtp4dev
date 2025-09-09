@@ -45,6 +45,25 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.ToTable("Mailboxes");
                 });
 
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.MailboxFolder", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("TEXT");
+
+                    b.Property<Guid>("MailboxId")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Name")
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MailboxId");
+
+                    b.ToTable("MailboxFolders");
+                });
+
             modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Message", b =>
                 {
                     b.Property<Guid>("Id")
@@ -78,6 +97,9 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.Property<Guid?>("MailboxId")
                         .HasColumnType("TEXT");
 
+                    b.Property<Guid?>("MailboxFolderId")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("MimeParseError")
                         .HasColumnType("TEXT");
 
@@ -105,6 +127,8 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("MailboxId");
+
+                    b.HasIndex("MailboxFolderId");
 
                     b.HasIndex("SessionId");
 
@@ -171,11 +195,27 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.ToTable("Sessions");
                 });
 
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.MailboxFolder", b =>
+                {
+                    b.HasOne("Rnwood.Smtp4dev.DbModel.Mailbox", "Mailbox")
+                        .WithMany("MailboxFolders")
+                        .HasForeignKey("MailboxId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Mailbox");
+                });
+
             modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Message", b =>
                 {
                     b.HasOne("Rnwood.Smtp4dev.DbModel.Mailbox", "Mailbox")
                         .WithMany()
                         .HasForeignKey("MailboxId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Rnwood.Smtp4dev.DbModel.MailboxFolder", "MailboxFolder")
+                        .WithMany("Messages")
+                        .HasForeignKey("MailboxFolderId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Rnwood.Smtp4dev.DbModel.Session", "Session")
@@ -184,6 +224,8 @@ namespace Rnwood.Smtp4dev.Migrations
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.Navigation("Mailbox");
+
+                    b.Navigation("MailboxFolder");
 
                     b.Navigation("Session");
                 });
@@ -197,6 +239,16 @@ namespace Rnwood.Smtp4dev.Migrations
                         .IsRequired();
 
                     b.Navigation("Message");
+                });
+
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Mailbox", b =>
+                {
+                    b.Navigation("MailboxFolders");
+                });
+
+            modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.MailboxFolder", b =>
+                {
+                    b.Navigation("Messages");
                 });
 
             modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Message", b =>
