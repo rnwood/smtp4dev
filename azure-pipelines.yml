@@ -252,24 +252,8 @@ stages:
                   Write-Error "Playwright browser installation failed with exception: $_"
                   exit 1
                 }
-          - task: DotNetCoreCLI@2
-            condition: and(succeeded(), eq(variables['runTests'], true))
-            displayName: Run Tests
-            timeoutInMinutes: 45
-            env:
-              SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
-              SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev
-              # Note: This environment variable is not currently used by our E2E tests
-              # Our tests run via dotnet test, not playwright test runner directly
-              PLAYWRIGHT_HTML_REPORT: $(Agent.TempDirectory)/playwright-report
-            inputs:
-              command: test
-              projects: Rnwood.Smtp4dev.Tests
-              configuration: release
-              arguments: '--collect:"XPlat Code Coverage" --settings:Rnwood.Smtp4dev.Tests/playwright.runsettings'
-              publishTestResults: true
           - task: PowerShell@2
-            condition: and(always(), eq(variables['runTests'], true))
+            condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Create Playwright HTML Report Directory
             inputs:
               targetType: inline
@@ -323,6 +307,21 @@ stages:
                   Write-Error "Failed to create HTML report file: $indexPath"
                   exit 1
                 }
+          - task: DotNetCoreCLI@2
+            condition: and(succeeded(), eq(variables['runTests'], true))
+            displayName: Run Tests
+            env:
+              SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
+              SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev
+              # Note: This environment variable is not currently used by our E2E tests
+              # Our tests run via dotnet test, not playwright test runner directly
+              PLAYWRIGHT_HTML_REPORT: $(Agent.TempDirectory)/playwright-report
+            inputs:
+              command: test
+              projects: Rnwood.Smtp4dev.Tests
+              configuration: release
+              arguments: '--collect:"XPlat Code Coverage" --settings:Rnwood.Smtp4dev.Tests/playwright.runsettings'
+              publishTestResults: true
           - task: PublishPipelineArtifact@1
             condition: and(always(), eq(variables['runTests'], true))
             displayName: Publish Playwright HTML Report
