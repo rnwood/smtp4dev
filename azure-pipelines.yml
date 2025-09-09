@@ -198,57 +198,32 @@ stages:
 
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
-            displayName: Install Playwright Browsers in Test Context
+            displayName: Install Playwright CLI Tool and Browsers
             timeoutInMinutes: 10
             inputs:
               targetType: inline
               script: |
-                Write-Host "Installing Playwright browsers using PowerShell script in test execution context..."
+                Write-Host "Installing Playwright CLI tool and browsers..."
                 
                 try {
                   Write-Host "Current directory: $(Get-Location)"
-                  Write-Host "Starting browser installation at: $(Get-Date)"
+                  Write-Host "Starting installation at: $(Get-Date)"
                   
-                  # Debug filesystem state
-                  Write-Host "Debugging filesystem state..."
-                  Write-Host "Contents of Rnwood.Smtp4dev.Tests/bin/:"
-                  if (Test-Path "Rnwood.Smtp4dev.Tests/bin") {
-                    Get-ChildItem "Rnwood.Smtp4dev.Tests/bin" -Recurse | Select-Object FullName | ForEach-Object { Write-Host "  $($_.FullName)" }
-                  } else {
-                    Write-Host "  Rnwood.Smtp4dev.Tests/bin directory does not exist"
+                  # Install Playwright CLI tool globally
+                  Write-Host "Installing Playwright CLI tool..."
+                  dotnet tool install --global Microsoft.Playwright.CLI --version 1.48.0
+                  
+                  # Install Chromium browser
+                  Write-Host "Installing Chromium browser..."
+                  playwright install chromium
+                  
+                  # Install system dependencies on Linux
+                  if ($IsLinux) {
+                    Write-Host "Installing system dependencies on Linux..."
+                    playwright install-deps chromium
                   }
                   
-                  # Use the test project's playwright.ps1 script directly
-                  # This ensures the same execution context as the tests
-                  $scriptPath = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
-                  Write-Host "Looking for Playwright script at: $scriptPath"
-                  Write-Host "Full path resolved: $(Resolve-Path $scriptPath -ErrorAction SilentlyContinue)"
-                  
-                  if (Test-Path $scriptPath) {
-                    Write-Host "✓ Found playwright script at: $scriptPath"
-                    Write-Host "Installing Chromium browser via Playwright script..."
-                    pwsh $scriptPath install chromium
-                    Write-Host "Browser installation completed at: $(Get-Date)"
-                  } else {
-                    Write-Host "Script not found. Checking alternate locations..."
-                    
-                    # Try to find the script in any location
-                    $foundScripts = Get-ChildItem -Path "." -Name "playwright.ps1" -Recurse -ErrorAction SilentlyContinue
-                    if ($foundScripts) {
-                      Write-Host "Found playwright.ps1 scripts at:"
-                      $foundScripts | ForEach-Object { Write-Host "  $_" }
-                      
-                      # Use the first found script
-                      $scriptPath = $foundScripts[0]
-                      Write-Host "Using script at: $scriptPath"
-                      pwsh $scriptPath install chromium
-                      Write-Host "Browser installation completed at: $(Get-Date)"
-                    } else {
-                      throw "Playwright script not found at: $scriptPath. Make sure the test project was built first."
-                    }
-                  }
-                  
-                  # Verify browser installation with detailed checking
+                  # Verify browser installation
                   Write-Host "Verifying browser installation..."
                   $playwrightCache = if ($IsWindows) { "$env:USERPROFILE\.cache\ms-playwright" } else { "$env:HOME/.cache/ms-playwright" }
                   
@@ -273,50 +248,14 @@ stages:
                     Write-Host "Warning: Playwright cache directory not found at: $playwrightCache"
                   }
                   
-                  Write-Host "✓ Playwright browser installation completed successfully"
+                  Write-Host "✓ Playwright installation completed successfully at: $(Get-Date)"
                 } catch {
-                  Write-Error "Failed to install Playwright browsers: $_"
+                  Write-Error "Failed to install Playwright: $_"
                   Write-Host "Error details: $($_.Exception.Message)"
                   Write-Host "Error at: $(Get-Date)"
                   exit 1
                 }
-          - task: PowerShell@2
-            condition: and(succeeded(), eq(variables['runTests'], true))
-            displayName: Install Playwright System Dependencies (Linux)
-            inputs:
-              targetType: inline
-              script: |
-                if ($IsLinux) {
-                  Write-Host "Installing system dependencies for Playwright on Linux..."
-                  
-                  try {
-                    # Use the test project's playwright script to install system dependencies
-                    $playwrightScriptPath = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
-                    
-                    if (Test-Path $playwrightScriptPath) {
-                      Write-Host "Installing Playwright system dependencies using project script..."
-                      pwsh $playwrightScriptPath install-deps chromium
-                      Write-Host "✓ Playwright system dependencies installed successfully"
-                    } else {
-                      Write-Host "Project script not found, trying manual installation..."
-                      sudo apt-get update -qq
-                      sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
-                      Write-Host "✓ Manual system dependencies installed successfully"
-                    }
-                  } catch {
-                    Write-Host "Script-based install-deps failed, trying manual installation..."
-                    try {
-                      sudo apt-get update -qq
-                      sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
-                      Write-Host "✓ Manual system dependencies installed successfully"
-                    } catch {
-                      Write-Error "Failed to install system dependencies: $_"
-                      exit 1
-                    }
-                  }
-                } else {
-                  Write-Host "Skipping system dependencies installation on Windows"
-                }
+
           - task: PowerShell@2
             condition: and(always(), eq(variables['runTests'], true))
             displayName: Create Playwright HTML Report Directory
