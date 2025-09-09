@@ -198,42 +198,66 @@ stages:
 
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
-            displayName: Install Playwright Browsers using Test Project Script
+            displayName: Install Playwright Browsers with Robust Detection
             timeoutInMinutes: 10
             inputs:
               targetType: inline
               script: |
-                Write-Host "Installing Playwright browsers using test project's playwright.ps1 script..."
+                Write-Host "Installing Playwright browsers with robust detection..."
                 
                 try {
                   Write-Host "Current directory: $(Get-Location)"
                   Write-Host "Starting installation at: $(Get-Date)"
                   
-                  # Look for playwright.ps1 script in test project output
-                  $playwrightScript = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
+                  # Force a fresh build of the test project to ensure playwright.ps1 is generated
+                  Write-Host "Ensuring test project is built with Playwright dependencies..."
+                  dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release --no-restore
                   
-                  Write-Host "Checking for Playwright script at: $playwrightScript"
-                  Write-Host "Current working directory: $pwd"
+                  # Wait briefly for file system to sync (CI timing issue)
+                  Start-Sleep -Seconds 2
                   
-                  # Debug: Show directory structure to understand CI layout
-                  if (Test-Path "Rnwood.Smtp4dev.Tests/bin") {
-                    Write-Host "Contents of Rnwood.Smtp4dev.Tests/bin:"
-                    Get-ChildItem "Rnwood.Smtp4dev.Tests/bin" -Recurse | Select-Object FullName | ForEach-Object { Write-Host "  $($_.FullName)" }
-                  } else {
-                    Write-Host "Rnwood.Smtp4dev.Tests/bin directory not found"
+                  # Look for playwright.ps1 script in multiple possible locations
+                  $possiblePaths = @(
+                    "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/linux-x64/Release/net8.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/win-x64/Release/net8.0/playwright.ps1"
+                  )
+                  
+                  $playwrightScript = $null
+                  foreach ($path in $possiblePaths) {
+                    Write-Host "Checking for Playwright script at: $path"
+                    if (Test-Path $path) {
+                      $playwrightScript = $path
+                      Write-Host "✓ Found Playwright script at: $playwrightScript"
+                      break
+                    }
                   }
                   
-                  # Try to find playwright.ps1 anywhere in the build output
-                  $foundScripts = Get-ChildItem -Path "." -Name "playwright.ps1" -Recurse -ErrorAction SilentlyContinue
-                  if ($foundScripts) {
-                    Write-Host "Found playwright.ps1 scripts at:"
-                    $foundScripts | ForEach-Object { Write-Host "  $_" }
-                    $playwrightScript = $foundScripts[0]
-                    Write-Host "Using script at: $playwrightScript"
+                  # If not found in expected locations, search recursively
+                  if (-not $playwrightScript) {
+                    Write-Host "Script not found in expected locations. Searching recursively..."
+                    $foundScripts = Get-ChildItem -Path "." -Name "playwright.ps1" -Recurse -ErrorAction SilentlyContinue
+                    if ($foundScripts) {
+                      $playwrightScript = $foundScripts[0]
+                      Write-Host "✓ Found Playwright script via recursive search at: $playwrightScript"
+                    }
                   }
                   
-                  if (Test-Path $playwrightScript) {
-                    Write-Host "✓ Found Playwright script at: $playwrightScript"
+                  # Debug: Show build output structure if script still not found
+                  if (-not $playwrightScript) {
+                    Write-Host "❌ Playwright script not found. Investigating build output structure..."
+                    if (Test-Path "Rnwood.Smtp4dev.Tests/bin") {
+                      Write-Host "Contents of Rnwood.Smtp4dev.Tests/bin:"
+                      Get-ChildItem "Rnwood.Smtp4dev.Tests/bin" -Recurse -File | Select-Object FullName | ForEach-Object { Write-Host "  $($_.FullName)" }
+                    } else {
+                      Write-Host "Rnwood.Smtp4dev.Tests/bin directory not found"
+                      Write-Host "Directory contents at root:"
+                      Get-ChildItem "." | ForEach-Object { Write-Host "  $_" }
+                    }
+                  }
+                  
+                  if ($playwrightScript -and (Test-Path $playwrightScript)) {
+                    Write-Host "Using test project's Playwright script for browser installation..."
                     
                     # Install Chromium browser using project script
                     Write-Host "Installing Chromium browser..."
@@ -245,7 +269,7 @@ stages:
                       pwsh $playwrightScript install-deps chromium
                     }
                   } else {
-                    Write-Host "❌ Playwright script not found. Falling back to global CLI tool approach..."
+                    Write-Host "Falling back to global CLI tool approach..."
                     
                     # Fallback: Use global CLI tool approach as backup
                     Write-Host "Installing global Playwright CLI tool..."
