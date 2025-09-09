@@ -13,4 +13,5 @@ public class MessageSummaryProjection
     public bool IsRelayed { get; set; }
     public string DeliveredTo { get; set; }
     public bool IsUnread { get; set; }
+    public bool HasBareLineFeed { get; set; }
 }

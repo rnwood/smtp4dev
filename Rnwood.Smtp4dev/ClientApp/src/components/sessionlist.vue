@@ -50,6 +50,19 @@
                     {{ scope.row.numberOfMessages }}
                 </template>
             </el-table-column>
+            <el-table-column property="hasWarnings"
+                             label=""
+                             width="28">
+                <template #default="scope">
+                    <el-tooltip effect="light"
+                                content="Session has warnings"
+                                placement="top-start">
+                        <el-icon v-if="scope.row.hasWarnings" style="color: orange;">
+                            <Warning />
+                        </el-icon>
+                    </el-tooltip>
+                </template>
+            </el-table-column>
         </el-table>
         <messagelistpager :paged-data="pagedServerMessages"
                           @on-current-page-change="handlePaginationCurrentChange"

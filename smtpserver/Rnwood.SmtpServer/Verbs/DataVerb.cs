@@ -27,6 +27,9 @@ public class DataVerb : IVerb
             return;
         }
 
+        // Reset bare line feed tracking for this message
+        connection.CurrentMessage.HasBareLineFeed = false;
+
         connection.CurrentMessage.SecureConnection = connection.Session.SecureConnection;
 
         await connection.WriteResponse(new SmtpResponse(
@@ -47,6 +50,12 @@ public class DataVerb : IVerb
                 if (!"."u8.ToArray().SequenceEqual(data))
                 {
                     data = ProcessLine(data);
+
+                    // Check for bare line feed
+                    if (connection.LastLineHadBareLineFeed)
+                    {
+                        connection.CurrentMessage.HasBareLineFeed = true;
+                    }
 
                     if (!firstLine)
                     {

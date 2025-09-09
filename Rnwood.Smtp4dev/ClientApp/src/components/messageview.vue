@@ -34,13 +34,22 @@
             </div>
 
             <div class="pad">
+            
+
+                <div v-if="message && message.relayError">
+                    <el-alert type="error">Message relay error: {{message.relayError}}</el-alert>
+                </div>
+
+                <template v-if="message && message.mimeParseError">
+                    <el-alert type="error">Message parse error: {{message.mimeParseError}}</el-alert>
+                </template>
                 <el-alert v-for="warning in warnings"
                           v-bind:key="warning.details"
                           :title="'Warning: ' + warning.details"
                           type="warning"
                           show-icon />
 
-                <div class="messageviewheader" v-if="message">
+                <div class="messageviewheader pad" v-if="message">
                     <p :class="{expanded: fromExpanded}" :title="message.from" @click="fromExpanded = !fromExpanded">
 
                         From: <span v-if="message">{{message.from}}</span>
@@ -83,14 +92,6 @@
 
                 </div>
 
-
-                <div v-if="message && message.relayError">
-                    <el-alert type="error">Message relay error: {{message.relayError}}</el-alert>
-                </div>
-
-                <template v-if="message && message.mimeParseError">
-                    <el-alert type="error">Message parse error: {{message.mimeParseError}}</el-alert>
-                </template>
             </div>
 
             <el-tabs v:model="selectedTabId" style="height: 100%; width:100%" class="fill" type="border-card">
@@ -348,6 +349,11 @@
             var result: MessageWarning[] = [];
 
             if (this.message != null) {
+                // Add main message warnings (e.g., bare line feed warnings)
+                for (let warning of this.message.warnings) {
+                    result.push(warning);
+                }
+                
                 var parts = this.message.parts;
                 this.getWarnings(parts, result);
             }

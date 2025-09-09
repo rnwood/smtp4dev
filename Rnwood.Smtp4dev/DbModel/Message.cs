@@ -34,6 +34,8 @@ namespace Rnwood.Smtp4dev.DbModel
         public bool SecureConnection { get; set; }
         
         public bool? EightBitTransport { get; set; }
+        
+        public bool HasBareLineFeed { get; set; }
 
         public virtual List<MessageRelay> Relays { get; set; } = new List<MessageRelay>();
         public string DeliveredTo { get; set; }

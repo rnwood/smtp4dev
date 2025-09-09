@@ -54,7 +54,8 @@ namespace Rnwood.Smtp4dev.Tests
                     AttachmentCount = m.AttachmentCount,
                     DeliveredTo = m.DeliveredTo,
                     IsRelayed = m.Relays.Count > 0,
-                    IsUnread = m.IsUnread
+                    IsUnread = m.IsUnread,
+                    HasBareLineFeed = m.HasBareLineFeed
                 }).AsQueryable();
         }
 

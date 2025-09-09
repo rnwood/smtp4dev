@@ -46,6 +46,11 @@ public interface IMessageBuilder : IDisposable
     ISession Session { get; set; }
 
     /// <summary>
+    ///     Gets or sets a value indicating whether the current message contains bare line feeds.
+    /// </summary>
+    bool HasBareLineFeed { get; set; }
+
+    /// <summary>
     ///     Gets the recipients of the message as specified in the RCPT TO command.
     /// </summary>
     /// <value>

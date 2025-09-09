@@ -84,7 +84,8 @@ namespace Rnwood.Smtp4dev.Server
                 MimeParseError = mimeParseError,
                 AttachmentCount = 0,
                 SecureConnection = message.SecureConnection,
-                SessionEncoding = message.EightBitTransport ? Encoding.UTF8.WebName : Encoding.Latin1.WebName
+                SessionEncoding = message.EightBitTransport ? Encoding.UTF8.WebName : Encoding.Latin1.WebName,
+                HasBareLineFeed = message.HasBareLineFeed
             };
 
             var parts = new Message(result).Parts;

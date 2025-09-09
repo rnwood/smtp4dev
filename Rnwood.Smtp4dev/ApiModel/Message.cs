@@ -30,6 +30,12 @@ namespace Rnwood.Smtp4dev.ApiModel
             Parts = new List<MessageEntitySummary>(1);
             RelayError = dbMessage.RelayError;
 
+            // Check for bare line feed warning
+            if (dbMessage.HasBareLineFeed)
+            {
+                Warnings.Add(new MessageWarning { Details = "Message contains bare line feeds (LF without CR). RFC 5321 requires CRLF line endings." });
+            }
+
             if (dbMessage.MimeParseError != null)
             {
                 MimeParseError = dbMessage.MimeParseError;
@@ -239,6 +245,8 @@ namespace Rnwood.Smtp4dev.ApiModel
         public string MimeParseError { get; set; }
 
         public string RelayError { get; set; }
+        
+        public List<MessageWarning> Warnings { get; set; } = new List<MessageWarning>();
 
         [JsonIgnore]
         internal MimeMessage MimeMessage { get; set; }
