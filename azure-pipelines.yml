@@ -198,67 +198,53 @@ stages:
 
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
-            displayName: Install Playwright Browsers for Test Project
-            timeoutInMinutes: 15
+            displayName: Install Playwright Browsers in Test Context
+            timeoutInMinutes: 10
             inputs:
               targetType: inline
               script: |
-                Write-Host "Installing Playwright browsers using test project's playwright.ps1 script..."
+                Write-Host "Installing Playwright browsers using PowerShell script in test execution context..."
                 
                 try {
-                  # Use the test project's generated playwright.ps1 script
-                  $playwrightScriptPath = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
+                  Write-Host "Current directory: $(Get-Location)"
+                  Write-Host "Installing Chromium browser via Playwright script..."
+                  Write-Host "Starting browser installation at: $(Get-Date)"
                   
-                  Write-Host "Verifying playwright.ps1 script exists at: $playwrightScriptPath"
-                  if (-not (Test-Path $playwrightScriptPath)) {
-                    throw "Playwright script not found at $playwrightScriptPath. Make sure the test project was built first."
-                  }
+                  # Use the test project's playwright.ps1 script directly
+                  # This ensures the same execution context as the tests
+                  $scriptPath = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
                   
-                  $resolvedPath = Resolve-Path $playwrightScriptPath
-                  Write-Host "Found playwright.ps1 at: $resolvedPath"
-                  
-                  # Install Chromium browser using the test project's script
-                  Write-Host "Installing Chromium browser using project script (this may take several minutes)..."
-                  Write-Host "Starting browser download at: $(Get-Date)"
-                  
-                  # Use a background job with timeout to handle potential hanging
-                  $installJob = Start-Job -ScriptBlock {
-                    param($scriptPath)
-                    pwsh $scriptPath install chromium 2>&1
-                  } -ArgumentList $resolvedPath
-                  
-                  # Wait for the job with a reasonable timeout (8 minutes)
-                  $completed = Wait-Job $installJob -Timeout 480
-                  
-                  if ($completed) {
-                    $output = Receive-Job $installJob
-                    Write-Host "Browser installation output:"
-                    Write-Host $output
+                  if (Test-Path $scriptPath) {
+                    Write-Host "Found playwright script at: $scriptPath"
+                    pwsh $scriptPath install chromium
                     Write-Host "Browser installation completed at: $(Get-Date)"
                   } else {
-                    Write-Host "Browser installation timed out after 8 minutes, stopping job..."
-                    Stop-Job $installJob
-                    Remove-Job $installJob -Force
-                    throw "Browser installation timed out"
+                    throw "Playwright script not found at: $scriptPath"
                   }
                   
-                  Remove-Job $installJob -Force
-                  
-                  # Verify browser installation
+                  # Verify browser installation with detailed checking
                   Write-Host "Verifying browser installation..."
-                  $chromiumPath = "~/.cache/ms-playwright/chromium-*/chrome-linux/chrome"
-                  $resolvedPath = Resolve-Path $chromiumPath -ErrorAction SilentlyContinue
-                  if ($resolvedPath) {
-                    Write-Host "✓ Chromium browser installed successfully"
-                    Write-Host "Browser location: $resolvedPath"
-                  } else {
-                    Write-Host "Warning: Could not verify Chromium installation path at $chromiumPath"
-                    # Try alternative verification
-                    $playwrightCache = "~/.cache/ms-playwright"
-                    if (Test-Path $playwrightCache) {
-                      Write-Host "Playwright cache directory exists, listing contents:"
-                      Get-ChildItem $playwrightCache -Recurse | Select-Object Name, FullName | Format-Table -AutoSize
+                  $playwrightCache = if ($IsWindows) { "$env:USERPROFILE\.cache\ms-playwright" } else { "$env:HOME/.cache/ms-playwright" }
+                  
+                  Write-Host "Checking Playwright cache at: $playwrightCache"
+                  if (Test-Path $playwrightCache) {
+                    Write-Host "✓ Playwright cache directory exists"
+                    $items = Get-ChildItem $playwrightCache -ErrorAction SilentlyContinue
+                    if ($items) {
+                      Write-Host "Cache contents:"
+                      $items | ForEach-Object { Write-Host "  $_" }
+                      
+                      $chromiumDirs = $items | Where-Object { $_.Name -like "chromium-*" }
+                      if ($chromiumDirs) {
+                        Write-Host "✓ Chromium browser directories found: $($chromiumDirs.Name -join ', ')"
+                      } else {
+                        Write-Host "Warning: No chromium directories found in cache"
+                      }
+                    } else {
+                      Write-Host "Warning: Playwright cache directory is empty"
                     }
+                  } else {
+                    Write-Host "Warning: Playwright cache directory not found at: $playwrightCache"
                   }
                   
                   Write-Host "✓ Playwright browser installation completed successfully"
