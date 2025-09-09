@@ -361,10 +361,10 @@ public class DataVerbTests
     }
 
     /// <summary>
-    /// Tests that bare line feeds are detected and tracked in the session.
+    /// Tests that bare line feeds are detected and tracked in the message.
     /// </summary>
     [Fact]
-    public async Task Data_BareLineFeed_TrackedInSession()
+    public async Task Data_BareLineFeed_TrackedInMessage()
     {
         TestMocks mocks = new TestMocks();
 
@@ -391,15 +391,15 @@ public class DataVerbTests
 
         mocks.Connection.Verify(c => c.CommitMessage());
         
-        // Verify that bare line feed was detected and tracked in session
-        Assert.True(mocks.Session.Object.CurrentMessageHasBareLineFeed);
+        // Verify that bare line feed was detected and tracked in message
+        Assert.True(messageBuilder.HasBareLineFeed);
     }
 
     /// <summary>
     /// Tests that no bare line feeds are detected when all lines have proper CRLF.
     /// </summary>
     [Fact]
-    public async Task Data_ProperCRLF_NotTrackedInSession()
+    public async Task Data_ProperCRLF_NotTrackedInMessage()
     {
         TestMocks mocks = new TestMocks();
 
@@ -425,7 +425,7 @@ public class DataVerbTests
 
         mocks.Connection.Verify(c => c.CommitMessage());
         
-        // Verify that no bare line feed was detected
-        Assert.False(mocks.Session.Object.CurrentMessageHasBareLineFeed);
+        // Verify that no bare line feed was detected in message
+        Assert.False(messageBuilder.HasBareLineFeed);
     }
 }
