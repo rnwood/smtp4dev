@@ -44,7 +44,7 @@ public class ScriptingHost
         if (source != expression)
         {
             expression = expression ?? "";
-            log.Information("Parsing {type} - {expression}", type, expression);
+            log.Debug("Parsing {type} - {expression}", type, expression);
 
             if (string.IsNullOrWhiteSpace(expression))
             {
