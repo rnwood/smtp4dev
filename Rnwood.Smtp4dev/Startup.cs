@@ -161,11 +161,17 @@ namespace Rnwood.Smtp4dev
                         }
 
                         //For message before delivered to was added, assume all recipients.
-                        foreach (var m in context.Messages.Where(m => m.DeliveredTo == null))
+                        // Use raw SQL to avoid entity model inconsistencies during migration
+                        try
                         {
-                            m.DeliveredTo = m.To;
+                            context.Database.ExecuteSqlRaw(
+                                "UPDATE Messages SET DeliveredTo = [To] WHERE DeliveredTo IS NULL");
                         }
-                        context.SaveChanges();
+                        catch (Exception ex)
+                        {
+                            // Log and continue if this fails - it's a data migration that can be retried
+                            Log.Logger.Warning(ex, "Failed to update DeliveredTo field for existing messages. This will be retried on next startup.");
+                        }
 
 
                     }, ServiceLifetime.Scoped, ServiceLifetime.Singleton);
