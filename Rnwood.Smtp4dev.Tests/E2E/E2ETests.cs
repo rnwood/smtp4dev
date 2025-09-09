@@ -95,7 +95,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             File.Delete(dbPath);
 
             args.AddRange(new[] {
-                "--debugsettings", options.InMemoryDB ? "--db=" : useDefaultDBPath ? "" : $"--db={dbPath}", "--nousersettings",
+                options.InMemoryDB ? "--db=" : useDefaultDBPath ? "" : $"--db={dbPath}", "--nousersettings",
                 "--tlsmode=StartTls"
             }.Where(a => a != ""));
 

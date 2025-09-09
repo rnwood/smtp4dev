@@ -189,7 +189,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             // Give time for both UI change and browser emulation to take effect
             await page.WaitForTimeoutAsync(1000);
             
-            Console.WriteLine($"🌈 Set browser color scheme emulation to: {(isDarkMode ? "dark" : "light")}");
+            // Set browser color scheme emulation (reduced logging for CI)
         }
 
         private async Task VerifyEmailColors(IPage page, bool emailSupportsDarkMode, bool isDarkMode)
@@ -235,7 +235,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         }, null, 2);
                     }
                 ");
-                Console.WriteLine($"🔍 DEBUG iframe content analysis: {iframeContent}");
+                // Debug iframe content (comment out for CI to reduce output)
+                // Console.WriteLine($"🔍 DEBUG iframe content analysis: {iframeContent}");
             }
             
             // Get the iframe element for filter inspection
@@ -245,14 +246,15 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             // Check the iframe's computed filter style using getComputedStyle
             var iframeFilter = await iframe.EvaluateAsync<string>("el => getComputedStyle(el).filter");
             
-            Console.WriteLine($"📋 Test scenario: UI Mode = {(isDarkMode ? "Dark" : "Light")}, Email Dark Mode Support = {emailSupportsDarkMode}");
-            Console.WriteLine($"🎨 Iframe computed filter: '{iframeFilter}'");
+            // Test scenario logging (reduced for CI)
+            // Console.WriteLine($"📋 Test scenario: UI Mode = {(isDarkMode ? "Dark" : "Light")}, Email Dark Mode Support = {emailSupportsDarkMode}");
+            // Console.WriteLine($"🎨 Iframe computed filter: '{iframeFilter}'");
             
             // Determine if inversion should be applied based on UI mode and email dark mode support
             bool shouldInvert = isDarkMode && !emailSupportsDarkMode;
             bool hasInvertFilter = iframeFilter.Contains("invert");
             
-            Console.WriteLine($"📊 Filter verification: expected invert = {shouldInvert}, actual invert = {hasInvertFilter}");
+            // Console.WriteLine($"📊 Filter verification: expected invert = {shouldInvert}, actual invert = {hasInvertFilter}");
             
             // Verify the iframe has the correct CSS filter
             if (shouldInvert)
@@ -280,7 +282,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             // Determine if dark mode media query colors should be active
             bool expectDarkModeMediaQueryColors = emailSupportsDarkMode && isDarkMode && !shouldInvert;
             
-            Console.WriteLine($"🔍 Dark mode media query colors expected: {expectDarkModeMediaQueryColors}");
+            // Console.WriteLine($"🔍 Dark mode media query colors expected: {expectDarkModeMediaQueryColors}");
             
             // Define expected colors - different sets based on whether dark mode media query should be active
             var baseColors = new Dictionary<string, (string original, string inverted)>
@@ -305,7 +307,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 overallBackground = await GetComputedBackgroundColor(frameLocator, "body");
             }
             
-            Console.WriteLine($"🎨 Overall background color: {overallBackground}");
+            // Console.WriteLine($"🎨 Overall background color: {overallBackground}");
             
             if (expectDarkModeMediaQueryColors && darkModeMediaQueryColors.ContainsKey("overall-background"))
             {
