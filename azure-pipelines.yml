@@ -205,7 +205,7 @@ stages:
                   Write-Host "Installing system dependencies for Playwright on Linux..."
                   try {
                     sudo apt-get update
-                    sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2t64 libatk-bridge2.0-0t64 libdrm2 libgtk-3-0t64 libatspi2.0-0t64
+                    sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
                     Write-Host "✓ System dependencies installed successfully"
                   } catch {
                     Write-Error "Failed to install system dependencies: $_"
