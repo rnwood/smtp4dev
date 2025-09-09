@@ -17,6 +17,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public int? Port { get; set; }
         public bool? AllowRemoteConnections { get; set; }
+        public string BindAddress { get; set; }
 
         public string Database { get; set; }
 

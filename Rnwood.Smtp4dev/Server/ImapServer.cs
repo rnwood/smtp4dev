@@ -72,8 +72,22 @@ namespace Rnwood.Smtp4dev.Server
 
             List<IPBindInfo> bindings = new List<IPBindInfo>();
 
+            // Check if a specific bind address is configured
+            System.Net.IPAddress bindAddress = null;
+            if (!string.IsNullOrWhiteSpace(serverOptions.CurrentValue.BindAddress))
+            {
+                if (!System.Net.IPAddress.TryParse(serverOptions.CurrentValue.BindAddress, out bindAddress))
+                {
+                    throw new ArgumentException($"Invalid bind address: {serverOptions.CurrentValue.BindAddress}");
+                }
+            }
 
-            if (serverOptions.CurrentValue.AllowRemoteConnections)
+            if (bindAddress != null)
+            {
+                // Use the specific bind address when configured
+                bindings.Add(new IPBindInfo(serverOptions.CurrentValue.HostName, BindInfoProtocol.TCP, bindAddress, serverOptions.CurrentValue.ImapPort.Value));
+            }
+            else if (serverOptions.CurrentValue.AllowRemoteConnections)
             {
                 if (!serverOptions.CurrentValue.DisableIPv6)
                 {

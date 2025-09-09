@@ -82,6 +82,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 ImapPort = serverOptionsCurrentValue.ImapPort,
                 HostName = serverOptionsCurrentValue.HostName,
                 AllowRemoteConnections = serverOptionsCurrentValue.AllowRemoteConnections,
+                BindAddress = serverOptionsCurrentValue.BindAddress,
                 NumberOfMessagesToKeep = serverOptionsCurrentValue.NumberOfMessagesToKeep,
                 NumberOfSessionsToKeep = serverOptionsCurrentValue.NumberOfSessionsToKeep,
                 Exception = server.Exception?.Message,
@@ -257,6 +258,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.Port = serverUpdate.Port != defaultSettingsFile.ServerOptions.Port ? serverUpdate.Port : null;
             newSettings.HostName = serverUpdate.HostName != defaultSettingsFile.ServerOptions.HostName ? serverUpdate.HostName : null;
             newSettings.AllowRemoteConnections = serverUpdate.AllowRemoteConnections != defaultSettingsFile.ServerOptions.AllowRemoteConnections ? serverUpdate.AllowRemoteConnections : null;
+            newSettings.BindAddress = serverUpdate.BindAddress != defaultSettingsFile.ServerOptions.BindAddress ? serverUpdate.BindAddress : null;
             newSettings.NumberOfMessagesToKeep = serverUpdate.NumberOfMessagesToKeep != defaultSettingsFile.ServerOptions.NumberOfMessagesToKeep ? serverUpdate.NumberOfMessagesToKeep : null;
             newSettings.NumberOfSessionsToKeep = serverUpdate.NumberOfSessionsToKeep != defaultSettingsFile.ServerOptions.NumberOfSessionsToKeep ? serverUpdate.NumberOfSessionsToKeep : null;
             newSettings.ImapPort = serverUpdate.ImapPort != defaultSettingsFile.ServerOptions.ImapPort ? serverUpdate.ImapPort : null;
