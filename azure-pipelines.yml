@@ -259,6 +259,8 @@ stages:
             env:
               SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
               SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev
+              # Note: This environment variable is not currently used by our E2E tests
+              # Our tests run via dotnet test, not playwright test runner directly
               PLAYWRIGHT_HTML_REPORT: $(Agent.TempDirectory)/playwright-report
             inputs:
               command: test
@@ -272,14 +274,27 @@ stages:
             inputs:
               targetType: inline
               script: |
-                $reportDir = "$(Agent.TempDirectory)/playwright-report"
+                # Use Join-Path for cross-platform compatibility
+                $tempDir = "$(Agent.TempDirectory)"
+                $reportDir = Join-Path $tempDir "playwright-report"
                 Write-Host "Creating Playwright HTML report directory: $reportDir"
+                Write-Host "Platform: $([Environment]::OSVersion.Platform)"
+                Write-Host "Agent.TempDirectory: $tempDir"
                 
                 if (-not (Test-Path $reportDir)) {
                   New-Item -ItemType Directory -Path $reportDir -Force
                   Write-Host "✓ Created directory: $reportDir"
                 } else {
                   Write-Host "✓ Directory already exists: $reportDir"
+                }
+                
+                # Verify the directory exists and is accessible
+                if (Test-Path $reportDir) {
+                  $resolvedPath = Resolve-Path $reportDir
+                  Write-Host "✓ Directory verified at: $resolvedPath"
+                } else {
+                  Write-Error "Failed to create or access directory: $reportDir"
+                  exit 1
                 }
                 
                 # Create a minimal index.html file for the report
@@ -297,14 +312,22 @@ stages:
                 </html>
                 "@
                 
-                $indexPath = "$reportDir/index.html"
+                $indexPath = Join-Path $reportDir "index.html"
                 $indexHtml | Out-File -FilePath $indexPath -Encoding UTF8
                 Write-Host "✓ Created basic HTML report: $indexPath"
+                
+                # Verify the file was created
+                if (Test-Path $indexPath) {
+                  Write-Host "✓ HTML report file verified"
+                } else {
+                  Write-Error "Failed to create HTML report file: $indexPath"
+                  exit 1
+                }
           - task: PublishPipelineArtifact@1
             condition: and(always(), eq(variables['runTests'], true))
             displayName: Publish Playwright HTML Report
             inputs:
-              targetPath: '$(Agent.TempDirectory)/playwright-report'
+              targetPath: $(Agent.TempDirectory)/playwright-report
               artifact: 'PlaywrightReport_$(platformName)'
               publishLocation: 'pipeline'
           - task: DotNetCoreCLI@2
