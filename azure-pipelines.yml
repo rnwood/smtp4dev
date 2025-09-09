@@ -318,7 +318,7 @@ stages:
                   Write-Host "Skipping system dependencies installation on Windows"
                 }
           - task: PowerShell@2
-            condition: and(succeeded(), eq(variables['runTests'], true))
+            condition: and(always(), eq(variables['runTests'], true))
             displayName: Create Playwright HTML Report Directory
             inputs:
               targetType: inline
