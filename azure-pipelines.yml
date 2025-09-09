@@ -198,29 +198,36 @@ stages:
 
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
-            displayName: Install Playwright CLI Tool and Browsers
+            displayName: Install Playwright Browsers using Test Project Script
             timeoutInMinutes: 10
             inputs:
               targetType: inline
               script: |
-                Write-Host "Installing Playwright CLI tool and browsers..."
+                Write-Host "Installing Playwright browsers using test project's playwright.ps1 script..."
                 
                 try {
                   Write-Host "Current directory: $(Get-Location)"
                   Write-Host "Starting installation at: $(Get-Date)"
                   
-                  # Install Playwright CLI tool globally with compatible version
-                  Write-Host "Installing Playwright CLI tool..."
-                  dotnet tool install --global Microsoft.Playwright.CLI --version 1.2.3
+                  # Use the test project's playwright.ps1 script for browser installation
+                  $playwrightScript = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
                   
-                  # Install Chromium browser
-                  Write-Host "Installing Chromium browser..."
-                  playwright install chromium
-                  
-                  # Install system dependencies on Linux
-                  if ($IsLinux) {
-                    Write-Host "Installing system dependencies on Linux..."
-                    playwright install-deps chromium
+                  if (Test-Path $playwrightScript) {
+                    Write-Host "Found Playwright script at: $playwrightScript"
+                    
+                    # Install Chromium browser using project script
+                    Write-Host "Installing Chromium browser..."
+                    pwsh $playwrightScript install chromium
+                    
+                    # Install system dependencies on Linux using project script
+                    if ($IsLinux) {
+                      Write-Host "Installing system dependencies on Linux..."
+                      pwsh $playwrightScript install-deps chromium
+                    }
+                  } else {
+                    Write-Error "Playwright script not found at: $playwrightScript"
+                    Write-Host "Please ensure the test project has been built first."
+                    exit 1
                   }
                   
                   # Verify browser installation
