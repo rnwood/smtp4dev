@@ -209,11 +209,31 @@ stages:
                   Write-Host "Current directory: $(Get-Location)"
                   Write-Host "Starting installation at: $(Get-Date)"
                   
-                  # Use the test project's playwright.ps1 script for browser installation
+                  # Look for playwright.ps1 script in test project output
                   $playwrightScript = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
                   
+                  Write-Host "Checking for Playwright script at: $playwrightScript"
+                  Write-Host "Current working directory: $pwd"
+                  
+                  # Debug: Show directory structure to understand CI layout
+                  if (Test-Path "Rnwood.Smtp4dev.Tests/bin") {
+                    Write-Host "Contents of Rnwood.Smtp4dev.Tests/bin:"
+                    Get-ChildItem "Rnwood.Smtp4dev.Tests/bin" -Recurse | Select-Object FullName | ForEach-Object { Write-Host "  $($_.FullName)" }
+                  } else {
+                    Write-Host "Rnwood.Smtp4dev.Tests/bin directory not found"
+                  }
+                  
+                  # Try to find playwright.ps1 anywhere in the build output
+                  $foundScripts = Get-ChildItem -Path "." -Name "playwright.ps1" -Recurse -ErrorAction SilentlyContinue
+                  if ($foundScripts) {
+                    Write-Host "Found playwright.ps1 scripts at:"
+                    $foundScripts | ForEach-Object { Write-Host "  $_" }
+                    $playwrightScript = $foundScripts[0]
+                    Write-Host "Using script at: $playwrightScript"
+                  }
+                  
                   if (Test-Path $playwrightScript) {
-                    Write-Host "Found Playwright script at: $playwrightScript"
+                    Write-Host "✓ Found Playwright script at: $playwrightScript"
                     
                     # Install Chromium browser using project script
                     Write-Host "Installing Chromium browser..."
@@ -225,9 +245,19 @@ stages:
                       pwsh $playwrightScript install-deps chromium
                     }
                   } else {
-                    Write-Error "Playwright script not found at: $playwrightScript"
-                    Write-Host "Please ensure the test project has been built first."
-                    exit 1
+                    Write-Host "❌ Playwright script not found. Falling back to global CLI tool approach..."
+                    
+                    # Fallback: Use global CLI tool approach as backup
+                    Write-Host "Installing global Playwright CLI tool..."
+                    dotnet tool install --global Microsoft.Playwright.CLI --version 1.2.3
+                    
+                    Write-Host "Installing Chromium browser..."
+                    playwright install chromium
+                    
+                    if ($IsLinux) {
+                      Write-Host "Installing system dependencies on Linux..."
+                      playwright install-deps chromium
+                    }
                   }
                   
                   # Verify browser installation
