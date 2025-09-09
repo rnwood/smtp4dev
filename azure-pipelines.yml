@@ -203,26 +203,29 @@ stages:
             inputs:
               targetType: inline
               script: |
-                Write-Host "Installing Playwright browsers using simplified approach..."
+                Write-Host "Installing Playwright browsers using test project's playwright.ps1 script..."
                 
                 try {
-                  # Use the reliable Microsoft Playwright CLI tool approach
-                  Write-Host "Installing Microsoft Playwright CLI tool..."
-                  dotnet tool install --global Microsoft.Playwright.CLI
+                  # Use the test project's generated playwright.ps1 script
+                  $playwrightScriptPath = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
                   
-                  # Verify the tool is available
-                  Write-Host "Verifying Playwright CLI tool installation..."
-                  $playwrightVersion = playwright --version
-                  Write-Host "Playwright CLI version: $playwrightVersion"
+                  Write-Host "Verifying playwright.ps1 script exists at: $playwrightScriptPath"
+                  if (-not (Test-Path $playwrightScriptPath)) {
+                    throw "Playwright script not found at $playwrightScriptPath. Make sure the test project was built first."
+                  }
                   
-                  # Install Chromium browser with explicit timeout handling
-                  Write-Host "Installing Chromium browser (this may take several minutes)..."
+                  $resolvedPath = Resolve-Path $playwrightScriptPath
+                  Write-Host "Found playwright.ps1 at: $resolvedPath"
+                  
+                  # Install Chromium browser using the test project's script
+                  Write-Host "Installing Chromium browser using project script (this may take several minutes)..."
                   Write-Host "Starting browser download at: $(Get-Date)"
                   
                   # Use a background job with timeout to handle potential hanging
                   $installJob = Start-Job -ScriptBlock {
-                    playwright install chromium 2>&1
-                  }
+                    param($scriptPath)
+                    pwsh $scriptPath install chromium 2>&1
+                  } -ArgumentList $resolvedPath
                   
                   # Wait for the job with a reasonable timeout (8 minutes)
                   $completed = Wait-Job $installJob -Timeout 480
@@ -275,12 +278,21 @@ stages:
                   Write-Host "Installing system dependencies for Playwright on Linux..."
                   
                   try {
-                    # Use the global playwright CLI tool to install system dependencies
-                    Write-Host "Installing Playwright system dependencies using CLI tool..."
-                    playwright install-deps chromium
-                    Write-Host "✓ Playwright system dependencies installed successfully"
+                    # Use the test project's playwright script to install system dependencies
+                    $playwrightScriptPath = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1"
+                    
+                    if (Test-Path $playwrightScriptPath) {
+                      Write-Host "Installing Playwright system dependencies using project script..."
+                      pwsh $playwrightScriptPath install-deps chromium
+                      Write-Host "✓ Playwright system dependencies installed successfully"
+                    } else {
+                      Write-Host "Project script not found, trying manual installation..."
+                      sudo apt-get update -qq
+                      sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
+                      Write-Host "✓ Manual system dependencies installed successfully"
+                    }
                   } catch {
-                    Write-Host "CLI tool install-deps failed, trying manual installation..."
+                    Write-Host "Script-based install-deps failed, trying manual installation..."
                     try {
                       sudo apt-get update -qq
                       sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
