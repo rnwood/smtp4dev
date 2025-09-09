@@ -502,12 +502,13 @@ namespace Rnwood.Smtp4dev.Server
             message.Session = dbContext.Sessions.Find(activeSessionsToDbId[session]);
             message.Mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == targetMailboxWithRecipients.Key.Name);
             
+            // TODO: Uncomment after migration is properly handled
             // Assign message to INBOX folder by default for SMTP received messages
-            if (message.Mailbox != null)
-            {
-                var inboxFolder = dbContext.MailboxFolders.FirstOrDefault(f => f.MailboxId == message.Mailbox.Id && f.Name == MailboxFolder.INBOX);
-                message.MailboxFolder = inboxFolder;
-            }
+            // if (message.Mailbox != null)
+            // {
+            //     var inboxFolder = dbContext.MailboxFolders.FirstOrDefault(f => f.MailboxId == message.Mailbox.Id && f.Name == MailboxFolder.INBOX);
+            //     message.MailboxFolder = inboxFolder;
+            // }
             
             var relayResult = TryRelayMessage(message, null);
             message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
