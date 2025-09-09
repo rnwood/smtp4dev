@@ -209,9 +209,9 @@ stages:
                   Write-Host "Current directory: $(Get-Location)"
                   Write-Host "Starting installation at: $(Get-Date)"
                   
-                  # Install Playwright CLI tool globally
+                  # Install Playwright CLI tool globally with compatible version
                   Write-Host "Installing Playwright CLI tool..."
-                  dotnet tool install --global Microsoft.Playwright.CLI --version 1.48.0
+                  dotnet tool install --global Microsoft.Playwright.CLI --version 1.2.3
                   
                   # Install Chromium browser
                   Write-Host "Installing Chromium browser..."
