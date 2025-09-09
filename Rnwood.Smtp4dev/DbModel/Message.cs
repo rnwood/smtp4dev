@@ -26,8 +26,9 @@ namespace Rnwood.Smtp4dev.DbModel
         public Session Session { get; set; }
 
         public Mailbox Mailbox { get; set; }
-        public Guid? MailboxFolderId { get; set; }
-        public MailboxFolder MailboxFolder { get; set; }
+        // TODO: Uncomment after migration is properly handled
+        // public Guid? MailboxFolderId { get; set; }
+        // public MailboxFolder MailboxFolder { get; set; }
         public int AttachmentCount { get; set; }
 
         public bool IsUnread { get; set; }

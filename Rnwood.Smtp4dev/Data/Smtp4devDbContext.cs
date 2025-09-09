@@ -26,23 +26,24 @@ namespace Rnwood.Smtp4dev.Data
                 .OnDelete(DeleteBehavior.Cascade)
                 .IsRequired();
 
-            modelBuilder.Entity<Mailbox>()
-                .HasMany<MailboxFolder>(m => m.MailboxFolders)
-                .WithOne(f => f.Mailbox)
-                .HasForeignKey(f => f.MailboxId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // TODO: Uncomment after migration is properly handled
+            // modelBuilder.Entity<Mailbox>()
+            //     .HasMany<MailboxFolder>(m => m.MailboxFolders)
+            //     .WithOne(f => f.Mailbox)
+            //     .HasForeignKey(f => f.MailboxId)
+            //     .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<MailboxFolder>()
-                .HasMany<Message>(f => f.Messages)
-                .WithOne(m => m.MailboxFolder)
-                .HasForeignKey(m => m.MailboxFolderId)
-                .OnDelete(DeleteBehavior.Cascade);
+            // modelBuilder.Entity<MailboxFolder>()
+            //     .HasMany<Message>(f => f.Messages)
+            //     .WithOne(m => m.MailboxFolder)
+            //     .HasForeignKey(m => m.MailboxFolderId)
+            //     .OnDelete(DeleteBehavior.Cascade);
 
-            // Keep legacy relationship for backwards compatibility during migration
+            // Keep legacy relationship for backwards compatibility
             modelBuilder.Entity<Mailbox>()
                 .HasMany<Message>()
                     .WithOne(m => m.Mailbox)
-                    .OnDelete(DeleteBehavior.SetNull);
+                    .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<Message>()
                 .HasOne<Session>(x => x.Session)
@@ -59,6 +60,7 @@ namespace Rnwood.Smtp4dev.Data
         public DbSet<ImapState> ImapState { get; set; }
 
         public DbSet<Mailbox> Mailboxes { get; set; }
-        public DbSet<MailboxFolder> MailboxFolders { get; set; }
+        // TODO: Uncomment after migration is properly handled
+        // public DbSet<MailboxFolder> MailboxFolders { get; set; }
     }
 }
