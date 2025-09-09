@@ -27,9 +27,22 @@ namespace Rnwood.Smtp4dev.Data
                 .IsRequired();
 
             modelBuilder.Entity<Mailbox>()
+                .HasMany<MailboxFolder>(m => m.MailboxFolders)
+                .WithOne(f => f.Mailbox)
+                .HasForeignKey(f => f.MailboxId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<MailboxFolder>()
+                .HasMany<Message>(f => f.Messages)
+                .WithOne(m => m.MailboxFolder)
+                .HasForeignKey(m => m.MailboxFolderId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            // Keep legacy relationship for backwards compatibility during migration
+            modelBuilder.Entity<Mailbox>()
                 .HasMany<Message>()
                     .WithOne(m => m.Mailbox)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .OnDelete(DeleteBehavior.SetNull);
 
             modelBuilder.Entity<Message>()
                 .HasOne<Session>(x => x.Session)
@@ -46,5 +59,6 @@ namespace Rnwood.Smtp4dev.Data
         public DbSet<ImapState> ImapState { get; set; }
 
         public DbSet<Mailbox> Mailboxes { get; set; }
+        public DbSet<MailboxFolder> MailboxFolders { get; set; }
     }
 }
