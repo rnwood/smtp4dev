@@ -195,6 +195,40 @@ stages:
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
               arguments: '-c Release -o bin/playwright'
 
+          - task: DotNetCoreCLI@2
+            condition: and(succeeded(), eq(variables['runTests'], true))
+            displayName: Install Playwright CLI Tool
+            inputs:
+              command: custom
+              custom: tool
+              arguments: 'install --global Microsoft.Playwright.CLI'
+          - task: PowerShell@2
+            condition: and(succeeded(), eq(variables['runTests'], true))
+            displayName: Install Playwright System Dependencies (Linux)
+            inputs:
+              targetType: inline
+              script: |
+                if ($IsLinux) {
+                  Write-Host "Installing system dependencies for Playwright on Linux..."
+                  try {
+                    # Use Playwright's own dependency installation
+                    Write-Host "Installing Playwright system dependencies using built-in command..."
+                    playwright install-deps chromium
+                    Write-Host "✓ Playwright dependencies installed successfully"
+                  } catch {
+                    Write-Host "Playwright install-deps failed, trying manual installation..."
+                    try {
+                      sudo apt-get update -qq
+                      sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
+                      Write-Host "✓ Manual system dependencies installed successfully"
+                    } catch {
+                      Write-Error "Failed to install system dependencies: $_"
+                      exit 1
+                    }
+                  }
+                } else {
+                  Write-Host "Skipping system dependencies installation on Windows"
+                }
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright Browsers
@@ -202,67 +236,25 @@ stages:
             inputs:
               targetType: inline
               script: |
-                # Install Playwright browsers using the project's installation method
-                Write-Host "Starting Playwright browser installation process..."
-                Write-Host "Current working directory: $(Get-Location)"
-                
-                # Find playwright.ps1 in the forced output directory
-                $baseDir = "bin/playwright"
-                $playwrightScript = "$baseDir/playwright.ps1"
-                
-                Write-Host "Searching for playwright.ps1 script..."
-                Write-Host "Expected path: $playwrightScript"
-                
-                if (-not (Test-Path $playwrightScript)) {
-                  Write-Error "✗ Playwright script not found at expected path: $playwrightScript"
-                  # Enhanced debugging - list all contents
-                  Write-Host "Detailed directory listing for debugging:"
-                  if (Test-Path $baseDir) {
-                    Write-Host "Contents of $($baseDir):"
-                    Get-ChildItem -Path $baseDir -Recurse | ForEach-Object { Write-Host "  $($_.FullName)" }
-                    Write-Host ""
-                    Write-Host "Searching for any playwright.ps1 files:"
-                    Get-ChildItem -Path $baseDir -Recurse -Name "playwright.ps1" -ErrorAction SilentlyContinue | ForEach-Object { Write-Host "  Found: $baseDir/$_" }
-                  } else {
-                    Write-Host "Base directory $baseDir does not exist!"
-                  }
-                  exit 1
-                }
-                
-                Write-Host "✓ Found playwright.ps1 at: $playwrightScript"
-                
-                # Use the generated playwright.ps1 script (works on both Windows and Linux)
-                Write-Host "Installing Playwright browser using script: $playwrightScript"
-                Write-Host "File exists check: $(Test-Path $playwrightScript)"
-                
+                Write-Host "Installing Playwright Chromium browser..."
                 try {
-                  if ($IsLinux) {
-                    Write-Host "Installing Chromium with system dependencies (this may take several minutes)..."
-                    Write-Host "Running command: pwsh $playwrightScript install chromium --with-deps"
-                    # Don't capture output - let it stream directly to avoid hanging
-                    pwsh $playwrightScript install chromium --with-deps
-                    $exitCode = $LASTEXITCODE
-                  } else {
-                    Write-Host "Installing Chromium..."
-                    Write-Host "Running command: pwsh $playwrightScript install chromium"
-                    # Don't capture output - let it stream directly to avoid hanging
-                    pwsh $playwrightScript install chromium
-                    $exitCode = $LASTEXITCODE
-                  }
+                  playwright install chromium
+                  $exitCode = $LASTEXITCODE
                   
                   if ($exitCode -ne 0) {
-                    Write-Error "Playwright installation failed with exit code $exitCode"
+                    Write-Error "Playwright browser installation failed with exit code $exitCode"
                     exit 1
                   }
+                  
+                  Write-Host "✓ Playwright browser installation completed successfully"
                 } catch {
-                  Write-Error "Playwright installation failed with exception: $_"
+                  Write-Error "Playwright browser installation failed with exception: $_"
                   exit 1
                 }
-                
-                Write-Host "✓ Playwright browser installation completed successfully"
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Run Tests
+            timeoutInMinutes: 30
             env:
               SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
               SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev
@@ -273,6 +265,40 @@ stages:
               configuration: release
               arguments: '--collect:"XPlat Code Coverage"'
               publishTestResults: true
+          - task: PowerShell@2
+            condition: and(succeeded(), eq(variables['runTests'], true))
+            displayName: Create Playwright HTML Report Directory
+            inputs:
+              targetType: inline
+              script: |
+                $reportDir = "$(Agent.TempDirectory)/playwright-report"
+                Write-Host "Creating Playwright HTML report directory: $reportDir"
+                
+                if (-not (Test-Path $reportDir)) {
+                  New-Item -ItemType Directory -Path $reportDir -Force
+                  Write-Host "✓ Created directory: $reportDir"
+                } else {
+                  Write-Host "✓ Directory already exists: $reportDir"
+                }
+                
+                # Create a minimal index.html file for the report
+                $indexHtml = @"
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Playwright Test Results</title>
+                </head>
+                <body>
+                    <h1>E2E Test Results</h1>
+                    <p>E2E tests were run via dotnet test. Check the test results in the Azure DevOps test results tab.</p>
+                    <p>For detailed logs, refer to the build pipeline output.</p>
+                </body>
+                </html>
+                "@
+                
+                $indexPath = "$reportDir/index.html"
+                $indexHtml | Out-File -FilePath $indexPath -Encoding UTF8
+                Write-Host "✓ Created basic HTML report: $indexPath"
           - task: PublishPipelineArtifact@1
             condition: and(always(), eq(variables['runTests'], true))
             displayName: Publish Playwright HTML Report
