@@ -510,7 +510,7 @@ namespace Rnwood.Smtp4dev.Server
             // Update session warnings if message has bare line feeds
             if (message.HasBareLineFeed)
             {
-                message.Session.HasWarnings = true;
+                message.Session.HasBareLineFeed = true;
             }
             
             dbContext.SaveChanges();

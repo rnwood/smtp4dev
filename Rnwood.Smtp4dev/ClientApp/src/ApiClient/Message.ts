@@ -2,6 +2,7 @@
 import MessageEntitySummary from "./MessageEntitySummary";
 //Header[] from Message 
 import Header from "./Header";
+import MessageWarning from "./MessageWarning";
 export default class Message {
   deliveredTo: string[];
   constructor(
@@ -19,7 +20,8 @@ export default class Message {
     relayError: string,
     secureConnection: boolean,
     hasHtmlBody: boolean,
-    hasPlainTextBody: boolean
+    hasPlainTextBody: boolean,
+    warnings: MessageWarning[]
   ) {
     this.id = id;
     this.from = from;
@@ -36,6 +38,7 @@ export default class Message {
     this.secureConnection = secureConnection;
     this.hasHtmlBody = hasHtmlBody;
     this.hasPlainTextBody = hasPlainTextBody;
+    this.warnings = warnings;
   }
 
   id: string;
@@ -52,4 +55,6 @@ export default class Message {
   secureConnection: boolean;
   hasHtmlBody: boolean;
   hasPlainTextBody: boolean;
+  warnings: MessageWarning[];
+  
 }

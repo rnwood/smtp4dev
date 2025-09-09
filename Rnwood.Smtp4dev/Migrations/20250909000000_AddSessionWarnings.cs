@@ -12,7 +12,7 @@ namespace Rnwood.Smtp4dev.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
-                name: "HasWarnings",
+                name: "HasBareLineFeed",
                 table: "Sessions",
                 type: "INTEGER",
                 nullable: false,
@@ -23,7 +23,7 @@ namespace Rnwood.Smtp4dev.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropColumn(
-                name: "HasWarnings",
+                name: "HasBareLineFeed",
                 table: "Sessions");
         }
     }

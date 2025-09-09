@@ -11,6 +11,11 @@
                       type="warning"
                       show-icon
                       title="This session terminated abnormally">{{session.error}}</el-alert>
+                <el-alert v-for="warning in session.warnings"
+                          v-bind:key="warning.details"
+                          :title="'Warning: ' + warning.details"
+                          type="warning"
+                          show-icon />
 
             <el-tabs value="log" style="height: 100%; width:100%" class="fill" type="border-card">
                 <el-tab-pane id="log" class="hfillpanel">

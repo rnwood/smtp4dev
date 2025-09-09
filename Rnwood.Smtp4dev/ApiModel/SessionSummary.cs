@@ -18,7 +18,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             this.StartDate = dbSession.StartDate;
             this.TerminatedWithError = dbSession.SessionError != null;
             this.Size = dbSession.Log?.Length ?? 0;
-            this.HasWarnings = dbSession.HasWarnings;
+            this.HasWarnings = dbSession.HasBareLineFeed;
         }
 
         public string ClientAddress { get; private set; }

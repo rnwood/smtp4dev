@@ -55,7 +55,7 @@
                              width="28">
                 <template #default="scope">
                     <el-tooltip effect="light"
-                                content="Session contains messages with RFC 5321 compliance warnings."
+                                content="Session has warnings"
                                 placement="top-start">
                         <el-icon v-if="scope.row.hasWarnings" style="color: orange;">
                             <Warning />

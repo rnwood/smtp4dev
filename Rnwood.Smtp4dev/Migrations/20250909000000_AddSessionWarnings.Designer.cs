@@ -155,7 +155,7 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("HasWarnings")
+                    b.Property<bool>("HasBareLineFeed")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Log")
