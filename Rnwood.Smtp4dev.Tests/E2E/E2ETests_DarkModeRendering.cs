@@ -187,7 +187,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             await homePage.SetDarkModeAsync(isDarkMode);
             
             // Give time for both UI change and browser emulation to take effect
-            await page.WaitForTimeoutAsync(2000);
+            await page.WaitForTimeoutAsync(1000);
             
             Console.WriteLine($"🌈 Set browser color scheme emulation to: {(isDarkMode ? "dark" : "light")}");
         }
@@ -204,7 +204,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             await frameLocator.Locator(".red-section").WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
             
             // Wait for dark mode processing to complete by giving time for Vue reactivity
-            await page.WaitForTimeoutAsync(3000);
+            await page.WaitForTimeoutAsync(2000);
             
             // DEBUG: Check if our dark mode CSS injection worked by examining iframe content
             if (isDarkMode && emailSupportsDarkMode) {

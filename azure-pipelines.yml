@@ -76,6 +76,7 @@ stages:
     jobs:
       - job: BuildMatrix
         displayName: Build and test - 
+        timeoutInMinutes: 90
         pool:
           vmImage: $(vmImage)
         strategy:
@@ -254,7 +255,7 @@ stages:
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Run Tests
-            timeoutInMinutes: 30
+            timeoutInMinutes: 45
             env:
               SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)/e2e
               SMTP4DEV_E2E_BINARY: $(Agent.TempDirectory)/e2e/Rnwood.Smtp4dev
@@ -263,7 +264,7 @@ stages:
               command: test
               projects: Rnwood.Smtp4dev.Tests
               configuration: release
-              arguments: '--collect:"XPlat Code Coverage"'
+              arguments: '--collect:"XPlat Code Coverage" --settings:playwright.runsettings'
               publishTestResults: true
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
