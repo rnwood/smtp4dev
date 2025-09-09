@@ -70,7 +70,22 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 //netcoreapp3.1
                 string folder = framework.TrimStart('.').Replace("CoreApp,Version=v", "").ToLower();
 
-                string mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/Debug/{folder}/Rnwood.Smtp4dev.dll");
+                // Determine build configuration - prefer Release if it exists, fallback to Debug
+                string configuration = "Debug";
+                string releaseModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/Release/{folder}/Rnwood.Smtp4dev.dll");
+                string debugModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/Debug/{folder}/Rnwood.Smtp4dev.dll");
+                
+                if (File.Exists(releaseModule))
+                {
+                    configuration = "Release";
+                }
+                else if (!File.Exists(debugModule))
+                {
+                    // If neither exists, check if we're in a CI environment and provide a helpful error
+                    throw new FileNotFoundException($"Could not find Rnwood.Smtp4dev.dll in either Release ({releaseModule}) or Debug ({debugModule}) configurations. Ensure the main project is built before running E2E tests.");
+                }
+
+                string mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev/bin/{configuration}/{folder}/Rnwood.Smtp4dev.dll");
                 args.Insert(0, mainModule);
 
             }
