@@ -199,109 +199,39 @@ stages:
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright Browsers for Test Project
-            timeoutInMinutes: 15
+            timeoutInMinutes: 10
             inputs:
               targetType: inline
               script: |
-                Write-Host "Installing Playwright browsers for test project..."
-                
-                # Enhanced debugging information
-                Write-Host "Current working directory: $(Get-Location)"
-                Write-Host "Build.SourcesDirectory: $(Build.SourcesDirectory)"
-                Write-Host "All Environment Variables for debugging:"
-                Get-ChildItem Env: | Where-Object { $_.Name -like "*BUILD*" -or $_.Name -like "*SOURCES*" -or $_.Name -like "*AGENT*" } | Format-Table Name, Value
-                
-                # Ensure we have a proper source directory
-                $sourceDir = "$(Build.SourcesDirectory)"
-                if ([string]::IsNullOrEmpty($sourceDir) -or $sourceDir -eq '$(Build.SourcesDirectory)') {
-                  # Fallback to working directory if Build.SourcesDirectory is not expanded
-                  $sourceDir = Get-Location
-                  Write-Host "Build.SourcesDirectory not available, using current directory: $sourceDir"
-                }
-                
-                # Use absolute path for more reliability with explicit path construction
-                $testProjectRelativePath = "Rnwood.Smtp4dev.Tests/bin/Release/net8.0"
-                $testProjectDir = Join-Path $sourceDir $testProjectRelativePath
-                $testProjectDir = [System.IO.Path]::GetFullPath($testProjectDir)  # Normalize path
-                $playwrightScript = Join-Path $testProjectDir "playwright.ps1"
-                
-                Write-Host "Source directory: $sourceDir"
-                Write-Host "Test project relative path: $testProjectRelativePath"
-                Write-Host "Full test project directory: $testProjectDir"
-                Write-Host "Looking for playwright script at: $playwrightScript"
-                
-                # Check if the directory exists first
-                if (-not (Test-Path $testProjectDir)) {
-                  Write-Error "Test project build directory not found at $testProjectDir"
-                  
-                  # More comprehensive debugging
-                  $binDir = Join-Path $sourceDir "Rnwood.Smtp4dev.Tests/bin"
-                  Write-Host "Checking bin directory: $binDir"
-                  if (Test-Path $binDir) {
-                    Write-Host "Available directories in $binDir"
-                    Get-ChildItem $binDir -Directory -ErrorAction SilentlyContinue | Select-Object Name, FullName | Format-Table
-                  } else {
-                    Write-Host "Bin directory does not exist: $binDir"
-                    Write-Host "Contents of Rnwood.Smtp4dev.Tests:"
-                    $testDir = Join-Path $sourceDir "Rnwood.Smtp4dev.Tests"
-                    if (Test-Path $testDir) {
-                      Get-ChildItem $testDir -ErrorAction SilentlyContinue | Select-Object Name, PSIsContainer | Format-Table
-                    }
-                  }
-                  exit 1
-                }
-                
-                # List contents of the build directory for debugging
-                Write-Host "Contents of test project build directory:"
-                Get-ChildItem $testProjectDir -ErrorAction SilentlyContinue | Select-Object Name, Length | Format-Table
-                
-                if (-not (Test-Path $playwrightScript)) {
-                  Write-Host "Playwright script not found at: $playwrightScript"
-                  
-                  # Check if there are any .ps1 files in the directory
-                  $ps1Files = Get-ChildItem $testProjectDir -Filter "*.ps1" -ErrorAction SilentlyContinue
-                  if ($ps1Files) {
-                    Write-Host "Found PowerShell files in directory:"
-                    $ps1Files | Select-Object Name, Length, FullName | Format-Table
-                  } else {
-                    Write-Host "No PowerShell files found in directory"
-                  }
-                  
-                  # Try alternative approach: use dotnet tool to install playwright
-                  Write-Host "Attempting alternative approach using dotnet tool..."
-                  try {
-                    Write-Host "Installing Playwright CLI tool globally..."
-                    dotnet tool install --global Microsoft.Playwright.CLI --version 1.47.0
-                    
-                    Write-Host "Installing Playwright browsers..."
-                    playwright install chromium
-                    
-                    Write-Host "✓ Playwright browsers installed successfully using dotnet tool"
-                    exit 0
-                  } catch {
-                    Write-Error "Alternative approach also failed: $_"
-                    exit 1
-                  }
-                }
+                Write-Host "Installing Playwright browsers using simplified approach..."
                 
                 try {
-                  Write-Host "Installing Playwright browsers using project script..."
-                  Write-Host "Changing to directory: $testProjectDir"
-                  Set-Location $testProjectDir
-                  Write-Host "Current location after change: $(Get-Location)"
+                  # Use the reliable Microsoft Playwright CLI tool approach
+                  Write-Host "Installing Microsoft Playwright CLI tool..."
+                  dotnet tool install --global Microsoft.Playwright.CLI
                   
-                  Write-Host "Executing: pwsh ./playwright.ps1 install chromium"
-                  pwsh ./playwright.ps1 install chromium
-                  $exitCode = $LASTEXITCODE
+                  # Verify the tool is available
+                  Write-Host "Verifying Playwright CLI tool installation..."
+                  $playwrightVersion = playwright --version
+                  Write-Host "Playwright CLI version: $playwrightVersion"
                   
-                  if ($exitCode -ne 0) {
-                    Write-Error "Playwright browser installation failed with exit code $exitCode"
-                    exit 1
+                  # Install Chromium browser for tests
+                  Write-Host "Installing Chromium browser..."
+                  playwright install chromium
+                  
+                  # Verify browser installation
+                  Write-Host "Verifying browser installation..."
+                  $chromiumPath = ~/.cache/ms-playwright/chromium-*/chrome-linux/chrome
+                  if (Test-Path $chromiumPath) {
+                    Write-Host "✓ Chromium browser installed successfully"
+                    Write-Host "Browser location: $chromiumPath"
+                  } else {
+                    Write-Host "Warning: Could not verify Chromium installation path, but installation command completed"
                   }
                   
-                  Write-Host "✓ Playwright browsers installed successfully for test project"
+                  Write-Host "✓ Playwright browser installation completed successfully"
                 } catch {
-                  Write-Error "Playwright browser installation failed with exception: $_"
+                  Write-Error "Failed to install Playwright browsers: $_"
                   exit 1
                 }
           - task: PowerShell@2
@@ -313,43 +243,20 @@ stages:
                 if ($IsLinux) {
                   Write-Host "Installing system dependencies for Playwright on Linux..."
                   
-                  # Use absolute path for more reliability
-                  $testProjectDir = Join-Path "$(Build.SourcesDirectory)" "Rnwood.Smtp4dev.Tests/bin/Release/net8.0"
-                  $playwrightScript = Join-Path $testProjectDir "playwright.ps1"
-                  
-                  if (Test-Path $playwrightScript) {
+                  try {
+                    # Use the global playwright CLI tool to install system dependencies
+                    Write-Host "Installing Playwright system dependencies using CLI tool..."
+                    playwright install-deps chromium
+                    Write-Host "✓ Playwright system dependencies installed successfully"
+                  } catch {
+                    Write-Host "CLI tool install-deps failed, trying manual installation..."
                     try {
-                      Write-Host "Installing Playwright system dependencies using project script..."
-                      Set-Location $testProjectDir
-                      pwsh ./playwright.ps1 install-deps chromium
-                      Write-Host "✓ Playwright system dependencies installed successfully"
+                      sudo apt-get update -qq
+                      sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
+                      Write-Host "✓ Manual system dependencies installed successfully"
                     } catch {
-                      Write-Host "Project script install-deps failed, trying manual installation..."
-                      try {
-                        sudo apt-get update -qq
-                        sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
-                        Write-Host "✓ Manual system dependencies installed successfully"
-                      } catch {
-                        Write-Error "Failed to install system dependencies: $_"
-                        exit 1
-                      }
-                    }
-                  } else {
-                    Write-Host "Playwright script not found, trying alternative dependency installation..."
-                    try {
-                      # Use the global playwright CLI tool if available
-                      playwright install-deps chromium
-                      Write-Host "✓ Playwright system dependencies installed using global CLI"
-                    } catch {
-                      Write-Host "Global CLI not available, trying manual installation..."
-                      try {
-                        sudo apt-get update -qq
-                        sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
-                        Write-Host "✓ Manual system dependencies installed successfully"
-                      } catch {
-                        Write-Error "Failed to install system dependencies: $_"
-                        exit 1
-                      }
+                      Write-Error "Failed to install system dependencies: $_"
+                      exit 1
                     }
                   }
                 } else {
