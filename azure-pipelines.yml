@@ -195,6 +195,13 @@ stages:
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
               arguments: '-c Release -o bin/playwright'
 
+          - task: DotNetCoreCLI@2
+            condition: and(succeeded(), eq(variables['runTests'], true))
+            displayName: Install Playwright CLI Tool
+            inputs:
+              command: custom
+              custom: tool
+              arguments: 'install --global Microsoft.Playwright.CLI'
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright System Dependencies (Linux)
@@ -204,23 +211,24 @@ stages:
                 if ($IsLinux) {
                   Write-Host "Installing system dependencies for Playwright on Linux..."
                   try {
-                    sudo apt-get update
-                    sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
-                    Write-Host "✓ System dependencies installed successfully"
+                    # Use Playwright's own dependency installation
+                    Write-Host "Installing Playwright system dependencies using built-in command..."
+                    playwright install-deps chromium
+                    Write-Host "✓ Playwright dependencies installed successfully"
                   } catch {
-                    Write-Error "Failed to install system dependencies: $_"
-                    exit 1
+                    Write-Host "Playwright install-deps failed, trying manual installation..."
+                    try {
+                      sudo apt-get update -qq
+                      sudo apt-get install -y libnss3 libnss3-dev libxss1 libasound2 libatk-bridge2.0-0 libdrm2 libgtk-3-0 libatspi2.0-0
+                      Write-Host "✓ Manual system dependencies installed successfully"
+                    } catch {
+                      Write-Error "Failed to install system dependencies: $_"
+                      exit 1
+                    }
                   }
                 } else {
                   Write-Host "Skipping system dependencies installation on Windows"
                 }
-          - task: DotNetCoreCLI@2
-            condition: and(succeeded(), eq(variables['runTests'], true))
-            displayName: Install Playwright CLI Tool
-            inputs:
-              command: custom
-              custom: tool
-              arguments: 'install --global Microsoft.Playwright.CLI'
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install Playwright Browsers
