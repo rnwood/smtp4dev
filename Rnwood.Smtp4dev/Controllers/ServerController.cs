@@ -82,6 +82,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 ImapPort = serverOptionsCurrentValue.ImapPort,
                 HostName = serverOptionsCurrentValue.HostName,
                 AllowRemoteConnections = serverOptionsCurrentValue.AllowRemoteConnections,
+                BindAddress = serverOptionsCurrentValue.BindAddress,
                 NumberOfMessagesToKeep = serverOptionsCurrentValue.NumberOfMessagesToKeep,
                 NumberOfSessionsToKeep = serverOptionsCurrentValue.NumberOfSessionsToKeep,
                 Exception = server.Exception?.Message,
@@ -114,7 +115,9 @@ namespace Rnwood.Smtp4dev.Controllers
                 SmtpEnabledAuthTypesWhenSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
                 CurrentUserName = currentUserName,
                 CurrentUserDefaultMailboxName = currentUserDefaultMailbox,
-                HtmlValidateConfig = serverOptionsCurrentValue.HtmlValidateConfig != null ? serverOptionsCurrentValue.HtmlValidateConfig : null
+                HtmlValidateConfig = serverOptionsCurrentValue.HtmlValidateConfig != null ? serverOptionsCurrentValue.HtmlValidateConfig : null,
+                DisableHtmlValidation = serverOptionsCurrentValue.DisableHtmlValidation,
+                DisableHtmlCompatibilityCheck = serverOptionsCurrentValue.DisableHtmlCompatibilityCheck
             };
         }
 
@@ -255,6 +258,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.Port = serverUpdate.Port != defaultSettingsFile.ServerOptions.Port ? serverUpdate.Port : null;
             newSettings.HostName = serverUpdate.HostName != defaultSettingsFile.ServerOptions.HostName ? serverUpdate.HostName : null;
             newSettings.AllowRemoteConnections = serverUpdate.AllowRemoteConnections != defaultSettingsFile.ServerOptions.AllowRemoteConnections ? serverUpdate.AllowRemoteConnections : null;
+            newSettings.BindAddress = serverUpdate.BindAddress != defaultSettingsFile.ServerOptions.BindAddress ? serverUpdate.BindAddress : null;
             newSettings.NumberOfMessagesToKeep = serverUpdate.NumberOfMessagesToKeep != defaultSettingsFile.ServerOptions.NumberOfMessagesToKeep ? serverUpdate.NumberOfMessagesToKeep : null;
             newSettings.NumberOfSessionsToKeep = serverUpdate.NumberOfSessionsToKeep != defaultSettingsFile.ServerOptions.NumberOfSessionsToKeep ? serverUpdate.NumberOfSessionsToKeep : null;
             newSettings.ImapPort = serverUpdate.ImapPort != defaultSettingsFile.ServerOptions.ImapPort ? serverUpdate.ImapPort : null;
@@ -275,6 +279,8 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.SmtpEnabledAuthTypesWhenNotSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection) != defaultSettingsFile.ServerOptions.SmtpEnabledAuthTypesWhenNotSecureConnection ? string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection) : null;
             newSettings.SmtpEnabledAuthTypesWhenSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection) != defaultSettingsFile.ServerOptions.SmtpEnabledAuthTypesWhenSecureConnection ? string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection) : null;
             newSettings.HtmlValidateConfig = serverUpdate.HtmlValidateConfig != defaultSettingsFile.ServerOptions.HtmlValidateConfig ?  serverUpdate.HtmlValidateConfig : null;
+            newSettings.DisableHtmlValidation = serverUpdate.DisableHtmlValidation != defaultSettingsFile.ServerOptions.DisableHtmlValidation ? serverUpdate.DisableHtmlValidation : null;
+            newSettings.DisableHtmlCompatibilityCheck = serverUpdate.DisableHtmlCompatibilityCheck != defaultSettingsFile.ServerOptions.DisableHtmlCompatibilityCheck ? serverUpdate.DisableHtmlCompatibilityCheck : null;
 
             newRelaySettings.SmtpServer = serverUpdate.RelaySmtpServer != defaultSettingsFile.RelayOptions.SmtpServer ? serverUpdate.RelaySmtpServer : null;
             newRelaySettings.SmtpPort = serverUpdate.RelaySmtpPort != defaultSettingsFile.RelayOptions.SmtpPort ? serverUpdate.RelaySmtpPort : null;

@@ -22,6 +22,8 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public bool AllowRemoteConnections { get; set; }
 
+        public string BindAddress { get; set; }
+
         public int NumberOfMessagesToKeep { get; set; }
 
         public int NumberOfSessionsToKeep { get; set; }
@@ -67,6 +69,8 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public string CurrentUserDefaultMailboxName { get; set; }
         public string HtmlValidateConfig { get; set; }
+        public bool DisableHtmlValidation { get; set; }
+        public bool DisableHtmlCompatibilityCheck { get; set; }
         public string CommandValidationExpression { get; set; }
     }
 

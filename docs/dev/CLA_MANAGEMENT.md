@@ -24,7 +24,9 @@ The CLA system automatically checks all pull requests to ensure contributors hav
 These users are exempt from CLA requirements:
 - `rnwood` (project owner)
 - `dependabot[bot]` (automated dependency updates)
-- `copilot` (GitHub Copilot assistant)
+- `copilot` (GitHub Copilot assistant - legacy lowercase)
+- `Copilot` (GitHub Copilot assistant - uppercase variant)
+- `copilot-swe-agent[bot]` (GitHub Copilot assistant - current)
 
 ## Signature Storage
 

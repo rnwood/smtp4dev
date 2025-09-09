@@ -25,6 +25,7 @@ namespace Rnwood.Smtp4dev
                 { "baseappdatapath=","Set the base config and appData path", data => map.Add(data, x => x.BaseAppDataPath)},
                 { "hostname=", "Specifies the server hostname. Used in auto-generated TLS certificate for SMTP if enabled.", data => map.Add(data, x => x.ServerOptions.HostName) },
                 { "allowremoteconnections", "Specifies if remote connections will be allowed to the SMTP and IMAP servers. Use -allowremoteconnections+ to enable or -allowremoteconnections- to disable", data => map.Add((data !=null).ToString(), x => x.ServerOptions.AllowRemoteConnections) },
+                { "bindaddress=", "Specifies the IP address to bind to for SMTP and IMAP servers. If not specified, the behavior is determined by allowremoteconnections", data => map.Add(data, x => x.ServerOptions.BindAddress) },
                 { "disableipv6", "If true, SMTP and IMAP servers will NOT listen using IPv6 Dual Stack", data => map.Add((data !=null).ToString(), x => x.ServerOptions.DisableIPv6)},
                 { "smtpport=", "Set the port the SMTP server listens on. Specify 0 to assign automatically", data => map.Add(data, x => x.ServerOptions.Port) },
                 { "db=", "Specifies the path where the database will be stored relative to APPDATA env var on Windows or XDG_CONFIG_HOME on non-Windows. Specify \"\" to use an in memory database.", data => map.Add(data, x => x.ServerOptions.Database) },

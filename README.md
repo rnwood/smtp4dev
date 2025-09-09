@@ -19,6 +19,58 @@ smtp4dev support many advanced features:
 
 *If you're looking for the older v2 Windows only GUI version. [Grab it here](https://github.com/rnwood/smtp4dev/releases/tag/v2.0.10).*
 
+## How smtp4dev Compares
+
+There are several fake SMTP servers available for development and testing. Here's how smtp4dev stacks up against other popular options:
+
+| Feature | smtp4dev | MailHog¹ | MailCatcher² | MailDev³ | FakeSMTP⁴ |
+|---------|----------|----------|-------------|---------|-----------|
+| **Web Interface** | ✅ Advanced | ✅ Basic | ✅ Basic | ✅ Basic | ❌ Desktop GUI |
+| **SMTP Server** | ✅ | ✅ | ✅ | ✅ | ✅ |
+| **IMAP Server** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **API (REST/OpenAPI)** | ✅ Swagger docs | ✅ Basic⁵ | ✅ RESTful⁶ | ✅ Basic⁷ | ❌ |
+| **HTML Email Rendering** | ✅ Advanced | ✅ Basic | ✅ Basic | ✅ Basic | ❌ |
+| **HTML Compatibility Reports** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Responsive Email Testing** | ✅ Viewport switcher | ❌ | ❌ | ✅ Resizable⁸ | ❌ |
+| **MIME Parts Inspector** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **SMTP Session Logging** | ✅ Detailed | ❌ | ❌ | ❌ | ❌ |
+| **TLS/SSL Support** | ✅ Auto-cert generation | ❌ | ❌ | ✅ Basic⁹ | ❌ |
+| **Authentication** | ✅ | ✅ Basic¹⁰ | ❌ | ✅ Basic¹¹ | ❌ |
+| **Multiple Mailboxes** | ✅ With rules | ❌ | ❌ | ❌ | ❌ |
+| **Message Relay** | ✅ With rules | ✅ Basic¹² | ❌ | ✅ Basic¹³ | ❌ |
+| **Message Composition** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Scripting & Error Simulation** | ✅ | ✅ Limited¹⁴ | ❌ | ❌ | ❌ |
+| **Dark Mode** | ✅ | ❌ | ❌ | ❌ | ❌ |
+| **Cross-Platform** | ✅ .NET 8 | ✅ Go | ✅ Ruby | ✅ Node.js | ✅ Java |
+| **Docker Support** | ✅ | ✅ | ✅ | ✅ | ❌ |
+
+### Sources
+
+1. [MailHog GitHub Repository](https://github.com/mailhog/MailHog) - Features verified from official documentation
+2. [MailCatcher GitHub Repository](https://github.com/sj26/mailcatcher) - Features verified from official documentation  
+3. [MailDev GitHub Repository](https://github.com/maildev/maildev) - Features verified from official documentation
+4. [FakeSMTP GitHub Repository](https://github.com/Nilhcem/FakeSMTP) - Features verified from official documentation
+5. MailHog API: [APIv1](https://github.com/mailhog/MailHog/blob/master/docs/APIv1.md) and [APIv2](https://github.com/mailhog/MailHog/blob/master/docs/APIv2.md) documentation
+6. MailCatcher API: RESTful URLs documented in [README](https://github.com/sj26/mailcatcher#api) but no formal API documentation
+7. MailDev API: [REST API documentation](https://github.com/maildev/maildev/blob/master/docs/rest.md)
+8. MailDev responsive testing: ["Test responsive emails with resizable preview pane"](https://github.com/maildev/maildev#features)
+9. MailDev TLS/SSL: [SSL options documented](https://github.com/maildev/maildev#usage) (`--incoming-secure`, `--incoming-cert`, `--incoming-key`)
+10. MailHog authentication: [HTTP basic authentication](https://github.com/mailhog/MailHog/blob/master/docs/Auth.md) for UI and API
+11. MailDev authentication: [Authentication options](https://github.com/maildev/maildev#usage) (`--incoming-user/pass`, `--web-user/pass`)
+12. MailHog relay: ["Release messages to real SMTP servers"](https://github.com/mailhog/MailHog#features)
+13. MailDev relay: ["Ability to relay email to an upstream SMTP server"](https://github.com/maildev/maildev#features) with auto-relay mode
+14. MailHog scripting: [Chaos Monkey for failure testing](https://github.com/mailhog/MailHog/blob/master/docs/JIM.md)
+
+### Why Choose smtp4dev?
+
+**For Advanced Development & Testing**: If you need comprehensive email testing capabilities, smtp4dev offers features not found in other tools like HTML compatibility analysis, responsive design testing, and detailed SMTP session logging.
+
+**For Production-Like Testing**: With IMAP support, TLS/SSL, authentication, and multiple mailboxes, smtp4dev can simulate real email server behavior more accurately.
+
+**For Team Workflows**: The advanced web interface, API documentation, and message relay capabilities make smtp4dev ideal for development teams and CI/CD pipelines.
+
+**For Modern Email Development**: Responsive email testing, HTML validation, and compatibility reports help ensure your emails work across all clients and devices.
+
 > <a style="float: right" href="https://www.patreon.com/bePatron?u=38204828" data-patreon-widget-type="become-patron-button"><img alt='Become a Patreon' src='https://c5.patreon.com/external/logo/become_a_patron_button.png' height="30px"></a> <a  style="float: right" href='https://www.paypal.me/rnwood'><img alt='Donate' src='https://www.paypalobjects.com/webstatic/en_US/btn/btn_donate_pp_142x27.png'/></a> *If you find smtp4dev useful, please consider supporting further development by making a donation*
 > .
 

@@ -37,6 +37,51 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
 
         public MessageView MessageView => new MessageView(page);
 
+        public ILocator GetDarkModeToggleButton()
+        {
+            // The dark mode toggle is the first circular button in the header
+            // Since it's the only icon-only circular button in the header after the logo
+            return page.Locator("header button.el-button.is-circle").First;
+        }
+
+        public async Task ToggleDarkModeAsync()
+        {
+            var darkModeButton = GetDarkModeToggleButton();
+            await darkModeButton.ClickAsync();
+        }
+
+        public async Task<bool> IsDarkModeActiveAsync()
+        {
+            // Check if the html element has the 'dark' class
+            var htmlElement = page.Locator("html");
+            var classes = await htmlElement.GetAttributeAsync("class");
+            bool hasDarkClass = classes?.Contains("dark") == true;
+            
+            // Also check using JavaScript as a fallback
+            if (!hasDarkClass)
+            {
+                hasDarkClass = await page.EvaluateAsync<bool>("() => document.documentElement.classList.contains('dark')");
+            }
+            
+            return hasDarkClass;
+        }
+
+        public async Task SetDarkModeAsync(bool isDarkMode)
+        {
+            // For E2E testing, apply the dark class directly since the UI toggle
+            // may use different mechanisms (VueUse, Element Plus, etc.)
+            if (isDarkMode)
+            {
+                await page.EvaluateAsync("() => document.documentElement.classList.add('dark')");
+            }
+            else
+            {
+                await page.EvaluateAsync("() => document.documentElement.classList.remove('dark')");
+            }
+            
+            await page.WaitForTimeoutAsync(500); // Allow CSS to take effect
+        }
+
         public class MessageListControl
         {
             private readonly ILocator element;

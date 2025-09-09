@@ -25,6 +25,6 @@ namespace Rnwood.Smtp4dev.Tests.DBMigrations.Helpers
 
   
 
-        public void Dispose() => _connection.Dispose();
+        public void Dispose() => _connection?.Dispose();
     }
 }

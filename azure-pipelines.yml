@@ -290,6 +290,13 @@ stages:
                 $indexPath = "$reportDir/index.html"
                 $indexHtml | Out-File -FilePath $indexPath -Encoding UTF8
                 Write-Host "✓ Created basic HTML report: $indexPath"
+          - task: PublishPipelineArtifact@1
+            condition: and(always(), eq(variables['runTests'], true))
+            displayName: Publish Playwright HTML Report
+            inputs:
+              targetPath: '$(Agent.TempDirectory)/playwright-report'
+              artifact: 'PlaywrightReport_$(platformName)'
+              publishLocation: 'pipeline'
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Install ReportGenerator Tool
