@@ -16,13 +16,23 @@
                 
                 <el-tabs v-model="activeTab" class="editor-tabs">
                     <el-tab-pane label="Code Editor" name="editor">
-                        <div class="code-editor-container">
-                            <el-input
-                                v-model="editorExpression"
-                                type="textarea"
-                                :rows="12"
-                                placeholder="Enter JavaScript expression..."
-                                class="code-textarea"
+                        <div class="ace-editor-container">
+                            <aceeditor 
+                                v-model:value="editorExpression"
+                                @init="editorInit"
+                                theme="monokai"
+                                lang="javascript"
+                                :options="{ 
+                                    useWorker: false,
+                                    enableLiveAutocompletion: true,
+                                    enableSnippets: true,
+                                    showPrintMargin: false,
+                                    fontSize: 14,
+                                    wrap: true
+                                }"
+                                width="100%" 
+                                height="300px"
+                                :placeholder="getCodeEditorPlaceholder()"
                                 @input="onEditorChange"
                             />
                         </div>
@@ -108,6 +118,17 @@ import { Component, Vue, Prop, Emit, Watch, toNative } from 'vue-facing-decorato
 import { CircleCheck, CircleClose } from '@element-plus/icons-vue';
 import ExpressionBuilder from './expressionbuilder.vue';
 
+import { VAceEditor } from 'vue3-ace-editor';
+import { Editor } from 'brace';
+import "ace-builds/src-noconflict/mode-javascript";
+import "ace-builds/src-noconflict/theme-monokai";
+import "ace-builds/src-noconflict/theme-chrome";
+import "ace-builds/src-noconflict/ext-language_tools";
+
+// Configure ACE base path for Vite
+import ace from 'ace-builds/src-noconflict/ace';
+ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict/');
+
 interface ValidationResult {
     valid: boolean;
     message: string;
@@ -129,7 +150,8 @@ interface Example {
     components: {
         CircleCheck,
         CircleClose,
-        expressionbuilder: ExpressionBuilder
+        expressionbuilder: ExpressionBuilder,
+        aceeditor: VAceEditor
     }
 })
 class JSExpressionEditor extends Vue {
@@ -176,6 +198,55 @@ class JSExpressionEditor extends Vue {
     
     mounted() {
         this.editorExpression = this.value;
+    }
+    
+    editorInit(editor: Editor) {
+        // Configure ACE editor for JavaScript expressions
+        editor.setOptions({
+            enableBasicAutocompletion: true,
+            enableLiveAutocompletion: true,
+            enableSnippets: true,
+            showLineNumbers: true,
+            showGutter: true,
+            fontSize: 14,
+            wrap: true,
+            scrollPastEnd: true
+        });
+
+        // Add custom completions for smtp4dev expressions
+        const langTools = (window as any).ace.require('ace/ext/language_tools');
+        const customCompleter = {
+            getCompletions: (editor: any, session: any, pos: any, prefix: any, callback: any) => {
+                const completions = this.getAutocompletions();
+                callback(null, completions.map(comp => ({
+                    caption: comp.caption,
+                    snippet: comp.snippet,
+                    meta: comp.meta,
+                    docText: comp.docText,
+                    score: 1000 // High priority for our custom completions
+                })));
+            }
+        };
+        
+        langTools.addCompleter(customCompleter);
+        
+        // Set theme based on user preference or default
+        editor.setTheme('ace/theme/monokai');
+        
+        // Configure for single line expressions if needed
+        editor.setOption('maxLines', 15);
+        editor.setOption('minLines', 5);
+    }
+    
+    getCodeEditorPlaceholder(): string {
+        switch (this.expressionType) {
+            case 'credentials': return 'Enter JavaScript expression to validate credentials (e.g., credentials.username === "admin")';
+            case 'recipient': return 'Enter JavaScript expression to validate recipients (e.g., recipient.endsWith("@example.com"))';
+            case 'message': return 'Enter JavaScript expression to validate messages (e.g., !message.subject.includes("spam"))';
+            case 'command': return 'Enter JavaScript expression to validate commands (e.g., command.Verb === "HELO")';
+            case 'relay': return 'Enter JavaScript expression for auto relay logic (e.g., recipient.replace("@test.com", "@prod.com"))';
+            default: return 'Enter JavaScript expression...';
+        }
     }
     
     onEditorChange(value: string) {
@@ -532,6 +603,26 @@ export default toNative(JSExpressionEditor);
     border: 1px solid #dcdfe6;
     border-radius: 4px;
     overflow: hidden;
+    margin-bottom: 16px;
+}
+
+.ace-editor-container :deep(.ace_editor) {
+    font-size: 14px !important;
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace !important;
+    border-radius: 4px;
+}
+
+.ace-editor-container :deep(.ace_content) {
+    background: #2d3748;
+}
+
+.ace-editor-container :deep(.ace_gutter) {
+    background: #2d3748;
+    border-right: 1px solid #4a5568;
+}
+
+.ace-editor-container :deep(.ace_scroller) {
+    background: #2d3748;
 }
 
 .code-editor-container {
