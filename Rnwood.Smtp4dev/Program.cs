@@ -51,7 +51,7 @@ namespace Rnwood.Smtp4dev
                 {
                     await host.WaitForShutdownAsync();
                 }
-                Log.Information("Exiting") // Missing semicolon for deliberate test
+                Log.Information("Exiting");
             }
             catch (CommandLineOptionsException ex)
             {
