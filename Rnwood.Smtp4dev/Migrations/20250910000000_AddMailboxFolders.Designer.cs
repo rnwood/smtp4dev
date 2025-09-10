@@ -11,7 +11,6 @@ using Rnwood.Smtp4dev.Data;
 namespace Rnwood.Smtp4dev.Migrations
 {
     [DbContext(typeof(Smtp4devDbContext))]
-    [Migration("20250910000000_AddMailboxFolders")]
     partial class AddMailboxFolders
     {
         /// <inheritdoc />
