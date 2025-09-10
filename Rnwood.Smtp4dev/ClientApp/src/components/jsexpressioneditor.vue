@@ -12,6 +12,9 @@
                 <div class="header-info">
                     <h4>{{ getExpressionTypeTitle(expressionType) }}</h4>
                     <p class="expression-description">{{ getExpressionDescription(expressionType) }}</p>
+                    <div class="return-values-info">
+                        <strong>Return Values:</strong> {{ getReturnValueDescription(expressionType) }}
+                    </div>
                 </div>
             </div>
             
@@ -59,12 +62,24 @@
                 <div v-if="showHelpPanel" class="help-panel">
                     <div class="help-content">
                         <div class="help-section">
-                            <h4>Available Variables for {{ getExpressionTypeTitle(expressionType) }}</h4>
-                            <el-table :data="getAvailableVariables()" style="width: 100%" size="small">
-                                <el-table-column prop="name" label="Variable" width="180"></el-table-column>
-                                <el-table-column prop="type" label="Type" width="80"></el-table-column>
-                                <el-table-column prop="description" label="Description"></el-table-column>
-                            </el-table>
+                            <h4>Available Variables</h4>
+                            <div v-for="variable in getTopLevelVariables()" :key="variable.name" class="variable-section">
+                                <div class="variable-header" @click="variable.expanded = !variable.expanded">
+                                    <el-icon class="expand-icon" :class="{ expanded: variable.expanded }">
+                                        <CaretRight />
+                                    </el-icon>
+                                    <span class="variable-name">{{ variable.name }}</span>
+                                    <span class="variable-type">{{ variable.type }}</span>
+                                    <span class="variable-description">{{ variable.description }}</span>
+                                </div>
+                                <div v-if="variable.expanded && variable.properties && variable.properties.length > 0" class="variable-properties">
+                                    <el-table :data="variable.properties" style="width: 100%" size="small">
+                                        <el-table-column prop="name" label="Property" width="150"></el-table-column>
+                                        <el-table-column prop="type" label="Type" width="80"></el-table-column>
+                                        <el-table-column prop="description" label="Description"></el-table-column>
+                                    </el-table>
+                                </div>
+                            </div>
                         </div>
                         
                         <div class="help-section">
@@ -100,7 +115,7 @@
 
 <script lang="ts">
 import { Component, Vue, Prop, Emit, Watch, toNative } from 'vue-facing-decorator';
-import { CircleCheck, CircleClose } from '@element-plus/icons-vue';
+import { CircleCheck, CircleClose, CaretRight } from '@element-plus/icons-vue';
 
 import { VAceEditor } from 'vue3-ace-editor';
 import { Editor } from 'brace';
@@ -124,6 +139,14 @@ interface Variable {
     description: string;
 }
 
+interface TopLevelVariable {
+    name: string;
+    type: string;
+    description: string;
+    expanded?: boolean;
+    properties?: Variable[];
+}
+
 interface Example {
     title: string;
     code: string;
@@ -134,6 +157,7 @@ interface Example {
     components: {
         CircleCheck,
         CircleClose,
+        CaretRight,
         aceeditor: VAceEditor
     }
 })
@@ -291,6 +315,142 @@ class JSExpressionEditor extends Vue {
         });
         
         return completions;
+    }
+    
+    getReturnValueDescription(type: string): string {
+        switch (type) {
+            case 'credentials': return 'Return true to accept credentials, false to reject.';
+            case 'recipient': return 'Return true to accept recipient, false to reject.';
+            case 'message': return 'Return true to accept, false to reject, number for error code, or string for error message.';
+            case 'command': return 'Return true to accept, false to reject, number for error code, or string for error message.';
+            case 'relay': return 'Return string/array of recipients to relay to, true for original recipient, false/null to not relay.';
+            default: return 'Return appropriate value based on expression type.';
+        }
+    }
+    
+    getTopLevelVariables(): TopLevelVariable[] {
+        const sessionProperties: Variable[] = [
+            { name: 'id', type: 'string', description: 'Unique session identifier' },
+            { name: 'startDate', type: 'Date', description: 'When the session started' },
+            { name: 'clientAddress', type: 'string', description: 'IP address of the connecting client' },
+            { name: 'clientName', type: 'string', description: 'Hostname of the connecting client' },
+            { name: 'error', type: 'string', description: 'Session error message if any' },
+            { name: 'errorType', type: 'string', description: 'Session error type if any' }
+        ];
+
+        const messageProperties: Variable[] = [
+            { name: 'id', type: 'string', description: 'Unique message identifier' },
+            { name: 'from', type: 'string', description: 'From address of the message' },
+            { name: 'to', type: 'string[]', description: 'Array of To addresses' },
+            { name: 'cc', type: 'string[]', description: 'Array of CC addresses' },
+            { name: 'bcc', type: 'string[]', description: 'Array of BCC addresses' },
+            { name: 'deliveredTo', type: 'string[]', description: 'Array of addresses message was delivered to' },
+            { name: 'subject', type: 'string', description: 'Subject line of the message' },
+            { name: 'receivedDate', type: 'Date', description: 'When the message was received' },
+            { name: 'secureConnection', type: 'boolean', description: 'Whether connection used TLS/SSL' },
+            { name: 'hasHtmlBody', type: 'boolean', description: 'Whether message has HTML body' },
+            { name: 'hasPlainTextBody', type: 'boolean', description: 'Whether message has plain text body' },
+            { name: 'headers', type: 'Header[]', description: 'Array of message headers' },
+            { name: 'parts', type: 'MessagePart[]', description: 'Array of message parts/attachments' },
+            { name: 'mimeParseError', type: 'string', description: 'MIME parsing error if any' },
+            { name: 'relayError', type: 'string', description: 'Relay error if any' }
+        ];
+
+        const commandProperties: Variable[] = [
+            { name: 'verb', type: 'string', description: 'SMTP command verb (HELO, MAIL, RCPT, etc.)' },
+            { name: 'argumentsText', type: 'string', description: 'Arguments provided with the command' },
+            { name: 'text', type: 'string', description: 'Full command text as received' },
+            { name: 'isValid', type: 'boolean', description: 'Whether command syntax is valid' },
+            { name: 'isEmpty', type: 'boolean', description: 'Whether command is empty' }
+        ];
+
+        const credentialsProperties: Variable[] = [
+            { name: 'type', type: 'string', description: 'Authentication type (e.g., USERNAME_PASSWORD)' },
+            { name: 'username', type: 'string', description: 'Provided username (for USERNAME_PASSWORD type)' },
+            { name: 'password', type: 'string', description: 'Provided password (for USERNAME_PASSWORD type)' }
+        ];
+
+        const baseVariables: TopLevelVariable[] = [
+            {
+                name: 'session',
+                type: 'object',
+                description: 'Current SMTP session information',
+                expanded: false,
+                properties: sessionProperties
+            }
+        ];
+
+        switch (this.expressionType) {
+            case 'credentials':
+                return [
+                    {
+                        name: 'credentials',
+                        type: 'object',
+                        description: 'Authentication credentials provided by client',
+                        expanded: false,
+                        properties: credentialsProperties
+                    },
+                    ...baseVariables
+                ];
+
+            case 'recipient':
+                return [
+                    {
+                        name: 'recipient',
+                        type: 'string',
+                        description: 'Email address of the recipient being validated',
+                        expanded: false,
+                        properties: []
+                    },
+                    ...baseVariables
+                ];
+
+            case 'message':
+                return [
+                    {
+                        name: 'message',
+                        type: 'object',
+                        description: 'Email message being processed',
+                        expanded: false,
+                        properties: messageProperties
+                    },
+                    ...baseVariables
+                ];
+
+            case 'command':
+                return [
+                    {
+                        name: 'command',
+                        type: 'object',
+                        description: 'SMTP command being processed',
+                        expanded: false,
+                        properties: commandProperties
+                    },
+                    ...baseVariables
+                ];
+
+            case 'relay':
+                return [
+                    {
+                        name: 'recipient',
+                        type: 'string',
+                        description: 'Original recipient email address',
+                        expanded: false,
+                        properties: []
+                    },
+                    {
+                        name: 'message',
+                        type: 'object',
+                        description: 'Email message to be relayed',
+                        expanded: false,
+                        properties: messageProperties
+                    },
+                    ...baseVariables
+                ];
+
+            default:
+                return baseVariables;
+        }
     }
     
     getExpressionTypeTitle(type: string): string {
@@ -643,6 +803,72 @@ export default toNative(JSExpressionEditor);
     margin: 0 0 12px 0;
     color: #303133;
     font-size: 14px;
+}
+
+.variable-section {
+    margin-bottom: 12px;
+    border: 1px solid #ebeef5;
+    border-radius: 4px;
+}
+
+.variable-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 12px;
+    background: #f8f9fa;
+    cursor: pointer;
+    border-radius: 4px;
+    gap: 8px;
+}
+
+.variable-header:hover {
+    background: #f0f0f0;
+}
+
+.expand-icon {
+    transition: transform 0.2s ease;
+    color: #909399;
+}
+
+.expand-icon.expanded {
+    transform: rotate(90deg);
+}
+
+.variable-name {
+    font-weight: 600;
+    color: #303133;
+    min-width: 80px;
+}
+
+.variable-type {
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    background: #e6f4ff;
+    color: #0969da;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 12px;
+    min-width: 60px;
+    text-align: center;
+}
+
+.variable-description {
+    color: #606266;
+    font-size: 13px;
+    flex: 1;
+}
+
+.variable-properties {
+    padding: 0 12px 12px 12px;
+}
+
+.return-values-info {
+    margin-top: 8px;
+    padding: 8px 12px;
+    background: #f0f9ff;
+    border: 1px solid #91d5ff;
+    border-radius: 4px;
+    font-size: 13px;
+    color: #067f8c;
 }
 
 .example {
