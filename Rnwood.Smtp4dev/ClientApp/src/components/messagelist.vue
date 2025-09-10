@@ -59,7 +59,6 @@
             </el-select>
 
             <el-select style="flex: 1 0 150px;" v-model="selectedFolder" class="fill" :disabled="!selectedMailbox">
-                <el-option key="all" label="All Folders" value="" />
                 <el-option v-for="folder in availableFolders"
                            :key="folder"
                            :label="folder"
@@ -203,7 +202,7 @@
 
         messages: MessageSummary[] = [];
         selectedMailbox: string | null = null;
-        selectedFolder: string = ""; // Empty string means "All Folders"
+        selectedFolder: string = "INBOX"; // Default to INBOX folder
         availableFolders: string[] = [];
 
         isRelayInProgress: boolean = false;
@@ -480,8 +479,8 @@
                     this.handleCurrentChange(message);
                 }
             );
-            // Reset folder selection when mailbox changes
-            this.selectedFolder = "";
+            // Default to INBOX folder when mailbox changes
+            this.selectedFolder = "INBOX";
             await this.loadFolders();
             await this.refresh(true, false);
         }
@@ -495,6 +494,10 @@
             if (this.selectedMailbox) {
                 try {
                     this.availableFolders = await new MessagesController().getFolders(this.selectedMailbox);
+                    // Ensure INBOX folder exists, if not fall back to first available folder
+                    if (this.availableFolders.length > 0 && !this.availableFolders.includes("INBOX")) {
+                        this.selectedFolder = this.availableFolders[0];
+                    }
                 } catch (error) {
                     console.error("Failed to load folders:", error);
                     this.availableFolders = [];
