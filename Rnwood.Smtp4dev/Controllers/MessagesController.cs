@@ -64,6 +64,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// </summary>
         /// <param name="searchTerms">Case insensitive term to search for in subject,from,to</param>
         /// <param name="mailboxName">Mailbox name. If not specified, defaults to the mailboxName with name 'Default'</param>
+        /// <param name="folderName">Folder name (INBOX, Sent). If not specified, returns all messages in mailbox</param>
         /// <param name="sortColumn">Property name from response type to sort by</param>
         /// <param name="sortIsDescending">True if sort should be descending</param>
         /// <param name="page">Page number to retrieve</param>
@@ -71,12 +72,22 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <returns></returns>
         [HttpGet]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.PagedResult<MessageSummary>), Description = "")]
-        public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string mailboxName = MailboxOptions.DEFAULTNAME, string sortColumn = "receivedDate",
+        public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string mailboxName = MailboxOptions.DEFAULTNAME, string folderName = null, string sortColumn = "receivedDate",
             bool sortIsDescending = true, int page = 1,
             int pageSize = 5)
         {
-            IQueryable<DbModel.Projections.MessageSummaryProjection> query = messagesRepository.GetMessageSummaries(mailboxName)
-                .OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""));
+            IQueryable<DbModel.Projections.MessageSummaryProjection> query;
+            
+            if (!string.IsNullOrEmpty(folderName))
+            {
+                query = messagesRepository.GetMessageSummaries(mailboxName, folderName);
+            }
+            else
+            {
+                query = messagesRepository.GetMessageSummaries(mailboxName);
+            }
+            
+            query = query.OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""));
 
             if (!string.IsNullOrEmpty(searchTerms))
             {
@@ -528,6 +539,22 @@ namespace Rnwood.Smtp4dev.Controllers
         public async Task DeleteAll(string mailboxName = MailboxOptions.DEFAULTNAME)
         {
             await messagesRepository.DeleteAllMessages(mailboxName);
+        }
+
+        /// <summary>
+        /// Returns available folders for the specified mailbox.
+        /// </summary>
+        /// <param name="mailboxName">Mailbox name. If not specified, defaults to the mailboxName with name 'Default'</param>
+        /// <returns></returns>
+        [HttpGet("folders")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(string[]), Description = "")]
+        public string[] GetFolders(string mailboxName = MailboxOptions.DEFAULTNAME)
+        {
+            using var dbContext = messagesRepository.DbContext;
+            return dbContext.MailboxFolders
+                .Where(f => f.Mailbox.Name == mailboxName)
+                .Select(f => f.Name)
+                .ToArray();
         }
     }
 }
