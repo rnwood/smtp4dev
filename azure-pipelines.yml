@@ -1205,100 +1205,29 @@ stages:
                   Write-Host "Proceeding with notification as fallback."
                 }
                 
-                # Get build logs using Azure DevOps REST API
-                $buildErrors = ""
-                try {
-                  $azureDevOpsHeaders = @{
-                    'Authorization' = "Bearer $env:SYSTEM_ACCESSTOKEN"
-                    'Accept' = 'application/json'
-                  }
-                  
-                  # Get build timeline to identify failed tasks
-                  $timelineUri = "$organizationUri$projectName/_apis/build/builds/$buildId/timeline?api-version=6.0"
-                  $timeline = Invoke-RestMethod -Uri $timelineUri -Headers $azureDevOpsHeaders -Method Get
-                  
-                  $failedRecords = $timeline.records | Where-Object { $_.result -eq "failed" -and $_.type -eq "Task" }
-                  
-                  if ($failedRecords) {
-                    $buildErrors = "`n`n**Build Error Details:**`n"
-                    
-                    foreach ($record in $failedRecords) {
-                      $buildErrors += "`n**Failed Task: $($record.name)**`n"
-                      
-                      # Get detailed logs for this task
-                      if ($record.log -and $record.log.id) {
-                        try {
-                          $logUri = "$organizationUri$projectName/_apis/build/builds/$buildId/logs/$($record.log.id)?api-version=6.0"
-                          
-                          # Get log data - Azure DevOps returns JSON with count and value array
-                          $logResponse = Invoke-RestMethod -Uri $logUri -Headers $azureDevOpsHeaders -Method Get
-                          
-                          Write-Host "Retrieved log data for task $($record.name), count: $($logResponse.count)"
-                          Write-Host "Log URI: $logUri"
-                          
-                          # Extract log lines from the value array
-                          $logLines = $logResponse.value
-                          
-                          Write-Host "Total log lines: $($logLines.Count)"
-                          
-                          # For failing steps, include ALL output instead of just lines that look like errors
-                          # This provides complete context to understand issues like missing files
-                          $errorContent = ""
-                          $errorCount = 0
-                          # Include all log lines, but limit to reasonable size for comment
-                          $maxLines = 100  # Limit to last 100 lines to avoid excessively long comments
-                          $startIndex = [Math]::Max(0, $logLines.Count - $maxLines)
-
-                          for ($i = $startIndex; $i -lt $logLines.Count; $i++) {
-                            $line = $logLines[$i]
-                            $trimmedLine = $line.Trim()
-
-                            # Skip empty lines to reduce noise
-                            if ($trimmedLine.Length -gt 0) {
-                              if ($errorContent -ne "") { $errorContent += [Environment]::NewLine }
-                              $errorContent += $trimmedLine
-                              $errorCount++
-                            }
-                          }
-                          
-                          Write-Host "Including last $errorCount non-empty log lines from failing task"
-                          
-                          if ($errorCount -gt 0) {
-                            $buildErrors += [Environment]::NewLine + '```' + [Environment]::NewLine
-                            $buildErrors += $errorContent
-                            $buildErrors += [Environment]::NewLine + '```'
-                          } else {
-                            $buildErrors += [Environment]::NewLine + "No log content available"
-                            Write-Host "No log content found for task $($record.name)"
-                          }
-                        } catch {
-                          $buildErrors += "Could not retrieve detailed logs for this task: $($_.Exception.Message)"
-                          Write-Host "Error retrieving logs for task $($record.name): $_"
-                        }
-                      } else {
-                        $buildErrors += "No log available for this task."
-                      }
-                      $buildErrors += "`n"
-                    }
-                  }
-                } catch {
-                  Write-Host "Warning: Could not retrieve detailed build logs: $_"
-                  $buildErrors = "`n`n**Note:** Detailed error logs could not be retrieved. Please check the build logs manually."
-                }
+                # Note: We no longer extract detailed build logs here to reduce comment size
+                # and encourage @copilot to access the live build data directly from Azure DevOps
                 
                 $commentBody = @"
-                @copilot The build triggered by this PR has failed. **Please use the error details provided below to investigate and fix the issues. Do not attempt to reproduce the build locally first - consult these error details directly.**
+                @copilot The build triggered by this PR has failed. **Please access the build logs directly from Azure DevOps to investigate and fix the issues.**
+                
+                **🚨 IMPORTANT: Only proceed if this is the most recent commit on your branch. If a newer commit exists, ignore this notification.**
                 
                 **Build Details:**
                 - Build ID: $buildId
-                - Build URL: $buildUrl
-                - Commit: $(Build.SourceVersion)$buildErrors
+                - Build URL: $buildUrl (Click to access full build logs and details)
+                - Commit: $(Build.SourceVersion)
+                - Build Status: FAILED
                 
                 **Instructions for @copilot:**
-                1. **Analyze the error details above first** - do not try to reproduce the build locally
-                2. Focus on the specific compilation errors, test failures, or other issues shown
-                3. Make targeted fixes based on the error messages provided
-                4. Only build locally after making fixes to verify the solution
+                1. **First verify this is the latest commit** - If $(Build.SourceVersion) is not the most recent commit in this PR branch, ignore this notification
+                2. **Navigate to the build URL above** to access the complete Azure DevOps build logs and failure details
+                3. **Use your browser tools** to explore the failed build tasks, error messages, and full context
+                4. **Focus on the specific compilation errors, test failures, or other issues** shown in the Azure DevOps interface
+                5. **Make targeted fixes** based on the error messages you find in the build logs
+                6. Only build locally after making fixes to verify the solution
+                
+                **Do not try to reproduce the build locally first - use the live build data from Azure DevOps for the most accurate failure information.**
                 "@
                 
                 $headers = @{
