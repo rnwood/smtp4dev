@@ -319,14 +319,16 @@ stages:
 
           - task: PowerShell@2
             condition: and(always(), eq(variables['runTests'], true))
-            displayName: Create Playwright HTML Report Directory
+            displayName: Create Playwright Reports Directory (HTML + Traces)
             inputs:
               targetType: inline
               script: |
                 # Use Join-Path for cross-platform compatibility
                 $tempDir = "$(Agent.TempDirectory)"
                 $reportDir = Join-Path $tempDir "playwright-report"
-                Write-Host "Creating Playwright HTML report directory: $reportDir"
+                $tracesDir = Join-Path $reportDir "traces"
+                Write-Host "Creating Playwright reports directory: $reportDir"
+                Write-Host "Creating Playwright traces directory: $tracesDir"
                 Write-Host "Platform: $([Environment]::OSVersion.Platform)"
                 Write-Host "Agent.TempDirectory: $tempDir"
                 
@@ -337,33 +339,99 @@ stages:
                   Write-Host "✓ Directory already exists: $reportDir"
                 }
                 
-                # Verify the directory exists and is accessible
+                if (-not (Test-Path $tracesDir)) {
+                  New-Item -ItemType Directory -Path $tracesDir -Force
+                  Write-Host "✓ Created traces directory: $tracesDir"
+                } else {
+                  Write-Host "✓ Traces directory already exists: $tracesDir"
+                }
+                
+                # Verify the directories exist and are accessible
                 if (Test-Path $reportDir) {
                   $resolvedPath = Resolve-Path $reportDir
-                  Write-Host "✓ Directory verified at: $resolvedPath"
+                  Write-Host "✓ Report directory verified at: $resolvedPath"
                 } else {
                   Write-Error "Failed to create or access directory: $reportDir"
                   exit 1
                 }
                 
-                # Create a minimal index.html file for the report
+                if (Test-Path $tracesDir) {
+                  $resolvedTracesPath = Resolve-Path $tracesDir
+                  Write-Host "✓ Traces directory verified at: $resolvedTracesPath"
+                } else {
+                  Write-Error "Failed to create or access traces directory: $tracesDir"
+                  exit 1
+                }
+                
+                # Create an index.html file that includes links to both HTML reports and traces
                 $indexHtml = @"
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Playwright Test Results</title>
+                    <title>Playwright E2E Test Results - $(platformName)</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+                        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                        h1 { color: #333; border-bottom: 3px solid #007acc; padding-bottom: 10px; }
+                        h2 { color: #555; margin-top: 30px; }
+                        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+                        .trace-info { background: #e7f3ff; padding: 15px; margin: 10px 0; border-radius: 5px; }
+                        .instructions { background: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+                        ul { line-height: 1.6; }
+                        .platform { color: #007acc; font-weight: bold; }
+                    </style>
                 </head>
                 <body>
-                    <h1>E2E Test Results</h1>
-                    <p>E2E tests were run via dotnet test. Check the test results in the Azure DevOps test results tab.</p>
-                    <p>For detailed logs, refer to the build pipeline output.</p>
+                    <div class='container'>
+                        <h1>E2E Test Results - <span class='platform'>$(platformName)</span></h1>
+                        <p><strong>Build:</strong> $(Build.BuildNumber) | <strong>Commit:</strong> $(Build.SourceVersion)</p>
+                        <p>Generated on: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')</p>
+                        
+                        <div class='section'>
+                            <h2>🔍 Playwright Traces</h2>
+                            <div class='trace-info'>
+                                <p><strong>New Feature:</strong> This build includes comprehensive Playwright traces instead of simple screenshots.</p>
+                                <p>Traces provide a complete debugging experience with:</p>
+                                <ul>
+                                    <li><strong>Screenshots</strong> at every step</li>
+                                    <li><strong>DOM snapshots</strong> showing page state</li>
+                                    <li><strong>Network activity</strong> and API calls</li>
+                                    <li><strong>Console logs</strong> and JavaScript errors</li>
+                                    <li><strong>Source code</strong> mapping</li>
+                                    <li><strong>Timeline</strong> of all actions</li>
+                                </ul>
+                            </div>
+                            
+                            <div class='instructions'>
+                                <h3>How to View Traces:</h3>
+                                <ol>
+                                    <li>Download the <code>PlaywrightReport_$(platformName)</code> artifact from Azure DevOps</li>
+                                    <li>Extract the ZIP file</li>
+                                    <li>Navigate to the <code>traces/</code> folder</li>
+                                    <li>Open any <code>.zip</code> trace file by:
+                                        <ul>
+                                            <li><strong>Online:</strong> Go to <a href='https://trace.playwright.dev' target='_blank'>trace.playwright.dev</a> and drag the trace ZIP file</li>
+                                            <li><strong>CLI:</strong> Run <code>npx playwright show-trace trace-file.zip</code></li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class='section'>
+                            <h2>📊 Test Execution Details</h2>
+                            <p>E2E tests were executed via <code>dotnet test</code> with Playwright tracing enabled.</p>
+                            <p>For test results and detailed logs, check the <strong>Tests</strong> tab in Azure DevOps.</p>
+                            <p>Each test that runs generates a corresponding trace file for debugging.</p>
+                        </div>
+                    </div>
                 </body>
                 </html>
                 "@
                 
                 $indexPath = Join-Path $reportDir "index.html"
                 $indexHtml | Out-File -FilePath $indexPath -Encoding UTF8
-                Write-Host "✓ Created basic HTML report: $indexPath"
+                Write-Host "✓ Created comprehensive HTML report: $indexPath"
                 
                 # Verify the file was created
                 if (Test-Path $indexPath) {
@@ -389,7 +457,7 @@ stages:
               publishTestResults: true
           - task: PublishPipelineArtifact@1
             condition: and(always(), eq(variables['runTests'], true))
-            displayName: Publish Playwright HTML Report
+            displayName: Publish Playwright Reports and Traces
             inputs:
               targetPath: $(Agent.TempDirectory)/playwright-report
               artifact: 'PlaywrightReport_$(platformName)'
