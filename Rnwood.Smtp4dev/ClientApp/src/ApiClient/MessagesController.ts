@@ -21,13 +21,17 @@ export default class MessagesController {
         return (await axios.get(this.getNewSummaries_url(lastSeenMessageId, mailboxName, pageSize), null || undefined)).data as MessageSummary[];
     }
 
-    public getSummaries_url(mailboxName: string, searchTerms: string, sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): string {
-        return `${this.apiBaseUrl}?mailboxName=${encodeURIComponent(mailboxName)}&searchTerms=${encodeURIComponent(searchTerms)}&sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}&page=${page}&pageSize=${pageSize}`;
+    public getSummaries_url(mailboxName: string, searchTerms: string, sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25, folderName: string | null = null): string {
+        let url = `${this.apiBaseUrl}?mailboxName=${encodeURIComponent(mailboxName)}&searchTerms=${encodeURIComponent(searchTerms)}&sortColumn=${encodeURIComponent(sortColumn)}&sortIsDescending=${sortIsDescending}&page=${page}&pageSize=${pageSize}`;
+        if (folderName) {
+            url += `&folderName=${encodeURIComponent(folderName)}`;
+        }
+        return url;
     }
 
-    public async getSummaries(mailboxName: string, searchTerms: string, sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25): Promise<PagedResult<MessageSummary>> {
+    public async getSummaries(mailboxName: string, searchTerms: string, sortColumn: string, sortIsDescending: boolean, page: number = 1, pageSize: number = 25, folderName: string | null = null): Promise<PagedResult<MessageSummary>> {
 
-        return (await axios.get(this.getSummaries_url(mailboxName, searchTerms, sortColumn, sortIsDescending, page, pageSize), null || undefined)).data as PagedResult<MessageSummary>;
+        return (await axios.get(this.getSummaries_url(mailboxName, searchTerms, sortColumn, sortIsDescending, page, pageSize, folderName), null || undefined)).data as PagedResult<MessageSummary>;
     }
 
     // get: api/Messages/${encodeURIComponent(id)}  
@@ -192,5 +196,13 @@ export default class MessagesController {
                 'Content-Type': 'message/rfc822' 
             }
         })).data;
+    }
+
+    public getFolders_url(mailboxName: string): string {
+        return `${this.apiBaseUrl}/folders?mailboxName=${encodeURIComponent(mailboxName)}`;
+    }
+
+    public async getFolders(mailboxName: string): Promise<string[]> {
+        return (await axios.get(this.getFolders_url(mailboxName), null || undefined)).data as string[];
     }
 }
