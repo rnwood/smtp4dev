@@ -14,7 +14,9 @@ namespace Rnwood.Smtp4dev.Data
         IQueryable<Message> GetAllMessages(bool unTracked = true);
 
         IQueryable<Message> GetMessages(string mailboxName, bool unTracked = true);
+        IQueryable<Message> GetMessages(string mailboxName, string folderName, bool unTracked = true);
         IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName);
+        IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName, string folderName);
 
         Task DeleteMessage(Guid id);
 

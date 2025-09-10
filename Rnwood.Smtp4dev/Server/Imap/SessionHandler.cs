@@ -48,7 +48,14 @@ namespace Rnwood.Smtp4dev.Server
 
             private void Session_Append(object sender, IMAP_e_Append e)
             {
-                e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "APPEND is not supported");
+                if (e.Folder == "Sent" || e.Folder == "INBOX")
+                {
+                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "OK", "APPEND completed");
+                }
+                else
+                {
+                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Folder not supported");
+                }
             }
 
             private void Session_Search(object sender, IMAP_e_Search e)
@@ -123,7 +130,20 @@ namespace Rnwood.Smtp4dev.Server
 
                     if (e.Folder == "INBOX")
                     {
-                        foreach (var message in messagesRepository.GetMessages(GetMailboxName()))
+                        foreach (var message in messagesRepository.GetMessages(GetMailboxName(), "INBOX", true))
+                        {
+                            List<string> flags = new List<string>();
+                            if (!message.IsUnread)
+                            {
+                                flags.Add("Seen");
+                            }
+
+                            e.MessagesInfo.Add(new IMAP_MessageInfo(message.Id.ToString(), message.ImapUid, flags.ToArray(), message.Data.Length, message.ReceivedDate));
+                        }
+                    }
+                    else if (e.Folder == "Sent")
+                    {
+                        foreach (var message in messagesRepository.GetMessages(GetMailboxName(), "Sent", true))
                         {
                             List<string> flags = new List<string>();
                             if (!message.IsUnread)
@@ -194,6 +214,11 @@ namespace Rnwood.Smtp4dev.Server
                 {
                     e.Folders.Add(new IMAP_r_u_List("INBOX", '/', ["\\HasNoChildren"]));
                 }
+                
+                if (e.FolderFilter == "Sent" || e.FolderFilter == "*")
+                {
+                    e.Folders.Add(new IMAP_r_u_List("Sent", '/', ["\\HasNoChildren"]));
+                }
             }
 
             private void Session_LSub(object sender, IMAP_e_LSub e)
@@ -201,6 +226,11 @@ namespace Rnwood.Smtp4dev.Server
                 if (e.FolderFilter == "INBOX" || e.FolderFilter == "*")
                 {
                     e.Folders.Add(new IMAP_r_u_LSub("INBOX", '/', ["\\HasNoChildren"]));
+                }
+                
+                if (e.FolderFilter == "Sent" || e.FolderFilter == "*")
+                {
+                    e.Folders.Add(new IMAP_r_u_LSub("Sent", '/', ["\\HasNoChildren"]));
                 }
             }
         }

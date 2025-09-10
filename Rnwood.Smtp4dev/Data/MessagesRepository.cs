@@ -64,6 +64,23 @@ namespace Rnwood.Smtp4dev.Data
             return unTracked ? query.AsNoTracking() : query;
         }
 
+        public IQueryable<Message> GetMessages(string mailboxName, string folderName, bool unTracked = true)
+        {
+            // For now, fall back to legacy behavior until migration is properly handled
+            // For INBOX, use all messages in the mailbox; for Sent, return empty (no messages until migration)
+            if (folderName == "INBOX")
+            {
+                var query = dbContext.Messages.Where(m => m.Mailbox != null && m.Mailbox.Name == mailboxName);
+                return unTracked ? query.AsNoTracking() : query;
+            }
+            else
+            {
+                // Return empty set for Sent folder until folder infrastructure is available
+                var query = dbContext.Messages.Where(m => false);
+                return unTracked ? query.AsNoTracking() : query;
+            }
+        }
+
         public IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName)
         {
             return dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName)
@@ -80,6 +97,46 @@ namespace Rnwood.Smtp4dev.Data
                     IsUnread = m.IsUnread,
                     HasBareLineFeed = m.HasBareLineFeed
                 }).AsNoTracking();
+        }
+
+        public IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName, string folderName)
+        {
+            // For now, fall back to legacy behavior until migration is properly handled
+            if (folderName == "INBOX")
+            {
+                return dbContext.Messages.Where(m => m.Mailbox != null && m.Mailbox.Name == mailboxName)
+                    .Select(m => new MessageSummaryProjection()
+                    {
+                        Id = m.Id,
+                        From = m.From,
+                        To = m.To,
+                        Subject = m.Subject,
+                        ReceivedDate = m.ReceivedDate,
+                        AttachmentCount = m.AttachmentCount,
+                        DeliveredTo = m.DeliveredTo,
+                        IsRelayed = m.Relays.Count > 0,
+                        IsUnread = m.IsUnread,
+                        HasBareLineFeed = m.HasBareLineFeed
+                    }).AsNoTracking();
+            }
+            else
+            {
+                // Return empty set for Sent folder until folder infrastructure is available
+                return dbContext.Messages.Where(m => false)
+                    .Select(m => new MessageSummaryProjection()
+                    {
+                        Id = m.Id,
+                        From = m.From,
+                        To = m.To,
+                        Subject = m.Subject,
+                        ReceivedDate = m.ReceivedDate,
+                        AttachmentCount = m.AttachmentCount,
+                        DeliveredTo = m.DeliveredTo,
+                        IsRelayed = m.Relays.Count > 0,
+                        IsUnread = m.IsUnread,
+                        HasBareLineFeed = m.HasBareLineFeed
+                    }).AsNoTracking();
+            }
         }
 
         public Task DeleteMessage(Guid id)
