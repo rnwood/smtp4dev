@@ -98,7 +98,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         {
             // Use the same directory structure as the existing Playwright HTML report
             string baseReportDir = Environment.GetEnvironmentVariable("PLAYWRIGHT_HTML_REPORT") ?? System.IO.Path.GetTempPath();
-            return System.IO.Path.Combine(baseReportDir, "traces");
+            string traceDir = System.IO.Path.Combine(baseReportDir, "traces");
+            
+            // Debug output for CI troubleshooting
+            Console.WriteLine($"PLAYWRIGHT_HTML_REPORT environment variable: {Environment.GetEnvironmentVariable("PLAYWRIGHT_HTML_REPORT")}");
+            Console.WriteLine($"Base report directory: {baseReportDir}");
+            Console.WriteLine($"Trace directory: {traceDir}");
+            
+            return traceDir;
         }
 
         protected async Task<T> WaitForAsync<T>(Func<Task<T>> getValue, int timeoutSeconds = 60) where T : class
