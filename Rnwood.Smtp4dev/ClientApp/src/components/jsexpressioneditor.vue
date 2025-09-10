@@ -64,7 +64,7 @@
                         <div class="help-section">
                             <h4>Available Variables</h4>
                             <div v-for="variable in getTopLevelVariables()" :key="variable.name" class="variable-section">
-                                <div class="variable-header" @click="variable.expanded = !variable.expanded">
+                                <div class="variable-header" @click="toggleVariableExpansion(variable)">
                                     <el-icon class="expand-icon" :class="{ expanded: variable.expanded }">
                                         <CaretRight />
                                     </el-icon>
@@ -175,6 +175,7 @@ class JSExpressionEditor extends Vue {
     editorExpression: string = '';
     showHelpPanel: boolean = false;
     validationResult: ValidationResult | null = null;
+    topLevelVariables: TopLevelVariable[] = [];
     
     get dialogVisible(): boolean {
         return this.visible;
@@ -196,11 +197,18 @@ class JSExpressionEditor extends Vue {
             this.editorExpression = this.value;
             this.validationResult = null;
             this.showHelpPanel = false;
+            this.topLevelVariables = this.buildTopLevelVariables();
         }
+    }
+    
+    @Watch('expressionType')
+    onExpressionTypeChanged() {
+        this.topLevelVariables = this.buildTopLevelVariables();
     }
     
     mounted() {
         this.editorExpression = this.value;
+        this.topLevelVariables = this.buildTopLevelVariables();
     }
     
     editorInit(editor: Editor) {
@@ -328,7 +336,7 @@ class JSExpressionEditor extends Vue {
         }
     }
     
-    getTopLevelVariables(): TopLevelVariable[] {
+    buildTopLevelVariables(): TopLevelVariable[] {
         const sessionProperties: Variable[] = [
             { name: 'id', type: 'string', description: 'Unique session identifier' },
             { name: 'startDate', type: 'Date', description: 'When the session started' },
@@ -451,6 +459,14 @@ class JSExpressionEditor extends Vue {
             default:
                 return baseVariables;
         }
+    }
+    
+    getTopLevelVariables(): TopLevelVariable[] {
+        return this.topLevelVariables;
+    }
+    
+    toggleVariableExpansion(variable: TopLevelVariable) {
+        variable.expanded = !variable.expanded;
     }
     
     getExpressionTypeTitle(type: string): string {
