@@ -13,66 +13,78 @@
                     <h4>{{ getExpressionTypeTitle(expressionType) }}</h4>
                     <p class="expression-description">{{ getExpressionDescription(expressionType) }}</p>
                 </div>
-                
-                <el-tabs v-model="activeTab" class="editor-tabs">
-                    <el-tab-pane label="Code Editor" name="editor">
-                        <div class="ace-editor-container">
-                            <aceeditor 
-                                v-model:value="editorExpression"
-                                @init="editorInit"
-                                theme="monokai"
-                                lang="javascript"
-                                :options="{ 
-                                    useWorker: false,
-                                    enableLiveAutocompletion: true,
-                                    enableSnippets: true,
-                                    showPrintMargin: false,
-                                    fontSize: 14,
-                                    wrap: true
-                                }"
-                                width="100%" 
-                                height="300px"
-                                :placeholder="getCodeEditorPlaceholder()"
-                                @input="onEditorChange"
-                            />
-                        </div>
-                        
-                        <div class="editor-toolbar">
-                            <div class="toolbar-left">
-                                <el-button size="small" @click="insertTemplate" icon="plus">Insert Template</el-button>
-                                <el-button size="small" @click="validateExpression" icon="check">Validate</el-button>
-                                <el-button size="small" @click="testExpression" icon="play">Test</el-button>
-                            </div>
-                            <div class="toolbar-right">
-                                <el-button size="small" @click="showHelpDialog = true" icon="question">Help</el-button>
-                            </div>
-                        </div>
-                    </el-tab-pane>
+            </div>
+            
+            <div class="editor-main">
+                <div class="editor-content">
+                    <div class="ace-editor-container">
+                        <aceeditor 
+                            v-model:value="editorExpression"
+                            @init="editorInit"
+                            theme="monokai"
+                            lang="javascript"
+                            :options="{ 
+                                useWorker: false,
+                                enableLiveAutocompletion: true,
+                                enableSnippets: true,
+                                showPrintMargin: false,
+                                fontSize: 14,
+                                wrap: true
+                            }"
+                            width="100%" 
+                            height="100%"
+                            :placeholder="getCodeEditorPlaceholder()"
+                        />
+                    </div>
                     
-                    <el-tab-pane label="Visual Builder" name="builder">
-                        <div class="builder-container">
-                            <expressionbuilder 
-                                :expression-type="expressionType"
-                                :value="builderValue"
-                                @update:value="onBuilderChange"
-                            />
+                    <div class="editor-toolbar">
+                        <div class="toolbar-left">
+                            <el-button size="small" @click="insertTemplate" icon="plus">Insert Template</el-button>
+                            <el-button size="small" @click="validateExpression" icon="check">Validate</el-button>
+                            <el-button size="small" @click="testExpression" icon="play">Test</el-button>
                         </div>
-                    </el-tab-pane>
-                </el-tabs>
-                
-                <!-- Validation Results -->
-                <div v-if="validationResult" class="validation-result" :class="validationResult.valid ? 'success' : 'error'">
-                    <el-icon v-if="validationResult.valid" class="success-icon"><CircleCheck /></el-icon>
-                    <el-icon v-else class="error-icon"><CircleClose /></el-icon>
-                    <span>{{ validationResult.message }}</span>
+                        <div class="toolbar-right">
+                            <el-button size="small" @click="showHelpPanel = !showHelpPanel" icon="question" :type="showHelpPanel ? 'primary' : ''">Help</el-button>
+                        </div>
+                    </div>
+                    
+                    <!-- Validation Results -->
+                    <div v-if="validationResult" class="validation-result" :class="validationResult.valid ? 'success' : 'error'">
+                        <el-icon v-if="validationResult.valid" class="success-icon"><CircleCheck /></el-icon>
+                        <el-icon v-else class="error-icon"><CircleClose /></el-icon>
+                        <span>{{ validationResult.message }}</span>
+                    </div>
+                    
+                    <!-- Test Results -->
+                    <div v-if="testResult" class="test-result">
+                        <h5>Test Result:</h5>
+                        <el-card>
+                            <pre>{{ testResult }}</pre>
+                        </el-card>
+                    </div>
                 </div>
                 
-                <!-- Test Results -->
-                <div v-if="testResult" class="test-result">
-                    <h5>Test Result:</h5>
-                    <el-card>
-                        <pre>{{ testResult }}</pre>
-                    </el-card>
+                <!-- Help Panel -->
+                <div v-if="showHelpPanel" class="help-panel">
+                    <div class="help-content">
+                        <div class="help-section">
+                            <h4>Available Variables for {{ getExpressionTypeTitle(expressionType) }}</h4>
+                            <el-table :data="getAvailableVariables()" style="width: 100%" size="small">
+                                <el-table-column prop="name" label="Variable" width="180"></el-table-column>
+                                <el-table-column prop="type" label="Type" width="80"></el-table-column>
+                                <el-table-column prop="description" label="Description"></el-table-column>
+                            </el-table>
+                        </div>
+                        
+                        <div class="help-section">
+                            <h4>Example Expressions</h4>
+                            <div v-for="example in getExampleExpressions()" :key="example.title" class="example">
+                                <h5>{{ example.title }}</h5>
+                                <pre><code>{{ example.code }}</code></pre>
+                                <p>{{ example.description }}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -83,40 +95,12 @@
                 <el-button type="primary" @click="handleSave" :disabled="!isValidExpression">Save Expression</el-button>
             </div>
         </template>
-        
-        <!-- Help Dialog -->
-        <el-dialog
-            title="Expression Help"
-            v-model="showHelpDialog"
-            width="70%"
-            append-to-body>
-            <div class="help-content">
-                <div class="help-section">
-                    <h4>Available Variables for {{ getExpressionTypeTitle(expressionType) }}</h4>
-                    <el-table :data="getAvailableVariables()" style="width: 100%">
-                        <el-table-column prop="name" label="Variable" width="200"></el-table-column>
-                        <el-table-column prop="type" label="Type" width="100"></el-table-column>
-                        <el-table-column prop="description" label="Description"></el-table-column>
-                    </el-table>
-                </div>
-                
-                <div class="help-section">
-                    <h4>Example Expressions</h4>
-                    <div v-for="example in getExampleExpressions()" :key="example.title" class="example">
-                        <h5>{{ example.title }}</h5>
-                        <pre><code>{{ example.code }}</code></pre>
-                        <p>{{ example.description }}</p>
-                    </div>
-                </div>
-            </div>
-        </el-dialog>
     </el-dialog>
 </template>
 
 <script lang="ts">
 import { Component, Vue, Prop, Emit, Watch, toNative } from 'vue-facing-decorator';
 import { CircleCheck, CircleClose } from '@element-plus/icons-vue';
-import ExpressionBuilder from './expressionbuilder.vue';
 
 import { VAceEditor } from 'vue3-ace-editor';
 import { Editor } from 'brace';
@@ -150,7 +134,6 @@ interface Example {
     components: {
         CircleCheck,
         CircleClose,
-        expressionbuilder: ExpressionBuilder,
         aceeditor: VAceEditor
     }
 })
@@ -166,11 +149,9 @@ class JSExpressionEditor extends Vue {
     expressionType!: string;
     
     editorExpression: string = '';
-    activeTab: string = 'editor';
-    showHelpDialog: boolean = false;
+    showHelpPanel: boolean = false;
     validationResult: ValidationResult | null = null;
     testResult: string = '';
-    builderValue: any = null;
     
     get dialogVisible(): boolean {
         return this.visible;
@@ -192,7 +173,7 @@ class JSExpressionEditor extends Vue {
             this.editorExpression = this.value;
             this.validationResult = null;
             this.testResult = '';
-            this.activeTab = 'editor';
+            this.showHelpPanel = false;
         }
     }
     
@@ -246,20 +227,6 @@ class JSExpressionEditor extends Vue {
             case 'command': return 'Enter JavaScript expression to validate commands (e.g., command.Verb === "HELO")';
             case 'relay': return 'Enter JavaScript expression for auto relay logic (e.g., recipient.replace("@test.com", "@prod.com"))';
             default: return 'Enter JavaScript expression...';
-        }
-    }
-    
-    onEditorChange(value: string) {
-        this.editorExpression = value;
-        this.validationResult = null; // Clear validation when editing
-    }
-    
-    onBuilderChange(builderData: any) {
-        this.builderValue = builderData;
-        if (builderData && builderData.expression) {
-            this.editorExpression = builderData.expression;
-            // Switch to editor tab to show the generated code
-            this.activeTab = 'editor';
         }
     }
     
@@ -553,12 +520,8 @@ class JSExpressionEditor extends Vue {
     
     @Emit('update:value')
     handleSave() {
-        const expression = this.activeTab === 'builder' && this.builderValue 
-            ? this.builderValue.expression 
-            : this.editorExpression;
-            
         this.dialogVisible = false;
-        return expression;
+        return this.editorExpression;
     }
     
     @Emit('close')
@@ -574,14 +537,27 @@ export default toNative(JSExpressionEditor);
 <style scoped>
 .expression-editor-dialog :deep(.el-dialog) {
     min-height: 70vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.expression-editor-dialog :deep(.el-dialog__body) {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
 }
 
 .expression-editor {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
     min-height: 500px;
 }
 
 .editor-header {
     margin-bottom: 20px;
+    flex-shrink: 0;
 }
 
 .header-info h4 {
@@ -595,21 +571,34 @@ export default toNative(JSExpressionEditor);
     font-size: 14px;
 }
 
-.editor-tabs {
-    margin-bottom: 16px;
+.editor-main {
+    display: flex;
+    flex: 1;
+    gap: 20px;
+    min-height: 0;
+}
+
+.editor-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
 }
 
 .ace-editor-container {
+    flex: 1;
     border: 1px solid #dcdfe6;
     border-radius: 4px;
     overflow: hidden;
     margin-bottom: 16px;
+    min-height: 300px;
 }
 
 .ace-editor-container :deep(.ace_editor) {
     font-size: 14px !important;
     font-family: 'Monaco', 'Consolas', 'Courier New', monospace !important;
     border-radius: 4px;
+    height: 100% !important;
 }
 
 .ace-editor-container :deep(.ace_content) {
@@ -625,42 +614,19 @@ export default toNative(JSExpressionEditor);
     background: #2d3748;
 }
 
-.code-editor-container {
-    margin-bottom: 16px;
-}
-
-.code-textarea {
-    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
-    font-size: 14px;
-}
-
-.code-textarea :deep(.el-textarea__inner) {
-    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
-    font-size: 14px;
-    line-height: 1.4;
-}
-
 .editor-toolbar {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    margin-top: 12px;
     padding: 8px 0;
     border-top: 1px solid #ebeef5;
+    flex-shrink: 0;
 }
 
 .toolbar-left,
 .toolbar-right {
     display: flex;
     gap: 8px;
-}
-
-.builder-container {
-    min-height: 300px;
-    border: 1px solid #dcdfe6;
-    border-radius: 4px;
-    padding: 16px;
-    background: #fafafa;
 }
 
 .validation-result {
@@ -671,6 +637,7 @@ export default toNative(JSExpressionEditor);
     padding: 8px 12px;
     border-radius: 4px;
     font-size: 14px;
+    flex-shrink: 0;
 }
 
 .validation-result.success {
@@ -695,6 +662,7 @@ export default toNative(JSExpressionEditor);
 
 .test-result {
     margin-top: 16px;
+    flex-shrink: 0;
 }
 
 .test-result h5 {
@@ -709,9 +677,16 @@ export default toNative(JSExpressionEditor);
     font-size: 12px;
 }
 
-.help-content {
-    max-height: 60vh;
+.help-panel {
+    width: 350px;
+    border-left: 1px solid #ebeef5;
+    padding-left: 20px;
+    flex-shrink: 0;
     overflow-y: auto;
+}
+
+.help-content {
+    height: 100%;
 }
 
 .help-section {
@@ -721,6 +696,7 @@ export default toNative(JSExpressionEditor);
 .help-section h4 {
     margin: 0 0 12px 0;
     color: #303133;
+    font-size: 14px;
 }
 
 .example {
@@ -733,6 +709,7 @@ export default toNative(JSExpressionEditor);
 .example h5 {
     margin: 0 0 8px 0;
     color: #606266;
+    font-size: 13px;
 }
 
 .example pre {
@@ -741,14 +718,14 @@ export default toNative(JSExpressionEditor);
     background: #fff;
     border: 1px solid #ebeef5;
     border-radius: 4px;
-    font-size: 12px;
+    font-size: 11px;
     overflow-x: auto;
 }
 
 .example p {
     margin: 8px 0 0 0;
     color: #909399;
-    font-size: 13px;
+    font-size: 12px;
 }
 
 .dialog-footer {
