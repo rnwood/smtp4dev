@@ -44,7 +44,22 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 Timeout = 60000 // 60 seconds for browser launch
             });
 
-            var page = await browser.NewPageAsync();
+            // Create browser context with tracing enabled
+            var browserContext = await browser.NewContextAsync();
+            
+            // Start tracing for the entire test
+            string traceDir = GetTraceDirectory();
+            string tracePath = System.IO.Path.Combine(traceDir, $"{testName}.zip");
+            System.IO.Directory.CreateDirectory(traceDir);
+            
+            await browserContext.Tracing.StartAsync(new TracingStartOptions
+            {
+                Screenshots = true,
+                Snapshots = true,
+                Sources = true
+            });
+
+            var page = await browserContext.NewPageAsync();
             
             // Set longer timeouts for CI environments
             page.SetDefaultTimeout(60000); // 60 seconds for page operations
@@ -53,16 +68,44 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             try
             {
                 await uitest(page, context.BaseUrl, context.SmtpPortNumber);
+                
+                // Stop tracing with successful completion
+                await browserContext.Tracing.StopAsync(new TracingStopOptions
+                {
+                    Path = tracePath
+                });
+                
+                Console.WriteLine($"Trace saved: {tracePath}");
             }
             catch
             {
-                // Take screenshot on failure
-                string screenshotPath = System.IO.Path.Combine(System.IO.Path.GetTempPath(), $"{testName}_{Guid.NewGuid()}.png");
-                await page.ScreenshotAsync(new PageScreenshotOptions { Path = screenshotPath, FullPage = true });
+                // Stop tracing and save on failure
+                await browserContext.Tracing.StopAsync(new TracingStopOptions
+                {
+                    Path = tracePath
+                });
                 
-                Console.WriteLine($"##vso[artifact.upload containerfolder=e2eerror;artifactname={testName}.png]{screenshotPath}");
+                Console.WriteLine($"Trace saved on failure: {tracePath}");
                 throw;
             }
+            finally
+            {
+                await browserContext.CloseAsync();
+            }
+        }
+        
+        protected string GetTraceDirectory()
+        {
+            // Use the same directory structure as the existing Playwright HTML report
+            string baseReportDir = Environment.GetEnvironmentVariable("PLAYWRIGHT_HTML_REPORT") ?? System.IO.Path.GetTempPath();
+            string traceDir = System.IO.Path.Combine(baseReportDir, "traces");
+            
+            // Debug output for CI troubleshooting
+            Console.WriteLine($"PLAYWRIGHT_HTML_REPORT environment variable: {Environment.GetEnvironmentVariable("PLAYWRIGHT_HTML_REPORT")}");
+            Console.WriteLine($"Base report directory: {baseReportDir}");
+            Console.WriteLine($"Trace directory: {traceDir}");
+            
+            return traceDir;
         }
 
         protected async Task<T> WaitForAsync<T>(Func<Task<T>> getValue, int timeoutSeconds = 60) where T : class
