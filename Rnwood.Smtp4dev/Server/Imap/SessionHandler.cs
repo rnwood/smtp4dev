@@ -11,6 +11,8 @@ using Rnwood.Smtp4dev.Data;
 using Serilog;
 using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.Smtp4dev.Server.Imap;
+using Microsoft.EntityFrameworkCore;
+using System.IO;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -50,12 +52,72 @@ namespace Rnwood.Smtp4dev.Server
             {
                 if (e.Folder == "Sent" || e.Folder == "INBOX")
                 {
-                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "OK", "APPEND completed");
+                    try
+                    {
+                        using (var scope = this.serviceScopeFactory.CreateScope())
+                        {
+                            var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
+                            var dbContext = messagesRepository.DbContext;
+                            
+                            // Read message data from stream
+                            byte[] messageData;
+                            using (var memoryStream = new MemoryStream())
+                            {
+                                e.Stream.CopyTo(memoryStream);
+                                messageData = memoryStream.ToArray();
+                            }
+                            
+                            // Parse the message
+                            var mail = Mail_Message.ParseFromByte(messageData);
+                            
+                            // Convert to our Message entity
+                            var message = new DbModel.Message
+                            {
+                                Id = Guid.NewGuid(),
+                                Data = messageData,
+                                ReceivedDate = e.InternalDate != DateTime.MinValue ? e.InternalDate : DateTime.UtcNow,
+                                From = mail.From?.ToString() ?? "",
+                                To = mail.To?.ToString() ?? "",
+                                Subject = mail.Subject ?? "",
+                                IsUnread = !e.Flags.Contains("Seen", StringComparer.OrdinalIgnoreCase),
+                                AttachmentCount = mail.Attachments.Count()
+                            };
+                            
+                            // Find the mailbox and folder
+                            var mailboxName = GetMailboxName();
+                            var mailbox = dbContext.Mailboxes.Include(m => m.MailboxFolders)
+                                .FirstOrDefault(m => m.Name == mailboxName);
+                                
+                            if (mailbox != null)
+                            {
+                                var folder = mailbox.MailboxFolders.FirstOrDefault(f => f.Name == e.Folder);
+                                if (folder != null)
+                                {
+                                    message.Mailbox = mailbox;
+                                    message.MailboxFolder = folder;
+                                    message.MailboxFolderId = folder.Id;
+                                    
+                                    // Assign IMAP UID
+                                    var imapState = dbContext.ImapState.Single();
+                                    imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
+                                    message.ImapUid = imapState.LastUid;
+                                    
+                                    dbContext.Messages.Add(message);
+                                    dbContext.SaveChanges();
+                                    
+                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "OK", $"APPEND completed [APPENDUID {folder.Id} {message.ImapUid}]");
+                                    return;
+                                }
+                            }
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        log.Error(ex, "Error processing APPEND command for folder {folder}", e.Folder);
+                    }
                 }
-                else
-                {
-                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Folder not supported");
-                }
+                
+                e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Folder not supported or error occurred");
             }
 
             private void Session_Search(object sender, IMAP_e_Search e)
