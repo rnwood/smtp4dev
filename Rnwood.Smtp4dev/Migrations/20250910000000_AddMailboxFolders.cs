@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace Rnwood.Smtp4dev.Migrations
 {
     /// <inheritdoc />
+    [Migration("20250910000000_AddMailboxFolders")]
     public partial class AddMailboxFolders : Migration
     {
         /// <inheritdoc />
