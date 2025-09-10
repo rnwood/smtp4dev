@@ -24,6 +24,7 @@
                         <aceeditor 
                             v-model:value="editorExpression"
                             @init="editorInit"
+                            ref="aceEditor"
                             theme="monokai"
                             lang="javascript"
                             :options="{ 
@@ -42,11 +43,7 @@
                     
                     <div class="editor-toolbar">
                         <div class="toolbar-left">
-                            <el-button size="small" @click="insertTemplate" icon="plus">Insert Template</el-button>
                             <el-button size="small" @click="validateExpression" icon="check">Validate</el-button>
-                        </div>
-                        <div class="toolbar-right">
-                            <el-button size="small" @click="showHelpPanel = !showHelpPanel" icon="question" :type="showHelpPanel ? 'primary' : ''">Help</el-button>
                         </div>
                     </div>
                     
@@ -59,7 +56,7 @@
                 </div>
                 
                 <!-- Help Panel -->
-                <div v-if="showHelpPanel" class="help-panel">
+                <div class="help-panel">
                     <div class="help-content">
                         <div class="help-section">
                             <h4>Available Variables</h4>
@@ -68,13 +65,17 @@
                                     <el-icon class="expand-icon" :class="{ expanded: variable.expanded }">
                                         <CaretRight />
                                     </el-icon>
-                                    <span class="variable-name">{{ variable.name }}</span>
+                                    <span class="variable-name clickable-item" @click.stop="insertAtCursor(variable.name)">{{ variable.name }}</span>
                                     <span class="variable-type">{{ variable.type }}</span>
                                     <span class="variable-description">{{ variable.description }}</span>
                                 </div>
                                 <div v-if="variable.expanded && variable.properties && variable.properties.length > 0" class="variable-properties">
                                     <el-table :data="variable.properties" style="width: 100%" size="small">
-                                        <el-table-column prop="name" label="Property" width="150"></el-table-column>
+                                        <el-table-column prop="name" label="Property" width="150">
+                                            <template #default="scope">
+                                                <span class="clickable-item" @click="insertAtCursor(variable.name + '.' + scope.row.name)">{{ scope.row.name }}</span>
+                                            </template>
+                                        </el-table-column>
                                         <el-table-column prop="type" label="Type" width="80"></el-table-column>
                                         <el-table-column prop="description" label="Description"></el-table-column>
                                     </el-table>
@@ -85,7 +86,11 @@
                         <div class="help-section">
                             <h4>Standard API Functions</h4>
                             <el-table :data="getStandardApiFunctions()" style="width: 100%" size="small">
-                                <el-table-column prop="name" label="Function" width="200"></el-table-column>
+                                <el-table-column prop="name" label="Function" width="200">
+                                    <template #default="scope">
+                                        <span class="clickable-item" @click="insertAtCursor(scope.row.name)">{{ scope.row.name }}</span>
+                                    </template>
+                                </el-table-column>
                                 <el-table-column prop="type" label="Returns" width="80"></el-table-column>
                                 <el-table-column prop="description" label="Description"></el-table-column>
                             </el-table>
@@ -95,7 +100,7 @@
                             <h4>Example Expressions</h4>
                             <div v-for="example in getExampleExpressions()" :key="example.title" class="example">
                                 <h5>{{ example.title }}</h5>
-                                <pre><code>{{ example.code }}</code></pre>
+                                <pre class="clickable-item" @click="insertAtCursor(example.code)"><code>{{ example.code }}</code></pre>
                                 <p>{{ example.description }}</p>
                             </div>
                         </div>
@@ -173,9 +178,9 @@ class JSExpressionEditor extends Vue {
     expressionType!: string;
     
     editorExpression: string = '';
-    showHelpPanel: boolean = false;
     validationResult: ValidationResult | null = null;
     topLevelVariables: TopLevelVariable[] = [];
+    aceEditorInstance: any = null;
     
     get dialogVisible(): boolean {
         return this.visible;
@@ -196,7 +201,6 @@ class JSExpressionEditor extends Vue {
         if (newValue) {
             this.editorExpression = this.value;
             this.validationResult = null;
-            this.showHelpPanel = false;
             this.topLevelVariables = this.buildTopLevelVariables();
         }
     }
@@ -212,6 +216,9 @@ class JSExpressionEditor extends Vue {
     }
     
     editorInit(editor: Editor) {
+        // Store reference to the editor instance
+        this.aceEditorInstance = editor;
+        
         // Configure ACE editor for JavaScript expressions
         editor.setOptions({
             enableBasicAutocompletion: true,
@@ -634,10 +641,10 @@ class JSExpressionEditor extends Vue {
         }
     }
     
-    insertTemplate() {
-        const examples = this.getExampleExpressions();
-        if (examples.length > 0) {
-            this.editorExpression = examples[0].code;
+    insertAtCursor(text: string) {
+        if (this.aceEditorInstance) {
+            this.aceEditorInstance.insert(text);
+            this.aceEditorInstance.focus();
         }
     }
     
@@ -908,6 +915,12 @@ export default toNative(JSExpressionEditor);
     border-radius: 4px;
     font-size: 11px;
     overflow-x: auto;
+    transition: background-color 0.2s ease;
+}
+
+.example pre.clickable-item:hover {
+    background: #f0f9ff;
+    border-color: #91d5ff;
 }
 
 .example p {
@@ -920,5 +933,17 @@ export default toNative(JSExpressionEditor);
     display: flex;
     justify-content: flex-end;
     gap: 12px;
+}
+
+.clickable-item {
+    cursor: pointer;
+    color: #409eff;
+    text-decoration: underline;
+    transition: color 0.2s ease;
+}
+
+.clickable-item:hover {
+    color: #66b1ff;
+    text-decoration: none;
 }
 </style>
