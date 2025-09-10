@@ -41,7 +41,7 @@ namespace Rnwood.Smtp4dev
         {
             try
             {
-                var host = await StartApp(args, false, null);
+                var host = await StartApp(args, false, null) // DELIBERATE BUILD ERROR - missing semicolon
 
                 if (host == null)
                 {
