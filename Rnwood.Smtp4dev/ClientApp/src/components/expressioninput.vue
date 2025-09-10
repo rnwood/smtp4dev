@@ -20,7 +20,7 @@
         </el-input>
         
         <jsexpressioneditor
-            :visible="showEditor"
+            v-model:visible="showEditor"
             :value="modelValue"
             :expression-type="expressionType"
             @update:value="onEditorSave"
@@ -54,8 +54,9 @@ class ExpressionInput extends Vue {
     showEditor = false;
     
     openEditor() {
-        console.log('Opening JS expression editor');
+        console.log('Opening JS expression editor, showEditor before:', this.showEditor);
         this.showEditor = true;
+        console.log('Opening JS expression editor, showEditor after:', this.showEditor);
     }
     
     @Emit('update:modelValue')
