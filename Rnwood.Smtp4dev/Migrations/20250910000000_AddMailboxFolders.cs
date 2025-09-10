@@ -12,7 +12,7 @@ namespace Rnwood.Smtp4dev.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            // Create MailboxFolders table
+            // Create MailboxFolders table first
             migrationBuilder.CreateTable(
                 name: "MailboxFolders",
                 columns: table => new
@@ -32,7 +32,13 @@ namespace Rnwood.Smtp4dev.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            // Add MailboxFolderId column to Messages table
+            // Create index for MailboxId in MailboxFolders
+            migrationBuilder.CreateIndex(
+                name: "IX_MailboxFolders_MailboxId",
+                table: "MailboxFolders",
+                column: "MailboxId");
+
+            // Add MailboxFolderId column to Messages table (nullable initially)
             migrationBuilder.AddColumn<Guid>(
                 name: "MailboxFolderId",
                 table: "Messages",
@@ -45,52 +51,14 @@ namespace Rnwood.Smtp4dev.Migrations
                 table: "Messages",
                 column: "MailboxFolderId");
 
-            // Create index for MailboxId in MailboxFolders
-            migrationBuilder.CreateIndex(
-                name: "IX_MailboxFolders_MailboxId",
-                table: "MailboxFolders",
-                column: "MailboxId");
-
-            // Add foreign key relationship for Messages to MailboxFolders
+            // Add foreign key relationship for Messages to MailboxFolders (with null handling)
             migrationBuilder.AddForeignKey(
                 name: "FK_Messages_MailboxFolders_MailboxFolderId",
                 table: "Messages",
                 column: "MailboxFolderId",
                 principalTable: "MailboxFolders",
                 principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
-
-            // Data migration: Create default folders for existing mailboxes
-            migrationBuilder.Sql(@"
-                INSERT INTO MailboxFolders (Id, Name, MailboxId)
-                SELECT 
-                    lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-' || lower(hex(randomblob(2))) || '-' || lower(hex(randomblob(2))) || '-' || lower(hex(randomblob(6))),
-                    'INBOX',
-                    Id
-                FROM Mailboxes;
-            ");
-
-            migrationBuilder.Sql(@"
-                INSERT INTO MailboxFolders (Id, Name, MailboxId)
-                SELECT 
-                    lower(hex(randomblob(4))) || '-' || lower(hex(randomblob(2))) || '-' || lower(hex(randomblob(2))) || '-' || lower(hex(randomblob(2))) || '-' || lower(hex(randomblob(6))),
-                    'Sent',
-                    Id
-                FROM Mailboxes;
-            ");
-
-            // Migrate existing messages to INBOX folders
-            migrationBuilder.Sql(@"
-                UPDATE Messages 
-                SET MailboxFolderId = (
-                    SELECT mf.Id 
-                    FROM MailboxFolders mf 
-                    WHERE mf.MailboxId = Messages.MailboxId 
-                    AND mf.Name = 'INBOX'
-                    LIMIT 1
-                )
-                WHERE MailboxId IS NOT NULL;
-            ");
+                onDelete: ReferentialAction.SetNull);
         }
 
         /// <inheritdoc />
