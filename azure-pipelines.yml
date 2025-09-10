@@ -1209,25 +1209,34 @@ stages:
                 # and encourage @copilot to access the live build data directly from Azure DevOps
                 
                 $commentBody = @"
-                @copilot The build triggered by this PR has failed. **Please access the build logs directly from Azure DevOps to investigate and fix the issues.**
+                @copilot The build triggered by this PR has failed. **Please use the Azure DevOps REST API to investigate and fix the issues.**
                 
                 **🚨 IMPORTANT: Only proceed if this is the most recent commit on your branch. If a newer commit exists, ignore this notification.**
                 
                 **Build Details:**
                 - Build ID: $buildId
-                - Build URL: $buildUrl (Click to access full build logs and details)
+                - Build URL: $buildUrl (for reference)
                 - Commit: $("$(System.PullRequest.SourceCommitId)".Substring(0, 7))
                 - Build Status: FAILED
                 
                 **Instructions for @copilot:**
                 1. **First verify this is the latest commit** - If $("$(System.PullRequest.SourceCommitId)".Substring(0, 7)) is not the most recent commit in this PR branch, ignore this notification
-                2. **Navigate to the build URL above** to access the complete Azure DevOps build logs and failure details
-                3. **Use your browser tools** to explore the failed build tasks, error messages, and full context
-                4. **Focus on the specific compilation errors, test failures, or other issues** shown in the Azure DevOps interface
-                5. **Make targeted fixes** based on the error messages you find in the build logs
-                6. Only build locally after making fixes to verify the solution
+                2. **Use Azure DevOps REST API to get build details and failures:**
+                   ```bash
+                   # Get build overview
+                   curl -s "https://dev.azure.com/rnwood/smtp4dev/_apis/build/builds/$buildId?api-version=6.0" | jq '{status: .status, result: .result, sourceVersion: .sourceVersion}'
+                   
+                   # Get failed tasks and their logs
+                   curl -s "https://dev.azure.com/rnwood/smtp4dev/_apis/build/builds/$buildId/timeline?api-version=6.0" | jq '.records[] | select(.result == "failed") | {name: .name, task: .task.name, errorCount: .errorCount, logId: .log.id}'
+                   
+                   # Get specific error details from a failed task log (replace LOG_ID)
+                   curl -s "https://dev.azure.com/rnwood/smtp4dev/_apis/build/builds/$buildId/logs/LOG_ID" | grep -i "error\|failed"
+                   ```
+                3. **Analyze the error messages** from the API responses to identify compilation errors, test failures, or other issues
+                4. **Make targeted fixes** based on the specific error messages found
+                5. **Build locally** after making fixes to verify the solution
                 
-                **Do not try to reproduce the build locally first - use the live build data from Azure DevOps for the most accurate failure information.**
+                **The Azure DevOps REST API provides comprehensive build failure information without requiring browser access.**
                 "@
                 
                 $headers = @{
