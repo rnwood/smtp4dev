@@ -1216,11 +1216,11 @@ stages:
                 **Build Details:**
                 - Build ID: $buildId
                 - Build URL: $buildUrl (Click to access full build logs and details)
-                - Commit: $(Build.SourceVersion)
+                - Commit: $("$(Build.SourceVersion)".Substring(0, 7))
                 - Build Status: FAILED
                 
                 **Instructions for @copilot:**
-                1. **First verify this is the latest commit** - If $(Build.SourceVersion) is not the most recent commit in this PR branch, ignore this notification
+                1. **First verify this is the latest commit** - If $("$(Build.SourceVersion)".Substring(0, 7)) is not the most recent commit in this PR branch, ignore this notification
                 2. **Navigate to the build URL above** to access the complete Azure DevOps build logs and failure details
                 3. **Use your browser tools** to explore the failed build tasks, error messages, and full context
                 4. **Focus on the specific compilation errors, test failures, or other issues** shown in the Azure DevOps interface
