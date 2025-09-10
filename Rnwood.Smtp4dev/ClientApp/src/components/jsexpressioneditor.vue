@@ -41,7 +41,6 @@
                         <div class="toolbar-left">
                             <el-button size="small" @click="insertTemplate" icon="plus">Insert Template</el-button>
                             <el-button size="small" @click="validateExpression" icon="check">Validate</el-button>
-                            <el-button size="small" @click="testExpression" icon="play">Test</el-button>
                         </div>
                         <div class="toolbar-right">
                             <el-button size="small" @click="showHelpPanel = !showHelpPanel" icon="question" :type="showHelpPanel ? 'primary' : ''">Help</el-button>
@@ -54,14 +53,6 @@
                         <el-icon v-else class="error-icon"><CircleClose /></el-icon>
                         <span>{{ validationResult.message }}</span>
                     </div>
-                    
-                    <!-- Test Results -->
-                    <div v-if="testResult" class="test-result">
-                        <h5>Test Result:</h5>
-                        <el-card>
-                            <pre>{{ testResult }}</pre>
-                        </el-card>
-                    </div>
                 </div>
                 
                 <!-- Help Panel -->
@@ -72,6 +63,15 @@
                             <el-table :data="getAvailableVariables()" style="width: 100%" size="small">
                                 <el-table-column prop="name" label="Variable" width="180"></el-table-column>
                                 <el-table-column prop="type" label="Type" width="80"></el-table-column>
+                                <el-table-column prop="description" label="Description"></el-table-column>
+                            </el-table>
+                        </div>
+                        
+                        <div class="help-section">
+                            <h4>Standard API Functions</h4>
+                            <el-table :data="getStandardApiFunctions()" style="width: 100%" size="small">
+                                <el-table-column prop="name" label="Function" width="200"></el-table-column>
+                                <el-table-column prop="type" label="Returns" width="80"></el-table-column>
                                 <el-table-column prop="description" label="Description"></el-table-column>
                             </el-table>
                         </div>
@@ -151,7 +151,6 @@ class JSExpressionEditor extends Vue {
     editorExpression: string = '';
     showHelpPanel: boolean = false;
     validationResult: ValidationResult | null = null;
-    testResult: string = '';
     
     get dialogVisible(): boolean {
         return this.visible;
@@ -172,7 +171,6 @@ class JSExpressionEditor extends Vue {
         if (newValue) {
             this.editorExpression = this.value;
             this.validationResult = null;
-            this.testResult = '';
             this.showHelpPanel = false;
         }
     }
@@ -251,6 +249,24 @@ class JSExpressionEditor extends Vue {
                 snippet: variable.name,
                 meta: variable.type,
                 docText: variable.description
+            });
+        });
+        
+        // Add smtp4dev specific functions
+        const smtp4devFunctions = [
+            { name: 'delay(seconds)', desc: 'Delays for specified seconds and returns true. Use -1 for infinite delay.', type: 'function' },
+            { name: 'random(min, max)', desc: 'Generates random integer from min (inclusive) to max (exclusive)', type: 'function' },
+            { name: 'error(code, message)', desc: 'Returns specific SMTP error code and message', type: 'function' },
+            { name: 'throttle(bps)', desc: 'Throttles connection speed to specified bits per second', type: 'function' },
+            { name: 'disconnect()', desc: 'Disconnects the session immediately', type: 'function' }
+        ];
+
+        smtp4devFunctions.forEach(func => {
+            completions.push({
+                caption: func.name,
+                snippet: func.name,
+                meta: func.type,
+                docText: func.desc
             });
         });
         
@@ -350,70 +366,90 @@ class JSExpressionEditor extends Vue {
         }
     }
     
+    getStandardApiFunctions(): Variable[] {
+        return [
+            { name: 'delay(seconds)', type: 'boolean', description: 'Delays for specified seconds and returns true. If seconds is -1, delay is almost infinite.' },
+            { name: 'random(minValue, maxValue)', type: 'number', description: 'Generates a random integer from minValue inclusive to maxValue exclusive.' },
+            { name: 'error(code, message)', type: 'void', description: 'Returns a specific SMTP error code and message.' },
+            { name: 'throttle(bps)', type: 'boolean', description: 'Throttles connect speed to specified bits per second. Returns true.' },
+            { name: 'disconnect()', type: 'void', description: 'Disconnects the session immediately.' }
+        ];
+    }
+    
     getExampleExpressions(): Example[] {
         switch (this.expressionType) {
             case 'credentials':
                 return [
                     {
                         title: 'Simple Username/Password Check',
-                        code: "credentials.Type == 'USERNAME_PASSWORD' && credentials.username == 'admin' && credentials.password == 'secret'",
-                        description: 'Accept only specific username and password combination'
-                    },
-                    {
-                        title: 'Multiple Valid Users',
-                        code: "credentials.Type == 'USERNAME_PASSWORD' && ['admin', 'user1', 'user2'].includes(credentials.username)",
-                        description: 'Accept multiple valid usernames with any password'
+                        code: "credentials.Type == 'USERNAME_PASSWORD' && credentials.username == 'rob' && credentials.password == 'pass'",
+                        description: 'Accept only specific username and password combination (from config file example)'
                     }
                 ];
                 
             case 'recipient':
                 return [
                     {
-                        title: 'Domain Whitelist',
-                        code: "recipient.endsWith('@example.com') || recipient.endsWith('@test.com')",
-                        description: 'Only allow recipients from specific domains'
+                        title: 'Accept Specific Recipient',
+                        code: 'recipient == "foo@bar.com"',
+                        description: 'Accepts this recipient only'
                     },
                     {
-                        title: 'Block Spam Domains',
-                        code: "!recipient.endsWith('@spam.com') && !recipient.includes('noreply')",
-                        description: 'Block specific domains and noreply addresses'
+                        title: 'Reject Specific Recipient',
+                        code: 'recipient != "foo@bar.com"',
+                        description: 'Rejects this recipient only'
                     }
                 ];
                 
             case 'message':
                 return [
                     {
-                        title: 'Subject Filter',
-                        code: "!message.subject.toLowerCase().includes('spam') && !message.subject.includes('[BULK]')",
-                        description: 'Reject messages with spam indicators in subject'
+                        title: 'Subject Content Filter',
+                        code: '!message.subject.includes("19")',
+                        description: 'Rejects messages that include "19" in the subject'
                     },
                     {
-                        title: 'Size Limit',
-                        code: "message.size < 1048576",
-                        description: 'Reject messages larger than 1MB'
+                        title: 'Conditional Response Code',
+                        code: 'message.subject.includes("19") ? 441 : null',
+                        description: 'Rejects messages that include "19" with a 441 error code, otherwise accepts'
                     }
                 ];
                 
             case 'command':
                 return [
                     {
-                        title: 'HELO Validation',
-                        code: "command.Verb == 'HELO' && command.ArgumentsText.length > 0 && !command.ArgumentsText.includes('localhost')",
-                        description: 'Require valid HELO arguments, reject localhost'
+                        title: 'HELO Command Validation',
+                        code: 'command.Verb == "HELO" && command.ArgumentsText == "rob"',
+                        description: 'Rejects "HELO rob" command'
+                    },
+                    {
+                        title: 'Custom Error Response',
+                        code: 'command.Verb == "HELO" && command.ArgumentsText == "rob" ? error(123, "Rob is not welcome here") : null',
+                        description: 'Rejects "HELO rob" with a custom error message'
                     }
                 ];
                 
             case 'relay':
                 return [
                     {
-                        title: 'Domain Rewriting',
-                        code: "recipient.replace(/@test.com$/, '@production.com')",
-                        description: 'Rewrite test domain to production domain'
+                        title: 'Subject-based Relay',
+                        code: "message.subject.includes('QP')",
+                        description: 'If message includes QP in the subject then relay to original recipient'
                     },
                     {
-                        title: 'Conditional Relay',
-                        code: "message.subject.includes('[RELAY]') ? recipient : null",
-                        description: 'Only relay messages with [RELAY] in subject'
+                        title: 'Domain Replacement',
+                        code: "recipient.replace(/@mailinator.com$/,'@smtp4dev.com')",
+                        description: 'Relay all messages to their original recipient except those to @mailinator.com, which are relayed instead to @smtp4dev.com'
+                    },
+                    {
+                        title: 'Conditional Recipient Override',
+                        code: "message.subject.includes('QP') ? 'newrecip@test.com' : null",
+                        description: 'If message includes QP in the subject then relay to newrecip@test.com, otherwise don\'t relay'
+                    },
+                    {
+                        title: 'Conditional Recipient or Original',
+                        code: "message.subject.includes('QP') ? 'newrecip@test.com' : recipient",
+                        description: 'If message includes QP in the subject then relay to newrecip@test.com, otherwise relay to original recipient'
                     }
                 ];
                 
@@ -442,79 +478,6 @@ class JSExpressionEditor extends Vue {
                 valid: false,
                 message: `Syntax error: ${error.message}`
             };
-        }
-    }
-    
-    testExpression() {
-        try {
-            // Create a test environment with sample data
-            const testData = this.getTestData();
-            const func = new Function(...Object.keys(testData), 'return ' + this.editorExpression);
-            const result = func(...Object.values(testData));
-            this.testResult = JSON.stringify(result, null, 2);
-        } catch (error: any) {
-            this.testResult = `Error: ${error.message}`;
-        }
-    }
-    
-    getTestData(): any {
-        const commonData = {
-            session: {
-                clientAddress: '127.0.0.1',
-                clientName: 'localhost',
-                id: 'test-session-123'
-            }
-        };
-        
-        switch (this.expressionType) {
-            case 'credentials':
-                return {
-                    ...commonData,
-                    credentials: {
-                        Type: 'USERNAME_PASSWORD',
-                        username: 'testuser',
-                        password: 'testpass'
-                    }
-                };
-                
-            case 'recipient':
-                return {
-                    ...commonData,
-                    recipient: 'test@example.com'
-                };
-                
-            case 'message':
-                return {
-                    ...commonData,
-                    message: {
-                        subject: 'Test Message',
-                        from: 'sender@example.com',
-                        id: 'msg-123',
-                        size: 1024
-                    }
-                };
-                
-            case 'command':
-                return {
-                    ...commonData,
-                    command: {
-                        Verb: 'HELO',
-                        ArgumentsText: 'client.example.com'
-                    }
-                };
-                
-            case 'relay':
-                return {
-                    ...commonData,
-                    recipient: 'user@test.com',
-                    message: {
-                        subject: 'Test Message',
-                        from: 'sender@example.com'
-                    }
-                };
-                
-            default:
-                return commonData;
         }
     }
     
@@ -658,23 +621,6 @@ export default toNative(JSExpressionEditor);
 
 .error-icon {
     color: #ff4d4f;
-}
-
-.test-result {
-    margin-top: 16px;
-    flex-shrink: 0;
-}
-
-.test-result h5 {
-    margin: 0 0 8px 0;
-}
-
-.test-result pre {
-    margin: 0;
-    white-space: pre-wrap;
-    word-break: break-word;
-    font-family: 'Monaco', 'Consolas', monospace;
-    font-size: 12px;
 }
 
 .help-panel {
