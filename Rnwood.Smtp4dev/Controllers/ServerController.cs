@@ -74,6 +74,14 @@ namespace Rnwood.Smtp4dev.Controllers
 
             var serverOptionsCurrentValue = serverOptions.CurrentValue;
             var relayOptionsCurrentValue = relayOptions.CurrentValue;
+            
+            // Hide relay password when settings are locked for security
+            string relayPassword = relayOptionsCurrentValue.Password;
+            if (lockedSettings.ContainsKey("relayPassword") || lockedSettings.ContainsKey("relayLogin"))
+            {
+                relayPassword = string.IsNullOrEmpty(relayOptionsCurrentValue.Password) ? "" : "***";
+            }
+            
             return new ApiModel.Server()
             {
                 IsRunning = server.IsRunning,
@@ -90,7 +98,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 RelayTlsMode = relayOptionsCurrentValue.TlsMode.ToString(),
                 RelaySmtpPort = relayOptionsCurrentValue.SmtpPort,
                 RelayLogin = relayOptionsCurrentValue.Login,
-                RelayPassword = relayOptionsCurrentValue.Password,
+                RelayPassword = relayPassword,
                 RelayAutomaticEmails = relayOptionsCurrentValue.AutomaticEmails.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray(),
                 RelaySenderAddress = relayOptionsCurrentValue.SenderAddress,
                 RelayAutomaticRelayExpression = relayOptionsCurrentValue.AutomaticRelayExpression,
