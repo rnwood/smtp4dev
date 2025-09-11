@@ -67,7 +67,6 @@ namespace Rnwood.Smtp4dev.Server
                                 if (messagesRepository == null)
                                 {
                                     log.Error("MessagesRepository service not available");
-                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Internal server error: Service unavailable");
                                     return;
                                 }
 
@@ -75,7 +74,6 @@ namespace Rnwood.Smtp4dev.Server
                                 if (dbContext == null)
                                 {
                                     log.Error("Database context not available");
-                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Internal server error: Database unavailable");
                                     return;
                                 }
                                 
@@ -86,7 +84,6 @@ namespace Rnwood.Smtp4dev.Server
                                 if (messageData.Length == 0)
                                 {
                                     log.Error("No message data received in stream");
-                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "No message data received");
                                     return;
                                 }
                                 
@@ -114,7 +111,6 @@ namespace Rnwood.Smtp4dev.Server
                                 if (mailbox == null)
                                 {
                                     log.Error("Mailbox {mailboxName} not found", mailboxName);
-                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", $"Mailbox '{mailboxName}' not found");
                                     return;
                                 }
 
@@ -122,7 +118,6 @@ namespace Rnwood.Smtp4dev.Server
                                 if (folder == null)
                                 {
                                     log.Error("Folder {folder} not found in mailbox {mailboxName}", e.Folder, mailboxName);
-                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", $"Folder '{e.Folder}' not found");
                                     return;
                                 }
 
@@ -135,7 +130,6 @@ namespace Rnwood.Smtp4dev.Server
                                 if (imapState == null)
                                 {
                                     log.Error("No IMAP state found in database");
-                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Internal server error: No IMAP state");
                                     return;
                                 }
 
@@ -145,7 +139,11 @@ namespace Rnwood.Smtp4dev.Server
                                 dbContext.Messages.Add(message);
                                 dbContext.SaveChanges();
                                 
-                                e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "OK", $"APPEND completed [APPENDUID {folder.Id.GetHashCode()} {message.ImapUid}]");
+                                // Set the APPENDUID response for MailKit compatibility  
+                                // Use folder ID as uidvalidity (ensure positive number)
+                                uint uidvalidity = (uint)Math.Abs(folder.Id.GetHashCode());
+                                e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "OK", $"[APPENDUID {uidvalidity} {message.ImapUid}] APPEND completed");
+                                log.Information("Successfully appended message to folder {folder} with UID {uid}", e.Folder, message.ImapUid);
                             }
                         }
                         catch (Exception ex)
@@ -192,6 +190,13 @@ namespace Rnwood.Smtp4dev.Server
 
             private void Session_Select(object sender, IMAP_e_Select e)
             {
+                // Only allow selection of supported folders
+                if (e.Folder != "INBOX" && e.Folder != "Sent")
+                {
+                    e.ErrorResponse = new IMAP_r_ServerStatus(e.CmdTag, "NO", $"Folder '{e.Folder}' not supported");
+                    return;
+                }
+                
                 e.Flags.Clear();
                 e.Flags.Add("\\Deleted");
                 e.Flags.Add("\\Seen");
@@ -200,7 +205,8 @@ namespace Rnwood.Smtp4dev.Server
                 e.PermanentFlags.Add("\\Deleted");
                 e.PermanentFlags.Add("\\Seen");
 
-                e.FolderUID = 1234;
+                // Use different UIDs for different folders to avoid conflicts
+                e.FolderUID = e.Folder == "INBOX" ? 1234 : 5678;
             }
 
             private void Session_Store(object sender, IMAP_e_Store e)
