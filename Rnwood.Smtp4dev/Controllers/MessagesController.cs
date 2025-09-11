@@ -517,6 +517,13 @@ namespace Rnwood.Smtp4dev.Controllers
                 dbMessage.Mailbox = mailbox;
                 dbMessage.IsUnread = true;
 
+                // Assign imported messages to INBOX folder by default
+                var inboxFolder = await dbContext.MailboxFolders.FirstOrDefaultAsync(f => f.Name == "INBOX" && f.MailboxId == mailbox.Id);
+                if (inboxFolder != null)
+                {
+                    dbMessage.MailboxFolder = inboxFolder;
+                }
+
                 // Add to database
                 dbContext.Messages.Add(dbMessage);
                 await dbContext.SaveChangesAsync();
