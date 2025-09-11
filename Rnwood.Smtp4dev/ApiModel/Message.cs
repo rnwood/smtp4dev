@@ -17,10 +17,10 @@ namespace Rnwood.Smtp4dev.ApiModel
             Data = dbMessage.Data;
             Id = dbMessage.Id;
             From = dbMessage.From;
-            To = dbMessage.To.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+            To = (dbMessage.To ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
             Cc = Array.Empty<string>();
             Bcc = Array.Empty<string>();
-            DeliveredTo = dbMessage.DeliveredTo.Split(',', StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries);
+            DeliveredTo = (dbMessage.DeliveredTo ?? "").Split(',', StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries);
             ReceivedDate = dbMessage.ReceivedDate;
             Subject = dbMessage.Subject;
             SecureConnection = dbMessage.SecureConnection;
@@ -254,6 +254,6 @@ namespace Rnwood.Smtp4dev.ApiModel
         internal byte[] Data { get; set; }
 
         [JsonIgnore]
-        string ICacheByKey.CacheKey => Id.ToString() + "v4";
+        string ICacheByKey.CacheKey => Id.ToString() + "v5";
     }
 }

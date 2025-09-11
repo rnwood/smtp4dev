@@ -16,7 +16,7 @@ namespace Rnwood.Smtp4dev.ApiModel
             AttachmentCount = dbMessage.AttachmentCount;
             IsUnread = dbMessage.IsUnread;
             IsRelayed = dbMessage.Relays.Count > 0;
-            DeliveredTo = dbMessage.DeliveredTo;
+            DeliveredTo = dbMessage.DeliveredTo ?? "";
             HasWarnings = dbMessage.HasBareLineFeed;
         }
         
@@ -51,6 +51,6 @@ namespace Rnwood.Smtp4dev.ApiModel
         public bool HasWarnings { get; set; }
 
         [JsonIgnore]
-        string ICacheByKey.CacheKey => Id.ToString() + IsUnread + IsRelayed + HasWarnings + "v4";
+        string ICacheByKey.CacheKey => Id.ToString() + IsUnread + IsRelayed + HasWarnings + "v5";
     }
 }

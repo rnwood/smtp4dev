@@ -39,7 +39,7 @@ namespace Rnwood.Smtp4dev.Controllers
         private readonly ISmtp4devServer server;
 
         /// <summary>
-        /// Returns all new messages since the provided message ID. Returns only the summary without message content.
+        /// Returns all new messages in the INBOX folder since the provided message ID. Returns only the summary without message content.
         /// </summary>
         /// <param name="lastSeenMessageId">If not specified all recently received messages will be returned up to the page limit.</param>
         /// <param name="mailboxName">Mailbox name. If not specified, defaults to the mailboxName with name 'Default'</param>
@@ -49,7 +49,7 @@ namespace Rnwood.Smtp4dev.Controllers
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(MessageSummary[]), Description = "")]
         public MessageSummary[] GetNewSummaries(Guid? lastSeenMessageId, string mailboxName = MailboxOptions.DEFAULTNAME, int pageSize = 50)
         {
-            return messagesRepository.GetMessageSummaries(mailboxName)
+            return messagesRepository.GetMessageSummaries(mailboxName, MailboxFolder.INBOX)
                 .OrderByDescending(m => m.ReceivedDate)
                 .ThenByDescending(m => m.Id)
                 .AsEnumerable()
@@ -72,21 +72,12 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <returns></returns>
         [HttpGet]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.PagedResult<MessageSummary>), Description = "")]
-        public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string mailboxName = MailboxOptions.DEFAULTNAME, string folderName = null, string sortColumn = "receivedDate",
+        public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string mailboxName = MailboxOptions.DEFAULTNAME, string folderName = MailboxFolder.INBOX, string sortColumn = "receivedDate",
             bool sortIsDescending = true, int page = 1,
             int pageSize = 5)
         {
-            IQueryable<DbModel.Projections.MessageSummaryProjection> query;
-            
-            if (!string.IsNullOrEmpty(folderName))
-            {
-                query = messagesRepository.GetMessageSummaries(mailboxName, folderName);
-            }
-            else
-            {
-                query = messagesRepository.GetMessageSummaries(mailboxName);
-            }
-            
+            IQueryable<DbModel.Projections.MessageSummaryProjection> query = messagesRepository.GetMessageSummaries(mailboxName, folderName);
+             
             query = query.OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""));
 
             if (!string.IsNullOrEmpty(searchTerms))
@@ -554,6 +545,7 @@ namespace Rnwood.Smtp4dev.Controllers
             return dbContext.MailboxFolders
                 .Where(f => f.Mailbox.Name == mailboxName)
                 .Select(f => f.Name)
+                .OrderBy(f => f == MailboxFolder.INBOX ? 0 : f == MailboxFolder.SENT ? 1 : 2).ThenBy(f => f)
                 .ToArray();
         }
     }
