@@ -58,50 +58,95 @@
                 <!-- Help Panel -->
                 <div class="help-panel">
                     <div class="help-content">
+                        <!-- Available Variables Section -->
                         <div class="help-section">
-                            <h4>Available Variables</h4>
-                            <div v-for="variable in getTopLevelVariables()" :key="variable.name" class="variable-section">
-                                <div class="variable-header" @click="toggleVariableExpansion(variable)">
-                                    <el-icon class="expand-icon" :class="{ expanded: variable.expanded }">
-                                        <CaretRight />
-                                    </el-icon>
-                                    <span class="variable-name clickable-item" @click.stop="insertAtCursor(variable.name)">{{ variable.name }}</span>
-                                    <span class="variable-type">{{ variable.type }}</span>
-                                    <span class="variable-description">{{ variable.description }}</span>
-                                </div>
-                                <div v-if="variable.expanded && variable.properties && variable.properties.length > 0" class="variable-properties">
-                                    <el-table :data="variable.properties" style="width: 100%" size="small">
-                                        <el-table-column prop="name" label="Property" width="150">
-                                            <template #default="scope">
-                                                <span class="clickable-item" @click="insertAtCursor(variable.name + '.' + scope.row.name)">{{ scope.row.name }}</span>
-                                            </template>
-                                        </el-table-column>
-                                        <el-table-column prop="type" label="Type" width="80"></el-table-column>
-                                        <el-table-column prop="description" label="Description"></el-table-column>
-                                    </el-table>
+                            <div class="section-header" @click="toggleSection('variables')">
+                                <el-icon class="expand-icon" :class="{ expanded: helpSections.variables }">
+                                    <CaretRight />
+                                </el-icon>
+                                <h4>Available Variables</h4>
+                            </div>
+                            <div v-if="helpSections.variables" class="section-content">
+                                <div v-for="variable in getTopLevelVariables()" :key="variable.name" class="variable-section">
+                                    <div class="variable-header" @click="toggleVariableExpansion(variable)">
+                                        <el-icon class="expand-icon" :class="{ expanded: variable.expanded }">
+                                            <CaretRight />
+                                        </el-icon>
+                                        <span class="variable-name clickable-item" @click.stop="insertAtCursor(variable.name)">{{ variable.name }}</span>
+                                        <span class="variable-type">{{ variable.type }}</span>
+                                        <span class="variable-description">{{ variable.description }}</span>
+                                    </div>
+                                    <div v-if="variable.expanded && variable.properties && variable.properties.length > 0" class="variable-properties">
+                                        <el-table :data="variable.properties" style="width: 100%" size="small">
+                                            <el-table-column prop="name" label="Property" width="150">
+                                                <template #default="scope">
+                                                    <span class="clickable-item" @click="insertAtCursor(variable.name + '.' + scope.row.name)">{{ scope.row.name }}</span>
+                                                </template>
+                                            </el-table-column>
+                                            <el-table-column prop="type" label="Type" width="80"></el-table-column>
+                                            <el-table-column prop="description" label="Description"></el-table-column>
+                                        </el-table>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         
+                        <!-- Standard API Functions Section -->
                         <div class="help-section">
-                            <h4>Standard API Functions</h4>
-                            <el-table :data="getStandardApiFunctions()" style="width: 100%" size="small">
-                                <el-table-column prop="name" label="Function" width="200">
-                                    <template #default="scope">
-                                        <span class="clickable-item" @click="insertAtCursor(scope.row.name)">{{ scope.row.name }}</span>
-                                    </template>
-                                </el-table-column>
-                                <el-table-column prop="type" label="Returns" width="80"></el-table-column>
-                                <el-table-column prop="description" label="Description"></el-table-column>
-                            </el-table>
+                            <div class="section-header" @click="toggleSection('functions')">
+                                <el-icon class="expand-icon" :class="{ expanded: helpSections.functions }">
+                                    <CaretRight />
+                                </el-icon>
+                                <h4>Standard API Functions</h4>
+                            </div>
+                            <div v-if="helpSections.functions" class="section-content">
+                                <el-table :data="getStandardApiFunctions()" style="width: 100%" size="small">
+                                    <el-table-column prop="name" label="Function" width="200">
+                                        <template #default="scope">
+                                            <span class="clickable-item" @click="insertAtCursor(scope.row.name)">{{ scope.row.name }}</span>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column prop="type" label="Returns" width="80"></el-table-column>
+                                    <el-table-column prop="description" label="Description"></el-table-column>
+                                </el-table>
+                            </div>
                         </div>
                         
+                        <!-- JavaScript Operators Section -->
                         <div class="help-section">
-                            <h4>Example Expressions</h4>
-                            <div v-for="example in getExampleExpressions()" :key="example.title" class="example">
-                                <h5>{{ example.title }}</h5>
-                                <pre class="clickable-item" @click="insertAtCursor(example.code)"><code>{{ example.code }}</code></pre>
-                                <p>{{ example.description }}</p>
+                            <div class="section-header" @click="toggleSection('operators')">
+                                <el-icon class="expand-icon" :class="{ expanded: helpSections.operators }">
+                                    <CaretRight />
+                                </el-icon>
+                                <h4>JavaScript Operators</h4>
+                            </div>
+                            <div v-if="helpSections.operators" class="section-content">
+                                <el-table :data="getJavaScriptOperators()" style="width: 100%" size="small">
+                                    <el-table-column prop="operator" label="Operator" width="80">
+                                        <template #default="scope">
+                                            <span class="clickable-item operator-text" @click="insertAtCursor(scope.row.operator)">{{ scope.row.operator }}</span>
+                                        </template>
+                                    </el-table-column>
+                                    <el-table-column prop="name" label="Name" width="120"></el-table-column>
+                                    <el-table-column prop="description" label="Description"></el-table-column>
+                                </el-table>
+                            </div>
+                        </div>
+                        
+                        <!-- Example Expressions Section -->
+                        <div class="help-section">
+                            <div class="section-header" @click="toggleSection('examples')">
+                                <el-icon class="expand-icon" :class="{ expanded: helpSections.examples }">
+                                    <CaretRight />
+                                </el-icon>
+                                <h4>Example Expressions</h4>
+                            </div>
+                            <div v-if="helpSections.examples" class="section-content">
+                                <div v-for="example in getExampleExpressions()" :key="example.title" class="example">
+                                    <h5>{{ example.title }}</h5>
+                                    <pre class="clickable-item" @click="insertAtCursor(example.code)"><code>{{ example.code }}</code></pre>
+                                    <p>{{ example.description }}</p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -181,6 +226,12 @@ class JSExpressionEditor extends Vue {
     validationResult: ValidationResult | null = null;
     topLevelVariables: TopLevelVariable[] = [];
     aceEditorInstance: any = null;
+    helpSections = {
+        variables: false,
+        functions: false,
+        operators: false,
+        examples: false
+    };
     
     get dialogVisible(): boolean {
         return this.visible;
@@ -476,6 +527,10 @@ class JSExpressionEditor extends Vue {
         variable.expanded = !variable.expanded;
     }
     
+    toggleSection(sectionName: keyof typeof this.helpSections) {
+        this.helpSections[sectionName] = !this.helpSections[sectionName];
+    }
+    
     getExpressionTypeTitle(type: string): string {
         switch (type) {
             case 'credentials': return 'Credentials Validation';
@@ -556,6 +611,28 @@ class JSExpressionEditor extends Vue {
             { name: 'error(code, message)', type: 'void', description: 'Returns a specific SMTP error code and message.' },
             { name: 'throttle(bps)', type: 'boolean', description: 'Throttles connect speed to specified bits per second. Returns true.' },
             { name: 'disconnect()', type: 'void', description: 'Disconnects the session immediately.' }
+        ];
+    }
+    
+    getJavaScriptOperators() {
+        return [
+            { operator: '==', name: 'Equal', description: 'Compares two values for equality' },
+            { operator: '!=', name: 'Not Equal', description: 'Compares two values for inequality' },
+            { operator: '===', name: 'Strict Equal', description: 'Compares two values for strict equality (type and value)' },
+            { operator: '!==', name: 'Strict Not Equal', description: 'Compares two values for strict inequality' },
+            { operator: '<', name: 'Less Than', description: 'Checks if left value is less than right value' },
+            { operator: '>', name: 'Greater Than', description: 'Checks if left value is greater than right value' },
+            { operator: '<=', name: 'Less/Equal', description: 'Checks if left value is less than or equal to right value' },
+            { operator: '>=', name: 'Greater/Equal', description: 'Checks if left value is greater than or equal to right value' },
+            { operator: '&&', name: 'Logical AND', description: 'Returns true if both operands are true' },
+            { operator: '||', name: 'Logical OR', description: 'Returns true if either operand is true' },
+            { operator: '!', name: 'Logical NOT', description: 'Returns the opposite boolean value' },
+            { operator: '+', name: 'Addition', description: 'Adds two numbers or concatenates strings' },
+            { operator: '-', name: 'Subtraction', description: 'Subtracts the right operand from the left operand' },
+            { operator: '*', name: 'Multiplication', description: 'Multiplies two numbers' },
+            { operator: '/', name: 'Division', description: 'Divides the left operand by the right operand' },
+            { operator: '%', name: 'Modulo', description: 'Returns the remainder of a division operation' },
+            { operator: '?:', name: 'Ternary', description: 'Conditional operator: condition ? valueIfTrue : valueIfFalse' }
         ];
     }
     
@@ -811,21 +888,47 @@ export default toNative(JSExpressionEditor);
     border-left: 1px solid #ebeef5;
     padding-left: 20px;
     flex-shrink: 0;
-    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .help-content {
-    height: 100%;
+    flex: 1;
+    overflow-y: auto;
+    padding-right: 8px;
 }
 
 .help-section {
-    margin-bottom: 24px;
+    margin-bottom: 16px;
 }
 
-.help-section h4 {
-    margin: 0 0 12px 0;
+.section-header {
+    display: flex;
+    align-items: center;
+    padding: 8px 0;
+    cursor: pointer;
+    gap: 8px;
+    border-bottom: 1px solid #ebeef5;
+    margin-bottom: 12px;
+}
+
+.section-header:hover {
+    background: #f8f9fa;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    padding: 8px 12px;
+}
+
+.section-header h4 {
+    margin: 0;
     color: #303133;
     font-size: 14px;
+    font-weight: 600;
+}
+
+.section-content {
+    margin-bottom: 12px;
 }
 
 .variable-section {
@@ -945,5 +1048,14 @@ export default toNative(JSExpressionEditor);
 .clickable-item:hover {
     color: #66b1ff;
     text-decoration: none;
+}
+
+.operator-text {
+    font-family: 'Monaco', 'Consolas', 'Courier New', monospace;
+    font-weight: bold;
+    background: #f0f9ff;
+    padding: 2px 6px;
+    border-radius: 3px;
+    border: 1px solid #91d5ff;
 }
 </style>
