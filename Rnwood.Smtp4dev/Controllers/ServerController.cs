@@ -82,6 +82,18 @@ namespace Rnwood.Smtp4dev.Controllers
                 relayPassword = string.IsNullOrEmpty(relayOptionsCurrentValue.Password) ? "" : "***";
             }
             
+            // Hide user passwords when settings are locked for security
+            UserOptions[] users = serverOptionsCurrentValue.Users;
+            if (lockedSettings.ContainsKey("users"))
+            {
+                users = serverOptionsCurrentValue.Users?.Select(u => new UserOptions
+                {
+                    Username = u.Username,
+                    Password = string.IsNullOrEmpty(u.Password) ? "" : "***",
+                    DefaultMailbox = u.DefaultMailbox
+                }).ToArray();
+            }
+            
             return new ApiModel.Server()
             {
                 IsRunning = server.IsRunning,
@@ -115,7 +127,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 DisableIPv6 = serverOptionsCurrentValue.DisableIPv6,
                 WebAuthenticationRequired = serverOptionsCurrentValue.WebAuthenticationRequired,
                 DeliverMessagesToUsersDefaultMailbox = serverOptionsCurrentValue.DeliverMessagesToUsersDefaultMailbox,
-                Users = serverOptionsCurrentValue.Users,
+                Users = users,
                 Mailboxes = serverOptionsCurrentValue.Mailboxes,
                 DesktopMinimiseToTrayIcon = desktopOptions.CurrentValue.MinimiseToTrayIcon,
                 IsDesktopApp = cmdLineOptions.IsDesktopApp,
@@ -279,7 +291,35 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.CommandValidationExpression = serverUpdate.CommandValidationExpression != defaultSettingsFile.ServerOptions.CommandValidationExpression ? serverUpdate.CommandValidationExpression : null;
             newSettings.MessageValidationExpression = serverUpdate.MessageValidationExpression != defaultSettingsFile.ServerOptions.MessageValidationExpression ? serverUpdate.MessageValidationExpression : null;
             newSettings.DisableIPv6 = serverUpdate.DisableIPv6 != defaultSettingsFile.ServerOptions.DisableIPv6 ? serverUpdate.DisableIPv6 : null;
-            newSettings.Users = serverUpdate.Users != defaultSettingsFile.ServerOptions.Users ? serverUpdate.Users : null;
+            
+            // Handle users - preserve passwords if placeholder values are submitted
+            if (serverUpdate.Users != null && serverUpdate.Users.Any(u => u.Password == "***"))
+            {
+                // Some users have placeholder passwords, need to preserve original passwords
+                var originalUsers = defaultSettingsFile.ServerOptions.Users ?? new UserOptions[0];
+                var updatedUsers = serverUpdate.Users.Select(updatedUser =>
+                {
+                    if (updatedUser.Password == "***")
+                    {
+                        // Find the corresponding original user and preserve their password
+                        var originalUser = originalUsers.FirstOrDefault(u => u.Username == updatedUser.Username);
+                        return new UserOptions
+                        {
+                            Username = updatedUser.Username,
+                            Password = originalUser?.Password ?? "",
+                            DefaultMailbox = updatedUser.DefaultMailbox
+                        };
+                    }
+                    return updatedUser;
+                }).ToArray();
+                
+                newSettings.Users = !updatedUsers.SequenceEqual(defaultSettingsFile.ServerOptions.Users ?? new UserOptions[0]) ? updatedUsers : null;
+            }
+            else
+            {
+                newSettings.Users = serverUpdate.Users != defaultSettingsFile.ServerOptions.Users ? serverUpdate.Users : null;
+            }
+            
             newSettings.Mailboxes = serverUpdate.Mailboxes != defaultSettingsFile.ServerOptions.Mailboxes ? serverUpdate.Mailboxes : null;
             newSettings.WebAuthenticationRequired = serverUpdate.WebAuthenticationRequired != defaultSettingsFile.ServerOptions.WebAuthenticationRequired ? serverUpdate.WebAuthenticationRequired : null;
             newSettings.DeliverMessagesToUsersDefaultMailbox = serverUpdate.DeliverMessagesToUsersDefaultMailbox != defaultSettingsFile.ServerOptions.DeliverMessagesToUsersDefaultMailbox ? serverUpdate.DeliverMessagesToUsersDefaultMailbox : null;
@@ -295,7 +335,18 @@ namespace Rnwood.Smtp4dev.Controllers
             newRelaySettings.TlsMode = Enum.Parse<SecureSocketOptions>(serverUpdate.RelayTlsMode) != defaultSettingsFile.RelayOptions.TlsMode ? Enum.Parse<SecureSocketOptions>(serverUpdate.RelayTlsMode) : null;
             newRelaySettings.SenderAddress = serverUpdate.RelaySenderAddress != defaultSettingsFile.RelayOptions.SenderAddress ? serverUpdate.RelaySenderAddress : null;
             newRelaySettings.Login = serverUpdate.RelayLogin != defaultSettingsFile.RelayOptions.Login ? serverUpdate.RelayLogin : null;
-            newRelaySettings.Password = serverUpdate.RelayPassword != defaultSettingsFile.RelayOptions.Password ? serverUpdate.RelayPassword : null;
+            
+            // Handle relay password - don't update if placeholder value is submitted
+            if (serverUpdate.RelayPassword == "***")
+            {
+                // Placeholder value submitted, preserve current password (don't change it)
+                newRelaySettings.Password = null;
+            }
+            else
+            {
+                newRelaySettings.Password = serverUpdate.RelayPassword != defaultSettingsFile.RelayOptions.Password ? serverUpdate.RelayPassword : null;
+            }
+            
             newRelaySettings.AutomaticEmails = serverUpdate.RelayAutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() != defaultSettingsFile.RelayOptions.AutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() ? serverUpdate.RelayAutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() : null;
             newRelaySettings.AutomaticRelayExpression = serverUpdate.RelayAutomaticRelayExpression != defaultSettingsFile.RelayOptions.AutomaticRelayExpression ? serverUpdate.RelayAutomaticRelayExpression : null;
 
