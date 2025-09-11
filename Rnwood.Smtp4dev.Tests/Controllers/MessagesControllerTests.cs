@@ -106,14 +106,32 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
         private static async Task<DbModel.Message> GetTestMessage(string subject, string from = "from@from.com", string to = "to@to.com")
         {
+            return await GetTestMessageWithExtras(subject, from, to, null, null, null, null);
+        }
+
+        private static async Task<DbModel.Message> GetTestMessageWithExtras(string subject, string from = "from@from.com", string to = "to@to.com", 
+            string cc = null, string htmlBody = null, string textBody = null, string attachmentFileName = null)
+        {
             MimeMessage mimeMessage = new MimeMessage();
             mimeMessage.From.Add(InternetAddress.Parse(from));
             mimeMessage.To.Add(InternetAddress.Parse(to));
+            
+            if (!string.IsNullOrEmpty(cc))
+            {
+                mimeMessage.Cc.Add(InternetAddress.Parse(cc));
+            }
 
             mimeMessage.Subject = subject;
             BodyBuilder bodyBuilder = new BodyBuilder();
-            bodyBuilder.HtmlBody = "<html>Hi</html>";
-            bodyBuilder.TextBody = "Hi";
+            bodyBuilder.HtmlBody = htmlBody ?? "<html>Hi</html>";
+            bodyBuilder.TextBody = textBody ?? "Hi";
+
+            if (!string.IsNullOrEmpty(attachmentFileName))
+            {
+                bodyBuilder.Attachments.Add(attachmentFileName, 
+                    new MemoryStream(System.Text.Encoding.UTF8.GetBytes("Test attachment content")), 
+                    new ContentType("text", "plain"));
+            }
 
             mimeMessage.Body = bodyBuilder.ToMessageBody();
 
@@ -172,7 +190,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1, testMessage2, testMessage3);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
-            var result = messagesController.GetSummaries(null);
+            var result = await messagesController.GetSummaries(null);
             result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage1.Id, testMessage2.Id, testMessage3.Id });
         }
 
@@ -190,8 +208,62 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             await messagesRepository.DbContext.SaveChangesAsync();
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
-            var result = messagesController.GetSummaries("sUbJect2");
+            var result = await messagesController.GetSummaries("sUbJect2");
             result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage2.Id });
+        }
+
+        [Fact]
+        public async Task GetSummaries_SearchInCC_MatchingMessagesReturned()
+        {
+            DbModel.Message testMessage1 = await GetTestMessageWithExtras("Subject1", cc: "ccuser@example.com");
+            DbModel.Message testMessage2 = await GetTestMessageWithExtras("Subject2", cc: "anothercc@example.com");
+            DbModel.Message testMessage3 = await GetTestMessage("Subject3");
+            var sqlLiteForTesting = new SqliteInMemory();
+            var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
+            MessagesRepository messagesRepository =
+                new MessagesRepository(Substitute.For<ITaskQueue>(), Substitute.For<NotificationsHub>(), context);
+            messagesRepository.DbContext.Messages.AddRange(testMessage1, testMessage2, testMessage3);
+            await messagesRepository.DbContext.SaveChangesAsync();
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+
+            var result = await messagesController.GetSummaries("ccuser");
+            result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage1.Id });
+        }
+
+        [Fact]
+        public async Task GetSummaries_SearchInBodyContent_MatchingMessagesReturned()
+        {
+            DbModel.Message testMessage1 = await GetTestMessageWithExtras("Subject1", htmlBody: "<html>Unique search content here</html>", textBody: "Plain text");
+            DbModel.Message testMessage2 = await GetTestMessageWithExtras("Subject2", htmlBody: "<html>Different content</html>", textBody: "Also different");
+            DbModel.Message testMessage3 = await GetTestMessageWithExtras("Subject3", htmlBody: "<html>Normal</html>", textBody: "Unique search content here in plain text");
+            var sqlLiteForTesting = new SqliteInMemory();
+            var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
+            MessagesRepository messagesRepository =
+                new MessagesRepository(Substitute.For<ITaskQueue>(), Substitute.For<NotificationsHub>(), context);
+            messagesRepository.DbContext.Messages.AddRange(testMessage1, testMessage2, testMessage3);
+            await messagesRepository.DbContext.SaveChangesAsync();
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+
+            var result = await messagesController.GetSummaries("Unique search content");
+            result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage1.Id, testMessage3.Id });
+        }
+
+        [Fact]
+        public async Task GetSummaries_SearchInAttachmentFilenames_MatchingMessagesReturned()
+        {
+            DbModel.Message testMessage1 = await GetTestMessageWithExtras("Subject1", attachmentFileName: "important-document.pdf");
+            DbModel.Message testMessage2 = await GetTestMessageWithExtras("Subject2", attachmentFileName: "regular-file.txt");
+            DbModel.Message testMessage3 = await GetTestMessage("Subject3");
+            var sqlLiteForTesting = new SqliteInMemory();
+            var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
+            MessagesRepository messagesRepository =
+                new MessagesRepository(Substitute.For<ITaskQueue>(), Substitute.For<NotificationsHub>(), context);
+            messagesRepository.DbContext.Messages.AddRange(testMessage1, testMessage2, testMessage3);
+            await messagesRepository.DbContext.SaveChangesAsync();
+            MessagesController messagesController = new MessagesController(messagesRepository, null);
+
+            var result = await messagesController.GetSummaries("important-document");
+            result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage1.Id });
         }
 
         [Fact]
