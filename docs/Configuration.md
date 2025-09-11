@@ -58,9 +58,23 @@ smtp4dev supports multiple virtual mailboxes to organize incoming messages. This
 1. **Processing Order**: Mailboxes are processed in the order they appear in the configuration
 2. **First Match Wins**: Each recipient is matched against mailbox recipient patterns, and the first match determines the destination
 3. **Default Mailbox**: A default mailbox with `Recipients="*"` (catch-all) is automatically added as the last mailbox
-4. **Single Delivery**: Each message is delivered only once to each mailbox, even if multiple recipients match the same mailbox
+4. **Single Delivery**: Each message is delivered only once to each mailbox
+5. **No Duplication**: Due to "first match wins" logic, messages go to exactly one mailbox per recipient
 
-### Basic Mailbox Configuration
+### Recipient Pattern Syntax
+
+**Wildcards** (recommended for simple patterns):
+- `*@example.com` - Any user at example.com
+- `user@*` - Specific user at any domain  
+- `*sales*@*` - Any address containing "sales"
+
+**Regular Expressions** (for complex patterns, surround with `/`):
+- `/.*@(sales|marketing)\.com$/` - Addresses ending with @sales.com or @marketing.com
+- `/^(admin|root)@.*$/` - Addresses starting with admin@ or root@
+
+### Common Mailbox Scenarios
+
+#### Example: Department-Based Routing
 
 ```json
 {
@@ -79,24 +93,12 @@ smtp4dev supports multiple virtual mailboxes to organize incoming messages. This
 }
 ```
 
-### Recipient Pattern Syntax
+With this configuration:
+- `john@sales.example.com` → **Sales** mailbox only
+- `support@company.com` → **Support** mailbox only  
+- `admin@company.com` → **Default** mailbox only (no custom match)
 
-**Wildcards** (recommended for simple patterns):
-- `*@example.com` - Any user at example.com
-- `user@*` - Specific user at any domain  
-- `*sales*@*` - Any address containing "sales"
-
-**Regular Expressions** (for complex patterns, surround with `/`):
-- `/.*@(sales|marketing)\.com$/` - Addresses ending with @sales.com or @marketing.com
-- `/^(admin|root)@.*$/` - Addresses starting with admin@ or root@
-
-### Preventing Default Mailbox Message Duplication
-
-**Problem**: By default, messages matching custom mailboxes also appear in the default mailbox because it uses a catch-all pattern (`*`).
-
-**Solution**: Configure the default mailbox explicitly with a negative regex to exclude recipients that should only go to specific mailboxes.
-
-#### Example: Excluding Spam from Default Mailbox
+#### Example: Spam Filtering
 
 ```json
 {
@@ -105,52 +107,45 @@ smtp4dev supports multiple virtual mailboxes to organize incoming messages. This
       {
         "Name": "Spam",
         "Recipients": "*spam*@*, *test*@*, *junk*@*"
-      },
-      {
-        "Name": "Default", 
-        "Recipients": "/^(?!.*(spam|test|junk)).*$/"
       }
     ]
   }
 }
 ```
 
-The negative regex `/^(?!.*(spam|test|junk)).*$/` means:
-- `^` - Start of string
-- `(?!.*(spam|test|junk))` - Negative lookahead: not containing spam, test, or junk
-- `.*` - Match any characters
-- `$` - End of string
+With this configuration:
+- `spam-user@example.com` → **Spam** mailbox only
+- `test@company.com` → **Spam** mailbox only
+- `regular@company.com` → **Default** mailbox only
 
-#### Example: Department-Based Routing
+### Advanced Configuration
+
+#### Custom Default Mailbox (Optional)
+
+If you want to customize the default mailbox behavior, you can explicitly configure it:
 
 ```json
 {
   "ServerOptions": {
     "Mailboxes": [
       {
-        "Name": "Sales",
-        "Recipients": "*@sales.company.com, sales@*"
-      },
-      {
-        "Name": "Support",
-        "Recipients": "*@support.company.com, support@*, help@*"
-      },
-      {
-        "Name": "Development", 
-        "Recipients": "*@dev.company.com, dev@*, developers@*"
+        "Name": "Alerts",
+        "Recipients": "*alert*@*, *notification*@*"
       },
       {
         "Name": "Default",
-        "Recipients": "/^(?!.*@(sales|support|dev)\\.company\\.com)(?!.*(sales|support|help|dev|developers)@).*$/"
+        "Recipients": "*"
       }
     ]
   }
 }
 ```
 
-### Advanced Configuration Tips
+**Note**: Explicitly configuring the default mailbox is typically unnecessary since it's automatically added with the same pattern (`*`).
 
-1. **Testing Patterns**: Use the SMTP sessions view in the web interface to see how recipients are being matched
+### Important Notes
+
+1. **No Message Duplication**: Due to "first match wins" logic, each recipient goes to exactly one mailbox
 
 2. **Case Sensitivity**: All pattern matching is case-insensitive
 
@@ -162,8 +157,8 @@ The negative regex `/^(?!.*(spam|test|junk)).*$/` means:
 
 ### Troubleshooting
 
-**Messages appear in multiple mailboxes**: Check if your default mailbox has a catch-all pattern. Use negative regex to exclude specific patterns.
-
-**Messages not appearing in expected mailbox**: Verify the order of mailboxes - earlier mailboxes take precedence over later ones.
+**Messages not appearing in expected mailbox**: Verify the order of mailboxes - earlier mailboxes take precedence over later ones due to "first match wins" logic.
 
 **Regex not working**: Ensure the pattern is surrounded by forward slashes (`/pattern/`) and test the regex with an online regex tester.
+
+**Want messages in multiple mailboxes**: This is not supported due to "first match wins" logic. Consider using a single mailbox with multiple recipient patterns instead.
