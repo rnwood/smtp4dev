@@ -62,7 +62,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <summary>
         /// Returns a list of message summaries including basic details but not the content.
         /// </summary>
-        /// <param name="searchTerms">Case insensitive term to search for in subject,from,to</param>
+        /// <param name="searchTerms">Case insensitive term to search for in subject, from, to, cc, body content, and attachment filenames</param>
         /// <param name="mailboxName">Mailbox name. If not specified, defaults to the mailboxName with name 'Default'</param>
         /// <param name="folderName">Folder name (INBOX, Sent). If not specified, returns all messages in mailbox</param>
         /// <param name="sortColumn">Property name from response type to sort by</param>
@@ -72,7 +72,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <returns></returns>
         [HttpGet]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.PagedResult<MessageSummary>), Description = "")]
-        public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string mailboxName = MailboxOptions.DEFAULTNAME, string folderName = MailboxFolder.INBOX, string sortColumn = "receivedDate",
+        public async Task<ApiModel.PagedResult<MessageSummary>> GetSummaries(string searchTerms, string mailboxName = MailboxOptions.DEFAULTNAME, string sortColumn = "receivedDate",
             bool sortIsDescending = true, int page = 1,
             int pageSize = 5)
         {
@@ -83,15 +83,178 @@ namespace Rnwood.Smtp4dev.Controllers
             if (!string.IsNullOrEmpty(searchTerms))
             {
                 var searchTermsLower = searchTerms.ToLower();
-                query = query.Where(m => m.Subject.ToLower().Contains(searchTermsLower)
-                                         || m.From.ToLower().Contains(searchTermsLower)
-                                         || m.To.ToLower().Contains(searchTermsLower)
-                );
+                
+                // First, get basic field matches from database
+                var basicFieldQuery = query.Where(m => m.Subject.ToLower().Contains(searchTermsLower)
+                                                         || m.From.ToLower().Contains(searchTermsLower)
+                                                         || m.To.ToLower().Contains(searchTermsLower));
+
+                // Try to execute the basic query to get results
+                List<DbModel.Projections.MessageSummaryProjection> basicMatches;
+                try
+                {
+                    basicMatches = await basicFieldQuery.ToListAsync();
+                }
+                catch (InvalidOperationException)
+                {
+                    // Fall back to synchronous execution for in-memory queries (like in tests)
+                    basicMatches = basicFieldQuery.ToList();
+                }
+
+                var basicMatchIds = basicMatches.Select(m => m.Id).ToHashSet();
+
+                // For extended search (CC, body, attachments), we need to check full messages
+                // To limit performance impact, we'll only search in recent messages (configurable limit)
+                const int maxMessagesToSearchForExtended = 1000; // Configurable limit to prevent performance issues
+                
+                List<DbModel.Message> recentMessages;
+                try
+                {
+                    recentMessages = await messagesRepository.GetMessages(mailboxName)
+                        .OrderByDescending(m => m.ReceivedDate)
+                        .Take(maxMessagesToSearchForExtended)
+                        .ToListAsync();
+                }
+                catch (InvalidOperationException)
+                {
+                    // Fall back to synchronous execution for in-memory queries (like in tests)
+                    recentMessages = messagesRepository.GetMessages(mailboxName)
+                        .OrderByDescending(m => m.ReceivedDate)
+                        .Take(maxMessagesToSearchForExtended)
+                        .ToList();
+                }
+
+                var extendedMatches = new List<DbModel.Projections.MessageSummaryProjection>();
+
+                foreach (var dbMessage in recentMessages)
+                {
+                    // Skip messages that already matched basic fields
+                    if (basicMatchIds.Contains(dbMessage.Id))
+                        continue;
+
+                    if (MessageMatchesExtendedSearch(dbMessage, searchTermsLower))
+                    {
+                        extendedMatches.Add(new DbModel.Projections.MessageSummaryProjection
+                        {
+                            Id = dbMessage.Id,
+                            From = dbMessage.From,
+                            To = dbMessage.To,
+                            Subject = dbMessage.Subject,
+                            ReceivedDate = dbMessage.ReceivedDate,
+                            AttachmentCount = dbMessage.AttachmentCount,
+                            DeliveredTo = dbMessage.DeliveredTo,
+                            IsRelayed = dbMessage.Relays.Count > 0,
+                            IsUnread = dbMessage.IsUnread,
+                            HasBareLineFeed = dbMessage.HasBareLineFeed
+                        });
+                    }
+                }
+
+                // Combine results
+                var allMatches = basicMatches.Concat(extendedMatches).ToList();
+                
+                // Sort the combined results
+                var sortedMatches = sortColumn.ToLower() switch
+                {
+                    "receiveddate" => sortIsDescending 
+                        ? allMatches.OrderByDescending(m => m.ReceivedDate).ToList()
+                        : allMatches.OrderBy(m => m.ReceivedDate).ToList(),
+                    "subject" => sortIsDescending 
+                        ? allMatches.OrderByDescending(m => m.Subject).ToList()
+                        : allMatches.OrderBy(m => m.Subject).ToList(),
+                    "from" => sortIsDescending 
+                        ? allMatches.OrderByDescending(m => m.From).ToList()
+                        : allMatches.OrderBy(m => m.From).ToList(),
+                    "to" => sortIsDescending 
+                        ? allMatches.OrderByDescending(m => m.To).ToList()
+                        : allMatches.OrderBy(m => m.To).ToList(),
+                    _ => sortIsDescending 
+                        ? allMatches.OrderByDescending(m => m.ReceivedDate).ToList()
+                        : allMatches.OrderBy(m => m.ReceivedDate).ToList()
+                };
+
+                // Apply pagination
+                var skip = (page - 1) * pageSize;
+                var pagedResults = sortedMatches.Skip(skip).Take(pageSize)
+                    .Select(m => new MessageSummary(m))
+                    .ToList();
+
+                return new ApiModel.PagedResult<MessageSummary>
+                {
+                    Results = pagedResults,
+                    CurrentPage = page,
+                    PageSize = pageSize,
+                    RowCount = sortedMatches.Count,
+                    PageCount = (int)Math.Ceiling((double)sortedMatches.Count / pageSize)
+                };
             }
 
             return query
                 .Select(m => new MessageSummary(m))
                 .GetPaged(page, pageSize);
+        }
+
+        /// <summary>
+        /// Checks if a message matches search terms in extended fields (CC, body content, attachment filenames)
+        /// </summary>
+        /// <param name="dbMessage">The database message to search</param>
+        /// <param name="searchTermsLower">The search terms in lowercase</param>
+        /// <returns>True if the message matches the search terms in extended fields</returns>
+        private bool MessageMatchesExtendedSearch(DbModel.Message dbMessage, string searchTermsLower)
+        {
+            try
+            {
+                // Skip messages with parse errors
+                if (dbMessage.MimeParseError != null)
+                {
+                    return false;
+                }
+
+                using var stream = new MemoryStream(dbMessage.Data);
+                var mimeMessage = MimeMessage.Load(stream);
+
+                // Search in CC field
+                if (mimeMessage.Cc != null)
+                {
+                    foreach (var cc in mimeMessage.Cc)
+                    {
+                        if (cc.ToString().ToLower().Contains(searchTermsLower))
+                        {
+                            return true;
+                        }
+                    }
+                }
+
+                // Search in body content (both HTML and plain text)
+                var htmlBody = mimeMessage.HtmlBody;
+                if (!string.IsNullOrEmpty(htmlBody) && htmlBody.ToLower().Contains(searchTermsLower))
+                {
+                    return true;
+                }
+
+                var textBody = mimeMessage.TextBody;
+                if (!string.IsNullOrEmpty(textBody) && textBody.ToLower().Contains(searchTermsLower))
+                {
+                    return true;
+                }
+
+                // Search in attachment filenames
+                foreach (var attachment in mimeMessage.Attachments)
+                {
+                    var fileName = attachment.ContentDisposition?.FileName ?? attachment.ContentType?.Name;
+                    if (!string.IsNullOrEmpty(fileName) && fileName.ToLower().Contains(searchTermsLower))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+            catch (Exception)
+            {
+                // If we can't parse the message, skip it
+                return false;
+            }
         }
 
         private async Task<Message> GetDbMessage(Guid id, bool tracked)
