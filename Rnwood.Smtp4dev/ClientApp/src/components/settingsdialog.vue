@@ -151,38 +151,52 @@
                             <el-switch v-model="server.smtpAllowAnyCredentials" :disabled="server.lockedSettings.smtpAllowAnyCredentials" />
                         </el-form-item>
 
-                        <el-form-item label="Credentials validation expression (see comments in appsettings.json)" prop="server.credentialsValidationExpression">
-
-                            <el-input v-model="server.credentialsValidationExpression" :disabled="server.lockedSettings.credentialsValidationExpression">
+                        <el-form-item label="Credentials validation expression" prop="server.credentialsValidationExpression">
+                            <expressioninput 
+                                v-model="server.credentialsValidationExpression" 
+                                expression-type="credentials"
+                                placeholder="Enter JavaScript expression to validate credentials..."
+                                :disabled="server.lockedSettings.credentialsValidationExpression">
                                 <template #prefix>
                                     <el-icon v-if="server.lockedSettings.credentialsValidationExpression" :title="`Locked: ${server.lockedSettings.credentialsValidationExpression}`"><Lock /></el-icon>
                                 </template>
-                            </el-input>
+                            </expressioninput>
                         </el-form-item>
 
-                        <el-form-item label="Recipient validation expression (see comments in appsettings.json)" prop="server.recipientValidationExpression">
-
-                            <el-input v-model="server.recipientValidationExpression" :disabled="server.lockedSettings.recipientValidationExpression">
+                        <el-form-item label="Recipient validation expression" prop="server.recipientValidationExpression">
+                            <expressioninput 
+                                v-model="server.recipientValidationExpression" 
+                                expression-type="recipient"
+                                placeholder="Enter JavaScript expression to validate recipients..."
+                                :disabled="server.lockedSettings.recipientValidationExpression">
                                 <template #prefix>
                                     <el-icon v-if="server.lockedSettings.recipientValidationExpression" :title="`Locked: ${server.lockedSettings.recipientValidationExpression}`"><Lock /></el-icon>
                                 </template>
-                            </el-input>
+                            </expressioninput>
                         </el-form-item>
 
-                        <el-form-item label="Message validation expression (see comments in appsettings.json)" prop="server.messageValidationExpression">
-                            <el-input v-model="server.messageValidationExpression" :disabled="server.lockedSettings.messageValidationExpression">
+                        <el-form-item label="Message validation expression" prop="server.messageValidationExpression">
+                            <expressioninput 
+                                v-model="server.messageValidationExpression" 
+                                expression-type="message"
+                                placeholder="Enter JavaScript expression to validate messages..."
+                                :disabled="server.lockedSettings.messageValidationExpression">
                                 <template #prefix>
                                     <el-icon v-if="server.lockedSettings.messageValidationExpression" :title="`Locked: ${server.lockedSettings.messageValidationExpression}`"><Lock /></el-icon>
                                 </template>
-                            </el-input>
+                            </expressioninput>
                         </el-form-item>
 
-                        <el-form-item label="Command validation expression (see comments in appsettings.json)" prop="server.commandValidationExpression">
-                            <el-input v-model="server.commandValidationExpression" :disabled="server.lockedSettings.commandValidationExpression">
+                        <el-form-item label="Command validation expression" prop="server.commandValidationExpression">
+                            <expressioninput 
+                                v-model="server.commandValidationExpression" 
+                                expression-type="command"
+                                placeholder="Enter JavaScript expression to validate commands..."
+                                :disabled="server.lockedSettings.commandValidationExpression">
                                 <template #prefix>
                                     <el-icon v-if="server.lockedSettings.commandValidationExpression" :title="`Locked: ${server.lockedSettings.commandValidationExpression}`"><Lock /></el-icon>
                                 </template>
-                            </el-input>
+                            </expressioninput>
                         </el-form-item>
                     </el-tab-pane>
 
@@ -263,13 +277,16 @@
                             </el-input>
                         </el-form-item>
 
-                        <el-form-item label="Auto relay expression (see comments in appsettings.json)" prop="server.relayAutomaticRelayExpression" v-show="isRelayEnabled">
-
-                            <el-input v-model="server.relayAutomaticRelayExpression" :disabled="server.lockedSettings.relayAutomaticRelayExpression">
+                        <el-form-item label="Auto relay expression" prop="server.relayAutomaticRelayExpression" v-show="isRelayEnabled">
+                            <expressioninput 
+                                v-model="server.relayAutomaticRelayExpression" 
+                                expression-type="relay"
+                                placeholder="Enter JavaScript expression for auto relay logic..."
+                                :disabled="server.lockedSettings.relayAutomaticRelayExpression">
                                 <template #prefix>
                                     <el-icon v-if="server.lockedSettings.relayAutomaticRelayExpression" :title="`Locked: ${server.lockedSettings.relayAutomaticRelayExpression}`"><Lock /></el-icon>
                                 </template>
-                            </el-input>
+                            </expressioninput>
                         </el-form-item>
 
                         <el-form-item label="Auto-Relay Recipients" v-show="isRelayEnabled" prop="isRelayEnabled">
@@ -402,8 +419,13 @@
     import { Mutex } from "async-mutex";
     import ServerController from "../ApiClient/ServerController";
     import Server from "../ApiClient/Server";
+    import ExpressionInput from "./expressioninput.vue";
 
-    @Component
+    @Component({
+        components: {
+            expressioninput: ExpressionInput
+        }
+    })
     class SettingsDialog extends Vue {
 
         @Prop({ default: null })
