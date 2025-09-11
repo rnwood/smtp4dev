@@ -13,6 +13,7 @@ using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.Smtp4dev.Server.Imap;
 using Microsoft.EntityFrameworkCore;
 using System.IO;
+using Rnwood.Smtp4dev.DbModel;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -136,13 +137,11 @@ namespace Rnwood.Smtp4dev.Server
                                 imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
                                 message.ImapUid = imapState.LastUid;
                                 
-                                dbContext.Messages.Add(message);
                                 dbContext.SaveChanges();
-                                
-                                // Set the APPENDUID response for MailKit compatibility  
-                                // Use folder ID as uidvalidity (ensure positive number)
-                                uint uidvalidity = (uint)Math.Abs(folder.Id.GetHashCode());
-                                e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "OK", $"[APPENDUID {uidvalidity} {message.ImapUid}] APPEND completed");
+
+                                messagesRepository.AddMessage(message).Wait();
+
+                                e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "OK", $"APPEND completed");
                                 log.Information("Successfully appended message to folder {folder} with UID {uid}", e.Folder, message.ImapUid);
                             }
                         }
@@ -172,7 +171,7 @@ namespace Rnwood.Smtp4dev.Server
                     using (var scope = this.serviceScopeFactory.CreateScope())
                     {
                         var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
-                        foreach (var unseenMessage in messagesRepository.GetMessages(GetMailboxName(), true).Where(condition))
+                        foreach (var unseenMessage in messagesRepository.GetMessages(GetMailboxName(), MailboxFolder.INBOX, true).Where(condition))
                         {
                             e.AddMessage(unseenMessage.ImapUid);
                         }
@@ -285,7 +284,7 @@ namespace Rnwood.Smtp4dev.Server
 
                     foreach (var msgInfo in e.MessagesInfo)
                     {
-                        var dbMessage = messagesRepository.GetMessages(GetMailboxName()).SingleOrDefault(m => m.Id == new Guid(msgInfo.ID));
+                        var dbMessage = messagesRepository.GetAllMessages().SingleOrDefault(m => m.Id == new Guid(msgInfo.ID));
 
                         if (dbMessage != null)
                         {

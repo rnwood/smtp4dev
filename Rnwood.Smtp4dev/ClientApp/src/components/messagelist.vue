@@ -116,8 +116,8 @@
                 <template #default="scope">
                     <div style="display: flow; gap: 6px;">
                         <div v-for="recip in scope.row.to" :key="recip">
-                            <strong v-if="scope.row.deliveredTo.includes(recip)">{{recip}}</strong>
-                            <span v-if="!scope.row.deliveredTo.includes(recip)">{{recip}}</span>
+                            <strong v-if="(scope.row.deliveredTo??'').includes(recip)">{{recip}}</strong>
+                            <span v-if="!(scope.row.deliveredTo??'').includes(recip)">{{recip}}</span>
                         </div>
                     </div>
                 </template>
@@ -209,6 +209,7 @@
         isRelayAvailable: boolean = false;
 
         composeDialogVisible = false;
+        pendingSelectMessageAfterRefresh: MessageSummary | null = null;
 
         get emptyText() {
             if (this.loading) {
@@ -475,6 +476,12 @@
             this.initialMailboxLoadDone = false;
             this.messageNotificationManager = new MessageNotificationManager(this.selectedMailbox,
                 (message) => {
+                    if (this.selectedFolder && this.selectedFolder != "INBOX") {
+                        this.selectedFolder = "INBOX";
+                        this.pendingSelectMessageAfterRefresh = message;
+                        return;
+                    }
+
                     this.selectMessage(message);
                     this.handleCurrentChange(message);
                 }
@@ -525,7 +532,7 @@
                 this.loading = !silent;
                 this.error = null;
 
-                const server = await this.connection.getServer()
+                const server = await this.connection!.getServer()
                 this.isRelayAvailable = !!server.relaySmtpServer;
 
                 this.availableMailboxes = await new MailboxesController().getAll();
@@ -580,6 +587,11 @@
 
                 if (includeNotifications) {
                     await this.messageNotificationManager?.refresh(!this.initialMailboxLoadDone);
+                }
+
+                if (this.pendingSelectMessageAfterRefresh) {
+                    this.selectMessage(this.pendingSelectMessageAfterRefresh);
+                    this.pendingSelectMessageAfterRefresh = null;
                 }
 
                 this.initialMailboxLoadDone = true;

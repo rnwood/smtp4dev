@@ -8,14 +8,14 @@ namespace Rnwood.Smtp4dev.Data
 {
     public interface IMessagesRepository
     {
+        Task AddMessage(Message message);
+
         Task MarkAllMessagesRead(string mailbox);
         Task MarkMessageRead(Guid id);
 
         IQueryable<Message> GetAllMessages(bool unTracked = true);
 
-        IQueryable<Message> GetMessages(string mailboxName, bool unTracked = true);
         IQueryable<Message> GetMessages(string mailboxName, string folderName, bool unTracked = true);
-        IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName);
         IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName, string folderName);
 
         Task DeleteMessage(Guid id);
