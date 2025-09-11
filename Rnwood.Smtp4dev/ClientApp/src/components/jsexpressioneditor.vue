@@ -890,13 +890,17 @@ export default toNative(JSExpressionEditor);
     flex-shrink: 0;
     display: flex;
     flex-direction: column;
-    min-height: 0;
+    height: 100%;
+    max-height: 100%;
+    overflow: hidden;
 }
 
 .help-content {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding-right: 8px;
+    min-height: 0;
 }
 
 .help-section {
