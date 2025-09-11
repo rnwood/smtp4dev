@@ -239,6 +239,35 @@ namespace Rnwood.Smtp4dev.Server
                     dbContext.Add(dbMailbox);
                 }
             }
+            
+            dbContext.SaveChanges();
+            
+            // Ensure default folders exist for each mailbox
+            var allMailboxes = dbContext.Mailboxes.Include(m => m.MailboxFolders).ToList();
+            foreach (var mailbox in allMailboxes)
+            {
+                if (!mailbox.MailboxFolders.Any(f => f.Name == MailboxFolder.INBOX))
+                {
+                    log.Information("Creating INBOX folder for mailbox {mailboxName}", mailbox.Name);
+                    dbContext.MailboxFolders.Add(new MailboxFolder
+                    {
+                        Name = MailboxFolder.INBOX,
+                        MailboxId = mailbox.Id,
+                        Mailbox = mailbox
+                    });
+                }
+                
+                if (!mailbox.MailboxFolders.Any(f => f.Name == MailboxFolder.SENT))
+                {
+                    log.Information("Creating Sent folder for mailbox {mailboxName}", mailbox.Name);
+                    dbContext.MailboxFolders.Add(new MailboxFolder
+                    {
+                        Name = MailboxFolder.SENT,
+                        MailboxId = mailbox.Id,
+                        Mailbox = mailbox
+                    });
+                }
+            }
 
             //Find configuredMailboxesAndDefault in DB not in config and delete
             foreach (var dbMailbox in dbMailboxes)
@@ -255,6 +284,23 @@ namespace Rnwood.Smtp4dev.Server
             foreach (var messageWithoutMailbox in dbContext.Messages.Where(m => m.Mailbox == null))
             {
                 messageWithoutMailbox.Mailbox = defaultMailbox;
+            }
+            
+            // Migrate existing messages without folder assignment to INBOX
+            var messagesWithoutFolders = dbContext.Messages
+                .Include(m => m.Mailbox)
+                .ThenInclude(mb => mb.MailboxFolders)
+                .Where(m => m.MailboxFolder == null && m.Mailbox != null)
+                .ToList();
+                
+            foreach (var message in messagesWithoutFolders)
+            {
+                var inboxFolder = message.Mailbox.MailboxFolders.FirstOrDefault(f => f.Name == MailboxFolder.INBOX);
+                if (inboxFolder != null)
+                {
+                    message.MailboxFolder = inboxFolder;
+                    message.MailboxFolderId = inboxFolder.Id;
+                }
             }
             dbContext.SaveChanges();
 
@@ -501,6 +547,18 @@ namespace Rnwood.Smtp4dev.Server
             
             message.Session = dbContext.Sessions.Find(activeSessionsToDbId[session]);
             message.Mailbox = dbContext.Mailboxes.FirstOrDefault(m => m.Name == targetMailboxWithRecipients.Key.Name);
+            
+            // Assign message to INBOX folder by default for SMTP received messages
+            if (message.Mailbox != null)
+            {
+                var inboxFolder = dbContext.MailboxFolders.FirstOrDefault(f => f.MailboxId == message.Mailbox.Id && f.Name == MailboxFolder.INBOX);
+                if (inboxFolder != null)
+                {
+                    message.MailboxFolder = inboxFolder;
+                    message.MailboxFolderId = inboxFolder.Id;
+                }
+            }
+            
             var relayResult = TryRelayMessage(message, null);
             message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
             

@@ -64,9 +64,37 @@ namespace Rnwood.Smtp4dev.Data
             return unTracked ? query.AsNoTracking() : query;
         }
 
+        public IQueryable<Message> GetMessages(string mailboxName, string folderName, bool unTracked = true)
+        {
+            var query = dbContext.Messages
+                .Where(m => m.Mailbox != null && m.Mailbox.Name == mailboxName && 
+                           m.MailboxFolder != null && m.MailboxFolder.Name == folderName);
+            return unTracked ? query.AsNoTracking() : query;
+        }
+
         public IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName)
         {
             return dbContext.Messages.Where(m => m.Mailbox.Name == mailboxName)
+                .Select(m => new MessageSummaryProjection()
+                {
+                    Id = m.Id,
+                    From = m.From,
+                    To = m.To,
+                    Subject = m.Subject,
+                    ReceivedDate = m.ReceivedDate,
+                    AttachmentCount = m.AttachmentCount,
+                    DeliveredTo = m.DeliveredTo,
+                    IsRelayed = m.Relays.Count > 0,
+                    IsUnread = m.IsUnread,
+                    HasBareLineFeed = m.HasBareLineFeed
+                }).AsNoTracking();
+        }
+
+        public IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName, string folderName)
+        {
+            return dbContext.Messages
+                .Where(m => m.Mailbox != null && m.Mailbox.Name == mailboxName && 
+                           m.MailboxFolder != null && m.MailboxFolder.Name == folderName)
                 .Select(m => new MessageSummaryProjection()
                 {
                     Id = m.Id,

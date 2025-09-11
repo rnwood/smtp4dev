@@ -41,7 +41,30 @@ namespace Rnwood.Smtp4dev.Tests
             return Messages.AsQueryable();
         }
 
+        public IQueryable<Message> GetMessages(string mailboxName, string folderName, bool unTracked = true)
+        {
+            return Messages.AsQueryable();
+        }
+
         public IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName)
+        {
+            return Messages
+                .Select(m => new MessageSummaryProjection()
+                {
+                    Id = m.Id,
+                    From = m.From,
+                    To = m.To,
+                    Subject = m.Subject,
+                    ReceivedDate = m.ReceivedDate,
+                    AttachmentCount = m.AttachmentCount,
+                    DeliveredTo = m.DeliveredTo,
+                    IsRelayed = m.Relays.Count > 0,
+                    IsUnread = m.IsUnread,
+                    HasBareLineFeed = m.HasBareLineFeed
+                }).AsQueryable();
+        }
+
+        public IQueryable<MessageSummaryProjection> GetMessageSummaries(string mailboxName, string folderName)
         {
             return Messages
                 .Select(m => new MessageSummaryProjection()

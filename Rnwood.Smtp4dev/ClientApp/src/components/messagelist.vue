@@ -58,6 +58,18 @@
 
             </el-select>
 
+            <el-select style="flex: 1 0 150px;" v-model="selectedFolder" class="fill" :disabled="!selectedMailbox">
+                <el-option v-for="folder in availableFolders"
+                           :key="folder"
+                           :label="folder"
+                           :value="folder" />
+
+                <template #prefix>
+                    <el-icon><Files /></el-icon>
+                </template>
+
+            </el-select>
+
 
 
             <el-input class="fill"
@@ -190,6 +202,8 @@
 
         messages: MessageSummary[] = [];
         selectedMailbox: string | null = null;
+        selectedFolder: string = "INBOX"; // Default to INBOX folder
+        availableFolders: string[] = [];
 
         isRelayInProgress: boolean = false;
         isRelayAvailable: boolean = false;
@@ -205,9 +219,10 @@
                 return "Select a mailbox to view messages";
             }
 
+            const folderText = this.selectedFolder ? ` in folder '${this.selectedFolder}'` : '';
             return this.searchTerm ?
-                `No messages matching '${this.searchTerm}' in mailbox '${this.selectedMailbox}'`
-                : `No messages in mailbox '${this.selectedMailbox}'`;
+                `No messages matching '${this.searchTerm}' in mailbox '${this.selectedMailbox}'${folderText}`
+                : `No messages in mailbox '${this.selectedMailbox}'${folderText}`;
         }
 
         error: Error | null = null;
@@ -464,7 +479,32 @@
                     this.handleCurrentChange(message);
                 }
             );
+            // Default to INBOX folder when mailbox changes
+            this.selectedFolder = "INBOX";
+            await this.loadFolders();
             await this.refresh(true, false);
+        }
+
+        @Watch("selectedFolder")
+        async onFolderChanged() {
+            await this.refresh(false);
+        }
+
+        async loadFolders() {
+            if (this.selectedMailbox) {
+                try {
+                    this.availableFolders = await new MessagesController().getFolders(this.selectedMailbox);
+                    // Ensure INBOX folder exists, if not fall back to first available folder
+                    if (this.availableFolders.length > 0 && !this.availableFolders.includes("INBOX")) {
+                        this.selectedFolder = this.availableFolders[0];
+                    }
+                } catch (error) {
+                    console.error("Failed to load folders:", error);
+                    this.availableFolders = [];
+                }
+            } else {
+                this.availableFolders = [];
+            }
         }
 
         private lastSort: string | null = null;
@@ -510,7 +550,8 @@
                         sortColumn,
                         sortDescending,
                         this.page,
-                        this.pageSize
+                        this.pageSize,
+                        this.selectedFolder || null
                     );
                 }
 
