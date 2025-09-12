@@ -1122,7 +1122,7 @@ stages:
                 isPreRelease: true
                 changeLogCompareToRelease: lastNonDraftRelease
 
-              assets: $(Build.ArtifactStagingDirectory)/Rnwood.Smtp4dev*/*.zip
+              assets: $(Build.ArtifactStagingDirectory)/**/Rnwood.Smtp4dev*.zip
           - task: NuGetCommand@2
             inputs:
               command: "push"
