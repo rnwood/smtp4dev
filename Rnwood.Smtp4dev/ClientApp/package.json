@@ -31,7 +31,7 @@
     "device-sizes": "^1.2.3",
     "element-plus": "^2.7.0",
     "eslint": "^8.57.0",
-    "eslint-plugin-vue": "^9",
+    "eslint-plugin-vue": "^10.0.0",
     "html-validate": "^9.0.0",
     "node-polyfill-webpack-plugin": "^4.0.0",
     "sanitize-html": "^2.13.0",
