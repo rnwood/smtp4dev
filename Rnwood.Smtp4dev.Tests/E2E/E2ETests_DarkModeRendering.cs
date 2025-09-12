@@ -33,8 +33,6 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             
             RunUITestAsync(testName, async (page, baseUrl, smtpPortNumber) =>
             {
-                var testResults = new TestResult { TestName = testName, IsDarkMode = isDarkMode, EmailSupportsDarkMode = emailSupportsDarkMode };
-                
                 // Navigate to the application
                 await page.GotoAsync(baseUrl.ToString());
                 var homePage = new HomePage(page);
@@ -60,9 +58,6 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 // Set UI dark/light mode
                 await SetUIMode(page, isDarkMode);
                 
-                // Take screenshot of email list with UI mode applied
-                testResults.Screenshots.Add(await TakeNamedScreenshotAsync(page, $"{testName}_1_EmailList"));
-                
                 // Click the message to view it
                 await messageRow.ClickAsync();
                 await page.WaitForTimeoutAsync(2000); // Wait for message to load
@@ -71,19 +66,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 var messageView = homePage.MessageView;
                 await messageView.ClickHtmlTabAsync();
                 await messageView.WaitForHtmlFrameAsync();
-                
-                // Take screenshot of the HTML view
-                testResults.Screenshots.Add(await TakeNamedScreenshotAsync(page, $"{testName}_2_HTMLView"));
 
                 // Verify the email colors are correct based on dark mode support and UI mode
                 await VerifyEmailColors(page, emailSupportsDarkMode, isDarkMode);
-                testResults.Passed = true;
-                
-                // Take final verification screenshot
-                testResults.Screenshots.Add(await TakeNamedScreenshotAsync(page, $"{testName}_3_Final"));
-
-                // Generate HTML report
-                await GenerateTestReport(testResults);
 
             }, new UITestOptions());
         }
@@ -440,90 +425,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                        .ToLowerInvariant();
         }
 
-        private async Task<string> TakeNamedScreenshotAsync(IPage page, string name)
+        private string GetTraceDirectory()
         {
-            string baseReportDir = Environment.GetEnvironmentVariable("PLAYWRIGHT_HTML_REPORT") ?? Path.GetTempPath();
-            string screenshotDir = Path.Combine(baseReportDir, "screenshots");
-            string screenshotPath = Path.Combine(screenshotDir, $"{name}.png");
-            
-            Directory.CreateDirectory(screenshotDir);
-            
-            await page.ScreenshotAsync(new PageScreenshotOptions 
-            { 
-                Path = screenshotPath, 
-                FullPage = true 
-            });
-            
-            Console.WriteLine($"Screenshot saved: {screenshotPath}");
-            
-            return screenshotPath;
-        }
-
-        private async Task GenerateTestReport(TestResult result)
-        {
-            string baseReportDir = Environment.GetEnvironmentVariable("PLAYWRIGHT_HTML_REPORT") ?? Path.GetTempPath();
-            string reportPath = Path.Combine(baseReportDir, $"{result.TestName}_report.html");
-            
-            var html = $@"
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Dark Mode Rendering Test: {result.TestName}</title>
-    <style>
-        body {{ font-family: Arial, sans-serif; margin: 20px; }}
-        .test-info {{ background: #f0f0f0; padding: 15px; border-radius: 5px; margin-bottom: 20px; }}
-        .screenshot {{ margin: 10px 0; text-align: center; }}
-        .screenshot img {{ max-width: 800px; border: 1px solid #ccc; }}
-        .passed {{ color: green; }} .failed {{ color: red; }}
-    </style>
-</head>
-<body>
-    <h1>Dark Mode Email Rendering Test</h1>
-    <div class=""test-info"">
-        <h2>Test: {result.TestName}</h2>
-        <p><strong>UI Mode:</strong> {(result.IsDarkMode ? "Dark" : "Light")}</p>
-        <p><strong>Email Dark Mode Support:</strong> {(result.EmailSupportsDarkMode ? "Yes" : "No")}</p>
-        <p><strong>Status:</strong> <span class=""{(result.Passed ? "passed" : "failed")}"">{(result.Passed ? "PASSED" : "FAILED")}</span></p>
-        
-        <h3>Expected Behavior:</h3>
-        <ul>
-            <li><strong>Light UI:</strong> Both email types display with original colors</li>
-            <li><strong>Dark UI:</strong>
-                <ul>
-                    <li>Emails WITHOUT dark support: colors are inverted (red→cyan, green→magenta, yellow→purple)</li>
-                    <li>Emails WITH dark support: maintain intended dark mode appearance (NOT inverted)</li>
-                </ul>
-            </li>
-        </ul>
-    </div>
-    
-    <h2>Screenshots</h2>";
-
-            foreach (var screenshot in result.Screenshots)
-            {
-                var fileName = Path.GetFileName(screenshot);
-                var relativePath = $"screenshots/{fileName}";
-                html += $@"
-    <div class=""screenshot"">
-        <h3>{fileName}</h3>
-        <img src=""{relativePath}"" alt=""{fileName}"" />
-    </div>";
-            }
-
-            html += @"
-</body>
-</html>";
-
-            await File.WriteAllTextAsync(reportPath, html);
-        }
-
-        private class TestResult
-        {
-            public string TestName { get; set; }
-            public bool IsDarkMode { get; set; }
-            public bool EmailSupportsDarkMode { get; set; }
-            public bool Passed { get; set; }
-            public List<string> Screenshots { get; set; } = new List<string>();
+            // Use the same directory structure as the existing Playwright HTML report
+            string baseReportDir = Environment.GetEnvironmentVariable("PLAYWRIGHT_HTML_REPORT") ?? System.IO.Path.GetTempPath();
+            return System.IO.Path.Combine(baseReportDir, "traces");
         }
 
         private static RemoteCertificateValidationCallback GetCertvalidationCallbackHandler()
@@ -584,8 +490,22 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 Timeout = 60000
             });
 
-            var page = await browser.NewPageAsync();
+            // Create browser context with tracing enabled
+            var browserContext = await browser.NewContextAsync();
             
+            // Start tracing for the entire test
+            string traceDir = GetTraceDirectory();
+            string tracePath = System.IO.Path.Combine(traceDir, $"{testName}.zip");
+            System.IO.Directory.CreateDirectory(traceDir);
+            
+            await browserContext.Tracing.StartAsync(new TracingStartOptions
+            {
+                Screenshots = true,
+                Snapshots = true,
+                Sources = true
+            });
+
+            var page = await browserContext.NewPageAsync();
             
             page.SetDefaultTimeout(60000);
             page.SetDefaultNavigationTimeout(60000);
@@ -593,22 +513,29 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             try
             {
                 await uitest(page, context.BaseUrl, context.SmtpPortNumber);
+                
+                // Stop tracing with successful completion
+                await browserContext.Tracing.StopAsync(new TracingStopOptions
+                {
+                    Path = tracePath
+                });
+                
+                Console.WriteLine($"Trace saved: {tracePath}");
             }
             catch (Exception)
             {
-                // Take failure screenshot
-                var failureScreenshot = await TakeNamedScreenshotAsync(page, $"{testName}_FAILURE");
+                // Stop tracing and save on failure
+                await browserContext.Tracing.StopAsync(new TracingStopOptions
+                {
+                    Path = tracePath
+                });
                 
-                // Generate failure report
-                var failureResult = new TestResult 
-                { 
-                    TestName = testName, 
-                    Passed = false,
-                    Screenshots = { failureScreenshot }
-                };
-                await GenerateTestReport(failureResult);
-                
+                Console.WriteLine($"Trace saved on failure: {tracePath}");
                 throw;
+            }
+            finally
+            {
+                await browserContext.CloseAsync();
             }
         }
     }

@@ -319,14 +319,16 @@ stages:
 
           - task: PowerShell@2
             condition: and(always(), eq(variables['runTests'], true))
-            displayName: Create Playwright HTML Report Directory
+            displayName: Create Playwright Reports Directory (HTML + Traces)
             inputs:
               targetType: inline
               script: |
                 # Use Join-Path for cross-platform compatibility
                 $tempDir = "$(Agent.TempDirectory)"
                 $reportDir = Join-Path $tempDir "playwright-report"
-                Write-Host "Creating Playwright HTML report directory: $reportDir"
+                $tracesDir = Join-Path $reportDir "traces"
+                Write-Host "Creating Playwright reports directory: $reportDir"
+                Write-Host "Creating Playwright traces directory: $tracesDir"
                 Write-Host "Platform: $([Environment]::OSVersion.Platform)"
                 Write-Host "Agent.TempDirectory: $tempDir"
                 
@@ -337,33 +339,99 @@ stages:
                   Write-Host "✓ Directory already exists: $reportDir"
                 }
                 
-                # Verify the directory exists and is accessible
+                if (-not (Test-Path $tracesDir)) {
+                  New-Item -ItemType Directory -Path $tracesDir -Force
+                  Write-Host "✓ Created traces directory: $tracesDir"
+                } else {
+                  Write-Host "✓ Traces directory already exists: $tracesDir"
+                }
+                
+                # Verify the directories exist and are accessible
                 if (Test-Path $reportDir) {
                   $resolvedPath = Resolve-Path $reportDir
-                  Write-Host "✓ Directory verified at: $resolvedPath"
+                  Write-Host "✓ Report directory verified at: $resolvedPath"
                 } else {
                   Write-Error "Failed to create or access directory: $reportDir"
                   exit 1
                 }
                 
-                # Create a minimal index.html file for the report
+                if (Test-Path $tracesDir) {
+                  $resolvedTracesPath = Resolve-Path $tracesDir
+                  Write-Host "✓ Traces directory verified at: $resolvedTracesPath"
+                } else {
+                  Write-Error "Failed to create or access traces directory: $tracesDir"
+                  exit 1
+                }
+                
+                # Create an index.html file that includes links to both HTML reports and traces
                 $indexHtml = @"
                 <!DOCTYPE html>
                 <html>
                 <head>
-                    <title>Playwright Test Results</title>
+                    <title>Playwright E2E Test Results - $(platformName)</title>
+                    <style>
+                        body { font-family: Arial, sans-serif; margin: 40px; background: #f5f5f5; }
+                        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 30px; border-radius: 8px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+                        h1 { color: #333; border-bottom: 3px solid #007acc; padding-bottom: 10px; }
+                        h2 { color: #555; margin-top: 30px; }
+                        .section { margin: 20px 0; padding: 20px; border: 1px solid #ddd; border-radius: 5px; }
+                        .trace-info { background: #e7f3ff; padding: 15px; margin: 10px 0; border-radius: 5px; }
+                        .instructions { background: #fff3cd; padding: 15px; margin: 10px 0; border-radius: 5px; }
+                        ul { line-height: 1.6; }
+                        .platform { color: #007acc; font-weight: bold; }
+                    </style>
                 </head>
                 <body>
-                    <h1>E2E Test Results</h1>
-                    <p>E2E tests were run via dotnet test. Check the test results in the Azure DevOps test results tab.</p>
-                    <p>For detailed logs, refer to the build pipeline output.</p>
+                    <div class='container'>
+                        <h1>E2E Test Results - <span class='platform'>$(platformName)</span></h1>
+                        <p><strong>Build:</strong> $(Build.BuildNumber) | <strong>Commit:</strong> $(Build.SourceVersion)</p>
+                        <p>Generated on: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss UTC')</p>
+                        
+                        <div class='section'>
+                            <h2>🔍 Playwright Traces</h2>
+                            <div class='trace-info'>
+                                <p><strong>New Feature:</strong> This build includes comprehensive Playwright traces instead of simple screenshots.</p>
+                                <p>Traces provide a complete debugging experience with:</p>
+                                <ul>
+                                    <li><strong>Screenshots</strong> at every step</li>
+                                    <li><strong>DOM snapshots</strong> showing page state</li>
+                                    <li><strong>Network activity</strong> and API calls</li>
+                                    <li><strong>Console logs</strong> and JavaScript errors</li>
+                                    <li><strong>Source code</strong> mapping</li>
+                                    <li><strong>Timeline</strong> of all actions</li>
+                                </ul>
+                            </div>
+                            
+                            <div class='instructions'>
+                                <h3>How to View Traces:</h3>
+                                <ol>
+                                    <li>Download the <code>PlaywrightReport_$(platformName)</code> artifact from Azure DevOps</li>
+                                    <li>Extract the ZIP file</li>
+                                    <li>Navigate to the <code>traces/</code> folder</li>
+                                    <li>Open any <code>.zip</code> trace file by:
+                                        <ul>
+                                            <li><strong>Online:</strong> Go to <a href='https://trace.playwright.dev' target='_blank'>trace.playwright.dev</a> and drag the trace ZIP file</li>
+                                            <li><strong>CLI:</strong> Run <code>npx playwright show-trace trace-file.zip</code></li>
+                                        </ul>
+                                    </li>
+                                </ol>
+                            </div>
+                        </div>
+                        
+                        <div class='section'>
+                            <h2>📊 Test Execution Details</h2>
+                            <p>E2E tests were executed via <code>dotnet test</code> with Playwright tracing enabled.</p>
+                            <p>For test results and detailed logs, check the <strong>Tests</strong> tab in Azure DevOps.</p>
+                            <p>Each test that runs generates a corresponding trace file for debugging.</p>
+                        </div>
+                    </div>
                 </body>
                 </html>
                 "@
                 
                 $indexPath = Join-Path $reportDir "index.html"
                 $indexHtml | Out-File -FilePath $indexPath -Encoding UTF8
-                Write-Host "✓ Created basic HTML report: $indexPath"
+                Write-Host "✓ Created comprehensive HTML report: $indexPath"
                 
                 # Verify the file was created
                 if (Test-Path $indexPath) {
@@ -389,7 +457,7 @@ stages:
               publishTestResults: true
           - task: PublishPipelineArtifact@1
             condition: and(always(), eq(variables['runTests'], true))
-            displayName: Publish Playwright HTML Report
+            displayName: Publish Playwright Reports and Traces
             inputs:
               targetPath: $(Agent.TempDirectory)/playwright-report
               artifact: 'PlaywrightReport_$(platformName)'
@@ -1054,7 +1122,7 @@ stages:
                 isPreRelease: true
                 changeLogCompareToRelease: lastNonDraftRelease
 
-              assets: $(Build.ArtifactStagingDirectory)/**/*.zip
+              assets: $(Build.ArtifactStagingDirectory)/**/Rnwood.Smtp4dev*.zip
           - task: NuGetCommand@2
             inputs:
               command: "push"
@@ -1205,100 +1273,38 @@ stages:
                   Write-Host "Proceeding with notification as fallback."
                 }
                 
-                # Get build logs using Azure DevOps REST API
-                $buildErrors = ""
-                try {
-                  $azureDevOpsHeaders = @{
-                    'Authorization' = "Bearer $env:SYSTEM_ACCESSTOKEN"
-                    'Accept' = 'application/json'
-                  }
-                  
-                  # Get build timeline to identify failed tasks
-                  $timelineUri = "$organizationUri$projectName/_apis/build/builds/$buildId/timeline?api-version=6.0"
-                  $timeline = Invoke-RestMethod -Uri $timelineUri -Headers $azureDevOpsHeaders -Method Get
-                  
-                  $failedRecords = $timeline.records | Where-Object { $_.result -eq "failed" -and $_.type -eq "Task" }
-                  
-                  if ($failedRecords) {
-                    $buildErrors = "`n`n**Build Error Details:**`n"
-                    
-                    foreach ($record in $failedRecords) {
-                      $buildErrors += "`n**Failed Task: $($record.name)**`n"
-                      
-                      # Get detailed logs for this task
-                      if ($record.log -and $record.log.id) {
-                        try {
-                          $logUri = "$organizationUri$projectName/_apis/build/builds/$buildId/logs/$($record.log.id)?api-version=6.0"
-                          
-                          # Get log data - Azure DevOps returns JSON with count and value array
-                          $logResponse = Invoke-RestMethod -Uri $logUri -Headers $azureDevOpsHeaders -Method Get
-                          
-                          Write-Host "Retrieved log data for task $($record.name), count: $($logResponse.count)"
-                          Write-Host "Log URI: $logUri"
-                          
-                          # Extract log lines from the value array
-                          $logLines = $logResponse.value
-                          
-                          Write-Host "Total log lines: $($logLines.Count)"
-                          
-                          # For failing steps, include ALL output instead of just lines that look like errors
-                          # This provides complete context to understand issues like missing files
-                          $errorContent = ""
-                          $errorCount = 0
-                          # Include all log lines, but limit to reasonable size for comment
-                          $maxLines = 100  # Limit to last 100 lines to avoid excessively long comments
-                          $startIndex = [Math]::Max(0, $logLines.Count - $maxLines)
-
-                          for ($i = $startIndex; $i -lt $logLines.Count; $i++) {
-                            $line = $logLines[$i]
-                            $trimmedLine = $line.Trim()
-
-                            # Skip empty lines to reduce noise
-                            if ($trimmedLine.Length -gt 0) {
-                              if ($errorContent -ne "") { $errorContent += [Environment]::NewLine }
-                              $errorContent += $trimmedLine
-                              $errorCount++
-                            }
-                          }
-                          
-                          Write-Host "Including last $errorCount non-empty log lines from failing task"
-                          
-                          if ($errorCount -gt 0) {
-                            $buildErrors += [Environment]::NewLine + '```' + [Environment]::NewLine
-                            $buildErrors += $errorContent
-                            $buildErrors += [Environment]::NewLine + '```'
-                          } else {
-                            $buildErrors += [Environment]::NewLine + "No log content available"
-                            Write-Host "No log content found for task $($record.name)"
-                          }
-                        } catch {
-                          $buildErrors += "Could not retrieve detailed logs for this task: $($_.Exception.Message)"
-                          Write-Host "Error retrieving logs for task $($record.name): $_"
-                        }
-                      } else {
-                        $buildErrors += "No log available for this task."
-                      }
-                      $buildErrors += "`n"
-                    }
-                  }
-                } catch {
-                  Write-Host "Warning: Could not retrieve detailed build logs: $_"
-                  $buildErrors = "`n`n**Note:** Detailed error logs could not be retrieved. Please check the build logs manually."
-                }
+                # Note: We no longer extract detailed build logs here to reduce comment size
+                # and encourage @copilot to access the live build data directly from Azure DevOps
                 
                 $commentBody = @"
-                @copilot The build triggered by this PR has failed. **Please use the error details provided below to investigate and fix the issues. Do not attempt to reproduce the build locally first - consult these error details directly.**
+                @copilot The build triggered by this PR has failed. **Please use the Azure DevOps REST API to investigate and fix the issues.**
+                
+                **🚨 IMPORTANT: Only proceed if this is the most recent commit on your branch. If a newer commit exists, ignore this notification.**
                 
                 **Build Details:**
                 - Build ID: $buildId
-                - Build URL: $buildUrl
-                - Commit: $(Build.SourceVersion)$buildErrors
+                - Build URL: $buildUrl (for reference)
+                - Commit: $("$(System.PullRequest.SourceCommitId)".Substring(0, 7))
+                - Build Status: FAILED
                 
                 **Instructions for @copilot:**
-                1. **Analyze the error details above first** - do not try to reproduce the build locally
-                2. Focus on the specific compilation errors, test failures, or other issues shown
-                3. Make targeted fixes based on the error messages provided
-                4. Only build locally after making fixes to verify the solution
+                1. **First verify this is the latest commit** - If $("$(System.PullRequest.SourceCommitId)".Substring(0, 7)) is not the most recent commit in this PR branch, ignore this notification
+                2. **Use Azure DevOps REST API to get build details and failures:**
+                   ```bash
+                   # Get build overview
+                   curl -s "https://dev.azure.com/rnwood/smtp4dev/_apis/build/builds/$buildId?api-version=6.0" | jq '{status: .status, result: .result, sourceVersion: .sourceVersion}'
+                   
+                   # Get failed tasks and their logs
+                   curl -s "https://dev.azure.com/rnwood/smtp4dev/_apis/build/builds/$buildId/timeline?api-version=6.0" | jq '.records[] | select(.result == "failed") | {name: .name, task: .task.name, errorCount: .errorCount, logId: .log.id}'
+                   
+                   # Get specific error details from a failed task log (replace LOG_ID)
+                   curl -s "https://dev.azure.com/rnwood/smtp4dev/_apis/build/builds/$buildId/logs/LOG_ID" | grep -i "error\|failed"
+                   ```
+                3. **Analyze the error messages** from the API responses to identify compilation errors, test failures, or other issues
+                4. **Make targeted fixes** based on the specific error messages found
+                5. **Build locally** after making fixes to verify the solution
+                
+                **The Azure DevOps REST API provides comprehensive build failure information without requiring browser access.**
                 "@
                 
                 $headers = @{

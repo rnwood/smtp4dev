@@ -6,8 +6,8 @@
     <!-- Set overall test timeout for CI reliability -->
     <TestSessionTimeout>2700000</TestSessionTimeout><!-- 45 minutes in milliseconds -->
     <EnvironmentVariables>
-      <!-- Playwright configuration for HTML reports -->
-      <PLAYWRIGHT_HTML_REPORT>$(Agent.TempDirectory)/playwright-report</PLAYWRIGHT_HTML_REPORT>
+      <!-- Note: PLAYWRIGHT_HTML_REPORT is set in the pipeline YAML with proper variable expansion -->
+      <!-- Removing it from here to avoid overriding with unexpanded Azure DevOps variables -->
       <PLAYWRIGHT_HTML_OPEN>never</PLAYWRIGHT_HTML_OPEN>
     </EnvironmentVariables>
   </RunConfiguration>
