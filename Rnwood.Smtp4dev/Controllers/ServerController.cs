@@ -22,6 +22,8 @@ using Microsoft.Extensions.Configuration;
 using CommandLiners;
 using System.Text.Json.Nodes;
 using System.Dynamic;
+using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -56,7 +58,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        public ApiModel.Server GetServer()
+        public ActionResult GetServer()
         {
             string currentUserName = this.User?.Identity?.Name;
             string currentUserDefaultMailbox = MailboxOptions.DEFAULTNAME;
@@ -75,28 +77,9 @@ namespace Rnwood.Smtp4dev.Controllers
             var serverOptionsCurrentValue = serverOptions.CurrentValue;
             var relayOptionsCurrentValue = relayOptions.CurrentValue;
             
-            // Hide relay password when settings are locked for security
-            string relayPassword = relayOptionsCurrentValue.Password;
-            if (lockedSettings.ContainsKey("relayPassword") || lockedSettings.ContainsKey("relayLogin"))
+            var server = new ApiModel.Server()
             {
-                relayPassword = string.IsNullOrEmpty(relayOptionsCurrentValue.Password) ? "" : "***";
-            }
-            
-            // Hide user passwords when settings are locked for security
-            UserOptions[] users = serverOptionsCurrentValue.Users;
-            if (lockedSettings.ContainsKey("users"))
-            {
-                users = serverOptionsCurrentValue.Users?.Select(u => new UserOptions
-                {
-                    Username = u.Username,
-                    Password = string.IsNullOrEmpty(u.Password) ? "" : "***",
-                    DefaultMailbox = u.DefaultMailbox
-                }).ToArray();
-            }
-            
-            return new ApiModel.Server()
-            {
-                IsRunning = server.IsRunning,
+                IsRunning = this.server.IsRunning,
                 LockedSettings = lockedSettings,
                 Port = serverOptionsCurrentValue.Port,
                 ImapPort = serverOptionsCurrentValue.ImapPort,
@@ -105,12 +88,12 @@ namespace Rnwood.Smtp4dev.Controllers
                 BindAddress = serverOptionsCurrentValue.BindAddress,
                 NumberOfMessagesToKeep = serverOptionsCurrentValue.NumberOfMessagesToKeep,
                 NumberOfSessionsToKeep = serverOptionsCurrentValue.NumberOfSessionsToKeep,
-                Exception = server.Exception?.Message,
+                Exception = this.server.Exception?.Message,
                 RelaySmtpServer = relayOptionsCurrentValue.SmtpServer,
                 RelayTlsMode = relayOptionsCurrentValue.TlsMode.ToString(),
                 RelaySmtpPort = relayOptionsCurrentValue.SmtpPort,
                 RelayLogin = relayOptionsCurrentValue.Login,
-                RelayPassword = relayPassword,
+                RelayPassword = relayOptionsCurrentValue.Password,
                 RelayAutomaticEmails = relayOptionsCurrentValue.AutomaticEmails.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray(),
                 RelaySenderAddress = relayOptionsCurrentValue.SenderAddress,
                 RelayAutomaticRelayExpression = relayOptionsCurrentValue.AutomaticRelayExpression,
@@ -127,7 +110,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 DisableIPv6 = serverOptionsCurrentValue.DisableIPv6,
                 WebAuthenticationRequired = serverOptionsCurrentValue.WebAuthenticationRequired,
                 DeliverMessagesToUsersDefaultMailbox = serverOptionsCurrentValue.DeliverMessagesToUsersDefaultMailbox,
-                Users = users,
+                Users = serverOptionsCurrentValue.Users,
                 Mailboxes = serverOptionsCurrentValue.Mailboxes,
                 DesktopMinimiseToTrayIcon = desktopOptions.CurrentValue.MinimiseToTrayIcon,
                 IsDesktopApp = cmdLineOptions.IsDesktopApp,
@@ -139,6 +122,33 @@ namespace Rnwood.Smtp4dev.Controllers
                 DisableHtmlValidation = serverOptionsCurrentValue.DisableHtmlValidation,
                 DisableHtmlCompatibilityCheck = serverOptionsCurrentValue.DisableHtmlCompatibilityCheck
             };
+
+            // If there are locked settings, remove those properties from the response
+            if (lockedSettings.Any())
+            {
+                // Serialize to JSON, then remove locked properties
+                var json = JsonSerializer.Serialize(server, new JsonSerializerOptions 
+                { 
+                    PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                    DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+                });
+                
+                var jsonObject = JsonSerializer.Deserialize<JsonElement>(json);
+                var modifiedObject = new Dictionary<string, JsonElement>();
+                
+                foreach (var property in jsonObject.EnumerateObject())
+                {
+                    // Skip locked properties
+                    if (!lockedSettings.ContainsKey(property.Name))
+                    {
+                        modifiedObject[property.Name] = property.Value;
+                    }
+                }
+                
+                return Ok(modifiedObject);
+            }
+            
+            return Ok(server);
         }
 
         private IDictionary<string, string> GetLockedSettings(bool toJsonCasing)
@@ -241,20 +251,37 @@ namespace Rnwood.Smtp4dev.Controllers
                 return Unauthorized("Settings are locked");
             }
 
-            var currentSettings = GetServer();
-
-            var lockedSettings = GetLockedSettings(false);
+            var lockedSettings = GetLockedSettings(true);
             if (lockedSettings.Any())
             {
-                foreach (var lockedSetting in lockedSettings)
+                // Check only sensitive properties that should never be sent by the client
+                // since they're excluded from GET responses
+                var sensitiveProperties = new[] { "relayPassword", "relayLogin" };
+                
+                foreach (var sensitiveProperty in sensitiveProperties)
                 {
-                    var oldValue = currentSettings.TryGetPropertyValue<object>(lockedSetting.Key);
-                    var newValue = serverUpdate.TryGetPropertyValue<object>(lockedSetting.Key);
-
-                    if (!oldValue.IsDeepEqual(newValue))
+                    if (lockedSettings.ContainsKey(sensitiveProperty))
                     {
-                        return Unauthorized($"The property '{ConvertPropertyNameToJsonCasing(lockedSetting.Key)}' is locked because '{lockedSetting.Value}'");
-
+                        var newValue = GetPropertyValue(serverUpdate, sensitiveProperty);
+                        
+                        // If a sensitive locked property has any non-null value, reject it
+                        // Since these properties are not sent in GET responses, any presence indicates tampering
+                        if (newValue != null && !string.IsNullOrEmpty(newValue.ToString()))
+                        {
+                            return Unauthorized($"The property '{sensitiveProperty}' is locked because '{lockedSettings[sensitiveProperty]}'");
+                        }
+                    }
+                }
+                
+                // Check Users array for password modifications
+                if (lockedSettings.ContainsKey("users") && serverUpdate.Users != null)
+                {
+                    foreach (var user in serverUpdate.Users)
+                    {
+                        if (!string.IsNullOrEmpty(user.Password))
+                        {
+                            return Unauthorized($"The property 'users' is locked because '{lockedSettings["users"]}'");
+                        }
                     }
                 }
             }
@@ -283,7 +310,7 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.NumberOfSessionsToKeep = serverUpdate.NumberOfSessionsToKeep != defaultSettingsFile.ServerOptions.NumberOfSessionsToKeep ? serverUpdate.NumberOfSessionsToKeep : null;
             newSettings.ImapPort = serverUpdate.ImapPort != defaultSettingsFile.ServerOptions.ImapPort ? serverUpdate.ImapPort : null;
             newSettings.DisableMessageSanitisation = serverUpdate.DisableMessageSanitisation != defaultSettingsFile.ServerOptions.DisableMessageSanitisation ? serverUpdate.DisableMessageSanitisation : null;
-            newSettings.TlsMode =  Enum.Parse<TlsMode>(serverUpdate.TlsMode) != defaultSettingsFile.ServerOptions.TlsMode ? Enum.Parse<TlsMode>(serverUpdate.TlsMode) : null;
+            newSettings.TlsMode = !string.IsNullOrEmpty(serverUpdate.TlsMode) && Enum.Parse<TlsMode>(serverUpdate.TlsMode) != defaultSettingsFile.ServerOptions.TlsMode ? Enum.Parse<TlsMode>(serverUpdate.TlsMode) : null;
             newSettings.AuthenticationRequired = serverUpdate.AuthenticationRequired != defaultSettingsFile.ServerOptions.AuthenticationRequired ? serverUpdate.AuthenticationRequired : null;
             newSettings.SecureConnectionRequired = serverUpdate.SecureConnectionRequired != defaultSettingsFile.ServerOptions.SecureConnectionRequired ? serverUpdate.SecureConnectionRequired : null;
             newSettings.CredentialsValidationExpression = serverUpdate.CredentialsValidationExpression != defaultSettingsFile.ServerOptions.CredentialsValidationExpression ? serverUpdate.CredentialsValidationExpression : null;
@@ -292,62 +319,26 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.MessageValidationExpression = serverUpdate.MessageValidationExpression != defaultSettingsFile.ServerOptions.MessageValidationExpression ? serverUpdate.MessageValidationExpression : null;
             newSettings.DisableIPv6 = serverUpdate.DisableIPv6 != defaultSettingsFile.ServerOptions.DisableIPv6 ? serverUpdate.DisableIPv6 : null;
             
-            // Handle users - preserve passwords if placeholder values are submitted
-            if (serverUpdate.Users != null && serverUpdate.Users.Any(u => u.Password == "***"))
-            {
-                // Some users have placeholder passwords, need to preserve original passwords
-                var originalUsers = defaultSettingsFile.ServerOptions.Users ?? new UserOptions[0];
-                var updatedUsers = serverUpdate.Users.Select(updatedUser =>
-                {
-                    if (updatedUser.Password == "***")
-                    {
-                        // Find the corresponding original user and preserve their password
-                        var originalUser = originalUsers.FirstOrDefault(u => u.Username == updatedUser.Username);
-                        return new UserOptions
-                        {
-                            Username = updatedUser.Username,
-                            Password = originalUser?.Password ?? "",
-                            DefaultMailbox = updatedUser.DefaultMailbox
-                        };
-                    }
-                    return updatedUser;
-                }).ToArray();
-                
-                newSettings.Users = !updatedUsers.SequenceEqual(defaultSettingsFile.ServerOptions.Users ?? new UserOptions[0]) ? updatedUsers : null;
-            }
-            else
-            {
-                newSettings.Users = serverUpdate.Users != defaultSettingsFile.ServerOptions.Users ? serverUpdate.Users : null;
-            }
+            newSettings.Users = serverUpdate.Users != defaultSettingsFile.ServerOptions.Users ? serverUpdate.Users : null;
             
             newSettings.Mailboxes = serverUpdate.Mailboxes != defaultSettingsFile.ServerOptions.Mailboxes ? serverUpdate.Mailboxes : null;
             newSettings.WebAuthenticationRequired = serverUpdate.WebAuthenticationRequired != defaultSettingsFile.ServerOptions.WebAuthenticationRequired ? serverUpdate.WebAuthenticationRequired : null;
             newSettings.DeliverMessagesToUsersDefaultMailbox = serverUpdate.DeliverMessagesToUsersDefaultMailbox != defaultSettingsFile.ServerOptions.DeliverMessagesToUsersDefaultMailbox ? serverUpdate.DeliverMessagesToUsersDefaultMailbox : null;
             newSettings.SmtpAllowAnyCredentials = serverUpdate.SmtpAllowAnyCredentials != defaultSettingsFile.ServerOptions.SmtpAllowAnyCredentials ? serverUpdate.SmtpAllowAnyCredentials : null;
-            newSettings.SmtpEnabledAuthTypesWhenNotSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection) != defaultSettingsFile.ServerOptions.SmtpEnabledAuthTypesWhenNotSecureConnection ? string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection) : null;
-            newSettings.SmtpEnabledAuthTypesWhenSecureConnection = string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection) != defaultSettingsFile.ServerOptions.SmtpEnabledAuthTypesWhenSecureConnection ? string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection) : null;
+            newSettings.SmtpEnabledAuthTypesWhenNotSecureConnection = serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection != null && string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection) != defaultSettingsFile.ServerOptions.SmtpEnabledAuthTypesWhenNotSecureConnection ? string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenNotSecureConnection) : null;
+            newSettings.SmtpEnabledAuthTypesWhenSecureConnection = serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection != null && string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection) != defaultSettingsFile.ServerOptions.SmtpEnabledAuthTypesWhenSecureConnection ? string.Join(",", serverUpdate.SmtpEnabledAuthTypesWhenSecureConnection) : null;
             newSettings.HtmlValidateConfig = serverUpdate.HtmlValidateConfig != defaultSettingsFile.ServerOptions.HtmlValidateConfig ?  serverUpdate.HtmlValidateConfig : null;
             newSettings.DisableHtmlValidation = serverUpdate.DisableHtmlValidation != defaultSettingsFile.ServerOptions.DisableHtmlValidation ? serverUpdate.DisableHtmlValidation : null;
             newSettings.DisableHtmlCompatibilityCheck = serverUpdate.DisableHtmlCompatibilityCheck != defaultSettingsFile.ServerOptions.DisableHtmlCompatibilityCheck ? serverUpdate.DisableHtmlCompatibilityCheck : null;
 
             newRelaySettings.SmtpServer = serverUpdate.RelaySmtpServer != defaultSettingsFile.RelayOptions.SmtpServer ? serverUpdate.RelaySmtpServer : null;
             newRelaySettings.SmtpPort = serverUpdate.RelaySmtpPort != defaultSettingsFile.RelayOptions.SmtpPort ? serverUpdate.RelaySmtpPort : null;
-            newRelaySettings.TlsMode = Enum.Parse<SecureSocketOptions>(serverUpdate.RelayTlsMode) != defaultSettingsFile.RelayOptions.TlsMode ? Enum.Parse<SecureSocketOptions>(serverUpdate.RelayTlsMode) : null;
+            newRelaySettings.TlsMode = !string.IsNullOrEmpty(serverUpdate.RelayTlsMode) && Enum.Parse<SecureSocketOptions>(serverUpdate.RelayTlsMode) != defaultSettingsFile.RelayOptions.TlsMode ? Enum.Parse<SecureSocketOptions>(serverUpdate.RelayTlsMode) : null;
             newRelaySettings.SenderAddress = serverUpdate.RelaySenderAddress != defaultSettingsFile.RelayOptions.SenderAddress ? serverUpdate.RelaySenderAddress : null;
             newRelaySettings.Login = serverUpdate.RelayLogin != defaultSettingsFile.RelayOptions.Login ? serverUpdate.RelayLogin : null;
+            newRelaySettings.Password = serverUpdate.RelayPassword != defaultSettingsFile.RelayOptions.Password ? serverUpdate.RelayPassword : null;
             
-            // Handle relay password - don't update if placeholder value is submitted
-            if (serverUpdate.RelayPassword == "***")
-            {
-                // Placeholder value submitted, preserve current password (don't change it)
-                newRelaySettings.Password = null;
-            }
-            else
-            {
-                newRelaySettings.Password = serverUpdate.RelayPassword != defaultSettingsFile.RelayOptions.Password ? serverUpdate.RelayPassword : null;
-            }
-            
-            newRelaySettings.AutomaticEmails = serverUpdate.RelayAutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() != defaultSettingsFile.RelayOptions.AutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() ? serverUpdate.RelayAutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() : null;
+            newRelaySettings.AutomaticEmails = serverUpdate.RelayAutomaticEmails != null && serverUpdate.RelayAutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() != defaultSettingsFile.RelayOptions.AutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() ? serverUpdate.RelayAutomaticEmails.Where(s => !String.IsNullOrWhiteSpace(s)).ToArray() : null;
             newRelaySettings.AutomaticRelayExpression = serverUpdate.RelayAutomaticRelayExpression != defaultSettingsFile.RelayOptions.AutomaticRelayExpression ? serverUpdate.RelayAutomaticRelayExpression : null;
 
             newDesktopSettings.MinimiseToTrayIcon = serverUpdate.DesktopMinimiseToTrayIcon;
@@ -382,6 +373,78 @@ namespace Rnwood.Smtp4dev.Controllers
 
 
             return Ok();
+        }
+
+        private ApiModel.Server GetCurrentServerData()
+        {
+            string currentUserName = this.User?.Identity?.Name;
+            string currentUserDefaultMailbox = MailboxOptions.DEFAULTNAME;
+
+            if (!string.IsNullOrEmpty(currentUserName))
+            {
+                var user = serverOptions.CurrentValue.Users.FirstOrDefault(u => currentUserName.Equals(u.Username, StringComparison.CurrentCultureIgnoreCase));
+                if (user != null)
+                {
+                    currentUserDefaultMailbox = user.DefaultMailbox ?? MailboxOptions.DEFAULTNAME;
+                }
+            }
+
+            var serverOptionsCurrentValue = serverOptions.CurrentValue;
+            var relayOptionsCurrentValue = relayOptions.CurrentValue;
+            
+            // Return current server data without any filtering (for comparison purposes)
+            return new ApiModel.Server()
+            {
+                IsRunning = this.server.IsRunning,
+                Port = serverOptionsCurrentValue.Port,
+                ImapPort = serverOptionsCurrentValue.ImapPort,
+                HostName = serverOptionsCurrentValue.HostName,
+                AllowRemoteConnections = serverOptionsCurrentValue.AllowRemoteConnections,
+                BindAddress = serverOptionsCurrentValue.BindAddress,
+                NumberOfMessagesToKeep = serverOptionsCurrentValue.NumberOfMessagesToKeep,
+                NumberOfSessionsToKeep = serverOptionsCurrentValue.NumberOfSessionsToKeep,
+                Exception = this.server.Exception?.Message,
+                RelaySmtpServer = relayOptionsCurrentValue.SmtpServer,
+                RelayTlsMode = relayOptionsCurrentValue.TlsMode.ToString(),
+                RelaySmtpPort = relayOptionsCurrentValue.SmtpPort,
+                RelayLogin = relayOptionsCurrentValue.Login,
+                RelayPassword = relayOptionsCurrentValue.Password,
+                RelayAutomaticEmails = relayOptionsCurrentValue.AutomaticEmails.Where(s => !string.IsNullOrWhiteSpace(s)).ToArray(),
+                RelaySenderAddress = relayOptionsCurrentValue.SenderAddress,
+                RelayAutomaticRelayExpression = relayOptionsCurrentValue.AutomaticRelayExpression,
+                SettingsAreEditable = hostingEnvironmentHelper.SettingsAreEditable,
+                DisableMessageSanitisation = serverOptionsCurrentValue.DisableMessageSanitisation,
+                TlsMode = serverOptionsCurrentValue.TlsMode.ToString(),
+                AuthenticationRequired = serverOptionsCurrentValue.AuthenticationRequired,
+                SmtpAllowAnyCredentials = serverOptionsCurrentValue.SmtpAllowAnyCredentials,
+                SecureConnectionRequired = serverOptionsCurrentValue.SecureConnectionRequired,
+                CredentialsValidationExpression = serverOptionsCurrentValue.CredentialsValidationExpression,
+                RecipientValidationExpression = serverOptionsCurrentValue.RecipientValidationExpression,
+                MessageValidationExpression = serverOptionsCurrentValue.MessageValidationExpression,
+                CommandValidationExpression = serverOptionsCurrentValue.CommandValidationExpression,
+                DisableIPv6 = serverOptionsCurrentValue.DisableIPv6,
+                WebAuthenticationRequired = serverOptionsCurrentValue.WebAuthenticationRequired,
+                DeliverMessagesToUsersDefaultMailbox = serverOptionsCurrentValue.DeliverMessagesToUsersDefaultMailbox,
+                Users = serverOptionsCurrentValue.Users,
+                Mailboxes = serverOptionsCurrentValue.Mailboxes,
+                DesktopMinimiseToTrayIcon = desktopOptions.CurrentValue.MinimiseToTrayIcon,
+                IsDesktopApp = cmdLineOptions.IsDesktopApp,
+                SmtpEnabledAuthTypesWhenNotSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                SmtpEnabledAuthTypesWhenSecureConnection = serverOptionsCurrentValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
+                CurrentUserName = currentUserName,
+                CurrentUserDefaultMailboxName = currentUserDefaultMailbox,
+                HtmlValidateConfig = serverOptionsCurrentValue.HtmlValidateConfig != null ? serverOptionsCurrentValue.HtmlValidateConfig : null,
+                DisableHtmlValidation = serverOptionsCurrentValue.DisableHtmlValidation,
+                DisableHtmlCompatibilityCheck = serverOptionsCurrentValue.DisableHtmlCompatibilityCheck
+            };
+        }
+
+        private object GetPropertyValue(object obj, string propertyName)
+        {
+            if (obj == null) return null;
+            
+            var property = obj.GetType().GetProperty(propertyName, System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Instance | System.Reflection.BindingFlags.IgnoreCase);
+            return property?.GetValue(obj);
         }
     }
 
