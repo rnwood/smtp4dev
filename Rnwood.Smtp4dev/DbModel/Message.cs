@@ -37,6 +37,16 @@ namespace Rnwood.Smtp4dev.DbModel
         
         public bool HasBareLineFeed { get; set; }
 
+        /// <summary>
+        /// JSON metadata extracted from MIME message including CC recipients, attachment filenames, etc.
+        /// </summary>
+        public string MimeMetadata { get; set; }
+        
+        /// <summary>
+        /// Plain text body content extracted from MIME message for searching
+        /// </summary>
+        public string BodyText { get; set; }
+
         public virtual List<MessageRelay> Relays { get; set; } = new List<MessageRelay>();
         public string DeliveredTo { get; set; }
 

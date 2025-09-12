@@ -190,11 +190,12 @@ namespace Rnwood.Smtp4dev.Server
                 return;
             }
 
-            Message message = new MessageConverter().ConvertAsync(await e.Connection.CurrentMessage.ToMessage(), e.Connection.CurrentMessage.Recipients.ToArray()).Result;
+            using var scope = serviceScopeFactory.CreateScope();
+            var mimeProcessingService = scope.ServiceProvider.GetService<MimeProcessingService>();
+            Message message = new MessageConverter(mimeProcessingService).ConvertAsync(await e.Connection.CurrentMessage.ToMessage(), e.Connection.CurrentMessage.Recipients.ToArray()).Result;
 
             var apiMessage = new ApiModel.Message(message);
 
-            using var scope = serviceScopeFactory.CreateScope();
             Smtp4devDbContext dbContext = scope.ServiceProvider.GetService<Smtp4devDbContext>();
             Session dbSession = dbContext.Sessions.Find(activeSessionsToDbId[e.Connection.Session]);
 
@@ -421,7 +422,9 @@ namespace Rnwood.Smtp4dev.Server
 
             foreach (var targetMailboxWithMatchedRecipients in targetMailboxes)
             {
-                Message message = new MessageConverter().ConvertAsync(e.Message, targetMailboxWithMatchedRecipients.ToArray()).Result;
+                using var scope = serviceScopeFactory.CreateScope();
+                var mimeProcessingService = scope.ServiceProvider.GetService<MimeProcessingService>();
+                Message message = new MessageConverter(mimeProcessingService).ConvertAsync(e.Message, targetMailboxWithMatchedRecipients.ToArray()).Result;
                 message.IsUnread = true;
 
                 await taskQueue.QueueTask(() => ProcessMessage(message, e.Message.Session, targetMailboxWithMatchedRecipients), false).ConfigureAwait(false);
