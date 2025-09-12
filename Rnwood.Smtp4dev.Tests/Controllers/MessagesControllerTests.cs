@@ -190,7 +190,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1, testMessage2, testMessage3);
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
-            var result = await messagesController.GetSummaries(null);
+            var result = messagesController.GetSummaries(null);
             result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage1.Id, testMessage2.Id, testMessage3.Id });
         }
 
@@ -208,7 +208,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             await messagesRepository.DbContext.SaveChangesAsync();
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
-            var result = await messagesController.GetSummaries("sUbJect2");
+            var result = messagesController.GetSummaries("sUbJect2");
             result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage2.Id });
         }
 
@@ -226,7 +226,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             await messagesRepository.DbContext.SaveChangesAsync();
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
-            var result = await messagesController.GetSummaries("ccuser");
+            var result = messagesController.GetSummaries("ccuser");
             result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage1.Id });
         }
 
@@ -244,7 +244,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             await messagesRepository.DbContext.SaveChangesAsync();
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
-            var result = await messagesController.GetSummaries("Unique search content");
+            var result = messagesController.GetSummaries("Unique search content");
             result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage1.Id, testMessage3.Id });
         }
 
@@ -262,7 +262,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             await messagesRepository.DbContext.SaveChangesAsync();
             MessagesController messagesController = new MessagesController(messagesRepository, null);
 
-            var result = await messagesController.GetSummaries("important-document");
+            var result = messagesController.GetSummaries("important-document");
             result.Results.Select(m => m.Id).Should().BeEquivalentTo(new[] { testMessage1.Id });
         }
 
