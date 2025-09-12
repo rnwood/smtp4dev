@@ -18,6 +18,7 @@ using Rnwood.Smtp4dev.Hubs;
 using Rnwood.Smtp4dev.Tests.DBMigrations.Helpers;
 using Xunit;
 using Rnwood.Smtp4dev.Server.Settings;
+using Rnwood.Smtp4dev.DbModel;
 
 namespace Rnwood.Smtp4dev.Tests.Controllers
 {
@@ -130,6 +131,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 
             var dbMessage = await new MessageConverter().ConvertAsync(message, [to]);
             dbMessage.Mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
+            dbMessage.MailboxFolder = new DbModel.MailboxFolder { Name = MailboxFolder.INBOX, Mailbox = dbMessage.Mailbox };
           
             return dbMessage;
         }

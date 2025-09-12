@@ -18,7 +18,8 @@ using Xunit.Abstractions;
 
 namespace Rnwood.Smtp4dev.Tests
 {
-    [Collection("E2E")]
+    [Collection("StressTests")]
+    
     public class MemoryLeakStressTests : E2ETests
     {
         private readonly ITestOutputHelper output;
@@ -28,7 +29,7 @@ namespace Rnwood.Smtp4dev.Tests
             this.output = output;
         }
 
-        [Fact]
+        [Fact(Skip ="Long running test - enable manually")]
         public void MessageSearchStressTest_ShouldNotLeakMemory()
         {
             RunMemoryStressTest(
@@ -57,7 +58,7 @@ namespace Rnwood.Smtp4dev.Tests
 
         private void RunMemoryStressTest(
             int messageBatches,
-            int messagesPerBatch, 
+            int messagesPerBatch,
             int concurrentSmtpSenders,
             int concurrentApiReaders,
             TimeSpan searchFrequency,
@@ -65,7 +66,7 @@ namespace Rnwood.Smtp4dev.Tests
         {
             RunE2ETest(context =>
             {
-                ExecuteStressTestAsync(context, messageBatches, messagesPerBatch, concurrentSmtpSenders, 
+                ExecuteStressTestAsync(context, messageBatches, messagesPerBatch, concurrentSmtpSenders,
                     concurrentApiReaders, searchFrequency, testDuration).GetAwaiter().GetResult();
             }, new E2ETestOptions
             {
@@ -74,9 +75,9 @@ namespace Rnwood.Smtp4dev.Tests
         }
 
         private async Task ExecuteStressTestAsync(
-            E2ETestContext context, 
+            E2ETestContext context,
             int messageBatches,
-            int messagesPerBatch, 
+            int messagesPerBatch,
             int concurrentSmtpSenders,
             int concurrentApiReaders,
             TimeSpan searchFrequency,
@@ -86,7 +87,7 @@ namespace Rnwood.Smtp4dev.Tests
             var messagesProcessed = 0;
             var searchOperations = 0;
             var cancellationTokenSource = new CancellationTokenSource(testDuration);
-            
+
             output.WriteLine($"Starting memory leak stress test");
             output.WriteLine($"Target: {messageBatches} batches × {messagesPerBatch} messages = {messageBatches * messagesPerBatch} total messages");
             output.WriteLine($"Concurrent SMTP senders: {concurrentSmtpSenders}");
@@ -102,7 +103,7 @@ namespace Rnwood.Smtp4dev.Tests
             // Setup SignalR connection for real-time notifications
             HubConnection signalRConnection = null;
             var messagesChangedCount = 0;
-            
+
             try
             {
                 signalRConnection = new HubConnectionBuilder()
@@ -156,7 +157,7 @@ namespace Rnwood.Smtp4dev.Tests
 
             // Wait for all tasks to complete or timeout
             var allTasks = sendingTasks.Concat(readingTasks).Concat(new[] { memoryMonitorTask }).ToArray();
-            
+
             try
             {
                 await Task.WhenAll(allTasks);
@@ -223,7 +224,7 @@ namespace Rnwood.Smtp4dev.Tests
                     }
 
                     output.WriteLine($"SMTP Sender {senderIndex}: Completed batch {batch + 1}/{messageBatches}");
-                    
+
                     // Pause between batches
                     await Task.Delay(100, cancellationToken);
                 }
@@ -260,11 +261,11 @@ namespace Rnwood.Smtp4dev.Tests
                     {
                         // Perform searches with different terms to exercise the search functionality
                         var searchTerm = searchTerms[random.Next(searchTerms.Length)];
-                        
+
                         var searchResponse = await httpClient.GetAsync(
                             $"api/messages?searchTerms={searchTerm}&pageSize=50&page=1",
                             cancellationToken);
-                        
+
                         if (searchResponse.IsSuccessStatusCode)
                         {
                             var content = await searchResponse.Content.ReadAsStringAsync(cancellationToken);
@@ -274,7 +275,7 @@ namespace Rnwood.Smtp4dev.Tests
                             });
 
                             onSearchOperation();
-                            
+
                             if (readerIndex == 0) // Only log from one reader to avoid spam
                             {
                                 output.WriteLine($"API Reader {readerIndex}: Search for '{searchTerm}' returned {searchResult?.Results?.Count ?? 0} messages");
@@ -353,7 +354,7 @@ namespace Rnwood.Smtp4dev.Tests
             body.AppendLine($"Batch: {batch}, Message: {messageIndex}, Sender: {senderIndex}");
             body.AppendLine($"Timestamp: {DateTime.UtcNow:O}");
             body.AppendLine();
-            
+
             // Add variable content to make messages different sizes
             for (int i = 0; i < (messageIndex % 5) + 1; i++)
             {
@@ -370,7 +371,7 @@ namespace Rnwood.Smtp4dev.Tests
             int signalRNotifications)
         {
             var readings = memoryReadings.OrderBy(r => r.Timestamp).ToList();
-            
+
             if (readings.Count == 0)
             {
                 output.WriteLine("No memory readings collected");
@@ -404,7 +405,7 @@ namespace Rnwood.Smtp4dev.Tests
 
             output.WriteLine("=== MEMORY USAGE OVER TIME ===");
             output.WriteLine("Time(s)\tMessages\tSearches\tWorking Set(MB)\tManaged(MB)");
-            
+
             foreach (var reading in readings.Where((r, i) => i % 5 == 0)) // Sample every 5th reading to avoid spam
             {
                 var elapsed = (reading.Timestamp - firstReading.Timestamp).TotalSeconds;
@@ -429,7 +430,7 @@ namespace Rnwood.Smtp4dev.Tests
         private void ValidateMemoryBehavior(ConcurrentBag<MemoryReading> memoryReadings)
         {
             var readings = memoryReadings.OrderBy(r => r.Timestamp).ToList();
-            
+
             if (readings.Count < 2)
             {
                 output.WriteLine("Not enough memory readings to validate behavior");
@@ -438,16 +439,16 @@ namespace Rnwood.Smtp4dev.Tests
 
             var firstReading = readings.First();
             var lastReading = readings.Last();
-            
+
             // Check that memory growth is reasonable (not a hard assertion as memory can fluctuate)
             var workingSetGrowth = lastReading.WorkingSetBytes - firstReading.WorkingSetBytes;
             var managedMemoryGrowth = lastReading.ManagedMemoryBytes - firstReading.ManagedMemoryBytes;
 
             output.WriteLine("=== MEMORY BEHAVIOR VALIDATION ===");
-            
+
             // Memory should not grow excessively (more than 500MB is concerning for this test)
             const long maxAllowableGrowth = 500L * 1024 * 1024; // 500MB
-            
+
             if (workingSetGrowth > maxAllowableGrowth)
             {
                 output.WriteLine($"WARNING: Working set grew by {FormatBytes(workingSetGrowth)}, which exceeds {FormatBytes(maxAllowableGrowth)}");
@@ -473,7 +474,7 @@ namespace Rnwood.Smtp4dev.Tests
             {
                 var recentReadings = readings.TakeLast(10).ToList();
                 var isGrowingConsistently = true;
-                
+
                 for (int i = 1; i < recentReadings.Count; i++)
                 {
                     if (recentReadings[i].ManagedMemoryBytes <= recentReadings[i - 1].ManagedMemoryBytes)
@@ -499,13 +500,13 @@ namespace Rnwood.Smtp4dev.Tests
             string[] suffixes = { "B", "KB", "MB", "GB" };
             double value = bytes;
             int suffixIndex = 0;
-            
+
             while (value >= 1024 && suffixIndex < suffixes.Length - 1)
             {
                 value /= 1024;
                 suffixIndex++;
             }
-            
+
             return $"{value:F2} {suffixes[suffixIndex]}";
         }
 
