@@ -59,7 +59,7 @@ namespace Rnwood.Smtp4dev.Tests.Data
 
             IMessage message = await memoryMessageBuilder.ToMessage();
 
-            var dbMessage = await new MessageConverter().ConvertAsync(message, [to]);
+            var dbMessage = await new MessageConverter(new MimeProcessingService()).ConvertAsync(message, [to]);
             dbMessage.Mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
 
             return dbMessage;
