@@ -506,6 +506,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 }
 
                 dbMessage.Mailbox = mailbox;
+                dbMessage.MailboxFolder = await dbContext.MailboxFolders.FirstOrDefaultAsync(f => f.Mailbox.Name == mailboxName && f.Name == MailboxFolder.INBOX);
                 dbMessage.IsUnread = true;
 
                 // Add to database
