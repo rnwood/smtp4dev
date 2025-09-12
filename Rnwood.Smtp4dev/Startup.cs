@@ -177,6 +177,8 @@ namespace Rnwood.Smtp4dev
             services.AddScoped<IHostingEnvironmentHelper, HostingEnvironmentHelper>();
             services.AddSingleton<ITaskQueue, TaskQueue>();
             services.AddSingleton<ScriptingHost>();
+            services.AddScoped<MimeMetadataPopulationService>();
+            services.AddHostedService<MimeMetadataStartupService>();
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>(relayOptions =>
             {
