@@ -28,7 +28,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         {
             messagesRepository = Substitute.For<IMessagesRepository>();
             server = Substitute.For<ISmtp4devServer>();
-            controller = new MessagesController(messagesRepository, server);
+            controller = new MessagesController(messagesRepository, server, new MimeProcessingService());
             var sqlLiteForTesting = new SqliteInMemory();
             context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
             InitRepo();
