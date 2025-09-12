@@ -15,6 +15,12 @@ namespace Rnwood.Smtp4dev.Server
 {
     public class MessageConverter
     {
+        private readonly MimeProcessingService _mimeProcessingService;
+
+        public MessageConverter(MimeProcessingService mimeProcessingService)
+        {
+            _mimeProcessingService = mimeProcessingService;
+        }
         public async Task<DbModel.Message> ConvertAsync(IMessage message, string[] deliveredTo)
         {
             string subject = "";
@@ -64,10 +70,10 @@ namespace Rnwood.Smtp4dev.Server
                         subject = mime.Subject;
 
                         // Extract MIME metadata
-                        mimeMetadata = ExtractMimeMetadata(mime);
+                        mimeMetadata = _mimeProcessingService.ExtractMimeMetadata(mime);
                         
                         // Extract body text
-                        bodyText = ExtractBodyText(mime);
+                        bodyText = _mimeProcessingService.ExtractBodyText(mime);
                     }
                     catch (OperationCanceledException e)
                     {
@@ -112,112 +118,6 @@ namespace Rnwood.Smtp4dev.Server
         private int CountAttachments(MessageEntitySummary part)
         {
             return part.Attachments.Count + part.ChildParts.Sum(CountAttachments);
-        }
-
-        private MimeMetadata ExtractMimeMetadata(MimeMessage mime)
-        {
-            var metadata = new MimeMetadata();
-
-            try
-            {
-                // Extract CC recipients
-                if (mime.Cc != null)
-                {
-                    foreach (var cc in mime.Cc)
-                    {
-                        metadata.CcRecipients.Add(cc.ToString());
-                    }
-                }
-
-                // Extract attachment filenames and body content info
-                ExtractPartMetadata(mime.Body, metadata);
-
-                // Set content type
-                metadata.ContentType = mime.Body?.ContentType?.MimeType ?? "";
-
-            }
-            catch (Exception)
-            {
-                // If extraction fails, return basic metadata
-            }
-
-            return metadata;
-        }
-
-        private void ExtractPartMetadata(MimeEntity entity, MimeMetadata metadata)
-        {
-            if (entity == null) return;
-
-            metadata.PartCount++;
-
-            // Check for attachments
-            if (entity.IsAttachment)
-            {
-                var filename = entity.ContentDisposition?.FileName ?? entity.ContentType?.Name;
-                if (!string.IsNullOrEmpty(filename))
-                {
-                    metadata.AttachmentFilenames.Add(filename);
-                }
-            }
-
-            // Check for body content types
-            if (entity is TextPart textPart)
-            {
-                if (textPart.IsPlain)
-                {
-                    metadata.HasTextBody = true;
-                }
-                else if (textPart.IsHtml)
-                {
-                    metadata.HasHtmlBody = true;
-                }
-            }
-            else if (entity is Multipart multipart)
-            {
-                foreach (var part in multipart)
-                {
-                    ExtractPartMetadata(part, metadata);
-                }
-            }
-        }
-
-        private string ExtractBodyText(MimeMessage mime)
-        {
-            try
-            {
-                var bodyText = new StringBuilder();
-
-                // Get text parts
-                var textPart = mime.TextBody;
-                if (!string.IsNullOrEmpty(textPart))
-                {
-                    bodyText.AppendLine(textPart);
-                }
-
-                // Get HTML parts and convert to text
-                var htmlPart = mime.HtmlBody;
-                if (!string.IsNullOrEmpty(htmlPart))
-                {
-                    try
-                    {
-                        var doc = new HtmlDocument();
-                        doc.LoadHtml(htmlPart);
-                        var plainText = doc.DocumentNode.InnerText;
-                        bodyText.AppendLine(plainText);
-                    }
-                    catch
-                    {
-                        // If HTML parsing fails, use raw HTML
-                        bodyText.AppendLine(htmlPart);
-                    }
-                }
-
-                return bodyText.ToString();
-            }
-            catch
-            {
-                return "";
-            }
         }
     }
 }

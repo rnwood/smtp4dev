@@ -28,15 +28,17 @@ namespace Rnwood.Smtp4dev.Controllers
     [UseEtagFilterAttribute]
     public class MessagesController : Controller
     {
-        public MessagesController(IMessagesRepository messagesRepository, ISmtp4devServer server)
+        public MessagesController(IMessagesRepository messagesRepository, ISmtp4devServer server, MimeProcessingService mimeProcessingService)
         {
             this.messagesRepository = messagesRepository;
             this.server = server;
+            this.mimeProcessingService = mimeProcessingService;
         }
 
         private const int CACHE_DURATION = 31556926;
         private readonly IMessagesRepository messagesRepository;
         private readonly ISmtp4devServer server;
+        private readonly MimeProcessingService mimeProcessingService;
 
         /// <summary>
         /// Returns all new messages in the INBOX folder since the provided message ID. Returns only the summary without message content.
@@ -499,7 +501,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 importedMessage.From = mimeMessage.From?.OfType<MailboxAddress>().FirstOrDefault()?.Address ?? "imported@localhost";
 
                 // Convert using existing MessageConverter
-                var messageConverter = new MessageConverter();
+                var messageConverter = new MessageConverter(mimeProcessingService);
                 var dbMessage = await messageConverter.ConvertAsync(importedMessage, recipients.ToArray());
 
                 // Set the mailbox
