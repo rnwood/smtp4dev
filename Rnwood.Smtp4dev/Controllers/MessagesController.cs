@@ -74,7 +74,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <returns></returns>
         [HttpGet]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(ApiModel.PagedResult<MessageSummary>), Description = "")]
-        public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string mailboxName = MailboxOptions.DEFAULTNAME, string sortColumn = "receivedDate",
+        public ApiModel.PagedResult<MessageSummary> GetSummaries(string searchTerms, string mailboxName = MailboxOptions.DEFAULTNAME, string folderName = MailboxFolder.INBOX, string sortColumn = "receivedDate",
             bool sortIsDescending = true, int page = 1,
             int pageSize = 5)
         {
