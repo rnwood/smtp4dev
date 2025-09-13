@@ -1,0 +1,22 @@
+{
+    "recommendations": [
+        "ms-dotnettools.csharp",
+        "ms-dotnettools.csdevkit",
+        "ms-vscode.vscode-typescript-next",
+        "vue.volar",
+        "vue.vscode-typescript-vue-plugin",
+        "ms-vscode.js-debug",
+        "ms-vscode.js-debug-companion",
+        "ms-edgedevtools.vscode-edge-devtools",
+        "bradlc.vscode-tailwindcss",
+        "esbenp.prettier-vscode",
+        "dbaeumer.vscode-eslint",
+        "ms-vscode.PowerShell",
+        "ms-vscode-remote.remote-containers",
+        "github.copilot",
+        "ms-dotnettools.vscode-dotnet-runtime",
+        "formulahendry.auto-rename-tag",
+        "christian-kohler.path-intellisense",
+        "visualstudioexptteam.vscodeintellicode"
+    ]
+}

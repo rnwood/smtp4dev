@@ -3,38 +3,101 @@
     // Use hover for the description of the existing attributes
     // For further information visit https://github.com/OmniSharp/omnisharp-vscode/blob/master/debugger-launchjson.md
     "version": "0.2.0",
-    "configurations": [{
+    "configurations": [
+        {
             "name": ".NET Core Launch (web)",
             "type": "coreclr",
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/net8.0/Rnwood.Smtp4dev.dll",
             "cwd": "${workspaceFolder}/Rnwood.Smtp4dev",
-            "args": "--recreatedb --urls http://localhost:5000",
+            "args": ["--recreatedb", "--urls", "http://localhost:5000"],
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
-            "preLaunchTask": "build Rnwood.Smtp4dev"
-            
+            "preLaunchTask": "build Rnwood.Smtp4dev",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5000"
+            }
         },
         {
+            "name": "Attach to .NET Core",
+            "type": "coreclr",
+            "request": "attach",
+            "processId": "${command:pickProcess}"
+        },
+        {
+            "name": "Chrome (Client Debug)",
             "type": "chrome",
             "request": "launch",
-            "name": "Chrome",
             "url": "http://localhost:5000",
             "webRoot": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp/src",
-            "breakOnLoad": true,
             "sourceMapPathOverrides": {
-              "webpack:///src/*": "${webRoot}/*"
-            }
-
+                "../../ClientApp/src/*": "${webRoot}/*",
+                "../ClientApp/src/*": "${webRoot}/*",
+                "./ClientApp/src/*": "${webRoot}/*",
+                "/ClientApp/src/*": "${webRoot}/*",
+                "src/*": "${webRoot}/*"
+            },
+            "userDataDir": "${workspaceFolder}/.chrome-debug-profile"
+        },
+        {
+            "name": "Chrome (Full App)",
+            "type": "chrome",
+            "request": "launch",
+            "url": "http://localhost:5000",
+            "webRoot": "${workspaceFolder}/Rnwood.Smtp4dev/wwwroot",
+            "sourceMapPathOverrides": {
+                "../../ClientApp/src/*": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp/src/*",
+                "../ClientApp/src/*": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp/src/*",
+                "./src/*": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp/src/*",
+                "src/*": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp/src/*"
+            },
+            "userDataDir": "${workspaceFolder}/.chrome-debug-profile-prod"
+        },
+        {
+            "name": "Edge (Client Debug)",
+            "type": "msedge",
+            "request": "launch",
+            "url": "http://localhost:5000",
+            "webRoot": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp/src",
+            "sourceMapPathOverrides": {
+                "../../ClientApp/src/*": "${webRoot}/*",
+                "../ClientApp/src/*": "${webRoot}/*",
+                "./ClientApp/src/*": "${webRoot}/*",
+                "/ClientApp/src/*": "${webRoot}/*",
+                "src/*": "${webRoot}/*"
+            },
+            "userDataDir": "${workspaceFolder}/.edge-debug-profile"
         }
     ],
-    "compounds": [{
-        "name": "Full stack",
-        "configurations": [
-            ".NET Core Launch (web)",
-            "Chrome"
-        ],
-        "preLaunchTask": "build Rnwood.Smtp4dev"
-    }]
+    "compounds": [
+        {
+            "name": "Full Stack (Development)",
+            "configurations": [
+                ".NET Core Launch (web)",
+                "Chrome (Client Debug)"
+            ],
+            "preLaunchTask": "prepare-fullstack-debug",
+            "stopAll": true
+        },
+        {
+            "name": "Full Stack (Production Build)",
+            "configurations": [
+                ".NET Core Launch (web)",
+                "Chrome (Full App)"
+            ],
+            "preLaunchTask": "build-all",
+            "stopAll": true
+        },
+        {
+            "name": "Full Stack (Edge)",
+            "configurations": [
+                ".NET Core Launch (web)",
+                "Edge (Client Debug)"
+            ],
+            "preLaunchTask": "prepare-fullstack-debug",
+            "stopAll": true
+        }
+    ]
 }

@@ -9,5 +9,32 @@
   ],
   "npm.includeDirectories": [
     "Rnwood.Smtp4dev/ClientApp"
-  ]
+  ],
+  "debug.allowBreakpointsEverywhere": true,
+  "debug.showSubSessionsInToolBar": true,
+  "debug.toolBarLocation": "docked",
+  "typescript.preferences.includePackageJsonAutoImports": "auto",
+  "typescript.suggest.autoImports": true,
+  "typescript.updateImportsOnFileMove.enabled": "always",
+  "dotnet.defaultSolution": "./smtp4dev.sln",
+  "dotnet.completion.showCompletionItemsFromUnimportedNamespaces": true,
+  "dotnet.preferCSharpExtension": true,
+  "omnisharp.enableEditorConfigSupport": true,
+  "omnisharp.enableImportCompletion": true,
+  "omnisharp.enableRoslynAnalyzers": true,
+  "csharp.semanticHighlighting.enabled": true,
+  "csharp.format.enable": true,
+  "files.exclude": {
+    "**/node_modules": true,
+    "**/bin": true,
+    "**/obj": true,
+    "**/.chrome-debug-profile*": true,
+    "**/.edge-debug-profile*": true
+  },
+  "search.exclude": {
+    "**/node_modules": true,
+    "**/bin": true,
+    "**/obj": true,
+    "**/wwwroot": true
+  }
 }

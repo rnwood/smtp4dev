@@ -22,7 +22,19 @@ export default defineConfig({
     },
     build: {
         outDir: "../wwwroot",
-        emptyOutDir: true
+        emptyOutDir: true,
+        sourcemap: true, // Enable source maps for production debugging
+        rollupOptions: {
+            output: {
+                sourcemapExcludeSources: false
+            }
+        }
+    },
+    server: {
+        host: '127.0.0.1',
+        port: 5173,
+        strictPort: true,
+        cors: true
     },
     worker: {
         format: 'es'
@@ -35,6 +47,7 @@ export default defineConfig({
             scss: {
                 api: 'modern'
             }
-        }
+        },
+        devSourcemap: true // Enable CSS source maps in development
     }
 })

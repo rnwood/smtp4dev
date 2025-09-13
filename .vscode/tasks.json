@@ -15,6 +15,132 @@
                 "kind": "build",
                 "isDefault": true
             }
+        },
+        {
+            "label": "install client dependencies",
+            "type": "shell",
+            "command": "npm",
+            "args": ["install"],
+            "options": {
+                "cwd": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "build client (dev)",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "build"],
+            "options": {
+                "cwd": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp"
+            },
+            "group": "build",
+            "dependsOn": "install client dependencies",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            }
+        },
+        {
+            "label": "start vite dev server",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "dev"],
+            "options": {
+                "cwd": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp"
+            },
+            "group": "build",
+            "dependsOn": "install client dependencies",
+            "isBackground": true,
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared",
+                "showReuseMessage": true,
+                "clear": false
+            },
+            "problemMatcher": [
+                {
+                    "pattern": [
+                        {
+                            "regexp": ".",
+                            "file": 1,
+                            "location": 2,
+                            "message": 3
+                        }
+                    ],
+                    "background": {
+                        "activeOnStart": true,
+                        "beginsPattern": ".",
+                        "endsPattern": "Local:.*http://127.0.0.1:3000"
+                    }
+                }
+            ]
+        },
+        {
+            "label": "clean client",
+            "type": "shell",
+            "command": "npm",
+            "args": ["run", "build"],
+            "options": {
+                "cwd": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp"
+            },
+            "group": "build"
+        },
+        {
+            "label": "prepare-fullstack-debug",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build Rnwood.Smtp4dev",
+                "install client dependencies"
+            ]
+        },
+        {
+            "label": "build-all",
+            "dependsOrder": "sequence",
+            "dependsOn": [
+                "build Rnwood.Smtp4dev",
+                "build client (dev)"
+            ]
+        },
+        {
+            "label": "clean",
+            "type": "shell",
+            "command": "dotnet",
+            "args": ["clean", "${workspaceFolder}/Rnwood.Smtp4dev"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
+        },
+        {
+            "label": "restore",
+            "type": "shell",
+            "command": "dotnet",
+            "args": ["restore", "${workspaceFolder}/Rnwood.Smtp4dev"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "shared"
+            }
         }
     ]
 }
