@@ -91,7 +91,9 @@ namespace Rnwood.Smtp4dev.Data
                     DeliveredTo = m.DeliveredTo,
                     IsRelayed = m.Relays.Count > 0,
                     IsUnread = m.IsUnread,
-                    HasBareLineFeed = m.HasBareLineFeed
+                    HasBareLineFeed = m.HasBareLineFeed,
+                    MimeMetadata = m.MimeMetadata,
+                    BodyText = m.BodyText
                 }).AsNoTracking();
         }
 

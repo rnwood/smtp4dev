@@ -2,6 +2,8 @@ using System;
 using System.Globalization;
 using System.IO;
 using System.Net;
+using System.Text;
+using System.Text.Json;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -167,6 +169,46 @@ namespace Rnwood.Smtp4dev
                         }
                         context.SaveChanges();
 
+                        // Populate MIME metadata for existing messages synchronously during startup
+                        var messagesWithoutMetadata = context.Messages
+                            .Where(m => string.IsNullOrEmpty(m.MimeMetadata) || string.IsNullOrEmpty(m.BodyText))
+                            .ToList();
+
+                        if (messagesWithoutMetadata.Any())
+                        {
+                            Log.Logger.Information("Populating MIME metadata for {count} existing messages during startup", messagesWithoutMetadata.Count);
+                            var mimeProcessingService = new MimeProcessingService();
+                            
+                            int processed = 0;
+                            int batchSize = 50; // Process in batches to avoid memory issues
+
+                            foreach (var batch in messagesWithoutMetadata.Chunk(batchSize))
+                            {
+                                foreach (var message in batch)
+                                {
+                                    try
+                                    {
+                                        var (mimeMetadata, bodyText) = mimeProcessingService.ExtractMimeDataFromMessage(message);
+                                        message.MimeMetadata = JsonSerializer.Serialize(mimeMetadata);
+                                        message.BodyText = bodyText;
+                                    }
+                                    catch (Exception ex)
+                                    {
+                                        Log.Logger.Warning(ex, "Failed to extract MIME metadata for message {messageId}", message.Id);
+                                        // Set fallback values
+                                        message.MimeMetadata = JsonSerializer.Serialize(new Server.MimeMetadata());
+                                        message.BodyText = Encoding.UTF8.GetString(message.Data);
+                                    }
+                                }
+
+                                context.SaveChanges();
+                                processed += batch.Length;
+                                Log.Logger.Information("Processed {processed}/{total} messages", processed, messagesWithoutMetadata.Count);
+                            }
+
+                            Log.Logger.Information("Successfully populated MIME metadata for all existing messages during startup");
+                        }
+
 
                     }, ServiceLifetime.Scoped, ServiceLifetime.Singleton);
 
@@ -177,6 +219,7 @@ namespace Rnwood.Smtp4dev
             services.AddScoped<IHostingEnvironmentHelper, HostingEnvironmentHelper>();
             services.AddSingleton<ITaskQueue, TaskQueue>();
             services.AddSingleton<ScriptingHost>();
+            services.AddScoped<MimeProcessingService>();
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>(relayOptions =>
             {

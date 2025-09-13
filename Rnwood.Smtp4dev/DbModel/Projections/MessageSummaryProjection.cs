@@ -14,4 +14,6 @@ public class MessageSummaryProjection
     public string DeliveredTo { get; set; }
     public bool IsUnread { get; set; }
     public bool HasBareLineFeed { get; set; }
+    public string MimeMetadata { get; set; }
+    public string BodyText { get; set; }
 }
