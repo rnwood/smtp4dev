@@ -469,7 +469,10 @@
         }
 
         @Watch("searchTerm")
-        doSearch = debounce(() => this.refresh(false), 200);
+        onSearchTermChanged() {
+            this.debouncedDoSearch();
+        }
+        debouncedDoSearch = debounce(() => this.refresh(false), 200);
 
         @Watch("selectedMailbox")
         async onMailboxChanged() {

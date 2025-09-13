@@ -3,14 +3,12 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using Rnwood.Smtp4dev.ApiModel;
 using System.Linq.Dynamic.Core;
 using Microsoft.EntityFrameworkCore;
 using Message = Rnwood.Smtp4dev.DbModel.Message;
 using Rnwood.Smtp4dev.Server;
-using MimeKit;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.DbModel;
 using NSwag.Annotations;
@@ -20,6 +18,8 @@ using StreamLib;
 using System.Text;
 using Rnwood.SmtpServer;
 using Microsoft.AspNetCore.Http;
+using MimeKit;
+using HtmlAgilityPack;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -28,15 +28,17 @@ namespace Rnwood.Smtp4dev.Controllers
     [UseEtagFilterAttribute]
     public class MessagesController : Controller
     {
-        public MessagesController(IMessagesRepository messagesRepository, ISmtp4devServer server)
+        public MessagesController(IMessagesRepository messagesRepository, ISmtp4devServer server, MimeProcessingService mimeProcessingService)
         {
             this.messagesRepository = messagesRepository;
             this.server = server;
+            this.mimeProcessingService = mimeProcessingService;
         }
 
         private const int CACHE_DURATION = 31556926;
         private readonly IMessagesRepository messagesRepository;
         private readonly ISmtp4devServer server;
+        private readonly MimeProcessingService mimeProcessingService;
 
         /// <summary>
         /// Returns all new messages in the INBOX folder since the provided message ID. Returns only the summary without message content.
@@ -62,7 +64,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <summary>
         /// Returns a list of message summaries including basic details but not the content.
         /// </summary>
-        /// <param name="searchTerms">Case insensitive term to search for in subject,from,to</param>
+        /// <param name="searchTerms">Case insensitive term to search for in subject, from, to, cc, body content, and attachment filenames</param>
         /// <param name="mailboxName">Mailbox name. If not specified, defaults to the mailboxName with name 'Default'</param>
         /// <param name="folderName">Folder name (INBOX, Sent). If not specified, returns all messages in mailbox</param>
         /// <param name="sortColumn">Property name from response type to sort by</param>
@@ -83,9 +85,16 @@ namespace Rnwood.Smtp4dev.Controllers
             if (!string.IsNullOrEmpty(searchTerms))
             {
                 var searchTermsLower = searchTerms.ToLower();
-                query = query.Where(m => m.Subject.ToLower().Contains(searchTermsLower)
-                                         || m.From.ToLower().Contains(searchTermsLower)
-                                         || m.To.ToLower().Contains(searchTermsLower)
+                
+                // Enhanced search using database fields - no need for message limits
+                query = query.Where(m => 
+                    // Basic fields
+                    m.Subject.ToLower().Contains(searchTermsLower) ||
+                    m.From.ToLower().Contains(searchTermsLower) ||
+                    m.To.ToLower().Contains(searchTermsLower) ||
+                    // Extended fields from database - need to access them through the Message entity
+                    (m.MimeMetadata != null && m.MimeMetadata.ToLower().Contains(searchTermsLower)) ||
+                    (m.BodyText != null && m.BodyText.ToLower().Contains(searchTermsLower))
                 );
             }
 
@@ -492,7 +501,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 importedMessage.From = mimeMessage.From?.OfType<MailboxAddress>().FirstOrDefault()?.Address ?? "imported@localhost";
 
                 // Convert using existing MessageConverter
-                var messageConverter = new MessageConverter();
+                var messageConverter = new MessageConverter(mimeProcessingService);
                 var dbMessage = await messageConverter.ConvertAsync(importedMessage, recipients.ToArray());
 
                 // Set the mailbox
