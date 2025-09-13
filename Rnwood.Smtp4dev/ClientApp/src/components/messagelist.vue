@@ -468,6 +468,8 @@
             }
         }
 
+        private debouncedRefresh = debounce(() => this.refresh(false), 200);
+
         @Watch("searchTerm")
         onSearchTermChanged() {
             this.debouncedDoSearch();
@@ -528,11 +530,9 @@
         }
 
         async refresh(includeNotifications: boolean, silent: boolean = false) {
-            this.loading = !silent;
+            if (!silent) this.loading = true;
             let unlock = await this.mutex.acquire();
-
             try {
-                this.loading = !silent;
                 this.error = null;
 
                 const server = await this.connection!.getServer()
@@ -603,7 +603,7 @@
             } catch (e: any) {
                 this.error = e;
             } finally {
-                this.loading = false;
+                if (!silent) this.loading = false;
                 unlock();
             }
         }
@@ -626,6 +626,7 @@
         }
 
         async mounted() {
+            this.loading = true;
             await this.refresh(true, false);
         }
 
