@@ -3,6 +3,11 @@ on:
   release:
     types: [released]
   workflow_dispatch:
+    inputs:
+      version:
+        type: string
+        required: true
+        description: Version
 jobs:
   publish:
     runs-on: windows-latest
@@ -13,9 +18,11 @@ jobs:
           identifier: Rnwood.Smtp4dev
           installers-regex: 'Rnwood.Smtp4dev-win-(x64|arm64)-.*\.zip'
           token: ${{ secrets.WINGET_TOKEN }}
+          version: ${{ inputs.version }}
       - name: Publish smtp4dev.Desktop to WinGet
         uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: Rnwood.Smtp4dev.Desktop
           installers-regex: 'Rnwood.Smtp4dev.Desktop-win-x64-.*\.zip'
           token: ${{ secrets.WINGET_TOKEN }}
+          version: ${{ inputs.version }}
