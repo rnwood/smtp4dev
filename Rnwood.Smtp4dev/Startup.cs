@@ -60,7 +60,7 @@ namespace Rnwood.Smtp4dev
 
             // Get all migrations that have been applied to the database
             var appliedMigrations = context.Database.GetAppliedMigrations().ToList();
-            
+
             // Get all migrations available in the current application
             var availableMigrations = context.Database.GetMigrations().ToList();
 
@@ -92,7 +92,7 @@ namespace Rnwood.Smtp4dev
                     //Remove the JSON content type from the actions where it is not supported.
                     NSwag.OpenApiOperationDescription sendOp = d.Operations.FirstOrDefault(o => o.Path.EndsWith("/send") || o.Path.EndsWith("/reply"));
                     sendOp.Operation.RequestBody.Content.Remove("application/json");
-              
+
                 };
             });
 
@@ -131,10 +131,10 @@ namespace Rnwood.Smtp4dev
 
 
                         using var context = new Smtp4devDbContext((DbContextOptions<Smtp4devDbContext>)opt.Options);
-                        
+
                         // Validate database version compatibility before attempting any operations
                         ValidateDatabaseVersionCompatibility(context);
-                        
+
                         if (string.IsNullOrEmpty(serverOptions.Database))
                         {
                             context.Database.Migrate();
@@ -178,7 +178,7 @@ namespace Rnwood.Smtp4dev
                         {
                             Log.Logger.Information("Populating MIME metadata for {count} existing messages during startup", messagesWithoutMetadata.Count);
                             var mimeProcessingService = new MimeProcessingService();
-                            
+
                             int processed = 0;
                             int batchSize = 50; // Process in batches to avoid memory issues
 
@@ -335,14 +335,30 @@ namespace Rnwood.Smtp4dev
 
             if (!string.IsNullOrEmpty(serverOptions.BasePath) && serverOptions.BasePath != "/")
             {
-                RewriteOptions rewrites = new RewriteOptions();
-                rewrites.AddRedirect("^" + serverOptions.BasePath.TrimEnd('/') + "$", serverOptions.BasePath.TrimEnd('/') + "/");
-                ;
-                rewrites.AddRedirect("^(/)?$", serverOptions.BasePath.TrimEnd('/') + "/");
-                ;
-                app.UseRewriter(rewrites);
+                string basePathNoSlash = serverOptions.BasePath.TrimEnd('/');
+                string redirectTarget = basePathNoSlash + "/";
 
-                app.Map(serverOptions.BasePath, configure);
+                // Global middleware to redirect /smtp4dev to /smtp4dev/
+                app.Use(async (context, next) =>
+                {
+                    if (context.Request.Path.Equals(basePathNoSlash, StringComparison.OrdinalIgnoreCase)
+                        && !context.Request.Path.Value.EndsWith("/"))
+                    {
+                        var queryString = context.Request.QueryString.HasValue ? context.Request.QueryString.Value : "";
+                        context.Response.Redirect(redirectTarget + queryString, true);
+                        return;
+                    }
+                    else if (context.Request.Path.Value.Equals("/")
+                        || context.Request.Path.Value == String.Empty)
+                    {
+                        var queryString = context.Request.QueryString.HasValue ? context.Request.QueryString.Value : "";
+                        context.Response.Redirect(redirectTarget + queryString, true);
+                        return;
+                    }
+                    await next();
+                });
+
+                app.Map(serverOptions.BasePath.TrimEnd('/'), configure);
             }
             else
             {
