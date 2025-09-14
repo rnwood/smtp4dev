@@ -75,7 +75,7 @@ stages:
     condition: succeeded()
     jobs:
       - job: BuildMatrix
-        displayName: Build and test - 
+        displayName: ${{ if eq(variables['runTests'], true) }}: 'Build and test -' ${{ else }}: 'Build' 
         timeoutInMinutes: 90
         pool:
           vmImage: $(vmImage)
