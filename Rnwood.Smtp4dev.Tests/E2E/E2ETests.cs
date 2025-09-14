@@ -24,8 +24,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
         public class E2ETestOptions
         {
-            public required  bool InMemoryDB { get; set; }
-            public required string BasePath { get; set; }
+            public bool InMemoryDB { get; set; }
+            public string BasePath { get; set; }
             
             public string TestPath { get; set; }
             public IDictionary<string, string> EnvironmentVariables { get; set; } = new Dictionary<string, string>();
