@@ -1,0 +1,13 @@
+name: Print WINGET_TOKEN
+
+on:
+  workflow_dispatch:
+
+jobs:
+  debug-token:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo WINGET_TOKEN
+        run: echo "WINGET_TOKEN=$WINGET_TOKEN"
+        env:
+          WINGET_TOKEN: ${{ secrets.WINGET_TOKEN }}
