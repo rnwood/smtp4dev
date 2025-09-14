@@ -19,6 +19,7 @@ jobs:
           installers-regex: 'Rnwood.Smtp4dev-win-(x64|arm64)-.*\.zip'
           token: ${{ secrets.WINGET_TOKEN }}
           version: ${{ inputs.version }}
+          release-tag: ${{ inputs.version }}
       - name: Publish smtp4dev.Desktop to WinGet
         uses: vedantmgoyal9/winget-releaser@main
         with:
@@ -26,3 +27,4 @@ jobs:
           installers-regex: 'Rnwood.Smtp4dev.Desktop-win-x64-.*\.zip'
           token: ${{ secrets.WINGET_TOKEN }}
           version: ${{ inputs.version }}
+          release-tag: ${{ inputs.version }}
