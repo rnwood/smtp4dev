@@ -1,7 +1,8 @@
-name: Publish to WinGet
+name: Publish to WinGet - stable builds
 on:
   release:
-    types: [published]
+    types: [released]
+  workflow_dispatch:
 jobs:
   publish:
     runs-on: windows-latest
