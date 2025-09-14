@@ -1100,8 +1100,10 @@ stages:
 
                 File Name | Description
                 -- | --
-                [Winget package](https://winget.run/pkg/rnwood/smtp4dev/desktop)| Rnwood.Smtp4dev.Desktop Winget package (recommended easy option for Win10/11)
-                [Winget package](https://winget.run/pkg/rnwood/smtp4dev)| Rnwood.Smtp4dev Winget package Win10/11)
+                ${{ if eq(variables['isreleasebuild'], true) }}
+                Winget package ```winget install -v "${tag}" -e Rnwood.Smtp4dev.Desktop``` | Rnwood.Smtp4dev.Desktop Winget package (recommended easy option for Win10/11)
+                Winget package ```winget install -v "${tag}" -e Rnwood.Smtp4dev``` | Rnwood.Smtp4dev Winget package Win10/11)
+                ${{ end }}
                 [Rnwood.Smtp4dev-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip) | Windows x64 binary standalone - Server edition
                 [Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip) | Windows x64 binary standalone - Desktop app edition.
                 [Rnwood.Smtp4dev-win-arm64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip) | Windows ARM 62-bit binary standalone
