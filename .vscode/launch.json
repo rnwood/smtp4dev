@@ -11,7 +11,7 @@
             // If you have changed target frameworks, make sure to update the program path.
             "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/net8.0/Rnwood.Smtp4dev.dll",
             "cwd": "${workspaceFolder}/Rnwood.Smtp4dev",
-            "args": ["--recreatedb", "--urls", "http://localhost:5000"],
+            "args": ["--recreatedb", "--urls", "http://localhost:5000", "--basepath=/smtp4dev"],
             "stopAtEntry": false,
             "internalConsoleOptions": "openOnSessionStart",
             "preLaunchTask": "build Rnwood.Smtp4dev",
@@ -30,7 +30,7 @@
             "name": "Chrome (Client Debug)",
             "type": "chrome",
             "request": "launch",
-            "url": "http://localhost:5000",
+            "url": "http://localhost:5000/smtp4dev",
             "webRoot": "${workspaceFolder}/Rnwood.Smtp4dev/ClientApp/src",
             "sourceMapPathOverrides": {
                 "../../ClientApp/src/*": "${webRoot}/*",
