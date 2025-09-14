@@ -26,7 +26,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         {
             public bool InMemoryDB { get; set; }
             public string BasePath { get; set; }
-            public IDictionary<string,string> EnvironmentVariables { get; set; } = new Dictionary<string,string>();
+            
+            public string TestPath { get; set; }
+            public IDictionary<string, string> EnvironmentVariables { get; set; } = new Dictionary<string, string>();
         }
 
         public class E2ETestContext
@@ -156,7 +158,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         if (newLine.StartsWith("Now listening on: http://"))
                         {
                             int portNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s]+:(\d+)", "$1"));
-                            baseUrl = new Uri($"http://localhost:{portNumber}{options.BasePath ?? ""}");
+                            baseUrl = new Uri($"http://localhost:{portNumber}{options.TestPath ?? options.BasePath ?? ""}");
                         }
 
                         if (newLine.StartsWith("SMTP Server is listening on port"))

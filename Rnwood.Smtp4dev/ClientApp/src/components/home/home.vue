@@ -4,8 +4,8 @@
             <div style="flex: 0 0 content">
                 <a href="https://github.com/rnwood/smtp4dev/" target="_blank">
 
-                    <UseDark v-slot="{ isDark, toggleDark }">
-                        <img height="35" :src="isDark ? '/logo-dark.png' : '/logo.png'" class="logo" alt="smtp4dev" />
+                    <UseDark v-slot="{ isDark }">
+                        <img height="35" :src="isDark ? './logo-dark.png' : './logo.png'" class="logo" alt="smtp4dev" />
                     </UseDark>
                 </a>
             </div>
