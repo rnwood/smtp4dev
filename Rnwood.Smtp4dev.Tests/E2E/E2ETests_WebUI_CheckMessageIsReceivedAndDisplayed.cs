@@ -17,11 +17,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         {
         }
 
-            [Theory]
-        [InlineData("/", false)]
-        [InlineData("/", true)]
-        [InlineData("/smtp4dev", true)]
-        public void CheckMessageIsReceivedAndDisplayed(string basePath, bool inMemoryDb)
+        [Theory]
+        [InlineData("", "", false)]
+        [InlineData("", "/", true)]
+        [InlineData("/smtp4dev", "/smtp4dev", true)]
+        [InlineData("/smtp4dev", "/smtp4dev/", true)]
+        [InlineData("/smtp4dev", "", true)]
+        [InlineData("/smtp4dev", "/", true)]
+        public void CheckMessageIsReceivedAndDisplayed(string basePath, string testPath, bool inMemoryDb)
         {
             RunUITestAsync($"{nameof(CheckMessageIsReceivedAndDisplayed)}-{basePath}-{inMemoryDb}", async (page, baseUrl, smtpPortNumber) =>
             {
@@ -59,13 +62,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     var rows = await grid.GetRowsAsync();
                     return rows.FirstOrDefault();
                 });
-                
+
                 Assert.NotNull(messageRow);
                 Assert.True(await messageRow.ContainsTextAsync(messageSubject));
             }, new UITestOptions
             {
                 InMemoryDB = inMemoryDb,
-                BasePath = basePath
+                BasePath = basePath,
+                TestPath = testPath
             });
         }
     }

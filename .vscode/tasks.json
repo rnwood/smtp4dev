@@ -7,7 +7,6 @@
             "type": "process",
             "args": [
                 "build",
-                "${workspaceFolder}/Rnwood.Smtp4dev",
                 "/property:GenerateFullPaths=true"
             ],
             "problemMatcher": "$msCompile",
