@@ -1,6 +1,6 @@
 ﻿<template>
 
-    <div class="hfillpanel" v-loading="!html">
+    <div class="hfillpanel" v-loading="loading">
 
         <div class="toolbar">
             <el-select style="flex: 1 0 200px;" v-model="selectedViewportSizeName" filterable @change="viewportRotate=false">
