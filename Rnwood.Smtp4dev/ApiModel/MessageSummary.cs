@@ -1,5 +1,7 @@
 ﻿using Rnwood.Smtp4dev.Migrations;
+using Rnwood.Smtp4dev.Server;
 using System;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace Rnwood.Smtp4dev.ApiModel
@@ -31,7 +33,13 @@ namespace Rnwood.Smtp4dev.ApiModel
             IsUnread = messagesSummaryProjection.IsUnread;
             IsRelayed = messagesSummaryProjection.IsRelayed;
             DeliveredTo = messagesSummaryProjection.DeliveredTo;
-            HasWarnings = messagesSummaryProjection.HasBareLineFeed;
+
+            MimeMetadata mimeMetadata = !string.IsNullOrEmpty(messagesSummaryProjection.MimeMetadata) ?
+                JsonSerializer.Deserialize<MimeMetadata>(messagesSummaryProjection.MimeMetadata)
+                : null;
+
+            HasWarnings = messagesSummaryProjection.HasBareLineFeed
+            || (mimeMetadata?.HasDuplicatedContentIds.GetValueOrDefault() ?? false);
         }
 
         public bool IsRelayed { get; set; }

@@ -43,5 +43,8 @@ namespace Rnwood.Smtp4dev.Server
         /// </summary>
         [JsonPropertyName("partCount")]
         public int PartCount { get; set; }
+
+        [JsonPropertyName("hasDuplicatedContentIds")]
+        public bool? HasDuplicatedContentIds { get; set; }
     }
 }
