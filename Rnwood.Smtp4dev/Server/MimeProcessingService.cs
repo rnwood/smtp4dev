@@ -56,7 +56,7 @@ namespace Rnwood.Smtp4dev.Server
                 }
 
                 // Extract attachment filenames and body content info
-                ExtractPartMetadata(mime.Body, metadata);
+                ExtractPartMetadata(mime.Body, metadata, new HashSet<string>());
 
                 // Set content type
                 metadata.ContentType = mime.Body?.ContentType?.MimeType ?? "";
@@ -69,11 +69,19 @@ namespace Rnwood.Smtp4dev.Server
             return metadata;
         }
 
-        public void ExtractPartMetadata(MimeEntity entity, MimeMetadata metadata)
+        public void ExtractPartMetadata(MimeEntity entity, MimeMetadata metadata, HashSet<string> seenContentIds)
         {
             if (entity == null) return;
 
             metadata.PartCount++;
+
+            if (!string.IsNullOrEmpty(entity.ContentId) && seenContentIds.Contains(entity.ContentId))
+            {
+                metadata.HasDuplicatedContentIds = true;
+            } else
+            {
+                seenContentIds.Add(entity.ContentId);
+            }
 
             // Check for attachments
             if (entity.IsAttachment)
@@ -101,7 +109,7 @@ namespace Rnwood.Smtp4dev.Server
             {
                 foreach (var part in multipart)
                 {
-                    ExtractPartMetadata(part, metadata);
+                    ExtractPartMetadata(part, metadata, seenContentIds);
                 }
             }
         }

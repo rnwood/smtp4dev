@@ -1,12 +1,13 @@
-﻿using MimeKit;
+﻿using Microsoft.AspNetCore.Mvc;
+using MimeKit;
+using Rnwood.Smtp4dev.Migrations;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Security.Cryptography;
 using System.Text;
-using Microsoft.AspNetCore.Mvc;
 using System.Text.Json.Serialization;
-using Rnwood.Smtp4dev.Migrations;
 
 namespace Rnwood.Smtp4dev.ApiModel
 {
@@ -88,6 +89,18 @@ namespace Rnwood.Smtp4dev.ApiModel
                 Parts.Add(HandleMimeEntity(MimeMessage.Body));
                 HasHtmlBody = MimeMessage.HtmlBody != null;
                 HasPlainTextBody = MimeMessage.TextBody != null;
+
+                var duplicateCids = Parts.Flatten(p => p.ChildParts)
+                    .Where(p => !string.IsNullOrEmpty(p.ContentId))
+                    .GroupBy(p => p.ContentId)
+                    .Where(g => g.Count() > 1)
+                    .Select(g => g.Key)
+                    .ToList();
+
+                if (duplicateCids.Any())
+                {
+                    Warnings.Add(new MessageWarning { Details = $"Non unique MIME Content-Id headers found: {string.Join(", ", duplicateCids.Select(cid => string.Concat("'", cid, "'")))}" });
+                }
             }
         }
 
