@@ -80,7 +80,7 @@
                     } else {
 
                         this.sourceurl = new MessagesController().getPartSource_url(this.messageEntitySummary.messageId, this.messageEntitySummary.id);
-                        this.downloadurl = new MessagesController().getPartContent_url(this.messageEntitySummary.messageId, this.messageEntitySummary.id);
+                        this.downloadurl = new MessagesController().getPartContent_url(this.messageEntitySummary.messageId, this.messageEntitySummary.id, true);
                         this.source = await new MessagesController().getPartSource(this.messageEntitySummary.messageId, this.messageEntitySummary.id);
                         this.sourceLang = this.messageEntitySummary.headers.find(h => h.name.toLowerCase() == "content-type" && h.value.indexOf("text/html") === 0) ? "html" : "text";
 
