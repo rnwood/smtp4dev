@@ -39,14 +39,3 @@
 
     export default toNative(MessagePartPreview);
 </script>
-
-<style scoped>
-    .messagepartpreview {
-    margin-top: 1em;
-    }
-    .messagepartpreview__not-previewable {
-    color: #888;
-    font-size: 0.95em;
-    margin-top: 1em;
-    }
-</style>

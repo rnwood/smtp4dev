@@ -192,7 +192,7 @@
                                 <template #label>
                                     <el-icon><View /></el-icon>&nbsp;Preview
                                 </template>
-                                <messagepartpreview :message="message" :part="selectedPart" class="fill" />
+                                <messagepartpreview :message="message" :part="selectedPart" class="nopad fill" />
                             </el-tab-pane>
                             <el-tab-pane label="Headers" id="headers" class="fill vfillpanel">
                                 <template #label>
