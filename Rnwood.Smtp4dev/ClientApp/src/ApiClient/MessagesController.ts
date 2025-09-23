@@ -96,13 +96,13 @@ export default class MessagesController {
     }
 
     // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content  
-    public getPartContent_url(id: string, partid: string): string {
-        return `${this.apiBaseUrl}/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content`;
+    public getPartContent_url(id: string, partid: string, download: boolean): string {
+        return `${this.apiBaseUrl}/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content?download=${download}`;
     }
 
-    public async getPartContent(id: string, partid: string): Promise<FileStreamResult> {
+    public async getPartContent(id: string, partid: string, download: boolean): Promise<FileStreamResult> {
 
-        return (await axios.get(this.getPartContent_url(id, partid), null || undefined)).data as FileStreamResult;
+        return (await axios.get(this.getPartContent_url(id, partid, download), null || undefined)).data as FileStreamResult;
     }
 
     // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/source  

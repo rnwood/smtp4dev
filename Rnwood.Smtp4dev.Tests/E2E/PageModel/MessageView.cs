@@ -13,19 +13,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
         }
 
         public async Task<ILocator> GetViewTabAsync()
-        {
-            // Try primary selector first
-            try
-            {
-                var tab = page.Locator("div[contains(@class, 'el-tab-pane')][id='view']//ancestor::div[contains(@class, 'el-tabs')]//div[contains(@class, 'el-tabs__item')]:has-text('View')");
-                await tab.WaitForAsync(new LocatorWaitForOptions { Timeout = 1000 });
-                return tab;
-            }
-            catch
-            {
-                // Fallback selector
-                return page.Locator("div[class*='el-tabs__item']:has-text('View')");
-            }
+        { 
+            // Fallback selector
+            return page.Locator("div[class*='el-tabs__item']:text-is('View')");
         }
 
         public async Task<ILocator> GetHtmlSubTabAsync()
@@ -89,7 +79,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
         {
             var frame = await GetHtmlFrameAsync();
             var frameHandle = await frame.ElementHandleAsync();
-            
+
             if (frameHandle != null)
             {
                 var frameContent = await frameHandle.ContentFrameAsync();
@@ -99,7 +89,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.PageModel
                     return await body.InnerHTMLAsync();
                 }
             }
-            
+
             return "";
         }
 

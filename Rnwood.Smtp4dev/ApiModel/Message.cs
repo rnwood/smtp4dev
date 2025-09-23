@@ -166,16 +166,24 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         }
 
-        internal static FileStreamResult GetPartContent(Message result, string cid)
+        internal static FileStreamResult GetPartContent(Message result, string cid, bool download= false)
         {
             var contentEntity = GetPart(result, cid);
 
             if (contentEntity is MimePart mimePart && mimePart.Content != null)
             {
+                string fileDownloadName = null;
+
+                if (download)
+                {
+                    fileDownloadName = mimePart.FileName ??
+                                       ((contentEntity.ContentId ?? "content") + (MimeTypes.TryGetExtension(mimePart.ContentType.MimeType, out string extn) ? extn : ""));
+                }
+
+
                 return new FileStreamResult(mimePart.Content.Open(), contentEntity.ContentType?.MimeType ?? "application/text")
                 {
-                    FileDownloadName = mimePart.FileName ??
-                                       ((contentEntity.ContentId ?? "content") + (MimeTypes.TryGetExtension(mimePart.ContentType.MimeType, out string extn) ? extn : ""))
+                    FileDownloadName = fileDownloadName
                 };
             }
             else
