@@ -186,7 +186,14 @@
                     </el-tree>
 
                     <div v-show="selectedPart" class="fill vfillpanel">
-                        <el-tabs value="headers" class="fill hfillpanel" type="border-card">
+                        <el-tabs v-if="selectedPart" value="preview" class="fill hfillpanel" type="border-card">
+
+                            <el-tab-pane label="Preview" id="preview" class="fill vfillpanel">
+                                <template #label>
+                                    <el-icon><View /></el-icon>&nbsp;Preview
+                                </template>
+                                <messagepartpreview :message="message" :part="selectedPart" class="nopad fill" />
+                            </el-tab-pane>
                             <el-tab-pane label="Headers" id="headers" class="fill vfillpanel">
                                 <template #label>
                                     <el-icon><Memo /></el-icon>&nbsp;Headers
@@ -207,6 +214,7 @@
                                 </template>
                                 <messagepartsource class="fill" :messageEntitySummary="selectedPart" type="raw"></messagepartsource>
                             </el-tab-pane>
+
                         </el-tabs>
                     </div>
 
@@ -243,6 +251,7 @@
     import ServerController from '../ApiClient/ServerController';
     import MessageViewPlainText from "./messageviewplaintext.vue";
     import MessageCompose from "@/components/messagecompose.vue";
+    import MessagePartPreview from "@/components/messagepartpreview.vue";
     import { UseDark } from '@vueuse/components';
 
     @Component({
@@ -256,6 +265,7 @@
             messageclientanalysis: MessageClientAnalysis,
             messagehtmlvalidation: MessageHtmlValidation,
             messagecompose: MessageCompose,
+            messagepartpreview: MessagePartPreview,
             UseDark
         }
     })
@@ -443,6 +453,13 @@
 
         get selectedPartHeaders() {
             return this.selectedPart != null ? this.selectedPart.headers : [];
+        }
+
+        get isSelectedPartPreviewable(): boolean {
+            if (!this.selectedPart) return false;
+            const header = this.selectedPart.headers.find(h => h.name.toLowerCase() === 'content-type');
+            const contentType = header ? header.value.split(';')[0].trim().toLowerCase() : '';
+            return contentType.startsWith('image/') || contentType === 'text/html' || contentType === 'application/pdf';
         }
     }
 

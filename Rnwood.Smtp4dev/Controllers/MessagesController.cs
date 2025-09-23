@@ -288,9 +288,9 @@ namespace Rnwood.Smtp4dev.Controllers
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(string), Description = "")]
         [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message or part does not exist")]
         [ResponseCache(Location = ResponseCacheLocation.Any, Duration = CACHE_DURATION)]
-        public async Task<FileStreamResult> GetPartContent(Guid id, string partid)
+        public async Task<FileStreamResult> GetPartContent(Guid id, string partid, bool download=false)
         {
-            return ApiModel.Message.GetPartContent(await GetMessage(id), partid);
+            return ApiModel.Message.GetPartContent(await GetMessage(id), partid, download);
         }
 
         /// <summary>
