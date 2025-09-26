@@ -664,20 +664,23 @@ stages:
               zipAfterPublish: false
               modifyOutputPath: false
               arguments: '-c Release -p:version=$(version) -o out'
+          - task: DotNetCoreCLI@2
+            displayName: Build Test Project for Playwright
+            inputs:
+              command: build
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
+              arguments: '-c Release'
           - task: PowerShell@2
-            displayName: Install Playwright Browsers for Docker Tests
+            displayName: Install Playwright Browsers with Robust Detection
+            timeoutInMinutes: 10
             inputs:
               targetType: inline
               script: |
-                Write-Host "Installing Playwright browsers for Docker E2E tests..."
+                Write-Host "Installing Playwright browsers with robust detection..."
                 
                 try {
                   Write-Host "Current directory: $(Get-Location)"
                   Write-Host "Starting installation at: $(Get-Date)"
-                  
-                  # Force a fresh build of the test project to ensure playwright.ps1 is generated
-                  Write-Host "Ensuring test project is built with Playwright dependencies..."
-                  dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release --no-restore
                   
                   # Wait briefly for file system to sync (CI timing issue)
                   Start-Sleep -Seconds 2
@@ -852,20 +855,23 @@ stages:
               zipAfterPublish: false
               modifyOutputPath: false
               arguments: '-c Release -p:version=$(version) -o out'
+          - task: DotNetCoreCLI@2
+            displayName: Build Test Project for Playwright
+            inputs:
+              command: build
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
+              arguments: '-c Release'
           - task: PowerShell@2
-            displayName: Install Playwright Browsers for Docker Tests
+            displayName: Install Playwright Browsers with Robust Detection
+            timeoutInMinutes: 10
             inputs:
               targetType: inline
               script: |
-                Write-Host "Installing Playwright browsers for Docker E2E tests..."
+                Write-Host "Installing Playwright browsers with robust detection..."
                 
                 try {
                   Write-Host "Current directory: $(Get-Location)"
                   Write-Host "Starting installation at: $(Get-Date)"
-                  
-                  # Force a fresh build of the test project to ensure playwright.ps1 is generated
-                  Write-Host "Ensuring test project is built with Playwright dependencies..."
-                  dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release --no-restore
                   
                   # Wait briefly for file system to sync (CI timing issue)
                   Start-Sleep -Seconds 2
@@ -1040,20 +1046,23 @@ stages:
               zipAfterPublish: false
               modifyOutputPath: false
               arguments: '-c Release -p:version=$(version) -r win-x64 --self-contained -o out'
+          - task: DotNetCoreCLI@2
+            displayName: Build Test Project for Playwright
+            inputs:
+              command: build
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
+              arguments: '-c Release'
           - task: PowerShell@2
-            displayName: Install Playwright Browsers for Docker Tests
+            displayName: Install Playwright Browsers with Robust Detection
+            timeoutInMinutes: 10
             inputs:
               targetType: inline
               script: |
-                Write-Host "Installing Playwright browsers for Docker E2E tests..."
+                Write-Host "Installing Playwright browsers with robust detection..."
                 
                 try {
                   Write-Host "Current directory: $(Get-Location)"
                   Write-Host "Starting installation at: $(Get-Date)"
-                  
-                  # Force a fresh build of the test project to ensure playwright.ps1 is generated
-                  Write-Host "Ensuring test project is built with Playwright dependencies..."
-                  dotnet build Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj -c Release --no-restore
                   
                   # Wait briefly for file system to sync (CI timing issue)
                   Start-Sleep -Seconds 2
