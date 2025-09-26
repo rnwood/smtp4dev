@@ -664,6 +664,12 @@ stages:
               zipAfterPublish: false
               modifyOutputPath: false
               arguments: '-c Release -p:version=$(version) -o out'
+          - task: Docker@2
+            displayName: Build image
+            inputs:
+              command: build
+              dockerfile: "**/Dockerfile.linux"
+              arguments: "--build-arg version=$(version) -t $(docker_repo):linux-amd64-$(tag)"
           - task: DotNetCoreCLI@2
             displayName: Build Test Project for Playwright
             inputs:
@@ -855,6 +861,12 @@ stages:
               zipAfterPublish: false
               modifyOutputPath: false
               arguments: '-c Release -p:version=$(version) -o out'
+          - task: Docker@2
+            displayName: Build image
+            inputs:
+              command: build
+              dockerfile: "**/Dockerfile.linux.arm64"
+              arguments: "--platform linux/arm64 --build-arg version=$(version) -t $(docker_repo):linux-arm64-$(tag)"
           - task: DotNetCoreCLI@2
             displayName: Build Test Project for Playwright
             inputs:
@@ -1046,6 +1058,18 @@ stages:
               zipAfterPublish: false
               modifyOutputPath: false
               arguments: '-c Release -p:version=$(version) -r win-x64 --self-contained -o out'
+          - task: Docker@2
+            displayName: Build image
+            inputs:
+              command: build
+              dockerfile: "**/Dockerfile.windows.ltsc2019"
+              arguments: "--build-arg version=$(version) -t $(docker_repo):windows-ltsc2019-amd64-$(tag)"
+          - task: Docker@2
+            displayName: Build image
+            inputs:
+              command: build
+              dockerfile: "**/Dockerfile.windows.ltsc2022"
+              arguments: "--build-arg version=$(version) -t $(docker_repo):windows-ltsc2022-amd64-$(tag)"
           - task: DotNetCoreCLI@2
             displayName: Build Test Project for Playwright
             inputs:
