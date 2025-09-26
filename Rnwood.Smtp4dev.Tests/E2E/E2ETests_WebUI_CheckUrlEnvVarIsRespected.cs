@@ -1,3 +1,4 @@
+using System;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -10,7 +11,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         {
         }
 
-        [Fact]
+        [SkipInDockerFact]
         public void CheckUrlEnvVarIsRespected()
         {
             UITestOptions options = new UITestOptions();

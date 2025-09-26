@@ -1,6 +1,6 @@
 <template>
     <div v-if="isPreviewable && contentUrl" class="messagepartpreview hfillpanel">
-        <iframe :src="contentUrl" frameborder="0" class="fill" />
+        <iframe :src="contentUrl" frameborder="0" class="fill" title="Message part preview" />
     </div>
     <div v-else class="fill nodetails centrecontents">
         <div>Not previewable.</div>

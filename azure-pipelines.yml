@@ -670,25 +670,29 @@ stages:
               command: build
               dockerfile: "**/Dockerfile.linux"
               arguments: "--build-arg version=$(version) -t $(docker_repo):linux-amd64-$(tag)"
-          # - task: DotNetCoreCLI@2
-          #   displayName: Run Tests
-          #   env:
-          #     SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
-          #     SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
-          #     SMTP4DEV_E2E_BINARY: docker
-          #     SMTP4DEV_E2E_ARGS: |
-          #       run
-          #       -i
-          #       -p
-          #       25:25
-          #       -p
-          #       80:80
-          #       -p
-          #       110:110
-          #       $(docker_repo):linux-amd64-$(tag)
-          #       --urls=http://*:80
-          #       --smtpport=25
-          #       --imapport=110
+          - task: DotNetCoreCLI@2
+            displayName: Run E2E Tests on Docker Image
+            env:
+              SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
+              SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
+              SMTP4DEV_E2E_BINARY: docker
+              SMTP4DEV_E2E_ARGS: |
+                run
+                -i
+                -p
+                2525:25
+                -p
+                5000:80
+                -p
+                1143:143
+                $(docker_repo):linux-amd64-$(tag)
+                --urls=http://*:80
+                --smtpport=25
+                --imapport=143
+            inputs:
+              command: test
+              projects: Rnwood.Smtp4dev.E2ETests/Rnwood.Smtp4dev.E2ETests.csproj
+              arguments: '--configuration Release --logger trx'
           - task: Docker@2
             displayName: Push image
             condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
@@ -746,6 +750,29 @@ stages:
               command: build
               dockerfile: "**/Dockerfile.linux.arm64"
               arguments: "--platform linux/arm64 --build-arg version=$(version) -t $(docker_repo):linux-arm64-$(tag)"
+          - task: DotNetCoreCLI@2
+            displayName: Run E2E Tests on Docker Image
+            env:
+              SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
+              SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
+              SMTP4DEV_E2E_BINARY: docker
+              SMTP4DEV_E2E_ARGS: |
+                run
+                -i
+                -p
+                2525:25
+                -p
+                5000:80
+                -p
+                1143:143
+                $(docker_repo):linux-arm64-$(tag)
+                --urls=http://*:80
+                --smtpport=25
+                --imapport=143
+            inputs:
+              command: test
+              projects: Rnwood.Smtp4dev.E2ETests/Rnwood.Smtp4dev.E2ETests.csproj
+              arguments: '--configuration Release --logger trx'
           - task: Docker@2
             displayName: Push image
             condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
@@ -805,6 +832,29 @@ stages:
               command: build
               dockerfile: "**/Dockerfile.windows.ltsc2022"
               arguments: "--build-arg version=$(version) -t $(docker_repo):windows-ltsc2022-amd64-$(tag)"
+          - task: DotNetCoreCLI@2
+            displayName: Run E2E Tests on Docker Image
+            env:
+              SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
+              SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
+              SMTP4DEV_E2E_BINARY: docker
+              SMTP4DEV_E2E_ARGS: |
+                run
+                -i
+                -p
+                2525:25
+                -p
+                5000:80
+                -p
+                1143:143
+                $(docker_repo):windows-ltsc2022-amd64-$(tag)
+                --urls=http://*:80
+                --smtpport=25
+                --imapport=143
+            inputs:
+              command: test
+              projects: Rnwood.Smtp4dev.E2ETests/Rnwood.Smtp4dev.E2ETests.csproj
+              arguments: '--configuration Release --logger trx'
           - task: Docker@2
             displayName: Push image
             condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
