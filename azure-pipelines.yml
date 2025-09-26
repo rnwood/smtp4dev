@@ -691,7 +691,7 @@ stages:
                 --imapport=143
             inputs:
               command: test
-              projects: Rnwood.Smtp4dev.E2ETests/Rnwood.Smtp4dev.E2ETests.csproj
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
               arguments: '--configuration Release --logger trx'
           - task: Docker@2
             displayName: Push image
@@ -771,7 +771,7 @@ stages:
                 --imapport=143
             inputs:
               command: test
-              projects: Rnwood.Smtp4dev.E2ETests/Rnwood.Smtp4dev.E2ETests.csproj
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
               arguments: '--configuration Release --logger trx'
           - task: Docker@2
             displayName: Push image
@@ -853,7 +853,7 @@ stages:
                 --imapport=143
             inputs:
               command: test
-              projects: Rnwood.Smtp4dev.E2ETests/Rnwood.Smtp4dev.E2ETests.csproj
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
               arguments: '--configuration Release --logger trx'
           - task: Docker@2
             displayName: Push image
