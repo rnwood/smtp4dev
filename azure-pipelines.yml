@@ -800,7 +800,7 @@ stages:
                 5000:80
                 -p
                 1143:143
-                $(docker_repo):linux-amd64-$(tag)
+                linux-amd64-$(tag)
                 --urls=http://*:80
                 --smtpport=25
                 --imapport=143
@@ -991,7 +991,7 @@ stages:
                 5000:80
                 -p
                 1143:143
-                $(docker_repo):linux-arm64-$(tag)
+                linux-arm64-$(tag)
                 --urls=http://*:80
                 --smtpport=25
                 --imapport=143
@@ -1182,7 +1182,7 @@ stages:
                 5000:80
                 -p
                 1143:143
-                $(docker_repo):windows-ltsc2022-amd64-$(tag)
+                windows-ltsc2022-amd64-$(tag)
                 --urls=http://*:80
                 --smtpport=25
                 --imapport=143
