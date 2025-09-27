@@ -82,9 +82,9 @@ namespace Rnwood.Smtp4dev
             _log = Log.ForContext<Program>();
 
             string version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
-            _log.Debug("smtp4dev version {version}", version);
-            _log.Debug("https://github.com/rnwood/smtp4dev");
-            _log.Debug(".NET Core runtime version: {netcoreruntime}", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
+            _log.Information("smtp4dev version {version}", version);
+            _log.Information("https://github.com/rnwood/smtp4dev");
+            _log.Information(".NET Core runtime version: {netcoreruntime}", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
 
 
             if (!Debugger.IsAttached && args.Contains("--service"))
@@ -101,7 +101,7 @@ namespace Rnwood.Smtp4dev
                 Directory.SetCurrentDirectory(cmdLineOptions.InstallPath);
             }
 
-            _log.Debug("Install location: {installpath}", Directory.GetCurrentDirectory());
+            _log.Information("Install location: {installpath}", Directory.GetCurrentDirectory());
 
             var host = BuildWebHost(args.Where(arg => arg != "--service").ToArray(), cmdLineOptions, commandLineOptions);
 
@@ -146,20 +146,20 @@ namespace Rnwood.Smtp4dev
         {
             var contentRoot = GetContentRoot();
             var dataDir = GetOrCreateDataDir(cmdLineOptions);
-            _log.Debug("DataDir: {dataDir}", dataDir);
+            _log.Information("DataDir: {dataDir}", dataDir);
             Directory.SetCurrentDirectory(dataDir);
 
             var cb = new ConfigurationBuilder()
                             .SetBasePath(contentRoot)
                             .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
 
-            _log.Debug("Default settings file: {file}", Path.Join(contentRoot, "appsettings.json"));
+            _log.Information("Default settings file: {file}", Path.Join(contentRoot, "appsettings.json"));
 
             if (!cmdLineOptions.NoUserSettings)
             {
                 cb = cb.AddJsonFile(Path.Join(dataDir, "appsettings.json"), optional: true, reloadOnChange: true);
 
-                _log.Debug("User settings file: {file}", Path.Join(dataDir, "appsettings.json"));
+                _log.Information("User settings file: {file}", Path.Join(dataDir, "appsettings.json"));
             }
 
             cb.AddEnvironmentVariables()
