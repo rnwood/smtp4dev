@@ -14,14 +14,15 @@ namespace Rnwood.Smtp4dev.Server.Settings
 {
     public record ServerOptions
     {
+        private string database = "database.db";
+
         public string Urls { get; set; }
 
         public int Port { get; set; } = 25;
         public bool AllowRemoteConnections { get; set; } = true;
         public string BindAddress { get; set; }
 
-        public string Database { get; set; } = "database.db";
-
+        public string Database { get => database?.Trim('"'); set => database = value; }
         public int NumberOfMessagesToKeep { get; set; } = 100;
         public int NumberOfSessionsToKeep { get; set; } = 100;
 
