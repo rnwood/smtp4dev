@@ -1,10 +1,10 @@
 using Microsoft.Playwright;
-using Rnwood.Smtp4dev.Tests.E2E.PageModel;
+using Rnwood.Smtp4dev.Tests.E2E.WebUI.PageModel;
 using System.Linq;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Rnwood.Smtp4dev.Tests.E2E
+namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
 {
     public class E2ETests_WebUI_CheckEmlImportWorksCorrectly : E2ETestsWebUIBase
     {

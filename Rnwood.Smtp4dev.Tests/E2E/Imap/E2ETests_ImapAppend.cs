@@ -8,7 +8,7 @@ using System.Threading;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Rnwood.Smtp4dev.Tests.E2E
+namespace Rnwood.Smtp4dev.Tests.E2E.Imap
 {
     public class E2ETests_ImapAppend : E2ETests
     {
