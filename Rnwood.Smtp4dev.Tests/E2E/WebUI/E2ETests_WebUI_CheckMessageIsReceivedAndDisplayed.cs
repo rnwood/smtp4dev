@@ -1,7 +1,7 @@
 using MailKit.Net.Smtp;
 using MailKit.Security;
 using MimeKit;
-using Rnwood.Smtp4dev.Tests.E2E.PageModel;
+using Rnwood.Smtp4dev.Tests.E2E.WebUI.PageModel;
 using System;
 using System.Linq;
 using System.Threading;
@@ -9,7 +9,7 @@ using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Rnwood.Smtp4dev.Tests.E2E
+namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
 {
     public class E2ETests_WebUI_CheckMessageIsReceivedAndDisplayed : E2ETestsWebUIBase
     {
