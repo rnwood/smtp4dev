@@ -57,7 +57,6 @@ namespace Rnwood.Smtp4dev.Desktop
                        { 
                            o.Urls = "http://127.0.0.1:0";
                            o.IsDesktopApp = true;
-
                        });
 
 

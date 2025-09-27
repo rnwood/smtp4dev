@@ -198,12 +198,12 @@ stages:
 
           - task: PowerShell@2
             condition: and(succeeded(), eq(variables['runTests'], true))
-            displayName: Install Playwright Browsers with Robust Detection
+            displayName: Install Playwright Browsers
             timeoutInMinutes: 10
             inputs:
               targetType: inline
               script: |
-                Write-Host "Installing Playwright browsers with robust detection..."
+                Write-Host "Installing Playwright browsers..."
                 
                 try {
                   Write-Host "Current directory: $(Get-Location)"
@@ -670,25 +670,150 @@ stages:
               command: build
               dockerfile: "**/Dockerfile.linux"
               arguments: "--build-arg version=$(version) -t $(docker_repo):linux-amd64-$(tag)"
-          # - task: DotNetCoreCLI@2
-          #   displayName: Run Tests
-          #   env:
-          #     SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
-          #     SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
-          #     SMTP4DEV_E2E_BINARY: docker
-          #     SMTP4DEV_E2E_ARGS: |
-          #       run
-          #       -i
-          #       -p
-          #       25:25
-          #       -p
-          #       80:80
-          #       -p
-          #       110:110
-          #       $(docker_repo):linux-amd64-$(tag)
-          #       --urls=http://*:80
-          #       --smtpport=25
-          #       --imapport=110
+          - task: DotNetCoreCLI@2
+            displayName: Build Test Project for Playwright
+            inputs:
+              command: build
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
+              arguments: '-c Release'
+          - task: PowerShell@2
+            displayName: Install Playwright Browsers
+            timeoutInMinutes: 10
+            inputs:
+              targetType: inline
+              script: |
+                Write-Host "Installing Playwright browsers..."
+                
+                try {
+                  Write-Host "Current directory: $(Get-Location)"
+                  Write-Host "Starting installation at: $(Get-Date)"
+                  
+                  # Wait briefly for file system to sync (CI timing issue)
+                  Start-Sleep -Seconds 2
+                  
+                  # Look for playwright.ps1 script in multiple possible locations
+                  $possiblePaths = @(
+                    "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/linux-x64/Release/net8.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/win-x64/Release/net8.0/playwright.ps1"
+                  )
+                  
+                  $playwrightScript = $null
+                  foreach ($path in $possiblePaths) {
+                    Write-Host "Checking for Playwright script at: $path"
+                    if (Test-Path $path) {
+                      $playwrightScript = $path
+                      Write-Host "✓ Found Playwright script at: $playwrightScript"
+                      break
+                    }
+                  }
+                  
+                  # If not found in expected locations, search recursively
+                  if (-not $playwrightScript) {
+                    Write-Host "Script not found in expected locations. Searching recursively..."
+                    $foundScripts = Get-ChildItem -Path "." -Name "playwright.ps1" -Recurse -ErrorAction SilentlyContinue
+                    if ($foundScripts) {
+                      $playwrightScript = $foundScripts[0]
+                      Write-Host "✓ Found Playwright script via recursive search at: $playwrightScript"
+                    }
+                  }
+                  
+                  # Debug: Show build output structure if script still not found
+                  if (-not $playwrightScript) {
+                    Write-Host "❌ Playwright script not found. Investigating build output structure..."
+                    if (Test-Path "Rnwood.Smtp4dev.Tests/bin") {
+                      Write-Host "Contents of Rnwood.Smtp4dev.Tests/bin:"
+                      Get-ChildItem "Rnwood.Smtp4dev.Tests/bin" -Recurse -File | Select-Object FullName | ForEach-Object { Write-Host "  $($_.FullName)" }
+                    } else {
+                      Write-Host "Rnwood.Smtp4dev.Tests/bin directory not found"
+                      Write-Host "Directory contents at root:"
+                      Get-ChildItem "." | ForEach-Object { Write-Host "  $_" }
+                    }
+                  }
+                  
+                  if ($playwrightScript -and (Test-Path $playwrightScript)) {
+                    Write-Host "Using test project's Playwright script for browser installation..."
+                    
+                    # Install Chromium browser using project script
+                    Write-Host "Installing Chromium browser..."
+                    pwsh $playwrightScript install chromium
+                    
+                    # Install system dependencies on Linux using project script
+                    if ($IsLinux) {
+                      Write-Host "Installing system dependencies on Linux..."
+                      pwsh $playwrightScript install-deps chromium
+                    }
+                  } else {
+                    Write-Host "Falling back to global CLI tool approach..."
+                    
+                    # Fallback: Use global CLI tool approach as backup
+                    Write-Host "Installing global Playwright CLI tool..."
+                    dotnet tool install --global Microsoft.Playwright.CLI --version 1.2.3
+                    
+                    Write-Host "Installing Chromium browser..."
+                    playwright install chromium
+                    
+                    if ($IsLinux) {
+                      Write-Host "Installing system dependencies on Linux..."
+                      playwright install-deps chromium
+                    }
+                  }
+                  
+                  # Verify browser installation
+                  Write-Host "Verifying browser installation..."
+                  $playwrightCache = if ($IsWindows) { "$env:USERPROFILE\.cache\ms-playwright" } else { "$env:HOME/.cache/ms-playwright" }
+                  
+                  Write-Host "Checking Playwright cache at: $playwrightCache"
+                  if (Test-Path $playwrightCache) {
+                    Write-Host "✓ Playwright cache directory exists"
+                    $items = Get-ChildItem $playwrightCache -ErrorAction SilentlyContinue
+                    if ($items) {
+                      Write-Host "Cache contents:"
+                      $items | ForEach-Object { Write-Host "  $_" }
+                      
+                      $chromiumDirs = $items | Where-Object { $_.Name -like "chromium-*" }
+                      if ($chromiumDirs) {
+                        Write-Host "✓ Chromium browser directories found: $($chromiumDirs.Name -join ', ')"
+                      } else {
+                        Write-Host "Warning: No chromium directories found in cache"
+                      }
+                    } else {
+                      Write-Host "Warning: Playwright cache directory is empty"
+                    }
+                  } else {
+                    Write-Host "Warning: Playwright cache directory not found at: $playwrightCache"
+                  }
+                  
+                  Write-Host "✓ Playwright installation completed successfully at: $(Get-Date)"
+                } catch {
+                  Write-Error "Failed to install Playwright: $_"
+                  Write-Host "Error details: $($_.Exception.Message)"
+                  Write-Host "Error at: $(Get-Date)"
+                  exit 1
+                }
+          - task: DotNetCoreCLI@2
+            displayName: Run E2E Tests on Docker Image
+            env:
+              SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
+              SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
+              SMTP4DEV_E2E_BINARY: docker
+              SMTP4DEV_E2E_ARGS: |
+                run
+                -i
+                -p
+                2525:25
+                -p
+                5000:80
+                -p
+                1143:143
+                $(docker_repo):linux-amd64-$(tag)
+                --urls=http://*:80
+                --smtpport=25
+                --imapport=143
+            inputs:
+              command: test
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
+              arguments: '--configuration Release --logger trx'
           - task: Docker@2
             displayName: Push image
             condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
@@ -746,6 +871,35 @@ stages:
               command: build
               dockerfile: "**/Dockerfile.linux.arm64"
               arguments: "--platform linux/arm64 --build-arg version=$(version) -t $(docker_repo):linux-arm64-$(tag)"
+          - task: DotNetCoreCLI@2
+            displayName: Build Test Project
+            inputs:
+              command: build
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
+              arguments: '-c Release'
+          - task: DotNetCoreCLI@2
+            displayName: Run E2E Tests on Docker Image
+            env:
+              SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
+              SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
+              SMTP4DEV_E2E_BINARY: docker
+              SMTP4DEV_E2E_ARGS: |
+                run
+                -i
+                -p
+                2525:25
+                -p
+                5000:80
+                -p
+                1143:143
+                $(docker_repo):linux-arm64-$(tag)
+                --urls=http://*:80
+                --smtpport=25
+                --imapport=143
+            inputs:
+              command: test
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
+              arguments: '--configuration Release --logger trx --filter "FullyQualifiedName!~Rnwood.Smtp4dev.Tests.E2E.WebUI"'
           - task: Docker@2
             displayName: Push image
             condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
@@ -805,6 +959,150 @@ stages:
               command: build
               dockerfile: "**/Dockerfile.windows.ltsc2022"
               arguments: "--build-arg version=$(version) -t $(docker_repo):windows-ltsc2022-amd64-$(tag)"
+          - task: DotNetCoreCLI@2
+            displayName: Build Test Project for Playwright
+            inputs:
+              command: build
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
+              arguments: '-c Release'
+          - task: PowerShell@2
+            displayName: Install Playwright Browsers
+            timeoutInMinutes: 10
+            inputs:
+              targetType: inline
+              script: |
+                Write-Host "Installing Playwright browsers..."
+                
+                try {
+                  Write-Host "Current directory: $(Get-Location)"
+                  Write-Host "Starting installation at: $(Get-Date)"
+                  
+                  # Wait briefly for file system to sync (CI timing issue)
+                  Start-Sleep -Seconds 2
+                  
+                  # Look for playwright.ps1 script in multiple possible locations
+                  $possiblePaths = @(
+                    "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/linux-x64/Release/net8.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/win-x64/Release/net8.0/playwright.ps1"
+                  )
+                  
+                  $playwrightScript = $null
+                  foreach ($path in $possiblePaths) {
+                    Write-Host "Checking for Playwright script at: $path"
+                    if (Test-Path $path) {
+                      $playwrightScript = $path
+                      Write-Host "✓ Found Playwright script at: $playwrightScript"
+                      break
+                    }
+                  }
+                  
+                  # If not found in expected locations, search recursively
+                  if (-not $playwrightScript) {
+                    Write-Host "Script not found in expected locations. Searching recursively..."
+                    $foundScripts = Get-ChildItem -Path "." -Name "playwright.ps1" -Recurse -ErrorAction SilentlyContinue
+                    if ($foundScripts) {
+                      $playwrightScript = $foundScripts[0]
+                      Write-Host "✓ Found Playwright script via recursive search at: $playwrightScript"
+                    }
+                  }
+                  
+                  # Debug: Show build output structure if script still not found
+                  if (-not $playwrightScript) {
+                    Write-Host "❌ Playwright script not found. Investigating build output structure..."
+                    if (Test-Path "Rnwood.Smtp4dev.Tests/bin") {
+                      Write-Host "Contents of Rnwood.Smtp4dev.Tests/bin:"
+                      Get-ChildItem "Rnwood.Smtp4dev.Tests/bin" -Recurse -File | Select-Object FullName | ForEach-Object { Write-Host "  $($_.FullName)" }
+                    } else {
+                      Write-Host "Rnwood.Smtp4dev.Tests/bin directory not found"
+                      Write-Host "Directory contents at root:"
+                      Get-ChildItem "." | ForEach-Object { Write-Host "  $_" }
+                    }
+                  }
+                  
+                  if ($playwrightScript -and (Test-Path $playwrightScript)) {
+                    Write-Host "Using test project's Playwright script for browser installation..."
+                    
+                    # Install Chromium browser using project script
+                    Write-Host "Installing Chromium browser..."
+                    pwsh $playwrightScript install chromium
+                    
+                    # Install system dependencies on Linux using project script
+                    if ($IsLinux) {
+                      Write-Host "Installing system dependencies on Linux..."
+                      pwsh $playwrightScript install-deps chromium
+                    }
+                  } else {
+                    Write-Host "Falling back to global CLI tool approach..."
+                    
+                    # Fallback: Use global CLI tool approach as backup
+                    Write-Host "Installing global Playwright CLI tool..."
+                    dotnet tool install --global Microsoft.Playwright.CLI --version 1.2.3
+                    
+                    Write-Host "Installing Chromium browser..."
+                    playwright install chromium
+                    
+                    if ($IsLinux) {
+                      Write-Host "Installing system dependencies on Linux..."
+                      playwright install-deps chromium
+                    }
+                  }
+                  
+                  # Verify browser installation
+                  Write-Host "Verifying browser installation..."
+                  $playwrightCache = if ($IsWindows) { "$env:USERPROFILE\.cache\ms-playwright" } else { "$env:HOME/.cache/ms-playwright" }
+                  
+                  Write-Host "Checking Playwright cache at: $playwrightCache"
+                  if (Test-Path $playwrightCache) {
+                    Write-Host "✓ Playwright cache directory exists"
+                    $items = Get-ChildItem $playwrightCache -ErrorAction SilentlyContinue
+                    if ($items) {
+                      Write-Host "Cache contents:"
+                      $items | ForEach-Object { Write-Host "  $_" }
+                      
+                      $chromiumDirs = $items | Where-Object { $_.Name -like "chromium-*" }
+                      if ($chromiumDirs) {
+                        Write-Host "✓ Chromium browser directories found: $($chromiumDirs.Name -join ', ')"
+                      } else {
+                        Write-Host "Warning: No chromium directories found in cache"
+                      }
+                    } else {
+                      Write-Host "Warning: Playwright cache directory is empty"
+                    }
+                  } else {
+                    Write-Host "Warning: Playwright cache directory not found at: $playwrightCache"
+                  }
+                  
+                  Write-Host "✓ Playwright installation completed successfully at: $(Get-Date)"
+                } catch {
+                  Write-Error "Failed to install Playwright: $_"
+                  Write-Host "Error details: $($_.Exception.Message)"
+                  Write-Host "Error at: $(Get-Date)"
+                  exit 1
+                }
+          - task: DotNetCoreCLI@2
+            displayName: Run E2E Tests on Docker Image
+            env:
+              SMTP4DEV_E2E_WORKINGDIR: $(Agent.TempDirectory)
+              SMTP4DEV_E2E_USEDEFAULTDBPATH: 1
+              SMTP4DEV_E2E_BINARY: docker
+              SMTP4DEV_E2E_ARGS: |
+                run
+                -i
+                -p
+                2525:25
+                -p
+                5000:80
+                -p
+                1143:143
+                $(docker_repo):windows-ltsc2022-amd64-$(tag)
+                --urls=http://*:80
+                --smtpport=25
+                --imapport=143
+            inputs:
+              command: test
+              projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
+              arguments: '--configuration Release --logger trx'
           - task: Docker@2
             displayName: Push image
             condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))

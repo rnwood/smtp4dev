@@ -1,8 +1,9 @@
+using System;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
-namespace Rnwood.Smtp4dev.Tests.E2E
+namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
 {
     public class E2ETests_WebUI_CheckUrlEnvVarIsRespected : E2ETestsWebUIBase
     {
@@ -10,7 +11,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         {
         }
 
-        [Fact]
+        [SkipInDockerFact]
         public void CheckUrlEnvVarIsRespected()
         {
             UITestOptions options = new UITestOptions();
