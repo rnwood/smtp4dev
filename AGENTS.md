@@ -35,7 +35,7 @@ smtp4dev is a fake SMTP email server for development and testing, built as a .NE
 3. **Build the application:**
    ```bash
    # Build main web application (recommended for development)
-   dotnet build Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj -c Release
+   dotnet build Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
    ```
    - Takes approximately 3-5 seconds after initial frontend build
    - NEVER CANCEL - Set timeout to 60+ seconds

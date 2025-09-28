@@ -5,6 +5,7 @@ version: '3'
 #   - '127.0.0.1:5000:80'   # Web interface (localhost only)
 #   - '127.0.0.1:25:25'     # SMTP server (localhost only)  
 #   - '127.0.0.1:143:143'   # IMAP server (localhost only)
+#   - '127.0.0.1:110:110'   # POP3 server (localhost only)
 # See docs/Docker-Security.md for detailed security guidelines.
 
 services:
@@ -21,6 +22,9 @@ services:
       # Change the number before : to the port the IMAP server should be accessible on
       # Add 127.0.0.1: prefix for localhost-only access (recommended for security)
       - '143:143'
+      # Change the number before : to the port the POP3 server should be accessible on
+      # Add 127.0.0.1: prefix for localhost-only access (recommended for security)
+      - '110:110'
     volumes:
       # This is where smtp4dev stores the database..
         - smtp4dev-data:/smtp4dev
@@ -82,6 +86,13 @@ services:
 
       #Specifies the port the IMAP server will listen on - allows standard email clients to view/retrieve messages
       #"ServerOptions__ImapPort"=143
+
+      #Specifies the port the POP3 server will listen on - allows standard email clients to retrieve/delete messages
+      #"ServerOptions__Pop3Port"=110
+
+      #Specifies POP3 TLS mode (None, StartTls, ImplicitTls) and whether secure connection is required
+      #"ServerOptions__Pop3TlsMode"=StartTls
+      #"ServerOptions__Pop3SecureConnectionRequired"=false
 
 volumes:
   smtp4dev-data:

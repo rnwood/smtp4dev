@@ -37,6 +37,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             public int SmtpPortNumber { get; set; }
 
             public int ImapPortNumber { get; set; }
+            public int Pop3PortNumber { get; set; }
         }
 
 
@@ -117,6 +118,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 args.Add("--imapport=0");
             }
 
+            if (!args.Any(a => a.StartsWith("--pop3port")))
+            {
+                args.Add("--pop3port=0");
+            }
+            
             if (!args.Any(a => a.StartsWith("--smtpport")))
             {
                 args.Add("--smtpport=0");
@@ -134,9 +140,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
 
 
-            if (!string.IsNullOrEmpty(options.BasePath))
+            if (string.IsNullOrEmpty(options.BasePath))
             {
-                args.Add($"--basepath={options.BasePath}");
+                args.Add("--basepath=");
             }
 
             output.WriteLine("Args: " + string.Join(" ", args.Select(a => $"\"{a}\"")));
@@ -154,9 +160,10 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     Uri baseUrl = null;
                     int? smtpPortNumber = null;
                     int? imapPortNumber = null;
+                    int? pop3PortNumber = null;
 
 
-                    while ((baseUrl == null || !smtpPortNumber.HasValue || !imapPortNumber.HasValue) && serverOutput.MoveNext())
+                    while ((baseUrl == null || !smtpPortNumber.HasValue || !imapPortNumber.HasValue || !pop3PortNumber.HasValue) && serverOutput.MoveNext())
                     {
                         string newLine = serverOutput.Current;
                         output.WriteLine(newLine);
@@ -181,6 +188,13 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                             int internalImapPort = int.Parse(Regex.Replace(newLine, @"IMAP Server is listening on port (\d+).*", "$1"));
                             // For Docker, map internal port 143 to external port 1143
                             imapPortNumber = (binary == "docker" && internalImapPort == 143) ? 1143 : internalImapPort;
+                        }
+
+                        if (newLine.StartsWith("POP3 Server is listening on port"))
+                        {
+                            int internalPop3Port = int.Parse(Regex.Replace(newLine, @"POP3 Server is listening on port (\d+).*", "$1"));
+                            // For Docker, map internal port 110 to external port 995? (no mapping configured) - use internal port
+                            pop3PortNumber = internalPop3Port;
                         }
 
                         if (newLine.StartsWith("Application started. Press Ctrl+C to shut down."))
@@ -211,7 +225,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     {
                         BaseUrl = baseUrl,
                         SmtpPortNumber = smtpPortNumber.Value,
-                        ImapPortNumber = imapPortNumber.Value
+                        ImapPortNumber = imapPortNumber.Value,
+                        Pop3PortNumber = pop3PortNumber.Value
                     });
                 }
                 finally

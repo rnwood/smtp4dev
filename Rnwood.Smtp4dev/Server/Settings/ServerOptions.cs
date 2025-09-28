@@ -30,6 +30,9 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public TlsMode TlsMode { get; set; } = TlsMode.None;
 
+        // POP3-specific TLS mode. If null/Default, global TlsMode is used by default at runtime (handled in server components).
+        public TlsMode? Pop3TlsMode { get; set; }
+
         [AllowNull]
         public string SslProtocols { get; set; } = null;
 
@@ -44,6 +47,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public string HostName { get; set; } = Dns.GetHostName();
 
         public int? ImapPort { get; set; } = 143;
+        public int? Pop3Port { get; set; } = 110;
 
         public bool RecreateDb { get; set; }
 
@@ -82,6 +86,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public long? MaxMessageSize { get; set; }
         
         public bool ValidateBareLineFeed { get; set; } = false;
+
+        public bool Pop3SecureConnectionRequired { get; set; } = false;
     }
 
 }

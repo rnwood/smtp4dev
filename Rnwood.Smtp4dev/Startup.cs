@@ -215,8 +215,23 @@ namespace Rnwood.Smtp4dev
 
             services.AddSingleton<ISmtp4devServer, Smtp4devServer>();
             services.AddSingleton<ImapServer>();
+            services.AddSingleton<Rnwood.Smtp4dev.Server.Pop3.Pop3Server>();
             services.AddScoped<IMessagesRepository, MessagesRepository>();
             services.AddScoped<IHostingEnvironmentHelper, HostingEnvironmentHelper>();
+
+            // POP3 command handlers
+            services.AddTransient<Rnwood.Smtp4dev.Server.Pop3.CommandHandlers.UserCommand>();
+            services.AddTransient<Rnwood.Smtp4dev.Server.Pop3.CommandHandlers.PassCommand>();
+            services.AddTransient<Rnwood.Smtp4dev.Server.Pop3.CommandHandlers.StatCommand>();
+            services.AddTransient<Rnwood.Smtp4dev.Server.Pop3.CommandHandlers.ListCommand>();
+            services.AddTransient<Rnwood.Smtp4dev.Server.Pop3.CommandHandlers.RetrCommand>();
+            services.AddTransient<Rnwood.Smtp4dev.Server.Pop3.CommandHandlers.UidlCommand>();
+            services.AddTransient<Rnwood.Smtp4dev.Server.Pop3.CommandHandlers.DeleCommand>();
+            services.AddTransient<Rnwood.Smtp4dev.Server.Pop3.CommandHandlers.RsetCommand>();
+            services.AddTransient<Rnwood.Smtp4dev.Server.Pop3.CommandHandlers.QuitCommand>();
+            services.AddTransient<Rnwood.Smtp4dev.Server.Pop3.CommandHandlers.CapaCommand>();
+            services.AddTransient<Rnwood.Smtp4dev.Server.Pop3.CommandHandlers.UnknownCommand>();
+            
             services.AddSingleton<ITaskQueue, TaskQueue>();
             services.AddSingleton<ScriptingHost>();
             services.AddScoped<MimeProcessingService>();
