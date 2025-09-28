@@ -17,7 +17,7 @@
 import { Component, Vue, Emit, Prop, Watch, toNative } from "vue-facing-decorator";
 
 import PagedResult from "@/ApiClient/PagedResult";
-import ClientSettingsController from "@/ApiClient/ClientSettingsController";
+import ClientSettingsManager from "@/ApiClient/ClientSettingsManager";
 
 
 @Component({})
@@ -33,13 +33,20 @@ class MessageListPager extends Vue {
 
   async created() {
     await this.initPageSizeProps();
+    this.setupSettingsListener();
+  }
+
+  private setupSettingsListener() {
+    ClientSettingsManager.onSettingsChanged((oldSettings, newSettings) => {
+      if (this.pageSize !== newSettings.pageSize) {
+        this.pageSize = newSettings.pageSize;
+        this.onPageSizeChange(this.pageSize);
+      }
+    });
   }
 
   @Watch("pagedData")
-  async onPagedDataChange(
-    value: PagedResult<any> | null,
-    oldValue: PagedResult<any> | null
-  ) {
+  async onPagedDataChange(value: PagedResult<any> | null) {
     if (value) {
       await this.updatePagination(value);
     }
@@ -54,12 +61,14 @@ class MessageListPager extends Vue {
   @Emit()
   onPageSizeChange(pageSize: number) {
     if (pageSize < 1) this.pageSize = 1;
+    // Save the page size to local storage
+    ClientSettingsManager.updateClientSettings({ pageSize: this.pageSize });
     return this.pageSize;
   }
 
   private async initPageSizeProps() {
-    const defaultPageSize = 25;
-    let client = await new ClientSettingsController().getClientSettings();
+    const defaultPageSize = 30;
+    let client = await ClientSettingsManager.getClientSettings();
     this.pageSize = client.pageSize || defaultPageSize;
   }
 

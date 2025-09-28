@@ -79,7 +79,7 @@
     import { TableInstance, ElNotification, ElMessageBox } from "element-plus";
     import PagedResult, { EmptyPagedResult } from "@/ApiClient/PagedResult";
     import Messagelistpager from "@/components/messagelistpager.vue";
-    import ClientSettingsController from "@/ApiClient/ClientSettingsController";
+    import ClientSettingsManager from "@/ApiClient/ClientSettingsManager";
 
     @Component({
         components: {
@@ -89,7 +89,6 @@
     class SessionList extends Vue {
 
         page: number = 1;
-        pageSize: number = 25;
         public pagedServerMessages: PagedResult<SessionSummary> | undefined = EmptyPagedResult<SessionSummary>();
 
         @Prop({ default: null })
@@ -113,7 +112,7 @@
         }
 
         async handlePaginationPageSizeChange(pageSize: number) {
-            this.pageSize = pageSize;
+            ClientSettingsManager.updateClientSettings({ pageSize });
             await this.refresh();
         }
 
@@ -185,9 +184,13 @@
                 this.error = null;
                 this.loading = !silent;
 
+                // Get current pageSize from settings
+                const clientSettings = await ClientSettingsManager.getClientSettings();
+                const pageSize = clientSettings.pageSize || 25;
+
                 this.pagedServerMessages = await new SessionsController().getSummaries(
                     this.page,
-                    this.pageSize);
+                    pageSize);
                 sortedArraySync(
                     this.pagedServerMessages.results,
                     this.sessions,
@@ -214,13 +217,6 @@
         }
 
         async created() {
-            await this.initPageSizeProps();
-        }
-
-        private async initPageSizeProps() {
-            const defaultPageSize = 25;
-            let client = await new ClientSettingsController().getClientSettings();
-            this.pageSize = client.pageSize || defaultPageSize;
         }
 
         @Watch("connection")
