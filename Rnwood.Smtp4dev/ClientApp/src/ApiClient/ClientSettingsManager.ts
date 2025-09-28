@@ -4,6 +4,7 @@ import ClientSettingsController from "./ClientSettingsController";
 export interface ClientSettingsData {
     pageSize: number;
     autoViewNewMessages: boolean;
+    darkMode: string;
 }
 
 type SettingsChangeCallback = (oldSettings: ClientSettingsData | null, newSettings: ClientSettingsData) => void;
@@ -38,7 +39,8 @@ export default class ClientSettingsManager {
         // Merge: local preferences override server defaults
         return new ClientSettings(
             storedSettings?.pageSize ?? serverSettings.pageSize,
-            storedSettings?.autoViewNewMessages ?? serverSettings.autoViewNewMessages
+            storedSettings?.autoViewNewMessages ?? serverSettings.autoViewNewMessages,
+            storedSettings?.darkMode ?? serverSettings.darkMode
         );
     }
 
@@ -49,7 +51,8 @@ export default class ClientSettingsManager {
         const oldSettings = this.getStoredSettings();
         const settingsToStore: ClientSettingsData = {
             pageSize: settings.pageSize,
-            autoViewNewMessages: settings.autoViewNewMessages
+            autoViewNewMessages: settings.autoViewNewMessages,
+            darkMode: settings.darkMode
         };
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(settingsToStore));
         this.emitSettingsChange(oldSettings, settingsToStore);
@@ -60,7 +63,7 @@ export default class ClientSettingsManager {
      */
     public static updateClientSettings(updates: Partial<ClientSettingsData>): void {
         const oldSettings = this.getStoredSettings();
-        const currentSettings = oldSettings || { pageSize: 30, autoViewNewMessages: false };
+        const currentSettings = oldSettings || { pageSize: 30, autoViewNewMessages: false, darkMode: "follow" };
         const updatedSettings: ClientSettingsData = { ...currentSettings, ...updates };
         localStorage.setItem(this.STORAGE_KEY, JSON.stringify(updatedSettings));
         this.emitSettingsChange(oldSettings, updatedSettings);

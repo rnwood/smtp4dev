@@ -28,7 +28,8 @@ namespace Rnwood.Smtp4dev.Controllers
             return new ApiModel.ClientSettings
             {
                 PageSize = clientProps.PageSize,
-                AutoViewNewMessages = clientProps.AutoViewNewMessages
+                AutoViewNewMessages = clientProps.AutoViewNewMessages,
+                DarkMode = clientProps.DarkMode
             };
         }
     }

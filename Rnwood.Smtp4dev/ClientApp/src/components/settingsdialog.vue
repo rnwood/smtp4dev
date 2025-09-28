@@ -91,6 +91,14 @@
                         <el-form-item label="Auto view new messages as they arrive">
                             <el-switch v-model="clientSettings.autoViewNewMessages" />
                         </el-form-item>
+
+                        <el-form-item label="Dark mode">
+                            <el-select v-model="clientSettings.darkMode" style="width: 100%;">
+                                <el-option key="follow" label="Follow system" value="follow"></el-option>
+                                <el-option key="dark" label="Dark" value="dark"></el-option>
+                                <el-option key="light" label="Light" value="light"></el-option>
+                            </el-select>
+                        </el-form-item>
                     </el-tab-pane>
                     <el-tab-pane label="SMTP Server">
 
@@ -528,7 +536,8 @@
                     if (this.clientSettings) {
                         ClientSettingsManager.updateClientSettings({
                             pageSize: this.clientSettings.pageSize,
-                            autoViewNewMessages: this.clientSettings.autoViewNewMessages
+                            autoViewNewMessages: this.clientSettings.autoViewNewMessages,
+                            darkMode: this.clientSettings.darkMode
                         });
                     }
 
