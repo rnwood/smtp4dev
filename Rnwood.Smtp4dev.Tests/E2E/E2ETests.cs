@@ -195,6 +195,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                             int internalPop3Port = int.Parse(Regex.Replace(newLine, @"POP3 Server is listening on port (\d+).*", "$1"));
                             // For Docker, map internal port 110 to external port 995? (no mapping configured) - use internal port
                             pop3PortNumber = internalPop3Port;
+                            // For Docker, map internal port 110 to external port 995
+                            pop3PortNumber = (binary == "docker" && internalPop3Port == 110) ? 995 : internalPop3Port;
                         }
 
                         if (newLine.StartsWith("Application started. Press Ctrl+C to shut down."))
