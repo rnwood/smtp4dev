@@ -4,5 +4,6 @@
     {
         public int PageSize { get; set; }
         public bool AutoViewNewMessages { get; set; }
+        public string DarkMode { get; set; }
     }
 }

@@ -172,7 +172,7 @@
     import MessageNotificationManager from "../MessageNotificationManager";
     import { debounce } from "ts-debounce";
     import ServerController from "../ApiClient/ServerController";
-    import ClientSettingsController from "../ApiClient/ClientSettingsController";
+    import ClientSettingsManager from "../ApiClient/ClientSettingsManager";
 
     import PagedResult, { EmptyPagedResult } from "@/ApiClient/PagedResult";
     import Messagelistpager from "@/components/messagelistpager.vue";
@@ -193,7 +193,6 @@
         private selectedSortColumn: string = "receivedDate";
 
         page: number = 1;
-        pageSize: number = 25;
 
         pagedServerMessages: PagedResult<MessageSummary> | undefined = EmptyPagedResult<MessageSummary>();
 
@@ -251,7 +250,7 @@
         }
 
         async handlePaginationPageSizeChange(pageSize: number) {
-            this.pageSize = pageSize;
+            ClientSettingsManager.updateClientSettings({ pageSize });
             await this.refresh(false);
         }
 
@@ -546,12 +545,16 @@
                     this.selectedMailbox = this.availableMailboxes.find(m => m.name == this.selectedMailbox)?.name ?? null;
                 }
 
+                // Get current pageSize from settings
+                const clientSettings = await ClientSettingsManager.getClientSettings();
+                const pageSize = clientSettings.pageSize || 25;
+
                 // Copy in case they are mutated during the async load below
                 let sortColumn = this.selectedSortColumn;
                 let sortDescending = this.selectedSortDescending;
 
                 if (!this.selectedMailbox) {
-                    this.pagedServerMessages = { currentPage: 1, firstRowOnPage: 0, lastRowOnPage: 0, pageCount: 1, rowCount: 0, pageSize: this.pageSize, results: [] };
+                    this.pagedServerMessages = { currentPage: 1, firstRowOnPage: 0, lastRowOnPage: 0, pageCount: 1, rowCount: 0, pageSize: pageSize, results: [] };
                 } else {
 
                     this.pagedServerMessages = await new MessagesController().getSummaries(
@@ -560,7 +563,7 @@
                         sortColumn,
                         sortDescending,
                         this.page,
-                        this.pageSize,
+                        pageSize,
                         this.selectedFolder || null
                     );
                 }
@@ -631,13 +634,6 @@
         }
 
         async created() {
-            await this.initPageSizeProps();
-        }
-
-        private async initPageSizeProps() {
-            const defaultPageSize = 25;
-            let client = await new ClientSettingsController().getClientSettings();
-            this.pageSize = client.pageSize || defaultPageSize;
         }
 
         @Watch("connection")
