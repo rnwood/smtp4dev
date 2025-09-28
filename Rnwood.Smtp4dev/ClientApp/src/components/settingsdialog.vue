@@ -82,9 +82,14 @@
 
                             <el-switch v-model="server.disableHtmlCompatibilityCheck" :disabled="server.lockedSettings.disableHtmlCompatibilityCheck" />
                         </el-form-item>
+                    </el-tab-pane>
+                    <el-tab-pane label="User Settings" v-if="clientSettings">
+                        <el-form-item label="Page size">
+                            <el-input-number v-model="clientSettings.pageSize" :min="1" :max="100" controls-position="right" />
+                        </el-form-item>
 
                         <el-form-item label="Auto view new messages as they arrive">
-                            <el-switch v-model="autoViewNewMessages" />
+                            <el-switch v-model="clientSettings.autoViewNewMessages" />
                         </el-form-item>
                     </el-tab-pane>
                     <el-tab-pane label="SMTP Server">
@@ -420,6 +425,8 @@
     import ServerController from "../ApiClient/ServerController";
     import Server from "../ApiClient/Server";
     import ExpressionInput from "./expressioninput.vue";
+    import ClientSettingsManager from "../ApiClient/ClientSettingsManager";
+    import ClientSettings from "../ApiClient/ClientSettings";
 
     @Component({
         components: {
@@ -436,6 +443,7 @@
         loading: boolean = true;
         saving: boolean = false;
         server: Server | null = null;
+        clientSettings: ClientSettings | null = null;
 
         get rules() {
             let result = {
@@ -509,15 +517,6 @@
             }
         }
 
-        get autoViewNewMessages(): boolean {
-            const stored = window.localStorage.getItem("auto-view-new-messages");
-            return stored === "true";
-        }
-
-        set autoViewNewMessages(value: boolean) {
-            window.localStorage.setItem("auto-view-new-messages", value.toString());
-        }
-
         async save() {
             this.saving = true;
             this.error = null;
@@ -525,6 +524,13 @@
                 let valid = await (this.$refs["form"] as FormInstance).validate()
 
                 if (valid) {
+                    // Save user settings
+                    if (this.clientSettings) {
+                        ClientSettingsManager.updateClientSettings({
+                            pageSize: this.clientSettings.pageSize,
+                            autoViewNewMessages: this.clientSettings.autoViewNewMessages
+                        });
+                    }
 
                     await new ServerController().updateServer(this.server!);
                     this.handleClose();
@@ -544,6 +550,7 @@
                 this.loading = !silent;
 
                 this.server = await this.connection.getServer();
+                this.clientSettings = await ClientSettingsManager.getClientSettings();
                 this.isRelayEnabled = !!this.server.relaySmtpServer;
             } catch (e: any) {
                 this.error = e;
