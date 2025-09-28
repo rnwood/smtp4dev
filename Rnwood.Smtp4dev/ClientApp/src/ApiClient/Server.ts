@@ -3,6 +3,12 @@ import User from './User';
 export default class Server {
     currentUserName: string;
     currentUserDefaultMailboxName: string;
+    bindAddress: any;
+    disableHtmlValidation: any;
+    disableHtmlCompatibilityCheck: any;
+    port: any;
+    relayAutomaticRelayExpression: any;
+    desktopMinimiseToTrayIcon: any;
 
 
     constructor(isRunning: boolean, exception: string, portNumber: number, hostName: string, allowRemoteConnections: boolean, numberOfMessagesToKeep: number, numberOfSessionsToKeep: number, imapPortNumber: number, pop3PortNumber: number, settingsAreEditable: boolean, disableMessageSanitisation: boolean, automaticRelayExpression: string, tlsMode: string, credentialsValidationExpression: string,

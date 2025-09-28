@@ -23,7 +23,7 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 
 	public class Pop3Server : IHostedService, IDisposable
 	{
-		private readonly TcpListener listener;
+		private TcpListener[] listeners;
 		private readonly IOptionsMonitor<ServerOptions> optionsMonitor;
 		private readonly ILogger<Pop3Server> logger;
 		private readonly IServiceScopeFactory serviceScopeFactory;
@@ -37,7 +37,7 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 			this.logger = logger;
 			this.serviceScopeFactory = serviceScopeFactory;
 			this.serviceProvider = null;
-			this.listener = new TcpListener(IPAddress.Any, optionsMonitor.CurrentValue.Pop3Port ?? 110);
+			// listener creation moved to StartAsync to support IPv6/dual-stack/fallback
 		}
 
 		// DI constructor - accepts IServiceProvider so handlers can be resolved from the container
@@ -53,9 +53,9 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 			{
 				try
 				{
-					if (listener?.LocalEndpoint is IPEndPoint ep)
+					if (listeners != null && listeners.Length > 0)
 					{
-						return new[] { ep.Port };
+						return listeners.Select(l => ((IPEndPoint)l.LocalEndpoint).Port).ToArray();
 					}
 				}
 				catch { }
@@ -84,10 +84,97 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 		public Task StartAsync(CancellationToken cancellationToken)
 		{
 			cts = CancellationTokenSource.CreateLinkedTokenSource(cancellationToken);
-			listener.Start();
-			isRunning = true;
-			_ = Task.Run(() => AcceptLoopAsync(cts.Token));
-			logger.LogInformation("POP3 server started");
+
+			// Create listeners now based on options
+			var opts = optionsMonitor.CurrentValue;
+			int port = opts.Pop3Port ?? 110;
+
+			// Determine a specific bind address if configured
+			IPAddress bindAddress = null;
+			if (!string.IsNullOrWhiteSpace(opts.BindAddress))
+			{
+				if (!IPAddress.TryParse(opts.BindAddress, out bindAddress))
+				{
+					throw new ArgumentException($"Invalid bind address: {opts.BindAddress}");
+				}
+			}
+
+			if (bindAddress != null)
+			{
+				// Use the specific bind address when configured
+				listeners = new[] { new TcpListener(bindAddress, port) };
+			}
+			else if (opts.AllowRemoteConnections)
+			{
+				if (!opts.DisableIPv6)
+				{
+					// Prefer IPv6Any with DualMode enabled; fall back to IPv4Any if IPv6 not supported
+					listeners = TryCreateListenersWithFallback(
+						() => new[] { CreateTcpListenerWithDualMode(IPAddress.IPv6Any, port) },
+						() => new[] { new TcpListener(IPAddress.Any, port) }
+					);
+				}
+				else
+				{
+					listeners = new[] { new TcpListener(IPAddress.Any, port) };
+				}
+			}
+			else
+			{
+				// Loopback only
+				if (!opts.DisableIPv6)
+				{
+					listeners = TryCreateListenersWithFallback(
+						() => new[] { CreateTcpListenerWithDualMode(IPAddress.IPv6Loopback, port), new TcpListener(IPAddress.Loopback, port) },
+						() => new[] { new TcpListener(IPAddress.Loopback, port) }
+					);
+				}
+				else
+				{
+					listeners = new[] { new TcpListener(IPAddress.Loopback, port) };
+				}
+			}
+
+			try
+			{
+				// Start all listeners
+				foreach (var l in listeners)
+				{
+					l.Start();
+				}
+				isRunning = true;
+
+				// Start accept loops for each listener
+				foreach (var l in listeners)
+				{
+					_ = Task.Run(() => AcceptLoopAsync(l, cts.Token), cts.Token);
+				}
+
+				// Log listening endpoints (if available)
+				foreach (var l in listeners)
+				{
+					try
+					{
+						var localEp = l.LocalEndpoint as IPEndPoint;
+						if (localEp != null)
+						{
+							logger.LogInformation($"POP3 server is listening on port {localEp.Port} ({localEp.Address})");
+						}
+					}
+					catch { }
+				}
+			}
+			catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressFamilyNotSupported && listeners != null && listeners.Any(l => l.LocalEndpoint == null))
+			{
+				// IPv6 not supported, stop and rethrow to let fallback logic in TryCreateListenersWithFallback handle
+				foreach (var l in listeners)
+				{
+					try { l.Stop(); } catch { }
+				}
+				logger.LogWarning("IPv6 not supported when starting POP3 listeners (AddressFamilyNotSupported)");
+				throw;
+			}
+
 			return Task.CompletedTask;
 		}
 
@@ -96,7 +183,13 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 			try
 			{
 				cts?.Cancel();
-				listener.Stop();
+				if (listeners != null)
+				{
+					foreach (var l in listeners)
+					{
+						try { l.Stop(); } catch { }
+					}
+				}
 			}
 			catch { }
 			finally
@@ -107,7 +200,7 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 			return Task.CompletedTask;
 		}
 
-		private async Task AcceptLoopAsync(CancellationToken cancellationToken)
+		private async Task AcceptLoopAsync(TcpListener listener, CancellationToken cancellationToken)
 		{
 			while (!cancellationToken.IsCancellationRequested)
 			{
@@ -168,21 +261,13 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 							var verb = parts[0].ToUpperInvariant();
 							var arg = parts.Length > 1 ? parts[1] : null;
 
-							switch (verb)
+							// Dispatch to handler by looking up the verb in the handlers dictionary
+							if (!handlers.TryGetValue(verb, out var handler))
 							{
-								case "USER": await ExecuteHandlerSafe(handlers["USER"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
-								case "PASS": await ExecuteHandlerSafe(handlers["PASS"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
-								case "STAT": await ExecuteHandlerSafe(handlers["STAT"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
-								case "LIST": await ExecuteHandlerSafe(handlers["LIST"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
-								case "RETR": await ExecuteHandlerSafe(handlers["RETR"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
-								case "UIDL": await ExecuteHandlerSafe(handlers["UIDL"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
-								case "DELE": await ExecuteHandlerSafe(handlers["DELE"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
-								case "RSET": await ExecuteHandlerSafe(handlers["RSET"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
-								case "QUIT": await ExecuteHandlerSafe(handlers["QUIT"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
-								case "STLS": await ExecuteHandlerSafe(handlers["STLS"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
-								case "CAPA": await ExecuteHandlerSafe(handlers["CAPA"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
-								default: await ExecuteHandlerSafe(handlers["UNKNOWN"], ctx, arg, sessionTokenSource.Token).ConfigureAwait(false); break;
+								handler = handlers["UNKNOWN"];
 							}
+
+							await ExecuteHandlerSafe(handler, ctx, arg, sessionTokenSource.Token).ConfigureAwait(false);
 						}
 					}
 					catch (OperationCanceledException)
@@ -207,47 +292,30 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 
 		private IDictionary<string, ICommandHandler> CreateHandlers()
 		{
-			if (serviceProvider != null)
+			// Require handlers be resolved from the configured IServiceProvider
+			if (serviceProvider == null)
 			{
-				// Resolve handlers from DI when available
-				var sp = serviceProvider;
-				var handlers = new Dictionary<string, ICommandHandler>(StringComparer.OrdinalIgnoreCase)
-				{
-					{"USER", sp.GetRequiredService<UserCommand>()},
-					{"PASS", sp.GetRequiredService<PassCommand>()},
-					{"STAT", sp.GetRequiredService<StatCommand>()},
-					{"LIST", sp.GetRequiredService<ListCommand>()},
-					{"RETR", sp.GetRequiredService<RetrCommand>()},
-					{"UIDL", sp.GetRequiredService<UidlCommand>()},
-					{"DELE", sp.GetRequiredService<DeleCommand>()},
-					{"RSET", sp.GetRequiredService<RsetCommand>()},
-					{"QUIT", sp.GetRequiredService<QuitCommand>()},
-					{"STLS", new StlsCommand(logger)},
-					{"CAPA", sp.GetRequiredService<CapaCommand>()},
-					{"UNKNOWN", sp.GetRequiredService<UnknownCommand>()}
-				};
-
-				return handlers;
+				throw new InvalidOperationException("Pop3Server requires an IServiceProvider to resolve command handlers. Construct the server using the DI-enabled constructor.");
 			}
 
-			// Fallback - create handlers directly
-			var handlersDirect = new Dictionary<string, ICommandHandler>(StringComparer.OrdinalIgnoreCase)
+			var sp = serviceProvider;
+			var handlers = new Dictionary<string, ICommandHandler>(StringComparer.OrdinalIgnoreCase)
 			{
-				{"USER", new UserCommand()},
-				{"PASS", new PassCommand()},
-				{"STAT", new StatCommand()},
-				{"LIST", new ListCommand()},
-				{"RETR", new RetrCommand()},
-				{"UIDL", new UidlCommand()},
-				{"DELE", new DeleCommand()},
-				{"RSET", new RsetCommand()},
-				{"QUIT", new QuitCommand()},
+				{"USER", sp.GetRequiredService<UserCommand>()},
+				{"PASS", sp.GetRequiredService<PassCommand>()},
+				{"STAT", sp.GetRequiredService<StatCommand>()},
+				{"LIST", sp.GetRequiredService<ListCommand>()},
+				{"RETR", sp.GetRequiredService<RetrCommand>()},
+				{"UIDL", sp.GetRequiredService<UidlCommand>()},
+				{"DELE", sp.GetRequiredService<DeleCommand>()},
+				{"RSET", sp.GetRequiredService<RsetCommand>()},
+				{"QUIT", sp.GetRequiredService<QuitCommand>()},
 				{"STLS", new StlsCommand(logger)},
-				{"CAPA", new CapaCommand()},
-				{"UNKNOWN", new UnknownCommand()}
+				{"CAPA", sp.GetRequiredService<CapaCommand>()},
+				{"UNKNOWN", sp.GetRequiredService<UnknownCommand>()}
 			};
 
-			return handlersDirect;
+			return handlers;
 		}
 
 		private async Task ExecuteHandlerSafe(ICommandHandler handler, Pop3SessionContext ctx, string arg, CancellationToken token)
@@ -276,8 +344,48 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 
 		public void Dispose()
 		{
-			listener?.Stop();
+			if (listeners != null)
+			{
+				foreach (var l in listeners)
+				{
+					try { l.Stop(); } catch { }
+				}
+			}
 			cts?.Dispose();
+		}
+
+		/// <summary>
+		/// Tries to create listeners with IPv6, falls back to IPv4 if IPv6 is not supported
+		/// </summary>
+		private TcpListener[] TryCreateListenersWithFallback(Func<IEnumerable<TcpListener>> primaryFactory, Func<IEnumerable<TcpListener>> fallbackFactory)
+		{
+			try
+			{
+				logger.LogDebug("Attempting to create POP3 listeners");
+				var primaryListener = primaryFactory();
+				return primaryListener.ToArray();
+			}
+			catch (SocketException ex) when (ex.SocketErrorCode == SocketError.AddressFamilyNotSupported)
+			{
+				logger.LogWarning("Error during POP3 listener creation (AddressFamilyNotSupported), falling back to IPv4 only");
+			}
+
+			logger.LogInformation("Creating POP3 fallback listeners");
+			return fallbackFactory().ToArray();
+		}
+
+		/// <summary>
+		/// Creates a TcpListener with DualMode enabled for IPv6
+		/// </summary>
+		private TcpListener CreateTcpListenerWithDualMode(IPAddress address, int port)
+		{
+			var listener = new TcpListener(address, port);
+			try
+			{
+				listener.Server.DualMode = true;
+			}
+			catch { }
+			return listener;
 		}
 	}
 }

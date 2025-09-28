@@ -362,7 +362,11 @@
                                 </el-button>
                             </el-form-item>
                         </div>
-                        <el-button size="small" @click="server.users.push({})" :disabled="server.lockedSettings.users">New User</el-button>
+                        <el-button size="small" @click="server.users.push({
+    username: '',
+    password: '',
+    defaultMailbox: ''
+})" :disabled="server.lockedSettings.users">New User</el-button>
 
 
                     </el-tab-pane>
@@ -403,7 +407,10 @@
                                 </el-button>
                             </el-form-item>
                         </div>
-                        <el-button size="small" @click="server.mailboxes.splice(0, 0, {})" :disabled="server.lockedSettings.mailboxes">New Mailbox</el-button>
+                        <el-button size="small" @click="server.mailboxes.splice(0, 0, {
+    name: '',
+    recipients: ''
+})" :disabled="server.lockedSettings.mailboxes">New Mailbox</el-button>
 
 
                     </el-tab-pane>
@@ -564,7 +571,7 @@
                 this.error = null;
                 this.loading = !silent;
 
-                this.server = await this.connection.getServer();
+                this.server = await this.connection!.getServer();
                 this.isRelayEnabled = !!this.server.relaySmtpServer;
             } catch (e: any) {
                 this.error = e;
