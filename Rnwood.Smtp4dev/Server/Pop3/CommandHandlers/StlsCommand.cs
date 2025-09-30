@@ -21,8 +21,8 @@ namespace Rnwood.Smtp4dev.Server.Pop3.CommandHandlers
 
 		public async Task ExecuteAsync(Pop3SessionContext context, string argument, CancellationToken cancellationToken)
 		{
-			var effectivePop3 = context.Options.Pop3TlsMode ?? context.Options.TlsMode;
-			if (effectivePop3 == TlsMode.None)
+			// Only allow STLS if POP3 is configured to use STARTTLS
+			if (context.Options.Pop3TlsMode != TlsMode.StartTls)
 			{
 				await context.WriteLineAsync("-ERR STLS not supported");
 				return;
@@ -52,6 +52,7 @@ namespace Rnwood.Smtp4dev.Server.Pop3.CommandHandlers
 				context.Stream = ssl; // update session stream to SSL stream
 				context.Writer = new StreamWriter(ssl, System.Text.Encoding.ASCII) { NewLine = "\r\n", AutoFlush = true };
 				context.Reader = new StreamReader(ssl, System.Text.Encoding.ASCII);
+				context.IsSecure = true;
 			}
 			catch (Exception ex)
 			{

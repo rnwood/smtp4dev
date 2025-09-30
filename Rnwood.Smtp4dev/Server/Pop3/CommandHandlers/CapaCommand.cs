@@ -16,8 +16,8 @@ namespace Rnwood.Smtp4dev.Server.Pop3.CommandHandlers
 			context.Writer.Write("USER\r\n");
 			context.Writer.Write("TOP\r\n");
 			context.Writer.Write("UIDL\r\n");
-			var effectivePop3 = context.Options.Pop3TlsMode ?? context.Options.TlsMode;
-			if (effectivePop3 != TlsMode.None)
+			// Only advertise STLS for STARTTLS when Pop3TlsMode is explicitly configured for POP3; implicit TLS doesn't use the STLS command
+			if (context.Options.Pop3TlsMode == TlsMode.StartTls)
 			{
 				context.Writer.Write("STLS\r\n");
 			}

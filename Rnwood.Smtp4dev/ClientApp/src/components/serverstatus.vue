@@ -3,7 +3,6 @@
         <el-button v-if="server && server.isRunning" :disabled="!server || !server.settingsAreEditable" @click="stop" icon="circle-check" link :title="'Stop'+ ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')"> SMTP server listening on port {{server.port}}</el-button>
         <el-button v-if="server && !server.isRunning && !server.exception" :disabled="!server || !server.settingsAreEditable" @click="start" icon="circle-close" type="danger" :title="'Start'+ ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')"> SMTP server stopped</el-button>
         <el-button v-if="server && !server.isRunning && server.exception" :disabled="!server || !server.settingsAreEditable" @click="start" icon="circle-close" type="danger" :title="'Start'+ ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')"> SMTP server error:<br />{{server.exception}}</el-button>
-        <el-button v-if="server && server.isRunning && server.pop3Port" :disabled="!server || !server.settingsAreEditable" @click="stop" icon="circle-check" link :title="'Stop'+ ((!server || !server.settingsAreEditable) ? ' - Disabled by config' : '')"> POP3 server listening on port {{server.pop3Port}}</el-button>
         <el-button style="font-size: 1.7em; padding: 6px;" circle icon="setting" title="Settings" @click="showSettings"></el-button>&nbsp;
     </div>
 
@@ -64,7 +63,7 @@
         @Watch("connection")
         onConnectionChanged() {
             if (this.connection) {
-                this.connection.onServerChanged( async () => {
+                this.connection.onServerChanged(async () => {
                     await this.refresh();
                 });
 

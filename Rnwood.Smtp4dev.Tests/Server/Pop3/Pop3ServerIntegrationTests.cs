@@ -34,7 +34,7 @@ namespace Rnwood.Smtp4dev.Tests.Server.Pop3
         {
             await RunWithTimeout(async () =>
             {
-                var so = new ServerOptions { Pop3Port = 0, TlsMode = TlsMode.StartTls, HostName = "localhost" };
+                var so = new ServerOptions { Pop3Port = 0, Pop3TlsMode = TlsMode.StartTls, HostName = "localhost" };
                 var optionsMonitor = new TestOptionsMonitor<ServerOptions>(so);
 
                 var services = new ServiceCollection();
@@ -43,7 +43,7 @@ namespace Rnwood.Smtp4dev.Tests.Server.Pop3
                 using var loggerFactory = LoggerFactory.Create(b => { });
                 var sp = services.BuildServiceProvider();
 
-                var pop3 = new Rnwood.Smtp4dev.Server.Pop3.Pop3Server(optionsMonitor, loggerFactory.CreateLogger<Rnwood.Smtp4dev.Server.Pop3.Pop3Server>(), sp.GetRequiredService<IServiceScopeFactory>());
+                var pop3 = new Rnwood.Smtp4dev.Server.Pop3.Pop3Server(optionsMonitor, loggerFactory.CreateLogger<Rnwood.Smtp4dev.Server.Pop3.Pop3Server>(), sp.GetRequiredService<IServiceScopeFactory>(), sp);
                 pop3.TryStart();
                 try
                 {
@@ -114,7 +114,7 @@ namespace Rnwood.Smtp4dev.Tests.Server.Pop3
         {
             await RunWithTimeout(async () =>
             {
-                var so = new ServerOptions { Pop3Port = 0, TlsMode = TlsMode.None };
+                var so = new ServerOptions { Pop3Port = 0, Pop3TlsMode = TlsMode.None };
                 var optionsMonitor = new TestOptionsMonitor<ServerOptions>(so);
 
                 var repo = new TestMessagesRepository();
@@ -126,7 +126,7 @@ namespace Rnwood.Smtp4dev.Tests.Server.Pop3
                 using var loggerFactory = LoggerFactory.Create(b => { });
                 var sp = services.BuildServiceProvider();
 
-                var pop3 = new Rnwood.Smtp4dev.Server.Pop3.Pop3Server(optionsMonitor, loggerFactory.CreateLogger<Rnwood.Smtp4dev.Server.Pop3.Pop3Server>(), sp.GetRequiredService<IServiceScopeFactory>());
+                var pop3 = new Rnwood.Smtp4dev.Server.Pop3.Pop3Server(optionsMonitor, loggerFactory.CreateLogger<Rnwood.Smtp4dev.Server.Pop3.Pop3Server>(), sp.GetRequiredService<IServiceScopeFactory>(), sp);
                 pop3.TryStart();
                 try
                 {
@@ -168,6 +168,65 @@ namespace Rnwood.Smtp4dev.Tests.Server.Pop3
 
                     var received = ms.ToArray();
                     Assert.Equal(message.Data, received);
+                }
+                finally
+                {
+                    pop3.Stop();
+                }
+            }, TimeSpan.FromSeconds(20));
+        }
+
+        [Fact]
+        public async Task ImplicitTls_OnConnect_UsesTlsAnd_NoStlsAdvertised()
+        {
+            await RunWithTimeout(async () =>
+            {
+                var so = new ServerOptions { Pop3Port = 0, Pop3TlsMode = TlsMode.ImplicitTls, HostName = "localhost" };
+                var optionsMonitor = new TestOptionsMonitor<ServerOptions>(so);
+
+                var services = new ServiceCollection();
+                services.AddScoped<IMessagesRepository>(_ => new TestMessagesRepository());
+                using var loggerFactory = LoggerFactory.Create(b => { });
+                var sp = services.BuildServiceProvider();
+
+                var pop3 = new Rnwood.Smtp4dev.Server.Pop3.Pop3Server(optionsMonitor, loggerFactory.CreateLogger<Rnwood.Smtp4dev.Server.Pop3.Pop3Server>(), sp.GetRequiredService<IServiceScopeFactory>(), sp);
+                pop3.TryStart();
+                try
+                {
+                    Assert.True(pop3.IsRunning);
+                    var port = pop3.ListeningPorts.First();
+                    Assert.True(port > 0);
+
+                    using var client = new TcpClient();
+                    await client.ConnectAsync("localhost", port);
+                    using var stream = client.GetStream();
+
+                    // Create an SslStream and authenticate as client
+                    using var ssl = new SslStream(stream, leaveInnerStreamOpen: false, (sender, cert, chain, errors) => true);
+                    await ssl.AuthenticateAsClientAsync("localhost");
+
+                    using var reader = new StreamReader(ssl, Encoding.ASCII);
+                    using var writer = new StreamWriter(ssl, Encoding.ASCII) { NewLine = "\r\n", AutoFlush = true };
+
+                    var greeting = await reader.ReadLineAsync();
+                    Assert.StartsWith("+OK", greeting);
+
+                    // Request CAPA and verify STLS is NOT advertised for implicit TLS
+                    await writer.WriteLineAsync("CAPA");
+                    var capaLines = new System.Text.StringBuilder();
+                    string capaLine;
+                    while (!string.IsNullOrEmpty(capaLine = await reader.ReadLineAsync()))
+                    {
+                        if (capaLine == ".") break;
+                        capaLines.AppendLine(capaLine);
+                    }
+
+                    Assert.DoesNotContain("STLS", capaLines.ToString());
+
+                    // Close the session politely
+                    await writer.WriteLineAsync("QUIT");
+                    var bye = await reader.ReadLineAsync();
+                    Assert.StartsWith("+OK", bye);
                 }
                 finally
                 {

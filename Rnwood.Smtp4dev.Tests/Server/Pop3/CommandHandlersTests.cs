@@ -254,7 +254,7 @@ namespace Rnwood.Smtp4dev.Tests.Server.Pop3
         [Fact]
         public async Task Capa_Advertises_Stls_Based_On_Options()
         {
-            var (ctx, ms) = CreateContext(options: new ServerOptions { TlsMode = TlsMode.StartTls });
+            var (ctx, ms) = CreateContext(options: new ServerOptions { Pop3TlsMode = TlsMode.StartTls });
             ctx.Authenticated = false;
             var handler = new CapaCommand();
 
@@ -265,12 +265,41 @@ namespace Rnwood.Smtp4dev.Tests.Server.Pop3
             Assert.Contains("STLS", outStr);
 
             // Without TLS — create a fresh context and read from its stream
-            var (ctx2, ms2) = CreateContext(options: new ServerOptions { TlsMode = TlsMode.None });
+            var (ctx2, ms2) = CreateContext(options: new ServerOptions { Pop3TlsMode = TlsMode.None });
             await new CapaCommand().ExecuteAsync(ctx2, null, CancellationToken.None);
             await ctx2.Writer.FlushAsync();
             var outStr2 = ReadOutput(ms2);
             Assert.Contains("UIDL", outStr2);
             Assert.DoesNotContain("STLS", outStr2);
+        }
+
+        [Fact]
+        public async Task Stls_IsRejected_When_Pop3Mode_Is_ImplicitTls()
+        {
+            var (ctx, ms) = CreateContext(options: new ServerOptions { Pop3TlsMode = TlsMode.ImplicitTls });
+            var handler = new StlsCommand();
+
+            await handler.ExecuteAsync(ctx, null, CancellationToken.None);
+            await ctx.Writer.FlushAsync();
+
+            var outStr = ReadOutput(ms);
+            Assert.StartsWith("-ERR", outStr);
+            Assert.Contains("STLS not supported", outStr);
+        }
+
+        [Fact]
+        public async Task Capa_DoesNotAdvertise_Stls_When_Pop3Mode_Is_ImplicitTls()
+        {
+            var (ctx, ms) = CreateContext(options: new ServerOptions { Pop3TlsMode = TlsMode.ImplicitTls });
+            ctx.Authenticated = false;
+            var handler = new CapaCommand();
+
+            await handler.ExecuteAsync(ctx, null, CancellationToken.None);
+            await ctx.Writer.FlushAsync();
+            var outStr = ReadOutput(ms);
+
+            Assert.Contains("UIDL", outStr);
+            Assert.DoesNotContain("STLS", outStr);
         }
     }
 }

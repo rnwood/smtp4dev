@@ -221,7 +221,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                     }
                 ");
                 // Debug iframe content (comment out for CI to reduce output)
-                // Console.WriteLine($"🔍 DEBUG iframe content analysis: {iframeContent}");
+                // output.WriteLine($"🔍 DEBUG iframe content analysis: {iframeContent}");
             }
             
             // Get the iframe element for filter inspection
@@ -232,25 +232,25 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             var iframeFilter = await iframe.EvaluateAsync<string>("el => getComputedStyle(el).filter");
             
             // Test scenario logging (reduced for CI)
-            // Console.WriteLine($"📋 Test scenario: UI Mode = {(isDarkMode ? "Dark" : "Light")}, Email Dark Mode Support = {emailSupportsDarkMode}");
-            // Console.WriteLine($"🎨 Iframe computed filter: '{iframeFilter}'");
+            // output.WriteLine($"📋 Test scenario: UI Mode = {(isDarkMode ? "Dark" : "Light")}, Email Dark Mode Support = {emailSupportsDarkMode}");
+            // output.WriteLine($"🎨 Iframe computed filter: '{iframeFilter}'");
             
             // Determine if inversion should be applied based on UI mode and email dark mode support
             bool shouldInvert = isDarkMode && !emailSupportsDarkMode;
             bool hasInvertFilter = iframeFilter.Contains("invert");
             
-            // Console.WriteLine($"📊 Filter verification: expected invert = {shouldInvert}, actual invert = {hasInvertFilter}");
+            // output.WriteLine($"📊 Filter verification: expected invert = {shouldInvert}, actual invert = {hasInvertFilter}");
             
             // Verify the iframe has the correct CSS filter
             if (shouldInvert)
             {
                 Assert.True(hasInvertFilter, $"Dark UI + Email without dark support should have invert filter. Computed filter: {iframeFilter}");
-                Console.WriteLine("✅ Invert filter correctly applied");
+                output.WriteLine("✅ Invert filter correctly applied");
             }
             else
             {
                 Assert.False(hasInvertFilter, $"Light UI OR Dark UI + Email with dark support should NOT have invert filter. Computed filter: {iframeFilter}");
-                Console.WriteLine("✅ Invert filter correctly NOT applied");
+                output.WriteLine("✅ Invert filter correctly NOT applied");
             }
             
             // Now check actual background colors of email sections
@@ -259,7 +259,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             // even when the colors are visually inverted for the user.
             await VerifyEmailSectionColors(frameLocator, shouldInvert, emailSupportsDarkMode, isDarkMode);
             
-            Console.WriteLine($"✅ Dark mode behavior and color verification completed successfully");
+            output.WriteLine($"✅ Dark mode behavior and color verification completed successfully");
         }
         
         private async Task VerifyEmailSectionColors(IFrameLocator frameLocator, bool shouldInvert, bool emailSupportsDarkMode, bool isDarkMode)
@@ -267,7 +267,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             // Determine if dark mode media query colors should be active
             bool expectDarkModeMediaQueryColors = emailSupportsDarkMode && isDarkMode && !shouldInvert;
             
-            // Console.WriteLine($"🔍 Dark mode media query colors expected: {expectDarkModeMediaQueryColors}");
+            // output.WriteLine($"🔍 Dark mode media query colors expected: {expectDarkModeMediaQueryColors}");
             
             // Define expected colors - different sets based on whether dark mode media query should be active
             var baseColors = new Dictionary<string, (string original, string inverted)>
@@ -292,13 +292,13 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 overallBackground = await GetComputedBackgroundColor(frameLocator, "body");
             }
             
-            // Console.WriteLine($"🎨 Overall background color: {overallBackground}");
+            // output.WriteLine($"🎨 Overall background color: {overallBackground}");
             
             if (expectDarkModeMediaQueryColors && darkModeMediaQueryColors.ContainsKey("overall-background"))
             {
                 // For emails with dark mode support in dark UI, expect the dark mode media query background color
                 var expectedDarkBg = darkModeMediaQueryColors["overall-background"];
-                Console.WriteLine($"🔍 Expecting dark mode media query background: {expectedDarkBg}");
+                output.WriteLine($"🔍 Expecting dark mode media query background: {expectedDarkBg}");
                 VerifyExactColorMatch("overall-background (dark mode media query)", overallBackground, expectedDarkBg);
             }
             else
@@ -309,17 +309,17 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             
             // Check red section (always follows base color rules - no dark mode override)
             var redBackground = await GetComputedBackgroundColor(frameLocator, ".red-section");
-            Console.WriteLine($"🎨 Red section background color: {redBackground}");
+            output.WriteLine($"🎨 Red section background color: {redBackground}");
             VerifyColorMatch("red-section", redBackground, baseColors["red-section"], shouldInvert);
             
             // Check green section (always follows base color rules - no dark mode override) 
             var greenBackground = await GetComputedBackgroundColor(frameLocator, ".green-section");
-            Console.WriteLine($"🎨 Green section background color: {greenBackground}");
+            output.WriteLine($"🎨 Green section background color: {greenBackground}");
             VerifyColorMatch("green-section", greenBackground, baseColors["green-section"], shouldInvert);
             
             // Check yellow section (always follows base color rules - no dark mode override)
             var yellowBackground = await GetComputedBackgroundColor(frameLocator, ".yellow-section");
-            Console.WriteLine($"🎨 Yellow section background color: {yellowBackground}");
+            output.WriteLine($"🎨 Yellow section background color: {yellowBackground}");
             VerifyColorMatch("yellow-section", yellowBackground, baseColors["yellow-section"], shouldInvert);
             
             // Check dark section if it exists (only in emails with dark mode support)
@@ -329,13 +329,13 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 if (darkSectionExists)
                 {
                     var darkBackground = await GetComputedBackgroundColor(frameLocator, ".dark-section");
-                    Console.WriteLine($"🎨 Dark section background color: {darkBackground}");
+                    output.WriteLine($"🎨 Dark section background color: {darkBackground}");
                     
                     if (expectDarkModeMediaQueryColors)
                     {
                         // For emails with dark mode support in dark UI, expect the dark mode media query color
                         var expectedDarkSectionBg = darkModeMediaQueryColors["dark-section"];
-                        Console.WriteLine($"🔍 Expecting dark mode media query dark section: {expectedDarkSectionBg}");
+                        output.WriteLine($"🔍 Expecting dark mode media query dark section: {expectedDarkSectionBg}");
                         VerifyExactColorMatch("dark-section (dark mode media query)", darkBackground, expectedDarkSectionBg);
                     }
                     else
@@ -347,12 +347,12 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 }
                 else if (emailSupportsDarkMode)
                 {
-                    Console.WriteLine($"⚠️ Dark section expected but not found for email with dark mode support");
+                    output.WriteLine($"⚠️ Dark section expected but not found for email with dark mode support");
                 }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"ℹ️ Dark section not found or not accessible: {ex.Message}");
+                output.WriteLine($"ℹ️ Dark section not found or not accessible: {ex.Message}");
             }
         }
         
@@ -364,14 +364,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"⚠️ Could not get background color for {selector}: {ex.Message}");
+                output.WriteLine($"⚠️ Could not get background color for {selector}: {ex.Message}");
                 return "";
             }
         }
         
         private void VerifyExactColorMatch(string sectionName, string actualColor, string expectedColor)
         {
-            Console.WriteLine($"🔍 {sectionName}: expected={expectedColor}, actual={actualColor}");
+            output.WriteLine($"🔍 {sectionName}: expected={expectedColor}, actual={actualColor}");
             
             // Normalize color values for comparison (handle different RGB formats)
             var normalizedActual = NormalizeRgbColor(actualColor);
@@ -379,7 +379,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             
             if (normalizedActual == normalizedExpected)
             {
-                Console.WriteLine($"✅ {sectionName} color matches expected value");
+                output.WriteLine($"✅ {sectionName} color matches expected value");
             }
             else
             {
@@ -395,8 +395,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             // So we always expect the original colors from inside the iframe.
             var expectedColor = expectedColors.original;
             
-            Console.WriteLine($"🔍 {sectionName}: expected={expectedColor}, actual={actualColor}, shouldInvert={shouldInvert}");
-            Console.WriteLine($"ℹ️  Note: CSS filter inversion happens at container level, so computed styles inside iframe always return original values");
+            output.WriteLine($"🔍 {sectionName}: expected={expectedColor}, actual={actualColor}, shouldInvert={shouldInvert}");
+            output.WriteLine($"ℹ️  Note: CSS filter inversion happens at container level, so computed styles inside iframe always return original values");
             
             // Normalize color values for comparison (handle different RGB formats)
             var normalizedActual = NormalizeRgbColor(actualColor);
@@ -404,7 +404,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             
             if (normalizedActual == normalizedExpected)
             {
-                Console.WriteLine($"✅ {sectionName} color matches expected value (original color from inside iframe)");
+                output.WriteLine($"✅ {sectionName} color matches expected value (original color from inside iframe)");
             }
             else
             {
@@ -514,23 +514,21 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             {
                 await uitest(page, context.BaseUrl, context.SmtpPortNumber);
                 
-                // Stop tracing with successful completion
                 await browserContext.Tracing.StopAsync(new TracingStopOptions
                 {
                     Path = tracePath
                 });
                 
-                Console.WriteLine($"Trace saved: {tracePath}");
+                output.WriteLine($"Trace saved: {tracePath}");
             }
             catch (Exception)
             {
-                // Stop tracing and save on failure
                 await browserContext.Tracing.StopAsync(new TracingStopOptions
                 {
                     Path = tracePath
                 });
                 
-                Console.WriteLine($"Trace saved on failure: {tracePath}");
+                output.WriteLine($"Trace saved on failure: {tracePath}");
                 throw;
             }
             finally

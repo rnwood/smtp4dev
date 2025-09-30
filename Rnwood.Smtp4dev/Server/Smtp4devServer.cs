@@ -703,8 +703,8 @@ namespace Rnwood.Smtp4dev.Server
 
                 foreach (var l in smtpServer.ListeningEndpoints)
                 {
-                    log.Information("SMTP Server is listening on port {smtpPortNumber} ({address}).",
-                        l.Port, l.Address);
+                    log.Information("SMTP Server is listening on port {smtpPortNumber} ({address}) with TLS mode ({tlsMode}).",
+                        l.Port, l.Address, this.lastStartOptions.TlsMode);
                 }
 
                 log.Information("Keeping last {messagesToKeep} messages per mailbox and {sessionsToKeep} sessions.",

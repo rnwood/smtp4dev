@@ -1,4 +1,5 @@
-﻿using Rnwood.Smtp4dev.Server.Settings;
+﻿using Rnwood.Smtp4dev.Server;
+using Rnwood.Smtp4dev.Server.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;

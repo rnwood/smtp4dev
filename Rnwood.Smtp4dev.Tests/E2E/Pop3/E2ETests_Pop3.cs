@@ -12,8 +12,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Pop3
     [Collection("E2E")]
     public class E2ETests_Pop3_RetrieveAnd_Delete : E2ETests
     {
+        private readonly ITestOutputHelper output;
+
         public E2ETests_Pop3_RetrieveAnd_Delete(ITestOutputHelper output) : base(output)
         {
+            this.output = output;
         }
 
         [Theory]
@@ -59,13 +62,37 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Pop3
                         _ => SecureSocketOptions.None
                     };
 
+                    // Helper to try connecting to multiple candidate hosts to avoid IPv4/IPv6 issues on test environments
+                    void ConnectWithFallback(MailKit.Net.Pop3.Pop3Client client, string host, int port, MailKit.Security.SecureSocketOptions options)
+                    {
+                        var candidates = new[] { host, "127.0.0.1", "::1" };
+                        Exception lastEx = null;
+                        foreach (var candidate in candidates)
+                        {
+                            try
+                            {
+                                output.WriteLine($"Attempting POP3 connect to {candidate}:{port} using {options}");
+                                client.Connect(candidate, port, options, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                                output.WriteLine($"Connected to POP3 {candidate}:{port}");
+                                return;
+                            }
+                            catch (Exception ex)
+                            {
+                                lastEx = ex;
+                                output.WriteLine($"POP3 connect to {candidate}:{port} failed: {ex.Message}");
+                            }
+                        }
+
+                        throw new AggregateException("All POP3 connect attempts failed", lastEx ?? new Exception("Unknown"));
+                    }
+
                     // Connect to POP3 and retrieve the message
                     using (var pop = new Pop3Client())
                     {
                         pop.CheckCertificateRevocation = false;
                         pop.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                        pop.Connect("localhost", context.Pop3PortNumber, popConnectOption, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                        ConnectWithFallback(pop, context.Pop3Host, context.Pop3PortNumber, popConnectOption);
                         // Authenticate - server currently accepts any creds when AuthenticationRequired is false
                         pop.Authenticate("user", "password");
 
@@ -85,7 +112,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Pop3
                         pop2.CheckCertificateRevocation = false;
                         pop2.ServerCertificateValidationCallback = (s, c, h, e) => true;
 
-                        pop2.Connect("localhost", context.Pop3PortNumber, popConnectOption, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
+                        ConnectWithFallback(pop2, context.Pop3Host, context.Pop3PortNumber, popConnectOption);
                         pop2.Authenticate("user", "password");
 
                         // There should be zero messages after deletion

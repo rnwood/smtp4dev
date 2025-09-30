@@ -5,6 +5,7 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 	using System.Threading;
 	using System.Threading.Tasks;
 	using Microsoft.Extensions.Logging;
+	using Microsoft.Extensions.DependencyInjection;
 	using Rnwood.Smtp4dev.Data;
 	using Rnwood.Smtp4dev.Server.Settings;
 
@@ -19,6 +20,12 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 		public ILogger Logger { get; set; }
 		public ServerOptions Options { get; set; }
 		public CancellationToken CancellationToken { get; set; }
+		
+		// Indicates whether the session is running over a secure TLS channel
+		public bool IsSecure { get; set; }
+
+		// Allows handlers to create short-lived DI scopes when they need repository instances with fresh DbContexts
+		public IServiceScopeFactory ScopeFactory { get; set; }
 
 		public Task WriteLineAsync(string line)
 		{
@@ -55,6 +62,7 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 			// defaults
 			Username = string.Empty;
 			Authenticated = false;
+			IsSecure = false;
 		}
 	}
 }

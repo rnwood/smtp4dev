@@ -4,6 +4,7 @@ namespace Rnwood.Smtp4dev.Server.Pop3.CommandHandlers
 	using System.Threading;
 	using System.Threading.Tasks;
 	using Rnwood.Smtp4dev.Server.Pop3;
+	using System;
 
 	internal class UidlCommand : ICommandHandler
 	{
@@ -14,7 +15,17 @@ namespace Rnwood.Smtp4dev.Server.Pop3.CommandHandlers
 				return context.WriteLineAsync("-ERR Not authenticated");
 			}
 
-			var mailbox = context.Username ?? Rnwood.Smtp4dev.Server.Settings.MailboxOptions.DEFAULTNAME;
+			string mailbox;
+			if (!context.Options.AuthenticationRequired)
+			{
+				mailbox = Rnwood.Smtp4dev.Server.Settings.MailboxOptions.DEFAULTNAME;
+			}
+			else
+			{
+				var user = context.Options.Users?.FirstOrDefault(u => string.Equals(u.Username, context.Username ?? string.Empty, StringComparison.OrdinalIgnoreCase));
+				mailbox = user?.DefaultMailbox ?? Rnwood.Smtp4dev.Server.Settings.MailboxOptions.DEFAULTNAME;
+			}
+
 			var messages = context.MessagesRepository.GetMessages(mailbox, "INBOX").ToList();
 			if (string.IsNullOrWhiteSpace(argument))
 			{

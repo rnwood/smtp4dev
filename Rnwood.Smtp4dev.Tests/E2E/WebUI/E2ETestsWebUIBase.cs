@@ -70,7 +70,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                     Path = tracePath
                 });
                 
-                Console.WriteLine($"Trace saved: {tracePath}");
+                output.WriteLine($"Trace saved: {tracePath}");
             }
             catch
             {
@@ -80,7 +80,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                     Path = tracePath
                 });
                 
-                Console.WriteLine($"Trace saved on failure: {tracePath}");
+                output.WriteLine($"Trace saved on failure: {tracePath}");
                 throw;
             }
             finally
@@ -96,9 +96,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             string traceDir = System.IO.Path.Combine(baseReportDir, "traces");
             
             // Debug output for CI troubleshooting
-            Console.WriteLine($"PLAYWRIGHT_HTML_REPORT environment variable: {Environment.GetEnvironmentVariable("PLAYWRIGHT_HTML_REPORT")}");
-            Console.WriteLine($"Base report directory: {baseReportDir}");
-            Console.WriteLine($"Trace directory: {traceDir}");
+            output.WriteLine($"PLAYWRIGHT_HTML_REPORT environment variable: {Environment.GetEnvironmentVariable("PLAYWRIGHT_HTML_REPORT")} ");
+            output.WriteLine($"Base report directory: {baseReportDir}");
+            output.WriteLine($"Trace directory: {traceDir}");
             
             return traceDir;
         }

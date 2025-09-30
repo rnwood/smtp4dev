@@ -30,8 +30,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
 
         public TlsMode TlsMode { get; set; } = TlsMode.None;
 
-        // POP3-specific TLS mode. If null/Default, global TlsMode is used by default at runtime (handled in server components).
-        public TlsMode? Pop3TlsMode { get; set; }
+        public TlsMode Pop3TlsMode { get; set; } = TlsMode.None;
 
         [AllowNull]
         public string SslProtocols { get; set; } = null;

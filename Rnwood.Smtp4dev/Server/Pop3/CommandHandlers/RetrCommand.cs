@@ -5,6 +5,7 @@ namespace Rnwood.Smtp4dev.Server.Pop3.CommandHandlers
 	using System.Threading;
 	using System.Threading.Tasks;
 	using Rnwood.Smtp4dev.Server.Pop3;
+	using Microsoft.Extensions.Logging;
 
 	internal class RetrCommand : ICommandHandler
 	{
@@ -22,7 +23,29 @@ namespace Rnwood.Smtp4dev.Server.Pop3.CommandHandlers
 				return;
 			}
 
-			var mailbox = context.Username ?? Rnwood.Smtp4dev.Server.Settings.MailboxOptions.DEFAULTNAME;
+			string mailbox;
+			if (!context.Options.AuthenticationRequired)
+			{
+				mailbox = Rnwood.Smtp4dev.Server.Settings.MailboxOptions.DEFAULTNAME;
+			}
+			else
+			{
+				var user = context.Options.Users?.FirstOrDefault(u => string.Equals(u.Username, context.Username ?? string.Empty, StringComparison.OrdinalIgnoreCase));
+				mailbox = user?.DefaultMailbox ?? Rnwood.Smtp4dev.Server.Settings.MailboxOptions.DEFAULTNAME;
+			}
+
+			// Temporary diagnostics to investigate E2E failure where POP3 reports zero messages
+			try
+			{
+				var allCount = context.MessagesRepository.GetAllMessages().Count();
+				var mailboxCount = context.MessagesRepository.GetMessages(mailbox, "INBOX").Count();
+				context.Logger?.LogInformation("POP3 Diagnostic RETR: DB total messages={allCount}, mailbox '{mailboxName}' messages={mailCount}", allCount, mailbox, mailboxCount);
+			}
+			catch (Exception ex)
+			{
+				context.Logger?.LogWarning(ex, "POP3 diagnostic logging failed");
+			}
+
 			var messages = context.MessagesRepository.GetMessages(mailbox, "INBOX").ToList();
 			if (id < 1 || id > messages.Count)
 			{

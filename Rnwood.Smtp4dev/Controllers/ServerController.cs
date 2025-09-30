@@ -83,6 +83,8 @@ namespace Rnwood.Smtp4dev.Controllers
                 Port = serverOptionsCurrentValue.Port,
                 ImapPort = serverOptionsCurrentValue.ImapPort,
                 Pop3Port = serverOptionsCurrentValue.Pop3Port,
+                Pop3TlsMode = serverOptionsCurrentValue.Pop3TlsMode.ToString(),
+                Pop3SecureConnectionRequired = serverOptionsCurrentValue.Pop3SecureConnectionRequired,
                 HostName = serverOptionsCurrentValue.HostName,
                 AllowRemoteConnections = serverOptionsCurrentValue.AllowRemoteConnections,
                 BindAddress = serverOptionsCurrentValue.BindAddress,
