@@ -1,4 +1,5 @@
-﻿using Rnwood.Smtp4dev.Server.Settings;
+﻿using Rnwood.Smtp4dev.Server;
+using Rnwood.Smtp4dev.Server.Settings;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +30,9 @@ namespace Rnwood.Smtp4dev.ApiModel
         public int NumberOfSessionsToKeep { get; set; }
 
         public int? ImapPort { get; set; }
+        public int? Pop3Port { get; set; }
+        public string Pop3TlsMode { get; set; }
+        public bool Pop3SecureConnectionRequired { get; set; }
 
         public bool DisableMessageSanitisation { get; set; }
         public string TlsMode { get; set; }

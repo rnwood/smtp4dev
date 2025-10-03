@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
 
 namespace Rnwood.Smtp4dev.Server
 {
@@ -12,9 +13,15 @@ namespace Rnwood.Smtp4dev.Server
 
     public class TaskQueue : ITaskQueue
     {
+        private readonly ILogger<TaskQueue> logger;
         private BlockingCollection<Action> processingQueue = new BlockingCollection<Action>();
 
         private BlockingCollection<Action> priorityProcessingQueue = new BlockingCollection<Action>();
+
+        public TaskQueue(ILogger<TaskQueue> logger)
+        {
+            this.logger = logger ?? throw new ArgumentNullException(nameof(logger));
+        }
 
         public Task QueueTask(Action action, bool priority)
         {
@@ -29,8 +36,7 @@ namespace Rnwood.Smtp4dev.Server
                 }
                 catch (Exception e)
                 {
-                    Console.WriteLine(e.ToString());
-
+                    logger.LogError(e, "TaskQueue action threw an unhandled exception");
                     tcs.SetException(e);
                 }
             };

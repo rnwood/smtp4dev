@@ -85,7 +85,7 @@ smtp4dev
 Docker images for both Windows and Linux are available. To run with the web interface on port 5000 and SMTP on port 2525:
 
 ```
-docker run --rm -it -p 5000:80 -p 2525:25 rnwood/smtp4dev
+docker run --rm -it -p 5000:80 -p 2525:25 -p 110:110 rnwood/smtp4dev
 ```
 Remove `--rm -it` if you want to leave smtp4dev running in the background, otherwise it will run until you hit CTRL+C.
 

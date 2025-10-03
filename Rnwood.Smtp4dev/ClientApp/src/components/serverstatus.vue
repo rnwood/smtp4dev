@@ -63,7 +63,7 @@
         @Watch("connection")
         onConnectionChanged() {
             if (this.connection) {
-                this.connection.onServerChanged( async () => {
+                this.connection.onServerChanged(async () => {
                     await this.refresh();
                 });
 

@@ -15,7 +15,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 {
     public class E2ETests
     {
-        private readonly ITestOutputHelper output;
+        protected readonly ITestOutputHelper output;
 
         public E2ETests(ITestOutputHelper output)
         {
@@ -37,6 +37,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             public int SmtpPortNumber { get; set; }
 
             public int ImapPortNumber { get; set; }
+            public int Pop3PortNumber { get; set; }
+            public string Pop3Host { get; set; } = "localhost";
         }
 
 
@@ -117,6 +119,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 args.Add("--imapport=0");
             }
 
+            if (!args.Any(a => a.StartsWith("--pop3port")))
+            {
+                args.Add("--pop3port=0");
+            }
+            
             if (!args.Any(a => a.StartsWith("--smtpport")))
             {
                 args.Add("--smtpport=0");
@@ -134,9 +141,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
 
 
-            if (!string.IsNullOrEmpty(options.BasePath))
+            if (string.IsNullOrEmpty(options.BasePath))
             {
-                args.Add($"--basepath={options.BasePath}");
+                args.Add("--basepath=");
             }
 
             output.WriteLine("Args: " + string.Join(" ", args.Select(a => $"\"{a}\"")));
@@ -154,9 +161,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     Uri baseUrl = null;
                     int? smtpPortNumber = null;
                     int? imapPortNumber = null;
+                    int? pop3PortNumber = null;
+                    string pop3Host = "localhost";
 
 
-                    while ((baseUrl == null || !smtpPortNumber.HasValue || !imapPortNumber.HasValue) && serverOutput.MoveNext())
+                    while ((baseUrl == null || !smtpPortNumber.HasValue || !imapPortNumber.HasValue || !pop3PortNumber.HasValue) && serverOutput.MoveNext())
                     {
                         string newLine = serverOutput.Current;
                         output.WriteLine(newLine);
@@ -183,6 +192,31 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                             imapPortNumber = (binary == "docker" && internalImapPort == 143) ? 1143 : internalImapPort;
                         }
 
+                        if (newLine.StartsWith("POP3 Server is listening on port"))
+                        {
+                            int internalPop3Port = int.Parse(Regex.Replace(newLine, @"POP3 Server is listening on port (\d+).*", "$1"));
+                            // For Docker, map internal port 110 to external port 1100
+                            pop3PortNumber = (binary == "docker" && internalPop3Port == 110) ? 1100 : internalPop3Port;
+                            // Try to parse the address from the same line (e.g. "POP3 Server is listening on port 53333 (::)")
+                            var m = Regex.Match(newLine, @"POP3 Server is listening on port \d+ \(([^)]+)\)");
+                            if (m.Success)
+                            {
+                                var addr = m.Groups[1].Value;
+                                if (addr == "::" || addr == "::1" || addr.Contains(':'))
+                                {
+                                    pop3Host = "::1";
+                                }
+                                else if (addr == "0.0.0.0")
+                                {
+                                    pop3Host = "127.0.0.1";
+                                }
+                                else
+                                {
+                                    pop3Host = addr;
+                                }
+                            }
+                        }
+
                         if (newLine.StartsWith("Application started. Press Ctrl+C to shut down."))
                         {
                             throw new Exception($@"Startup completed but did not catch variables from startup output:
@@ -207,11 +241,14 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                     Assert.False(serverProcess.Process.HasExited, "Server process failed");
 
 
+                    output.WriteLine($"Using Pop3Host: {pop3Host}, Pop3Port: {pop3PortNumber}");
                     test(new E2ETestContext
                     {
                         BaseUrl = baseUrl,
                         SmtpPortNumber = smtpPortNumber.Value,
-                        ImapPortNumber = imapPortNumber.Value
+                        ImapPortNumber = imapPortNumber.Value,
+                        Pop3PortNumber = pop3PortNumber.Value,
+                        Pop3Host = pop3Host
                     });
                 }
                 finally

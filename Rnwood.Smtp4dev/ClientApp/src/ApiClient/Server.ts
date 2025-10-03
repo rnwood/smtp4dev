@@ -1,14 +1,21 @@
-﻿
-import Mailbox from './Mailbox';
+﻿import Mailbox from './Mailbox';
 import User from './User';
 export default class Server {
     currentUserName: string;
     currentUserDefaultMailboxName: string;
+    bindAddress: any;
+    disableHtmlValidation: any;
+    disableHtmlCompatibilityCheck: any;
+    port: any;
+    relayAutomaticRelayExpression: any;
+    desktopMinimiseToTrayIcon: any;
 
 
-    constructor(isRunning: boolean, exception: string, portNumber: number, hostName: string, allowRemoteConnections: boolean, numberOfMessagesToKeep: number, numberOfSessionsToKeep: number, imapPortNumber: number, settingsAreEditable: boolean, disableMessageSanitisation: boolean, automaticRelayExpression: string, tlsMode: string, credentialsValidationExpression: string,
+    constructor(isRunning: boolean, exception: string, portNumber: number, hostName: string, allowRemoteConnections: boolean, numberOfMessagesToKeep: number, numberOfSessionsToKeep: number, imapPortNumber: number, pop3PortNumber: number, settingsAreEditable: boolean, disableMessageSanitisation: boolean, automaticRelayExpression: string, tlsMode: string, credentialsValidationExpression: string,
         authenticationRequired: boolean,
         secureConnectionRequired: boolean, recipientValidationExpression: string, messageValidationExpression: string, commandValidationExpression: string, disableIPv6: string, users: User[],
+        pop3TlsMode: string | undefined,
+        pop3SecureConnectionRequired: boolean,
         relayTlsMode: string | undefined,
         relaySmtpServer: string,
         relaySmtpPort: number,
@@ -29,7 +36,7 @@ export default class Server {
         currentUserDefaultMailboxName: string,
         htmlValidateConfig: string
     ) {
-
+        
         this.isRunning = isRunning;
         this.exception = exception;
         this.portNumber = portNumber;
@@ -38,6 +45,7 @@ export default class Server {
         this.numberOfMessagesToKeep = numberOfMessagesToKeep;
         this.numberOfSessionsToKeep = numberOfSessionsToKeep;
         this.imapPortNumber = imapPortNumber;
+        this.pop3PortNumber = pop3PortNumber;
         this.settingsAreEditable = settingsAreEditable;
         this.disableMessageSanitisation = disableMessageSanitisation;
         this.automaticRelayExpression = automaticRelayExpression;
@@ -45,11 +53,8 @@ export default class Server {
         this.credentialsValidationExpression = credentialsValidationExpression;
         this.authenticationRequired = authenticationRequired;
         this.secureConnectionRequired = secureConnectionRequired;
-        this.recipientValidationExpression = recipientValidationExpression;
-        this.messageValidationExpression = messageValidationExpression;
-        this.commandValidationExpression = commandValidationExpression;
-        this.disableIPv6 = disableIPv6;
-        this.users = users;
+        this.pop3TlsMode = pop3TlsMode;
+        this.pop3SecureConnectionRequired = pop3SecureConnectionRequired;
         this.relayTlsMode = relayTlsMode;
         this.relaySmtpServer = relaySmtpServer;
         this.relaySmtpPort = relaySmtpPort;
@@ -69,6 +74,15 @@ export default class Server {
         this.currentUserName = currentUserName;
         this.currentUserDefaultMailboxName = currentUserDefaultMailboxName;
         this.htmlValidateConfig = htmlValidateConfig;
+        this.imapPort = imapPortNumber;
+        this.pop3Port = pop3PortNumber;
+        this.pop3TlsMode = pop3TlsMode;
+        this.pop3SecureConnectionRequired = pop3SecureConnectionRequired;
+        this.recipientValidationExpression = recipientValidationExpression;
+        this.messageValidationExpression = messageValidationExpression;
+        this.commandValidationExpression = commandValidationExpression;
+        this.disableIPv6 = disableIPv6;
+        this.users = users;
     }
 
 
@@ -80,6 +94,7 @@ export default class Server {
     numberOfMessagesToKeep: number;
     numberOfSessionsToKeep: number;
     imapPortNumber: number;
+    pop3PortNumber: number;
     settingsAreEditable: boolean;
     disableMessageSanitisation: boolean;
     automaticRelayExpression: string;
@@ -87,6 +102,8 @@ export default class Server {
     credentialsValidationExpression: string;
     authenticationRequired: boolean;
     secureConnectionRequired: boolean;
+    pop3TlsMode: string | undefined;
+    pop3SecureConnectionRequired: boolean;
     recipientValidationExpression: string;
     messageValidationExpression: string;
     commandValidationExpression: string;
@@ -109,4 +126,6 @@ export default class Server {
     smtpEnabledAuthTypesWhenSecureConnection: string[];
     mailboxes: Mailbox[];
     htmlValidateConfig: string;
+    imapPort: number;
+    pop3Port: number;
 }

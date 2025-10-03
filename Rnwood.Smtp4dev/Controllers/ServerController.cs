@@ -29,11 +29,12 @@ namespace Rnwood.Smtp4dev.Controllers
     [ApiController]
     public class ServerController : Controller
     {
-        public ServerController(ISmtp4devServer server, ImapServer imapServer, IOptionsMonitor<ServerOptions> serverOptions,
+        public ServerController(ISmtp4devServer server, ImapServer imapServer, Rnwood.Smtp4dev.Server.Pop3.Pop3Server pop3Server, IOptionsMonitor<ServerOptions> serverOptions,
             IOptionsMonitor<RelayOptions> relayOptions, IOptionsMonitor<DesktopOptions> desktopOptions, MapOptions<CommandLineOptions> commandLineOptions, CommandLineOptions cmdLineOptions, IHostingEnvironmentHelper hostingEnvironmentHelper)
         {
             this.server = server;
             this.imapServer = imapServer;
+            this.pop3Server = pop3Server;
             this.serverOptions = serverOptions;
             this.relayOptions = relayOptions;
             this.desktopOptions = desktopOptions;
@@ -44,6 +45,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
         private readonly ISmtp4devServer server;
         private readonly ImapServer imapServer;
+        private readonly Rnwood.Smtp4dev.Server.Pop3.Pop3Server pop3Server;
         private readonly IOptionsMonitor<ServerOptions> serverOptions;
         private readonly IOptionsMonitor<RelayOptions> relayOptions;
         private readonly IOptionsMonitor<DesktopOptions> desktopOptions;
@@ -80,6 +82,9 @@ namespace Rnwood.Smtp4dev.Controllers
                 LockedSettings = lockedSettings,
                 Port = serverOptionsCurrentValue.Port,
                 ImapPort = serverOptionsCurrentValue.ImapPort,
+                Pop3Port = serverOptionsCurrentValue.Pop3Port,
+                Pop3TlsMode = serverOptionsCurrentValue.Pop3TlsMode.ToString(),
+                Pop3SecureConnectionRequired = serverOptionsCurrentValue.Pop3SecureConnectionRequired,
                 HostName = serverOptionsCurrentValue.HostName,
                 AllowRemoteConnections = serverOptionsCurrentValue.AllowRemoteConnections,
                 BindAddress = serverOptionsCurrentValue.BindAddress,
@@ -262,6 +267,9 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.NumberOfMessagesToKeep = serverUpdate.NumberOfMessagesToKeep != defaultSettingsFile.ServerOptions.NumberOfMessagesToKeep ? serverUpdate.NumberOfMessagesToKeep : null;
             newSettings.NumberOfSessionsToKeep = serverUpdate.NumberOfSessionsToKeep != defaultSettingsFile.ServerOptions.NumberOfSessionsToKeep ? serverUpdate.NumberOfSessionsToKeep : null;
             newSettings.ImapPort = serverUpdate.ImapPort != defaultSettingsFile.ServerOptions.ImapPort ? serverUpdate.ImapPort : null;
+            newSettings.Pop3Port = serverUpdate.Pop3Port != defaultSettingsFile.ServerOptions.Pop3Port ? serverUpdate.Pop3Port : null;
+            newSettings.Pop3TlsMode = Enum.Parse<TlsMode>(serverUpdate.Pop3TlsMode) != defaultSettingsFile.ServerOptions.Pop3TlsMode ? Enum.Parse<TlsMode>(serverUpdate.Pop3TlsMode) : null;
+            newSettings.Pop3SecureConnectionRequired = serverUpdate.Pop3SecureConnectionRequired != defaultSettingsFile.ServerOptions.Pop3SecureConnectionRequired ? serverUpdate.Pop3SecureConnectionRequired : null;
             newSettings.DisableMessageSanitisation = serverUpdate.DisableMessageSanitisation != defaultSettingsFile.ServerOptions.DisableMessageSanitisation ? serverUpdate.DisableMessageSanitisation : null;
             newSettings.TlsMode =  Enum.Parse<TlsMode>(serverUpdate.TlsMode) != defaultSettingsFile.ServerOptions.TlsMode ? Enum.Parse<TlsMode>(serverUpdate.TlsMode) : null;
             newSettings.AuthenticationRequired = serverUpdate.AuthenticationRequired != defaultSettingsFile.ServerOptions.AuthenticationRequired ? serverUpdate.AuthenticationRequired : null;
@@ -321,6 +329,15 @@ namespace Rnwood.Smtp4dev.Controllers
                 this.imapServer.TryStart();
             }
 
+
+            if (!serverUpdate.IsRunning && this.pop3Server.IsRunning)
+            {
+                this.pop3Server.Stop();
+            }
+            else if (serverUpdate.IsRunning && !this.pop3Server.IsRunning)
+            {
+                this.pop3Server.TryStart();
+            }
 
             return Ok();
         }

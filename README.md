@@ -5,7 +5,7 @@ A dummy SMTP server for Windows, Linux, Mac OS-X (and maybe elsewhere where .NET
 
 smtp4dev support many advanced features:
 - OpenAPI/Swagger API
-- IMAP access to retrieve and delete messages
+- IMAP and POP3 access to retrieve and delete messages
 - SMTP session logging
 - UTF8 support
 - Viewport size switcher to simulate mobile etc

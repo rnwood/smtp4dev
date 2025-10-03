@@ -23,30 +23,14 @@ smtp4dev is a fake SMTP email server for development and testing, built as a .NE
    - Takes approximately 40-60 seconds
    - NEVER CANCEL - Set timeout to 120+ seconds
 
-2. **Install frontend dependencies:**
-   ```bash
-   cd Rnwood.Smtp4dev/ClientApp
-   npm install
-   ```
-   - Takes approximately 35-50 seconds
-   - NEVER CANCEL - Set timeout to 120+ seconds
-   - May show peer dependency warnings (expected and harmless)
-
-3. **Build the application:**
+2. **Build the application:**
    ```bash
    # Build main web application (recommended for development)
-   dotnet build Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj -c Release
+   dotnet build Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
    ```
    - Takes approximately 3-5 seconds after initial frontend build
    - NEVER CANCEL - Set timeout to 60+ seconds
    - The Desktop project will fail on Linux (expected - Windows-only)
-
-4. **Publish the application:**
-   ```bash
-   dotnet publish Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj -c Release -o ./published
-   ```
-   - Takes approximately 20-25 seconds including frontend Vite build
-   - NEVER CANCEL - Set timeout to 120+ seconds
 
 ### Run the Application
 
@@ -57,6 +41,9 @@ dotnet run --project Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj --urls="http://local
 
 **Published mode:**
 ```bash
+
+dotnet publish Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj -c Release -o ./published
+
 cd ./published
 ./Rnwood.Smtp4dev --urls="http://localhost:5000" --smtpport=2525 --imapport=1143
 ```
@@ -92,12 +79,6 @@ npm run lint
 - Takes approximately 10-15 seconds
 - Some configuration warnings are expected
 
-**Frontend Tests:**
-```bash
-cd Rnwood.Smtp4dev/ClientApp
-npm test -- --passWithNoTests
-```
-- Currently has Jest configuration issues (known limitation)
 
 ### Validation Scenarios
 
@@ -168,16 +149,11 @@ npm test -- --passWithNoTests
 3. **Always run validation scenarios** after changes
 4. Test both development and published modes
 
-### Frontend Development
-```bash
-cd Rnwood.Smtp4dev/ClientApp
-npm run dev  # Development server with hot reload (runs on port 5173)
-```
-
-### Backend Development
+### Full Stack Development
 ```bash
 dotnet watch run --project Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
 ```
+Both the front end and backend will reload on changes.
 
 ### Configuration
 - Default configuration in `appsettings.json` with extensive inline documentation
@@ -248,7 +224,6 @@ type(optional-scope): description
 - **Database locks**: Application creates SQLite database in user config directory
 
 ### Testing Issues
-- **Jest configuration errors**: Known issue with current module configuration
 - **E2E test complexity**: Requires Chrome and specific environment setup
 - **Network-dependent tests**: May fail in restricted environments
 
@@ -264,28 +239,3 @@ The project uses Azure Pipelines (`azure-pipelines.yml`) with:
 - `win-x64`, `linux-x64`, `linux-musl-x64`, `linux-arm`, `win-arm64`
 - Desktop variants (Windows only)
 - Docker images (Linux and Windows)
-
-## Command Reference
-
-### Essential Commands
-```bash
-# Quick development setup
-dotnet restore && cd Rnwood.Smtp4dev/ClientApp && npm install && cd ../..
-
-# Build for development
-dotnet build Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj -c Release
-
-# Run with development settings
-dotnet run --project Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj --urls="http://localhost:5000" --smtpport=2525
-
-# Test SMTP functionality
-echo -e "HELO test\nMAIL FROM:<test@example.com>\nRCPT TO:<user@example.com>\nDATA\nSubject: Test\n\nTest message\n.\nQUITS" | nc localhost 2525
-
-# Check web UI
-curl -s http://localhost:5000/ && echo "Web UI is running"
-
-# Check API
-curl -s http://localhost:5000/api/messages | jq '.results | length'
-```
-
-Always ensure the application is fully functional by testing email sending, web UI access, and API responses after making any changes.

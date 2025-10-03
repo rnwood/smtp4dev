@@ -215,6 +215,7 @@ namespace Rnwood.Smtp4dev
 
             services.AddSingleton<ISmtp4devServer, Smtp4devServer>();
             services.AddSingleton<ImapServer>();
+            services.AddSingleton<Rnwood.Smtp4dev.Server.Pop3.Pop3Server>();
             services.AddScoped<IMessagesRepository, MessagesRepository>();
             services.AddScoped<IHostingEnvironmentHelper, HostingEnvironmentHelper>();
             services.AddSingleton<ITaskQueue, TaskQueue>();

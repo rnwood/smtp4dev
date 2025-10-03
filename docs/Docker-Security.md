@@ -14,12 +14,12 @@ By default, Docker's port publishing mechanism (`-p` flag or `ports:` in docker-
 
 ❌ **INSECURE** (exposes to all interfaces):
 ```bash
-docker run -p 5000:80 -p 25:25 -p 143:143 rnwood/smtp4dev:v3
+docker run -p 5000:80 -p 25:25 -p 143:143 -p 110:110 rnwood/smtp4dev:v3
 ```
 
 ✅ **SECURE** (localhost only):
 ```bash
-docker run -p 127.0.0.1:5000:80 -p 127.0.0.1:25:25 -p 127.0.0.1:143:143 rnwood/smtp4dev:v3
+docker run -p 127.0.0.1:5000:80 -p 127.0.0.1:25:25 -p 127.0.0.1:143:143 -p 127.0.0.1:110:110 rnwood/smtp4dev:v3
 ```
 
 ### Docker Compose
@@ -33,6 +33,7 @@ services:
       - '5000:80'    # Exposed to all interfaces
       - '25:25'      # Exposed to all interfaces  
       - '143:143'    # Exposed to all interfaces
+      - '110:110'    # POP3 plain (exposed to all interfaces)
 ```
 
 ✅ **SECURE** docker-compose.yml:
@@ -44,6 +45,7 @@ services:
       - '127.0.0.1:5000:80'    # Localhost only
       - '127.0.0.1:25:25'      # Localhost only
       - '127.0.0.1:143:143'    # Localhost only
+      - '127.0.0.1:110:110'    # POP3 plain (localhost only)
 ```
 
 ## How It Works
@@ -70,10 +72,10 @@ services:
     image: rnwood/smtp4dev:v3
     restart: always
     ports:
-      # Bind to localhost only for security
       - '127.0.0.1:5000:80'    # Web interface
       - '127.0.0.1:2525:25'    # SMTP server (using non-standard port)
       - '127.0.0.1:1143:143'   # IMAP server (using non-standard port)
+      - '127.0.0.1:1110:110'   # POP3 server (using non-standard port)
     volumes:
       - smtp4dev-data:/smtp4dev
     environment:

@@ -27,6 +27,7 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public string BasePath { get; set; }
 
         public TlsMode? TlsMode { get; set; }
+        public TlsMode? Pop3TlsMode { get; set; }
 
         public string TlsCertificateStoreThumbprint { get; set; }
         public string TlsCertificate { get; set; }
@@ -37,6 +38,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public string HostName { get; set; }
 
         public int? ImapPort { get; set; }
+        public int? Pop3Port { get; set; }
+        public bool? Pop3SecureConnectionRequired { get; set; }
 
         public bool? RecreateDb { get; set; }
 

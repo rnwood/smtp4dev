@@ -8,7 +8,7 @@
             <el-form v-if="server" :model="this" ref="form" :rules="rules" :disabled="saving" scroll-to-error>
                 <el-tabs tab-position="top">
                     <el-tab-pane label="General">
-                        <el-form-item label="Hostname (SMTP, IMAP)" prop="server.hostName">
+                        <el-form-item label="Hostname (SMTP, IMAP, POP3)" prop="server.hostName">
                             <el-input v-model="server.hostName" :disabled="server.lockedSettings.hostName">
                                 <template #prefix>
                                     <el-icon v-if="server.lockedSettings.hostName" :title="`Locked: ${server.lockedSettings.hostName}`"><Lock /></el-icon>
@@ -17,7 +17,7 @@
                         </el-form-item>
 
 
-                        <el-form-item label="Allow Remote Connections (SMTP, IMAP)" prop="server.allowRemoteConnections">
+                        <el-form-item label="Allow Remote Connections (SMTP, IMAP, POP3)" prop="server.allowRemoteConnections">
 
                             <el-icon v-if="server.lockedSettings.allowRemoteConnections" :title="`Locked: ${server.lockedSettings.allowRemoteConnections}`"><Lock /></el-icon>
 
@@ -26,7 +26,7 @@
 
                         </el-form-item>
 
-                        <el-form-item label="Bind Address (SMTP, IMAP)" prop="server.bindAddress">
+                        <el-form-item label="Bind Address (SMTP, IMAP, POP3)" prop="server.bindAddress">
                             <el-input v-model="server.bindAddress" :disabled="server.lockedSettings.bindAddress" placeholder="Leave empty to use default (0.0.0.0 when remote connections allowed, 127.0.0.1 when not)">
                                 <template #prefix>
                                     <el-icon v-if="server.lockedSettings.bindAddress" :title="`Locked: ${server.lockedSettings.bindAddress}`"><Lock /></el-icon>
@@ -34,13 +34,13 @@
                             </el-input>
                         </el-form-item>
 
-                        <el-form-item label="Disable IPv6 (SMTP, IMAP)" prop="server.disableIPv6">
+                        <el-form-item label="Disable IPv6 (SMTP, IMAP, POP3)" prop="server.disableIPv6">
                             <el-icon v-if="server.lockedSettings.disableIPv6" :title="`Locked: ${server.lockedSettings.disableIPv6}`"><Lock /></el-icon>
 
                             <el-switch v-model="server.disableIPv6" :disabled="server.lockedSettings.disableIPv6" />
                         </el-form-item>
 
-                        <el-form-item label="Require Authentication (SMTP, IMAP)" prop="server.authenticationRequired">
+                        <el-form-item label="Require Authentication (SMTP, IMAP, POP3)" prop="server.authenticationRequired">
                             <el-icon v-if="server.lockedSettings.authenticationRequired" :title="`Locked: ${server.lockedSettings.authenticationRequired}`"><Lock /></el-icon>
 
                             <el-switch v-model="server.authenticationRequired" :disabled="server.lockedSettings.authenticationRequired" />
@@ -216,13 +216,34 @@
 
                     <el-tab-pane label="IMAP Server">
                         <el-form-item label="Port Number (0=auto assign)" prop="server.imapPort">
-
                             <el-icon v-if="server.lockedSettings.imapPort" :title="`Locked: ${server.lockedSettings.imapPort}`"><Lock /></el-icon>
-
                             <el-input-number :min=0 :max=65535 controls-position="right" v-model="server.imapPort" :disabled="server.lockedSettings.imapPort">
                             </el-input-number>
                         </el-form-item>
                     </el-tab-pane>
+                    <el-tab-pane label="POP3 Server">
+                        <el-form-item label="Port Number (0=auto assign)" prop="server.pop3Port">
+                            <el-icon v-if="server.lockedSettings.pop3Port" :title="`Locked: ${server.lockedSettings.pop3Port}`"><Lock /></el-icon>
+                            <el-input-number :min=0 :max=65535 controls-position="right" v-model="server.pop3Port" :disabled="server.lockedSettings.pop3Port">
+                            </el-input-number>
+                        </el-form-item>
+                        <el-form-item label="TLS mode" prop="server.pop3TlsMode">
+                            <el-icon v-if="server.lockedSettings.pop3TlsMode" :title="`Locked: ${server.lockedSettings.pop3TlsMode}`"><Lock /></el-icon>
+                            <el-select v-model="server.pop3TlsMode" style="width: 100%;" :disabled="server.lockedSettings.pop3TlsMode">
+                                <el-option key="None" label="None" value="None"></el-option>
+                                <el-option key="StartTls" label="STARTTLS (client requests TLS after session starts)" value="StartTls"></el-option>
+                                <el-option key="ImplicitTls" label="Implicit TLS (TLS immediately)" value="ImplicitTls"></el-option>
+                                <template #prefix>
+                                    <el-icon v-if="server.lockedSettings.pop3TlsMode" :title="`Locked: ${server.lockedSettings.pop3TlsMode}`"><Lock /></el-icon>
+                                </template>
+                            </el-select>
+                        </el-form-item>
+                        <el-form-item label="Require Secure Connection" prop="server.pop3SecureConnectionRequired">
+                            <el-icon v-if="server.lockedSettings.pop3SecureConnectionRequired" :title="`Locked: ${server.lockedSettings.pop3SecureConnectionRequired}`"><Lock /></el-icon>
+                            <el-switch v-model="server.pop3SecureConnectionRequired" :disabled="server.lockedSettings.pop3SecureConnectionRequired" />
+                        </el-form-item>
+                    </el-tab-pane>
+                    
                     <el-tab-pane label="Message Relay">
                         <el-form-item label="Message Relay Enabled" prop="isRelayEnabled">
                             <el-icon v-if="server.lockedSettings.relaySmtpServer" :title="`Locked: ${server.lockedSettings.relaySmtpServer}`"><Lock /></el-icon>
@@ -354,7 +375,11 @@
                                 </el-button>
                             </el-form-item>
                         </div>
-                        <el-button size="small" @click="server.users.push({})" :disabled="server.lockedSettings.users">New User</el-button>
+                        <el-button size="small" @click="server.users.push({
+    username: '',
+    password: '',
+    defaultMailbox: ''
+})" :disabled="server.lockedSettings.users">New User</el-button>
 
 
                     </el-tab-pane>
@@ -395,7 +420,10 @@
                                 </el-button>
                             </el-form-item>
                         </div>
-                        <el-button size="small" @click="server.mailboxes.splice(0, 0, {})" :disabled="server.lockedSettings.mailboxes">New Mailbox</el-button>
+                        <el-button size="small" @click="server.mailboxes.splice(0, 0, {
+    name: '',
+    recipients: ''
+})" :disabled="server.lockedSettings.mailboxes">New Mailbox</el-button>
 
 
                     </el-tab-pane>
