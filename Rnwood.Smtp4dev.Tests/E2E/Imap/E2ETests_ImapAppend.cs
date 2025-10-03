@@ -10,6 +10,7 @@ using Xunit.Abstractions;
 
 namespace Rnwood.Smtp4dev.Tests.E2E.Imap
 {
+    [Collection("E2ETests")]
     public class E2ETests_ImapAppend : E2ETests
     {
         public E2ETests_ImapAppend(ITestOutputHelper output) : base(output)

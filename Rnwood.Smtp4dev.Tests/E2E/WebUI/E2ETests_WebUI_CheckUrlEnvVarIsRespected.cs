@@ -5,6 +5,7 @@ using Xunit.Abstractions;
 
 namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
 {
+    [Collection("E2ETests")]
     public class E2ETests_WebUI_CheckUrlEnvVarIsRespected : E2ETestsWebUIBase
     {
         public E2ETests_WebUI_CheckUrlEnvVarIsRespected(ITestOutputHelper output) : base(output)
