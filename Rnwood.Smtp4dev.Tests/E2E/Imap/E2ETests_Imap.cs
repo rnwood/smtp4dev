@@ -15,6 +15,7 @@ using MailboxAddress = MimeKit.MailboxAddress;
 
 namespace Rnwood.Smtp4dev.Tests.E2E.Imap
 {
+    [Collection("E2ETests")]
     public class E2ETests_Imap_MessagesAvailable : E2ETests
     {
         public E2ETests_Imap_MessagesAvailable(ITestOutputHelper output) : base(output)
