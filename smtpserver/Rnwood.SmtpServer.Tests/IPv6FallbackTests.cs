@@ -22,20 +22,13 @@ namespace Rnwood.SmtpServer.Tests
             // In environments where IPv6 is truly unavailable, the server should fall back to IPv4
             
             // Create server options that would normally use IPv6
-            var options = new ServerOptions(
-                allowRemoteConnections: true,
-                enableIpV6: true, // This would normally create IPv6Any listener
-                domainName: "test",
-                portNumber: (int)StandardSmtpPort.AssignAutomatically, // Use automatic port assignment
-                requireAuthentication: false,
-                nonSecureAuthMechanismIds: new string[0],
-                secureAuthMechanismNamesIds: new string[0],
-                implcitTlsCertificate: null,
-                startTlsCertificate: null,
-                sslProtocols: SslProtocols.None,
-                tlsCipherSuites: null,
-                maxMessageSize: null
-            );
+            var options = ServerOptions.Builder()
+                .WithAllowRemoteConnections(true)
+                .WithEnableIpV6(true) // This would normally create IPv6Any listener
+                .WithDomainName("test")
+                .WithPort((int)StandardSmtpPort.AssignAutomatically) // Use automatic port assignment
+                .WithRequireAuthentication(false)
+                .Build();
 
             using (var server = new SmtpServer(options))
             {
@@ -78,20 +71,13 @@ namespace Rnwood.SmtpServer.Tests
         public void SmtpServer_StartWithIPv6Loopback_ShouldFallbackToIPv4WhenIPv6Unavailable()
         {
             // Create server options that would normally use IPv6 loopback
-            var options = new ServerOptions(
-                allowRemoteConnections: false,
-                enableIpV6: true, // This would normally create IPv6Loopback listener
-                domainName: "test",
-                portNumber: (int)StandardSmtpPort.AssignAutomatically, // Use automatic port assignment
-                requireAuthentication: false,
-                nonSecureAuthMechanismIds: new string[0],
-                secureAuthMechanismNamesIds: new string[0],
-                implcitTlsCertificate: null,
-                startTlsCertificate: null,
-                sslProtocols: SslProtocols.None,
-                tlsCipherSuites: null,
-                maxMessageSize: null
-            );
+            var options = ServerOptions.Builder()
+                .WithAllowRemoteConnections(false)
+                .WithEnableIpV6(true) // This would normally create IPv6Loopback listener
+                .WithDomainName("test")
+                .WithPort((int)StandardSmtpPort.AssignAutomatically) // Use automatic port assignment
+                .WithRequireAuthentication(false)
+                .Build();
 
             using (var server = new SmtpServer(options))
             {

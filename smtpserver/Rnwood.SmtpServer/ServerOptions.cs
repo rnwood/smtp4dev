@@ -38,6 +38,12 @@ public class ServerOptions : IServerOptions
     private readonly IPAddress bindAddress;
 
     /// <summary>
+    ///     Creates a new <see cref="ServerOptionsBuilder" /> for building server options using a fluent API.
+    /// </summary>
+    /// <returns>A new <see cref="ServerOptionsBuilder" /> instance.</returns>
+    public static ServerOptionsBuilder Builder() => new ServerOptionsBuilder();
+
+    /// <summary>
     ///     Initializes a new instance of the <see cref="ServerOptions" /> class.
     /// </summary>
     /// <param name="allowRemoteConnections">if set to <c>true</c> remote connections to the server are allowed.</param>
