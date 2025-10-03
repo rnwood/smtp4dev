@@ -141,7 +141,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
 
 
-            if (string.IsNullOrEmpty(options.BasePath))
+            if (!string.IsNullOrEmpty(options.BasePath))
+            {
+                args.Add($"--basepath={options.BasePath}");
+            }
+            else
             {
                 args.Add("--basepath=");
             }
