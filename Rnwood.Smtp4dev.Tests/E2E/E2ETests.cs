@@ -114,17 +114,21 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 args.RemoveAll(a => a.StartsWith("--urls"));
             }
 
-            if (!args.Any(a => a.StartsWith("--imapport")))
+            // Only add port arguments if not running in Docker mode (binary != "docker")
+            // In Docker mode, port mappings are controlled via docker -p flags and args from SMTP4DEV_E2E_ARGS
+            bool isDockerMode = binary == "docker";
+
+            if (!isDockerMode && !args.Any(a => a.StartsWith("--imapport")))
             {
                 args.Add("--imapport=0");
             }
 
-            if (!args.Any(a => a.StartsWith("--pop3port")))
+            if (!isDockerMode && !args.Any(a => a.StartsWith("--pop3port")))
             {
                 args.Add("--pop3port=0");
             }
             
-            if (!args.Any(a => a.StartsWith("--smtpport")))
+            if (!isDockerMode && !args.Any(a => a.StartsWith("--smtpport")))
             {
                 args.Add("--smtpport=0");
             }
@@ -134,14 +138,13 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 args.Add("--hostname=localhost");
             }
 
-            if (!args.Any(a => a.StartsWith("--smtpport")))
+
+
+            if (!string.IsNullOrEmpty(options.BasePath))
             {
-                args.Add("--smtpport=0");
+                args.Add($"--basepath={options.BasePath}");
             }
-
-
-
-            if (string.IsNullOrEmpty(options.BasePath))
+            else
             {
                 args.Add("--basepath=");
             }
