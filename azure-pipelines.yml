@@ -812,6 +812,7 @@ stages:
                 --urls=http://*:80
                 --smtpport=25
                 --imapport=143
+                --pop3port=110
             inputs:
               command: test
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
@@ -900,6 +901,7 @@ stages:
                 --urls=http://*:80
                 --smtpport=25
                 --imapport=143
+                --pop3port=110
             inputs:
               command: test
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
@@ -1105,6 +1107,7 @@ stages:
                 --urls=http://*:80
                 --smtpport=25
                 --imapport=143
+                --pop3port=110
             inputs:
               command: test
               projects: Rnwood.Smtp4dev.Tests/Rnwood.Smtp4dev.Tests.csproj
