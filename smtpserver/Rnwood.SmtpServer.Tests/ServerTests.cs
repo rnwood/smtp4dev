@@ -108,7 +108,13 @@ public class ServerTests
     [Fact]
     public void StartOnAutomaticPort_PortNumberReturned()
     {
-        SmtpServer server = new SmtpServer(new ServerOptions(false, false, "test", (int)StandardSmtpPort.AssignAutomatically, true, [], [], null, null, System.Security.Authentication.SslProtocols.None, null, null));
+        SmtpServer server = new SmtpServer(
+            ServerOptions.Builder()
+                .WithDomainName("test")
+                .WithPort((int)StandardSmtpPort.AssignAutomatically)
+                .WithRequireAuthentication(true)
+                .Build()
+        );
         server.Start();
         Assert.NotEqual(0, server.ListeningEndpoints.First().Port);
     }
@@ -223,7 +229,15 @@ public class ServerTests
     /// <summary>
     /// </summary>
     /// <returns>The <see cref="SmtpServer" /></returns>
-    private SmtpServer NewServer(bool allowRemoteConnections, bool allowIpV6) => new SmtpServer(new Rnwood.SmtpServer.ServerOptions(allowRemoteConnections, allowIpV6, "test", (int)StandardSmtpPort.AssignAutomatically, false, [], [], null, null, SslProtocols.None, null, null));
+    private SmtpServer NewServer(bool allowRemoteConnections, bool allowIpV6) => new SmtpServer(
+        ServerOptions.Builder()
+            .WithAllowRemoteConnections(allowRemoteConnections)
+            .WithEnableIpV6(allowIpV6)
+            .WithDomainName("test")
+            .WithPort((int)StandardSmtpPort.AssignAutomatically)
+            .WithRequireAuthentication(false)
+            .Build()
+    );
 
     /// <summary>
     /// </summary>

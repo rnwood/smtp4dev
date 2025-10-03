@@ -101,15 +101,35 @@ namespace Rnwood.Smtp4dev.Server
                 }
             }
 
-            this.smtpServer = new Rnwood.SmtpServer.SmtpServer(new SmtpServer.ServerOptions(serverOptionsValue.AllowRemoteConnections, !serverOptionsValue.DisableIPv6, serverOptionsValue.HostName, serverOptionsValue.Port, serverOptionsValue.AuthenticationRequired,
-                serverOptionsValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries), serverOptionsValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries),
-                serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null,
-            serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null,
-                !string.IsNullOrWhiteSpace(serverOptionsValue.SslProtocols) ? serverOptionsValue.SslProtocols.Split(",", StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries).Select(s => Enum.Parse<SslProtocols>(s, true)).Aggregate((current, protocol) => current | protocol) : SslProtocols.None,
-                !string.IsNullOrWhiteSpace(serverOptionsValue.TlsCipherSuites) ? serverOptionsValue.TlsCipherSuites.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries).Select(s => Enum.Parse<TlsCipherSuite>(s, true)).ToArray() : null,
-                serverOptionsValue.MaxMessageSize,
-                bindAddress
-            ));
+            var builder = SmtpServer.ServerOptions.Builder()
+                .WithAllowRemoteConnections(serverOptionsValue.AllowRemoteConnections)
+                .WithEnableIpV6(!serverOptionsValue.DisableIPv6)
+                .WithDomainName(serverOptionsValue.HostName)
+                .WithPort(serverOptionsValue.Port)
+                .WithRequireAuthentication(serverOptionsValue.AuthenticationRequired)
+                .WithNonSecureAuthMechanisms(serverOptionsValue.SmtpEnabledAuthTypesWhenNotSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                .WithSecureAuthMechanisms(serverOptionsValue.SmtpEnabledAuthTypesWhenSecureConnection.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries))
+                .WithImplicitTlsCertificate(serverOptionsValue.TlsMode == TlsMode.ImplicitTls ? cert : null)
+                .WithStartTlsCertificate(serverOptionsValue.TlsMode == TlsMode.StartTls ? cert : null)
+                .WithSslProtocols(!string.IsNullOrWhiteSpace(serverOptionsValue.SslProtocols) 
+                    ? serverOptionsValue.SslProtocols.Split(",", StringSplitOptions.RemoveEmptyEntries|StringSplitOptions.TrimEntries).Select(s => Enum.Parse<SslProtocols>(s, true)).Aggregate((current, protocol) => current | protocol) 
+                    : SslProtocols.None)
+                .WithMaxMessageSize(serverOptionsValue.MaxMessageSize);
+
+            if (bindAddress != null)
+            {
+                builder.WithBindAddress(bindAddress);
+            }
+
+            if (!string.IsNullOrWhiteSpace(serverOptionsValue.TlsCipherSuites))
+            {
+                var cipherSuites = serverOptionsValue.TlsCipherSuites.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                    .Select(s => Enum.Parse<TlsCipherSuite>(s, true))
+                    .ToArray();
+                builder.WithTlsCipherSuites(cipherSuites);
+            }
+
+            this.smtpServer = new Rnwood.SmtpServer.SmtpServer(builder.Build());
             this.smtpServer.MessageCompletedEventHandler += OnMessageCompleted;
             this.smtpServer.MessageReceivedEventHandler += OnMessageReceived;
             this.smtpServer.SessionCompletedEventHandler += OnSessionCompleted;
