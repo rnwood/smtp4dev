@@ -460,7 +460,15 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 
                 if (result == null)
                 {
-                    await Task.Delay(100, timeout.Token);
+                    try
+                    {
+                        await Task.Delay(100, timeout.Token);
+                    }
+                    catch (OperationCanceledException)
+                    {
+                        // Timeout expired, exit the loop
+                        break;
+                    }
                 }
             }
 

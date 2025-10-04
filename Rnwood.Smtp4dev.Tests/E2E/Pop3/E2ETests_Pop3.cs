@@ -29,7 +29,12 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Pop3
             try
             {
                 // Tell the server to use the specific POP3 TLS mode for this run
-                Environment.SetEnvironmentVariable("SMTP4DEV_E2E_ARGS", $"--pop3tlsmode={pop3Mode}");
+                // Append to existing args if present (e.g., Docker args), otherwise set new value
+                var existingArgs = previousArgs ?? "";
+                var newArgs = string.IsNullOrEmpty(existingArgs) 
+                    ? $"--pop3tlsmode={pop3Mode}"
+                    : $"{existingArgs}\n--pop3tlsmode={pop3Mode}";
+                Environment.SetEnvironmentVariable("SMTP4DEV_E2E_ARGS", newArgs);
 
                 RunE2ETest(context =>
                 {
