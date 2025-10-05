@@ -60,6 +60,7 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="6.0.0" />
     <PackageReference Include="Serilog.Sinks.EventLog" Version="4.0.0" />
     <PackageReference Include="Spectre.Console" Version="0.49.1" />
+    <PackageReference Include="Html2Markdown" Version="6.0.0.33" />
     <PackageReference Include="StreamLib" Version="0.12.0" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.4" />
     <PackageReference Include="System.Reactive" Version="6.0.1" />

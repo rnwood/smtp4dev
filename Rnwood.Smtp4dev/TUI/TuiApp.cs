@@ -13,6 +13,9 @@ using Rnwood.Smtp4dev.Server.Settings;
 using Serilog;
 using Serilog.Events;
 using System.Collections.Concurrent;
+using System.IO;
+using System.Text.Json;
+using MimeKit;
 
 namespace Rnwood.Smtp4dev.TUI
 {
@@ -23,6 +26,14 @@ namespace Rnwood.Smtp4dev.TUI
         private readonly List<LogEventInfo> logBuffer;
         private readonly object logLock = new object();
         private bool isRunning = true;
+        private readonly SettingsManager settingsManager;
+        private readonly KeyboardShortcuts keyboardShortcuts;
+        private readonly HtmlRenderer htmlRenderer;
+        private readonly AutoRefreshService autoRefreshService;
+        private string currentMailbox = "Default";
+        private string currentFolder = "INBOX";
+        private string messageSearchFilter = "";
+        private string sessionSearchFilter = "";
 
         public TuiApp(IHost host)
         {
@@ -30,8 +41,42 @@ namespace Rnwood.Smtp4dev.TUI
             this.cancellationTokenSource = new CancellationTokenSource();
             this.logBuffer = new List<LogEventInfo>();
             
-            // Set up log listener
+            var dataDir = DirectoryHelper.GetDataDir(host.Services.GetRequiredService<CommandLineOptions>());
+            this.settingsManager = new SettingsManager(
+                host.Services.GetRequiredService<IOptionsMonitor<ServerOptions>>(),
+                host.Services.GetRequiredService<IOptionsMonitor<RelayOptions>>(),
+                dataDir);
+            
+            this.keyboardShortcuts = KeyboardShortcuts.CreateDefault();
+            this.htmlRenderer = new HtmlRenderer();
+            this.autoRefreshService = new AutoRefreshService();
+            
             SetupLogListener();
+            SetupKeyboardShortcuts();
+        }
+
+        private void SetupKeyboardShortcuts()
+        {
+            keyboardShortcuts.Register(ConsoleKey.F1, () => ShowHelp(), "Show Help");
+            keyboardShortcuts.Register(ConsoleKey.F2, () => ShowMessages(), "Messages");
+            keyboardShortcuts.Register(ConsoleKey.F3, () => ShowSessions(), "Sessions");
+            keyboardShortcuts.Register(ConsoleKey.F4, () => ShowServerLogs(), "Server Logs");
+            keyboardShortcuts.Register(ConsoleKey.F5, () => { /* Refresh current view */ }, "Refresh");
+            keyboardShortcuts.Register(ConsoleKey.F10, () => isRunning = false, "Exit");
+        }
+
+        private void ShowHelp()
+        {
+            AnsiConsole.Clear();
+            AnsiConsole.Write(new Rule("[blue]Help - Keyboard Shortcuts[/]"));
+            AnsiConsole.WriteLine();
+            AnsiConsole.WriteLine(keyboardShortcuts.GetHelp());
+            AnsiConsole.WriteLine("\n[bold]Navigation:[/]");
+            AnsiConsole.WriteLine("  Arrow Keys: Navigate menus");
+            AnsiConsole.WriteLine("  Enter: Select option");
+            AnsiConsole.WriteLine("  Escape: Back (where supported)");
+            AnsiConsole.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
         }
 
         private void SetupLogListener()
@@ -75,17 +120,21 @@ namespace Rnwood.Smtp4dev.TUI
 
             var choice = AnsiConsole.Prompt(
                 new SelectionPrompt<string>()
-                    .Title("Select an option:")
-                    .PageSize(10)
+                    .Title($"Select an option: [dim](Mailbox: {currentMailbox}/{currentFolder})[/]")
+                    .PageSize(12)
                     .AddChoices(new[] {
                         "📧 Messages",
                         "📊 Sessions",
                         "📝 Server Logs",
                         "⚙️  Server Status",
-                        "⚙️  Settings",
+                        "⚙️  Settings (Editable)",
+                        "👥 Manage Users",
+                        "📁 Manage Mailboxes",
+                        "🔀 Switch Mailbox/Folder",
                         "✉️  Compose/Send Message",
                         "🔄 Refresh All",
-                        "❌ Exit"
+                        "❓ Help (F1)",
+                        "❌ Exit (F10)"
                     }));
 
             switch (choice)
@@ -102,8 +151,17 @@ namespace Rnwood.Smtp4dev.TUI
                 case "⚙️  Server Status":
                     ShowServerStatus();
                     break;
-                case "⚙️  Settings":
-                    ShowSettings();
+                case "⚙️  Settings (Editable)":
+                    ShowEditableSettings();
+                    break;
+                case "👥 Manage Users":
+                    ManageUsers();
+                    break;
+                case "📁 Manage Mailboxes":
+                    ManageMailboxes();
+                    break;
+                case "🔀 Switch Mailbox/Folder":
+                    SwitchMailboxFolder();
                     break;
                 case "✉️  Compose/Send Message":
                     ComposeMessage();
@@ -112,33 +170,323 @@ namespace Rnwood.Smtp4dev.TUI
                     AnsiConsole.Status()
                         .Start("Refreshing...", ctx => { Thread.Sleep(500); });
                     break;
-                case "❌ Exit":
+                case "❓ Help (F1)":
+                    ShowHelp();
+                    break;
+                case "❌ Exit (F10)":
                     isRunning = false;
                     break;
             }
         }
 
+        private void SwitchMailboxFolder()
+        {
+            var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
+            var serverOptions = settingsManager.GetServerOptions();
+            
+            var mailboxes = serverOptions.Mailboxes?.Select(m => m.Name).ToList() ?? new List<string>();
+            if (!mailboxes.Contains("Default"))
+                mailboxes.Insert(0, "Default");
+
+            mailboxes.Add("Back");
+
+            var selectedMailbox = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Select mailbox:")
+                    .AddChoices(mailboxes));
+
+            if (selectedMailbox == "Back")
+                return;
+
+            currentMailbox = selectedMailbox;
+
+            var folders = new[] { "INBOX", "Sent", "Back" };
+            var selectedFolder = AnsiConsole.Prompt(
+                new SelectionPrompt<string>()
+                    .Title("Select folder:")
+                    .AddChoices(folders));
+
+            if (selectedFolder != "Back")
+            {
+                currentFolder = selectedFolder;
+                AnsiConsole.MarkupLine($"[green]Switched to {currentMailbox}/{currentFolder}[/]");
+                Thread.Sleep(1000);
+            }
+        }
+
+        private void ManageUsers()
+        {
+            while (true)
+            {
+                AnsiConsole.Clear();
+                AnsiConsole.Write(new Rule("[blue]User Management[/]"));
+                AnsiConsole.WriteLine();
+
+                var serverOptions = settingsManager.GetServerOptions();
+                var users = serverOptions.Users ?? Array.Empty<UserOptions>();
+
+                var table = new Table();
+                table.AddColumn("Username");
+                table.AddColumn("Has Password");
+                table.AddColumn("Default Mailbox");
+
+                foreach (var user in users)
+                {
+                    table.AddRow(
+                        user.Username?.EscapeMarkup() ?? "",
+                        string.IsNullOrEmpty(user.Password) ? "No" : "Yes",
+                        user.DefaultMailbox?.EscapeMarkup() ?? "Default"
+                    );
+                }
+
+                AnsiConsole.Write(table);
+                AnsiConsole.WriteLine($"\nTotal Users: {users.Length}");
+
+                var action = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Select action:")
+                        .AddChoices(new[] {
+                            "Add User",
+                            "Remove User",
+                            "Back to Main Menu"
+                        }));
+
+                switch (action)
+                {
+                    case "Add User":
+                        var username = AnsiConsole.Ask<string>("Enter username:");
+                        var password = AnsiConsole.Prompt(
+                            new TextPrompt<string>("Enter password:")
+                                .Secret());
+                        settingsManager.AddUser(username, password).Wait();
+                        Thread.Sleep(1500);
+                        break;
+                    case "Remove User":
+                        if (users.Any())
+                        {
+                            var userChoices = users.Select(u => u.Username).ToList();
+                            userChoices.Add("Cancel");
+                            var selectedUser = AnsiConsole.Prompt(
+                                new SelectionPrompt<string>()
+                                    .Title("Select user to remove:")
+                                    .AddChoices(userChoices));
+                            if (selectedUser != "Cancel")
+                            {
+                                settingsManager.RemoveUser(selectedUser).Wait();
+                                Thread.Sleep(1500);
+                            }
+                        }
+                        break;
+                    case "Back to Main Menu":
+                        return;
+                }
+            }
+        }
+
+        private void ManageMailboxes()
+        {
+            while (true)
+            {
+                AnsiConsole.Clear();
+                AnsiConsole.Write(new Rule("[blue]Mailbox Management[/]"));
+                AnsiConsole.WriteLine();
+
+                var serverOptions = settingsManager.GetServerOptions();
+                var mailboxes = serverOptions.Mailboxes ?? Array.Empty<MailboxOptions>();
+
+                var table = new Table();
+                table.AddColumn("Name");
+                table.AddColumn("Recipients");
+
+                foreach (var mailbox in mailboxes)
+                {
+                    table.AddRow(
+                        mailbox.Name?.EscapeMarkup() ?? "",
+                        mailbox.Recipients?.EscapeMarkup() ?? ""
+                    );
+                }
+
+                AnsiConsole.Write(table);
+                AnsiConsole.WriteLine($"\nTotal Mailboxes: {mailboxes.Length}");
+
+                var action = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Select action:")
+                        .AddChoices(new[] {
+                            "Add Mailbox",
+                            "Remove Mailbox",
+                            "Back to Main Menu"
+                        }));
+
+                switch (action)
+                {
+                    case "Add Mailbox":
+                        var name = AnsiConsole.Ask<string>("Enter mailbox name:");
+                        var recipients = AnsiConsole.Ask<string>("Enter recipients pattern (e.g., *@example.com):");
+                        settingsManager.AddMailbox(name, recipients).Wait();
+                        Thread.Sleep(1500);
+                        break;
+                    case "Remove Mailbox":
+                        if (mailboxes.Any())
+                        {
+                            var mailboxChoices = mailboxes.Select(m => m.Name).ToList();
+                            mailboxChoices.Add("Cancel");
+                            var selectedMailbox = AnsiConsole.Prompt(
+                                new SelectionPrompt<string>()
+                                    .Title("Select mailbox to remove:")
+                                    .AddChoices(mailboxChoices));
+                            if (selectedMailbox != "Cancel")
+                            {
+                                settingsManager.RemoveMailbox(selectedMailbox).Wait();
+                                Thread.Sleep(1500);
+                            }
+                        }
+                        break;
+                    case "Back to Main Menu":
+                        return;
+                }
+            }
+        }
+
+        private void ShowEditableSettings()
+        {
+            while (true)
+            {
+                AnsiConsole.Clear();
+                AnsiConsole.Write(new Rule("[blue]Editable Settings[/]"));
+                AnsiConsole.WriteLine();
+
+                var action = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Select settings category:")
+                        .AddChoices(new[] {
+                            "SMTP Server Settings",
+                            "IMAP Server Settings",
+                            "Relay Settings",
+                            "Storage Settings",
+                            "View All Settings (Read-Only)",
+                            "Back to Main Menu"
+                        }));
+
+                switch (action)
+                {
+                    case "SMTP Server Settings":
+                        EditSmtpSettings();
+                        break;
+                    case "IMAP Server Settings":
+                        EditImapSettings();
+                        break;
+                    case "Relay Settings":
+                        EditRelaySettings();
+                        break;
+                    case "Storage Settings":
+                        EditStorageSettings();
+                        break;
+                    case "View All Settings (Read-Only)":
+                        ShowSettings();
+                        break;
+                    case "Back to Main Menu":
+                        return;
+                }
+            }
+        }
+
+        private void EditSmtpSettings()
+        {
+            var serverOptions = settingsManager.GetServerOptions();
+            
+            var port = AnsiConsole.Ask("SMTP Port:", serverOptions.Port);
+            var hostname = AnsiConsole.Ask("Hostname:", serverOptions.HostName ?? "localhost");
+            var allowRemote = AnsiConsole.Confirm("Allow Remote Connections?", serverOptions.AllowRemoteConnections);
+
+            serverOptions.Port = port;
+            serverOptions.HostName = hostname;
+            serverOptions.AllowRemoteConnections = allowRemote;
+
+            settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
+            AnsiConsole.MarkupLine("[green]SMTP settings updated! Restart required for changes to take effect.[/]");
+            Thread.Sleep(2000);
+        }
+
+        private void EditImapSettings()
+        {
+            var serverOptions = settingsManager.GetServerOptions();
+            
+            var port = AnsiConsole.Ask("IMAP Port:", serverOptions.ImapPort ?? 143);
+
+            serverOptions.ImapPort = port;
+
+            settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
+            AnsiConsole.MarkupLine("[green]IMAP settings updated! Restart required for changes to take effect.[/]");
+            Thread.Sleep(2000);
+        }
+
+        private void EditRelaySettings()
+        {
+            var relayOptions = settingsManager.GetRelayOptions();
+            
+            var server = AnsiConsole.Ask("Relay SMTP Server:", relayOptions.SmtpServer ?? "");
+            var port = AnsiConsole.Ask("Relay SMTP Port:", relayOptions.SmtpPort);
+
+            relayOptions.SmtpServer = server;
+            relayOptions.SmtpPort = port;
+
+            settingsManager.SaveSettings(settingsManager.GetServerOptions(), relayOptions).Wait();
+            AnsiConsole.MarkupLine("[green]Relay settings updated![/]");
+            Thread.Sleep(2000);
+        }
+
+        private void EditStorageSettings()
+        {
+            var serverOptions = settingsManager.GetServerOptions();
+            
+            var messagesToKeep = AnsiConsole.Ask("Messages to Keep:", serverOptions.NumberOfMessagesToKeep);
+            var sessionsToKeep = AnsiConsole.Ask("Sessions to Keep:", serverOptions.NumberOfSessionsToKeep);
+
+            serverOptions.NumberOfMessagesToKeep = messagesToKeep;
+            serverOptions.NumberOfSessionsToKeep = sessionsToKeep;
+
+            settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
+            AnsiConsole.MarkupLine("[green]Storage settings updated![/]");
+            Thread.Sleep(2000);
+        }
+
         private void ShowMessages()
         {
             var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
-            var autoRefresh = true;
+            var messagesRepo = host.Services.GetRequiredService<IMessagesRepository>();
+            
+            // Start auto-refresh in background
+            autoRefreshService.Start(() => {
+                // Refresh will happen when user selects "Enable Auto-Refresh"
+            }, 3);
 
-            while (autoRefresh)
+            while (true)
             {
                 AnsiConsole.Clear();
-                AnsiConsole.Write(new Rule("[blue]Messages[/]"));
+                AnsiConsole.Write(new Rule($"[blue]Messages - {currentMailbox}/{currentFolder}[/]"));
                 AnsiConsole.WriteLine();
 
-                var messages = dbContext.Messages
+                if (!string.IsNullOrEmpty(messageSearchFilter))
+                {
+                    AnsiConsole.MarkupLine($"[yellow]Filter: {messageSearchFilter.EscapeMarkup()}[/]");
+                }
+
+                var query = messagesRepo.GetMessageSummaries(currentMailbox, currentFolder);
+                
+                // Apply search filter
+                if (!string.IsNullOrEmpty(messageSearchFilter))
+                {
+                    var filter = messageSearchFilter.ToLower();
+                    query = query.Where(m => 
+                        (m.From != null && m.From.ToLower().Contains(filter)) ||
+                        (m.To != null && m.To.ToLower().Contains(filter)) ||
+                        (m.Subject != null && m.Subject.ToLower().Contains(filter)));
+                }
+
+                var messages = query
                     .OrderByDescending(m => m.ReceivedDate)
                     .Take(50)
-                    .Select(m => new {
-                        m.Id,
-                        m.From,
-                        m.To,
-                        m.Subject,
-                        ReceivedDate = m.ReceivedDate
-                    })
                     .ToList();
 
                 if (!messages.Any())
@@ -173,6 +521,8 @@ namespace Rnwood.Smtp4dev.TUI
                         .Title("Select action:")
                         .AddChoices(new[] {
                             "View Message",
+                            "Search/Filter Messages",
+                            "Clear Filter",
                             "Delete All Messages",
                             "Refresh",
                             "Back to Main Menu"
@@ -184,7 +534,7 @@ namespace Rnwood.Smtp4dev.TUI
                         if (messages.Any())
                         {
                             var msgChoices = messages.Select(m =>
-                                $"{m.ReceivedDate:HH:mm:ss} - {m.Subject?.Take(40)}").ToList();
+                                $"{m.ReceivedDate:HH:mm:ss} - {(m.Subject?.Length > 40 ? m.Subject.Substring(0, 40) + "..." : m.Subject)}").ToList();
                             msgChoices.Add("Back");
 
                             var selected = AnsiConsole.Prompt(
@@ -196,9 +546,21 @@ namespace Rnwood.Smtp4dev.TUI
                             if (selected != "Back")
                             {
                                 var index = msgChoices.IndexOf(selected);
-                                ShowMessageDetail(messages[index].Id);
+                                var fullMessage = dbContext.Messages.FirstOrDefault(m => m.Id == messages[index].Id);
+                                if (fullMessage != null)
+                                {
+                                    ShowMessageDetailEnhanced(fullMessage);
+                                }
                             }
                         }
+                        break;
+                    case "Search/Filter Messages":
+                        messageSearchFilter = AnsiConsole.Ask<string>("Enter search term (searches From, To, Subject):");
+                        break;
+                    case "Clear Filter":
+                        messageSearchFilter = "";
+                        AnsiConsole.MarkupLine("[green]Filter cleared[/]");
+                        Thread.Sleep(500);
                         break;
                     case "Delete All Messages":
                         if (AnsiConsole.Confirm("Delete all messages?"))
@@ -212,9 +574,168 @@ namespace Rnwood.Smtp4dev.TUI
                     case "Refresh":
                         continue;
                     case "Back to Main Menu":
-                        autoRefresh = false;
-                        break;
+                        autoRefreshService.Stop();
+                        return;
                 }
+            }
+        }
+
+        private void ShowMessageDetailEnhanced(Rnwood.Smtp4dev.DbModel.Message message)
+        {
+            while (true)
+            {
+                AnsiConsole.Clear();
+                AnsiConsole.Write(new Rule($"[blue]Message: {message.Subject?.EscapeMarkup()}[/]"));
+                AnsiConsole.WriteLine();
+
+                var viewChoice = AnsiConsole.Prompt(
+                    new SelectionPrompt<string>()
+                        .Title("Select view:")
+                        .AddChoices(new[] {
+                            "Overview",
+                            "Body (with HTML rendering)",
+                            "Headers",
+                            "MIME Parts (Enhanced)",
+                            "Raw Source",
+                            "Back"
+                        }));
+
+                AnsiConsole.Clear();
+                
+                switch (viewChoice)
+                {
+                    case "Overview":
+                        ShowMessageOverview(message);
+                        break;
+                    case "Body (with HTML rendering)":
+                        ShowMessageBodyEnhanced(message);
+                        break;
+                    case "Headers":
+                        ShowMessageHeaders(message);
+                        break;
+                    case "MIME Parts (Enhanced)":
+                        ShowMessagePartsEnhanced(message);
+                        break;
+                    case "Raw Source":
+                        ShowMessageSource(message);
+                        break;
+                    case "Back":
+                        return;
+                }
+
+                if (viewChoice != "Back")
+                {
+                    AnsiConsole.WriteLine("\nPress any key to continue...");
+                    Console.ReadKey();
+                }
+            }
+        }
+
+        private void ShowMessageBodyEnhanced(Rnwood.Smtp4dev.DbModel.Message message)
+        {
+            AnsiConsole.Write(new Rule("[blue]Message Body[/]"));
+            AnsiConsole.WriteLine();
+
+            var body = message.BodyText ?? "";
+            if (string.IsNullOrEmpty(body) && message.Data != null)
+            {
+                body = System.Text.Encoding.UTF8.GetString(message.Data);
+            }
+
+            // Try to render HTML if it's HTML content
+            if (htmlRenderer.IsHtmlContent(body))
+            {
+                AnsiConsole.MarkupLine("[yellow]HTML content detected - rendering as text:[/]");
+                AnsiConsole.WriteLine();
+                var renderedText = htmlRenderer.ConvertHtmlToText(body);
+                AnsiConsole.WriteLine(renderedText.EscapeMarkup());
+            }
+            else
+            {
+                AnsiConsole.WriteLine(body.EscapeMarkup());
+            }
+        }
+
+        private void ShowMessagePartsEnhanced(Rnwood.Smtp4dev.DbModel.Message message)
+        {
+            AnsiConsole.Write(new Rule("[blue]MIME Parts (Enhanced View)[/]"));
+            AnsiConsole.WriteLine();
+
+            try
+            {
+                if (message.Data != null)
+                {
+                    var mimeMessage = MimeMessage.Load(new MemoryStream(message.Data));
+                    
+                    var tree = new Tree("Message Structure");
+                    BuildMimePartTree(tree, mimeMessage.Body, 0);
+                    
+                    AnsiConsole.Write(tree);
+                }
+                else
+                {
+                    AnsiConsole.MarkupLine("[yellow]No MIME data available[/]");
+                }
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Error parsing MIME: {ex.Message}[/]");
+                AnsiConsole.WriteLine($"\nContent Type: {message.MimeMetadata?.Split('\n').FirstOrDefault(l => l.StartsWith("Content-Type:"))}");
+            }
+        }
+
+        private void BuildMimePartTree(Tree tree, MimeEntity entity, int level)
+        {
+            if (entity is Multipart multipart)
+            {
+                var node = tree.AddNode($"[yellow]Multipart/{multipart.ContentType.MediaSubtype}[/]");
+                foreach (var child in multipart)
+                {
+                    BuildMimePartTreeNode(node, child, level + 1);
+                }
+            }
+            else if (entity is MessagePart messagePart)
+            {
+                var node = tree.AddNode($"[cyan]Message Part[/]");
+                if (messagePart.Message?.Body != null)
+                {
+                    BuildMimePartTreeNode(node, messagePart.Message.Body, level + 1);
+                }
+            }
+            else
+            {
+                var part = entity as MimePart;
+                var contentType = part?.ContentType?.MimeType ?? "unknown";
+                var fileName = part?.FileName ?? "(no filename)";
+                tree.AddNode($"[green]{contentType}[/] - {fileName}");
+            }
+        }
+
+        private void BuildMimePartTreeNode(TreeNode parentNode, MimeEntity entity, int level)
+        {
+            if (entity is Multipart multipart)
+            {
+                var node = parentNode.AddNode($"[yellow]Multipart/{multipart.ContentType.MediaSubtype}[/]");
+                foreach (var child in multipart)
+                {
+                    BuildMimePartTreeNode(node, child, level + 1);
+                }
+            }
+            else if (entity is MessagePart messagePart)
+            {
+                var node = parentNode.AddNode($"[cyan]Message Part[/]");
+                if (messagePart.Message?.Body != null)
+                {
+                    BuildMimePartTreeNode(node, messagePart.Message.Body, level + 1);
+                }
+            }
+            else
+            {
+                var part = entity as MimePart;
+                var contentType = part?.ContentType?.MimeType ?? "unknown";
+                var fileName = part?.FileName ?? "(no filename)";
+                var size = part?.Content?.Stream?.Length ?? 0;
+                parentNode.AddNode($"[green]{contentType}[/] - {fileName} ({size} bytes)");
             }
         }
 
@@ -349,16 +870,31 @@ namespace Rnwood.Smtp4dev.TUI
         private void ShowSessions()
         {
             var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
-            var autoRefresh = true;
 
-            while (autoRefresh)
+            while (true)
             {
                 AnsiConsole.Clear();
                 AnsiConsole.Write(new Rule("[blue]SMTP Sessions[/]"));
                 AnsiConsole.WriteLine();
 
-                var sessions = dbContext.Sessions
-                    .Where(s => s.EndDate.HasValue)
+                if (!string.IsNullOrEmpty(sessionSearchFilter))
+                {
+                    AnsiConsole.MarkupLine($"[yellow]Filter: {sessionSearchFilter.EscapeMarkup()}[/]");
+                }
+
+                var query = dbContext.Sessions
+                    .Where(s => s.EndDate.HasValue);
+
+                // Apply search filter
+                if (!string.IsNullOrEmpty(sessionSearchFilter))
+                {
+                    var filter = sessionSearchFilter.ToLower();
+                    query = query.Where(s =>
+                        (s.ClientAddress != null && s.ClientAddress.ToLower().Contains(filter)) ||
+                        (s.SessionError != null && s.SessionError.ToLower().Contains(filter)));
+                }
+
+                var sessions = query
                     .OrderByDescending(s => s.StartDate)
                     .Take(50)
                     .ToList();
@@ -395,6 +931,8 @@ namespace Rnwood.Smtp4dev.TUI
                         .Title("Select action:")
                         .AddChoices(new[] {
                             "View Session",
+                            "Search/Filter Sessions",
+                            "Clear Filter",
                             "Delete All Sessions",
                             "Refresh",
                             "Back to Main Menu"
@@ -422,6 +960,14 @@ namespace Rnwood.Smtp4dev.TUI
                             }
                         }
                         break;
+                    case "Search/Filter Sessions":
+                        sessionSearchFilter = AnsiConsole.Ask<string>("Enter search term (searches Client Address, Errors):");
+                        break;
+                    case "Clear Filter":
+                        sessionSearchFilter = "";
+                        AnsiConsole.MarkupLine("[green]Filter cleared[/]");
+                        Thread.Sleep(500);
+                        break;
                     case "Delete All Sessions":
                         if (AnsiConsole.Confirm("Delete all sessions?"))
                         {
@@ -434,8 +980,7 @@ namespace Rnwood.Smtp4dev.TUI
                     case "Refresh":
                         continue;
                     case "Back to Main Menu":
-                        autoRefresh = false;
-                        break;
+                        return;
                 }
             }
         }
