@@ -573,8 +573,7 @@ namespace Rnwood.Smtp4dev.TUI
                     case "Delete All Messages":
                         if (AnsiConsole.Confirm("Delete all messages?"))
                         {
-                            dbContext.Messages.RemoveRange(dbContext.Messages);
-                            dbContext.SaveChanges();
+                            messagesRepo.DeleteAllMessages(currentMailbox).Wait();
                             AnsiConsole.MarkupLine("[green]All messages deleted[/]");
                             Thread.Sleep(1000);
                         }
@@ -979,8 +978,8 @@ namespace Rnwood.Smtp4dev.TUI
                     case "Delete All Sessions":
                         if (AnsiConsole.Confirm("Delete all sessions?"))
                         {
-                            dbContext.Sessions.RemoveRange(dbContext.Sessions);
-                            dbContext.SaveChanges();
+                            var server = host.Services.GetRequiredService<ISmtp4devServer>();
+                            server.DeleteAllSessions().Wait();
                             AnsiConsole.MarkupLine("[green]All sessions deleted[/]");
                             Thread.Sleep(1000);
                         }
