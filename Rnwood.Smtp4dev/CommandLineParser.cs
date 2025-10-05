@@ -70,7 +70,8 @@ namespace Rnwood.Smtp4dev
                 { "sslprotocols=", "Specifies the SSL/TLS protocol version(s) that will be allowed. Separate with commas. See https://learn.microsoft.com/en-us/dotnet/api/system.security.authentication.sslprotocols?view=net-9.0", data => map.Add(data, x => x.ServerOptions.SslProtocols)  },
                 { "tlsciphersuites=", "Specifies the TLS cipher suites to be allowed. Not supported on Windows. Separate with commas. See https://learn.microsoft.com/en-us/dotnet/api/system.net.security.tlsciphersuite?view=net-9.0", data => map.Add(data, x => x.ServerOptions.TlsCipherSuites) },
                 { "HtmlValidateConfigfile=", "Defines path to a config file used for HTML validation. See https://html-validate.org/usage/index.html#configuration", data => map.Add(File.ReadAllText(data), x => x.ServerOptions.HtmlValidateConfig) },
-                { "maxmessagesize=", "Defines the maximum message size in bytes accepted by the SMTP server", data => map.Add(data, x => x.ServerOptions.MaxMessageSize) }
+                { "maxmessagesize=", "Defines the maximum message size in bytes accepted by the SMTP server", data => map.Add(data, x => x.ServerOptions.MaxMessageSize) },
+                { "tui", "Run with Terminal User Interface (TUI) instead of web interface", data => map.Add((data != null).ToString(), x => x.UseTui) }
             };
 
             if (!isDesktopApp)
