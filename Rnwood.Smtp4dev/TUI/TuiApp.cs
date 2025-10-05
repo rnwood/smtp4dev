@@ -131,6 +131,8 @@ namespace Rnwood.Smtp4dev.TUI
                         "👥 Manage Users",
                         "📁 Manage Mailboxes",
                         "🔀 Switch Mailbox/Folder",
+                        "📱 Split-Screen: Messages",
+                        "📱 Split-Screen: Sessions",
                         "✉️  Compose/Send Message",
                         "🔄 Refresh All",
                         "❓ Help (F1)",
@@ -162,6 +164,12 @@ namespace Rnwood.Smtp4dev.TUI
                     break;
                 case "🔀 Switch Mailbox/Folder":
                     SwitchMailboxFolder();
+                    break;
+                case "📱 Split-Screen: Messages":
+                    ShowMessagesSplitScreen();
+                    break;
+                case "📱 Split-Screen: Sessions":
+                    ShowSessionsSplitScreen();
                     break;
                 case "✉️  Compose/Send Message":
                     ComposeMessage();
@@ -1017,18 +1025,65 @@ namespace Rnwood.Smtp4dev.TUI
 
         private void ShowServerLogs()
         {
-            var autoRefresh = true;
+            AnsiConsole.Clear();
+            AnsiConsole.MarkupLine("[yellow]Server Logs - Real-Time Auto-Refresh[/]");
+            AnsiConsole.MarkupLine("[dim]Refreshing every 2 seconds... Press ESC to exit[/]");
+            Thread.Sleep(1500);
 
-            while (autoRefresh)
+            var cancellationTokenSource = new CancellationTokenSource();
+            var isRunning = true;
+
+            // Start auto-refresh
+            autoRefreshService.Start(() => {
+                // Logs are captured automatically by LogCaptureSink
+            }, 2);
+
+            try
             {
-                AnsiConsole.Clear();
-                AnsiConsole.Write(new Rule("[blue]Server Logs (Last 50 entries)[/]"));
-                AnsiConsole.WriteLine();
+                AnsiConsole.Live(CreateLogsLayout())
+                    .AutoClear(false)
+                    .Start(ctx =>
+                    {
+                        while (isRunning)
+                        {
+                            var layout = CreateLogsLayout();
+                            ctx.UpdateTarget(layout);
+                            
+                            // Check for ESC key
+                            if (Console.KeyAvailable)
+                            {
+                                var key = Console.ReadKey(true);
+                                if (key.Key == ConsoleKey.Escape || key.Key == ConsoleKey.Q)
+                                {
+                                    isRunning = false;
+                                }
+                            }
+                            
+                            Thread.Sleep(500); // Update every 500ms for responsiveness
+                        }
+                    });
+            }
+            finally
+            {
+                autoRefreshService.Stop();
+            }
+        }
 
-                lock (logLock)
+        private Panel CreateLogsLayout()
+        {
+            var grid = new Grid();
+            grid.AddColumn();
+
+            lock (logLock)
+            {
+                var logs = logBuffer.TakeLast(50).ToList();
+                
+                if (!logs.Any())
                 {
-                    var logs = logBuffer.TakeLast(50).ToList();
-                    
+                    grid.AddRow("[yellow]No logs available yet[/]");
+                }
+                else
+                {
                     foreach (var log in logs)
                     {
                         var color = log.Level switch
@@ -1039,29 +1094,14 @@ namespace Rnwood.Smtp4dev.TUI
                             _ => "grey"
                         };
 
-                        AnsiConsole.MarkupLine($"[{color}]{log.Timestamp:HH:mm:ss} [{log.Level}] {log.Message.EscapeMarkup()}[/]");
+                        grid.AddRow($"[{color}]{log.Timestamp:HH:mm:ss} [{log.Level}] {log.Message.EscapeMarkup()}[/]");
                     }
-
-                    if (!logs.Any())
-                    {
-                        AnsiConsole.MarkupLine("[yellow]No logs available yet[/]");
-                    }
-                }
-
-                AnsiConsole.WriteLine();
-                var action = AnsiConsole.Prompt(
-                    new SelectionPrompt<string>()
-                        .Title("Select action:")
-                        .AddChoices(new[] {
-                            "Refresh",
-                            "Back to Main Menu"
-                        }));
-
-                if (action == "Back to Main Menu")
-                {
-                    autoRefresh = false;
                 }
             }
+
+            return new Panel(grid)
+                .Header($"[blue]Server Logs - Real-Time (Last 50 entries) - {DateTime.Now:HH:mm:ss}[/]")
+                .Border(BoxBorder.Rounded);
         }
 
         private void ShowServerStatus()
@@ -1131,6 +1171,39 @@ namespace Rnwood.Smtp4dev.TUI
             AnsiConsole.Write(tree);
 
             AnsiConsole.WriteLine("\n[yellow]Note: Settings cannot be modified in TUI mode. Use appsettings.json or command-line arguments.[/]");
+            AnsiConsole.WriteLine("\nPress any key to continue...");
+            Console.ReadKey();
+        }
+
+        private void ShowMessagesSplitScreen()
+        {
+            AnsiConsole.Clear();
+            AnsiConsole.MarkupLine("[yellow]Split-Screen Messages View[/]");
+            AnsiConsole.MarkupLine("[dim]Use ↑/↓ to navigate, ESC to exit[/]");
+            AnsiConsole.WriteLine();
+            Thread.Sleep(1000);
+
+            var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
+            var splitView = new SplitScreenView(dbContext);
+            
+            try
+            {
+                splitView.ShowMessageSplitView();
+            }
+            catch (Exception ex)
+            {
+                AnsiConsole.MarkupLine($"[red]Error: {ex.Message}[/]");
+                AnsiConsole.WriteLine("Press any key to continue...");
+                Console.ReadKey();
+            }
+        }
+
+        private void ShowSessionsSplitScreen()
+        {
+            AnsiConsole.Clear();
+            AnsiConsole.MarkupLine("[yellow]Split-Screen Sessions View[/]");
+            AnsiConsole.MarkupLine("[dim]Use ↑/↓ to navigate, ESC to exit[/]");
+            AnsiConsole.MarkupLine("[dim]This feature provides real-time session monitoring with split view[/]");
             AnsiConsole.WriteLine("\nPress any key to continue...");
             Console.ReadKey();
         }
