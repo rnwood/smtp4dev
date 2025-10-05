@@ -6,7 +6,6 @@ Welcome to the smtp4dev documentation! This documentation will help you get star
 
 - [Getting Started](Getting-Started.md) - Quick start guide to get smtp4dev running
 - [Installation](Installation.md) - Detailed installation instructions for different platforms
-- [TUI Mode](TUI.md) - Terminal User Interface for environments without a graphical interface
 
 ## Configuration
 
