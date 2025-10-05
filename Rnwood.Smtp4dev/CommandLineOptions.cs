@@ -17,5 +17,6 @@ namespace Rnwood.Smtp4dev
         public string InstallPath { get; set; }
         public string ApplicationName { get; set; }
         public bool IsDesktopApp { get; set; }
+        public bool UseTui { get; set; }
     }
 }
