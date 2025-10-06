@@ -221,6 +221,7 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<ITaskQueue, TaskQueue>();
             services.AddSingleton<ScriptingHost>();
             services.AddScoped<MimeProcessingService>();
+            services.AddSingleton(Program.ServerLogService);
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>(relayOptions =>
             {
@@ -271,6 +272,14 @@ namespace Rnwood.Smtp4dev
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
+
+            // Wire up server log notifications
+            var serverLogService = app.ApplicationServices.GetRequiredService<ServerLogService>();
+            var notificationsHub = app.ApplicationServices.GetRequiredService<NotificationsHub>();
+            serverLogService.LogReceived += async (sender, logEntry) =>
+            {
+                await notificationsHub.OnServerLogReceived(logEntry);
+            };
 
             app.UseRouting();
 
