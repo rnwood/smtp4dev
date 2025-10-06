@@ -76,6 +76,8 @@ namespace Rnwood.Smtp4dev.ApiModel
         public bool DisableHtmlValidation { get; set; }
         public bool DisableHtmlCompatibilityCheck { get; set; }
         public string CommandValidationExpression { get; set; }
+        public bool DisableWhatsNewNotifications { get; set; }
+        public bool DisableUpdateNotifications { get; set; }
     }
 
 }

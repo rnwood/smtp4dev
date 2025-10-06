@@ -118,6 +118,26 @@ namespace Rnwood.Smtp4dev
                 _log.Information("Now listening on: {url}", url);
             }
 
+            // Check for updates and what's new on startup
+            _ = Task.Run(async () =>
+            {
+                try
+                {
+                    using var scope = host.Services.CreateScope();
+                    var updateService = scope.ServiceProvider.GetService<UpdateNotificationService>();
+                    if (updateService != null)
+                    {
+                        var result = await updateService.CheckForUpdatesAsync();
+                        updateService.LogWhatsNewNotification(result);
+                        updateService.LogUpdateNotification(result);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _log.Warning(ex, "Failed to check for updates on startup");
+                }
+            });
+
             return host;
 
 

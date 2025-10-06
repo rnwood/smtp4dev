@@ -82,6 +82,18 @@
 
                             <el-switch v-model="server.disableHtmlCompatibilityCheck" :disabled="server.lockedSettings.disableHtmlCompatibilityCheck" />
                         </el-form-item>
+
+                        <el-form-item label="Disable 'What's New' notifications" prop="server.disableWhatsNewNotifications">
+                            <el-icon v-if="server.lockedSettings.disableWhatsNewNotifications" :title="`Locked: ${server.lockedSettings.disableWhatsNewNotifications}`"><Lock /></el-icon>
+
+                            <el-switch v-model="server.disableWhatsNewNotifications" :disabled="server.lockedSettings.disableWhatsNewNotifications" />
+                        </el-form-item>
+
+                        <el-form-item label="Disable update notifications" prop="server.disableUpdateNotifications">
+                            <el-icon v-if="server.lockedSettings.disableUpdateNotifications" :title="`Locked: ${server.lockedSettings.disableUpdateNotifications}`"><Lock /></el-icon>
+
+                            <el-switch v-model="server.disableUpdateNotifications" :disabled="server.lockedSettings.disableUpdateNotifications" />
+                        </el-form-item>
                     </el-tab-pane>
                     <el-tab-pane label="User Settings" v-if="clientSettings">
                         <el-form-item label="Page size">

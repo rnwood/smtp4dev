@@ -61,5 +61,7 @@ namespace Rnwood.Smtp4dev.Data
 
         public DbSet<Mailbox> Mailboxes { get; set; }
         public DbSet<MailboxFolder> MailboxFolders { get; set; }
+
+        public DbSet<UserVersionInfo> UserVersionInfos { get; set; }
     }
 }

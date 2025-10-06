@@ -102,6 +102,7 @@ namespace Rnwood.Smtp4dev
             services.Configure<DesktopOptions>(Configuration.GetSection("DesktopOptions"));
 
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
+            services.AddSingleton(serverOptions);
 
             services.AddDbContext<Smtp4devDbContext>(opt =>
                     {
@@ -221,6 +222,8 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<ITaskQueue, TaskQueue>();
             services.AddSingleton<ScriptingHost>();
             services.AddScoped<MimeProcessingService>();
+            services.AddScoped<UpdateNotificationService>();
+            services.AddHttpClient();
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>(relayOptions =>
             {

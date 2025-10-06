@@ -32,6 +32,12 @@
             </el-dropdown>
         </el-header>
         <settingsdialog v-model="settingsVisible" :connection="connection" v-on:closed="showSettings(false)" />
+        <whatsnewdialog 
+            :visible="whatsNewVisible" 
+            :update-check-result="updateCheckResult"
+            @close="whatsNewVisible = false"
+            @dismiss="dismissWhatsNew"
+            @marked-read="onMarkedRead" />
         <el-main class="fill vfillpanel">
             <el-tabs id="maintabs" class="fill" v-model="activeTabId" type="border-card">
                 <el-tab-pane label="Messages" name="messages" class="vfillpanel">
@@ -95,10 +101,13 @@
     import HubConnectionManager from "@/HubConnectionManager";
     import ServerStatus from "@/components/serverstatus.vue";
     import SettingsDialog from "@/components/settingsdialog.vue";
+    import WhatsNewDialog from "@/components/whatsnewdialog.vue";
     import HubConnectionStatus from "@/components/hubconnectionstatus.vue";
     import { Splitpanes, Pane } from 'splitpanes';
     import 'splitpanes/dist/splitpanes.css';
-    import { ElIcon } from "element-plus";
+    import { ElIcon, ElNotification } from "element-plus";
+    import UpdateNotificationManager from "@/UpdateNotificationManager";
+    import UpdateCheckResult from "@/ApiClient/UpdateCheckResult";
 
     @Component({
         components: {
@@ -109,6 +118,7 @@
             hubconnstatus: HubConnectionStatus,
             serverstatus: ServerStatus,
             settingsdialog: SettingsDialog,
+            whatsnewdialog: WhatsNewDialog,
             splitpanes: Splitpanes,
             pane: Pane,
             VersionInfo,
@@ -123,6 +133,10 @@
         connection: HubConnectionManager | null = null;
 
         settingsVisible: boolean = false;
+        whatsNewVisible: boolean = false;
+        updateCheckResult: UpdateCheckResult | null = null;
+        updateManager = new UpdateNotificationManager();
+        updateNotification: any = null;
 
         showSettings(visible: boolean) {
             this.settingsVisible = visible;
@@ -185,11 +199,57 @@
         async mounted() {
             this.connection = new HubConnectionManager("hubs/notifications")
             this.connection.start();
+
+            // Setup update notification callbacks
+            this.updateManager.onWhatsNew((result) => {
+                this.updateCheckResult = result;
+                this.whatsNewVisible = true;
+            });
+
+            this.updateManager.onUpdateAvailable((result) => {
+                this.showUpdateNotification(result);
+            });
+
+            // Start periodic update checks
+            this.updateManager.startPeriodicCheck();
         }
 
         destroyed() {
             if (this.connection) {
                 this.connection.stop();
+            }
+            this.updateManager.stopPeriodicCheck();
+            if (this.updateNotification) {
+                this.updateNotification.close();
+            }
+        }
+
+        showUpdateNotification(result: UpdateCheckResult) {
+            if (this.updateNotification) {
+                this.updateNotification.close();
+            }
+
+            this.updateNotification = ElNotification({
+                title: 'Update Available',
+                message: `A new version (${result.newReleases[0]?.tagName}) is available. Click to view release notes.`,
+                type: 'warning',
+                duration: 0, // Don't auto-dismiss
+                onClick: () => {
+                    this.updateCheckResult = result;
+                    this.whatsNewVisible = true;
+                }
+            });
+        }
+
+        dismissWhatsNew() {
+            this.whatsNewVisible = false;
+        }
+
+        async onMarkedRead() {
+            this.whatsNewVisible = false;
+            if (this.updateNotification) {
+                this.updateNotification.close();
+                this.updateNotification = null;
             }
         }
 
