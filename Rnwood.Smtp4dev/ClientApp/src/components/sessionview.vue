@@ -11,7 +11,7 @@
                       type="warning"
                       show-icon
                       title="This session terminated abnormally">{{session.error}}</el-alert>
-                <el-alert v-for="warning in session.warnings"
+                <el-alert v-for="warning in session?.warnings || []"
                           v-bind:key="warning.details"
                           :title="'Warning: ' + warning.details"
                           type="warning"
