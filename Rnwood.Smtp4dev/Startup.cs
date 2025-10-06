@@ -221,6 +221,8 @@ namespace Rnwood.Smtp4dev
             services.AddSingleton<ITaskQueue, TaskQueue>();
             services.AddSingleton<ScriptingHost>();
             services.AddScoped<MimeProcessingService>();
+            services.AddScoped<UpdateNotificationService>();
+            services.AddHttpClient();
 
             services.AddSingleton<Func<RelayOptions, SmtpClient>>(relayOptions =>
             {
