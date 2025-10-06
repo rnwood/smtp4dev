@@ -34,7 +34,7 @@ namespace Rnwood.Smtp4dev.Controllers
         [HttpGet]
         public PagedResult<SessionSummary> GetSummaries(int page = 1, int pageSize = 5)
         {
-            return dbContext.Sessions.AsNoTracking().Where(s => s.EndDate.HasValue).OrderByDescending(x => x.StartDate)
+            return dbContext.Sessions.AsNoTracking().OrderByDescending(x => x.StartDate)
                 .Select(m => new SessionSummary(m)).GetPaged(page, pageSize);
         }
 

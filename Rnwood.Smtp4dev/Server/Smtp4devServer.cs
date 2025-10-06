@@ -416,6 +416,8 @@ namespace Rnwood.Smtp4dev.Server
                 dbContext.SaveChanges();
 
                 activeSessionsToDbId[e.Session] = dbSession.Id;
+                
+                notificationsHub.OnSessionUpdated(dbSession.Id).Wait();
             }, false).ConfigureAwait(false);
         }
 
@@ -440,6 +442,7 @@ namespace Rnwood.Smtp4dev.Server
 
                 activeSessionsToDbId.Remove(e.Session);
 
+                notificationsHub.OnSessionUpdated(dbSession.Id).Wait();
                 notificationsHub.OnSessionsChanged().Wait();
             }, false).ConfigureAwait(false);
         }
