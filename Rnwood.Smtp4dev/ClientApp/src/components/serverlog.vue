@@ -20,7 +20,7 @@
 </template>
 
 <script lang="ts">
-    import { Component, Vue, Prop, Watch, toNative } from "vue-facing-decorator";
+    import { Component, Vue, Prop, toNative } from "vue-facing-decorator";
     import ServerLogController from "../ApiClient/ServerLogController";
     import HubConnectionManager from "@/HubConnectionManager";
 
