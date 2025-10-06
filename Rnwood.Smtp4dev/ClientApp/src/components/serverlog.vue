@@ -4,6 +4,30 @@
             <el-button size="small" @click="clearLogs">Clear</el-button>
             <el-button size="small" @click="refresh">Refresh</el-button>
             <el-checkbox v-model="autoScroll" size="small" style="margin-left: 10px;">Auto-scroll</el-checkbox>
+            
+            <el-divider direction="vertical" />
+            
+            <el-select v-model="selectedLevel" placeholder="All Levels" size="small" clearable @change="applyFilters" style="width: 150px;">
+                <el-option label="All Levels" :value="null" />
+                <el-option v-for="level in availableLevels" :key="level" :label="level" :value="level" />
+            </el-select>
+            
+            <el-select v-model="selectedSource" placeholder="All Sources" size="small" clearable @change="applyFilters" style="width: 200px; margin-left: 10px;">
+                <el-option label="All Sources" :value="null" />
+                <el-option v-for="source in availableSources" :key="source" :label="source" :value="source" />
+            </el-select>
+            
+            <el-input 
+                v-model="searchText" 
+                placeholder="Search logs..." 
+                size="small" 
+                clearable 
+                @input="onSearchInput"
+                style="width: 250px; margin-left: 10px;">
+                <template #prefix>
+                    <el-icon><search /></el-icon>
+                </template>
+            </el-input>
         </div>
 
         <div v-loading.body="loading" class="vfillpanel fill">
@@ -13,7 +37,7 @@
             </el-alert>
 
             <div class="log-container fill">
-                <pre ref="logContent" class="log-content">{{ logs }}</pre>
+                <pre ref="logContent" class="log-content">{{ displayedLogs }}</pre>
             </div>
         </div>
     </div>
@@ -22,6 +46,7 @@
 <script lang="ts">
     import { Component, Vue, Prop, toNative } from "vue-facing-decorator";
     import ServerLogController from "../ApiClient/ServerLogController";
+    import LogEntry from "../ApiClient/LogEntry";
     import HubConnectionManager from "@/HubConnectionManager";
 
     @Component({
@@ -31,10 +56,20 @@
         @Prop({})
         connection: HubConnectionManager | null = null;
 
-        logs: string = "";
+        logEntries: LogEntry[] = [];
+        availableLevels: string[] = [];
+        availableSources: string[] = [];
+        selectedLevel: string | null = null;
+        selectedSource: string | null = null;
+        searchText: string = "";
         error: Error | null = null;
         loading = false;
         autoScroll = true;
+        searchDebounceTimer: number | null = null;
+
+        get displayedLogs(): string {
+            return this.logEntries.map(e => e.formattedMessage).join("");
+        }
 
         async mounted() {
             await this.refresh();
@@ -50,8 +85,22 @@
             }
         }
 
-        onServerLogReceived(logEntry: string) {
-            this.logs += logEntry;
+        onServerLogReceived(logEntry: LogEntry) {
+            // Add new entry to the buffer
+            this.logEntries.push(logEntry);
+            
+            // Update available sources and levels if needed
+            if (!this.availableSources.includes(logEntry.source)) {
+                this.availableSources.push(logEntry.source);
+                this.availableSources.sort();
+            }
+            if (!this.availableLevels.includes(logEntry.level)) {
+                this.availableLevels.push(logEntry.level);
+                this.availableLevels.sort();
+            }
+            
+            // Apply filters to new entry and update display
+            this.applyFilters();
             
             if (this.autoScroll) {
                 this.$nextTick(() => {
@@ -67,12 +116,60 @@
             }
         }
 
+        onSearchInput() {
+            // Debounce search input
+            if (this.searchDebounceTimer) {
+                clearTimeout(this.searchDebounceTimer);
+            }
+            this.searchDebounceTimer = window.setTimeout(() => {
+                this.applyFilters();
+            }, 300);
+        }
+
+        async applyFilters() {
+            this.error = null;
+            this.loading = true;
+
+            try {
+                const entries = await new ServerLogController().getServerLogEntries(
+                    this.selectedLevel || undefined,
+                    this.selectedSource || undefined,
+                    this.searchText || undefined
+                );
+                
+                this.logEntries = entries;
+                
+                if (this.autoScroll) {
+                    this.$nextTick(() => {
+                        this.scrollToBottom();
+                    });
+                }
+            } catch (e: any) {
+                this.error = e;
+            } finally {
+                this.loading = false;
+            }
+        }
+
         async refresh() {
             this.error = null;
             this.loading = true;
 
             try {
-                this.logs = await new ServerLogController().getServerLog();
+                // Load available filter options
+                const [levels, sources, entries] = await Promise.all([
+                    new ServerLogController().getServerLogLevels(),
+                    new ServerLogController().getServerLogSources(),
+                    new ServerLogController().getServerLogEntries(
+                        this.selectedLevel || undefined,
+                        this.selectedSource || undefined,
+                        this.searchText || undefined
+                    )
+                ]);
+                
+                this.availableLevels = levels;
+                this.availableSources = sources;
+                this.logEntries = entries;
                 
                 if (this.autoScroll) {
                     this.$nextTick(() => {
@@ -92,7 +189,12 @@
 
             try {
                 await new ServerLogController().clearServerLog();
-                this.logs = "";
+                this.logEntries = [];
+                this.availableLevels = [];
+                this.availableSources = [];
+                this.selectedLevel = null;
+                this.selectedSource = null;
+                this.searchText = "";
             } catch (e: any) {
                 this.error = e;
             } finally {
@@ -115,6 +217,8 @@
             background-color: var(--el-bg-color);
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
+            gap: 5px;
         }
 
         .log-container {

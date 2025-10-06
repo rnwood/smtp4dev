@@ -58,7 +58,7 @@ namespace Rnwood.Smtp4dev.Hubs
             }
         }
 
-        public async Task OnServerLogReceived(string logEntry)
+        public async Task OnServerLogReceived(Service.LogEntry logEntry)
         {
             if (Clients != null)
             {
