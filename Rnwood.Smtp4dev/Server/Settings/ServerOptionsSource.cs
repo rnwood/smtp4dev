@@ -77,5 +77,9 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public bool? DisableHtmlCompatibilityCheck { get; set; }
 
         public long? MaxMessageSize { get; set; }
+
+        public bool? DisableWhatsNewNotifications { get; set; }
+
+        public bool? DisableUpdateNotifications { get; set; }
     }
 }

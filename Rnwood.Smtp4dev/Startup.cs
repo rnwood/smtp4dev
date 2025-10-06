@@ -102,6 +102,7 @@ namespace Rnwood.Smtp4dev
             services.Configure<DesktopOptions>(Configuration.GetSection("DesktopOptions"));
 
             ServerOptions serverOptions = Configuration.GetSection("ServerOptions").Get<ServerOptions>();
+            services.AddSingleton(serverOptions);
 
             services.AddDbContext<Smtp4devDbContext>(opt =>
                     {
