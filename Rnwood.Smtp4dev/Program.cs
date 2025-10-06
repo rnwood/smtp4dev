@@ -271,8 +271,12 @@ namespace Rnwood.Smtp4dev
                 ServerLogService = new Service.ServerLogService();
 
                 var logConfigBuilder = new LoggerConfiguration()
-    .ReadFrom.Configuration(configuration)
-    .WriteTo.Sink(ServerLogService);
+                    .ReadFrom.Configuration(configuration)
+                    .Enrich.FromLogContext()
+                    .Enrich.WithProcessId()
+                    .Enrich.WithProcessName()
+                    .WriteTo.Sink(ServerLogService);
+                    
                 if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
                 {
 #pragma warning disable CA1416 // Validate platform compatibility
