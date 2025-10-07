@@ -107,7 +107,7 @@ namespace Rnwood.Smtp4dev
                     {
                         if (string.IsNullOrEmpty(serverOptions.Database))
                         {
-                            Log.Logger.Information("Using in memory database.");
+                            Log.Logger.Information("Using in-memory database for message storage");
 
                             //Must be held open to keep the memory DB alive
                             keepAliveConnection = new SqliteConnection(InMemoryDbConnString);
@@ -119,11 +119,12 @@ namespace Rnwood.Smtp4dev
                             var dbLocation = Path.GetFullPath(serverOptions.Database);
                             if (serverOptions.RecreateDb && File.Exists(dbLocation))
                             {
-                                Log.Logger.Information("Deleting Sqlite database.");
+                                Log.Logger.Information("Recreating database. Location: {dbLocation}", dbLocation);
                                 File.Delete(dbLocation);
                             }
 
-                            Log.Logger.Information("Using Sqlite database at {dbLocation}", dbLocation);
+                            Log.Logger.Information("Using SQLite database. Location: {dbLocation}, FileExists: {fileExists}", 
+                                dbLocation, File.Exists(dbLocation));
 
                             opt.UseSqlite($"Data Source={dbLocation}");
                         }
@@ -146,9 +147,11 @@ namespace Rnwood.Smtp4dev
                             var pendingMigrations = context.Database.GetPendingMigrations();
                             if (pendingMigrations.Any())
                             {
-                                Log.Logger.Information("Updating DB schema with migrations: {migrations}", string.Join(", ", pendingMigrations));
+                                Log.Logger.Information("Applying database migrations. MigrationCount: {count}, Migrations: {migrations}", 
+                                    pendingMigrations.Count(), string.Join(", ", pendingMigrations));
                                 context.Database.Migrate();
                                 context.SaveChanges();
+                                Log.Logger.Information("Database migrations completed successfully");
                             }
                         }
 
@@ -194,7 +197,8 @@ namespace Rnwood.Smtp4dev
                                     }
                                     catch (Exception ex)
                                     {
-                                        Log.Logger.Warning(ex, "Failed to extract MIME metadata for message {messageId}", message.Id);
+                                        Log.Logger.Warning(ex, "Failed to extract MIME metadata. MessageId: {messageId}, ExceptionType: {exceptionType}", 
+                                            message.Id, ex.GetType().Name);
                                         // Set fallback values
                                         message.MimeMetadata = JsonSerializer.Serialize(new Server.MimeMetadata());
                                         message.BodyText = Encoding.UTF8.GetString(message.Data);

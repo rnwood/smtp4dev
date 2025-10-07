@@ -20,6 +20,7 @@ using Rnwood.SmtpServer;
 using Microsoft.AspNetCore.Http;
 using MimeKit;
 using HtmlAgilityPack;
+using Serilog;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -28,6 +29,8 @@ namespace Rnwood.Smtp4dev.Controllers
     [UseEtagFilterAttribute]
     public class MessagesController : Controller
     {
+        private readonly ILogger log = Log.ForContext<MessagesController>();
+        
         public MessagesController(IMessagesRepository messagesRepository, ISmtp4devServer server, MimeProcessingService mimeProcessingService)
         {
             this.messagesRepository = messagesRepository;
@@ -436,6 +439,7 @@ namespace Rnwood.Smtp4dev.Controllers
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
         public async Task Delete(Guid id)
         {
+            log.Information("Deleting message. MessageId: {messageId}", id);
             await messagesRepository.DeleteMessage(id);
         }
 
@@ -526,6 +530,7 @@ namespace Rnwood.Smtp4dev.Controllers
             }
             catch (Exception ex)
             {
+                log.Error(ex, "Failed to import EML file. ExceptionType: {exceptionType}", ex.GetType().Name);
                 return BadRequest($"Failed to import EML: {ex.Message}");
             }
         }
@@ -539,6 +544,7 @@ namespace Rnwood.Smtp4dev.Controllers
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
         public async Task DeleteAll(string mailboxName = MailboxOptions.DEFAULTNAME)
         {
+            log.Information("Deleting all messages. Mailbox: {mailboxName}", mailboxName);
             await messagesRepository.DeleteAllMessages(mailboxName);
         }
 
