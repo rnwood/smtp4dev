@@ -21,8 +21,13 @@ namespace Rnwood.Smtp4dev.TUI
         private ListView sessionListView;
         private TextView logTextView;
         private Label statusLabel;
+        private TextField searchField;
+        private CheckBox errorOnlyCheckbox;
         private List<Session> sessions = new List<Session>();
+        private List<Session> filteredSessions = new List<Session>();
         private Session selectedSession;
+        private string searchFilter = string.Empty;
+        private bool showErrorsOnly = false;
 
         public SessionsTab(IHost host)
         {
@@ -41,14 +46,39 @@ namespace Rnwood.Smtp4dev.TUI
                 Height = Dim.Fill()
             };
 
-            // Status label at top
+            // Status label, search field, and filter checkbox at top
             statusLabel = new Label("Loading sessions...")
             {
                 X = 1,
                 Y = 0,
-                Width = Dim.Fill() - 2
+                Width = Dim.Percent(30)
             };
-            container.Add(statusLabel);
+            
+            var searchLabel = new Label("Search:")
+            {
+                X = Pos.Right(statusLabel) + 2,
+                Y = 0
+            };
+            
+            searchField = new TextField("")
+            {
+                X = Pos.Right(searchLabel) + 1,
+                Y = 0,
+                Width = Dim.Percent(30)
+            };
+            searchField.TextChanged += (old) => ApplyFilter();
+            
+            errorOnlyCheckbox = new CheckBox("Errors Only")
+            {
+                X = Pos.Right(searchField) + 2,
+                Y = 0
+            };
+            errorOnlyCheckbox.Toggled += (old) => {
+                showErrorsOnly = errorOnlyCheckbox.Checked;
+                ApplyFilter();
+            };
+            
+            container.Add(statusLabel, searchLabel, searchField, errorOnlyCheckbox);
 
             // Left panel - Session list (40% width)
             var listFrame = new FrameView("Session List")
@@ -139,7 +169,32 @@ namespace Rnwood.Smtp4dev.TUI
                 .Take(100)
                 .ToList();
 
-            var sessionStrings = sessions.Select(s =>
+            ApplyFilter();
+        }
+        
+        private void ApplyFilter()
+        {
+            searchFilter = searchField?.Text?.ToString() ?? string.Empty;
+            
+            filteredSessions = sessions;
+            
+            // Apply error filter
+            if (showErrorsOnly)
+            {
+                filteredSessions = filteredSessions.Where(s => !string.IsNullOrEmpty(s.SessionError)).ToList();
+            }
+            
+            // Apply search filter
+            if (!string.IsNullOrWhiteSpace(searchFilter))
+            {
+                filteredSessions = filteredSessions.Where(s =>
+                    (s.ClientAddress != null && s.ClientAddress.Contains(searchFilter, StringComparison.OrdinalIgnoreCase)) ||
+                    (s.ClientName != null && s.ClientName.Contains(searchFilter, StringComparison.OrdinalIgnoreCase))
+                ).ToList();
+            }
+
+            var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
+            var sessionStrings = filteredSessions.Select(s =>
             {
                 var status = string.IsNullOrEmpty(s.SessionError) ? "OK" : "ERROR";
                 var messageCount = dbContext.Messages.Count(m => m.Session.Id == s.Id);
@@ -147,14 +202,14 @@ namespace Rnwood.Smtp4dev.TUI
             }).ToList();
 
             sessionListView.SetSource(sessionStrings);
-            statusLabel.Text = $"Sessions: {sessions.Count}";
+            statusLabel.Text = $"Sessions: {filteredSessions.Count}/{sessions.Count}";
         }
 
         private void OnSessionSelected(ListViewItemEventArgs args)
         {
-            if (args.Item >= 0 && args.Item < sessions.Count)
+            if (args.Item >= 0 && args.Item < filteredSessions.Count)
             {
-                selectedSession = sessions[args.Item];
+                selectedSession = filteredSessions[args.Item];
                 ShowSessionLog();
             }
         }
@@ -163,8 +218,27 @@ namespace Rnwood.Smtp4dev.TUI
         {
             if (selectedSession != null)
             {
-                var log = selectedSession.Log ?? "No log data available.";
-                logTextView.Text = log;
+                var logText = $"Session Details:\n" +
+                             $"Client: {selectedSession.ClientAddress}\n" +
+                             $"Client Name: {selectedSession.ClientName}\n" +
+                             $"Start: {selectedSession.StartDate}\n" +
+                             $"End: {selectedSession.EndDate}\n" +
+                             $"Duration: {(selectedSession.EndDate - selectedSession.StartDate).Value.TotalSeconds:F2}s\n";
+                             
+                if (!string.IsNullOrEmpty(selectedSession.SessionError))
+                {
+                    logText += $"\nERROR: {selectedSession.SessionError}\n";
+                }
+                
+                var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
+                var messageCount = dbContext.Messages.Count(m => m.Session.Id == selectedSession.Id);
+                logText += $"Messages: {messageCount}\n";
+                logText += "\n" + new string('-', 60) + "\n";
+                logText += "Session Log:\n";
+                logText += new string('-', 60) + "\n\n";
+                logText += selectedSession.Log ?? "No log data available.";
+                
+                logTextView.Text = logText;
             }
         }
 
