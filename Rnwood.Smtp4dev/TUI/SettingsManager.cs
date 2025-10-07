@@ -19,14 +19,11 @@ namespace Rnwood.Smtp4dev.TUI
         private readonly IOptionsMonitor<ServerOptions> serverOptionsMonitor;
         private readonly IOptionsMonitor<RelayOptions> relayOptionsMonitor;
 
-        public SettingsManager(IHost host)
+        public SettingsManager(IHost host, string dataDir)
         {
             this.serverOptionsMonitor = host.Services.GetRequiredService<IOptionsMonitor<ServerOptions>>();
             this.relayOptionsMonitor = host.Services.GetRequiredService<IOptionsMonitor<RelayOptions>>();
             
-            // Get data directory
-            var directoryHelper = host.Services.GetRequiredService<DirectoryHelper>();
-            var dataDir = directoryHelper.GetDataDirectory();
             this.settingsPath = Path.Combine(dataDir, "appsettings.json");
         }
 

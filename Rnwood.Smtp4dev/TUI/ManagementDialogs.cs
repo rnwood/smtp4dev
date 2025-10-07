@@ -1,7 +1,9 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using Microsoft.Extensions.Hosting;
 using Terminal.Gui;
+using Rnwood.Smtp4dev.Server.Settings;
 
 namespace Rnwood.Smtp4dev.TUI
 {
@@ -11,13 +13,15 @@ namespace Rnwood.Smtp4dev.TUI
     public class UsersDialog : Dialog
     {
         private readonly IHost host;
+        private readonly string dataDir;
         private ListView userListView;
         private SettingsManager settingsManager;
 
-        public UsersDialog(IHost host) : base("Manage Users", 60, 20)
+        public UsersDialog(IHost host, string dataDir) : base("Manage Users", 60, 20)
         {
             this.host = host;
-            this.settingsManager = new SettingsManager(host);
+            this.dataDir = dataDir;
+            this.settingsManager = new SettingsManager(host, dataDir);
             CreateUI();
         }
 
@@ -86,15 +90,15 @@ namespace Rnwood.Smtp4dev.TUI
                 if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
                 {
                     var serverOptions = settingsManager.GetServerOptions();
-                    if (serverOptions.Users == null)
-                        serverOptions.Users = new System.Collections.Generic.List<Rnwood.Smtp4dev.Server.Settings.User>();
-
-                    serverOptions.Users.Add(new Rnwood.Smtp4dev.Server.Settings.User
+                    var usersList = serverOptions.Users?.ToList() ?? new List<UserOptions>();
+                    
+                    usersList.Add(new UserOptions
                     {
                         Username = username,
                         Password = password
                     });
 
+                    serverOptions.Users = usersList.ToArray();
                     settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
                     RefreshList();
                     Application.RequestStop();
@@ -118,7 +122,7 @@ namespace Rnwood.Smtp4dev.TUI
             if (userListView.SelectedItem >= 0)
             {
                 var serverOptions = settingsManager.GetServerOptions();
-                if (serverOptions.Users != null && userListView.SelectedItem < serverOptions.Users.Count)
+                if (serverOptions.Users != null && userListView.SelectedItem < serverOptions.Users.Length)
                 {
                     var username = serverOptions.Users[userListView.SelectedItem].Username;
                     var result = MessageBox.Query("Remove User",
@@ -127,7 +131,9 @@ namespace Rnwood.Smtp4dev.TUI
 
                     if (result == 0)
                     {
-                        serverOptions.Users.RemoveAt(userListView.SelectedItem);
+                        var usersList = serverOptions.Users.ToList();
+                        usersList.RemoveAt(userListView.SelectedItem);
+                        serverOptions.Users = usersList.ToArray();
                         settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
                         RefreshList();
                     }
@@ -142,13 +148,15 @@ namespace Rnwood.Smtp4dev.TUI
     public class MailboxesDialog : Dialog
     {
         private readonly IHost host;
+        private readonly string dataDir;
         private ListView mailboxListView;
         private SettingsManager settingsManager;
 
-        public MailboxesDialog(IHost host) : base("Manage Mailboxes", 60, 20)
+        public MailboxesDialog(IHost host, string dataDir) : base("Manage Mailboxes", 60, 20)
         {
             this.host = host;
-            this.settingsManager = new SettingsManager(host);
+            this.dataDir = dataDir;
+            this.settingsManager = new SettingsManager(host, dataDir);
             CreateUI();
         }
 
@@ -193,7 +201,7 @@ namespace Rnwood.Smtp4dev.TUI
         private void RefreshList()
         {
             var serverOptions = settingsManager.GetServerOptions();
-            var mailboxes = serverOptions.Mailboxes?.Select(m => $"{m.Name} ({m.RecipientPattern})").ToList() 
+            var mailboxes = serverOptions.Mailboxes?.Select(m => $"{m.Name} ({m.Recipients})").ToList() 
                 ?? new System.Collections.Generic.List<string>();
             mailboxListView.SetSource(mailboxes);
         }
@@ -218,14 +226,15 @@ namespace Rnwood.Smtp4dev.TUI
                 if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(pattern))
                 {
                     var serverOptions = settingsManager.GetServerOptions();
-                    if (serverOptions.Mailboxes == null)
-                        serverOptions.Mailboxes = new System.Collections.Generic.List<Rnwood.Smtp4dev.Server.Settings.Mailbox>();
-
-                    serverOptions.Mailboxes.Add(new Rnwood.Smtp4dev.Server.Settings.Mailbox
+                    var mailboxesList = serverOptions.Mailboxes?.ToList() ?? new List<MailboxOptions>();
+                    
+                    mailboxesList.Add(new MailboxOptions
                     {
                         Name = name,
-                        RecipientPattern = pattern
+                        Recipients = pattern
                     });
+
+                    serverOptions.Mailboxes = mailboxesList.ToArray();
 
                     settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
                     RefreshList();
@@ -250,7 +259,7 @@ namespace Rnwood.Smtp4dev.TUI
             if (mailboxListView.SelectedItem >= 0)
             {
                 var serverOptions = settingsManager.GetServerOptions();
-                if (serverOptions.Mailboxes != null && mailboxListView.SelectedItem < serverOptions.Mailboxes.Count)
+                if (serverOptions.Mailboxes != null && mailboxListView.SelectedItem < serverOptions.Mailboxes.Length)
                 {
                     var mailbox = serverOptions.Mailboxes[mailboxListView.SelectedItem];
                     var result = MessageBox.Query("Remove Mailbox",
@@ -259,7 +268,9 @@ namespace Rnwood.Smtp4dev.TUI
 
                     if (result == 0)
                     {
-                        serverOptions.Mailboxes.RemoveAt(mailboxListView.SelectedItem);
+                        var mailboxesList = serverOptions.Mailboxes.ToList();
+                        mailboxesList.RemoveAt(mailboxListView.SelectedItem);
+                        serverOptions.Mailboxes = mailboxesList.ToArray();
                         settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
                         RefreshList();
                     }

@@ -53,7 +53,8 @@ namespace Rnwood.Smtp4dev
                     var cmdLineOptions = host.Services.GetRequiredService<CommandLineOptions>();
                     if (cmdLineOptions.UseTui)
                     {
-                        var tuiApp = new Rnwood.Smtp4dev.TUI.TerminalGuiApp(host);
+                        var dataDir = DirectoryHelper.GetDataDir(cmdLineOptions);
+                        var tuiApp = new Rnwood.Smtp4dev.TUI.TerminalGuiApp(host, dataDir);
                         tuiApp.Run();
                     }
                     else

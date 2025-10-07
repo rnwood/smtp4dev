@@ -18,6 +18,7 @@ namespace Rnwood.Smtp4dev.TUI
     public class TerminalGuiApp
     {
         private readonly IHost host;
+        private readonly string dataDir;
         private Window mainWindow;
         private TabView tabView;
         private MessagesTab messagesTab;
@@ -25,9 +26,10 @@ namespace Rnwood.Smtp4dev.TUI
         private StatusBar statusBar;
         private bool running = true;
 
-        public TerminalGuiApp(IHost host)
+        public TerminalGuiApp(IHost host, string dataDir)
         {
             this.host = host;
+            this.dataDir = dataDir;
         }
 
         public void Run()
@@ -108,11 +110,12 @@ namespace Rnwood.Smtp4dev.TUI
         private void RefreshCurrentTab()
         {
             var currentTab = tabView.SelectedTab;
-            if (currentTab == 0) // Messages tab
+            var tabs = tabView.Tabs.ToList();
+            if (tabs.Count > 0 && currentTab == tabs[0]) // Messages tab
             {
                 messagesTab.Refresh();
             }
-            else if (currentTab == 1) // Sessions tab
+            else if (tabs.Count > 1 && currentTab == tabs[1]) // Sessions tab
             {
                 sessionsTab.Refresh();
             }
@@ -134,7 +137,7 @@ namespace Rnwood.Smtp4dev.TUI
 
         private void ShowSettings()
         {
-            var settingsDialog = new SettingsDialog(host);
+            var settingsDialog = new SettingsDialog(host, dataDir);
             Application.Run(settingsDialog);
         }
     }

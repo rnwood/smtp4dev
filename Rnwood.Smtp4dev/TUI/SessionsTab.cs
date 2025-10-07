@@ -141,7 +141,7 @@ namespace Rnwood.Smtp4dev.TUI
 
             var sessionStrings = sessions.Select(s =>
             {
-                var status = string.IsNullOrEmpty(s.Error) ? "OK" : "ERROR";
+                var status = string.IsNullOrEmpty(s.SessionError) ? "OK" : "ERROR";
                 var messageCount = dbContext.Messages.Count(m => m.Session.Id == s.Id);
                 return $"{s.StartDate:yyyy-MM-dd HH:mm} | {TruncateString(s.ClientAddress, 20)} | {status} | Msgs: {messageCount}";
             }).ToList();

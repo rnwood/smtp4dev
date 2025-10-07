@@ -12,6 +12,7 @@ namespace Rnwood.Smtp4dev.TUI
     public class SettingsDialog : Dialog
     {
         private readonly IHost host;
+        private readonly string dataDir;
         private TextField smtpPortField;
         private TextField hostnameField;
         private CheckBox remoteConnectionsCheck;
@@ -21,9 +22,10 @@ namespace Rnwood.Smtp4dev.TUI
         private TextField messagesToKeepField;
         private TextField sessionsToKeepField;
 
-        public SettingsDialog(IHost host) : base("Settings", 80, 25)
+        public SettingsDialog(IHost host, string dataDir) : base("Settings", 80, 25)
         {
             this.host = host;
+            this.dataDir = dataDir;
             CreateUI();
         }
 
@@ -207,7 +209,7 @@ namespace Rnwood.Smtp4dev.TUI
 
         private void LoadSettings()
         {
-            var settingsManager = new SettingsManager(host);
+            var settingsManager = new SettingsManager(host, dataDir);
             var serverOptions = settingsManager.GetServerOptions();
 
             smtpPortField.Text = serverOptions.Port.ToString();
@@ -227,7 +229,7 @@ namespace Rnwood.Smtp4dev.TUI
         {
             try
             {
-                var settingsManager = new SettingsManager(host);
+                var settingsManager = new SettingsManager(host, dataDir);
                 var serverOptions = settingsManager.GetServerOptions();
                 var relayOptions = settingsManager.GetRelayOptions();
 
@@ -270,13 +272,13 @@ namespace Rnwood.Smtp4dev.TUI
 
         private void ManageUsers()
         {
-            var usersDialog = new UsersDialog(host);
+            var usersDialog = new UsersDialog(host, dataDir);
             Application.Run(usersDialog);
         }
 
         private void ManageMailboxes()
         {
-            var mailboxesDialog = new MailboxesDialog(host);
+            var mailboxesDialog = new MailboxesDialog(host, dataDir);
             Application.Run(mailboxesDialog);
         }
     }
