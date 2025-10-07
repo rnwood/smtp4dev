@@ -92,23 +92,24 @@ namespace Rnwood.Smtp4dev.Desktop.Tests
                         string newLine = serverOutput.Current;
                         output.WriteLine(newLine);
 
-                        if (newLine.StartsWith("Now listening on: http://"))
+                        if (newLine.Contains("Now listening on: http://"))
                         {
+                            // Handle both IPv4 (http://localhost:5000) and IPv6 (http://[::]:80) formats
                             int portNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s]+:(\d+)", "$1"));
                             baseUrl = new Uri($"http://localhost:{portNumber}");
                         }
 
-                        if (newLine.StartsWith("SMTP Server is listening on port"))
+                        if (newLine.Contains("SMTP Server is listening on port"))
                         {
-                            smtpPortNumber = int.Parse(Regex.Replace(newLine, @"SMTP Server is listening on port (\d+).*", "$1"));
+                            smtpPortNumber = int.Parse(Regex.Replace(newLine, @".*SMTP Server is listening on port (\d+).*", "$1"));
                         }
 
-                        if (newLine.StartsWith("IMAP Server is listening on port"))
+                        if (newLine.Contains("IMAP Server is listening on port"))
                         {
-                            imapPortNumber = int.Parse(Regex.Replace(newLine, @"IMAP Server is listening on port (\d+).*", "$1"));
+                            imapPortNumber = int.Parse(Regex.Replace(newLine, @".*IMAP Server is listening on port (\d+).*", "$1"));
                         }
 
-                        if (newLine.StartsWith("Application started. Press Ctrl+C to shut down."))
+                        if (newLine.Contains("Application started. Press Ctrl+C to shut down."))
                         {
                             throw new Exception($@"Startup completed but did not catch variables from startup output:
                             baseUrl:{baseUrl}

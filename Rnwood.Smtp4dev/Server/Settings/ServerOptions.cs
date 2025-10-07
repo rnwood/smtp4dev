@@ -87,6 +87,10 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public bool ValidateBareLineFeed { get; set; } = false;
 
         public bool Pop3SecureConnectionRequired { get; set; } = false;
+
+        public string DeliverToStdout { get; set; } = "";
+
+        public int? ExitAfterMessages { get; set; }
     }
 
 }

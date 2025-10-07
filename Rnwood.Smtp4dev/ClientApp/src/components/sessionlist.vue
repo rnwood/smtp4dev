@@ -225,6 +225,9 @@
                 this.connection.on("sessionschanged", () => {
                     this.refresh(true);
                 });
+                this.connection.on("sessionupdated", (sessionId: string) => {
+                    this.refresh(true);
+                });
                 this.connection.addOnConnectedCallback(() => this.refresh(true));
             }
         }

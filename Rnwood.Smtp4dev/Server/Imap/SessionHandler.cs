@@ -67,14 +67,14 @@ namespace Rnwood.Smtp4dev.Server
                                 var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
                                 if (messagesRepository == null)
                                 {
-                                    log.Error("MessagesRepository service not available");
+                                    log.Error("IMAP APPEND failed - MessagesRepository service not available");
                                     return;
                                 }
 
                                 var dbContext = messagesRepository.DbContext;
                                 if (dbContext == null)
                                 {
-                                    log.Error("Database context not available");
+                                    log.Error("IMAP APPEND failed - Database context not available");
                                     return;
                                 }
                                 
@@ -84,7 +84,7 @@ namespace Rnwood.Smtp4dev.Server
                                 
                                 if (messageData.Length == 0)
                                 {
-                                    log.Error("No message data received in stream");
+                                    log.Error("IMAP APPEND failed - No message data received in stream");
                                     return;
                                 }
                                 
@@ -111,7 +111,7 @@ namespace Rnwood.Smtp4dev.Server
                                     
                                 if (mailbox == null)
                                 {
-                                    log.Error("Mailbox {mailboxName} not found", mailboxName);
+                                    log.Error("IMAP APPEND failed - Mailbox not found. MailboxName: {mailboxName}", mailboxName);
                                     return;
                                 }
 
@@ -309,12 +309,14 @@ namespace Rnwood.Smtp4dev.Server
 
                 if (user != null && e.Password.Equals(user.Password))
                 {
-                    log.Information("IMAP login success for user {user} to mailbox", e.UserName);
+                    log.Information("IMAP authentication successful. Username: {username}, RemoteEndpoint: {remoteEndpoint}", 
+                        e.UserName, session.RemoteEndPoint);
                     e.IsAuthenticated = true;
                 }
                 else
                 {
-                    log.Error("IMAP login failure for user {user}", e.UserName);
+                    log.Warning("IMAP authentication failed. Username: {username}, RemoteEndpoint: {remoteEndpoint}", 
+                        e.UserName, session.RemoteEndPoint);
                     e.IsAuthenticated = false;
                 }
             }

@@ -352,7 +352,8 @@ namespace Rnwood.Smtp4dev.Server
 
             if (result == null && this.serverOptions.CurrentValue.SmtpAllowAnyCredentials)
             {
-                this.log.Information("SMTP auth success (allow any credentials is on)");
+                this.log.Information("SMTP authentication successful - any credentials allowed. ClientAddress: {clientAddress}", 
+                    e.Session.ClientAddress);
                 result = AuthenticationResult.Success;
             }
 
@@ -364,19 +365,22 @@ namespace Rnwood.Smtp4dev.Server
                     if (user != null && val.ValidateResponse(user.Password))
                     {
                         result = AuthenticationResult.Success;
-                        this.log.Information("SMTP auth success for user {user}", val.Username);
+                        this.log.Information("SMTP authentication successful. Username: {username}, ClientAddress: {clientAddress}", 
+                            val.Username, e.Session.ClientAddress);
 
                     }
                     else
                     {
                         result = AuthenticationResult.Failure;
-                        this.log.Warning("SMTP auth failure for user {user}", val.Username);
+                        this.log.Warning("SMTP authentication failed - invalid credentials. Username: {username}, ClientAddress: {clientAddress}", 
+                            val.Username, e.Session.ClientAddress);
                     }
                 }
                 else
                 {
                     result = AuthenticationResult.Failure;
-                    this.log.Warning("SMTP auth failure: Cannot validate credentials of type {type}", e.Credentials.Type);
+                    this.log.Warning("SMTP authentication failed - unsupported credential type. CredentialType: {credentialType}, ClientAddress: {clientAddress}", 
+                        e.Credentials.Type, e.Session.ClientAddress);
                 }
             }
 
@@ -404,7 +408,8 @@ namespace Rnwood.Smtp4dev.Server
 
         private async Task OnSessionStarted(object sender, SessionEventArgs e)
         {
-            log.Information("Session started. Client address {clientAddress}.", e.Session.ClientAddress);
+            log.Information("SMTP session started. ClientAddress: {clientAddress}", 
+                e.Session.ClientAddress);
             await taskQueue.QueueTask(() =>
             {
                 using var scope = serviceScopeFactory.CreateScope();
@@ -416,14 +421,19 @@ namespace Rnwood.Smtp4dev.Server
                 dbContext.SaveChanges();
 
                 activeSessionsToDbId[e.Session] = dbSession.Id;
+                
+                notificationsHub.OnSessionUpdated(dbSession.Id).Wait();
             }, false).ConfigureAwait(false);
         }
 
         private async Task OnSessionCompleted(object sender, SessionEventArgs e)
         {
             int messageCount = (await e.Session.GetMessages()).Count;
-            log.Information("Session completed. Client address {clientAddress}. Number of messages {messageCount}.", e.Session.ClientAddress,
-                messageCount);
+            var duration = e.Session.EndDate.HasValue 
+                ? (e.Session.EndDate.Value - e.Session.StartDate).TotalMilliseconds 
+                : 0;
+            log.Information("SMTP session completed. ClientAddress: {clientAddress}, MessageCount: {messageCount}, Duration: {duration}ms", 
+                e.Session.ClientAddress, messageCount, duration);
 
 
             await taskQueue.QueueTask(() =>
@@ -440,6 +450,7 @@ namespace Rnwood.Smtp4dev.Server
 
                 activeSessionsToDbId.Remove(e.Session);
 
+                notificationsHub.OnSessionUpdated(dbSession.Id).Wait();
                 notificationsHub.OnSessionsChanged().Wait();
             }, false).ConfigureAwait(false);
         }
@@ -475,14 +486,16 @@ namespace Rnwood.Smtp4dev.Server
 
         private async Task OnMessageReceived(object sender, MessageEventArgs e)
         {
-            log.Information("Message received. Client address {clientAddress}, From {messageFrom}, To {messageTo}, SecureConnection: {secure}.",
-                e.Message.Session.ClientAddress, e.Message.From, e.Message.Recipients, e.Message.SecureConnection);
+            log.Information("SMTP message received. ClientAddress: {clientAddress}, From: {messageFrom}, To: {messageTo}, SecureConnection: {secure}, DeclaredSize: {size}",
+                e.Message.Session.ClientAddress, e.Message.From, 
+                string.Join(", ", e.Message.Recipients), e.Message.SecureConnection, e.Message.DeclaredMessageSize);
 
             var targetMailboxes = GetTargetMailboxes(e.Message.Recipients, e.Message.Session);
 
             if (!targetMailboxes.Any())
             {
-                log.Warning("Message with recipients {recipients} will be delivered to 0 mailboxes.", e.Message.Recipients);
+                log.Warning("Message delivery failed - no matching mailboxes. Recipients: {recipients}, ClientAddress: {clientAddress}", 
+                    string.Join(", ", e.Message.Recipients), e.Message.Session.ClientAddress);
                 return;
             }
 
@@ -562,6 +575,28 @@ namespace Rnwood.Smtp4dev.Server
             return targetMailboxesWithMatchedRecipient.ToLookup(t => t.Item1, t=> t.Item2);
         }
 
+        private bool ShouldDeliverToStdout(string mailboxName)
+        {
+            var deliverToStdout = serverOptions.CurrentValue.DeliverToStdout;
+            
+            if (string.IsNullOrWhiteSpace(deliverToStdout))
+            {
+                return false;
+            }
+
+            // If "*", deliver all mailboxes to stdout
+            if (deliverToStdout.Trim() == "*")
+            {
+                return true;
+            }
+
+            // Check if mailbox name is in the comma-separated list
+            var mailboxNames = deliverToStdout.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(m => m.Trim());
+            
+            return mailboxNames.Contains(mailboxName, StringComparer.OrdinalIgnoreCase);
+        }
+
         void ProcessMessage(Message message, ISession session, IGrouping<MailboxOptions, string> targetMailboxWithRecipients)
         {
             log.Information("Processing received message for mailbox '{mailbox}' for recipients '{recipients}'", targetMailboxWithRecipients.Key.Name, targetMailboxWithRecipients.ToArray());
@@ -609,7 +644,46 @@ namespace Rnwood.Smtp4dev.Server
             TrimMessages(dbContext, new List<Mailbox>() {message.Mailbox});
             dbContext.SaveChanges();
             notificationsHub.OnMessagesChanged(targetMailboxWithRecipients.Key.Name).Wait();
-            log.Information("Processing received message DONE");
+            log.Information("Message processing completed. MessageId: {messageId}, Mailbox: {mailbox}, ImapUid: {imapUid}", 
+                message.Id, message.Mailbox.Name, message.ImapUid);
+
+            // Deliver to stdout if configured for this mailbox
+            if (ShouldDeliverToStdout(targetMailboxWithRecipients.Key.Name))
+            {
+                lock (stdoutLock)
+                {
+                    // Output the raw message content to stdout
+                    // Use a delimiter that is very unlikely to appear in email messages
+                    Console.WriteLine("--- BEGIN SMTP4DEV MESSAGE ---");
+                    if (message.Data != null)
+                    {
+                        // Write raw message bytes to stdout
+                        using (var stdout = Console.OpenStandardOutput())
+                        {
+                            stdout.Write(message.Data, 0, message.Data.Length);
+                            stdout.Flush();
+                        }
+                        Console.WriteLine(); // Ensure delimiter is on new line
+                    }
+                    Console.WriteLine("--- END SMTP4DEV MESSAGE ---");
+                    Console.Out.Flush();
+
+                    messagesDeliveredToStdoutCount++;
+                    
+                    // Check if we should exit after delivering this message
+                    var exitAfter = serverOptions.CurrentValue.ExitAfterMessages;
+                    if (exitAfter.HasValue && messagesDeliveredToStdoutCount >= exitAfter.Value)
+                    {
+                        log.Information("Delivered {count} messages to stdout. Exiting as configured by ExitAfterMessages.", messagesDeliveredToStdoutCount);
+                        // Schedule application exit on a background thread to allow this method to complete
+                        Task.Run(async () =>
+                        {
+                            await Task.Delay(100); // Give time for logs to flush
+                            Environment.Exit(0);
+                        });
+                    }
+                }
+            }
         }
 
         public RelayResult TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
@@ -649,7 +723,8 @@ namespace Rnwood.Smtp4dev.Server
             {
                 try
                 {
-                    log.Information("Relaying message to {recipient}", recipient);
+                    log.Information("Relaying message. Recipient: {recipient}, MessageId: {messageId}, RelayServer: {relayServer}", 
+                        recipient.Address, message.Id, relayOptions.CurrentValue.SmtpServer);
 
                     using SmtpClient relaySmtpClient = relaySmtpClientFactory(relayOptions.CurrentValue);
 
@@ -670,7 +745,8 @@ namespace Rnwood.Smtp4dev.Server
                 }
                 catch (Exception e)
                 {
-                    log.Error(e, "Can not relay message to {recipient}: {errorMessage}", recipient, e.ToString());
+                    log.Error(e, "Failed to relay message. Recipient: {recipient}, MessageId: {messageId}, Exception: {exceptionType}", 
+                        recipient.Address, message.Id, e.GetType().Name);
                     result.Exceptions[recipient] = e;
                 }
             }
@@ -703,6 +779,8 @@ namespace Rnwood.Smtp4dev.Server
         private readonly NotificationsHub notificationsHub;
         private readonly IServiceScopeFactory serviceScopeFactory;
         private Settings.ServerOptions lastStartOptions;
+        private int messagesDeliveredToStdoutCount = 0;
+        private readonly object stdoutLock = new object();
 
         public Exception Exception { get; private set; }
 
@@ -732,7 +810,8 @@ namespace Rnwood.Smtp4dev.Server
             }
             catch (Exception e)
             {
-                log.Fatal(e, "The SMTP server failed to start: {failureReason}", e.ToString());
+                log.Fatal(e, "SMTP server failed to start. TlsMode: {tlsMode}, Port: {port}, AllowRemoteConnections: {allowRemote}, Exception: {exceptionType}", 
+                    this.lastStartOptions?.TlsMode, this.lastStartOptions?.Port, this.lastStartOptions?.AllowRemoteConnections, e.GetType().Name);
                 this.Exception = e;
             }
             finally

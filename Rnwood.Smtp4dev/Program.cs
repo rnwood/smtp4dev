@@ -36,6 +36,7 @@ namespace Rnwood.Smtp4dev
         public static bool IsService { get; private set; }
 
         private static ILogger _log;
+        public static Service.ServerLogService ServerLogService { get; private set; }
 
         public static async Task Main(string[] args)
         {
@@ -194,7 +195,7 @@ namespace Rnwood.Smtp4dev
 
                         if (cmdLineOptions.DebugSettings)
                         {
-                            Console.WriteLine(JsonSerializer.Serialize(new SettingsDebugInfo
+                            Console.Error.WriteLine(JsonSerializer.Serialize(new SettingsDebugInfo
                             {
                                 CmdLineArgs = Environment.GetCommandLineArgs(),
                                 CmdLineOptions = cmdLineOptions,
@@ -278,8 +279,12 @@ namespace Rnwood.Smtp4dev
                        .AddJsonFile("appsettings.json")
                        .Build();
 
+                ServerLogService = new Service.ServerLogService();
+
                 var logConfigBuilder = new LoggerConfiguration()
-    .ReadFrom.Configuration(configuration);
+                    .ReadFrom.Configuration(configuration)
+                    .WriteTo.Sink(ServerLogService);
+                    
                 if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
                 {
 #pragma warning disable CA1416 // Validate platform compatibility
@@ -292,7 +297,8 @@ namespace Rnwood.Smtp4dev
             catch
             {
                 //Ensure output goes somewhere if there's a config error.
-                var logConfigBuilder = new LoggerConfiguration();
+                ServerLogService = new Service.ServerLogService();
+                var logConfigBuilder = new LoggerConfiguration().WriteTo.Sink(ServerLogService);
                 if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
                 {
 #pragma warning disable CA1416 // Validate platform compatibility

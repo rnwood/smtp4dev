@@ -73,6 +73,15 @@
                         </pane>
                     </splitpanes>
                 </el-tab-pane>
+
+                <el-tab-pane label="Server Log" name="serverlog" class="vfillpanel">
+                    <template #label>
+                        <span>
+                            <el-icon><document /></el-icon> Server Log
+                        </span>
+                    </template>
+                    <serverlog class="fill" :connection="connection" />
+                </el-tab-pane>
             </el-tabs>
         </el-main>
     </el-container>
@@ -91,6 +100,7 @@
     import MessageView from "@/components/messageview.vue";
     import SessionList from "@/components/sessionlist.vue";
     import SessionView from "@/components/sessionview.vue";
+    import ServerLog from "@/components/serverlog.vue";
     import VersionInfo from "@/components/versionInfo.vue";
     import HubConnectionManager from "@/HubConnectionManager";
     import ServerStatus from "@/components/serverstatus.vue";
@@ -106,6 +116,7 @@
             messageview: MessageView,
             sessionlist: SessionList,
             sessionview: SessionView,
+            serverlog: ServerLog,
             hubconnstatus: HubConnectionStatus,
             serverstatus: ServerStatus,
             settingsdialog: SettingsDialog,

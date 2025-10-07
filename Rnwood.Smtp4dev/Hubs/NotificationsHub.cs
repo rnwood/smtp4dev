@@ -50,11 +50,27 @@ namespace Rnwood.Smtp4dev.Hubs
             }
         }
 
+        public async Task OnSessionUpdated(Guid sessionId)
+        {
+            if (Clients != null)
+            {
+                await Clients.All.SendAsync("sessionupdated", sessionId);
+            }
+        }
+
         public async Task OnMailboxesChanged()
         {
             if (Clients != null)
             {
                 await Clients.All.SendAsync("mailboxeschanged");
+            }
+        }
+
+        public async Task OnServerLogReceived(Service.LogEntry logEntry)
+        {
+            if (Clients != null)
+            {
+                await Clients.All.SendAsync("serverlogreceived", logEntry);
             }
         }
     }

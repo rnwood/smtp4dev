@@ -11,7 +11,7 @@
                       type="warning"
                       show-icon
                       title="This session terminated abnormally">{{session.error}}</el-alert>
-                <el-alert v-for="warning in session.warnings"
+                <el-alert v-for="warning in session?.warnings || []"
                           v-bind:key="warning.details"
                           :title="'Warning: ' + warning.details"
                           type="warning"
@@ -41,12 +41,13 @@
     </div>
 </template>
 <script lang="ts">
-    import { Component, Vue, Prop, Watch, toNative } from "vue-facing-decorator";
+    import { Component, Vue, Prop, Watch, toNative, Inject } from "vue-facing-decorator";
 
     import SessionsController from "../ApiClient/SessionsController";
     import SessionSummary from "../ApiClient/SessionSummary";
     import Session from "../ApiClient/Session";
     import TextView from "@/components/textview.vue";
+    import HubConnectionManager from "../HubConnectionManager";
 
     @Component({
         components: {
@@ -57,11 +58,17 @@
 
         @Prop({})
         sessionSummary: SessionSummary | null = null;
+        
+        @Inject({ default: null })
+        connection!: HubConnectionManager | null;
+        
         session: Session | null = null;
         log: string | null = null;
 
         error: Error | null = null;
         loading = false;
+        
+        private pollInterval: number | null = null;
 
         @Watch("sessionSummary")
         async onMessageChanged(
@@ -69,6 +76,7 @@
             oldValue: SessionSummary | null
         ) {
             await this.loadSession();
+            this.setupPolling();
         }
 
         async loadMessage() {
@@ -104,10 +112,72 @@
                 this.loading = false;
             }
         }
+        
+        async refreshLog() {
+            if (this.sessionSummary != null && !this.sessionSummary.endDate) {
+                try {
+                    const newSession = await new SessionsController().getSession(
+                        this.sessionSummary.id
+                    );
+                    const newLog = await new SessionsController().getSessionLog(
+                        this.sessionSummary.id
+                    );
+                    
+                    // Only update if content has changed
+                    if (this.log !== newLog) {
+                        this.log = newLog;
+                    }
+                    
+                    // Update session properties if they've changed
+                    if (JSON.stringify(this.session) !== JSON.stringify(newSession)) {
+                        this.session = newSession;
+                    }
+                    
+                    // If session has ended, stop polling
+                    if (newSession) {
+                        // Session ended, need to update the summary as well
+                        this.stopPolling();
+                    }
+                } catch (e: any) {
+                    // Silently ignore errors during polling
+                    console.warn('Failed to refresh session log:', e);
+                }
+            }
+        }
+        
+        setupPolling() {
+            this.stopPolling();
+            
+            // Only poll if session is active (no end date)
+            if (this.sessionSummary && !this.sessionSummary.endDate) {
+                this.pollInterval = window.setInterval(() => {
+                    this.refreshLog();
+                }, 1000); // Poll every second
+            }
+        }
+        
+        stopPolling() {
+            if (this.pollInterval !== null) {
+                clearInterval(this.pollInterval);
+                this.pollInterval = null;
+            }
+        }
+        
+        onSessionUpdated(sessionId: string) {
+            if (this.sessionSummary && this.sessionSummary.id === sessionId) {
+                this.refreshLog();
+            }
+        }
 
-        async created() { }
+        async created() {
+            if (this.connection) {
+                this.connection.on("sessionupdated", this.onSessionUpdated.bind(this));
+            }
+        }
 
-        async destroyed() { }
+        async unmounted() {
+            this.stopPolling();
+        }
     }
 
 
