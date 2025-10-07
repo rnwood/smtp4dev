@@ -57,5 +57,13 @@ namespace Rnwood.Smtp4dev.Hubs
                 await Clients.All.SendAsync("mailboxeschanged");
             }
         }
+
+        public async Task OnServerLogReceived(Service.LogEntry logEntry)
+        {
+            if (Clients != null)
+            {
+                await Clients.All.SendAsync("serverlogreceived", logEntry);
+            }
+        }
     }
 }
