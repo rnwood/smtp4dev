@@ -1,0 +1,270 @@
+using System;
+using System.Linq;
+using Microsoft.Extensions.Hosting;
+using Terminal.Gui;
+
+namespace Rnwood.Smtp4dev.TUI
+{
+    /// <summary>
+    /// Dialog for managing SMTP users
+    /// </summary>
+    public class UsersDialog : Dialog
+    {
+        private readonly IHost host;
+        private ListView userListView;
+        private SettingsManager settingsManager;
+
+        public UsersDialog(IHost host) : base("Manage Users", 60, 20)
+        {
+            this.host = host;
+            this.settingsManager = new SettingsManager(host);
+            CreateUI();
+        }
+
+        private void CreateUI()
+        {
+            userListView = new ListView()
+            {
+                X = 1,
+                Y = 1,
+                Width = Dim.Fill() - 2,
+                Height = Dim.Fill() - 6
+            };
+            Add(userListView);
+
+            var addButton = new Button("Add User")
+            {
+                X = 1,
+                Y = Pos.Bottom(userListView) + 1
+            };
+            addButton.Clicked += AddUser;
+            Add(addButton);
+
+            var removeButton = new Button("Remove")
+            {
+                X = Pos.Right(addButton) + 2,
+                Y = Pos.Bottom(userListView) + 1
+            };
+            removeButton.Clicked += RemoveUser;
+            Add(removeButton);
+
+            var closeButton = new Button("Close")
+            {
+                X = Pos.Center(),
+                Y = Pos.Bottom(this) - 3
+            };
+            closeButton.Clicked += () => Application.RequestStop();
+            AddButton(closeButton);
+
+            RefreshList();
+        }
+
+        private void RefreshList()
+        {
+            var serverOptions = settingsManager.GetServerOptions();
+            var users = serverOptions.Users?.Select(u => u.Username).ToList() ?? new System.Collections.Generic.List<string>();
+            userListView.SetSource(users);
+        }
+
+        private void AddUser()
+        {
+            var usernameField = new TextField() { X = 15, Y = 1, Width = 30 };
+            var passwordField = new TextField() { X = 15, Y = 3, Width = 30, Secret = true };
+
+            var dialog = new Dialog("Add User", 50, 10);
+            dialog.Add(new Label("Username:") { X = 1, Y = 1 });
+            dialog.Add(usernameField);
+            dialog.Add(new Label("Password:") { X = 1, Y = 3 });
+            dialog.Add(passwordField);
+
+            var okButton = new Button("OK") { IsDefault = true };
+            okButton.Clicked += () =>
+            {
+                var username = usernameField.Text.ToString();
+                var password = passwordField.Text.ToString();
+
+                if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
+                {
+                    var serverOptions = settingsManager.GetServerOptions();
+                    if (serverOptions.Users == null)
+                        serverOptions.Users = new System.Collections.Generic.List<Rnwood.Smtp4dev.Server.Settings.User>();
+
+                    serverOptions.Users.Add(new Rnwood.Smtp4dev.Server.Settings.User
+                    {
+                        Username = username,
+                        Password = password
+                    });
+
+                    settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
+                    RefreshList();
+                    Application.RequestStop();
+                }
+                else
+                {
+                    MessageBox.ErrorQuery("Error", "Username and password are required", "OK");
+                }
+            };
+            dialog.AddButton(okButton);
+
+            var cancelButton = new Button("Cancel");
+            cancelButton.Clicked += () => Application.RequestStop();
+            dialog.AddButton(cancelButton);
+
+            Application.Run(dialog);
+        }
+
+        private void RemoveUser()
+        {
+            if (userListView.SelectedItem >= 0)
+            {
+                var serverOptions = settingsManager.GetServerOptions();
+                if (serverOptions.Users != null && userListView.SelectedItem < serverOptions.Users.Count)
+                {
+                    var username = serverOptions.Users[userListView.SelectedItem].Username;
+                    var result = MessageBox.Query("Remove User",
+                        $"Remove user '{username}'?",
+                        "Yes", "No");
+
+                    if (result == 0)
+                    {
+                        serverOptions.Users.RemoveAt(userListView.SelectedItem);
+                        settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
+                        RefreshList();
+                    }
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Dialog for managing mailboxes
+    /// </summary>
+    public class MailboxesDialog : Dialog
+    {
+        private readonly IHost host;
+        private ListView mailboxListView;
+        private SettingsManager settingsManager;
+
+        public MailboxesDialog(IHost host) : base("Manage Mailboxes", 60, 20)
+        {
+            this.host = host;
+            this.settingsManager = new SettingsManager(host);
+            CreateUI();
+        }
+
+        private void CreateUI()
+        {
+            mailboxListView = new ListView()
+            {
+                X = 1,
+                Y = 1,
+                Width = Dim.Fill() - 2,
+                Height = Dim.Fill() - 6
+            };
+            Add(mailboxListView);
+
+            var addButton = new Button("Add Mailbox")
+            {
+                X = 1,
+                Y = Pos.Bottom(mailboxListView) + 1
+            };
+            addButton.Clicked += AddMailbox;
+            Add(addButton);
+
+            var removeButton = new Button("Remove")
+            {
+                X = Pos.Right(addButton) + 2,
+                Y = Pos.Bottom(mailboxListView) + 1
+            };
+            removeButton.Clicked += RemoveMailbox;
+            Add(removeButton);
+
+            var closeButton = new Button("Close")
+            {
+                X = Pos.Center(),
+                Y = Pos.Bottom(this) - 3
+            };
+            closeButton.Clicked += () => Application.RequestStop();
+            AddButton(closeButton);
+
+            RefreshList();
+        }
+
+        private void RefreshList()
+        {
+            var serverOptions = settingsManager.GetServerOptions();
+            var mailboxes = serverOptions.Mailboxes?.Select(m => $"{m.Name} ({m.RecipientPattern})").ToList() 
+                ?? new System.Collections.Generic.List<string>();
+            mailboxListView.SetSource(mailboxes);
+        }
+
+        private void AddMailbox()
+        {
+            var nameField = new TextField() { X = 20, Y = 1, Width = 30 };
+            var patternField = new TextField() { X = 20, Y = 3, Width = 30 };
+
+            var dialog = new Dialog("Add Mailbox", 55, 10);
+            dialog.Add(new Label("Mailbox Name:") { X = 1, Y = 1 });
+            dialog.Add(nameField);
+            dialog.Add(new Label("Recipient Pattern:") { X = 1, Y = 3 });
+            dialog.Add(patternField);
+
+            var okButton = new Button("OK") { IsDefault = true };
+            okButton.Clicked += () =>
+            {
+                var name = nameField.Text.ToString();
+                var pattern = patternField.Text.ToString();
+
+                if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(pattern))
+                {
+                    var serverOptions = settingsManager.GetServerOptions();
+                    if (serverOptions.Mailboxes == null)
+                        serverOptions.Mailboxes = new System.Collections.Generic.List<Rnwood.Smtp4dev.Server.Settings.Mailbox>();
+
+                    serverOptions.Mailboxes.Add(new Rnwood.Smtp4dev.Server.Settings.Mailbox
+                    {
+                        Name = name,
+                        RecipientPattern = pattern
+                    });
+
+                    settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
+                    RefreshList();
+                    Application.RequestStop();
+                }
+                else
+                {
+                    MessageBox.ErrorQuery("Error", "Name and pattern are required", "OK");
+                }
+            };
+            dialog.AddButton(okButton);
+
+            var cancelButton = new Button("Cancel");
+            cancelButton.Clicked += () => Application.RequestStop();
+            dialog.AddButton(cancelButton);
+
+            Application.Run(dialog);
+        }
+
+        private void RemoveMailbox()
+        {
+            if (mailboxListView.SelectedItem >= 0)
+            {
+                var serverOptions = settingsManager.GetServerOptions();
+                if (serverOptions.Mailboxes != null && mailboxListView.SelectedItem < serverOptions.Mailboxes.Count)
+                {
+                    var mailbox = serverOptions.Mailboxes[mailboxListView.SelectedItem];
+                    var result = MessageBox.Query("Remove Mailbox",
+                        $"Remove mailbox '{mailbox.Name}'?",
+                        "Yes", "No");
+
+                    if (result == 0)
+                    {
+                        serverOptions.Mailboxes.RemoveAt(mailboxListView.SelectedItem);
+                        settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
+                        RefreshList();
+                    }
+                }
+            }
+        }
+    }
+}
