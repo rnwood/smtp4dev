@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -17,19 +18,21 @@ namespace Rnwood.Smtp4dev.TUI
     public class MessagesTab
     {
         private readonly IHost host;
-        private FrameView container;
+        private View container;
         private ListView messageListView;
-        private FrameView detailsPanel;
-        private TextView detailsTextView;
-        private TextView bodyTextView;
-        private TextView headersTextView;
+        private View detailsPanel;
+        private TextView overviewBodyTextView;
+        private TableView headersTableView;
         private TextView rawTextView;
+        private ListView partsListView;
+        private ListView attachmentsListView;
         private Label statusLabel;
         private TextField searchField;
         private List<Message> messages = new List<Message>();
         private List<Message> filteredMessages = new List<Message>();
         private Message selectedMessage;
         private string searchFilter = string.Empty;
+        private int lastSelectedIndex = -1;
 
         public MessagesTab(IHost host)
         {
@@ -39,8 +42,8 @@ namespace Rnwood.Smtp4dev.TUI
 
         private void CreateUI()
         {
-            // Main container
-            container = new FrameView("Messages")
+            // Main container (no frame)
+            container = new View()
             {
                 X = 0,
                 Y = 0,
@@ -51,7 +54,7 @@ namespace Rnwood.Smtp4dev.TUI
             // Status label and search field at top
             statusLabel = new Label("Loading messages...")
             {
-                X = 1,
+                X = 0,
                 Y = 0,
                 Width = Dim.Percent(50)
             };
@@ -66,44 +69,28 @@ namespace Rnwood.Smtp4dev.TUI
             {
                 X = Pos.Right(searchLabel) + 1,
                 Y = 0,
-                Width = Dim.Fill() - 2
+                Width = Dim.Fill() - 1
             };
             searchField.TextChanged += (old) => ApplyFilter();
             
             container.Add(statusLabel, searchLabel, searchField);
 
-            // Left panel - Message list (40% width)
-            var listFrame = new FrameView("Message List")
+            // Left panel - Message list (40% width) - no frame
+            messageListView = new ListView()
             {
                 X = 0,
                 Y = 1,
                 Width = Dim.Percent(40),
-                Height = Dim.Fill() - 1
-            };
-
-            messageListView = new ListView()
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill(),
-                Height = Dim.Fill() - 2,
+                Height = Dim.Fill() - 3,
                 AllowsMarking = false,
                 CanFocus = true
             };
 
             messageListView.SelectedItemChanged += OnMessageSelected;
 
-            var refreshButton = new Button("Refresh (F5)")
-            {
-                X = 0,
-                Y = Pos.Bottom(messageListView),
-                Width = 15
-            };
-            refreshButton.Clicked += () => Refresh();
-
             var deleteButton = new Button("Delete")
             {
-                X = Pos.Right(refreshButton) + 1,
+                X = 0,
                 Y = Pos.Bottom(messageListView),
                 Width = 10
             };
@@ -125,13 +112,12 @@ namespace Rnwood.Smtp4dev.TUI
             };
             composeButton.Clicked += () => ComposeMessage();
 
-            listFrame.Add(messageListView, refreshButton, deleteButton, deleteAllButton, composeButton);
-            container.Add(listFrame);
+            container.Add(messageListView, deleteButton, deleteAllButton, composeButton);
 
-            // Right panel - Message details (60% width)
-            detailsPanel = new FrameView("Message Details")
+            // Right panel - Message details (60% width) - no frame
+            detailsPanel = new View()
             {
-                X = Pos.Right(listFrame),
+                X = Pos.Right(messageListView) + 1,
                 Y = 1,
                 Width = Dim.Fill(),
                 Height = Dim.Fill() - 1
@@ -145,17 +131,21 @@ namespace Rnwood.Smtp4dev.TUI
                 Height = Dim.Fill()
             };
 
-            // Overview tab
-            var overviewView = CreateOverviewView();
-            tabView.AddTab(new TabView.Tab("Overview", overviewView), false);
+            // Overview/Body combined tab
+            var overviewBodyView = CreateOverviewBodyView();
+            tabView.AddTab(new TabView.Tab("Message", overviewBodyView), false);
 
-            // Body tab
-            var bodyView = CreateBodyView();
-            tabView.AddTab(new TabView.Tab("Body", bodyView), false);
-
-            // Headers tab
-            var headersView = CreateHeadersView();
+            // Headers tab (table view)
+            var headersView = CreateHeadersTableView();
             tabView.AddTab(new TabView.Tab("Headers", headersView), false);
+
+            // Parts tab
+            var partsView = CreatePartsView();
+            tabView.AddTab(new TabView.Tab("Parts", partsView), false);
+
+            // Attachments tab
+            var attachmentsView = CreateAttachmentsView();
+            tabView.AddTab(new TabView.Tab("Attachments", attachmentsView), false);
 
             // Raw tab
             var rawView = CreateRawView();
@@ -168,9 +158,9 @@ namespace Rnwood.Smtp4dev.TUI
             Refresh();
         }
 
-        private View CreateOverviewView()
+        private View CreateOverviewBodyView()
         {
-            detailsTextView = new TextView()
+            overviewBodyTextView = new TextView()
             {
                 X = 0,
                 Y = 0,
@@ -179,35 +169,66 @@ namespace Rnwood.Smtp4dev.TUI
                 ReadOnly = true,
                 WordWrap = true
             };
-            return detailsTextView;
+            return overviewBodyTextView;
         }
 
-        private View CreateBodyView()
+        private View CreateHeadersTableView()
         {
-            bodyTextView = new TextView()
+            headersTableView = new TableView()
             {
                 X = 0,
                 Y = 0,
                 Width = Dim.Fill(),
-                Height = Dim.Fill(),
-                ReadOnly = true,
-                WordWrap = true
+                Height = Dim.Fill()
             };
-            return bodyTextView;
+            
+            var table = new DataTable();
+            table.Columns.Add("Header");
+            table.Columns.Add("Value");
+            headersTableView.Table = table;
+            
+            return headersTableView;
         }
 
-        private View CreateHeadersView()
+        private View CreatePartsView()
         {
-            headersTextView = new TextView()
+            partsListView = new ListView()
             {
                 X = 0,
                 Y = 0,
                 Width = Dim.Fill(),
-                Height = Dim.Fill(),
-                ReadOnly = true,
-                WordWrap = false
+                Height = Dim.Fill()
             };
-            return headersTextView;
+            return partsListView;
+        }
+
+        private View CreateAttachmentsView()
+        {
+            var view = new View()
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill()
+            };
+
+            attachmentsListView = new ListView()
+            {
+                X = 0,
+                Y = 0,
+                Width = Dim.Fill(),
+                Height = Dim.Fill() - 2
+            };
+            
+            var saveButton = new Button("Save Selected")
+            {
+                X = 0,
+                Y = Pos.Bottom(attachmentsListView)
+            };
+            saveButton.Clicked += () => SaveAttachment();
+            
+            view.Add(attachmentsListView, saveButton);
+            return view;
         }
 
         private View CreateRawView()
@@ -231,6 +252,9 @@ namespace Rnwood.Smtp4dev.TUI
 
         public void Refresh()
         {
+            // Save current selection
+            lastSelectedIndex = messageListView.SelectedItem;
+            
             var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
             messages = dbContext.Messages
                 .AsNoTracking()
@@ -259,17 +283,26 @@ namespace Rnwood.Smtp4dev.TUI
             }
 
             var messageStrings = filteredMessages.Select(m => 
-                $"{m.ReceivedDate:yyyy-MM-dd HH:mm} | {TruncateString(m.From ?? "", 25)} | {TruncateString(m.Subject ?? "", 40)}"
-            ).ToList();
+            {
+                var unreadIndicator = m.IsUnread ? "* " : "  ";
+                return $"{unreadIndicator}{m.ReceivedDate:yyyy-MM-dd HH:mm} | {TruncateString(m.From ?? "", 20)} | {TruncateString(m.Subject ?? "", 35)}";
+            }).ToList();
 
             messageListView.SetSource(messageStrings);
             statusLabel.Text = $"Messages: {filteredMessages.Count}/{messages.Count}";
+            
+            // Restore selection if possible
+            if (lastSelectedIndex >= 0 && lastSelectedIndex < filteredMessages.Count)
+            {
+                messageListView.SelectedItem = lastSelectedIndex;
+            }
         }
 
         private void OnMessageSelected(ListViewItemEventArgs args)
         {
             if (args.Item >= 0 && args.Item < filteredMessages.Count)
             {
+                lastSelectedIndex = args.Item;
                 selectedMessage = filteredMessages[args.Item];
                 ShowMessageDetails();
             }
@@ -281,54 +314,48 @@ namespace Rnwood.Smtp4dev.TUI
 
             try
             {
-                // Overview tab
-                var details = $"From: {selectedMessage.From}\n" +
-                             $"To: {selectedMessage.To}\n" +
+                // Combined Overview and Body (compact overview)
+                var details = $"From: {selectedMessage.From}  |  To: {selectedMessage.To}  |  Date: {selectedMessage.ReceivedDate:yyyy-MM-dd HH:mm}\n" +
                              $"Subject: {selectedMessage.Subject}\n" +
-                             $"Date: {selectedMessage.ReceivedDate}\n" +
-                             $"Size: {selectedMessage.Data?.Length ?? 0} bytes\n" +
-                             $"Attachments: {selectedMessage.AttachmentCount}\n" +
-                             $"Secure: {selectedMessage.SecureConnection}\n" +
-                             $"Is Unread: {selectedMessage.IsUnread}\n";
-                detailsTextView.Text = details;
-
-                // Body tab - use BodyText property
+                             $"Size: {selectedMessage.Data?.Length ?? 0}b | Attachments: {selectedMessage.AttachmentCount} | Unread: {(selectedMessage.IsUnread ? "Yes" : "No")}\n" +
+                             $"{new string('-', 80)}\n\n";
+                
+                // Append body
                 if (!string.IsNullOrEmpty(selectedMessage.BodyText))
                 {
-                    bodyTextView.Text = selectedMessage.BodyText;
+                    details += selectedMessage.BodyText;
                 }
                 else if (selectedMessage.Data != null)
                 {
                     try
                     {
                         var messageText = System.Text.Encoding.UTF8.GetString(selectedMessage.Data);
-                        // Try to extract body from raw message
                         var bodyStart = messageText.IndexOf("\r\n\r\n");
                         if (bodyStart > 0)
                         {
-                            bodyTextView.Text = messageText.Substring(bodyStart + 4);
+                            details += messageText.Substring(bodyStart + 4);
                         }
                         else
                         {
-                            bodyTextView.Text = messageText;
+                            details += messageText;
                         }
                     }
                     catch
                     {
-                        bodyTextView.Text = "[Unable to decode message body]";
+                        details += "[Unable to decode message body]";
                     }
                 }
                 else
                 {
-                    bodyTextView.Text = "[No body content]";
+                    details += "[No body content]";
                 }
+                
+                overviewBodyTextView.Text = details;
 
-                // Headers tab - parse from raw data
-                var headersText = string.Empty;
-                if (selectedMessage.MimeParseError != null)
-                {
-                    headersText = $"MIME Parse Error: {selectedMessage.MimeParseError}\n\n";
-                }
+                // Headers tab - use table view
+                var table = new DataTable();
+                table.Columns.Add("Header");
+                table.Columns.Add("Value");
                 
                 if (selectedMessage.Data != null)
                 {
@@ -338,19 +365,107 @@ namespace Rnwood.Smtp4dev.TUI
                         var headerEnd = messageText.IndexOf("\r\n\r\n");
                         if (headerEnd > 0)
                         {
-                            headersText += messageText.Substring(0, headerEnd);
-                        }
-                        else
-                        {
-                            headersText += "Unable to parse headers";
+                            var headersText = messageText.Substring(0, headerEnd);
+                            var headerLines = headersText.Split(new[] { "\r\n" }, StringSplitOptions.RemoveEmptyEntries);
+                            
+                            foreach (var line in headerLines)
+                            {
+                                var colonIndex = line.IndexOf(':');
+                                if (colonIndex > 0)
+                                {
+                                    var headerName = line.Substring(0, colonIndex).Trim();
+                                    var headerValue = line.Substring(colonIndex + 1).Trim();
+                                    table.Rows.Add(headerName, headerValue);
+                                }
+                            }
                         }
                     }
                     catch
                     {
-                        headersText += "Error parsing headers";
+                        table.Rows.Add("Error", "Failed to parse headers");
                     }
                 }
-                headersTextView.Text = headersText;
+                headersTableView.Table = table;
+
+                // Parts list
+                var partsList = new List<string>();
+                if (selectedMessage.MimeParseError != null)
+                {
+                    partsList.Add($"MIME Parse Error: {selectedMessage.MimeParseError}");
+                }
+                // Add basic parts info from content type if available
+                if (selectedMessage.Data != null)
+                {
+                    try
+                    {
+                        var messageText = System.Text.Encoding.UTF8.GetString(selectedMessage.Data);
+                        if (messageText.Contains("Content-Type:"))
+                        {
+                            partsList.Add("Message structure (from headers):");
+                            var lines = messageText.Split('\n');
+                            foreach (var line in lines.Take(50))
+                            {
+                                if (line.Contains("Content-Type:") || line.Contains("Content-Transfer-Encoding:"))
+                                {
+                                    partsList.Add("  " + line.Trim());
+                                }
+                            }
+                        }
+                    }
+                    catch { }
+                }
+                if (partsList.Count == 0)
+                {
+                    partsList.Add("No MIME parts information available");
+                }
+                partsListView.SetSource(partsList);
+
+                // Attachments list
+                var attachmentsList = new List<string>();
+                if (selectedMessage.AttachmentCount > 0)
+                {
+                    // Try to extract attachment info from message
+                    if (selectedMessage.Data != null)
+                    {
+                        try
+                        {
+                            var messageText = System.Text.Encoding.UTF8.GetString(selectedMessage.Data);
+                            var lines = messageText.Split('\n');
+                            for (int i = 0; i < lines.Length; i++)
+                            {
+                                if (lines[i].Contains("Content-Disposition:") && lines[i].Contains("attachment"))
+                                {
+                                    // Look for filename
+                                    var filenameLine = lines[i];
+                                    var filenameIndex = filenameLine.IndexOf("filename=");
+                                    if (filenameIndex >= 0)
+                                    {
+                                        var filename = filenameLine.Substring(filenameIndex + 9).Trim().Trim('"', ';');
+                                        attachmentsList.Add(filename);
+                                    }
+                                    else
+                                    {
+                                        attachmentsList.Add($"Attachment {attachmentsList.Count + 1}");
+                                    }
+                                }
+                            }
+                        }
+                        catch { }
+                    }
+                    
+                    if (attachmentsList.Count == 0)
+                    {
+                        for (int i = 0; i < selectedMessage.AttachmentCount; i++)
+                        {
+                            attachmentsList.Add($"Attachment {i + 1}");
+                        }
+                    }
+                }
+                else
+                {
+                    attachmentsList.Add("No attachments");
+                }
+                attachmentsListView.SetSource(attachmentsList);
 
                 // Raw source tab
                 if (selectedMessage.Data != null)
@@ -364,8 +479,19 @@ namespace Rnwood.Smtp4dev.TUI
             }
             catch (Exception ex)
             {
-                detailsTextView.Text = $"Error loading message details: {ex.Message}";
+                overviewBodyTextView.Text = $"Error loading message details: {ex.Message}";
             }
+        }
+
+        private void SaveAttachment()
+        {
+            if (selectedMessage == null || selectedMessage.AttachmentCount == 0) return;
+            
+            MessageBox.Query("Save Attachment", 
+                "Attachment saving functionality requires access to the message repository.\n\n" +
+                "Currently only viewing is supported in TUI mode.\n" +
+                "Please use the web UI to save attachments.", 
+                "OK");
         }
 
         private void DeleteSelected()

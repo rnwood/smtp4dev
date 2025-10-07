@@ -17,7 +17,7 @@ namespace Rnwood.Smtp4dev.TUI
     public class SessionsTab
     {
         private readonly IHost host;
-        private FrameView container;
+        private View container;
         private ListView sessionListView;
         private TextView logTextView;
         private Label statusLabel;
@@ -28,6 +28,7 @@ namespace Rnwood.Smtp4dev.TUI
         private Session selectedSession;
         private string searchFilter = string.Empty;
         private bool showErrorsOnly = false;
+        private int lastSelectedIndex = -1;
 
         public SessionsTab(IHost host)
         {
@@ -37,8 +38,8 @@ namespace Rnwood.Smtp4dev.TUI
 
         private void CreateUI()
         {
-            // Main container
-            container = new FrameView("Sessions")
+            // Main container (no frame)
+            container = new View()
             {
                 X = 0,
                 Y = 0,
@@ -49,7 +50,7 @@ namespace Rnwood.Smtp4dev.TUI
             // Status label, search field, and filter checkbox at top
             statusLabel = new Label("Loading sessions...")
             {
-                X = 1,
+                X = 0,
                 Y = 0,
                 Width = Dim.Percent(30)
             };
@@ -80,38 +81,22 @@ namespace Rnwood.Smtp4dev.TUI
             
             container.Add(statusLabel, searchLabel, searchField, errorOnlyCheckbox);
 
-            // Left panel - Session list (40% width)
-            var listFrame = new FrameView("Session List")
+            // Left panel - Session list (40% width) - no frame
+            sessionListView = new ListView()
             {
                 X = 0,
                 Y = 1,
                 Width = Dim.Percent(40),
-                Height = Dim.Fill() - 1
-            };
-
-            sessionListView = new ListView()
-            {
-                X = 0,
-                Y = 0,
-                Width = Dim.Fill(),
-                Height = Dim.Fill() - 2,
+                Height = Dim.Fill() - 3,
                 AllowsMarking = false,
                 CanFocus = true
             };
 
             sessionListView.SelectedItemChanged += OnSessionSelected;
 
-            var refreshButton = new Button("Refresh (F5)")
-            {
-                X = 0,
-                Y = Pos.Bottom(sessionListView),
-                Width = 15
-            };
-            refreshButton.Clicked += () => Refresh();
-
             var deleteButton = new Button("Delete")
             {
-                X = Pos.Right(refreshButton) + 1,
+                X = 0,
                 Y = Pos.Bottom(sessionListView),
                 Width = 10
             };
@@ -125,30 +110,20 @@ namespace Rnwood.Smtp4dev.TUI
             };
             deleteAllButton.Clicked += () => DeleteAll();
 
-            listFrame.Add(sessionListView, refreshButton, deleteButton, deleteAllButton);
-            container.Add(listFrame);
+            container.Add(sessionListView, deleteButton, deleteAllButton);
 
-            // Right panel - Session log (60% width)
-            var logFrame = new FrameView("Session Log")
-            {
-                X = Pos.Right(listFrame),
-                Y = 1,
-                Width = Dim.Fill(),
-                Height = Dim.Fill() - 1
-            };
-
+            // Right panel - Session log (60% width) - no frame
             logTextView = new TextView()
             {
-                X = 0,
-                Y = 0,
+                X = Pos.Right(sessionListView) + 1,
+                Y = 1,
                 Width = Dim.Fill(),
-                Height = Dim.Fill(),
+                Height = Dim.Fill() - 1,
                 ReadOnly = true,
                 WordWrap = false
             };
 
-            logFrame.Add(logTextView);
-            container.Add(logFrame);
+            container.Add(logTextView);
 
             // Load initial data
             Refresh();
@@ -161,6 +136,9 @@ namespace Rnwood.Smtp4dev.TUI
 
         public void Refresh()
         {
+            // Save current selection
+            lastSelectedIndex = sessionListView.SelectedItem;
+            
             var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
             sessions = dbContext.Sessions
                 .AsNoTracking()
@@ -196,19 +174,26 @@ namespace Rnwood.Smtp4dev.TUI
             var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
             var sessionStrings = filteredSessions.Select(s =>
             {
-                var status = string.IsNullOrEmpty(s.SessionError) ? "OK" : "ERROR";
+                var errorIndicator = !string.IsNullOrEmpty(s.SessionError) ? "[ERR] " : "      ";
                 var messageCount = dbContext.Messages.Count(m => m.Session.Id == s.Id);
-                return $"{s.StartDate:yyyy-MM-dd HH:mm} | {TruncateString(s.ClientAddress, 20)} | {status} | Msgs: {messageCount}";
+                return $"{errorIndicator}{s.StartDate:yyyy-MM-dd HH:mm} | {TruncateString(s.ClientAddress, 20)} | Msgs: {messageCount}";
             }).ToList();
 
             sessionListView.SetSource(sessionStrings);
             statusLabel.Text = $"Sessions: {filteredSessions.Count}/{sessions.Count}";
+            
+            // Restore selection if possible
+            if (lastSelectedIndex >= 0 && lastSelectedIndex < filteredSessions.Count)
+            {
+                sessionListView.SelectedItem = lastSelectedIndex;
+            }
         }
 
         private void OnSessionSelected(ListViewItemEventArgs args)
         {
             if (args.Item >= 0 && args.Item < filteredSessions.Count)
             {
+                lastSelectedIndex = args.Item;
                 selectedSession = filteredSessions[args.Item];
                 ShowSessionLog();
             }

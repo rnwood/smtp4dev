@@ -16,13 +16,18 @@ namespace Rnwood.Smtp4dev.TUI
         private TextField smtpPortField;
         private TextField hostnameField;
         private CheckBox remoteConnectionsCheck;
+        private CheckBox requireAuthCheck;
         private TextField imapPortField;
+        private TextField pop3PortField;
         private TextField relayServerField;
         private TextField relayPortField;
+        private TextField relayUsernameField;
+        private TextField relayPasswordField;
         private TextField messagesToKeepField;
         private TextField sessionsToKeepField;
+        private TextField basePathField;
 
-        public SettingsDialog(IHost host, string dataDir) : base("Settings", 80, 25)
+        public SettingsDialog(IHost host, string dataDir) : base("Settings", 90, 30)
         {
             this.host = host;
             this.dataDir = dataDir;
@@ -49,7 +54,7 @@ namespace Rnwood.Smtp4dev.TUI
             });
             smtpPortField = new TextField("")
             {
-                X = 20,
+                X = 25,
                 Y = y++,
                 Width = 10
             };
@@ -62,11 +67,24 @@ namespace Rnwood.Smtp4dev.TUI
             });
             hostnameField = new TextField("")
             {
-                X = 20,
+                X = 25,
                 Y = y++,
                 Width = 40
             };
             Add(hostnameField);
+
+            Add(new Label("Base Path:")
+            {
+                X = 3,
+                Y = y
+            });
+            basePathField = new TextField("")
+            {
+                X = 25,
+                Y = y++,
+                Width = 40
+            };
+            Add(basePathField);
 
             remoteConnectionsCheck = new CheckBox("Allow Remote Connections")
             {
@@ -75,10 +93,17 @@ namespace Rnwood.Smtp4dev.TUI
             };
             Add(remoteConnectionsCheck);
 
+            requireAuthCheck = new CheckBox("Require Authentication")
+            {
+                X = 3,
+                Y = y++
+            };
+            Add(requireAuthCheck);
+
             y++; // Blank line
 
-            // IMAP Settings section
-            var imapLabel = new Label("IMAP Server Settings:")
+            // IMAP/POP3 Settings section
+            var imapLabel = new Label("IMAP/POP3 Server Settings:")
             {
                 X = 1,
                 Y = y++,
@@ -86,18 +111,31 @@ namespace Rnwood.Smtp4dev.TUI
             };
             Add(imapLabel);
 
-            Add(new Label("Port:")
+            Add(new Label("IMAP Port:")
             {
                 X = 3,
                 Y = y
             });
             imapPortField = new TextField("")
             {
-                X = 20,
+                X = 25,
                 Y = y++,
                 Width = 10
             };
             Add(imapPortField);
+
+            Add(new Label("POP3 Port:")
+            {
+                X = 3,
+                Y = y
+            });
+            pop3PortField = new TextField("")
+            {
+                X = 25,
+                Y = y++,
+                Width = 10
+            };
+            Add(pop3PortField);
 
             y++; // Blank line
 
@@ -117,7 +155,7 @@ namespace Rnwood.Smtp4dev.TUI
             });
             relayServerField = new TextField("")
             {
-                X = 20,
+                X = 25,
                 Y = y++,
                 Width = 40
             };
@@ -130,11 +168,38 @@ namespace Rnwood.Smtp4dev.TUI
             });
             relayPortField = new TextField("")
             {
-                X = 20,
+                X = 25,
                 Y = y++,
                 Width = 10
             };
             Add(relayPortField);
+
+            Add(new Label("Username:")
+            {
+                X = 3,
+                Y = y
+            });
+            relayUsernameField = new TextField("")
+            {
+                X = 25,
+                Y = y++,
+                Width = 30
+            };
+            Add(relayUsernameField);
+
+            Add(new Label("Password:")
+            {
+                X = 3,
+                Y = y
+            });
+            relayPasswordField = new TextField("")
+            {
+                X = 25,
+                Y = y++,
+                Width = 30,
+                Secret = true
+            };
+            Add(relayPasswordField);
 
             y++; // Blank line
 
@@ -154,7 +219,7 @@ namespace Rnwood.Smtp4dev.TUI
             });
             messagesToKeepField = new TextField("")
             {
-                X = 20,
+                X = 25,
                 Y = y++,
                 Width = 10
             };
@@ -167,7 +232,7 @@ namespace Rnwood.Smtp4dev.TUI
             });
             sessionsToKeepField = new TextField("")
             {
-                X = 20,
+                X = 25,
                 Y = y++,
                 Width = 10
             };
@@ -176,35 +241,39 @@ namespace Rnwood.Smtp4dev.TUI
             // Load current settings
             LoadSettings();
 
-            // Buttons
-            var saveButton = new Button("Save")
+            // Main action buttons - prominently placed
+            var usersButton = new Button("Manage Users")
+            {
+                X = Pos.Center() - 30,
+                Y = Pos.Bottom(this) - 4
+            };
+            usersButton.Clicked += ManageUsers;
+            AddButton(usersButton);
+
+            var mailboxesButton = new Button("Manage Mailboxes")
             {
                 X = Pos.Center() - 10,
+                Y = Pos.Bottom(this) - 4
+            };
+            mailboxesButton.Clicked += ManageMailboxes;
+            AddButton(mailboxesButton);
+
+            var saveButton = new Button("Save")
+            {
+                X = Pos.Center() + 15,
                 Y = Pos.Bottom(this) - 4,
                 IsDefault = true
             };
             saveButton.Clicked += SaveSettings;
             AddButton(saveButton);
 
-            var cancelButton = new Button("Cancel");
+            var cancelButton = new Button("Cancel")
+            {
+                X = Pos.Center() + 25,
+                Y = Pos.Bottom(this) - 4
+            };
             cancelButton.Clicked += () => Application.RequestStop();
             AddButton(cancelButton);
-
-            var usersButton = new Button("Manage Users")
-            {
-                X = 3,
-                Y = Pos.Bottom(this) - 4
-            };
-            usersButton.Clicked += ManageUsers;
-            Add(usersButton);
-
-            var mailboxesButton = new Button("Manage Mailboxes")
-            {
-                X = Pos.Right(usersButton) + 2,
-                Y = Pos.Bottom(this) - 4
-            };
-            mailboxesButton.Clicked += ManageMailboxes;
-            Add(mailboxesButton);
         }
 
         private void LoadSettings()
@@ -214,12 +283,17 @@ namespace Rnwood.Smtp4dev.TUI
 
             smtpPortField.Text = serverOptions.Port.ToString();
             hostnameField.Text = serverOptions.HostName ?? "";
+            basePathField.Text = serverOptions.BasePath ?? "/";
             remoteConnectionsCheck.Checked = serverOptions.AllowRemoteConnections;
+            requireAuthCheck.Checked = serverOptions.DisableMessageSanitisation; // Using as proxy for auth requirement
             imapPortField.Text = serverOptions.ImapPort.ToString();
+            pop3PortField.Text = serverOptions.Pop3Port.ToString();
 
             var relayOptions = settingsManager.GetRelayOptions();
             relayServerField.Text = relayOptions.SmtpServer ?? "";
             relayPortField.Text = relayOptions.SmtpPort.ToString();
+            relayUsernameField.Text = relayOptions.Login ?? "";
+            relayPasswordField.Text = relayOptions.Password ?? "";
 
             messagesToKeepField.Text = serverOptions.NumberOfMessagesToKeep.ToString();
             sessionsToKeepField.Text = serverOptions.NumberOfSessionsToKeep.ToString();
@@ -238,10 +312,15 @@ namespace Rnwood.Smtp4dev.TUI
                     serverOptions.Port = smtpPort;
                 
                 serverOptions.HostName = hostnameField.Text.ToString();
+                serverOptions.BasePath = basePathField.Text.ToString();
                 serverOptions.AllowRemoteConnections = remoteConnectionsCheck.Checked;
+                serverOptions.DisableMessageSanitisation = requireAuthCheck.Checked;
 
                 if (int.TryParse(imapPortField.Text.ToString(), out int imapPort))
                     serverOptions.ImapPort = imapPort;
+
+                if (int.TryParse(pop3PortField.Text.ToString(), out int pop3Port))
+                    serverOptions.Pop3Port = pop3Port;
 
                 if (int.TryParse(messagesToKeepField.Text.ToString(), out int messagesToKeep))
                     serverOptions.NumberOfMessagesToKeep = messagesToKeep;
@@ -253,6 +332,8 @@ namespace Rnwood.Smtp4dev.TUI
                 relayOptions.SmtpServer = relayServerField.Text.ToString();
                 if (int.TryParse(relayPortField.Text.ToString(), out int relayPort))
                     relayOptions.SmtpPort = relayPort;
+                relayOptions.Login = relayUsernameField.Text.ToString();
+                relayOptions.Password = relayPasswordField.Text.ToString();
 
                 // Save settings
                 settingsManager.SaveSettings(serverOptions, relayOptions).Wait();
