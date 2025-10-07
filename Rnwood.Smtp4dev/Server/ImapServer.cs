@@ -65,7 +65,7 @@ namespace Rnwood.Smtp4dev.Server
 
             if (!serverOptions.CurrentValue.ImapPort.HasValue)
             {
-                log.Information("IMAP server disabled");
+                log.Information("IMAP server disabled - no port configured");
                 return;
             }
 
@@ -78,6 +78,7 @@ namespace Rnwood.Smtp4dev.Server
             {
                 if (!System.Net.IPAddress.TryParse(serverOptions.CurrentValue.BindAddress, out bindAddress))
                 {
+                    log.Error("Invalid IMAP bind address configured: {bindAddress}", serverOptions.CurrentValue.BindAddress);
                     throw new ArgumentException($"Invalid bind address: {serverOptions.CurrentValue.BindAddress}");
                 }
             }
@@ -143,11 +144,14 @@ namespace Rnwood.Smtp4dev.Server
 
             if (index == 1)
             {
-                log.Warning("The IMAP server failed to start: {Exception}" + errorTask.Result.Exception.ToString());
+                log.Error(errorTask.Result.Exception, "IMAP server failed to start. Port: {port}, BindAddress: {bindAddress}, ExceptionType: {exceptionType}",
+                    serverOptions.CurrentValue.ImapPort, serverOptions.CurrentValue.BindAddress ?? "Any", 
+                    errorTask.Result.Exception.GetType().Name);
             }
             else if (index == 2)
             {
-                log.Warning("The IMAP server failed to start: Timeout");
+                log.Error("IMAP server failed to start - timeout after 30 seconds. Port: {port}", 
+                    serverOptions.CurrentValue.ImapPort);
 
                 try
                 {
