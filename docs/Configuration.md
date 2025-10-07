@@ -161,4 +161,79 @@ If you want to customize the default mailbox behavior, you can explicitly config
 
 **Regex not working**: Ensure the pattern is surrounded by forward slashes (`/pattern/`) and test the regex with an online regex tester.
 
+## Deliver to Stdout Feature
+
+smtp4dev can output raw message content to stdout for automated processing or testing scenarios. This feature is useful for CI/CD pipelines, automated testing, or integrating with other tools.
+
+### Configuration Options
+
+#### DeliverToStdout
+
+Specifies which mailboxes should have their messages output to stdout:
+
+- **`*`** - Deliver all messages from all mailboxes to stdout
+- **`mailbox1,mailbox2`** - Deliver only messages from specified mailboxes (comma-separated)
+- **Empty string** (default) - Disable stdout delivery
+
+**Command Line**: `--delivertostdout="*"` or `--delivertostdout="Sales,Support"`
+
+**Configuration File**:
+```json
+{
+  "ServerOptions": {
+    "DeliverToStdout": "*"
+  }
+}
+```
+
+#### ExitAfterMessages
+
+Automatically exit the application after delivering a specified number of messages to stdout. Useful for automated testing scenarios.
+
+**Command Line**: `--exitafter=5`
+
+**Configuration File**:
+```json
+{
+  "ServerOptions": {
+    "ExitAfterMessages": 5
+  }
+}
+```
+
+### Message Format
+
+Messages delivered to stdout are wrapped with delimiters to separate multiple messages:
+
+```
+--- BEGIN SMTP4DEV MESSAGE ---
+<raw message content>
+--- END SMTP4DEV MESSAGE ---
+```
+
+### Logging Behavior
+
+When using deliver to stdout, all diagnostic and application logs are automatically redirected to stderr, ensuring stdout contains only message content.
+
+### Example Usage
+
+**Capture all messages and exit after 10:**
+```bash
+smtp4dev --delivertostdout="*" --exitafter=10 --smtpport=2525 > messages.txt 2> logs.txt
+```
+
+**Capture only Sales mailbox messages:**
+```bash
+smtp4dev --mailbox="Sales=*sales*@*" --delivertostdout="Sales" --smtpport=2525 > sales-messages.txt
+```
+
+**Use in CI/CD pipeline:**
+```bash
+# Start smtp4dev in background, send test emails, capture output
+smtp4dev --delivertostdout="*" --exitafter=3 --smtpport=2525 --imapport=0 --pop3port=0 > captured-emails.txt 2>&1 &
+# ... send test emails ...
+# Process captured-emails.txt
+```
+
+
 **Want messages in multiple mailboxes**: This is not supported due to "first match wins" logic. Consider using a single mailbox with multiple recipient patterns instead.

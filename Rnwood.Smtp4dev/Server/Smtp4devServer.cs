@@ -421,6 +421,8 @@ namespace Rnwood.Smtp4dev.Server
                 dbContext.SaveChanges();
 
                 activeSessionsToDbId[e.Session] = dbSession.Id;
+                
+                notificationsHub.OnSessionUpdated(dbSession.Id).Wait();
             }, false).ConfigureAwait(false);
         }
 
@@ -448,6 +450,7 @@ namespace Rnwood.Smtp4dev.Server
 
                 activeSessionsToDbId.Remove(e.Session);
 
+                notificationsHub.OnSessionUpdated(dbSession.Id).Wait();
                 notificationsHub.OnSessionsChanged().Wait();
             }, false).ConfigureAwait(false);
         }
@@ -572,6 +575,28 @@ namespace Rnwood.Smtp4dev.Server
             return targetMailboxesWithMatchedRecipient.ToLookup(t => t.Item1, t=> t.Item2);
         }
 
+        private bool ShouldDeliverToStdout(string mailboxName)
+        {
+            var deliverToStdout = serverOptions.CurrentValue.DeliverToStdout;
+            
+            if (string.IsNullOrWhiteSpace(deliverToStdout))
+            {
+                return false;
+            }
+
+            // If "*", deliver all mailboxes to stdout
+            if (deliverToStdout.Trim() == "*")
+            {
+                return true;
+            }
+
+            // Check if mailbox name is in the comma-separated list
+            var mailboxNames = deliverToStdout.Split(',', StringSplitOptions.RemoveEmptyEntries)
+                .Select(m => m.Trim());
+            
+            return mailboxNames.Contains(mailboxName, StringComparer.OrdinalIgnoreCase);
+        }
+
         void ProcessMessage(Message message, ISession session, IGrouping<MailboxOptions, string> targetMailboxWithRecipients)
         {
             log.Information("Processing received message for mailbox '{mailbox}' for recipients '{recipients}'", targetMailboxWithRecipients.Key.Name, targetMailboxWithRecipients.ToArray());
@@ -621,6 +646,44 @@ namespace Rnwood.Smtp4dev.Server
             notificationsHub.OnMessagesChanged(targetMailboxWithRecipients.Key.Name).Wait();
             log.Information("Message processing completed. MessageId: {messageId}, Mailbox: {mailbox}, ImapUid: {imapUid}", 
                 message.Id, message.Mailbox.Name, message.ImapUid);
+
+            // Deliver to stdout if configured for this mailbox
+            if (ShouldDeliverToStdout(targetMailboxWithRecipients.Key.Name))
+            {
+                lock (stdoutLock)
+                {
+                    // Output the raw message content to stdout
+                    // Use a delimiter that is very unlikely to appear in email messages
+                    Console.WriteLine("--- BEGIN SMTP4DEV MESSAGE ---");
+                    if (message.Data != null)
+                    {
+                        // Write raw message bytes to stdout
+                        using (var stdout = Console.OpenStandardOutput())
+                        {
+                            stdout.Write(message.Data, 0, message.Data.Length);
+                            stdout.Flush();
+                        }
+                        Console.WriteLine(); // Ensure delimiter is on new line
+                    }
+                    Console.WriteLine("--- END SMTP4DEV MESSAGE ---");
+                    Console.Out.Flush();
+
+                    messagesDeliveredToStdoutCount++;
+                    
+                    // Check if we should exit after delivering this message
+                    var exitAfter = serverOptions.CurrentValue.ExitAfterMessages;
+                    if (exitAfter.HasValue && messagesDeliveredToStdoutCount >= exitAfter.Value)
+                    {
+                        log.Information("Delivered {count} messages to stdout. Exiting as configured by ExitAfterMessages.", messagesDeliveredToStdoutCount);
+                        // Schedule application exit on a background thread to allow this method to complete
+                        Task.Run(async () =>
+                        {
+                            await Task.Delay(100); // Give time for logs to flush
+                            Environment.Exit(0);
+                        });
+                    }
+                }
+            }
         }
 
         public RelayResult TryRelayMessage(Message message, MailboxAddress[] overrideRecipients)
@@ -716,6 +779,8 @@ namespace Rnwood.Smtp4dev.Server
         private readonly NotificationsHub notificationsHub;
         private readonly IServiceScopeFactory serviceScopeFactory;
         private Settings.ServerOptions lastStartOptions;
+        private int messagesDeliveredToStdoutCount = 0;
+        private readonly object stdoutLock = new object();
 
         public Exception Exception { get; private set; }
 
