@@ -94,18 +94,18 @@ namespace Rnwood.Smtp4dev.Desktop.Tests
 
                         if (newLine.Contains("Now listening on: http://"))
                         {
-                            int portNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s]+:(\d+)", "$1"));
+                            int portNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s:]+:(\d+)", "$1"));
                             baseUrl = new Uri($"http://localhost:{portNumber}");
                         }
 
                         if (newLine.Contains("SMTP Server is listening on port"))
                         {
-                            smtpPortNumber = int.Parse(Regex.Replace(newLine, @"SMTP Server is listening on port (\d+).*", "$1"));
+                            smtpPortNumber = int.Parse(Regex.Replace(newLine, @".*SMTP Server is listening on port (\d+).*", "$1"));
                         }
 
                         if (newLine.Contains("IMAP Server is listening on port"))
                         {
-                            imapPortNumber = int.Parse(Regex.Replace(newLine, @"IMAP Server is listening on port (\d+).*", "$1"));
+                            imapPortNumber = int.Parse(Regex.Replace(newLine, @".*IMAP Server is listening on port (\d+).*", "$1"));
                         }
 
                         if (newLine.Contains("Application started. Press Ctrl+C to shut down."))
