@@ -175,7 +175,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                         if (newLine.Contains("Now listening on: http://"))
                         {
-                            int internalPortNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s:]+:(\d+)", "$1"));
+                            // Handle both IPv4 (http://localhost:5000) and IPv6 (http://[::]:80) formats
+                            int internalPortNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s]+:(\d+)", "$1"));
                             // For Docker, map internal port 80 to external port 5000
                             int portNumber = (binary == "docker" && internalPortNumber == 80) ? 5000 : internalPortNumber;
                             baseUrl = new Uri($"http://localhost:{portNumber}{options.TestPath ?? options.BasePath ?? ""}");

@@ -94,7 +94,8 @@ namespace Rnwood.Smtp4dev.Desktop.Tests
 
                         if (newLine.Contains("Now listening on: http://"))
                         {
-                            int portNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s:]+:(\d+)", "$1"));
+                            // Handle both IPv4 (http://localhost:5000) and IPv6 (http://[::]:80) formats
+                            int portNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s]+:(\d+)", "$1"));
                             baseUrl = new Uri($"http://localhost:{portNumber}");
                         }
 
