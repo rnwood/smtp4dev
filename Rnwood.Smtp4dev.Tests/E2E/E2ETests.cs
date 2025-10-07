@@ -173,7 +173,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         string newLine = serverOutput.Current;
                         output.WriteLine(newLine);
 
-                        if (newLine.StartsWith("Now listening on: http://"))
+                        if (newLine.Contains("Now listening on: http://"))
                         {
                             int internalPortNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s]+:(\d+)", "$1"));
                             // For Docker, map internal port 80 to external port 5000
@@ -181,21 +181,21 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                             baseUrl = new Uri($"http://localhost:{portNumber}{options.TestPath ?? options.BasePath ?? ""}");
                         }
 
-                        if (newLine.StartsWith("SMTP Server is listening on port"))
+                        if (newLine.Contains("SMTP Server is listening on port"))
                         {
                             int internalSmtpPort = int.Parse(Regex.Replace(newLine, @"SMTP Server is listening on port (\d+).*", "$1"));
                             // For Docker, map internal port 25 to external port 2525
                             smtpPortNumber = (binary == "docker" && internalSmtpPort == 25) ? 2525 : internalSmtpPort;
                         }
 
-                        if (newLine.StartsWith("IMAP Server is listening on port"))
+                        if (newLine.Contains("IMAP Server is listening on port"))
                         {
                             int internalImapPort = int.Parse(Regex.Replace(newLine, @"IMAP Server is listening on port (\d+).*", "$1"));
                             // For Docker, map internal port 143 to external port 1143
                             imapPortNumber = (binary == "docker" && internalImapPort == 143) ? 1143 : internalImapPort;
                         }
 
-                        if (newLine.StartsWith("POP3 Server is listening on port"))
+                        if (newLine.Contains("POP3 Server is listening on port"))
                         {
                             int internalPop3Port = int.Parse(Regex.Replace(newLine, @"POP3 Server is listening on port (\d+).*", "$1"));
                             // For Docker, map internal port 110 to external port 1100
@@ -220,7 +220,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                             }
                         }
 
-                        if (newLine.StartsWith("Application started. Press Ctrl+C to shut down."))
+                        if (newLine.Contains("Application started. Press Ctrl+C to shut down."))
                         {
                             throw new Exception($@"Startup completed but did not catch variables from startup output:
                             baseUrl:{baseUrl}
