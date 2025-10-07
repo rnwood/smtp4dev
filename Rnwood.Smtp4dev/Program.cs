@@ -50,7 +50,18 @@ namespace Rnwood.Smtp4dev
                 }
                 else
                 {
-                    await host.WaitForShutdownAsync();
+                    // Check if we should run TUI mode
+                    var cmdLineOptions = host.Services.GetRequiredService<CommandLineOptions>();
+                    if (cmdLineOptions.UseTui)
+                    {
+                        var dataDir = DirectoryHelper.GetDataDir(cmdLineOptions);
+                        var tuiApp = new Rnwood.Smtp4dev.TUI.TerminalGuiApp(host, dataDir);
+                        tuiApp.Run();
+                    }
+                    else
+                    {
+                        await host.WaitForShutdownAsync();
+                    }
                 }
                 Log.Information("Exiting");
             }
