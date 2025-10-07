@@ -272,9 +272,6 @@ namespace Rnwood.Smtp4dev
 
                 var logConfigBuilder = new LoggerConfiguration()
                     .ReadFrom.Configuration(configuration)
-                    .Enrich.FromLogContext()
-                    .Enrich.WithProcessId()
-                    .Enrich.WithProcessName()
                     .WriteTo.Sink(ServerLogService);
                     
                 if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
