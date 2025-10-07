@@ -406,6 +406,125 @@ public class SmtpTestcontainersTests : IAsyncLifetime
             await smtp4devContainer.DisposeAsync();
         }
     }
+
+## Capturing raw messages via stdout (--delivertostdout)
+
+For CI and automated tests you can have smtp4dev write the raw message bytes it receives to stdout so your test harness can capture and inspect them directly.
+
+How it works
+- Use `--delivertostdout` to specify either `*` (all mailboxes) or a comma-separated list of mailbox names (case-insensitive). The server checks the configured mailbox name for each delivered message and, when matched, writes the message's raw bytes to stdout.
+- Each message written to stdout is wrapped with clear ASCII delimiters to make parsing simple:
+
+```
+--- BEGIN SMTP4DEV MESSAGE ---
+<raw message content (bytes)>
+--- END SMTP4DEV MESSAGE ---
+```
+
+- The server writes the message bytes directly to the stdout stream (so attachments and binary content are preserved). The delimiters are written using normal Console.WriteLine calls.
+- When `--delivertostdout` is used the application logs and diagnostics should be captured from stderr (the default Serilog console configuration writes application logs to stderr), ensuring stdout contains only message content.
+
+Exit after N messages
+- Use `--exitafter=<n>` to make smtp4dev automatically exit once it has delivered `n` messages to stdout. This is intended for short-lived test runs where you start smtp4dev, send test emails, and wait for the process to exit.
+- The server tracks the number of messages written to stdout and, when the configured threshold is reached, schedules an orderly exit (Environment.Exit(0)) after a short delay to allow output to flush.
+
+Important notes and examples
+- `--delivertostdout` accepts `*` or a list of mailbox names: `--delivertostdout="*"` or `--delivertostdout="Sales,Support"`.
+- `--exitafter` only counts messages that were actually delivered to stdout (i.e. matched by `--delivertostdout`).
+- Because the raw bytes are written to stdout, redirect stdout to a file to capture messages and keep stderr for logs:
+
+```powershell
+# Capture all messages and logs separately (Windows PowerShell syntax)
+dotnet run --project Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj --delivertostdout="*" --exitafter=3 --smtpport=2525 --imapport=0 --pop3port=0 > captured-emails.txt 2> logs.txt
+```
+
+- Example for a single mailbox only:
+
+```powershell
+dotnet run --project Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj --mailbox="Sales=*sales*@*" --delivertostdout="Sales" --smtpport=2525 > sales-messages.txt 2> logs.txt
+```
+
+- When parsing the captured file, split on the delimiter lines (`--- BEGIN SMTP4DEV MESSAGE ---` / `--- END SMTP4DEV MESSAGE ---`) to extract each message's raw content.
+- The server uses a short delay before exiting to allow output buffers to flush; exit code will be `0` on normal shutdown triggered by `--exitafter`.
+
+Concurrency and reliability
+- Writing to stdout is synchronized internally to avoid interleaving when multiple messages arrive concurrently.
+- The count used by `--exitafter` is updated under the same lock that writes the message, so the exit threshold is reliable even under concurrent deliveries.
+
+Use cases
+- CI jobs that send a fixed number of test emails and then examine the captured files
+- Scripts that need to extract raw MIME messages for downstream processing or assertions
+
+Parsing captured output
+-----------------------
+
+Here are a few small examples that show how to remove the delimiters and split the captured output into individual raw messages. Each example writes each message to a separate `.eml` file.
+
+PowerShell (simple, text-oriented):
+
+```powershell
+# Reads the captured file as text and splits on the begin delimiter.
+$content = Get-Content -Raw -Encoding UTF8 'captured-emails.txt'
+$parts = $content -split '--- BEGIN SMTP4DEV MESSAGE ---' | Where-Object { $_.Trim() -ne '' }
+$i = 1
+foreach ($part in $parts) {
+    $msg = ($part -split '--- END SMTP4DEV MESSAGE ---')[0].TrimStart("`r`n")
+    [System.IO.File]::WriteAllText("message_$i.eml", $msg, [System.Text.Encoding]::UTF8)
+    $i++
+}
+
+# Note: this approach treats the captured file as UTF-8 text. For fully binary-safe handling use the Python or Node.js examples below.
+```
+
+Python (binary-safe):
+
+```python
+begin = b"--- BEGIN SMTP4DEV MESSAGE ---\n"
+end = b"--- END SMTP4DEV MESSAGE ---\n"
+
+with open('captured-emails.txt', 'rb') as f:
+    data = f.read()
+
+messages = []
+start = 0
+while True:
+    i = data.find(begin, start)
+    if i == -1:
+        break
+    j = data.find(end, i + len(begin))
+    if j == -1:
+        break
+    msg = data[i + len(begin):j]
+    messages.append(msg)
+    start = j + len(end)
+
+for idx, msg in enumerate(messages, start=1):
+    with open(f'message_{idx}.eml', 'wb') as out:
+        out.write(msg)
+```
+
+Node.js (binary-safe):
+
+```javascript
+const fs = require('fs');
+const begin = Buffer.from('--- BEGIN SMTP4DEV MESSAGE ---\n');
+const end = Buffer.from('--- END SMTP4DEV MESSAGE ---\n');
+const data = fs.readFileSync('captured-emails.txt');
+
+let start = 0;
+let idx = 1;
+while (true) {
+  const i = data.indexOf(begin, start);
+  if (i === -1) break;
+  const j = data.indexOf(end, i + begin.length);
+  if (j === -1) break;
+  const msg = data.slice(i + begin.length, j);
+  fs.writeFileSync(`message_${idx}.eml`, msg);
+  idx++;
+  start = j + end.length;
+}
+```
+
 }
 ```
 
