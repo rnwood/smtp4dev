@@ -77,5 +77,9 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public bool? DisableHtmlCompatibilityCheck { get; set; }
 
         public long? MaxMessageSize { get; set; }
+
+        public string DeliverToStdout { get; set; }
+
+        public int? ExitAfterMessages { get; set; }
     }
 }
