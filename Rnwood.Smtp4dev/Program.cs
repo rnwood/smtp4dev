@@ -183,7 +183,7 @@ namespace Rnwood.Smtp4dev
 
                         if (cmdLineOptions.DebugSettings)
                         {
-                            Console.WriteLine(JsonSerializer.Serialize(new SettingsDebugInfo
+                            Console.Error.WriteLine(JsonSerializer.Serialize(new SettingsDebugInfo
                             {
                                 CmdLineArgs = Environment.GetCommandLineArgs(),
                                 CmdLineOptions = cmdLineOptions,
