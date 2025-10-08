@@ -37,11 +37,15 @@ namespace Rnwood.Smtp4dev.TUI
 
             try
             {
-                // Set default theme to Base (more modern look)
+                // Set default theme to Base with improved focus visibility
                 Colors.Base.Normal = Application.Driver.MakeAttribute(Color.White, Color.Black);
-                Colors.Base.Focus = Application.Driver.MakeAttribute(Color.Black, Color.Cyan);
+                Colors.Base.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
                 Colors.Base.HotNormal = Application.Driver.MakeAttribute(Color.BrightCyan, Color.Black);
-                Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightBlue, Color.Cyan);
+                Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightYellow, Color.BrightCyan);
+                
+                // Improve TextView contrast
+                Colors.TopLevel.Normal = Application.Driver.MakeAttribute(Color.White, Color.Black);
+                Colors.TopLevel.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
 
                 // Create tab view directly (no outer window frame)
                 tabView = new TabView()
@@ -153,21 +157,27 @@ namespace Rnwood.Smtp4dev.TUI
                 {
                     case 0: // Base
                         Colors.Base.Normal = Application.Driver.MakeAttribute(Color.White, Color.Black);
-                        Colors.Base.Focus = Application.Driver.MakeAttribute(Color.Black, Color.Cyan);
+                        Colors.Base.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
                         Colors.Base.HotNormal = Application.Driver.MakeAttribute(Color.BrightCyan, Color.Black);
-                        Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightBlue, Color.Cyan);
+                        Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightYellow, Color.BrightCyan);
+                        Colors.TopLevel.Normal = Application.Driver.MakeAttribute(Color.White, Color.Black);
+                        Colors.TopLevel.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
                         break;
                     case 1: // Dark
                         Colors.Base.Normal = Application.Driver.MakeAttribute(Color.BrightGreen, Color.Black);
-                        Colors.Base.Focus = Application.Driver.MakeAttribute(Color.Black, Color.Green);
+                        Colors.Base.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightGreen);
                         Colors.Base.HotNormal = Application.Driver.MakeAttribute(Color.BrightYellow, Color.Black);
-                        Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightYellow, Color.Green);
+                        Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightYellow, Color.BrightGreen);
+                        Colors.TopLevel.Normal = Application.Driver.MakeAttribute(Color.BrightGreen, Color.Black);
+                        Colors.TopLevel.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightGreen);
                         break;
                     case 2: // Light
                         Colors.Base.Normal = Application.Driver.MakeAttribute(Color.Black, Color.Gray);
-                        Colors.Base.Focus = Application.Driver.MakeAttribute(Color.White, Color.Blue);
-                        Colors.Base.HotNormal = Application.Driver.MakeAttribute(Color.Blue, Color.Gray);
-                        Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightCyan, Color.Blue);
+                        Colors.Base.Focus = Application.Driver.MakeAttribute(Color.White, Color.BrightBlue);
+                        Colors.Base.HotNormal = Application.Driver.MakeAttribute(Color.BrightBlue, Color.Gray);
+                        Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightYellow, Color.BrightBlue);
+                        Colors.TopLevel.Normal = Application.Driver.MakeAttribute(Color.Black, Color.Gray);
+                        Colors.TopLevel.Focus = Application.Driver.MakeAttribute(Color.White, Color.BrightBlue);
                         break;
                 }
                 Application.Top.SetNeedsDisplay();
