@@ -641,12 +641,18 @@ namespace Rnwood.Smtp4dev.TUI
         {
             var usersDialog = new UsersDialog(host, dataDir);
             Application.Run(usersDialog);
+            
+            // Reload settings after the subdialog closes to reflect any changes
+            LoadSettings();
         }
 
         private void ManageMailboxes()
         {
             var mailboxesDialog = new MailboxesDialog(host, dataDir);
             Application.Run(mailboxesDialog);
+            
+            // Reload settings after the subdialog closes to reflect any changes
+            LoadSettings();
         }
     }
 }
