@@ -54,6 +54,9 @@ namespace Rnwood.Smtp4dev
                     var cmdLineOptions = host.Services.GetRequiredService<CommandLineOptions>();
                     if (cmdLineOptions.UseTui)
                     {
+                        // Show splash screen
+                        Rnwood.Smtp4dev.TUI.SplashScreen.Show(2000);
+                        
                         var dataDir = DirectoryHelper.GetDataDir(cmdLineOptions);
                         var tuiApp = new Rnwood.Smtp4dev.TUI.TerminalGuiApp(host, dataDir);
                         tuiApp.Run();
