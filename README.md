@@ -7,6 +7,7 @@ smtp4dev support many advanced features:
 - OpenAPI/Swagger API
 - IMAP and POP3 access to retrieve and delete messages
 - SMTP session logging
+- **Terminal User Interface (TUI) mode with full functionality**
 - UTF8 support
 - Viewport size switcher to simulate mobile etc
 - Multipart MIME inspector
@@ -26,6 +27,7 @@ There are several fake SMTP servers available for development and testing. Here'
 | Feature | smtp4dev | MailHog¹ | MailCatcher² | MailDev³ | FakeSMTP⁴ |
 |---------|----------|----------|-------------|---------|-----------|
 | **Web Interface** | ✅ Advanced | ✅ Basic | ✅ Basic | ✅ Basic | ❌ Desktop GUI |
+| **Terminal UI (TUI)** | ✅ Full-featured | ❌ | ❌ | ❌ | ❌ |
 | **SMTP Server** | ✅ | ✅ | ✅ | ✅ | ✅ |
 | **IMAP Server** | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **API (REST/OpenAPI)** | ✅ Swagger docs | ✅ Basic⁵ | ✅ RESTful⁶ | ✅ Basic⁷ | ❌ |
