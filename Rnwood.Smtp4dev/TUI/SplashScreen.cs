@@ -1,5 +1,5 @@
 using System;
-using System.Threading;
+using System.Threading.Tasks;
 using Terminal.Gui;
 
 namespace Rnwood.Smtp4dev.TUI
@@ -21,49 +21,46 @@ namespace Rnwood.Smtp4dev.TUI
                             Version 3.x
 ";
 
+        /// <summary>
+        /// Shows a splash screen as a modal dialog within an existing Application context
+        /// </summary>
+        /// <param name="durationMs">Duration to show the splash in milliseconds</param>
         public static void Show(int durationMs = 2000)
         {
-            Application.Init();
-
-            try
+            var dialog = new Dialog("smtp4dev", 80, 15)
             {
-                var win = new Window("smtp4dev")
+                Border = new Border()
                 {
-                    X = 0,
-                    Y = 0,
-                    Width = Dim.Fill(),
-                    Height = Dim.Fill()
-                };
+                    BorderStyle = BorderStyle.Double
+                }
+            };
 
-                // Create a label with the logo centered
-                var logoLabel = new Label(Logo)
-                {
-                    X = Pos.Center(),
-                    Y = Pos.Center() - 5,
-                    ColorScheme = Colors.Base
-                };
-
-                win.Add(logoLabel);
-
-                var loadingLabel = new Label("Loading...")
-                {
-                    X = Pos.Center(),
-                    Y = Pos.Center() + 5,
-                    ColorScheme = Colors.Base
-                };
-
-                win.Add(loadingLabel);
-
-                Application.Top.Add(win);
-                Application.Refresh();
-
-                // Show splash for specified duration
-                Thread.Sleep(durationMs);
-            }
-            finally
+            // Create a label with the logo centered
+            var logoLabel = new Label(Logo)
             {
-                Application.Shutdown();
-            }
+                X = Pos.Center(),
+                Y = 0,
+                TextAlignment = TextAlignment.Centered
+            };
+
+            dialog.Add(logoLabel);
+
+            var loadingLabel = new Label("Loading...")
+            {
+                X = Pos.Center(),
+                Y = Pos.Bottom(dialog) - 3,
+                TextAlignment = TextAlignment.Centered
+            };
+
+            dialog.Add(loadingLabel);
+
+            // Use a timeout to auto-close the splash
+            var timeout = Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(durationMs), (_) => {
+                Application.RequestStop();
+                return false;
+            });
+
+            Application.Run(dialog);
         }
     }
 }
