@@ -38,10 +38,20 @@ namespace Rnwood.Smtp4dev
         private static ILogger _log;
         public static Service.ServerLogService ServerLogService { get; private set; }
 
+        public const string Reset = "\u001b[0m";
+        public const string Bold = "\u001b[1m";
+        public const string White = "\u001b[37m";
+        public const string Blue = "\u001b[34m";
+        public const string Yellow = "\u001b[33m";
+
         public static async Task Main(string[] args)
         {
             try
             {
+
+
+
+
                 var host = await StartApp(args, false, null);
 
                 if (host == null)
@@ -94,6 +104,22 @@ namespace Rnwood.Smtp4dev
             _log = Log.ForContext<Program>();
 
             string version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+
+
+            string[] envelope = [
+        $"{Blue}┌────────────.{Reset}",
+            $"{Blue}|\\          / \\{Reset}    {Yellow}version {version}",
+            $"{Blue}| \\        /   \\{Reset}   {Yellow}https://github.com/rnwood/smtp4dev",
+            $"{Blue}|  {Bold}{White}smtp4dev{Reset}{Blue}    /{Reset}  {Yellow}{System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}",
+            $"{Blue}|             /{Reset}",
+            $"{Blue}└────────────'{Reset}",
+        $"{Reset}" ];
+            foreach (var line in envelope)
+            {
+                Console.Error.WriteLine(line);
+            }
+
+
             _log.Information("smtp4dev version {version}", version);
             _log.Information("https://github.com/rnwood/smtp4dev");
             _log.Information(".NET Core runtime version: {netcoreruntime}", System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription);
@@ -187,7 +213,7 @@ namespace Rnwood.Smtp4dev
                         var env = hostingContext.HostingEnvironment;
 
                         configBuilder.Sources.Clear();
-                        foreach(var source in cb.Sources)
+                        foreach (var source in cb.Sources)
                         {
                             configBuilder.Sources.Add(source);
                         }
@@ -199,7 +225,7 @@ namespace Rnwood.Smtp4dev
                             {
                                 CmdLineArgs = Environment.GetCommandLineArgs(),
                                 CmdLineOptions = cmdLineOptions,
-                                Sources = cb.Sources.Select( s=>
+                                Sources = cb.Sources.Select(s =>
                                 {
                                     var source = new ConfigurationBuilder().Add(s).Build();
 
@@ -229,7 +255,7 @@ namespace Rnwood.Smtp4dev
                 c.UseStartup<Startup>();
                 c.UseShutdownTimeout(TimeSpan.FromSeconds(10));
 
-                
+
                 ServerOptions serverOptions = config.GetSection("ServerOptions").Get<ServerOptions>();
 
                 if (!string.IsNullOrEmpty(cmdLineOptions.Urls))
@@ -253,7 +279,7 @@ namespace Rnwood.Smtp4dev
             });
 
             builder.UseWindowsService(s => s.ServiceName = "smtp4dev");
-        
+
 
 
 
@@ -340,11 +366,12 @@ namespace Rnwood.Smtp4dev
         public RelayOptions RelayOption { get; set; }
         public DesktopOptions DesktopOptions { get; set; }
     }
-    
 
-        [JsonSourceGenerationOptions(WriteIndented = true)]
+
+    [JsonSourceGenerationOptions(WriteIndented = true)]
     [JsonSerializable(typeof(SettingsDebugInfo))]
-    internal partial class SettingsDebugInfoSerializationContext : JsonSerializerContext {
+    internal partial class SettingsDebugInfoSerializationContext : JsonSerializerContext
+    {
 
     }
 }
