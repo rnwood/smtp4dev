@@ -16,12 +16,14 @@ namespace Rnwood.Smtp4dev.TUI
         private readonly string dataDir;
         private ListView userListView;
         private SettingsManager settingsManager;
+        private ServerOptions serverOptions;
 
         public UsersDialog(IHost host, string dataDir) : base("Manage Users", 60, 20)
         {
             this.host = host;
             this.dataDir = dataDir;
             this.settingsManager = new SettingsManager(host, dataDir);
+            this.serverOptions = settingsManager.GetServerOptions();
             CreateUI();
         }
 
@@ -65,7 +67,6 @@ namespace Rnwood.Smtp4dev.TUI
 
         private void RefreshList()
         {
-            var serverOptions = settingsManager.GetServerOptions();
             var users = serverOptions.Users?.Select(u => u.Username).ToList() ?? new System.Collections.Generic.List<string>();
             userListView.SetSource(users);
         }
@@ -89,7 +90,6 @@ namespace Rnwood.Smtp4dev.TUI
 
                 if (!string.IsNullOrWhiteSpace(username) && !string.IsNullOrWhiteSpace(password))
                 {
-                    var serverOptions = settingsManager.GetServerOptions();
                     var usersList = serverOptions.Users?.ToList() ?? new List<UserOptions>();
                     
                     usersList.Add(new UserOptions
@@ -99,7 +99,6 @@ namespace Rnwood.Smtp4dev.TUI
                     });
 
                     serverOptions.Users = usersList.ToArray();
-                    settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
                     RefreshList();
                     Application.RequestStop();
                 }
@@ -121,7 +120,6 @@ namespace Rnwood.Smtp4dev.TUI
         {
             if (userListView.SelectedItem >= 0)
             {
-                var serverOptions = settingsManager.GetServerOptions();
                 if (serverOptions.Users != null && userListView.SelectedItem < serverOptions.Users.Length)
                 {
                     var username = serverOptions.Users[userListView.SelectedItem].Username;
@@ -134,7 +132,6 @@ namespace Rnwood.Smtp4dev.TUI
                         var usersList = serverOptions.Users.ToList();
                         usersList.RemoveAt(userListView.SelectedItem);
                         serverOptions.Users = usersList.ToArray();
-                        settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
                         RefreshList();
                     }
                 }
@@ -151,12 +148,14 @@ namespace Rnwood.Smtp4dev.TUI
         private readonly string dataDir;
         private ListView mailboxListView;
         private SettingsManager settingsManager;
+        private ServerOptions serverOptions;
 
         public MailboxesDialog(IHost host, string dataDir) : base("Manage Mailboxes", 60, 20)
         {
             this.host = host;
             this.dataDir = dataDir;
             this.settingsManager = new SettingsManager(host, dataDir);
+            this.serverOptions = settingsManager.GetServerOptions();
             CreateUI();
         }
 
@@ -200,7 +199,6 @@ namespace Rnwood.Smtp4dev.TUI
 
         private void RefreshList()
         {
-            var serverOptions = settingsManager.GetServerOptions();
             var mailboxes = serverOptions.Mailboxes?.Select(m => $"{m.Name} ({m.Recipients})").ToList() 
                 ?? new System.Collections.Generic.List<string>();
             mailboxListView.SetSource(mailboxes);
@@ -225,7 +223,6 @@ namespace Rnwood.Smtp4dev.TUI
 
                 if (!string.IsNullOrWhiteSpace(name) && !string.IsNullOrWhiteSpace(pattern))
                 {
-                    var serverOptions = settingsManager.GetServerOptions();
                     var mailboxesList = serverOptions.Mailboxes?.ToList() ?? new List<MailboxOptions>();
                     
                     mailboxesList.Add(new MailboxOptions
@@ -235,8 +232,6 @@ namespace Rnwood.Smtp4dev.TUI
                     });
 
                     serverOptions.Mailboxes = mailboxesList.ToArray();
-
-                    settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
                     RefreshList();
                     Application.RequestStop();
                 }
@@ -258,7 +253,6 @@ namespace Rnwood.Smtp4dev.TUI
         {
             if (mailboxListView.SelectedItem >= 0)
             {
-                var serverOptions = settingsManager.GetServerOptions();
                 if (serverOptions.Mailboxes != null && mailboxListView.SelectedItem < serverOptions.Mailboxes.Length)
                 {
                     var mailbox = serverOptions.Mailboxes[mailboxListView.SelectedItem];
@@ -271,7 +265,6 @@ namespace Rnwood.Smtp4dev.TUI
                         var mailboxesList = serverOptions.Mailboxes.ToList();
                         mailboxesList.RemoveAt(mailboxListView.SelectedItem);
                         serverOptions.Mailboxes = mailboxesList.ToArray();
-                        settingsManager.SaveSettings(serverOptions, settingsManager.GetRelayOptions()).Wait();
                         RefreshList();
                     }
                 }
