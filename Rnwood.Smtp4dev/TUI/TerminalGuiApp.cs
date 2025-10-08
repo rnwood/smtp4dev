@@ -37,6 +37,9 @@ namespace Rnwood.Smtp4dev.TUI
 
             try
             {
+                // Show splash screen first
+                SplashScreen.Show(2000);
+                
                 // Set default theme to Base with improved focus visibility
                 Colors.Base.Normal = Application.Driver.MakeAttribute(Color.White, Color.Black);
                 Colors.Base.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
