@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 using System.Net;
@@ -22,6 +23,7 @@ using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.Service;
 using Serilog;
 using System.Linq;
+using System.Net.Security;
 using Microsoft.Data.Sqlite;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.AspNetCore.Http;
@@ -235,6 +237,24 @@ namespace Rnwood.Smtp4dev
                 }
 
                 SmtpClient result = new SmtpClient();
+#if NET5_0_OR_GREATER
+                if (relayOptions.SslCipherSuitesPolicy.Length > 0)
+                {
+                    try
+                    {
+                        var suites = new List<TlsCipherSuite>(relayOptions.SslCipherSuitesPolicy.Length);
+                        foreach (var suite in relayOptions.SslCipherSuitesPolicy)
+                        {
+                            suites.Add(Enum.Parse<TlsCipherSuite>(suite));
+                        }
+
+                        result.SslCipherSuitesPolicy = new CipherSuitesPolicy(suites.ToArray());
+                    } catch (PlatformNotSupportedException e)
+                    {
+                        Log.Logger.Warning("Ssl cipher suites policy is not supported on this platform: {exception}", e);
+                    }
+                }
+#endif
                 result.Connect(relayOptions.SmtpServer, relayOptions.SmtpPort, relayOptions.TlsMode);
 
                 if (!string.IsNullOrEmpty(relayOptions.Login))
