@@ -255,6 +255,7 @@ namespace Rnwood.Smtp4dev
                     }
                 }
 #endif
+                result.CheckCertificateRevocation = relayOptions.CheckCertificateRevocation;
                 result.Connect(relayOptions.SmtpServer, relayOptions.SmtpPort, relayOptions.TlsMode);
 
                 if (!string.IsNullOrEmpty(relayOptions.Login))

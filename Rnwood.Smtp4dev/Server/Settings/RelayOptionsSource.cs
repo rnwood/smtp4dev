@@ -20,6 +20,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
         
         public string[] SslCipherSuitesPolicy { get; set; } = System.Array.Empty<string>();
 
+        public bool CheckCertificateRevocation { get; set; } = true;
+        
         public string[] AutomaticEmails { get; set; } = System.Array.Empty<string>();
 
         public string AutomaticRelayExpression { get; set; }
