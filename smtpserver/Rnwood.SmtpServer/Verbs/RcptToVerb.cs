@@ -4,7 +4,6 @@
 // </copyright>
 
 using System;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace Rnwood.SmtpServer.Verbs;
@@ -26,8 +25,7 @@ public class RcptToVerb : IVerb
         }
 
         if (command.ArgumentsText == "<>" || !command.ArgumentsText.StartsWith("<", StringComparison.Ordinal) ||
-            !command.ArgumentsText.EndsWith(">", StringComparison.Ordinal) ||
-            command.ArgumentsText.Count(c => c == '<') != command.ArgumentsText.Count(c => c == '>'))
+            !command.ArgumentsText.EndsWith(">", StringComparison.Ordinal))
         {
             await connection.WriteResponse(
                 new SmtpResponse(

@@ -39,14 +39,13 @@ public class RcptToVerbTests
     public async Task EmptyAddress_ReturnsError() => await TestBadAddressAsync("<>");
 
     /// <summary>
-    ///     The MismatchedBraket_ReturnsError
+    ///     The MissingClosingBracket_ReturnsError
     /// </summary>
     /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
     [Fact]
-    public async Task MismatchedBraket_ReturnsError()
+    public async Task MissingClosingBracket_ReturnsError()
     {
         await TestBadAddressAsync("<rob@rnwood.co.uk");
-        await TestBadAddressAsync("<Robert Wood<rob@rnwood.co.uk>");
     }
 
     /// <summary>
@@ -148,20 +147,17 @@ public class RcptToVerbTests
     }
 
     /// <summary>
-    ///     RFC 5321 - Test edge case with bracket validation logic
+    ///     Test edge cases for bracket validation - only checks starts with &lt; and ends with &gt;
     /// </summary>
     [Fact]
     public async Task Process_BracketValidation_WorksAsImplemented()
     {
-        // These should be rejected due to unequal bracket counts
+        // These should be rejected due to missing opening or closing bracket
         await TestBadAddressAsync("<test@example.com");
         await TestBadAddressAsync("test@example.com>");
-        await TestBadAddressAsync("<<<test@example.com>");
         
-        // These have equal bracket counts but are still parsed (implementation behavior)
-        // The current implementation only checks that < count == > count
-        // Then removes first character and everything from position (length-2) to end
-        // For "<<test@example.com>>": removes first '<' and last '>', leaving "<test@example.com>"
+        // These have nested brackets but are accepted because they start with < and end with >
+        await TestGoodAddressAsync("<<<test@example.com>>>", "<<test@example.com>>");
         await TestGoodAddressAsync("<<test@example.com>>", "<test@example.com>");
     }
 
