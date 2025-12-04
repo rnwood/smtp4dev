@@ -20,6 +20,23 @@
                 "ASPNETCORE_URLS": "http://localhost:5000"
             }
         },
+     {
+            "name": ".NET Core Launch (TUI)",
+            "type": "coreclr",
+            "request": "launch",
+            // If you have changed target frameworks, make sure to update the program path.
+            "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/net8.0/Rnwood.Smtp4dev.dll",
+            "cwd": "${workspaceFolder}/Rnwood.Smtp4dev",
+            "args": ["--recreatedb", "--urls", "http://localhost:5000", "--debugsettings", "--tui"],
+            "stopAtEntry": false,
+            "internalConsoleOptions": "openOnSessionStart",
+            "console": "externalTerminal",
+            "preLaunchTask": "build Rnwood.Smtp4dev",
+            "env": {
+                "ASPNETCORE_ENVIRONMENT": "Development",
+                "ASPNETCORE_URLS": "http://localhost:5000"
+            }
+        },
         {
             "name": "Attach to .NET Core",
             "type": "coreclr",

@@ -19,7 +19,7 @@ namespace Rnwood.Smtp4dev.TUI
     {
         private readonly IHost host;
         private View container;
-        private ListView messageListView;
+        private TableView messageTableView;
         private View detailsPanel;
         private TextView overviewBodyTextView;
         private TableView headersTableView;
@@ -32,7 +32,7 @@ namespace Rnwood.Smtp4dev.TUI
         private List<Message> filteredMessages = new List<Message>();
         private Message selectedMessage;
         private string searchFilter = string.Empty;
-        private int lastSelectedIndex = -1;
+        private int lastSelectedRow = -1;
 
         public MessagesTab(IHost host)
         {
@@ -51,47 +51,67 @@ namespace Rnwood.Smtp4dev.TUI
                 Height = Dim.Fill()
             };
 
-            // Status label and search field at top
+            // Status label at top
             statusLabel = new Label("Loading messages...")
             {
                 X = 0,
                 Y = 0,
-                Width = Dim.Percent(50)
+                Width = Dim.Fill()
             };
             
+            container.Add(statusLabel);
+
+            // Left panel - Message table (40% width) - no frame
+            messageTableView = new TableView()
+            {
+                X = 0,
+                Y = 1,
+                Width = Dim.Percent(40),
+                Height = Dim.Fill() - 4,
+                FullRowSelect = true
+            };
+
+            // Setup table columns
+            var table = new DataTable();
+            table.Columns.Add("Unread", typeof(string)); // Unread indicator
+            table.Columns.Add("Date", typeof(string));
+            table.Columns.Add("From", typeof(string));
+            table.Columns.Add("Subject", typeof(string));
+            messageTableView.Table = table;
+            
+            messageTableView.SelectedCellChanged += OnMessageSelected;
+            messageTableView.KeyPress += (e) => {
+                if (e.KeyEvent.Key == Key.DeleteChar || e.KeyEvent.Key == Key.Backspace)
+                {
+                    DeleteSelected();
+                    e.Handled = true;
+                }
+            };
+
+            container.Add(messageTableView);
+
+            // Search box below the list
             var searchLabel = new Label("Search:")
             {
-                X = Pos.Right(statusLabel) + 2,
-                Y = 0
+                X = 0,
+                Y = Pos.Bottom(messageTableView)
             };
             
             searchField = new TextField("")
             {
                 X = Pos.Right(searchLabel) + 1,
-                Y = 0,
-                Width = Dim.Fill() - 1
+                Y = Pos.Bottom(messageTableView),
+                Width = Dim.Fill() - 10
             };
             searchField.TextChanged += (old) => ApplyFilter();
-            
-            container.Add(statusLabel, searchLabel, searchField);
 
-            // Left panel - Message list (40% width) - no frame
-            messageListView = new ListView()
-            {
-                X = 0,
-                Y = 1,
-                Width = Dim.Percent(40),
-                Height = Dim.Fill() - 3,
-                AllowsMarking = false,
-                CanFocus = true
-            };
+            container.Add(searchLabel, searchField);
 
-            messageListView.SelectedItemChanged += OnMessageSelected;
-
+            // Action buttons below search
             var deleteButton = new Button("Delete")
             {
                 X = 0,
-                Y = Pos.Bottom(messageListView),
+                Y = Pos.Bottom(searchField),
                 Width = 10
             };
             deleteButton.Clicked += () => DeleteSelected();
@@ -99,7 +119,7 @@ namespace Rnwood.Smtp4dev.TUI
             var deleteAllButton = new Button("Delete All")
             {
                 X = Pos.Right(deleteButton) + 1,
-                Y = Pos.Bottom(messageListView),
+                Y = Pos.Bottom(searchField),
                 Width = 12
             };
             deleteAllButton.Clicked += () => DeleteAll();
@@ -107,17 +127,17 @@ namespace Rnwood.Smtp4dev.TUI
             var composeButton = new Button("Compose")
             {
                 X = Pos.Right(deleteAllButton) + 1,
-                Y = Pos.Bottom(messageListView),
+                Y = Pos.Bottom(searchField),
                 Width = 10
             };
             composeButton.Clicked += () => ComposeMessage();
 
-            container.Add(messageListView, deleteButton, deleteAllButton, composeButton);
+            container.Add(deleteButton, deleteAllButton, composeButton);
 
             // Right panel - Message details (60% width) - no frame
             detailsPanel = new View()
             {
-                X = Pos.Right(messageListView) + 1,
+                X = Pos.Right(messageTableView) + 1,
                 Y = 1,
                 Width = Dim.Fill(),
                 Height = Dim.Fill() - 1
@@ -253,7 +273,10 @@ namespace Rnwood.Smtp4dev.TUI
         public void Refresh()
         {
             // Save current selection
-            lastSelectedIndex = messageListView.SelectedItem;
+            if (messageTableView.Table != null && messageTableView.SelectedRow >= 0)
+            {
+                lastSelectedRow = messageTableView.SelectedRow;
+            }
             
             var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
             messages = dbContext.Messages
@@ -282,28 +305,39 @@ namespace Rnwood.Smtp4dev.TUI
                 ).ToList();
             }
 
-            var messageStrings = filteredMessages.Select(m => 
-            {
-                var unreadIndicator = m.IsUnread ? "* " : "  ";
-                return $"{unreadIndicator}{m.ReceivedDate:yyyy-MM-dd HH:mm} | {TruncateString(m.From ?? "", 20)} | {TruncateString(m.Subject ?? "", 35)}";
-            }).ToList();
+            var table = new DataTable();
+            table.Columns.Add(" ", typeof(string)); // Unread indicator
+            table.Columns.Add("Date", typeof(string));
+            table.Columns.Add("From", typeof(string));
+            table.Columns.Add("Subject", typeof(string));
 
-            messageListView.SetSource(messageStrings);
+            foreach (var message in filteredMessages)
+            {
+                table.Rows.Add(
+                    message.IsUnread ? "*" : " ",
+                    message.ReceivedDate.ToString("yyyy-MM-dd HH:mm"),
+                    TruncateString(message.From ?? "", 20),
+                    TruncateString(message.Subject ?? "", 35)
+                );
+            }
+
+            messageTableView.Table = table;
+            
             statusLabel.Text = $"Messages: {filteredMessages.Count}/{messages.Count}";
             
             // Restore selection if possible
-            if (lastSelectedIndex >= 0 && lastSelectedIndex < filteredMessages.Count)
+            if (lastSelectedRow >= 0 && lastSelectedRow < filteredMessages.Count)
             {
-                messageListView.SelectedItem = lastSelectedIndex;
+                messageTableView.SelectedRow = lastSelectedRow;
             }
         }
 
-        private void OnMessageSelected(ListViewItemEventArgs args)
+        private void OnMessageSelected(TableView.SelectedCellChangedEventArgs args)
         {
-            if (args.Item >= 0 && args.Item < filteredMessages.Count)
+            if (args.NewRow >= 0 && args.NewRow < filteredMessages.Count)
             {
-                lastSelectedIndex = args.Item;
-                selectedMessage = filteredMessages[args.Item];
+                lastSelectedRow = args.NewRow;
+                selectedMessage = filteredMessages[args.NewRow];
                 ShowMessageDetails();
             }
         }

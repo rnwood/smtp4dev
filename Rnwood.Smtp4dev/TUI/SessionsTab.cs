@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Data;
 using System.Linq;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
@@ -18,7 +19,7 @@ namespace Rnwood.Smtp4dev.TUI
     {
         private readonly IHost host;
         private View container;
-        private ListView sessionListView;
+        private TableView sessionTableView;
         private TextView logTextView;
         private Label statusLabel;
         private TextField searchField;
@@ -28,7 +29,7 @@ namespace Rnwood.Smtp4dev.TUI
         private Session selectedSession;
         private string searchFilter = string.Empty;
         private bool showErrorsOnly = false;
-        private int lastSelectedIndex = -1;
+        private int lastSelectedRow = -1;
 
         public SessionsTab(IHost host)
         {
@@ -47,24 +48,56 @@ namespace Rnwood.Smtp4dev.TUI
                 Height = Dim.Fill()
             };
 
-            // Status label, search field, and filter checkbox at top
+            // Status label at top
             statusLabel = new Label("Loading sessions...")
             {
                 X = 0,
                 Y = 0,
-                Width = Dim.Percent(30)
+                Width = Dim.Fill()
             };
             
+            container.Add(statusLabel);
+
+            // Left panel - Session table (40% width) - no frame
+            sessionTableView = new TableView()
+            {
+                X = 0,
+                Y = 1,
+                Width = Dim.Percent(40),
+                Height = Dim.Fill() - 5,
+                FullRowSelect = true
+            };
+
+            // Setup table columns
+            var table = new DataTable();
+            table.Columns.Add("Err", typeof(string)); // Error indicator
+            table.Columns.Add("Date", typeof(string));
+            table.Columns.Add("Client", typeof(string));
+            table.Columns.Add("Msgs", typeof(string));
+            sessionTableView.Table = table;
+            
+            sessionTableView.SelectedCellChanged += OnSessionSelected;
+            sessionTableView.KeyPress += (e) => {
+                if (e.KeyEvent.Key == Key.DeleteChar || e.KeyEvent.Key == Key.Backspace)
+                {
+                    DeleteSelected();
+                    e.Handled = true;
+                }
+            };
+
+            container.Add(sessionTableView);
+
+            // Search box and filter below the list
             var searchLabel = new Label("Search:")
             {
-                X = Pos.Right(statusLabel) + 2,
-                Y = 0
+                X = 0,
+                Y = Pos.Bottom(sessionTableView)
             };
             
             searchField = new TextField("")
             {
                 X = Pos.Right(searchLabel) + 1,
-                Y = 0,
+                Y = Pos.Bottom(sessionTableView),
                 Width = Dim.Percent(30)
             };
             searchField.TextChanged += (old) => ApplyFilter();
@@ -72,32 +105,20 @@ namespace Rnwood.Smtp4dev.TUI
             errorOnlyCheckbox = new CheckBox("Errors Only")
             {
                 X = Pos.Right(searchField) + 2,
-                Y = 0
+                Y = Pos.Bottom(sessionTableView)
             };
             errorOnlyCheckbox.Toggled += (old) => {
                 showErrorsOnly = errorOnlyCheckbox.Checked;
                 ApplyFilter();
             };
             
-            container.Add(statusLabel, searchLabel, searchField, errorOnlyCheckbox);
+            container.Add(searchLabel, searchField, errorOnlyCheckbox);
 
-            // Left panel - Session list (40% width) - no frame
-            sessionListView = new ListView()
-            {
-                X = 0,
-                Y = 1,
-                Width = Dim.Percent(40),
-                Height = Dim.Fill() - 3,
-                AllowsMarking = false,
-                CanFocus = true
-            };
-
-            sessionListView.SelectedItemChanged += OnSessionSelected;
-
+            // Action buttons below search
             var deleteButton = new Button("Delete")
             {
                 X = 0,
-                Y = Pos.Bottom(sessionListView),
+                Y = Pos.Bottom(searchField),
                 Width = 10
             };
             deleteButton.Clicked += () => DeleteSelected();
@@ -105,17 +126,17 @@ namespace Rnwood.Smtp4dev.TUI
             var deleteAllButton = new Button("Delete All")
             {
                 X = Pos.Right(deleteButton) + 1,
-                Y = Pos.Bottom(sessionListView),
+                Y = Pos.Bottom(searchField),
                 Width = 12
             };
             deleteAllButton.Clicked += () => DeleteAll();
 
-            container.Add(sessionListView, deleteButton, deleteAllButton);
+            container.Add(deleteButton, deleteAllButton);
 
             // Right panel - Session log (60% width) - no frame
             logTextView = new TextView()
             {
-                X = Pos.Right(sessionListView) + 1,
+                X = Pos.Right(sessionTableView) + 1,
                 Y = 1,
                 Width = Dim.Fill(),
                 Height = Dim.Fill() - 1,
@@ -137,7 +158,10 @@ namespace Rnwood.Smtp4dev.TUI
         public void Refresh()
         {
             // Save current selection
-            lastSelectedIndex = sessionListView.SelectedItem;
+            if (sessionTableView.Table != null && sessionTableView.SelectedRow >= 0)
+            {
+                lastSelectedRow = sessionTableView.SelectedRow;
+            }
             
             var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
             sessions = dbContext.Sessions
@@ -172,29 +196,42 @@ namespace Rnwood.Smtp4dev.TUI
             }
 
             var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
-            var sessionStrings = filteredSessions.Select(s =>
-            {
-                var errorIndicator = !string.IsNullOrEmpty(s.SessionError) ? "[ERR] " : "      ";
-                var messageCount = dbContext.Messages.Count(m => m.Session.Id == s.Id);
-                return $"{errorIndicator}{s.StartDate:yyyy-MM-dd HH:mm} | {TruncateString(s.ClientAddress, 20)} | Msgs: {messageCount}";
-            }).ToList();
+            
+            var table = new DataTable();
+            table.Columns.Add(" ", typeof(string)); // Error indicator
+            table.Columns.Add("Date", typeof(string));
+            table.Columns.Add("Client", typeof(string));
+            table.Columns.Add("Msgs", typeof(string));
 
-            sessionListView.SetSource(sessionStrings);
+            foreach (var session in filteredSessions)
+            {
+                var errorIndicator = !string.IsNullOrEmpty(session.SessionError) ? "[ERR]" : "";
+                var messageCount = dbContext.Messages.Count(m => m.Session.Id == session.Id);
+                table.Rows.Add(
+                    errorIndicator,
+                    session.StartDate.ToString("yyyy-MM-dd HH:mm"),
+                    TruncateString(session.ClientAddress, 20),
+                    messageCount.ToString()
+                );
+            }
+
+            sessionTableView.Table = table;
+            
             statusLabel.Text = $"Sessions: {filteredSessions.Count}/{sessions.Count}";
             
             // Restore selection if possible
-            if (lastSelectedIndex >= 0 && lastSelectedIndex < filteredSessions.Count)
+            if (lastSelectedRow >= 0 && lastSelectedRow < filteredSessions.Count)
             {
-                sessionListView.SelectedItem = lastSelectedIndex;
+                sessionTableView.SelectedRow = lastSelectedRow;
             }
         }
 
-        private void OnSessionSelected(ListViewItemEventArgs args)
+        private void OnSessionSelected(TableView.SelectedCellChangedEventArgs args)
         {
-            if (args.Item >= 0 && args.Item < filteredSessions.Count)
+            if (args.NewRow >= 0 && args.NewRow < filteredSessions.Count)
             {
-                lastSelectedIndex = args.Item;
-                selectedSession = filteredSessions[args.Item];
+                lastSelectedRow = args.NewRow;
+                selectedSession = filteredSessions[args.NewRow];
                 ShowSessionLog();
             }
         }
