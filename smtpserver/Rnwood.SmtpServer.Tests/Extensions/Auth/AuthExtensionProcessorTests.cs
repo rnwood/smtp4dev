@@ -49,7 +49,7 @@ public class AuthExtensionProcessorTests
 
 
         AuthExtensionProcessor authExtensionProcessor = new AuthExtensionProcessor(mocks.Connection.Object);
-        await mocks.Connection.Object.MailVerb.FromSubVerb.Process(mocks.Connection.Object, new SmtpCommand("FROM <e=mc2@example.com> AUTH=e+3Dmc2@example.com"));
+        await mocks.Connection.Object.MailVerb.Process(mocks.Connection.Object, new SmtpCommand("MAIL FROM:<e=mc2@example.com> AUTH=e+3Dmc2@example.com"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
     }
@@ -67,7 +67,7 @@ public class AuthExtensionProcessorTests
 
 
         AuthExtensionProcessor authExtensionProcessor = new AuthExtensionProcessor(mocks.Connection.Object);
-        await mocks.Connection.Object.MailVerb.FromSubVerb.Process(mocks.Connection.Object, new SmtpCommand("FROM <e=mc2@example.com> AUTH=<>"));
+        await mocks.Connection.Object.MailVerb.Process(mocks.Connection.Object, new SmtpCommand("MAIL FROM:<e=mc2@example.com> AUTH=<>"));
 
         mocks.VerifyWriteResponse(StandardSmtpResponseCode.OK);
     }
@@ -88,7 +88,7 @@ public class AuthExtensionProcessorTests
 
         var exception = await Assert.ThrowsAsync<SmtpServerException>(async () =>
         {
-            await mocks.Connection.Object.MailVerb.FromSubVerb.Process(mocks.Connection.Object, new SmtpCommand("FROM <e=mc2@example.com> AUTH="));
+            await mocks.Connection.Object.MailVerb.Process(mocks.Connection.Object, new SmtpCommand("MAIL FROM:<e=mc2@example.com> AUTH="));
         });
         Assert.Equal((int) StandardSmtpResponseCode.SyntaxErrorInCommandArguments, exception.SmtpResponse.Code);
     }
