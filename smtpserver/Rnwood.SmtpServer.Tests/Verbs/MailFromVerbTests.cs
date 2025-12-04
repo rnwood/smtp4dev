@@ -43,13 +43,12 @@ public class MailFromVerbTests
             StandardSmtpResponseCode.OK, eightBitMessage: true);
 
     /// <summary>
-    ///     The Process_Address_Plain
+    ///     RFC 5321 Section 4.1.1.2 - Plain address without angle brackets should be rejected
     /// </summary>
     /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
     [Fact]
-    public async Task Process_Address_Plain() =>
-        await Process_AddressAsync("rob@rnwood.co.uk", "rob@rnwood.co.uk", StandardSmtpResponseCode.OK)
-            ;
+    public async Task Process_Address_Plain_Rejected() =>
+        await Process_AddressRejectedAsync("rob@rnwood.co.uk");
 
     /// <summary>
     ///     The Process_AlreadyGivenFrom_ErrorResponse
@@ -164,6 +163,25 @@ public class MailFromVerbTests
     }
 
     /// <summary>
+    ///     RFC 5321 Section 4.1.1.2 - Mismatched angle brackets should be rejected
+    /// </summary>
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    [Fact]
+    public async Task Process_MismatchedBracket_Rejected()
+    {
+        await Process_AddressRejectedAsync("<rob@rnwood.co.uk");
+        await Process_AddressRejectedAsync("<Robert Wood<rob@rnwood.co.uk>");
+    }
+
+    /// <summary>
+    ///     RFC 5321 Section 4.1.1.2 - Address without angle brackets should be rejected
+    /// </summary>
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    [Fact]
+    public async Task Process_UnbracketedAddress_Rejected() =>
+        await Process_AddressRejectedAsync("rob@rnwood.co.uk");
+
+    /// <summary>
     ///     The Process_AddressAsync
     /// </summary>
     /// <param name="address">The address<see cref="string" /></param>
@@ -203,5 +221,28 @@ public class MailFromVerbTests
         {
             message.VerifySet(m => m.From = expectedParsedAddress);
         }
+    }
+
+    /// <summary>
+    ///     Test that an address is rejected with syntax error.
+    /// </summary>
+    /// <param name="address">The address<see cref="string" /></param>
+    /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
+    private async Task Process_AddressRejectedAsync(string address)
+    {
+        TestMocks mocks = new TestMocks();
+        Mock<IMessageBuilder> message = new Mock<IMessageBuilder>();
+        IMessageBuilder currentMessage = null;
+        mocks.Connection.Setup(c => c.NewMessage()).ReturnsAsync(() =>
+        {
+            currentMessage = message.Object;
+            return currentMessage;
+        });
+        mocks.Connection.SetupGet(c => c.CurrentMessage).Returns(() => currentMessage);
+
+        MailFromVerb mailFromVerb = new MailFromVerb();
+        await mailFromVerb.Process(mocks.Connection.Object, new SmtpCommand("FROM " + address));
+
+        mocks.VerifyWriteResponse(StandardSmtpResponseCode.SyntaxErrorInCommandArguments);
     }
 }
