@@ -245,7 +245,7 @@ namespace Rnwood.Smtp4dev
                         var suites = new List<TlsCipherSuite>(relayOptions.SslCipherSuitesPolicy.Length);
                         foreach (var suite in relayOptions.SslCipherSuitesPolicy)
                         {
-                            suites.Add(Enum.Parse<TlsCipherSuite>(suite));
+                            suites.Add(Enum.Parse<TlsCipherSuite>(suite, true));
                         }
 
                         result.SslCipherSuitesPolicy = new CipherSuitesPolicy(suites.ToArray());
