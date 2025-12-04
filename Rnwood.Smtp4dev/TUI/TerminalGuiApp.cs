@@ -33,23 +33,11 @@ namespace Rnwood.Smtp4dev.TUI
 
         public void Run()
         {
-            Application.Init();
 
             try
             {
-                // Show splash screen first
-                SplashScreen.Show(2000);
-                
-                // Set default theme to Base with improved focus visibility
-                Colors.Base.Normal = Application.Driver.MakeAttribute(Color.White, Color.Black);
-                Colors.Base.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
-                Colors.Base.HotNormal = Application.Driver.MakeAttribute(Color.BrightCyan, Color.Black);
-                Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightYellow, Color.BrightCyan);
-                
-                // Improve TextView contrast
-                Colors.TopLevel.Normal = Application.Driver.MakeAttribute(Color.White, Color.Black);
-                Colors.TopLevel.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
-
+                           Application.Init();
+            
                 // Create tab view directly (no outer window frame)
                 tabView = new TabView()
                 {
@@ -78,10 +66,12 @@ namespace Rnwood.Smtp4dev.TUI
                     new StatusItem(Key.F10, "~F10~ Quit", () => {
                         running = false;
                         Application.RequestStop();
-                    })
+                    }),
+                    new StatusItem(Key.Null, "smtp4dev", null)
                 });
 
                 Application.Top.Add(tabView, statusBar);
+                                SplashScreen.Show(2000);
 
                 // Start auto-refresh in background
                 Task.Run(() => AutoRefreshLoop());

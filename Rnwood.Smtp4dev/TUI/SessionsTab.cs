@@ -70,7 +70,7 @@ namespace Rnwood.Smtp4dev.TUI
 
             // Setup table columns
             var table = new DataTable();
-            table.Columns.Add("", typeof(string)); // Error indicator
+            table.Columns.Add("Err", typeof(string)); // Error indicator
             table.Columns.Add("Date", typeof(string));
             table.Columns.Add("Client", typeof(string));
             table.Columns.Add("Msgs", typeof(string));

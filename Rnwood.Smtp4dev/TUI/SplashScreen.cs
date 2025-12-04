@@ -1,5 +1,6 @@
 using System;
 using System.Threading.Tasks;
+using Esprima.Ast;
 using Terminal.Gui;
 
 namespace Rnwood.Smtp4dev.TUI
@@ -18,7 +19,6 @@ namespace Rnwood.Smtp4dev.TUI
      ╚══════╝╚═╝     ╚═╝   ╚═╝   ╚═╝          ╚═╝╚═════╝ ╚══════╝  ╚═══╝  
                                                                             
                 Fake SMTP Server for Development & Testing
-                            Version 3.x
 ";
 
         /// <summary>
@@ -55,12 +55,13 @@ namespace Rnwood.Smtp4dev.TUI
             dialog.Add(loadingLabel);
 
             // Use a timeout to auto-close the splash
-            var timeout = Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(durationMs), (_) => {
-                Application.RequestStop();
-                return false;
+            var timeout = Application.MainLoop.AddTimeout(TimeSpan.FromMilliseconds(durationMs), (_) =>
+            {
+                Application.Top.Remove(dialog);
+                return false; // Don't repeat
             });
 
-            Application.Run(dialog);
+            Application.Top.Add(dialog);
         }
     }
 }
