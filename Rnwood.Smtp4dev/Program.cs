@@ -298,6 +298,9 @@ namespace Rnwood.Smtp4dev
 
         public static void SetupStaticLogger(IEnumerable<string> args)
         {
+            // Ensure UTF-8 console output for proper emoji/color support
+            ConsoleHelper.EnsureUtf8Console();
+            
             try
             {
                 IConfigurationRoot configuration =
@@ -308,8 +311,20 @@ namespace Rnwood.Smtp4dev
                 ServerLogService = new Service.ServerLogService();
 
                 var logConfigBuilder = new LoggerConfiguration()
-                    .ReadFrom.Configuration(configuration)
                     .WriteTo.Sink(ServerLogService);
+                
+                // Determine whether to use emojis based on terminal support
+                bool useEmoji = ConsoleHelper.IsEmojiSupported;
+                
+                // Configure console logging with our custom formatter
+                logConfigBuilder.WriteTo.Console(new ColoredConsoleFormatter(useEmoji));
+                
+                // Read other config from appsettings (log levels, enrichers, file sink, etc.)
+                // but skip the console sink from config since we're setting it programmatically
+                logConfigBuilder.ReadFrom.Configuration(configuration, new Serilog.Settings.Configuration.ConfigurationReaderOptions
+                {
+                    SectionName = "Serilog"
+                });
                     
                 if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -333,7 +348,7 @@ namespace Rnwood.Smtp4dev
                 }
                 else
                 {
-                    logConfigBuilder.WriteTo.Console();
+                    logConfigBuilder.WriteTo.Console(new ColoredConsoleFormatter());
                 }
                 Log.Logger = logConfigBuilder.CreateLogger();
                 throw;
