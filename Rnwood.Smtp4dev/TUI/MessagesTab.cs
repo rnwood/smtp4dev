@@ -306,7 +306,7 @@ namespace Rnwood.Smtp4dev.TUI
             }
 
             var table = new DataTable();
-            table.Columns.Add("", typeof(string)); // Unread indicator
+            table.Columns.Add(" ", typeof(string)); // Unread indicator
             table.Columns.Add("Date", typeof(string));
             table.Columns.Add("From", typeof(string));
             table.Columns.Add("Subject", typeof(string));

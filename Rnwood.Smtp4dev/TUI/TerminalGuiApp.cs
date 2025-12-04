@@ -1,14 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Terminal.Gui;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Server;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading;
+using System.Threading.Tasks;
+using Terminal.Gui;
 
 namespace Rnwood.Smtp4dev.TUI
 {
@@ -36,8 +37,15 @@ namespace Rnwood.Smtp4dev.TUI
 
             try
             {
-                           Application.Init();
-            
+                Application.Init();
+
+                Colors.Base.Normal = Application.Driver.MakeAttribute(Color.White, Color.Black);
+                Colors.Base.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
+                Colors.Base.HotNormal = Application.Driver.MakeAttribute(Color.BrightCyan, Color.Black);
+                Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightYellow, Color.BrightCyan);
+                Colors.TopLevel.Normal = Application.Driver.MakeAttribute(Color.White, Color.Black);
+                Colors.TopLevel.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
+
                 // Create tab view directly (no outer window frame)
                 tabView = new TabView()
                 {
@@ -57,21 +65,22 @@ namespace Rnwood.Smtp4dev.TUI
                 tabView.AddTab(messagesTabPage, false);
                 tabView.AddTab(sessionsTabPage, false);
 
+                string version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
+
+
                 // Create status bar
                 statusBar = new StatusBar(new StatusItem[] {
                     new StatusItem(Key.F1, "~F1~ Help", ShowHelp),
                     new StatusItem(Key.F5, "~F5~ Refresh", RefreshCurrentTab),
-                    new StatusItem(Key.F8, "~F8~ Theme", ChangeTheme),
                     new StatusItem(Key.F9, "~F9~ Settings", ShowSettings),
                     new StatusItem(Key.F10, "~F10~ Quit", () => {
                         running = false;
                         Application.RequestStop();
                     }),
-                    new StatusItem(Key.Null, "smtp4dev", null)
+                    new StatusItem(Key.Null, $"smtp4dev {version}", null)
                 });
 
                 Application.Top.Add(tabView, statusBar);
-                                SplashScreen.Show(2000);
 
                 // Start auto-refresh in background
                 Task.Run(() => AutoRefreshLoop());
@@ -92,7 +101,8 @@ namespace Rnwood.Smtp4dev.TUI
                 Thread.Sleep(3000);
                 if (running)
                 {
-                    Application.MainLoop.Invoke(() => {
+                    Application.MainLoop.Invoke(() =>
+                    {
                         RefreshCurrentTab();
                     });
                 }
@@ -115,75 +125,18 @@ namespace Rnwood.Smtp4dev.TUI
 
         private void ShowHelp()
         {
-            MessageBox.Query("Help", 
+            MessageBox.Query("Help",
                 "Keyboard Shortcuts:\n\n" +
                 "F1  - Show this help\n" +
                 "F5  - Refresh current tab\n" +
-                "F8  - Change theme\n" +
                 "F9  - Open settings\n" +
                 "F10 - Quit application\n\n" +
                 "Tab - Switch between tabs\n" +
                 "Arrow keys - Navigate lists\n" +
-                "Enter - View details", 
+                "Enter - View details",
                 "OK");
         }
 
-        private void ChangeTheme()
-        {
-            var themes = new List<string> { "Base (Blue/Cyan)", "Dark (Green)", "Light (Classic)" };
-            var dialog = new Dialog("Select Theme", 50, 10);
-            
-            var listView = new ListView(themes)
-            {
-                X = 1,
-                Y = 1,
-                Width = Dim.Fill() - 2,
-                Height = Dim.Fill() - 4
-            };
-            
-            dialog.Add(listView);
-            
-            var okButton = new Button("OK");
-            okButton.Clicked += () => {
-                var selected = listView.SelectedItem;
-                switch (selected)
-                {
-                    case 0: // Base
-                        Colors.Base.Normal = Application.Driver.MakeAttribute(Color.White, Color.Black);
-                        Colors.Base.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
-                        Colors.Base.HotNormal = Application.Driver.MakeAttribute(Color.BrightCyan, Color.Black);
-                        Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightYellow, Color.BrightCyan);
-                        Colors.TopLevel.Normal = Application.Driver.MakeAttribute(Color.White, Color.Black);
-                        Colors.TopLevel.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightCyan);
-                        break;
-                    case 1: // Dark
-                        Colors.Base.Normal = Application.Driver.MakeAttribute(Color.BrightGreen, Color.Black);
-                        Colors.Base.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightGreen);
-                        Colors.Base.HotNormal = Application.Driver.MakeAttribute(Color.BrightYellow, Color.Black);
-                        Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightYellow, Color.BrightGreen);
-                        Colors.TopLevel.Normal = Application.Driver.MakeAttribute(Color.BrightGreen, Color.Black);
-                        Colors.TopLevel.Focus = Application.Driver.MakeAttribute(Color.Black, Color.BrightGreen);
-                        break;
-                    case 2: // Light
-                        Colors.Base.Normal = Application.Driver.MakeAttribute(Color.Black, Color.Gray);
-                        Colors.Base.Focus = Application.Driver.MakeAttribute(Color.White, Color.BrightBlue);
-                        Colors.Base.HotNormal = Application.Driver.MakeAttribute(Color.BrightBlue, Color.Gray);
-                        Colors.Base.HotFocus = Application.Driver.MakeAttribute(Color.BrightYellow, Color.BrightBlue);
-                        Colors.TopLevel.Normal = Application.Driver.MakeAttribute(Color.Black, Color.Gray);
-                        Colors.TopLevel.Focus = Application.Driver.MakeAttribute(Color.White, Color.BrightBlue);
-                        break;
-                }
-                Application.Top.SetNeedsDisplay();
-                Application.RequestStop();
-            };
-            dialog.AddButton(okButton);
-            
-            var cancelButton = new Button("Cancel");
-            cancelButton.Clicked += () => Application.RequestStop();
-            dialog.AddButton(cancelButton);
-            
-            Application.Run(dialog);
-        }
 
         private void ShowSettings()
         {

@@ -198,7 +198,7 @@ namespace Rnwood.Smtp4dev.TUI
             var dbContext = host.Services.GetRequiredService<Smtp4devDbContext>();
             
             var table = new DataTable();
-            table.Columns.Add("", typeof(string)); // Error indicator
+            table.Columns.Add(" ", typeof(string)); // Error indicator
             table.Columns.Add("Date", typeof(string));
             table.Columns.Add("Client", typeof(string));
             table.Columns.Add("Msgs", typeof(string));
