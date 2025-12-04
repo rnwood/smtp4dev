@@ -84,6 +84,15 @@ services:
       #The password for the SMTP server used to relay messages
       #- RelayOptions__Password=
 
+      #Sets the TLS mode when connecting to relay SMTP server. See: http://www.mimekit.net/docs/html/T_MailKit_Security_SecureSocketOptions.htm
+      #- RelayOptions__TlsMode=Auto
+
+      #Specifies whether the certificate revocation list should be checked when verifying the relay server's TLS certificate. See: https://www.mimekit.net/docs/html/P_MailKit_MailService_CheckCertificateRevocation.htm
+      #- RelayOptions__CheckCertificateRevocation=true
+
+      #Specifies the TLS cipher suites to be allowed for the relay connection. Not supported on Windows. Separate multiple values with commas. See: https://learn.microsoft.com/en-us/dotnet/api/system.net.security.tlsciphersuite?view=net-9.0
+      #- RelayOptions__SslCipherSuitesPolicy__0=TLS_AES_128_GCM_SHA256
+
       #Specifies the port the IMAP server will listen on - allows standard email clients to view/retrieve messages
       #"ServerOptions__ImapPort"=143
 
