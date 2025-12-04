@@ -80,7 +80,7 @@ public class MailFromVerb : IVerb
             return;
         }
 
-        from = from.Remove(0, 1).Remove(from.Length - 2, 1);
+        from = from.Remove(0, 1).Remove(from.Length - 2);
 
         await connection.Server.Options.OnMessageStart(connection, from).ConfigureAwait(false);
         await connection.NewMessage().ConfigureAwait(false);
