@@ -38,5 +38,12 @@ namespace Rnwood.Smtp4dev.Server.Settings
             get => string.Join(",", AutomaticEmails);
             set => AutomaticEmails = value.Split(',');
         }
+
+        [JsonIgnore]
+        public string SslCipherSuitesPolicyString
+        {
+            get => string.Join(",", SslCipherSuitesPolicy);
+            set => SslCipherSuitesPolicy = value.Split(',');
+        }
     }
 }
