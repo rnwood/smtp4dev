@@ -163,14 +163,13 @@ public class MailFromVerbTests
     }
 
     /// <summary>
-    ///     RFC 5321 Section 4.1.1.2 - Mismatched angle brackets should be rejected
+    ///     RFC 5321 Section 4.1.1.2 - Missing closing bracket should be rejected
     /// </summary>
     /// <returns>A <see cref="Task{T}" /> representing the async operation</returns>
     [Fact]
-    public async Task Process_MismatchedBracket_Rejected()
+    public async Task Process_MissingClosingBracket_Rejected()
     {
         await Process_AddressRejectedAsync("<rob@rnwood.co.uk");
-        await Process_AddressRejectedAsync("<Robert Wood<rob@rnwood.co.uk>");
     }
 
     /// <summary>

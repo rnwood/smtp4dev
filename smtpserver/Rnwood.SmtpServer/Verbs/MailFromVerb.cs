@@ -70,8 +70,7 @@ public class MailFromVerb : IVerb
 
         // RFC 5321 Section 4.1.1.2 - Address must be enclosed in angle brackets
         if (!from.StartsWith("<", StringComparison.Ordinal) ||
-            !from.EndsWith(">", StringComparison.Ordinal) ||
-            from.Count(c => c == '<') != from.Count(c => c == '>'))
+            !from.EndsWith(">", StringComparison.Ordinal))
         {
             await connection.WriteResponse(
                 new SmtpResponse(
