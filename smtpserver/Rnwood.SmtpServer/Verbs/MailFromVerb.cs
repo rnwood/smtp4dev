@@ -67,15 +67,19 @@ public class MailFromVerb : IVerb
         IReadOnlyCollection<string> arguments = argumentsParser.Arguments;
 
         string from = arguments.First();
-        if (from.StartsWith("<", StringComparison.OrdinalIgnoreCase))
+
+        // RFC 5321 Section 4.1.1.2 - Address must be enclosed in angle brackets
+        if (!from.StartsWith("<", StringComparison.Ordinal) ||
+            !from.EndsWith(">", StringComparison.Ordinal))
         {
-            from = from.Remove(0, 1);
+            await connection.WriteResponse(
+                new SmtpResponse(
+                    StandardSmtpResponseCode.SyntaxErrorInCommandArguments,
+                    "Must specify from address <address> or <>")).ConfigureAwait(false);
+            return;
         }
 
-        if (from.EndsWith(">", StringComparison.OrdinalIgnoreCase))
-        {
-            from = from.Remove(from.Length - 1, 1);
-        }
+        from = from.Remove(0, 1).Remove(from.Length - 2);
 
         await connection.Server.Options.OnMessageStart(connection, from).ConfigureAwait(false);
         await connection.NewMessage().ConfigureAwait(false);
