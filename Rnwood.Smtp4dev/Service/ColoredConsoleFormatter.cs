@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using Serilog.Events;
 using Serilog.Formatting;
+using Serilog.Formatting.Display;
 
 namespace Rnwood.Smtp4dev.Service
 {
@@ -14,6 +15,10 @@ namespace Rnwood.Smtp4dev.Service
     {
         private readonly bool _useEmoji;
         private readonly bool _useColors;
+        
+        // Formatter that renders the message with :lj (literal, JSON-safe) to avoid quotes around string values
+        private static readonly MessageTemplateTextFormatter _messageFormatter = 
+            new MessageTemplateTextFormatter("{Message:lj}", null);
 
         // ANSI escape codes for colors
         private const string Reset = "\x1b[0m";
@@ -66,8 +71,12 @@ namespace Rnwood.Smtp4dev.Service
             
             output.Write(prefix);
             
-            // Render the message
-            logEvent.RenderMessage(output);
+            // Render the message using :lj format (literal, no quotes around strings)
+            using (var messageWriter = new StringWriter())
+            {
+                _messageFormatter.Format(logEvent, messageWriter);
+                output.Write(messageWriter.ToString().TrimEnd());
+            }
             
             if (_useColors)
             {
