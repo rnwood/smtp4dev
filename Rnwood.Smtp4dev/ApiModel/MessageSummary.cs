@@ -12,7 +12,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         {
             Id = dbMessage.Id;
             From = dbMessage.From;
-            To = dbMessage.To.Split(',');
+            To = dbMessage.To?.Split(',') ?? Array.Empty<string>();
             ReceivedDate = dbMessage.ReceivedDate;
             Subject = dbMessage.Subject;
             AttachmentCount = dbMessage.AttachmentCount;
@@ -26,13 +26,13 @@ namespace Rnwood.Smtp4dev.ApiModel
         {
             Id = messagesSummaryProjection.Id;
             From = messagesSummaryProjection.From;
-            To = messagesSummaryProjection.To.Split(',');
+            To = messagesSummaryProjection.To?.Split(',') ?? Array.Empty<string>();
             ReceivedDate = messagesSummaryProjection.ReceivedDate;
             Subject = messagesSummaryProjection.Subject;
             AttachmentCount = messagesSummaryProjection.AttachmentCount;
             IsUnread = messagesSummaryProjection.IsUnread;
             IsRelayed = messagesSummaryProjection.IsRelayed;
-            DeliveredTo = messagesSummaryProjection.DeliveredTo;
+            DeliveredTo = messagesSummaryProjection.DeliveredTo ?? "";
 
             MimeMetadata mimeMetadata = !string.IsNullOrEmpty(messagesSummaryProjection.MimeMetadata) ?
                 JsonSerializer.Deserialize<MimeMetadata>(messagesSummaryProjection.MimeMetadata)
