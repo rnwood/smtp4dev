@@ -17,6 +17,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
     public class E2ETests
     {
         protected readonly ITestOutputHelper output;
+        
+        // Timeout constants for Docker operations
+        private const int DockerPortQueryTimeoutMs = 5000;
+        private const int DockerStopTimeoutMs = 10000;
+        private const int DockerRemoveTimeoutMs = 5000;
 
         public E2ETests(ITestOutputHelper output)
         {
@@ -64,7 +69,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 if (process == null) return null;
 
                 string portOutput = process.StandardOutput.ReadToEnd();
-                process.WaitForExit(5000);
+                process.WaitForExit(DockerPortQueryTimeoutMs);
 
                 if (process.ExitCode != 0)
                 {
@@ -73,7 +78,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 }
 
                 // Output format is like: "0.0.0.0:32768" or "[::]:32768" or "0.0.0.0:32768\n[::]:32768"
-                // We need to extract the port number
+                // We need to extract the port number - when both IPv4 and IPv6 mappings exist,
+                // Docker assigns the same host port for both, so we just extract the first one.
                 var match = Regex.Match(portOutput, @":(\d+)");
                 if (match.Success)
                 {
@@ -114,7 +120,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                 using (var stopProcess = Process.Start(stopInfo))
                 {
-                    stopProcess?.WaitForExit(10000);
+                    stopProcess?.WaitForExit(DockerStopTimeoutMs);
                 }
 
                 // Remove the container
@@ -130,7 +136,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E
 
                 using (var rmProcess = Process.Start(rmInfo))
                 {
-                    rmProcess?.WaitForExit(5000);
+                    rmProcess?.WaitForExit(DockerRemoveTimeoutMs);
                 }
 
                 output.WriteLine($"Docker container {containerName} cleaned up");
@@ -202,10 +208,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             bool isDockerMode = binary == "docker";
             
             // Generate unique container name for Docker mode to avoid conflicts
+            // Format: smtp4dev-e2e-<first 12 chars of GUID> (total 24 chars, well within Docker's 64 char limit)
             string dockerContainerName = null;
             if (isDockerMode)
             {
-                dockerContainerName = $"smtp4dev-e2e-{Guid.NewGuid():N}".Substring(0, 32);
+                dockerContainerName = $"smtp4dev-e2e-{Guid.NewGuid():N}".Substring(0, 24);
                 output.WriteLine($"Docker container name: {dockerContainerName}");
                 
                 // Insert --name argument after 'run' and before other args
