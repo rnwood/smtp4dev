@@ -16,7 +16,7 @@ jobs:
     timeout-minutes: 5
     steps:
       - name: Check PR title follows conventional commit format
-        uses: amannn/action-semantic-pull-request@v5.4.0
+        uses: amannn/action-semantic-pull-request@v5.5.3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
