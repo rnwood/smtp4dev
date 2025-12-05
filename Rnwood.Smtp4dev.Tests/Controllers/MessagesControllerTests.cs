@@ -269,6 +269,31 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         }
 
         [Fact]
+        public void GetSummaries_MessageWithNullToField_DoesNotThrow()
+        {
+            // Arrange - create a message with null To field to simulate edge cases
+            var mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
+            var messageWithNullTo = new DbModel.Message
+            {
+                Id = Guid.NewGuid(),
+                Subject = "Test Subject",
+                From = "from@test.com",
+                To = null, // This is the edge case that was causing NullReferenceException
+                ReceivedDate = DateTime.Now,
+                Mailbox = mailbox,
+                MailboxFolder = new DbModel.MailboxFolder { Name = MailboxFolder.INBOX, Mailbox = mailbox }
+            };
+            
+            TestMessagesRepository messagesRepository = new TestMessagesRepository(messageWithNullTo);
+            MessagesController messagesController = new MessagesController(messagesRepository, null, new MimeProcessingService());
+
+            // Act & Assert - should not throw NullReferenceException
+            var result = messagesController.GetSummaries(null);
+            result.Results.Should().HaveCount(1);
+            result.Results[0].To.Should().BeEmpty();
+        }
+
+        [Fact]
         public async Task GetHtmlBody()
         {
             DbModel.Message testMessage1 = await GetTestMessage1();
