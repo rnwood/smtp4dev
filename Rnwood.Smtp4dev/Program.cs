@@ -105,15 +105,22 @@ namespace Rnwood.Smtp4dev
 
             string version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 
+            // Only use ANSI colors if stderr is not redirected (e.g., not captured by tests)
+            bool useColors = !Console.IsErrorRedirected;
+            string blue = useColors ? Blue : "";
+            string yellow = useColors ? Yellow : "";
+            string bold = useColors ? Bold : "";
+            string white = useColors ? White : "";
+            string reset = useColors ? Reset : "";
 
             string[] envelope = [
-        $"{Blue}┌────────────.{Reset}",
-            $"{Blue}|\\          / \\{Reset}    {Yellow}version {version}",
-            $"{Blue}| \\        /   \\{Reset}   {Yellow}https://github.com/rnwood/smtp4dev",
-            $"{Blue}|  {Bold}{White}smtp4dev{Reset}{Blue}    /{Reset}  {Yellow}{System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}",
-            $"{Blue}|             /{Reset}",
-            $"{Blue}└────────────'{Reset}",
-        $"{Reset}" ];
+        $"{blue}┌────────────.{reset}",
+            $"{blue}|\\          / \\{reset}    {yellow}version {version}",
+            $"{blue}| \\        /   \\{reset}   {yellow}https://github.com/rnwood/smtp4dev",
+            $"{blue}|  {bold}{white}smtp4dev{reset}{blue}    /{reset}  {yellow}{System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}",
+            $"{blue}|             /{reset}",
+            $"{blue}└────────────'{reset}",
+        $"{reset}" ];
             foreach (var line in envelope)
             {
                 Console.Error.WriteLine(line);

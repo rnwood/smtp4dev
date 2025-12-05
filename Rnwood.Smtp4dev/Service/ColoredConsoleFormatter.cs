@@ -8,10 +8,12 @@ namespace Rnwood.Smtp4dev.Service
     /// <summary>
     /// A Serilog formatter that outputs log messages with colors and conditional emoji support.
     /// Emojis are only shown for Warning, Error, and Fatal levels, and only if emoji support is detected.
+    /// Colors are disabled when output is redirected (e.g., captured by tests).
     /// </summary>
     public class ColoredConsoleFormatter : ITextFormatter
     {
         private readonly bool _useEmoji;
+        private readonly bool _useColors;
 
         // ANSI escape codes for colors
         private const string Reset = "\x1b[0m";
@@ -23,18 +25,30 @@ namespace Rnwood.Smtp4dev.Service
 
         /// <summary>
         /// Creates a new ColoredConsoleFormatter.
+        /// Colors are automatically disabled when console output is redirected.
         /// </summary>
-        public ColoredConsoleFormatter() : this(ConsoleHelper.IsEmojiSupported)
+        public ColoredConsoleFormatter() : this(ConsoleHelper.IsEmojiSupported, !Console.IsOutputRedirected)
         {
         }
 
         /// <summary>
         /// Creates a new ColoredConsoleFormatter with explicit emoji control.
+        /// Colors are automatically disabled when console output is redirected.
         /// </summary>
         /// <param name="useEmoji">Whether to use emoji prefixes for warnings and errors.</param>
-        public ColoredConsoleFormatter(bool useEmoji)
+        public ColoredConsoleFormatter(bool useEmoji) : this(useEmoji, !Console.IsOutputRedirected)
+        {
+        }
+
+        /// <summary>
+        /// Creates a new ColoredConsoleFormatter with explicit emoji and color control.
+        /// </summary>
+        /// <param name="useEmoji">Whether to use emoji prefixes for warnings and errors.</param>
+        /// <param name="useColors">Whether to use ANSI color codes.</param>
+        public ColoredConsoleFormatter(bool useEmoji, bool useColors)
         {
             _useEmoji = useEmoji;
+            _useColors = useColors;
         }
 
         /// <summary>
@@ -44,21 +58,35 @@ namespace Rnwood.Smtp4dev.Service
         {
             var (color, prefix) = GetLevelFormatting(logEvent.Level);
             
-            // Write the prefix (emoji or plain) with color
-            output.Write(color);
+            // Write color code only if colors are enabled
+            if (_useColors)
+            {
+                output.Write(color);
+            }
+            
             output.Write(prefix);
             
             // Render the message
             logEvent.RenderMessage(output);
-            output.Write(Reset);
+            
+            if (_useColors)
+            {
+                output.Write(Reset);
+            }
             output.WriteLine();
             
             // Write exception if present
             if (logEvent.Exception != null)
             {
-                output.Write(Red);
+                if (_useColors)
+                {
+                    output.Write(Red);
+                }
                 output.WriteLine(logEvent.Exception.ToString());
-                output.Write(Reset);
+                if (_useColors)
+                {
+                    output.Write(Reset);
+                }
             }
         }
 
