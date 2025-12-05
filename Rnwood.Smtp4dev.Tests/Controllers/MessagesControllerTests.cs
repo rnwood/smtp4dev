@@ -272,6 +272,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         public void GetSummaries_MessageWithNullToField_DoesNotThrow()
         {
             // Arrange - create a message with null To field to simulate edge cases
+            var mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
             var messageWithNullTo = new DbModel.Message
             {
                 Id = Guid.NewGuid(),
@@ -279,8 +280,8 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
                 From = "from@test.com",
                 To = null, // This is the edge case that was causing NullReferenceException
                 ReceivedDate = DateTime.Now,
-                Mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME },
-                MailboxFolder = new DbModel.MailboxFolder { Name = MailboxFolder.INBOX }
+                Mailbox = mailbox,
+                MailboxFolder = new DbModel.MailboxFolder { Name = MailboxFolder.INBOX, Mailbox = mailbox }
             };
             
             TestMessagesRepository messagesRepository = new TestMessagesRepository(messageWithNullTo);
