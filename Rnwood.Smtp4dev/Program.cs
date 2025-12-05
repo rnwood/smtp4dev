@@ -105,15 +105,22 @@ namespace Rnwood.Smtp4dev
 
             string version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 
+            // Only use ANSI colors if stderr is not redirected (e.g., not captured by tests)
+            bool useColors = !Console.IsErrorRedirected;
+            string blue = useColors ? Blue : "";
+            string yellow = useColors ? Yellow : "";
+            string bold = useColors ? Bold : "";
+            string white = useColors ? White : "";
+            string reset = useColors ? Reset : "";
 
             string[] envelope = [
-        $"{Blue}┌────────────.{Reset}",
-            $"{Blue}|\\          / \\{Reset}    {Yellow}version {version}",
-            $"{Blue}| \\        /   \\{Reset}   {Yellow}https://github.com/rnwood/smtp4dev",
-            $"{Blue}|  {Bold}{White}smtp4dev{Reset}{Blue}    /{Reset}  {Yellow}{System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}",
-            $"{Blue}|             /{Reset}",
-            $"{Blue}└────────────'{Reset}",
-        $"{Reset}" ];
+        $"{blue}┌────────────.{reset}",
+            $"{blue}|\\          / \\{reset}    {yellow}version {version}",
+            $"{blue}| \\        /   \\{reset}   {yellow}https://github.com/rnwood/smtp4dev",
+            $"{blue}|  {bold}{white}smtp4dev{reset}{blue}    /{reset}  {yellow}{System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription}",
+            $"{blue}|             /{reset}",
+            $"{blue}└────────────'{reset}",
+        $"{reset}" ];
             foreach (var line in envelope)
             {
                 Console.Error.WriteLine(line);
@@ -298,6 +305,9 @@ namespace Rnwood.Smtp4dev
 
         public static void SetupStaticLogger(IEnumerable<string> args)
         {
+            // Ensure UTF-8 console output for proper emoji/color support
+            ConsoleHelper.EnsureUtf8Console();
+            
             try
             {
                 IConfigurationRoot configuration =
@@ -308,8 +318,20 @@ namespace Rnwood.Smtp4dev
                 ServerLogService = new Service.ServerLogService();
 
                 var logConfigBuilder = new LoggerConfiguration()
-                    .ReadFrom.Configuration(configuration)
                     .WriteTo.Sink(ServerLogService);
+                
+                // Determine whether to use emojis based on terminal support
+                bool useEmoji = ConsoleHelper.IsEmojiSupported;
+                
+                // Configure console logging with our custom formatter
+                logConfigBuilder.WriteTo.Console(new ColoredConsoleFormatter(useEmoji));
+                
+                // Read other config from appsettings (log levels, enrichers, file sink, etc.)
+                // but skip the console sink from config since we're setting it programmatically
+                logConfigBuilder.ReadFrom.Configuration(configuration, new Serilog.Settings.Configuration.ConfigurationReaderOptions
+                {
+                    SectionName = "Serilog"
+                });
                     
                 if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -333,7 +355,7 @@ namespace Rnwood.Smtp4dev
                 }
                 else
                 {
-                    logConfigBuilder.WriteTo.Console();
+                    logConfigBuilder.WriteTo.Console(new ColoredConsoleFormatter());
                 }
                 Log.Logger = logConfigBuilder.CreateLogger();
                 throw;
