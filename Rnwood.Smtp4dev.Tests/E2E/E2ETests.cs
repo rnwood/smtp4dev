@@ -1,6 +1,7 @@
 ﻿using Medallion.Shell;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
@@ -16,6 +17,11 @@ namespace Rnwood.Smtp4dev.Tests.E2E
     public class E2ETests
     {
         protected readonly ITestOutputHelper output;
+        
+        // Timeout constants for Docker operations
+        private const int DockerPortQueryTimeoutMs = 5000;
+        private const int DockerStopTimeoutMs = 10000;
+        private const int DockerRemoveTimeoutMs = 5000;
 
         public E2ETests(ITestOutputHelper output)
         {
@@ -41,6 +47,105 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             public string Pop3Host { get; set; } = "localhost";
         }
 
+        /// <summary>
+        /// Query Docker for the host port mapped to a container's internal port.
+        /// Uses `docker port <container> <internal_port>` command.
+        /// </summary>
+        private int? GetDockerHostPort(string containerName, int internalPort, ITestOutputHelper output)
+        {
+            try
+            {
+                var startInfo = new ProcessStartInfo
+                {
+                    FileName = "docker",
+                    Arguments = $"port {containerName} {internalPort}",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var process = Process.Start(startInfo);
+                if (process == null) return null;
+
+                string portOutput = process.StandardOutput.ReadToEnd();
+                process.WaitForExit(DockerPortQueryTimeoutMs);
+
+                if (process.ExitCode != 0)
+                {
+                    output.WriteLine($"docker port command failed for {containerName}:{internalPort}");
+                    return null;
+                }
+
+                // Output format is like: "0.0.0.0:32768" or "[::]:32768" or "0.0.0.0:32768\n[::]:32768"
+                // We need to extract the port number - when both IPv4 and IPv6 mappings exist,
+                // Docker assigns the same host port for both, so we just extract the first one.
+                var match = Regex.Match(portOutput, @":(\d+)");
+                if (match.Success)
+                {
+                    int hostPort = int.Parse(match.Groups[1].Value);
+                    output.WriteLine($"Docker port mapping: {containerName}:{internalPort} -> host:{hostPort}");
+                    return hostPort;
+                }
+
+                output.WriteLine($"Could not parse docker port output: {portOutput}");
+                return null;
+            }
+            catch (Exception ex)
+            {
+                output.WriteLine($"Error querying docker port: {ex.Message}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// Stop and remove a Docker container by name.
+        /// </summary>
+        private void CleanupDockerContainer(string containerName, ITestOutputHelper output)
+        {
+            try
+            {
+                output.WriteLine($"Cleaning up Docker container: {containerName}");
+                
+                // Stop the container
+                var stopInfo = new ProcessStartInfo
+                {
+                    FileName = "docker",
+                    Arguments = $"stop {containerName}",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using (var stopProcess = Process.Start(stopInfo))
+                {
+                    stopProcess?.WaitForExit(DockerStopTimeoutMs);
+                }
+
+                // Remove the container
+                var rmInfo = new ProcessStartInfo
+                {
+                    FileName = "docker",
+                    Arguments = $"rm -f {containerName}",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using (var rmProcess = Process.Start(rmInfo))
+                {
+                    rmProcess?.WaitForExit(DockerRemoveTimeoutMs);
+                }
+
+                output.WriteLine($"Docker container {containerName} cleaned up");
+            }
+            catch (Exception ex)
+            {
+                output.WriteLine($"Error cleaning up docker container: {ex.Message}");
+            }
+        }
 
         protected void RunE2ETest(Action<E2ETestContext> test, E2ETestOptions options = null)
         {
@@ -98,6 +203,28 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             string dbPath = Path.GetTempFileName();
             File.Delete(dbPath);
 
+            // Only add port arguments if not running in Docker mode (binary != "docker")
+            // In Docker mode, port mappings are controlled via docker -p flags and args from SMTP4DEV_E2E_ARGS
+            bool isDockerMode = binary == "docker";
+            
+            // Generate unique container name for Docker mode to avoid conflicts
+            // Format: smtp4dev-e2e-<first 12 chars of GUID> (total 24 chars, well within Docker's 64 char limit)
+            string dockerContainerName = null;
+            if (isDockerMode)
+            {
+                dockerContainerName = $"smtp4dev-e2e-{Guid.NewGuid():N}".Substring(0, 24);
+                output.WriteLine($"Docker container name: {dockerContainerName}");
+                
+                // Insert --name argument after 'run' and before other args
+                // Find the index of 'run' in args and insert --name after it
+                int runIndex = args.IndexOf("run");
+                if (runIndex >= 0)
+                {
+                    args.Insert(runIndex + 1, "--name");
+                    args.Insert(runIndex + 2, dockerContainerName);
+                }
+            }
+
             args.AddRange(new[] {
                 options.InMemoryDB ? "--db=" : useDefaultDBPath ? "" : $"--db={dbPath}", "--nousersettings",
                 "--tlsmode=StartTls"
@@ -113,10 +240,6 @@ namespace Rnwood.Smtp4dev.Tests.E2E
             {
                 args.RemoveAll(a => a.StartsWith("--urls"));
             }
-
-            // Only add port arguments if not running in Docker mode (binary != "docker")
-            // In Docker mode, port mappings are controlled via docker -p flags and args from SMTP4DEV_E2E_ARGS
-            bool isDockerMode = binary == "docker";
 
             if (!isDockerMode && !args.Any(a => a.StartsWith("--imapport")))
             {
@@ -177,30 +300,68 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                         {
                             // Handle both IPv4 (http://localhost:5000) and IPv6 (http://[::]:80) formats
                             int internalPortNumber = int.Parse(Regex.Replace(newLine, @".*http://[^\s]+:(\d+)", "$1"));
-                            // For Docker, map internal port 80 to external port 5000
-                            int portNumber = (binary == "docker" && internalPortNumber == 80) ? 5000 : internalPortNumber;
+                            
+                            // For Docker, query the actual mapped host port dynamically
+                            int portNumber;
+                            if (isDockerMode && dockerContainerName != null)
+                            {
+                                int? mappedPort = GetDockerHostPort(dockerContainerName, internalPortNumber, output);
+                                portNumber = mappedPort ?? internalPortNumber;
+                            }
+                            else
+                            {
+                                portNumber = internalPortNumber;
+                            }
                             baseUrl = new Uri($"http://localhost:{portNumber}{options.TestPath ?? options.BasePath ?? ""}");
                         }
 
                         if (newLine.Contains("SMTP Server is listening on port"))
                         {
                             int internalSmtpPort = int.Parse(Regex.Replace(newLine, @".*SMTP Server is listening on port (\d+).*", "$1"));
-                            // For Docker, map internal port 25 to external port 2525
-                            smtpPortNumber = (binary == "docker" && internalSmtpPort == 25) ? 2525 : internalSmtpPort;
+                            
+                            // For Docker, query the actual mapped host port dynamically
+                            if (isDockerMode && dockerContainerName != null)
+                            {
+                                int? mappedPort = GetDockerHostPort(dockerContainerName, internalSmtpPort, output);
+                                smtpPortNumber = mappedPort ?? internalSmtpPort;
+                            }
+                            else
+                            {
+                                smtpPortNumber = internalSmtpPort;
+                            }
                         }
 
                         if (newLine.Contains("IMAP Server is listening on port"))
                         {
                             int internalImapPort = int.Parse(Regex.Replace(newLine, @".*IMAP Server is listening on port (\d+).*", "$1"));
-                            // For Docker, map internal port 143 to external port 1143
-                            imapPortNumber = (binary == "docker" && internalImapPort == 143) ? 1143 : internalImapPort;
+                            
+                            // For Docker, query the actual mapped host port dynamically
+                            if (isDockerMode && dockerContainerName != null)
+                            {
+                                int? mappedPort = GetDockerHostPort(dockerContainerName, internalImapPort, output);
+                                imapPortNumber = mappedPort ?? internalImapPort;
+                            }
+                            else
+                            {
+                                imapPortNumber = internalImapPort;
+                            }
                         }
 
                         if (newLine.Contains("POP3 Server is listening on port"))
                         {
                             int internalPop3Port = int.Parse(Regex.Replace(newLine, @".*POP3 Server is listening on port (\d+).*", "$1"));
-                            // For Docker, map internal port 110 to external port 1100
-                            pop3PortNumber = (binary == "docker" && internalPop3Port == 110) ? 1100 : internalPop3Port;
+                            
+                            // For Docker, query the actual mapped host port dynamically
+                            if (isDockerMode && dockerContainerName != null)
+                            {
+                                int? mappedPort = GetDockerHostPort(dockerContainerName, internalPop3Port, output);
+                                pop3PortNumber = mappedPort ?? internalPop3Port;
+                            }
+                            else
+                            {
+                                pop3PortNumber = internalPop3Port;
+                            }
+                            
                             // Try to parse the address from the same line (e.g. "POP3 Server is listening on port 53333 (::)")
                             var m = Regex.Match(newLine, @"POP3 Server is listening on port \d+ \(([^)]+)\)");
                             if (m.Success)
@@ -257,12 +418,20 @@ namespace Rnwood.Smtp4dev.Tests.E2E
                 }
                 finally
                 {
-                    serverProcess.TrySignalAsync(CommandSignal.ControlC).Wait();
-                    serverProcess.StandardInput.Close();
-                    if (!serverProcess.Process.WaitForExit(5000))
+                    // For Docker mode, properly stop and remove the container
+                    if (isDockerMode && dockerContainerName != null)
                     {
-                        serverProcess.Kill();
-                        output.WriteLine("E2E process didn't exit!");
+                        CleanupDockerContainer(dockerContainerName, output);
+                    }
+                    else
+                    {
+                        serverProcess.TrySignalAsync(CommandSignal.ControlC).Wait();
+                        serverProcess.StandardInput.Close();
+                        if (!serverProcess.Process.WaitForExit(5000))
+                        {
+                            serverProcess.Kill();
+                            output.WriteLine("E2E process didn't exit!");
+                        }
                     }
   
                     cancellationTokenSource.Cancel();

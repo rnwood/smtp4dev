@@ -1,7 +1,7 @@
 ﻿<template>
 
     
-        <aceeditor class="textview" v-model:value="textToShow" @init="editorInit" theme="chrome" :lang="lang" :options="{ useWorker: true }"  width="100%" :wrap="true" height="100%"></aceeditor>
+        <aceeditor class="textview" v-model:value="textToShow" @init="editorInit" theme="chrome" :lang="lang" :options="{ useWorker: false }"  width="100%" :wrap="true" height="100%"></aceeditor>
     
 </template>
 

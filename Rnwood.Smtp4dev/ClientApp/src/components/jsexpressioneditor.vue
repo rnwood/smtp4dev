@@ -174,10 +174,6 @@ import "ace-builds/src-noconflict/theme-monokai";
 import "ace-builds/src-noconflict/theme-chrome";
 import "ace-builds/src-noconflict/ext-language_tools";
 
-// Configure ACE base path for Vite
-import ace from 'ace-builds/src-noconflict/ace';
-ace.config.set('basePath', '/node_modules/ace-builds/src-noconflict/');
-
 interface ValidationResult {
     valid: boolean;
     message: string;
