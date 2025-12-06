@@ -51,7 +51,7 @@
     </PackageReference>
     <PackageReference Include="MimeKit" Version="4.14.0" />
     <PackageReference Include="Mono.Options" Version="6.12.0.148" />
-    <PackageReference Include="NSwag.AspNetCore" Version="14.4.0" />
+    <PackageReference Include="NSwag.AspNetCore" Version="14.6.3" />
 
 
     <PackageReference Include="Serilog" Version="4.3.0" />
