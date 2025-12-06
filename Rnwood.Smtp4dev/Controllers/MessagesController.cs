@@ -125,6 +125,51 @@ namespace Rnwood.Smtp4dev.Controllers
             return new ApiModel.Message(await GetDbMessage(id, false));
         }
 
+        private const int MAX_ATTACHMENT_SIZE = 10 * 1024 * 1024; // 10 MB per file
+        
+        private async Task<List<Server.AttachmentInfo>> ProcessAttachments(List<IFormFile> attachments)
+        {
+            if (attachments == null || attachments.Count == 0)
+            {
+                return null;
+            }
+
+            var attachmentInfos = new List<Server.AttachmentInfo>();
+            foreach (var file in attachments)
+            {
+                // Validate file size
+                if (file.Length > MAX_ATTACHMENT_SIZE)
+                {
+                    throw new ArgumentException($"Attachment '{file.FileName}' exceeds maximum size of {MAX_ATTACHMENT_SIZE / (1024 * 1024)} MB");
+                }
+
+                var memoryStream = new MemoryStream();
+                try
+                {
+                    await file.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+                    
+                    attachmentInfos.Add(new Server.AttachmentInfo
+                    {
+                        FileName = file.FileName,
+                        ContentType = file.ContentType ?? "application/octet-stream",
+                        Content = memoryStream
+                    });
+                }
+                catch
+                {
+                    // Clean up on error
+                    memoryStream.Dispose();
+                    foreach (var info in attachmentInfos)
+                    {
+                        info.Content?.Dispose();
+                    }
+                    throw;
+                }
+            }
+            return attachmentInfos;
+        }
+
         /// <summary>
         /// Replies to the message with the specified ID using the configured relay SMTP server.
         /// </summary>
@@ -224,25 +269,8 @@ namespace Rnwood.Smtp4dev.Controllers
 
             List<string> envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
 
-            // Convert IFormFile attachments to AttachmentInfo
-            List<Server.AttachmentInfo> attachmentInfos = null;
-            if (attachments != null && attachments.Count > 0)
-            {
-                attachmentInfos = new List<Server.AttachmentInfo>();
-                foreach (var file in attachments)
-                {
-                    var memoryStream = new MemoryStream();
-                    await file.CopyToAsync(memoryStream);
-                    memoryStream.Position = 0;
-                    
-                    attachmentInfos.Add(new Server.AttachmentInfo
-                    {
-                        FileName = file.FileName,
-                        ContentType = file.ContentType ?? "application/octet-stream",
-                        Content = memoryStream
-                    });
-                }
-            }
+            // Process attachments with proper error handling
+            var attachmentInfos = await ProcessAttachments(attachments);
 
             this.server.Send(headers,
                 toRecips,
@@ -322,25 +350,8 @@ namespace Rnwood.Smtp4dev.Controllers
 
             List<string> envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
 
-            // Convert IFormFile attachments to AttachmentInfo
-            List<Server.AttachmentInfo> attachmentInfos = null;
-            if (attachments != null && attachments.Count > 0)
-            {
-                attachmentInfos = new List<Server.AttachmentInfo>();
-                foreach (var file in attachments)
-                {
-                    var memoryStream = new MemoryStream();
-                    await file.CopyToAsync(memoryStream);
-                    memoryStream.Position = 0;
-                    
-                    attachmentInfos.Add(new Server.AttachmentInfo
-                    {
-                        FileName = file.FileName,
-                        ContentType = file.ContentType ?? "application/octet-stream",
-                        Content = memoryStream
-                    });
-                }
-            }
+            // Process attachments with proper error handling
+            var attachmentInfos = await ProcessAttachments(attachments);
 
             this.server.Send(headers,
                 toRecips,
