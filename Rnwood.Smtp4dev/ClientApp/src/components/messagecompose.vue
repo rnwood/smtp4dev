@@ -107,17 +107,9 @@
                     .map(f => f.raw as File);
 
                 if (this.replyToMessage) {
-                    if (files.length > 0) {
-                        await new MessagesController().replyWithAttachments(this.replyToMessage?.id, this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body, files);
-                    } else {
-                        await new MessagesController().reply(this.replyToMessage?.id, this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body);
-                    }
+                    await new MessagesController().reply(this.replyToMessage?.id, this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body, files);
                 } else {
-                    if (files.length > 0) {
-                        await new MessagesController().sendWithAttachments(this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body, files);
-                    } else {
-                        await new MessagesController().send(this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body);
-                    }
+                    await new MessagesController().send(this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body, files);
                 }
                 
                 ElNotification.success({ title: "Message sent" });

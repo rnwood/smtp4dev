@@ -173,6 +173,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
         /// <summary>
         /// Replies to the message with the specified ID using the configured relay SMTP server.
+        /// Accepts either text/html (for body only) or multipart/form-data (for body with optional attachments).
         /// </summary>
         /// <param name="id">The Id of the message to reply to</param>
         /// <param name="to">List of email addresses separated by commas</param>
@@ -181,16 +182,31 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <param name="from">Email address</param>
         /// <param name="deliverToAll">True if the message should be delivered to the CC and BCC recipients in addition to the TO recipients. When false, the message is only delivered to the TO recipients, but the message headers will show the specified other recipients.</param>
         /// <param name="subject">The subject of message</param>
-        /// <param name="bodyHtml">UTF8 encoded HTML body for the message</param>
+        /// <param name="bodyHtml">HTML body content (when using multipart/form-data, or as body when using text/html)</param>
+        /// <param name="attachments">Optional files to attach (when using multipart/form-data)</param>
         /// <returns></returns>
         [HttpPost("{id}/reply")]
-        [OpenApiBodyParameter("text/html")]
-        [Consumes("text/html")]
+        [Consumes("text/html", "multipart/form-data")]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
         [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message does not exist")]
         [SwaggerResponse(System.Net.HttpStatusCode.InternalServerError, typeof(void), Description = "If message fails to send.")]
-        public async Task<IActionResult> Reply(Guid id, string to, string cc, string bcc, string from, bool deliverToAll, string subject, [FromBody] string bodyHtml)
+        public async Task<IActionResult> Reply(
+            Guid id, 
+            string to, 
+            string cc, 
+            string bcc, 
+            string from, 
+            bool deliverToAll, 
+            string subject, 
+            [FromForm] string bodyHtml = null,
+            [FromForm] List<IFormFile> attachments = null)
         {
+            // Handle different content types
+            if (HttpContext.Request.ContentType?.StartsWith("text/html") == true)
+            {
+                bodyHtml = await HttpContext.Request.Body.ReadStringAsync(Encoding.UTF8);
+            }
+
             var origMessage = new ApiModel.Message(await GetDbMessage(id, false));
             var origMessageId = origMessage.Headers.FirstOrDefault(h => h.Name.Equals("Message-Id", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
 
@@ -212,65 +228,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
             List<string> envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
 
-            this.server.Send(headers,
-                toRecips,
-                ccRecips,
-                from, envelopeRecips.Distinct().ToArray(), subject, bodyHtml);
-
-            return Ok();
-        }
-
-        /// <summary>
-        /// Replies to the message with the specified ID with attachments using the configured relay SMTP server.
-        /// </summary>
-        /// <param name="id">The Id of the message to reply to</param>
-        /// <param name="to">List of email addresses separated by commas</param>
-        /// <param name="cc">List of email addresses separated by commas</param>
-        /// <param name="bcc">List of email addresses separated by commas</param>
-        /// <param name="from">Email address</param>
-        /// <param name="deliverToAll">True if the message should be delivered to the CC and BCC recipients in addition to the TO recipients. When false, the message is only delivered to the TO recipients, but the message headers will show the specified other recipients.</param>
-        /// <param name="subject">The subject of message</param>
-        /// <param name="bodyHtml">HTML body content</param>
-        /// <param name="attachments">Files to attach</param>
-        /// <returns></returns>
-        [HttpPost("{id}/replyWithAttachments")]
-        [Consumes("multipart/form-data")]
-        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
-        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message does not exist")]
-        [SwaggerResponse(System.Net.HttpStatusCode.InternalServerError, typeof(void), Description = "If message fails to send.")]
-        public async Task<IActionResult> ReplyWithAttachments(
-            Guid id,
-            string to,
-            string cc,
-            string bcc,
-            string from,
-            bool deliverToAll,
-            string subject,
-            [FromForm] string bodyHtml,
-            [FromForm] List<IFormFile> attachments)
-        {
-            var origMessage = new ApiModel.Message(await GetDbMessage(id, false));
-            var origMessageId = origMessage.Headers.FirstOrDefault(h => h.Name.Equals("Message-Id", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
-
-
-            Dictionary<string, string> headers = new Dictionary<string, string>();
-            headers["References"] = (
-                origMessageId
-                + " " +
-                origMessage.Headers.FirstOrDefault(h => h.Name.Equals("References"))?.Value ?? "").Trim();
-
-            if (!string.IsNullOrEmpty(origMessageId))
-            {
-                headers["In-Reply-To"] = origMessageId;
-            }
-
-            var toRecips = to?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-            var ccRecips = cc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-            var bccRecips = bcc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-
-            List<string> envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
-
-            // Process attachments with proper error handling
+            // Process attachments if provided
             var attachmentInfos = await ProcessAttachments(attachments);
 
             this.server.Send(headers,
@@ -283,7 +241,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
         /// <summary>
         /// Sends a message via the configured upstream/relay SMTP server.
-        /// The body of the request should be a HTML message to send encoded as UTF-8.
+        /// Accepts either text/html (for body only) or multipart/form-data (for body with optional attachments).
         /// </summary>
         /// <param name="to">List of email addresses separated by commas</param>
         /// <param name="cc">List of email addresses separated by commas</param>
@@ -291,58 +249,29 @@ namespace Rnwood.Smtp4dev.Controllers
         /// <param name="from">Email address</param>
         /// <param name="deliverToAll">True if the message should be delivered to the CC and BCC recipients in addition to the TO recipients. When false, the message is only delivered to the TO recipients, but the message headers will show the specified other recipients.</param>
         /// <param name="subject">The subject of message</param>
+        /// <param name="bodyHtml">HTML body content (when using multipart/form-data)</param>
+        /// <param name="attachments">Optional files to attach (when using multipart/form-data)</param>
         /// <returns></returns>
         [HttpPost("send")]
-        [OpenApiBodyParameter("text/html")]
-        [Consumes("text/html")]
+        [Consumes("text/html", "multipart/form-data")]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
         [SwaggerResponse(System.Net.HttpStatusCode.InternalServerError, typeof(void), Description = "If message fails to send.")]
-        public async Task<IActionResult> Send(string to, string cc, string bcc, string from, bool deliverToAll, string subject)
-        {
-            string bodyHtml = await HttpContext.Request.Body.ReadStringAsync(Encoding.UTF8);
-            Dictionary<string, string> headers = new Dictionary<string, string>();
-      
-            var toRecips = to?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-            var ccRecips = cc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-            var bccRecips = bcc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-
-            List<string> envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
-
-            this.server.Send(headers,
-                toRecips,
-                ccRecips,
-                from, envelopeRecips.Distinct().ToArray(), subject, bodyHtml);
-
-            return Ok();
-        }
-
-        /// <summary>
-        /// Sends a message with attachments via the configured upstream/relay SMTP server.
-        /// The request should be multipart/form-data with 'bodyHtml' field and optional 'attachments' files.
-        /// </summary>
-        /// <param name="to">List of email addresses separated by commas</param>
-        /// <param name="cc">List of email addresses separated by commas</param>
-        /// <param name="bcc">List of email addresses separated by commas</param>
-        /// <param name="from">Email address</param>
-        /// <param name="deliverToAll">True if the message should be delivered to the CC and BCC recipients in addition to the TO recipients. When false, the message is only delivered to the TO recipients, but the message headers will show the specified other recipients.</param>
-        /// <param name="subject">The subject of message</param>
-        /// <param name="bodyHtml">HTML body content</param>
-        /// <param name="attachments">Files to attach</param>
-        /// <returns></returns>
-        [HttpPost("sendWithAttachments")]
-        [Consumes("multipart/form-data")]
-        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
-        [SwaggerResponse(System.Net.HttpStatusCode.InternalServerError, typeof(void), Description = "If message fails to send.")]
-        public async Task<IActionResult> SendWithAttachments(
+        public async Task<IActionResult> Send(
             string to, 
             string cc, 
             string bcc, 
             string from, 
             bool deliverToAll, 
             string subject,
-            [FromForm] string bodyHtml,
-            [FromForm] List<IFormFile> attachments)
+            [FromForm] string bodyHtml = null,
+            [FromForm] List<IFormFile> attachments = null)
         {
+            // Handle different content types
+            if (HttpContext.Request.ContentType?.StartsWith("text/html") == true)
+            {
+                bodyHtml = await HttpContext.Request.Body.ReadStringAsync(Encoding.UTF8);
+            }
+
             Dictionary<string, string> headers = new Dictionary<string, string>();
       
             var toRecips = to?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
@@ -351,7 +280,7 @@ namespace Rnwood.Smtp4dev.Controllers
 
             List<string> envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
 
-            // Process attachments with proper error handling
+            // Process attachments if provided
             var attachmentInfos = await ProcessAttachments(attachments);
 
             this.server.Send(headers,
