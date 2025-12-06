@@ -175,6 +175,84 @@ namespace Rnwood.Smtp4dev.Controllers
         }
 
         /// <summary>
+        /// Replies to the message with the specified ID with attachments using the configured relay SMTP server.
+        /// </summary>
+        /// <param name="id">The Id of the message to reply to</param>
+        /// <param name="to">List of email addresses separated by commas</param>
+        /// <param name="cc">List of email addresses separated by commas</param>
+        /// <param name="bcc">List of email addresses separated by commas</param>
+        /// <param name="from">Email address</param>
+        /// <param name="deliverToAll">True if the message should be delivered to the CC and BCC recipients in addition to the TO recipients. When false, the message is only delivered to the TO recipients, but the message headers will show the specified other recipients.</param>
+        /// <param name="subject">The subject of message</param>
+        /// <param name="bodyHtml">HTML body content</param>
+        /// <param name="attachments">Files to attach</param>
+        /// <returns></returns>
+        [HttpPost("{id}/replyWithAttachments")]
+        [Consumes("multipart/form-data")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.NotFound, typeof(void), Description = "If the message does not exist")]
+        [SwaggerResponse(System.Net.HttpStatusCode.InternalServerError, typeof(void), Description = "If message fails to send.")]
+        public async Task<IActionResult> ReplyWithAttachments(
+            Guid id,
+            string to,
+            string cc,
+            string bcc,
+            string from,
+            bool deliverToAll,
+            string subject,
+            [FromForm] string bodyHtml,
+            [FromForm] List<IFormFile> attachments)
+        {
+            var origMessage = new ApiModel.Message(await GetDbMessage(id, false));
+            var origMessageId = origMessage.Headers.FirstOrDefault(h => h.Name.Equals("Message-Id", StringComparison.OrdinalIgnoreCase))?.Value ?? "";
+
+
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+            headers["References"] = (
+                origMessageId
+                + " " +
+                origMessage.Headers.FirstOrDefault(h => h.Name.Equals("References"))?.Value ?? "").Trim();
+
+            if (!string.IsNullOrEmpty(origMessageId))
+            {
+                headers["In-Reply-To"] = origMessageId;
+            }
+
+            var toRecips = to?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+            var ccRecips = cc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+            var bccRecips = bcc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+
+            List<string> envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
+
+            // Convert IFormFile attachments to AttachmentInfo
+            List<Server.AttachmentInfo> attachmentInfos = null;
+            if (attachments != null && attachments.Count > 0)
+            {
+                attachmentInfos = new List<Server.AttachmentInfo>();
+                foreach (var file in attachments)
+                {
+                    var memoryStream = new MemoryStream();
+                    await file.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+                    
+                    attachmentInfos.Add(new Server.AttachmentInfo
+                    {
+                        FileName = file.FileName,
+                        ContentType = file.ContentType ?? "application/octet-stream",
+                        Content = memoryStream
+                    });
+                }
+            }
+
+            this.server.Send(headers,
+                toRecips,
+                ccRecips,
+                from, envelopeRecips.Distinct().ToArray(), subject, bodyHtml, attachmentInfos);
+
+            return Ok();
+        }
+
+        /// <summary>
         /// Sends a message via the configured upstream/relay SMTP server.
         /// The body of the request should be a HTML message to send encoded as UTF-8.
         /// </summary>
@@ -205,6 +283,69 @@ namespace Rnwood.Smtp4dev.Controllers
                 toRecips,
                 ccRecips,
                 from, envelopeRecips.Distinct().ToArray(), subject, bodyHtml);
+
+            return Ok();
+        }
+
+        /// <summary>
+        /// Sends a message with attachments via the configured upstream/relay SMTP server.
+        /// The request should be multipart/form-data with 'bodyHtml' field and optional 'attachments' files.
+        /// </summary>
+        /// <param name="to">List of email addresses separated by commas</param>
+        /// <param name="cc">List of email addresses separated by commas</param>
+        /// <param name="bcc">List of email addresses separated by commas</param>
+        /// <param name="from">Email address</param>
+        /// <param name="deliverToAll">True if the message should be delivered to the CC and BCC recipients in addition to the TO recipients. When false, the message is only delivered to the TO recipients, but the message headers will show the specified other recipients.</param>
+        /// <param name="subject">The subject of message</param>
+        /// <param name="bodyHtml">HTML body content</param>
+        /// <param name="attachments">Files to attach</param>
+        /// <returns></returns>
+        [HttpPost("sendWithAttachments")]
+        [Consumes("multipart/form-data")]
+        [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.InternalServerError, typeof(void), Description = "If message fails to send.")]
+        public async Task<IActionResult> SendWithAttachments(
+            string to, 
+            string cc, 
+            string bcc, 
+            string from, 
+            bool deliverToAll, 
+            string subject,
+            [FromForm] string bodyHtml,
+            [FromForm] List<IFormFile> attachments)
+        {
+            Dictionary<string, string> headers = new Dictionary<string, string>();
+      
+            var toRecips = to?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+            var ccRecips = cc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+            var bccRecips = bcc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+
+            List<string> envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
+
+            // Convert IFormFile attachments to AttachmentInfo
+            List<Server.AttachmentInfo> attachmentInfos = null;
+            if (attachments != null && attachments.Count > 0)
+            {
+                attachmentInfos = new List<Server.AttachmentInfo>();
+                foreach (var file in attachments)
+                {
+                    var memoryStream = new MemoryStream();
+                    await file.CopyToAsync(memoryStream);
+                    memoryStream.Position = 0;
+                    
+                    attachmentInfos.Add(new Server.AttachmentInfo
+                    {
+                        FileName = file.FileName,
+                        ContentType = file.ContentType ?? "application/octet-stream",
+                        Content = memoryStream
+                    });
+                }
+            }
+
+            this.server.Send(headers,
+                toRecips,
+                ccRecips,
+                from, envelopeRecips.Distinct().ToArray(), subject, bodyHtml, attachmentInfos);
 
             return Ok();
         }

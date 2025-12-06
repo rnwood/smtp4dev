@@ -28,6 +28,18 @@
             <el-form-item label="Subject">
                 <el-input v-model="subject" />
             </el-form-item>
+
+            <el-form-item label="Attachments">
+                <el-upload
+                    ref="upload"
+                    v-model:file-list="attachments"
+                    :auto-upload="false"
+                    multiple
+                    :on-remove="handleRemove"
+                    :on-change="handleChange">
+                    <el-button type="primary" size="small">Choose Files</el-button>
+                </el-upload>
+            </el-form-item>
         </el-form>
 
         <quillEditor style="height: 50vh" ref="editor"  content-type="html"></quillEditor>
@@ -46,6 +58,7 @@
     import Message from '../ApiClient/Message';
     import MessagesController from '../ApiClient/MessagesController';
     import { ElNotification } from 'element-plus';
+    import type { UploadFile, UploadUserFile } from 'element-plus';
 
     @Component({ components: { quillEditor: QuillEditor } })
     class MessageCompose extends Vue {
@@ -58,6 +71,7 @@
         subject = "";
         sendInProgress = false;
         fromChoices: string[] = [];
+        attachments: UploadUserFile[] = [];
 
         @Prop({ default: null })
         replyToMessage: Message | null = null;
@@ -73,16 +87,37 @@
         async close() {
         }
 
+        handleRemove(file: UploadFile) {
+            // File removal is handled automatically by el-upload
+        }
+
+        handleChange(file: UploadFile) {
+            // File change is handled automatically by el-upload
+        }
+
         async send() {
             try {
                 this.sendInProgress = true
 
                 const body = (this.$refs.editor as any).getHTML();
 
+                // Convert UploadUserFile to File objects
+                const files: File[] = this.attachments
+                    .filter(f => f.raw)
+                    .map(f => f.raw as File);
+
                 if (this.replyToMessage) {
-                    await new MessagesController().reply(this.replyToMessage?.id, this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject,body);
+                    if (files.length > 0) {
+                        await new MessagesController().replyWithAttachments(this.replyToMessage?.id, this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body, files);
+                    } else {
+                        await new MessagesController().reply(this.replyToMessage?.id, this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body);
+                    }
                 } else {
-                    await new MessagesController().send(this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body);
+                    if (files.length > 0) {
+                        await new MessagesController().sendWithAttachments(this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body, files);
+                    } else {
+                        await new MessagesController().send(this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body);
+                    }
                 }
                 
                 ElNotification.success({ title: "Message sent" });
@@ -146,6 +181,9 @@
                 this.bcc="";
                 body = "";
             }
+
+            // Clear attachments when replying/composing new message
+            this.attachments = [];
 
             (this.$refs.editor as any).setHTML('');
             (this.$refs.editor as any).pasteHTML(body, 'silent');
