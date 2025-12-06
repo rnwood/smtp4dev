@@ -8,10 +8,26 @@ using Rnwood.Smtp4dev.DbModel;
 
 namespace Rnwood.Smtp4dev.Server
 {
+    /// <summary>
+    /// Represents an email attachment with its metadata and content.
+    /// The consumer is responsible for disposing the Content stream after use.
+    /// </summary>
     public class AttachmentInfo
     {
+        /// <summary>
+        /// Gets or sets the filename of the attachment.
+        /// </summary>
         public string FileName { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the MIME content type of the attachment.
+        /// </summary>
         public string ContentType { get; set; }
+        
+        /// <summary>
+        /// Gets or sets the content stream of the attachment.
+        /// The stream will be disposed by the SMTP client after sending.
+        /// </summary>
         public Stream Content { get; set; }
     }
 

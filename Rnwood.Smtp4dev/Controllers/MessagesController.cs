@@ -156,7 +156,7 @@ namespace Rnwood.Smtp4dev.Controllers
                         Content = memoryStream
                     });
                 }
-                catch
+                catch (Exception ex) when (ex is IOException || ex is ArgumentException)
                 {
                     // Clean up on error
                     memoryStream.Dispose();
@@ -164,6 +164,7 @@ namespace Rnwood.Smtp4dev.Controllers
                     {
                         info.Content?.Dispose();
                     }
+                    log.Error(ex, "Failed to process attachment: {fileName}", file.FileName);
                     throw;
                 }
             }
