@@ -82,8 +82,22 @@ export default class MessagesController {
         return `${this.apiBaseUrl}/${encodeURIComponent(id)}/reply?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc)}&bcc=${encodeURIComponent(bcc)}&deliverToAll=${encodeURIComponent(deliverToAll)}&subject=${encodeURIComponent(subject)}`;
     }
 
-    public async reply(id: string, from: string, to: string, cc: string, bcc: string, deliverToAll: boolean, subject: string, bodyHtml: string): Promise<void> {
-        return (await axios.post(this.reply_url(id, from, to, cc, bcc, deliverToAll, subject), bodyHtml || undefined, { headers: { "Content-Type": "text/html" } })).data as void;
+    public async reply(id: string, from: string, to: string, cc: string, bcc: string, deliverToAll: boolean, subject: string, bodyHtml: string, attachments?: File[]): Promise<void> {
+        // If attachments provided, use multipart/form-data, otherwise use text/html
+        if (attachments && attachments.length > 0) {
+            const formData = new FormData();
+            formData.append('bodyHtml', bodyHtml);
+            attachments.forEach(file => {
+                formData.append('attachments', file);
+            });
+            return (await axios.post(this.reply_url(id, from, to, cc, bcc, deliverToAll, subject), formData, { 
+                headers: { "Content-Type": "multipart/form-data" } 
+            })).data as void;
+        } else {
+            return (await axios.post(this.reply_url(id, from, to, cc, bcc, deliverToAll, subject), bodyHtml || undefined, { 
+                headers: { "Content-Type": "text/html" } 
+            })).data as void;
+        }
     }
 
     // post: api/Messages/send  
@@ -91,8 +105,22 @@ export default class MessagesController {
         return `${this.apiBaseUrl}/send?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc)}&bcc=${encodeURIComponent(bcc)}&deliverToAll=${encodeURIComponent(deliverToAll)}&subject=${encodeURIComponent(subject)}`;
     }
 
-    public async send(from: string, to: string, cc: string, bcc: string, deliverToAll: boolean, subject: string, bodyHtml: string): Promise<void> {
-        return (await axios.post(this.send_url(from, to, cc, bcc, deliverToAll, subject), bodyHtml || undefined, { headers: { "Content-Type": "text/html" } })).data as void;
+    public async send(from: string, to: string, cc: string, bcc: string, deliverToAll: boolean, subject: string, bodyHtml: string, attachments?: File[]): Promise<void> {
+        // If attachments provided, use multipart/form-data, otherwise use text/html
+        if (attachments && attachments.length > 0) {
+            const formData = new FormData();
+            formData.append('bodyHtml', bodyHtml);
+            attachments.forEach(file => {
+                formData.append('attachments', file);
+            });
+            return (await axios.post(this.send_url(from, to, cc, bcc, deliverToAll, subject), formData, { 
+                headers: { "Content-Type": "multipart/form-data" } 
+            })).data as void;
+        } else {
+            return (await axios.post(this.send_url(from, to, cc, bcc, deliverToAll, subject), bodyHtml || undefined, { 
+                headers: { "Content-Type": "text/html" } 
+            })).data as void;
+        }
     }
 
     // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content  
