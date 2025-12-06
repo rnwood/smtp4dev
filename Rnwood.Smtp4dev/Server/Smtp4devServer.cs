@@ -832,7 +832,7 @@ namespace Rnwood.Smtp4dev.Server
             return Task.CompletedTask;
         }
 
-        public void Send(IDictionary<string, string> headers, string[] to, string[] cc, string from, string[] envelopeRecipients, string subject, string bodyHtml)
+        public void Send(IDictionary<string, string> headers, string[] to, string[] cc, string from, string[] envelopeRecipients, string subject, string bodyHtml, IEnumerable<AttachmentInfo> attachments = null)
         {
             MailboxAddress sender = MailboxAddress.Parse(from);
             var relaySmtpClient = this.relaySmtpClientFactory(this.relayOptions.CurrentValue);
@@ -847,6 +847,16 @@ namespace Rnwood.Smtp4dev.Server
             message.MessageId = $"<{Guid.NewGuid()}@{this.serverOptions.CurrentValue.HostName}>";
             BodyBuilder bodyBuilder = new BodyBuilder();
             bodyBuilder.HtmlBody = bodyHtml;
+            
+            // Add attachments if provided
+            if (attachments != null)
+            {
+                foreach (var attachment in attachments)
+                {
+                    bodyBuilder.Attachments.Add(attachment.FileName, attachment.Content, ContentType.Parse(attachment.ContentType));
+                }
+            }
+            
             message.Body = bodyBuilder.ToMessageBody();
             foreach (var kvp in headers)
             {
