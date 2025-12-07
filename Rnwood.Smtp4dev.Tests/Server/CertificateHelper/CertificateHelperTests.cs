@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Rnwood.Smtp4dev.Tests.Resources;
 using Xunit;
 

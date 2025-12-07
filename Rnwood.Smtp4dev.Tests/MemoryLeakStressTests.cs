@@ -10,7 +10,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.AspNetCore.SignalR.Client;
 using Rnwood.Smtp4dev.Tests.E2E;
 using Xunit;

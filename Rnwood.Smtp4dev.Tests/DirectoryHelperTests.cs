@@ -1,6 +1,6 @@
 ﻿using System;
 using System.IO;
-using FluentAssertions;
+using AwesomeAssertions;
 using Xunit;
 
 namespace Rnwood.Smtp4dev.Tests
