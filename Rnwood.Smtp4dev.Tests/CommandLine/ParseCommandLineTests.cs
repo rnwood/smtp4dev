@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Reflection;
 using CommandLiners;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.Extensions.Configuration;
 using Xunit;
 
