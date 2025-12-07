@@ -1,4 +1,4 @@
-﻿using FluentAssertions;
+﻿using AwesomeAssertions;
 using Xunit;
 
 namespace Rnwood.Smtp4dev.Tests.Server.SSCertGenerator

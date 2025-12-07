@@ -1,6 +1,6 @@
 using System;
 using System.Linq;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.EntityFrameworkCore;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.Tests.DBMigrations.Helpers;

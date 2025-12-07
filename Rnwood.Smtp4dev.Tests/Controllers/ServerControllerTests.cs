@@ -10,7 +10,7 @@ using Rnwood.Smtp4dev.Server;
 using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.Smtp4dev.Service;
 using Xunit;
-using FluentAssertions;
+using AwesomeAssertions;
 using CommandLiners;
 
 namespace Rnwood.Smtp4dev.Tests.Controllers

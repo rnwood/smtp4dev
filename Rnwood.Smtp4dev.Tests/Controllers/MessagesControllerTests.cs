@@ -9,7 +9,7 @@ using System.Text;
 using System.Threading.Tasks;
 using AngleSharp.Io;
 using Microsoft.AspNetCore.Mvc;
-using FluentAssertions;
+using AwesomeAssertions;
 using Microsoft.EntityFrameworkCore;
 using MimeKit.Encodings;
 using NSubstitute;

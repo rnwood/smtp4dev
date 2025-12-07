@@ -11,7 +11,7 @@ using Xunit;
 using Rnwood.Smtp4dev.Server.Imap;
 using LumiSoft.Net.IMAP;
 using System.Linq.Dynamic.Core;
-using FluentAssertions;
+using AwesomeAssertions;
 using Rnwood.Smtp4dev.Migrations;
 using Org.BouncyCastle.Bcpg;
 
