@@ -31,8 +31,8 @@
     <PackageReference Include="ReflectionMagic" Version="5.0.1" />
     <PackageReference Include="AngleSharp" Version="1.1.2" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
-    <PackageReference Include="Microsoft.Playwright" Version="1.47.0" />
-    <PackageReference Include="Microsoft.Playwright.MSTest" Version="1.47.0" />
+    <PackageReference Include="Microsoft.Playwright" Version="1.57.0" />
+    <PackageReference Include="Microsoft.Playwright.MSTest" Version="1.57.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.4" />
     <PackageReference Include="xunit" Version="2.9.3" />
