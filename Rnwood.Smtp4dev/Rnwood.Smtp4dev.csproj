@@ -69,7 +69,7 @@
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="StreamLib" Version="0.12.1" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
-    <PackageReference Include="System.Reactive" Version="6.0.1" />
+    <PackageReference Include="System.Reactive" Version="6.1.0" />
     <PackageReference Include="VueCliMiddleware" Version="6.0.0" />
     </ItemGroup>
 
