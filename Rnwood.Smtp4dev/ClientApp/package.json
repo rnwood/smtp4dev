@@ -17,7 +17,7 @@
     "@fortawesome/vue-fontawesome": "^3.0.6",
     "@jsx-email/doiuse-email": "^1.0.1",
     "@microsoft/signalr": "^8.0.0",
-    "@types/jest": "^29.5.12",
+    "@types/jest": "^30.0.0",
     "@types/sanitize-html": "^2.11.0",
     "@typescript-eslint/parser": "^8.0.0",
     "@vitejs/plugin-vue": "^5.0.4",
