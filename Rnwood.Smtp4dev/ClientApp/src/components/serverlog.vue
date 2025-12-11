@@ -57,6 +57,7 @@
         connection: HubConnectionManager | null = null;
 
         logEntries: LogEntry[] = [];
+        allLogEntries: LogEntry[] = []; // Store all entries for client-side filtering
         availableLevels: string[] = [];
         availableSources: string[] = [];
         selectedLevel: string | null = null;
@@ -66,9 +67,38 @@
         loading = false;
         autoScroll = true;
         searchDebounceTimer: number | null = null;
+        maxLogEntries = 500; // Match server-side buffer size
 
         get displayedLogs(): string {
             return this.logEntries.map(e => e.formattedMessage).join("");
+        }
+
+        // Client-side filtering method
+        filterLogEntries(): LogEntry[] {
+            const searchLower = this.searchText ? this.searchText.toLowerCase() : null;
+            
+            return this.allLogEntries.filter(e => {
+                // Filter by level
+                if (this.selectedLevel && e.level !== this.selectedLevel) {
+                    return false;
+                }
+                
+                // Filter by source
+                if (this.selectedSource && e.source !== this.selectedSource) {
+                    return false;
+                }
+                
+                // Filter by search text
+                if (searchLower) {
+                    const matchesMessage = e.message.toLowerCase().includes(searchLower);
+                    const matchesException = e.exception && e.exception.toLowerCase().includes(searchLower);
+                    if (!matchesMessage && !matchesException) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
         }
 
         async mounted() {
@@ -86,8 +116,13 @@
         }
 
         onServerLogReceived(logEntry: LogEntry) {
-            // Add new entry to the buffer
-            this.logEntries.push(logEntry);
+            // Add new entry to the full collection
+            this.allLogEntries.push(logEntry);
+            
+            // Trim buffer if it exceeds max size (match server behavior)
+            if (this.allLogEntries.length > this.maxLogEntries) {
+                this.allLogEntries.shift(); // Remove oldest entry
+            }
             
             // Update available sources and levels if needed
             if (!this.availableSources.includes(logEntry.source)) {
@@ -99,8 +134,8 @@
                 this.availableLevels.sort();
             }
             
-            // Apply filters to new entry and update display
-            this.applyFilters();
+            // Apply client-side filtering to update displayed entries
+            this.logEntries = this.filterLogEntries();
             
             if (this.autoScroll) {
                 this.$nextTick(() => {
@@ -122,32 +157,25 @@
                 clearTimeout(this.searchDebounceTimer);
             }
             this.searchDebounceTimer = window.setTimeout(() => {
-                this.applyFilters();
-            }, 300);
-        }
-
-        async applyFilters() {
-            this.error = null;
-            this.loading = true;
-
-            try {
-                const entries = await new ServerLogController().getServerLogEntries(
-                    this.selectedLevel || undefined,
-                    this.selectedSource || undefined,
-                    this.searchText || undefined
-                );
-                
-                this.logEntries = entries;
+                // Apply client-side filtering
+                this.logEntries = this.filterLogEntries();
                 
                 if (this.autoScroll) {
                     this.$nextTick(() => {
                         this.scrollToBottom();
                     });
                 }
-            } catch (e: any) {
-                this.error = e;
-            } finally {
-                this.loading = false;
+            }, 300);
+        }
+
+        async applyFilters() {
+            // Apply client-side filtering without making API calls
+            this.logEntries = this.filterLogEntries();
+            
+            if (this.autoScroll) {
+                this.$nextTick(() => {
+                    this.scrollToBottom();
+                });
             }
         }
 
@@ -156,20 +184,19 @@
             this.loading = true;
 
             try {
-                // Load available filter options
+                // Load available filter options and all entries
                 const [levels, sources, entries] = await Promise.all([
                     new ServerLogController().getServerLogLevels(),
                     new ServerLogController().getServerLogSources(),
-                    new ServerLogController().getServerLogEntries(
-                        this.selectedLevel || undefined,
-                        this.selectedSource || undefined,
-                        this.searchText || undefined
-                    )
+                    new ServerLogController().getServerLogEntries()
                 ]);
                 
                 this.availableLevels = levels;
                 this.availableSources = sources;
-                this.logEntries = entries;
+                this.allLogEntries = entries;
+                
+                // Apply client-side filtering
+                this.logEntries = this.filterLogEntries();
                 
                 if (this.autoScroll) {
                     this.$nextTick(() => {
@@ -189,6 +216,7 @@
 
             try {
                 await new ServerLogController().clearServerLog();
+                this.allLogEntries = [];
                 this.logEntries = [];
                 this.availableLevels = [];
                 this.availableSources = [];
