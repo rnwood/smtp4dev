@@ -75,25 +75,30 @@
 
         // Client-side filtering method
         filterLogEntries(): LogEntry[] {
-            let filtered = this.allLogEntries;
-
-            if (this.selectedLevel) {
-                filtered = filtered.filter(e => e.level === this.selectedLevel);
-            }
-
-            if (this.selectedSource) {
-                filtered = filtered.filter(e => e.source === this.selectedSource);
-            }
-
-            if (this.searchText) {
-                const searchLower = this.searchText.toLowerCase();
-                filtered = filtered.filter(e => 
-                    e.message.toLowerCase().includes(searchLower) ||
-                    (e.exception && e.exception.toLowerCase().includes(searchLower))
-                );
-            }
-
-            return filtered;
+            const searchLower = this.searchText ? this.searchText.toLowerCase() : null;
+            
+            return this.allLogEntries.filter(e => {
+                // Filter by level
+                if (this.selectedLevel && e.level !== this.selectedLevel) {
+                    return false;
+                }
+                
+                // Filter by source
+                if (this.selectedSource && e.source !== this.selectedSource) {
+                    return false;
+                }
+                
+                // Filter by search text
+                if (searchLower) {
+                    const matchesMessage = e.message.toLowerCase().includes(searchLower);
+                    const matchesException = e.exception && e.exception.toLowerCase().includes(searchLower);
+                    if (!matchesMessage && !matchesException) {
+                        return false;
+                    }
+                }
+                
+                return true;
+            });
         }
 
         async mounted() {
