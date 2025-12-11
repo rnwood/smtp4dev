@@ -67,6 +67,7 @@
         loading = false;
         autoScroll = true;
         searchDebounceTimer: number | null = null;
+        maxLogEntries = 500; // Match server-side buffer size
 
         get displayedLogs(): string {
             return this.logEntries.map(e => e.formattedMessage).join("");
@@ -88,7 +89,7 @@
                 const searchLower = this.searchText.toLowerCase();
                 filtered = filtered.filter(e => 
                     e.message.toLowerCase().includes(searchLower) ||
-                    e.exception.toLowerCase().includes(searchLower)
+                    (e.exception && e.exception.toLowerCase().includes(searchLower))
                 );
             }
 
@@ -112,6 +113,11 @@
         onServerLogReceived(logEntry: LogEntry) {
             // Add new entry to the full collection
             this.allLogEntries.push(logEntry);
+            
+            // Trim buffer if it exceeds max size (match server behavior)
+            if (this.allLogEntries.length > this.maxLogEntries) {
+                this.allLogEntries.shift(); // Remove oldest entry
+            }
             
             // Update available sources and levels if needed
             if (!this.availableSources.includes(logEntry.source)) {
