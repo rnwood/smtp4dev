@@ -42,7 +42,7 @@
     "ts-jest": "^29.1.2",
     "typescript": "^5.4.5",
     "vue": "^3.2.13",
-    "vue-facing-decorator": "^3.0.4",
+    "vue-facing-decorator": "^4.0.0",
     "vue-router": "^4.3.0",
     "vue3-ace-editor": "^2.2.4"
   },
