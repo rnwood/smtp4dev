@@ -65,7 +65,7 @@
     <PackageReference Include="Serilog.Sinks.Console" Version="6.1.1" />
     <PackageReference Include="Serilog.Sinks.EventLog" Version="4.0.0" />
     <PackageReference Include="Terminal.Gui" Version="1.19.0" />
-    <PackageReference Include="Html2Markdown" Version="6.2.5.7" />
+    <PackageReference Include="Html2Markdown" Version="7.1.1.19" />
     <PackageReference Include="Serilog.Sinks.File" Version="7.0.0" />
     <PackageReference Include="StreamLib" Version="0.12.1" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.1" />
