@@ -30,7 +30,7 @@
     <PackageReference Include="NSubstitute" Version="5.3.0" />
     <PackageReference Include="ReflectionMagic" Version="5.0.1" />
     <PackageReference Include="AngleSharp" Version="1.4.0" />
-    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
     <PackageReference Include="Microsoft.Playwright" Version="1.57.0" />
     <PackageReference Include="Microsoft.Playwright.MSTest" Version="1.57.0" />
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="8.0.1" />
