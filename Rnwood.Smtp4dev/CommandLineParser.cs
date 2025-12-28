@@ -115,9 +115,9 @@ namespace Rnwood.Smtp4dev
             }
             else
             {
-                Console.Error.WriteLine();
-                Console.Error.WriteLine(" > For help use argument --help");
-                Console.Error.WriteLine();
+                Console.WriteLine();
+                Console.WriteLine(" > For help use argument --help");
+                Console.WriteLine();
             }
 
             return map;

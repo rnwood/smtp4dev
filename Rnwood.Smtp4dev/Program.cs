@@ -105,8 +105,8 @@ namespace Rnwood.Smtp4dev
 
             string version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 
-            // Only use ANSI colors if stderr is not redirected (e.g., not captured by tests)
-            bool useColors = !Console.IsErrorRedirected;
+            // Only use ANSI colors if stdout is not redirected (e.g., not captured by tests)
+            bool useColors = !Console.IsOutputRedirected;
             string blue = useColors ? Blue : "";
             string yellow = useColors ? Yellow : "";
             string bold = useColors ? Bold : "";
@@ -123,7 +123,7 @@ namespace Rnwood.Smtp4dev
         $"{reset}" ];
             foreach (var line in envelope)
             {
-                Console.Error.WriteLine(line);
+                Console.WriteLine(line);
             }
 
 
