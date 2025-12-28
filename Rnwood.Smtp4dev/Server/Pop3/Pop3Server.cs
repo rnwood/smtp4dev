@@ -70,7 +70,14 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 					}
 				}
 				catch { }
-				return new[] { (optionsMonitor.CurrentValue.Pop3Port ?? 110) };
+				
+				// If Pop3Port is null, the server is disabled - return empty array
+				if (!optionsMonitor.CurrentValue.Pop3Port.HasValue)
+				{
+					return Array.Empty<int>();
+				}
+				
+				return new[] { optionsMonitor.CurrentValue.Pop3Port.Value };
 			}
 		}
 
