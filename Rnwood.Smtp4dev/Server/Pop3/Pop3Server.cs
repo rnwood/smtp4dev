@@ -70,7 +70,14 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 					}
 				}
 				catch { }
-				return new[] { (optionsMonitor.CurrentValue.Pop3Port ?? 110) };
+				
+				// If Pop3Port is null, the server is disabled - return empty array
+				if (!optionsMonitor.CurrentValue.Pop3Port.HasValue)
+				{
+					return Array.Empty<int>();
+				}
+				
+				return new[] { optionsMonitor.CurrentValue.Pop3Port.Value };
 			}
 		}
 
@@ -98,7 +105,14 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 
 			// Create listeners now based on options
 			var opts = optionsMonitor.CurrentValue;
-			int port = opts.Pop3Port ?? 110;
+			
+			if (!opts.Pop3Port.HasValue)
+			{
+				logger.LogInformation("POP3 server disabled - no port configured");
+				return Task.CompletedTask;
+			}
+			
+			int port = opts.Pop3Port.Value;
 
 			// Determine a specific bind address if configured
 			IPAddress bindAddress = null;
