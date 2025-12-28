@@ -28,6 +28,7 @@ namespace Rnwood.Smtp4dev.Service
             lock (_syncRoot)
             {
                 _formatter.Format(logEvent, _output);
+                _output.Flush(); // Ensure log events appear immediately
             }
         }
     }
