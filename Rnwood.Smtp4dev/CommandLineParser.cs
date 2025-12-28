@@ -18,6 +18,9 @@ namespace Rnwood.Smtp4dev
 
             bool help = false;
             bool hadBadArgs = false;
+            
+            // Check if delivertostdout is enabled - if so, help hint goes to stderr to keep stdout clean for message content
+            bool deliverToStdout = args.Any(a => a.StartsWith("--delivertostdout", StringComparison.OrdinalIgnoreCase));
 
             OptionSet options = new OptionSet
             {
@@ -115,9 +118,11 @@ namespace Rnwood.Smtp4dev
             }
             else
             {
-                Console.WriteLine();
-                Console.WriteLine(" > For help use argument --help");
-                Console.WriteLine();
+                // Write help hint to stderr when delivertostdout is enabled, stdout otherwise
+                var hintOutput = deliverToStdout ? Console.Error : Console.Out;
+                hintOutput.WriteLine();
+                hintOutput.WriteLine(" > For help use argument --help");
+                hintOutput.WriteLine();
             }
 
             return map;
