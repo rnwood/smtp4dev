@@ -380,6 +380,42 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             Assert.Equal(testMessage1File2Content, stringResult);
         }
 
+        [Fact]
+        public async Task GetPartContent_WithDownloadTrue_SetsFileDownloadName()
+        {
+            DbModel.Message testMessage1 = await GetTestMessage1();
+            TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
+            MessagesController messagesController = new MessagesController(messagesRepository, null, new MimeProcessingService());
+
+            var parts = (await messagesController.GetMessage(testMessage1.Id)).Parts.Flatten(p => p.ChildParts).SelectMany(p => p.Attachments);
+
+            var part = parts.First(p => p.FileName == "file2");
+
+            var result = await messagesController.GetPartContent(testMessage1.Id, part.Id, download: true);
+            var stringResult = await new StreamReader(result.FileStream, Encoding.UTF8).ReadToEndAsync();
+
+            Assert.Equal(testMessage1File2Content, stringResult);
+            Assert.Equal("file2", result.FileDownloadName);
+        }
+
+        [Fact]
+        public async Task GetPartContent_WithDownloadFalse_NoFileDownloadName()
+        {
+            DbModel.Message testMessage1 = await GetTestMessage1();
+            TestMessagesRepository messagesRepository = new TestMessagesRepository(testMessage1);
+            MessagesController messagesController = new MessagesController(messagesRepository, null, new MimeProcessingService());
+
+            var parts = (await messagesController.GetMessage(testMessage1.Id)).Parts.Flatten(p => p.ChildParts).SelectMany(p => p.Attachments);
+
+            var part = parts.First(p => p.FileName == "file2");
+
+            var result = await messagesController.GetPartContent(testMessage1.Id, part.Id, download: false);
+            var stringResult = await new StreamReader(result.FileStream, Encoding.UTF8).ReadToEndAsync();
+
+            Assert.Equal(testMessage1File2Content, stringResult);
+            Assert.Null(result.FileDownloadName);
+        }
+
         [Theory]
         [InlineData("utf-8")]
         [InlineData("iso-8859-1")]
