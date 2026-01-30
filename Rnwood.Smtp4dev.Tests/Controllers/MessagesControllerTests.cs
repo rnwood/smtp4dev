@@ -417,6 +417,49 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             
             Assert.Contains(qpResult, result);
         }
+
+        [Fact]
+        public async Task GetSummaries_MultipleRecipients_EmailsShouldNotHaveLeadingSpaces()
+        {
+            // Arrange - create a message with multiple recipients that will be joined with ", "
+            MimeMessage mimeMessage = new MimeMessage();
+            mimeMessage.From.Add(InternetAddress.Parse("from@example.com"));
+            mimeMessage.To.Add(InternetAddress.Parse("test@example.com"));
+            mimeMessage.To.Add(InternetAddress.Parse("admin@example.com"));
+            mimeMessage.Subject = "Test Subject";
+            
+            BodyBuilder bodyBuilder = new BodyBuilder();
+            bodyBuilder.HtmlBody = "<html>Test</html>";
+            mimeMessage.Body = bodyBuilder.ToMessageBody();
+
+            MemoryMessageBuilder memoryMessageBuilder = new MemoryMessageBuilder();
+            memoryMessageBuilder.Recipients.Add("test@example.com");
+            memoryMessageBuilder.Recipients.Add("admin@example.com");
+            memoryMessageBuilder.From = "from@example.com";
+            memoryMessageBuilder.ReceivedDate = DateTime.Now;
+            using (var messageData = await memoryMessageBuilder.WriteData())
+            {
+                mimeMessage.WriteTo(messageData);
+            }
+
+            IMessage message = await memoryMessageBuilder.ToMessage();
+            var dbMessage = await new MessageConverter(new MimeProcessingService()).ConvertAsync(message, new[] { "test@example.com", "admin@example.com" });
+            dbMessage.Mailbox = new DbModel.Mailbox { Name = MailboxOptions.DEFAULTNAME };
+            dbMessage.MailboxFolder = new DbModel.MailboxFolder { Name = MailboxFolder.INBOX, Mailbox = dbMessage.Mailbox };
+
+            TestMessagesRepository messagesRepository = new TestMessagesRepository(dbMessage);
+            MessagesController messagesController = new MessagesController(messagesRepository, null, new MimeProcessingService());
+
+            // Act
+            var result = messagesController.GetSummaries(null);
+
+            // Assert
+            Assert.Single(result.Results);
+            Assert.Equal(2, result.Results[0].To.Length);
+            Assert.Equal("test@example.com", result.Results[0].To[0]);
+            Assert.Equal("admin@example.com", result.Results[0].To[1]); // Should NOT have leading space
+            Assert.DoesNotContain(result.Results[0].To, email => email.StartsWith(" "));
+        }
     }
 
 }
