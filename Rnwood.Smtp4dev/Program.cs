@@ -44,6 +44,14 @@ namespace Rnwood.Smtp4dev
         public const string Blue = "\u001b[34m";
         public const string Yellow = "\u001b[33m";
 
+        /// <summary>
+        /// Checks if the --delivertostdout flag is present in command line arguments
+        /// </summary>
+        private static bool IsDeliverToStdoutEnabled(IEnumerable<string> args)
+        {
+            return args.Any(a => a.StartsWith("--delivertostdout", StringComparison.OrdinalIgnoreCase));
+        }
+
         public static async Task Main(string[] args)
         {
             try
@@ -105,8 +113,11 @@ namespace Rnwood.Smtp4dev
 
             string version = Assembly.GetExecutingAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>().InformationalVersion;
 
-            // Only use ANSI colors if stderr is not redirected (e.g., not captured by tests)
-            bool useColors = !Console.IsErrorRedirected;
+            // Check if delivertostdout is enabled - if so, splash screen goes to stderr to keep stdout clean for message content
+            bool deliverToStdout = IsDeliverToStdoutEnabled(args);
+            
+            // Only use ANSI colors if the target output stream is not redirected
+            bool useColors = deliverToStdout ? !Console.IsErrorRedirected : !Console.IsOutputRedirected;
             string blue = useColors ? Blue : "";
             string yellow = useColors ? Yellow : "";
             string bold = useColors ? Bold : "";
@@ -121,9 +132,12 @@ namespace Rnwood.Smtp4dev
             $"{blue}|             /{reset}",
             $"{blue}└────────────'{reset}",
         $"{reset}" ];
+            
+            // Write splash screen to stderr when delivertostdout is enabled, stdout otherwise
+            var splashOutput = deliverToStdout ? Console.Error : Console.Out;
             foreach (var line in envelope)
             {
-                Console.Error.WriteLine(line);
+                splashOutput.WriteLine(line);
             }
 
 
@@ -323,8 +337,15 @@ namespace Rnwood.Smtp4dev
                 // Determine whether to use emojis based on terminal support
                 bool useEmoji = ConsoleHelper.IsEmojiSupported;
                 
-                // Configure console logging with our custom formatter
-                logConfigBuilder.WriteTo.Console(new ColoredConsoleFormatter(useEmoji));
+                // Check if delivertostdout is enabled - if so, logs go to stderr to keep stdout clean for message content
+                bool deliverToStdout = IsDeliverToStdoutEnabled(args);
+                
+                // Configure console logging with our custom formatter and sink
+                // When delivertostdout is enabled, write to stderr; otherwise write to stdout
+                logConfigBuilder.WriteTo.Sink(new Service.ConsoleStreamSink(
+                    new ColoredConsoleFormatter(useEmoji),
+                    useStdErr: deliverToStdout
+                ));
                 
                 // Read other config from appsettings (log levels, enrichers, file sink, etc.)
                 // but skip the console sink from config since we're setting it programmatically
@@ -346,6 +367,10 @@ namespace Rnwood.Smtp4dev
             {
                 //Ensure output goes somewhere if there's a config error.
                 ServerLogService = new Service.ServerLogService();
+                
+                // Check if delivertostdout is enabled to route error logs to the correct stream
+                bool deliverToStdout = IsDeliverToStdoutEnabled(args);
+                
                 var logConfigBuilder = new LoggerConfiguration().WriteTo.Sink(ServerLogService);
                 if (args.Any(a => a.Equals("--service", StringComparison.OrdinalIgnoreCase)))
                 {
@@ -355,7 +380,11 @@ namespace Rnwood.Smtp4dev
                 }
                 else
                 {
-                    logConfigBuilder.WriteTo.Console(new ColoredConsoleFormatter());
+                    // Use the custom sink to ensure logs go to the correct stream even on error
+                    logConfigBuilder.WriteTo.Sink(new Service.ConsoleStreamSink(
+                        new ColoredConsoleFormatter(),
+                        useStdErr: deliverToStdout
+                    ));
                 }
                 Log.Logger = logConfigBuilder.CreateLogger();
                 throw;
