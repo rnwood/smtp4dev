@@ -1,6 +1,7 @@
 ﻿using Rnwood.Smtp4dev.Migrations;
 using Rnwood.Smtp4dev.Server;
 using System;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -12,7 +13,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         {
             Id = dbMessage.Id;
             From = dbMessage.From;
-            To = dbMessage.To?.Split(',') ?? Array.Empty<string>();
+            To = dbMessage.To?.Split(',').Select(email => email.Trim()).ToArray() ?? Array.Empty<string>();
             ReceivedDate = dbMessage.ReceivedDate;
             Subject = dbMessage.Subject;
             AttachmentCount = dbMessage.AttachmentCount;
@@ -26,7 +27,7 @@ namespace Rnwood.Smtp4dev.ApiModel
         {
             Id = messagesSummaryProjection.Id;
             From = messagesSummaryProjection.From;
-            To = messagesSummaryProjection.To?.Split(',') ?? Array.Empty<string>();
+            To = messagesSummaryProjection.To?.Split(',').Select(email => email.Trim()).ToArray() ?? Array.Empty<string>();
             ReceivedDate = messagesSummaryProjection.ReceivedDate;
             Subject = messagesSummaryProjection.Subject;
             AttachmentCount = messagesSummaryProjection.AttachmentCount;
