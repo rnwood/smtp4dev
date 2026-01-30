@@ -537,7 +537,8 @@
                 const server = await this.connection!.getServer()
                 this.isRelayAvailable = !!server.relaySmtpServer;
 
-                this.availableMailboxes = await new MailboxesController().getAll();
+                const mailboxes = await new MailboxesController().getAll();
+                this.availableMailboxes = mailboxes.sort((a, b) => a.name.localeCompare(b.name));
                 if (!this.selectedMailbox) {
                     this.selectedMailbox = this.availableMailboxes.find(m => m.name == server.currentUserDefaultMailboxName)?.name ?? this.availableMailboxes[this.availableMailboxes.length - 1]?.name ?? null;
                 } else {
