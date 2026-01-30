@@ -155,7 +155,7 @@ namespace Rnwood.Smtp4dev.ApiModel
                            Id = result.Id,
                            ContentId = result.ContentId,
                            FileName = fileName,
-                           Url = $"api/messages/{Id}/part/{result.Id}/content"
+                           Url = $"api/messages/{Id}/part/{result.Id}/content?download=true"
                        });
                    }
                }

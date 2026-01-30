@@ -417,6 +417,25 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             
             Assert.Contains(qpResult, result);
         }
+
+        [Fact]
+        public async Task AttachmentUrl_ShouldIncludeDownloadParameter()
+        {
+            // Arrange - Create a message with an attachment
+            DbModel.Message dbMessage = await GetTestMessageWithExtras("Test Subject", attachmentFileName: "Confirmation.pdf");
+            
+            // Act - Convert to API model
+            var apiMessage = new ApiModel.Message(dbMessage);
+            
+            // Assert - Check that attachment URL includes download=true
+            var allAttachments = apiMessage.Parts.Flatten(p => p.ChildParts)
+                .SelectMany(p => p.Attachments)
+                .ToList();
+            var attachment = allAttachments.FirstOrDefault(a => a.FileName == "Confirmation.pdf");
+            
+            Assert.NotNull(attachment);
+            Assert.Contains("download=true", attachment.Url);
+        }
     }
 
 }
