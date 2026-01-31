@@ -739,6 +739,15 @@ namespace Rnwood.Smtp4dev.Server
                         !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)
                             ? relayOptions.CurrentValue.SenderAddress
                             : apiMsg.From);
+                    
+                    // Update the From header if a custom sender address is configured
+                    // This is required for SMTP servers like AWS SES that validate the From header matches the envelope sender
+                    if (!string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress))
+                    {
+                        newEmail.From.Clear();
+                        newEmail.From.Add(sender);
+                    }
+                    
                     relaySmtpClient.Send(newEmail, sender, new[] { recipient });
                     result.RelayRecipients.Add(new RelayRecipientResult() { Email = recipient.Address, RelayDate = DateTime.UtcNow });
                     relaySmtpClient.Disconnect(true);
