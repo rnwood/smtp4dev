@@ -261,6 +261,10 @@ namespace LumiSoft.Net
                     if(m_SourceString.Length >= wordLength + 1){
                         m_SourceString = m_SourceString.Substring(wordLength + 1);
                     }
+                    else{
+                        // At end of string, just consume the word
+                        m_SourceString = m_SourceString.Substring(wordLength);
+                    }
                 }
                 else{
 				    m_SourceString = m_SourceString.Substring(wordLength);
