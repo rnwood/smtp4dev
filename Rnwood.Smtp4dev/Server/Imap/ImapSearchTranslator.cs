@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Rnwood.Smtp4dev.DbModel;
 using System;
+using System.Collections.Generic;
 using System.Linq.Expressions;
 using System.Reactive.Subjects;
 
@@ -33,6 +34,7 @@ namespace Rnwood.Smtp4dev.Server.Imap
                 IMAP_Search_Key_Since since => HandleSince(since),
                 IMAP_Search_Key_Younger younger => HandleYounger(younger),
                 IMAP_Search_Key_Older older => HandleOlder(older),
+                IMAP_Search_Key_Uid uid => HandleUid(uid),
                 { } unknown => throw new ImapSearchCriteriaNotSupportedException($"The criteria '{unknown} is not supported'")
             };
         }
@@ -54,6 +56,23 @@ namespace Rnwood.Smtp4dev.Server.Imap
             // Capture the current time as a parameter that EF can properly translate
             var now = DateTime.Now;
             return m => m.ReceivedDate < now.AddSeconds(-older.Interval);
+        }
+
+        private Expression<Func<Message, bool>> HandleUid(IMAP_Search_Key_Uid uid)
+        {
+            // Convert the sequence set to a list of individual UIDs that EF can translate
+            // We need to enumerate the ranges and create an in-memory list
+            var uidList = new List<long>();
+            foreach (var range in uid.Value.Items)
+            {
+                for (long i = range.Start; i <= range.End; i++)
+                {
+                    uidList.Add(i);
+                }
+            }
+            
+            // Now use the list which EF Core can translate to SQL IN clause
+            return m => uidList.Contains(m.ImapUid);
         }
 
         private Expression<Func<Message, bool>> HandleNone()
