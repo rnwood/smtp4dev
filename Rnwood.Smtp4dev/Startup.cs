@@ -162,9 +162,50 @@ namespace Rnwood.Smtp4dev
                             context.Add(new ImapState
                             {
                                 Id = Guid.Empty,
-                                LastUid = 1
+                                LastUid = 0
                             });
                             context.SaveChanges();
+                        }
+                        else
+                        {
+                            // Fix existing databases that may have incorrect LastUid initialization
+                            // or messages with invalid ImapUid values
+                            var imapState = context.ImapState.Single();
+                            var maxImapUid = context.Messages.Any() ? context.Messages.Max(m => m.ImapUid) : 0;
+                            
+                            // If there are no messages but LastUid > 0, reset it to 0 to avoid skipping UIDs
+                            if (!context.Messages.Any() && imapState.LastUid > 0)
+                            {
+                                Log.Logger.Information("Resetting ImapState.LastUid from {oldValue} to 0 (no messages in database)", 
+                                    imapState.LastUid);
+                                imapState.LastUid = 0;
+                                context.SaveChanges();
+                            }
+                            // If LastUid is inconsistent with actual message UIDs, fix it
+                            else if (maxImapUid > imapState.LastUid)
+                            {
+                                Log.Logger.Information("Fixing ImapState.LastUid from {oldValue} to {newValue} based on existing messages", 
+                                    imapState.LastUid, maxImapUid);
+                                imapState.LastUid = maxImapUid;
+                                context.SaveChanges();
+                            }
+                            
+                            // Fix any messages with invalid ImapUid (0 or negative)
+                            var messagesWithInvalidUid = context.Messages.Where(m => m.ImapUid < 1).ToList();
+                            if (messagesWithInvalidUid.Any())
+                            {
+                                Log.Logger.Warning("Found {count} messages with invalid ImapUid (<= 0). Reassigning UIDs.", 
+                                    messagesWithInvalidUid.Count);
+                                
+                                foreach (var message in messagesWithInvalidUid.OrderBy(m => m.ReceivedDate))
+                                {
+                                    imapState.LastUid++;
+                                    message.ImapUid = imapState.LastUid;
+                                    Log.Logger.Information("Reassigned message {messageId} to ImapUid {imapUid}", 
+                                        message.Id, message.ImapUid);
+                                }
+                                context.SaveChanges();
+                            }
                         }
 
                         //For message before delivered to was added, assume all recipients.
