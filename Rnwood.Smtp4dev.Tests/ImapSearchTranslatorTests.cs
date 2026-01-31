@@ -338,6 +338,159 @@ namespace Rnwood.Smtp4dev.Tests
             Assert.Empty(results);
         }
 
+        [Fact]
+        public async Task Uid_SingleUid()
+        {
+            SqliteInMemory m = new SqliteInMemory();
+
+            DbModel.Message testMessage1 = await GetTestMessage("Message subject1");
+            DbModel.Message testMessage2 = await GetTestMessage("Message subject2");
+            DbModel.Message testMessage3 = await GetTestMessage("Message subject3");
+            var sqlLiteForTesting = new SqliteInMemory();
+            var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
+
+            context.AddRange(testMessage1, testMessage2, testMessage3);
+            context.SaveChanges();
+
+            // Assign IMAP UIDs
+            testMessage1.ImapUid = 1;
+            testMessage2.ImapUid = 2;
+            testMessage3.ImapUid = 3;
+            context.SaveChanges();
+
+            ImapSearchTranslator imapSearchTranslator = new ImapSearchTranslator();
+
+            // Test UID 2 - should return only message 2
+            var criteria = imapSearchTranslator.Translate(new IMAP_Search_Key_Uid(IMAP_t_SeqSet.Parse("2")));
+            var results = context.Messages.Where(criteria);
+            results.Should().Contain([testMessage2]);
+            results.Should().NotContain([testMessage1, testMessage3]);
+
+            // Test UID 5 - should return no messages (non-existent UID)
+            criteria = imapSearchTranslator.Translate(new IMAP_Search_Key_Uid(IMAP_t_SeqSet.Parse("5")));
+            results = context.Messages.Where(criteria);
+            Assert.Empty(results);
+        }
+
+        [Fact]
+        public async Task Uid_Range()
+        {
+            SqliteInMemory m = new SqliteInMemory();
+
+            DbModel.Message testMessage1 = await GetTestMessage("Message subject1");
+            DbModel.Message testMessage2 = await GetTestMessage("Message subject2");
+            DbModel.Message testMessage3 = await GetTestMessage("Message subject3");
+            DbModel.Message testMessage4 = await GetTestMessage("Message subject4");
+            DbModel.Message testMessage5 = await GetTestMessage("Message subject5");
+            var sqlLiteForTesting = new SqliteInMemory();
+            var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
+
+            context.AddRange(testMessage1, testMessage2, testMessage3, testMessage4, testMessage5);
+            context.SaveChanges();
+
+            // Assign IMAP UIDs
+            testMessage1.ImapUid = 1;
+            testMessage2.ImapUid = 2;
+            testMessage3.ImapUid = 3;
+            testMessage4.ImapUid = 4;
+            testMessage5.ImapUid = 5;
+            context.SaveChanges();
+
+            ImapSearchTranslator imapSearchTranslator = new ImapSearchTranslator();
+
+            // Test UID 2:4 - should return messages 2, 3, 4
+            var criteria = imapSearchTranslator.Translate(new IMAP_Search_Key_Uid(IMAP_t_SeqSet.Parse("2:4")));
+            var results = context.Messages.Where(criteria);
+            results.Should().Contain([testMessage2, testMessage3, testMessage4]);
+            results.Should().NotContain([testMessage1, testMessage5]);
+
+            // Test UID 1:2 - should return messages 1, 2
+            criteria = imapSearchTranslator.Translate(new IMAP_Search_Key_Uid(IMAP_t_SeqSet.Parse("1:2")));
+            results = context.Messages.Where(criteria);
+            results.Should().Contain([testMessage1, testMessage2]);
+            results.Should().NotContain([testMessage3, testMessage4, testMessage5]);
+        }
+
+        [Fact]
+        public async Task Uid_MultipleValues()
+        {
+            SqliteInMemory m = new SqliteInMemory();
+
+            DbModel.Message testMessage1 = await GetTestMessage("Message subject1");
+            DbModel.Message testMessage2 = await GetTestMessage("Message subject2");
+            DbModel.Message testMessage3 = await GetTestMessage("Message subject3");
+            DbModel.Message testMessage4 = await GetTestMessage("Message subject4");
+            DbModel.Message testMessage5 = await GetTestMessage("Message subject5");
+            var sqlLiteForTesting = new SqliteInMemory();
+            var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
+
+            context.AddRange(testMessage1, testMessage2, testMessage3, testMessage4, testMessage5);
+            context.SaveChanges();
+
+            // Assign IMAP UIDs
+            testMessage1.ImapUid = 1;
+            testMessage2.ImapUid = 2;
+            testMessage3.ImapUid = 3;
+            testMessage4.ImapUid = 4;
+            testMessage5.ImapUid = 5;
+            context.SaveChanges();
+
+            ImapSearchTranslator imapSearchTranslator = new ImapSearchTranslator();
+
+            // Test UID 2,4,5 - should return messages 2, 4, 5
+            var criteria = imapSearchTranslator.Translate(new IMAP_Search_Key_Uid(IMAP_t_SeqSet.Parse("2,4,5")));
+            var results = context.Messages.Where(criteria);
+            results.Should().Contain([testMessage2, testMessage4, testMessage5]);
+            results.Should().NotContain([testMessage1, testMessage3]);
+
+            // Test UID 1,3 - should return messages 1, 3
+            criteria = imapSearchTranslator.Translate(new IMAP_Search_Key_Uid(IMAP_t_SeqSet.Parse("1,3")));
+            results = context.Messages.Where(criteria);
+            results.Should().Contain([testMessage1, testMessage3]);
+            results.Should().NotContain([testMessage2, testMessage4, testMessage5]);
+        }
+
+        [Fact]
+        public async Task Uid_MixedRangeAndValues()
+        {
+            SqliteInMemory m = new SqliteInMemory();
+
+            DbModel.Message testMessage1 = await GetTestMessage("Message subject1");
+            DbModel.Message testMessage2 = await GetTestMessage("Message subject2");
+            DbModel.Message testMessage3 = await GetTestMessage("Message subject3");
+            DbModel.Message testMessage4 = await GetTestMessage("Message subject4");
+            DbModel.Message testMessage5 = await GetTestMessage("Message subject5");
+            DbModel.Message testMessage6 = await GetTestMessage("Message subject6");
+            var sqlLiteForTesting = new SqliteInMemory();
+            var context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
+
+            context.AddRange(testMessage1, testMessage2, testMessage3, testMessage4, testMessage5, testMessage6);
+            context.SaveChanges();
+
+            // Assign IMAP UIDs
+            testMessage1.ImapUid = 1;
+            testMessage2.ImapUid = 2;
+            testMessage3.ImapUid = 3;
+            testMessage4.ImapUid = 4;
+            testMessage5.ImapUid = 5;
+            testMessage6.ImapUid = 6;
+            context.SaveChanges();
+
+            ImapSearchTranslator imapSearchTranslator = new ImapSearchTranslator();
+
+            // Test UID 2:4,6 - should return messages 2, 3, 4, 6
+            var criteria = imapSearchTranslator.Translate(new IMAP_Search_Key_Uid(IMAP_t_SeqSet.Parse("2:4,6")));
+            var results = context.Messages.Where(criteria);
+            results.Should().Contain([testMessage2, testMessage3, testMessage4, testMessage6]);
+            results.Should().NotContain([testMessage1, testMessage5]);
+
+            // Test UID 1,3:5 - should return messages 1, 3, 4, 5
+            criteria = imapSearchTranslator.Translate(new IMAP_Search_Key_Uid(IMAP_t_SeqSet.Parse("1,3:5")));
+            results = context.Messages.Where(criteria);
+            results.Should().Contain([testMessage1, testMessage3, testMessage4, testMessage5]);
+            results.Should().NotContain([testMessage2, testMessage6]);
+        }
+
         private static async Task<DbModel.Message> GetTestMessage(string subject, string from = "from@from.com", string to = "to@to.com", Boolean unread = true, DateTime? receivedDate = null)
         {
             MimeMessage mimeMessage = new MimeMessage();
