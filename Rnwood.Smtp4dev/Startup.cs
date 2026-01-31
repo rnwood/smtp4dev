@@ -173,8 +173,16 @@ namespace Rnwood.Smtp4dev
                             var imapState = context.ImapState.Single();
                             var maxImapUid = context.Messages.Any() ? context.Messages.Max(m => m.ImapUid) : 0;
                             
+                            // If there are no messages but LastUid > 0, reset it to 0 to avoid skipping UIDs
+                            if (!context.Messages.Any() && imapState.LastUid > 0)
+                            {
+                                Log.Logger.Information("Resetting ImapState.LastUid from {oldValue} to 0 (no messages in database)", 
+                                    imapState.LastUid);
+                                imapState.LastUid = 0;
+                                context.SaveChanges();
+                            }
                             // If LastUid is inconsistent with actual message UIDs, fix it
-                            if (maxImapUid > imapState.LastUid)
+                            else if (maxImapUid > imapState.LastUid)
                             {
                                 Log.Logger.Information("Fixing ImapState.LastUid from {oldValue} to {newValue} based on existing messages", 
                                     imapState.LastUid, maxImapUid);
