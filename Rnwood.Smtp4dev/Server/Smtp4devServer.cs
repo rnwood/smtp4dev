@@ -735,14 +735,17 @@ namespace Rnwood.Smtp4dev.Server
 
                     var apiMsg = new ApiModel.Message(message);
                     MimeMessage newEmail = apiMsg.MimeMessage;
+                    
+                    // Determine the sender address - use custom if configured, otherwise use original
+                    bool hasCustomSenderAddress = !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress);
                     MailboxAddress sender = MailboxAddress.Parse(
-                        !string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress)
+                        hasCustomSenderAddress
                             ? relayOptions.CurrentValue.SenderAddress
                             : apiMsg.From);
                     
                     // Update the From header if a custom sender address is configured
                     // This is required for SMTP servers like AWS SES that validate the From header matches the envelope sender
-                    if (!string.IsNullOrEmpty(relayOptions.CurrentValue.SenderAddress))
+                    if (hasCustomSenderAddress)
                     {
                         newEmail.From.Clear();
                         newEmail.From.Add(sender);
