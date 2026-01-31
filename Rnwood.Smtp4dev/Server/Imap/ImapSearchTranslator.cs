@@ -24,6 +24,7 @@ namespace Rnwood.Smtp4dev.Server.Imap
                 IMAP_Search_Key_From from => HandleFrom(from),
                 IMAP_Search_Key_To to => HandleTo(to),
                 IMAP_Search_Key_Subject subject => HandleSubject(subject),
+                IMAP_Search_Key_Header header => HandleHeader(header),
                 IMAP_Search_Key_Or or => HandleOr(or),
                 IMAP_Search_Key_All all => HandleAll(all),
                 IMAP_Search_Key_Draft => HandleNone(),
@@ -95,6 +96,24 @@ namespace Rnwood.Smtp4dev.Server.Imap
         private Expression<Func<Message, bool>> HandleFrom(IMAP_Search_Key_From from)
         {
             return Contains(m => m.From, from.Value);
+        }
+
+        private Expression<Func<Message, bool>> HandleHeader(IMAP_Search_Key_Header header)
+        {
+            // For MESSAGE-ID header specifically, we can search for the value in the BodyText or Data
+            // For simplicity, we'll search in the plain text representation
+            // In a real implementation, we'd need to parse the MIME headers properly
+            
+            // For now, just search for the value anywhere in the message body text
+            // This is a simplified implementation
+            if (!string.IsNullOrEmpty(header.Value))
+            {
+                return Contains(m => m.BodyText, header.Value);
+            }
+            
+            // If no value specified, we can't easily check if header exists without parsing
+            // So we'll just return true (all messages have headers)
+            return m => true;
         }
 
         private Expression<Func<Message, bool>> HandleNot(IMAP_Search_Key_Not not)

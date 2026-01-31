@@ -238,7 +238,7 @@ namespace LumiSoft.Net.IMAP
 
 		/// <summary>
 		/// Encodes specified data with IMAP modified UTF7 encoding. Defined in RFC 3501 5.1.3.  Mailbox International Naming Convention.
-		/// Example: öö is encoded to &amp;APYA9g-.
+		/// Example: ï¿½ï¿½ is encoded to &amp;APYA9g-.
 		/// </summary>
 		/// <param name="text">Text to encode.</param>
 		/// <returns></returns>
@@ -286,7 +286,7 @@ namespace LumiSoft.Net.IMAP
 				// Not allowed char, encode it
 				else{
 					// Superfluous shifts are not allowed. 
-					// For example: öö may not encoded as &APY-&APY-, but must be &APYA9g-.
+					// For example: ï¿½ï¿½ may not encoded as &APY-&APY-, but must be &APYA9g-.
 
 					// Get all continuous chars that need encoding and encode them as one block
 					MemoryStream encodeBlock = new MemoryStream();
@@ -321,7 +321,7 @@ namespace LumiSoft.Net.IMAP
 
 		/// <summary>
 		/// Decodes IMAP modified UTF7 encoded data. Defined in RFC 3501 5.1.3.  Mailbox International Naming Convention.
-		/// Example: &amp;APYA9g- is decoded to öö.
+		/// Example: &amp;APYA9g- is decoded to ï¿½ï¿½.
 		/// </summary>
 		/// <param name="text">Text to encode.</param>
 		/// <returns></returns>
@@ -632,7 +632,18 @@ namespace LumiSoft.Net.IMAP
             }
             // string/astring/nstring
             else{
-                string word = reader.ReadWord();
+                // RFC 3501: ASTRING-CHAR = ATOM-CHAR / resp-specials
+                // ATOM-CHAR = <any CHAR except atom-specials>
+                // atom-specials = "(" / ")" / "{" / SP / CTL / list-wildcards / quoted-specials / resp-specials
+                // list-wildcards = "%" / "*"
+                // quoted-specials = DQUOTE / "\"
+                // resp-specials = "]"
+                // 
+                // Note: "<" and ">" are NOT atom-specials, so they are valid in astrings.
+                // This allows message IDs like <id@example.com> to be parsed correctly.
+                // We also include common delimiters like "," ";" "[" for safety.
+                char[] imapAstringTerminators = new char[] { ' ', ',', ';', '{', '}', '(', ')', '[', ']', '%', '*', '"', '\\', '\r', '\n' };
+                string word = reader.ReadWord(true, imapAstringTerminators, true);
                 
                 // nstring
                 if(string.Equals(word,"NIL",StringComparison.InvariantCultureIgnoreCase)){
