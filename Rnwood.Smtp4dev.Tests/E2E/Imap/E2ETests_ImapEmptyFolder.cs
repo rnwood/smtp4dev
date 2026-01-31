@@ -20,6 +20,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
         {
             RunE2ETest(context => {
                 // Connect to IMAP server with no messages
+                // Note: "user"/"password" are test-only credentials configured for E2E tests
                 using (ImapClient imapClient = new ImapClient())
                 {
                     imapClient.Connect("localhost", context.ImapPortNumber);
@@ -41,6 +42,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
         {
             RunE2ETest(context => {
                 // Connect to IMAP server with no messages
+                // Note: "user"/"password" are test-only credentials configured for E2E tests
                 using (ImapClient imapClient = new ImapClient())
                 {
                     imapClient.Connect("localhost", context.ImapPortNumber);

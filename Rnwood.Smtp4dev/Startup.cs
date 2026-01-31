@@ -199,7 +199,7 @@ namespace Rnwood.Smtp4dev
                                 
                                 foreach (var message in messagesWithInvalidUid.OrderBy(m => m.ReceivedDate))
                                 {
-                                    imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
+                                    imapState.LastUid++;
                                     message.ImapUid = imapState.LastUid;
                                     Log.Logger.Information("Reassigned message {messageId} to ImapUid {imapUid}", 
                                         message.Id, message.ImapUid);
