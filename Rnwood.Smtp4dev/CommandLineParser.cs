@@ -76,7 +76,10 @@ namespace Rnwood.Smtp4dev
                 { "maxmessagesize=", "Defines the maximum message size in bytes accepted by the SMTP server", data => map.Add(data, x => x.ServerOptions.MaxMessageSize) },
                 { "tui", "Run with Terminal User Interface (TUI) instead of web interface", data => map.Add((data != null).ToString(), x => x.UseTui) },
                 { "delivertostdout=", "Specifies mailboxes (comma-separated) or '*' to output received raw message content to stdout", data => map.Add(data, x => x.ServerOptions.DeliverToStdout) },
-                { "exitafter=", "Specifies the number of messages to receive before exiting the application (used with delivertostdout)", data => map.Add(data, x => x.ServerOptions.ExitAfterMessages) }
+                { "exitafter=", "Specifies the number of messages to receive before exiting the application (used with delivertostdout)", data => map.Add(data, x => x.ServerOptions.ExitAfterMessages) },
+                { "oauth2authority=", "OAuth2/XOAUTH2 Identity Provider authority URL for token validation (e.g., https://login.microsoftonline.com/common/v2.0)", data => map.Add(data, x => x.ServerOptions.OAuth2Authority) },
+                { "oauth2audience=", "OAuth2/XOAUTH2 expected audience value for token validation", data => map.Add(data, x => x.ServerOptions.OAuth2Audience) },
+                { "oauth2issuer=", "OAuth2/XOAUTH2 expected issuer value for token validation (optional, defaults to authority's issuer)", data => map.Add(data, x => x.ServerOptions.OAuth2Issuer) }
             };
 
             if (!isDesktopApp)

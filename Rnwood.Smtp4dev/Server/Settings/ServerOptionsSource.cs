@@ -81,5 +81,11 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public string DeliverToStdout { get; set; }
 
         public int? ExitAfterMessages { get; set; }
+
+        public string OAuth2Authority { get; set; }
+
+        public string OAuth2Audience { get; set; }
+
+        public string OAuth2Issuer { get; set; }
     }
 }

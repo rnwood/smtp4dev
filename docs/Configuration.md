@@ -237,3 +237,163 @@ smtp4dev --delivertostdout="*" --exitafter=3 --smtpport=2525 --imapport=0 --pop3
 
 
 **Want messages in multiple mailboxes**: This is not supported due to "first match wins" logic. Consider using a single mailbox with multiple recipient patterns instead.
+
+## OAuth2/XOAUTH2 Authentication
+
+smtp4dev supports OAuth2/XOAUTH2 authentication for SMTP connections, allowing you to validate access tokens against an Identity Provider (IDP) such as Azure AD, Google, Okta, or any OpenID Connect compatible provider.
+
+### How OAuth2 Authentication Works
+
+When a client connects using XOAUTH2 authentication:
+
+1. **With `SmtpAllowAnyCredentials=true`**: Any OAuth2 token is accepted without validation (default behavior, suitable for development)
+2. **With `SmtpAllowAnyCredentials=false`** and OAuth2Authority configured:
+   - The access token is validated against the configured IDP
+   - Token signature, expiration, issuer, and audience are verified
+   - The subject claim from the token must match the provided username (case-insensitive)
+   - Authentication fails if validation fails or the subject doesn't match
+
+### Configuration
+
+To enable OAuth2 token validation, configure the following settings:
+
+#### OAuth2Authority (Required for validation)
+
+The OpenID Connect authority URL for your IDP. This URL should point to the base URL where the OpenID Connect discovery document can be found.
+
+**Examples:**
+- Azure AD (multi-tenant): `https://login.microsoftonline.com/common/v2.0`
+- Azure AD (single tenant): `https://login.microsoftonline.com/{tenant-id}/v2.0`
+- Google: `https://accounts.google.com`
+- Okta: `https://{your-domain}.okta.com/oauth2/default`
+
+**Command Line**: `--oauth2authority="https://login.microsoftonline.com/common/v2.0"`
+
+**Configuration File**:
+```json
+{
+  "ServerOptions": {
+    "OAuth2Authority": "https://login.microsoftonline.com/common/v2.0"
+  }
+}
+```
+
+**Environment Variable**: `ServerOptions__OAuth2Authority`
+
+#### OAuth2Audience (Optional but recommended)
+
+The expected audience value for tokens. If specified, tokens must be issued for this audience.
+
+**Command Line**: `--oauth2audience="your-app-id"`
+
+**Configuration File**:
+```json
+{
+  "ServerOptions": {
+    "OAuth2Audience": "api://your-application-id"
+  }
+}
+```
+
+**Environment Variable**: `ServerOptions__OAuth2Audience`
+
+#### OAuth2Issuer (Optional)
+
+The expected issuer value for tokens. If not specified, the issuer is validated using the authority's discovery document.
+
+**Command Line**: `--oauth2issuer="https://login.microsoftonline.com/{tenant-id}/v2.0"`
+
+**Configuration File**:
+```json
+{
+  "ServerOptions": {
+    "OAuth2Issuer": "https://login.microsoftonline.com/{tenant-id}/v2.0"
+  }
+}
+```
+
+**Environment Variable**: `ServerOptions__OAuth2Issuer`
+
+### Complete Example
+
+**Azure AD Configuration:**
+```json
+{
+  "ServerOptions": {
+    "AuthenticationRequired": true,
+    "SmtpAllowAnyCredentials": false,
+    "OAuth2Authority": "https://login.microsoftonline.com/common/v2.0",
+    "OAuth2Audience": "api://your-application-id",
+    "SmtpEnabledAuthTypesWhenNotSecureConnection": "XOAUTH2",
+    "SmtpEnabledAuthTypesWhenSecureConnection": "XOAUTH2"
+  }
+}
+```
+
+**Google OAuth2 Configuration:**
+```json
+{
+  "ServerOptions": {
+    "AuthenticationRequired": true,
+    "SmtpAllowAnyCredentials": false,
+    "OAuth2Authority": "https://accounts.google.com",
+    "OAuth2Audience": "your-google-client-id.apps.googleusercontent.com"
+  }
+}
+```
+
+### Subject Claim Mapping
+
+The token validator looks for the username/email in the following claims (in order):
+1. `sub` - Subject identifier
+2. `email` - Email address
+3. `preferred_username` - Preferred username
+4. `upn` - User Principal Name
+
+The value from the first found claim must match the username provided in the XOAUTH2 authentication data.
+
+### Troubleshooting
+
+**Authentication fails with "OAuth2Authority not configured":**
+- Ensure `OAuth2Authority` is set when `SmtpAllowAnyCredentials` is false
+- Verify the authority URL is correct and accessible
+
+**Authentication fails with "Token validation error":**
+- Check that the token hasn't expired
+- Verify the token was issued by the configured authority
+- Ensure the audience claim matches `OAuth2Audience` if configured
+- Check server logs for detailed error messages
+
+**Authentication fails with "subject mismatch":**
+- The subject claim in the token must match the username provided in the XOAUTH2 authentication
+- Both values are compared case-insensitively
+- Check which claim is being used (sub, email, preferred_username, or upn)
+
+### Development vs Production
+
+**Development Mode** (default):
+```json
+{
+  "ServerOptions": {
+    "SmtpAllowAnyCredentials": true
+  }
+}
+```
+- Any credentials are accepted
+- OAuth2 tokens are not validated
+- Suitable for local development and testing
+
+**Production Mode**:
+```json
+{
+  "ServerOptions": {
+    "AuthenticationRequired": true,
+    "SmtpAllowAnyCredentials": false,
+    "OAuth2Authority": "https://your-idp.com",
+    "OAuth2Audience": "your-app-id"
+  }
+}
+```
+- Credentials are validated
+- OAuth2 tokens are validated against the IDP
+- Subject must match username
