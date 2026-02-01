@@ -1,12 +1,8 @@
-// <copyright file="OAuth2TokenValidator.cs" company="Rnwood.SmtpServer project contributors">
-// Copyright (c) Rnwood.SmtpServer project contributors. All rights reserved.
-// Licensed under the BSD license. See LICENSE.md file in the project root for full license information.
-// </copyright>
-
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.IdentityModel.Protocols;
 using Microsoft.IdentityModel.Protocols.OpenIdConnect;
@@ -21,6 +17,7 @@ namespace Rnwood.Smtp4dev.Server.Auth;
 public class OAuth2TokenValidator
 {
     private readonly ILogger log;
+    private readonly SemaphoreSlim configLock = new SemaphoreSlim(1, 1);
     private ConfigurationManager<OpenIdConnectConfiguration> configurationManager;
     private string currentAuthority;
     private string currentAudience;
@@ -61,17 +58,32 @@ public class OAuth2TokenValidator
                 return (false, null, "OAuth2Authority is not configured");
             }
 
-            // Initialize or update configuration manager if authority changed
-            if (configurationManager == null || currentAuthority != authority)
+            // Thread-safe initialization or update of configuration manager if authority changed
+            await configLock.WaitAsync();
+            try
             {
-                var metadataAddress = authority.TrimEnd('/') + "/.well-known/openid-configuration";
-                configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
-                    metadataAddress,
-                    new OpenIdConnectConfigurationRetriever(),
-                    new HttpDocumentRetriever());
-                currentAuthority = authority;
-                currentAudience = audience;
-                currentIssuer = issuer;
+                if (configurationManager == null || currentAuthority != authority)
+                {
+                    // Dispose old configuration manager if it exists
+                    if (configurationManager != null)
+                    {
+                        // ConfigurationManager doesn't implement IDisposable, but we should still replace it
+                        configurationManager = null;
+                    }
+
+                    var metadataAddress = authority.TrimEnd('/') + "/.well-known/openid-configuration";
+                    configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
+                        metadataAddress,
+                        new OpenIdConnectConfigurationRetriever(),
+                        new HttpDocumentRetriever());
+                    currentAuthority = authority;
+                    currentAudience = audience;
+                    currentIssuer = issuer;
+                }
+            }
+            finally
+            {
+                configLock.Release();
             }
 
             // Get OpenID Connect configuration
