@@ -64,13 +64,8 @@ public class OAuth2TokenValidator
             {
                 if (configurationManager == null || currentAuthority != authority)
                 {
-                    // Dispose old configuration manager if it exists
-                    if (configurationManager != null)
-                    {
-                        // ConfigurationManager doesn't implement IDisposable, but we should still replace it
-                        configurationManager = null;
-                    }
-
+                    // Replace configuration manager with new instance for new authority
+                    // Note: ConfigurationManager<T> does not implement IDisposable
                     var metadataAddress = authority.TrimEnd('/') + "/.well-known/openid-configuration";
                     configurationManager = new ConfigurationManager<OpenIdConnectConfiguration>(
                         metadataAddress,
