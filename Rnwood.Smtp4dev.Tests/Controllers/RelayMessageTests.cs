@@ -5,12 +5,14 @@ using System.Threading.Tasks;
 using AwesomeAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Options;
 using MimeKit;
 using NSubstitute;
 using Rnwood.Smtp4dev.ApiModel;
 using Rnwood.Smtp4dev.Controllers;
 using Rnwood.Smtp4dev.Data;
 using Rnwood.Smtp4dev.Server;
+using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.Smtp4dev.Tests.DBMigrations.Helpers;
 using Xunit;
 using Message = Rnwood.Smtp4dev.DbModel.Message;
@@ -24,11 +26,19 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
         private readonly ISmtp4devServer server;
         private readonly Smtp4devDbContext context;
 
+        private static IOptionsMonitor<ServerOptions> CreateServerOptionsMock()
+        {
+            var serverOptions = new ServerOptions { Users = new UserOptions[0] };
+            var optionsMonitor = Substitute.For<IOptionsMonitor<ServerOptions>>();
+            optionsMonitor.CurrentValue.Returns(serverOptions);
+            return optionsMonitor;
+        }
+
         public RelayMessagesTests()
         {
             messagesRepository = Substitute.For<IMessagesRepository>();
             server = Substitute.For<ISmtp4devServer>();
-            controller = new MessagesController(messagesRepository, server, new MimeProcessingService());
+            controller = new MessagesController(messagesRepository, server, new MimeProcessingService(), CreateServerOptionsMock());
             var sqlLiteForTesting = new SqliteInMemory();
             context = new Smtp4devDbContext(sqlLiteForTesting.ContextOptions);
             InitRepo();
