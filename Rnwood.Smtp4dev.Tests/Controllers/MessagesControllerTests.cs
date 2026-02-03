@@ -25,10 +25,10 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
 {
     public class MessagesControllerTests
     {
-        private static IOptionsMonitor<ServerOptions> CreateServerOptionsMock()
+        private static IOptionsMonitor<Rnwood.Smtp4dev.Server.Settings.ServerOptions> CreateServerOptionsMock()
         {
-            var serverOptions = new ServerOptions { Users = new UserOptions[0] };
-            var optionsMonitor = Substitute.For<IOptionsMonitor<ServerOptions>>();
+            var serverOptions = new Rnwood.Smtp4dev.Server.Settings.ServerOptions { Users = new UserOptions[0] };
+            var optionsMonitor = Substitute.For<IOptionsMonitor<Rnwood.Smtp4dev.Server.Settings.ServerOptions>>();
             optionsMonitor.CurrentValue.Returns(serverOptions);
             return optionsMonitor;
         }
