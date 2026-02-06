@@ -88,7 +88,11 @@ if (!supportedBrowser) {
 
     const routes = [
         { path: '/', component: Home },
-        { path: '/mailbox/:mailbox', component: Home },
+        { path: '/messages', component: Home },
+        { path: '/messages/mailbox/:mailbox', component: Home },
+        { path: '/sessions', component: Home },
+        { path: '/sessions/session/:sessionId', component: Home },
+        { path: '/serverlog', component: Home },
     ];
 
     const router = createRouter({

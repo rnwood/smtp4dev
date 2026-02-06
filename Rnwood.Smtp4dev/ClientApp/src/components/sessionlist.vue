@@ -99,6 +99,7 @@
         selectedsession: SessionSummary | null = null;
         loading: boolean = true;
         private mutex = new Mutex();
+        private isInitialLoad = true;
 
         @Emit("selected-session-changed")
         handleCurrentChange(session: SessionSummary | null) {
@@ -197,6 +198,17 @@
                     (a: SessionSummary, b: SessionSummary) => a.id == b.id
                 );
 
+                // On initial load, check if there's a session ID in the route
+                if (this.isInitialLoad) {
+                    const sessionId = this.$route.params.sessionId as string | undefined;
+                    if (sessionId) {
+                        const session = this.sessions.find(s => s.id === sessionId);
+                        if (session) {
+                            this.selectSession(session);
+                        }
+                    }
+                }
+
                 if (
                     !this.sessions.some(
                         (m) => this.selectedsession != null && m.id == this.selectedsession.id
@@ -213,7 +225,8 @@
         }
 
         async mounted() {
-            this.refresh(false);
+            await this.refresh(false);
+            this.isInitialLoad = false;
         }
 
         async created() {
@@ -229,6 +242,25 @@
                     this.refresh(true);
                 });
                 this.connection.addOnConnectedCallback(() => this.refresh(true));
+            }
+        }
+
+        @Watch("$route")
+        onRouteChanged(newRoute: any, oldRoute: any) {
+            // Handle route changes for session selection (e.g., browser back/forward)
+            const newSessionId = newRoute.params.sessionId as string | undefined;
+            const oldSessionId = oldRoute.params.sessionId as string | undefined;
+            
+            if (newSessionId !== oldSessionId && !this.isInitialLoad) {
+                if (newSessionId) {
+                    const session = this.sessions.find(s => s.id === newSessionId);
+                    if (session && session.id !== this.selectedsession?.id) {
+                        this.selectSession(session);
+                    }
+                } else {
+                    // Route changed to sessions root, clear selection
+                    this.handleCurrentChange(null);
+                }
             }
         }
     }

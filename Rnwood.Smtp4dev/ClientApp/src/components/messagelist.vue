@@ -507,9 +507,9 @@
 
             // Update URL route if not during initial load and not suppressed
             if (!this.isInitialLoad && !this.suppressRouteUpdate && this.selectedMailbox) {
-                this.$router.push({ path: `/mailbox/${encodeURIComponent(this.selectedMailbox)}` });
+                this.$router.push({ path: `/messages/mailbox/${encodeURIComponent(this.selectedMailbox)}` });
             } else if (!this.isInitialLoad && !this.suppressRouteUpdate && !this.selectedMailbox) {
-                this.$router.push({ path: '/' });
+                this.$router.push({ path: '/messages' });
             }
         }
 
@@ -688,7 +688,7 @@
         }
 
         @Watch("$route")
-        async onRouteChanged(newRoute: any, oldRoute: any) {
+        onRouteChanged(newRoute: any, oldRoute: any) {
             // Handle route changes (e.g., browser back/forward)
             const newMailbox = newRoute.params.mailbox as string | undefined;
             const oldMailbox = oldRoute.params.mailbox as string | undefined;
@@ -704,11 +704,6 @@
                         this.selectedMailbox = mailbox.name;
                         this.suppressRouteUpdate = false;
                     }
-                } else if (!decodedMailbox && this.selectedMailbox) {
-                    // Route changed to root, clear mailbox selection
-                    this.suppressRouteUpdate = true;
-                    this.selectedMailbox = null;
-                    this.suppressRouteUpdate = false;
                 }
             }
         }

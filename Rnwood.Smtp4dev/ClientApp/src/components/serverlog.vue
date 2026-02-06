@@ -48,6 +48,7 @@
     import ServerLogController from "../ApiClient/ServerLogController";
     import LogEntry from "../ApiClient/LogEntry";
     import HubConnectionManager from "@/HubConnectionManager";
+    import { Watch } from "vue-facing-decorator";
 
     @Component({
         components: {}
@@ -68,6 +69,7 @@
         autoScroll = true;
         searchDebounceTimer: number | null = null;
         maxLogEntries = 500; // Match server-side buffer size
+        suppressRouteUpdate = false;
 
         get displayedLogs(): string {
             return this.logEntries.map(e => e.formattedMessage).join("");
@@ -102,6 +104,18 @@
         }
 
         async mounted() {
+            // Load filters from URL query parameters
+            const query = this.$route.query;
+            if (query.level) {
+                this.selectedLevel = query.level as string;
+            }
+            if (query.source) {
+                this.selectedSource = query.source as string;
+            }
+            if (query.search) {
+                this.searchText = query.search as string;
+            }
+            
             await this.refresh();
 
             if (this.connection) {
@@ -160,6 +174,9 @@
                 // Apply client-side filtering
                 this.logEntries = this.filterLogEntries();
                 
+                // Update URL with search parameter
+                this.updateRouteQuery();
+                
                 if (this.autoScroll) {
                     this.$nextTick(() => {
                         this.scrollToBottom();
@@ -172,10 +189,52 @@
             // Apply client-side filtering without making API calls
             this.logEntries = this.filterLogEntries();
             
+            // Update URL with filter parameters
+            this.updateRouteQuery();
+            
             if (this.autoScroll) {
                 this.$nextTick(() => {
                     this.scrollToBottom();
                 });
+            }
+        }
+
+        updateRouteQuery() {
+            if (this.suppressRouteUpdate) return;
+            
+            const query: any = {};
+            if (this.selectedLevel) {
+                query.level = this.selectedLevel;
+            }
+            if (this.selectedSource) {
+                query.source = this.selectedSource;
+            }
+            if (this.searchText) {
+                query.search = this.searchText;
+            }
+            
+            // Only update if query has changed
+            const currentQuery = this.$route.query;
+            if (JSON.stringify(currentQuery) !== JSON.stringify(query)) {
+                this.$router.replace({ path: '/serverlog', query });
+            }
+        }
+
+        @Watch("$route")
+        onRouteChanged() {
+            // Update filters when route query changes (e.g., browser back/forward)
+            if (this.$route.path === '/serverlog') {
+                this.suppressRouteUpdate = true;
+                
+                const query = this.$route.query;
+                this.selectedLevel = query.level as string || null;
+                this.selectedSource = query.source as string || null;
+                this.searchText = query.search as string || "";
+                
+                // Apply filters
+                this.logEntries = this.filterLogEntries();
+                
+                this.suppressRouteUpdate = false;
             }
         }
 
