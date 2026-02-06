@@ -384,9 +384,20 @@ namespace Rnwood.Smtp4dev.Server
                             // Check if subject matches username (case-insensitive)
                             if (subject.Equals(tokenCreds.Username, StringComparison.OrdinalIgnoreCase))
                             {
-                                result = AuthenticationResult.Success;
-                                this.log.Information("SMTP OAuth2 authentication successful. Username: {username}, Subject: {subject}, ClientAddress: {clientAddress}", 
-                                    tokenCreds.Username, subject, e.Session.ClientAddress);
+                                // Check if username exists in configured users list
+                                var user = serverOptions.CurrentValue.Users.FirstOrDefault(u => u.Username.Equals(tokenCreds.Username, StringComparison.OrdinalIgnoreCase));
+                                if (user != null)
+                                {
+                                    result = AuthenticationResult.Success;
+                                    this.log.Information("SMTP OAuth2 authentication successful. Username: {username}, Subject: {subject}, ClientAddress: {clientAddress}", 
+                                        tokenCreds.Username, subject, e.Session.ClientAddress);
+                                }
+                                else
+                                {
+                                    result = AuthenticationResult.Failure;
+                                    this.log.Warning("SMTP OAuth2 authentication failed - username not in configured users list. Username: {username}, Subject: {subject}, ClientAddress: {clientAddress}", 
+                                        tokenCreds.Username, subject, e.Session.ClientAddress);
+                                }
                             }
                             else
                             {

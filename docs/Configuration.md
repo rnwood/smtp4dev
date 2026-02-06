@@ -251,7 +251,8 @@ When a client connects using XOAUTH2 authentication:
    - The access token is validated against the configured IDP
    - Token signature, expiration, issuer, and audience are verified
    - The subject claim from the token must match the provided username (case-insensitive)
-   - Authentication fails if validation fails or the subject doesn't match
+   - The username must exist in the configured Users list
+   - Authentication fails if validation fails, the subject doesn't match, or the user is not configured
 
 ### Configuration
 
@@ -314,6 +315,34 @@ The expected issuer value for tokens. If not specified, the issuer is validated 
 
 **Environment Variable**: `ServerOptions__OAuth2Issuer`
 
+#### Users (Required when SmtpAllowAnyCredentials=false)
+
+When OAuth2 authentication is used with `SmtpAllowAnyCredentials=false`, you must configure the allowed users. The username in the Users list must match the subject claim from the OAuth2 token (case-insensitive).
+
+**Command Line**: `--user="john@example.com=password"`
+
+Note: The password field is required for the Users configuration but is not used for OAuth2 authentication. You can set it to any value.
+
+**Configuration File**:
+```json
+{
+  "ServerOptions": {
+    "Users": [
+      {
+        "Username": "john@example.com",
+        "Password": "not-used-for-oauth2"
+      },
+      {
+        "Username": "jane@example.com",
+        "Password": "not-used-for-oauth2"
+      }
+    ]
+  }
+}
+```
+
+**Environment Variable**: `ServerOptions__Users__0__Username`, `ServerOptions__Users__0__Password`
+
 ### Complete Example
 
 **Azure AD Configuration:**
@@ -325,7 +354,13 @@ The expected issuer value for tokens. If not specified, the issuer is validated 
     "OAuth2Authority": "https://login.microsoftonline.com/common/v2.0",
     "OAuth2Audience": "api://your-application-id",
     "SmtpEnabledAuthTypesWhenNotSecureConnection": "XOAUTH2",
-    "SmtpEnabledAuthTypesWhenSecureConnection": "XOAUTH2"
+    "SmtpEnabledAuthTypesWhenSecureConnection": "XOAUTH2",
+    "Users": [
+      {
+        "Username": "john@example.com",
+        "Password": "not-used-for-oauth2"
+      }
+    ]
   }
 }
 ```
@@ -337,7 +372,13 @@ The expected issuer value for tokens. If not specified, the issuer is validated 
     "AuthenticationRequired": true,
     "SmtpAllowAnyCredentials": false,
     "OAuth2Authority": "https://accounts.google.com",
-    "OAuth2Audience": "your-google-client-id.apps.googleusercontent.com"
+    "OAuth2Audience": "your-google-client-id.apps.googleusercontent.com",
+    "Users": [
+      {
+        "Username": "john@example.com",
+        "Password": "not-used-for-oauth2"
+      }
+    ]
   }
 }
 ```
@@ -369,6 +410,11 @@ The value from the first found claim must match the username provided in the XOA
 - Both values are compared case-insensitively
 - Check which claim is being used (sub, email, preferred_username, or upn)
 
+**Authentication fails with "username not in configured users list":**
+- When `SmtpAllowAnyCredentials=false`, the username must be in the configured Users list
+- Add the user to the Users configuration with any password (password is not used for OAuth2)
+- Ensure the username matches the subject claim from the token (case-insensitive)
+
 ### Development vs Production
 
 **Development Mode** (default):
@@ -390,10 +436,17 @@ The value from the first found claim must match the username provided in the XOA
     "AuthenticationRequired": true,
     "SmtpAllowAnyCredentials": false,
     "OAuth2Authority": "https://your-idp.com",
-    "OAuth2Audience": "your-app-id"
+    "OAuth2Audience": "your-app-id",
+    "Users": [
+      {
+        "Username": "allowed-user@example.com",
+        "Password": "not-used-for-oauth2"
+      }
+    ]
   }
 }
 ```
 - Credentials are validated
 - OAuth2 tokens are validated against the IDP
 - Subject must match username
+- Username must be in configured Users list
