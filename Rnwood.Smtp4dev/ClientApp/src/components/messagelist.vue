@@ -191,6 +191,9 @@
 
         private selectedSortDescending: boolean = true;
         private selectedSortColumn: string = "receivedDate";
+        private static readonly MAILBOX_STORAGE_KEY = "smtp4dev-selected-mailbox";
+        private isInitialLoad: boolean = true;
+        private suppressRouteUpdate: boolean = false;
 
         page: number = 1;
 
@@ -494,6 +497,20 @@
             this.selectedFolder = "INBOX";
             await this.loadFolders();
             await this.refresh(true, false);
+
+            // Save selected mailbox to localStorage
+            if (this.selectedMailbox) {
+                localStorage.setItem(MessageList.MAILBOX_STORAGE_KEY, this.selectedMailbox);
+            } else {
+                localStorage.removeItem(MessageList.MAILBOX_STORAGE_KEY);
+            }
+
+            // Update URL route if not during initial load and not suppressed
+            if (!this.isInitialLoad && !this.suppressRouteUpdate && this.selectedMailbox) {
+                this.$router.push({ path: `/mailbox/${encodeURIComponent(this.selectedMailbox)}` });
+            } else if (!this.isInitialLoad && !this.suppressRouteUpdate && !this.selectedMailbox) {
+                this.$router.push({ path: '/' });
+            }
         }
 
         @Watch("selectedFolder")
@@ -540,7 +557,39 @@
                 const mailboxes = await new MailboxesController().getAll();
                 this.availableMailboxes = mailboxes.sort((a, b) => a.name.localeCompare(b.name));
                 if (!this.selectedMailbox) {
-                    this.selectedMailbox = this.availableMailboxes.find(m => m.name == server.currentUserDefaultMailboxName)?.name ?? this.availableMailboxes[this.availableMailboxes.length - 1]?.name ?? null;
+                    // Priority order for mailbox selection on initial load:
+                    // 1. URL route parameter (for bookmarks/direct links)
+                    // 2. localStorage (for persistent selection)
+                    // 3. Server default mailbox
+                    // 4. Last mailbox in the list
+                    let mailboxToSelect: string | null = null;
+                    
+                    if (this.isInitialLoad) {
+                        // Check URL route parameter first
+                        const routeMailbox = this.$route.params.mailbox as string | undefined;
+                        if (routeMailbox) {
+                            const decodedMailbox = decodeURIComponent(routeMailbox);
+                            mailboxToSelect = this.availableMailboxes.find(m => m.name === decodedMailbox)?.name ?? null;
+                        }
+                        
+                        // If not in URL, check localStorage
+                        if (!mailboxToSelect) {
+                            const storedMailbox = localStorage.getItem(MessageList.MAILBOX_STORAGE_KEY);
+                            if (storedMailbox) {
+                                mailboxToSelect = this.availableMailboxes.find(m => m.name === storedMailbox)?.name ?? null;
+                            }
+                        }
+                    }
+                    
+                    // Fall back to server default or last mailbox
+                    if (!mailboxToSelect) {
+                        mailboxToSelect = this.availableMailboxes.find(m => m.name == server.currentUserDefaultMailboxName)?.name ?? this.availableMailboxes[this.availableMailboxes.length - 1]?.name ?? null;
+                    }
+                    
+                    // Suppress route update during initial load to avoid redundant navigation
+                    this.suppressRouteUpdate = true;
+                    this.selectedMailbox = mailboxToSelect;
+                    this.suppressRouteUpdate = false;
                 } else {
                     //Potentially removed mailbox
                     this.selectedMailbox = this.availableMailboxes.find(m => m.name == this.selectedMailbox)?.name ?? null;
@@ -632,9 +681,36 @@
         async mounted() {
             this.loading = true;
             await this.refresh(true, false);
+            this.isInitialLoad = false;
         }
 
         async created() {
+        }
+
+        @Watch("$route")
+        async onRouteChanged(newRoute: any, oldRoute: any) {
+            // Handle route changes (e.g., browser back/forward)
+            const newMailbox = newRoute.params.mailbox as string | undefined;
+            const oldMailbox = oldRoute.params.mailbox as string | undefined;
+            
+            if (newMailbox !== oldMailbox) {
+                const decodedMailbox = newMailbox ? decodeURIComponent(newMailbox) : null;
+                
+                // Only update if the mailbox actually exists and is different from current selection
+                if (decodedMailbox && this.availableMailboxes) {
+                    const mailbox = this.availableMailboxes.find(m => m.name === decodedMailbox);
+                    if (mailbox && mailbox.name !== this.selectedMailbox) {
+                        this.suppressRouteUpdate = true;
+                        this.selectedMailbox = mailbox.name;
+                        this.suppressRouteUpdate = false;
+                    }
+                } else if (!decodedMailbox && this.selectedMailbox) {
+                    // Route changed to root, clear mailbox selection
+                    this.suppressRouteUpdate = true;
+                    this.selectedMailbox = null;
+                    this.suppressRouteUpdate = false;
+                }
+            }
         }
 
         @Watch("connection")
