@@ -109,6 +109,7 @@
     import { Splitpanes, Pane } from 'splitpanes';
     import 'splitpanes/dist/splitpanes.css';
     import { ElIcon } from "element-plus";
+    import { Watch } from "vue-facing-decorator";
 
     @Component({
         components: {
@@ -130,6 +131,7 @@
         activeTabId = "messages";
         selectedMessage: MessageSummary | null = null;
         selectedSession: SessionSummary | null = null;
+        suppressRouteUpdate = false;
 
         connection: HubConnectionManager | null = null;
 
@@ -163,6 +165,54 @@
 
         selectedSessionChanged(selectedSession: SessionSummary | null) {
             this.selectedSession = selectedSession;
+            
+            // Update URL when session is selected
+            if (!this.suppressRouteUpdate && this.activeTabId === 'sessions') {
+                if (selectedSession) {
+                    this.$router.push({ path: `/sessions/session/${selectedSession.id}` });
+                } else {
+                    this.$router.push({ path: '/sessions' });
+                }
+            }
+        }
+
+        @Watch("activeTabId")
+        onActiveTabChanged(newTab: string) {
+            // Update URL when tab changes
+            if (!this.suppressRouteUpdate) {
+                switch (newTab) {
+                    case 'messages':
+                        // Mailbox routing is handled by messagelist component
+                        break;
+                    case 'sessions':
+                        if (this.selectedSession) {
+                            this.$router.push({ path: `/sessions/session/${this.selectedSession.id}` });
+                        } else {
+                            this.$router.push({ path: '/sessions' });
+                        }
+                        break;
+                    case 'serverlog':
+                        this.$router.push({ path: '/serverlog' });
+                        break;
+                }
+            }
+        }
+
+        @Watch("$route")
+        onRouteChanged() {
+            // Update active tab based on route
+            const path = this.$route.path;
+            this.suppressRouteUpdate = true;
+            
+            if (path.startsWith('/messages') || path === '/') {
+                this.activeTabId = 'messages';
+            } else if (path.startsWith('/sessions')) {
+                this.activeTabId = 'sessions';
+            } else if (path.startsWith('/serverlog')) {
+                this.activeTabId = 'serverlog';
+            }
+            
+            this.suppressRouteUpdate = false;
         }
 
         get messageListPaneSize(): number {
@@ -196,6 +246,9 @@
         async mounted() {
             this.connection = new HubConnectionManager("hubs/notifications")
             this.connection.start();
+            
+            // Initialize tab from route on mount
+            this.onRouteChanged();
         }
 
         destroyed() {

@@ -1,6 +1,6 @@
 import './css/site.css';
 import { createApp } from 'vue';
-import { createRouter, createWebHistory } from 'vue-router';
+import { createRouter, createWebHashHistory } from 'vue-router';
 import Element from 'element-plus';
 import axios from "axios";
 import Home from '@/components/home/home.vue';
@@ -88,10 +88,16 @@ if (!supportedBrowser) {
 
     const routes = [
         { path: '/', component: Home },
+        { path: '/messages', component: Home },
+        { path: '/messages/mailbox/:mailbox', component: Home },
+        { path: '/messages/mailbox/:mailbox/message/:messageId', component: Home },
+        { path: '/sessions', component: Home },
+        { path: '/sessions/session/:sessionId', component: Home },
+        { path: '/serverlog', component: Home },
     ];
 
     const router = createRouter({
-        history: createWebHistory(location.pathname),
+        history: createWebHashHistory(),
         routes: routes,
     });
     

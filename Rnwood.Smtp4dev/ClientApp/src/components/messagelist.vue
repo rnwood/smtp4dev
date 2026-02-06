@@ -191,6 +191,9 @@
 
         private selectedSortDescending: boolean = true;
         private selectedSortColumn: string = "receivedDate";
+        private static readonly MAILBOX_STORAGE_KEY = "smtp4dev-selected-mailbox";
+        private isInitialLoad: boolean = true;
+        private suppressRouteUpdate: boolean = false;
 
         page: number = 1;
 
@@ -241,6 +244,12 @@
         @Emit("selected-message-changed")
         handleCurrentChange(message: MessageSummary | null) {
             this.selectedmessage = message;
+            
+            // Update URL with selected message
+            if (!this.suppressRouteUpdate && !this.isInitialLoad) {
+                this.updateRouteWithCurrentState();
+            }
+            
             return message;
         }
 
@@ -472,8 +481,14 @@
         @Watch("searchTerm")
         onSearchTermChanged() {
             this.debouncedDoSearch();
+            // Update URL with search filter
+            if (!this.suppressRouteUpdate && !this.isInitialLoad) {
+                this.debouncedUpdateRoute();
+            }
         }
+        
         debouncedDoSearch = debounce(() => this.refresh(false), 200);
+        debouncedUpdateRoute = debounce(() => this.updateRouteWithCurrentState(), 300);
 
         @Watch("selectedMailbox")
         async onMailboxChanged() {
@@ -494,11 +509,27 @@
             this.selectedFolder = "INBOX";
             await this.loadFolders();
             await this.refresh(true, false);
+
+            // Save selected mailbox to localStorage
+            if (this.selectedMailbox) {
+                localStorage.setItem(MessageList.MAILBOX_STORAGE_KEY, this.selectedMailbox);
+            } else {
+                localStorage.removeItem(MessageList.MAILBOX_STORAGE_KEY);
+            }
+
+            // Update URL route if not during initial load and not suppressed
+            if (!this.isInitialLoad && !this.suppressRouteUpdate) {
+                this.updateRouteWithCurrentState();
+            }
         }
 
         @Watch("selectedFolder")
         async onFolderChanged() {
             await this.refresh(false);
+            // Update URL with folder filter
+            if (!this.suppressRouteUpdate && !this.isInitialLoad) {
+                this.updateRouteWithCurrentState();
+            }
         }
 
         async loadFolders() {
@@ -540,7 +571,57 @@
                 const mailboxes = await new MailboxesController().getAll();
                 this.availableMailboxes = mailboxes.sort((a, b) => a.name.localeCompare(b.name));
                 if (!this.selectedMailbox) {
-                    this.selectedMailbox = this.availableMailboxes.find(m => m.name == server.currentUserDefaultMailboxName)?.name ?? this.availableMailboxes[this.availableMailboxes.length - 1]?.name ?? null;
+                    // Priority order for mailbox selection on initial load:
+                    // 1. URL route parameter (for bookmarks/direct links)
+                    // 2. localStorage (for persistent selection)
+                    // 3. Server default mailbox
+                    // 4. Last mailbox alphabetically
+                    let mailboxToSelect: string | null = null;
+                    
+                    if (this.isInitialLoad) {
+                        // Check URL route parameter first
+                        const routeMailbox = this.$route.params.mailbox as string | undefined;
+                        if (routeMailbox) {
+                            const decodedMailbox = decodeURIComponent(routeMailbox);
+                            mailboxToSelect = this.availableMailboxes.find(m => m.name === decodedMailbox)?.name ?? null;
+                        }
+                        
+                        // If not in URL, check localStorage
+                        if (!mailboxToSelect) {
+                            const storedMailbox = localStorage.getItem(MessageList.MAILBOX_STORAGE_KEY);
+                            if (storedMailbox) {
+                                mailboxToSelect = this.availableMailboxes.find(m => m.name === storedMailbox)?.name ?? null;
+                            }
+                        }
+                    }
+                    
+                    // Fall back to server default or last mailbox
+                    if (!mailboxToSelect) {
+                        mailboxToSelect = this.availableMailboxes.find(m => m.name == server.currentUserDefaultMailboxName)?.name ?? this.availableMailboxes[this.availableMailboxes.length - 1]?.name ?? null;
+                    }
+                    
+                    // Suppress route update during initial load to avoid redundant navigation
+                    this.suppressRouteUpdate = true;
+                    this.selectedMailbox = mailboxToSelect;
+                    
+                    // On initial load, restore filters from URL query parameters
+                    if (this.isInitialLoad) {
+                        const query = this.$route.query;
+                        if (query.search) {
+                            this.searchTerm = query.search as string;
+                        }
+                        if (query.folder) {
+                            this.selectedFolder = query.folder as string;
+                        }
+                        if (query.sort) {
+                            this.selectedSortColumn = query.sort as string;
+                        }
+                        if (query.order) {
+                            this.selectedSortDescending = query.order !== 'asc';
+                        }
+                    }
+                    
+                    this.suppressRouteUpdate = false;
                 } else {
                     //Potentially removed mailbox
                     this.selectedMailbox = this.availableMailboxes.find(m => m.name == this.selectedMailbox)?.name ?? null;
@@ -600,6 +681,19 @@
                     this.selectMessage(this.pendingSelectMessageAfterRefresh);
                     this.pendingSelectMessageAfterRefresh = null;
                 }
+                
+                // On initial load, select message from URL if specified
+                if (this.isInitialLoad) {
+                    const messageId = this.$route.params.messageId as string | undefined;
+                    if (messageId) {
+                        const message = this.messages.find(m => m.id === messageId);
+                        if (message) {
+                            this.suppressRouteUpdate = true;
+                            this.selectMessage(message);
+                            this.suppressRouteUpdate = false;
+                        }
+                    }
+                }
 
                 this.initialMailboxLoadDone = true;
                 this.lastSort = sortColumn;
@@ -626,15 +720,146 @@
                 this.selectedSortDescending = descending;
 
                 await this.refresh(false);
+                
+                // Update URL with sort parameters
+                if (!this.suppressRouteUpdate && !this.isInitialLoad) {
+                    this.updateRouteWithCurrentState();
+                }
+            }
+        }
+
+        // Method to update route with all current state (mailbox, message, filters)
+        updateRouteWithCurrentState() {
+            if (!this.selectedMailbox) {
+                try {
+                    this.$router.replace({ path: '/messages' });
+                } catch (e) {
+                    console.error("Error updating route:", e);
+                }
+                return;
+            }
+
+            // Build the path
+            let path = `/messages/mailbox/${encodeURIComponent(this.selectedMailbox)}`;
+            if (this.selectedmessage) {
+                path += `/message/${this.selectedmessage.id}`;
+            }
+
+            // Build query parameters for filters
+            const query: any = {};
+            if (this.searchTerm) {
+                query.search = this.searchTerm;
+            }
+            if (this.selectedFolder && this.selectedFolder !== 'INBOX') {
+                query.folder = this.selectedFolder;
+            }
+            if (this.selectedSortColumn !== 'receivedDate') {
+                query.sort = this.selectedSortColumn;
+            }
+            if (!this.selectedSortDescending) {
+                query.order = 'asc';
+            }
+
+            try {
+                const result = this.$router.replace({ path, query });
+                // Handle the promise if it's returned
+                if (result && typeof result.catch === 'function') {
+                    result.catch((err: any) => {
+                        // Ignore navigation cancelled errors
+                        if (err && err.name !== 'NavigationDuplicated' && err.type !== 16) {
+                            console.error("Error updating route:", err);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Error updating route:", e);
             }
         }
 
         async mounted() {
             this.loading = true;
             await this.refresh(true, false);
+            this.isInitialLoad = false;
         }
 
-        async created() {
+        @Watch("$route")
+        onRouteChanged(newRoute: any, oldRoute: any) {
+            // Handle route changes (e.g., browser back/forward)
+            const newMailbox = newRoute.params.mailbox as string | undefined;
+            const oldMailbox = oldRoute.params.mailbox as string | undefined;
+            const newMessageId = newRoute.params.messageId as string | undefined;
+            const oldMessageId = oldRoute.params.messageId as string | undefined;
+            
+            this.suppressRouteUpdate = true;
+            
+            // Handle mailbox change
+            if (newMailbox !== oldMailbox) {
+                const decodedMailbox = newMailbox ? decodeURIComponent(newMailbox) : null;
+                
+                // Only update if the mailbox actually exists and is different from current selection
+                if (decodedMailbox && this.availableMailboxes) {
+                    const mailbox = this.availableMailboxes.find(m => m.name === decodedMailbox);
+                    if (mailbox && mailbox.name !== this.selectedMailbox) {
+                        this.selectedMailbox = mailbox.name;
+                    }
+                }
+            }
+            
+            // Handle message selection change
+            if (newMessageId !== oldMessageId) {
+                if (newMessageId) {
+                    // Select the message if it exists in current list
+                    const message = this.messages.find(m => m.id === newMessageId);
+                    if (message && message.id !== this.selectedmessage?.id) {
+                        this.selectMessage(message);
+                    }
+                } else if (this.selectedmessage) {
+                    // Clear selection
+                    this.handleCurrentChange(null);
+                }
+            }
+            
+            // Handle query parameter changes (filters)
+            const query = newRoute.query;
+            const oldQuery = oldRoute.query;
+            
+            if (JSON.stringify(query) !== JSON.stringify(oldQuery)) {
+                let needsRefresh = false;
+                
+                // Update search term
+                const newSearch = (query.search as string) ?? "";
+                if (newSearch !== this.searchTerm) {
+                    this.searchTerm = newSearch;
+                    needsRefresh = true;
+                }
+                
+                // Update folder
+                const newFolder = (query.folder as string) ?? "INBOX";
+                if (newFolder !== this.selectedFolder) {
+                    this.selectedFolder = newFolder;
+                    needsRefresh = true;
+                }
+                
+                // Update sort column
+                const newSort = (query.sort as string) ?? "receivedDate";
+                if (newSort !== this.selectedSortColumn) {
+                    this.selectedSortColumn = newSort;
+                    needsRefresh = true;
+                }
+                
+                // Update sort order
+                const newOrder = query.order === 'asc' ? false : true;
+                if (newOrder !== this.selectedSortDescending) {
+                    this.selectedSortDescending = newOrder;
+                    needsRefresh = true;
+                }
+                
+                if (needsRefresh && !this.isInitialLoad) {
+                    this.refresh(false);
+                }
+            }
+            
+            this.suppressRouteUpdate = false;
         }
 
         @Watch("connection")
