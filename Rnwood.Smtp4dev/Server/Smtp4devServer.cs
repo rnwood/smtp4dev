@@ -38,12 +38,14 @@ using LinqKit;
 using Org.BouncyCastle.Bcpg.OpenPgp;
 using System.Security.Authentication;
 using System.Net.Security;
+using Rnwood.Smtp4dev.Server.Auth;
 
 namespace Rnwood.Smtp4dev.Server
 {
     internal class Smtp4devServer : ISmtp4devServer, IHostedService
     {
         private readonly ILogger log = Log.ForContext<Smtp4devServer>();
+        private readonly OAuth2TokenValidator oauth2TokenValidator;
 
         public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<Settings.ServerOptions> serverOptions,
             IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory,
@@ -56,6 +58,7 @@ namespace Rnwood.Smtp4dev.Server
             this.relaySmtpClientFactory = relaySmtpClientFactory;
             this.taskQueue = taskQueue;
             this.scriptingHost = scriptingHost;
+            this.oauth2TokenValidator = new OAuth2TokenValidator(log);
 
             taskQueue.Start();
             StartWatchingServerOptionsForChanges();
@@ -337,7 +340,7 @@ namespace Rnwood.Smtp4dev.Server
 
         }
 
-        private Task OnAuthenticationCredentialsValidationRequired(object sender, AuthenticationCredentialsValidationEventArgs e)
+        private async Task OnAuthenticationCredentialsValidationRequired(object sender, AuthenticationCredentialsValidationEventArgs e)
         {
 
 
@@ -359,8 +362,68 @@ namespace Rnwood.Smtp4dev.Server
 
             if (result == null)
             {
-                if (e.Credentials is IAuthenticationCredentialsCanValidateWithPassword val)
+                // Check if credentials support OAuth2 token validation
+                if (e.Credentials is IAuthenticationCredentialsCanValidateWithToken tokenCreds)
                 {
+                    // OAuth2/XOAUTH2 validation
+                    var authority = serverOptions.CurrentValue.OAuth2Authority;
+                    var audience = serverOptions.CurrentValue.OAuth2Audience;
+                    var issuer = serverOptions.CurrentValue.OAuth2Issuer;
+
+                    if (!string.IsNullOrWhiteSpace(authority))
+                    {
+                        // Validate token with IDP
+                        var (isValid, subject, error) = await oauth2TokenValidator.ValidateTokenAsync(
+                            tokenCreds.AccessToken, 
+                            authority, 
+                            audience, 
+                            issuer);
+
+                        if (isValid)
+                        {
+                            // Check if subject matches username (case-insensitive)
+                            if (subject.Equals(tokenCreds.Username, StringComparison.OrdinalIgnoreCase))
+                            {
+                                // Check if username exists in configured users list
+                                var user = serverOptions.CurrentValue.Users.FirstOrDefault(u => u.Username.Equals(tokenCreds.Username, StringComparison.OrdinalIgnoreCase));
+                                if (user != null)
+                                {
+                                    result = AuthenticationResult.Success;
+                                    this.log.Information("SMTP OAuth2 authentication successful. Username: {username}, Subject: {subject}, ClientAddress: {clientAddress}", 
+                                        tokenCreds.Username, subject, e.Session.ClientAddress);
+                                }
+                                else
+                                {
+                                    result = AuthenticationResult.Failure;
+                                    this.log.Warning("SMTP OAuth2 authentication failed - username not in configured users list. Username: {username}, Subject: {subject}, ClientAddress: {clientAddress}", 
+                                        tokenCreds.Username, subject, e.Session.ClientAddress);
+                                }
+                            }
+                            else
+                            {
+                                result = AuthenticationResult.Failure;
+                                this.log.Warning("SMTP OAuth2 authentication failed - subject mismatch. Username: {username}, Subject: {subject}, ClientAddress: {clientAddress}", 
+                                    tokenCreds.Username, subject, e.Session.ClientAddress);
+                            }
+                        }
+                        else
+                        {
+                            result = AuthenticationResult.Failure;
+                            this.log.Warning("SMTP OAuth2 authentication failed - token validation failed. Username: {username}, Error: {error}, ClientAddress: {clientAddress}", 
+                                tokenCreds.Username, error, e.Session.ClientAddress);
+                        }
+                    }
+                    else
+                    {
+                        // OAuth2Authority not configured - fail authentication
+                        result = AuthenticationResult.Failure;
+                        this.log.Warning("SMTP OAuth2 authentication failed - OAuth2Authority not configured. Username: {username}, ClientAddress: {clientAddress}", 
+                            tokenCreds.Username, e.Session.ClientAddress);
+                    }
+                }
+                else if (e.Credentials is IAuthenticationCredentialsCanValidateWithPassword val)
+                {
+                    // Password-based validation (PLAIN, LOGIN, CRAM-MD5)
                     var user = serverOptions.CurrentValue.Users.FirstOrDefault(u => u.Username.Equals(val.Username, StringComparison.CurrentCultureIgnoreCase));
                     if (user != null && val.ValidateResponse(user.Password))
                     {
@@ -385,7 +448,6 @@ namespace Rnwood.Smtp4dev.Server
             }
 
             e.AuthenticationResult = result.Value;
-            return Task.CompletedTask;
         }
 
 
