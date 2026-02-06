@@ -204,7 +204,7 @@
             const path = this.$route.path;
             this.suppressRouteUpdate = true;
             
-            if (path.startsWith('/messages') || path.startsWith('/mailbox') || path === '/') {
+            if (path.startsWith('/messages') || path === '/') {
                 this.activeTabId = 'messages';
             } else if (path.startsWith('/sessions')) {
                 this.activeTabId = 'sessions';

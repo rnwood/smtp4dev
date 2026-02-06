@@ -201,7 +201,7 @@
                 // On initial load, check if there's a session ID in the route
                 if (this.isInitialLoad) {
                     const sessionId = this.$route.params.sessionId as string | undefined;
-                    if (sessionId) {
+                    if (sessionId && sessionId.trim()) {
                         const session = this.sessions.find(s => s.id === sessionId);
                         if (session) {
                             this.selectSession(session);
