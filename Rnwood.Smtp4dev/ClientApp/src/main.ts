@@ -90,6 +90,7 @@ if (!supportedBrowser) {
         { path: '/', component: Home },
         { path: '/messages', component: Home },
         { path: '/messages/mailbox/:mailbox', component: Home },
+        { path: '/messages/mailbox/:mailbox/message/:messageId', component: Home },
         { path: '/sessions', component: Home },
         { path: '/sessions/session/:sessionId', component: Home },
         { path: '/serverlog', component: Home },

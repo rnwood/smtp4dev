@@ -244,6 +244,12 @@
         @Emit("selected-message-changed")
         handleCurrentChange(message: MessageSummary | null) {
             this.selectedmessage = message;
+            
+            // Update URL with selected message
+            if (!this.suppressRouteUpdate && !this.isInitialLoad) {
+                this.updateRouteWithCurrentState();
+            }
+            
             return message;
         }
 
@@ -475,8 +481,14 @@
         @Watch("searchTerm")
         onSearchTermChanged() {
             this.debouncedDoSearch();
+            // Update URL with search filter
+            if (!this.suppressRouteUpdate && !this.isInitialLoad) {
+                this.debouncedUpdateRoute();
+            }
         }
+        
         debouncedDoSearch = debounce(() => this.refresh(false), 200);
+        debouncedUpdateRoute = debounce(() => this.updateRouteWithCurrentState(), 300);
 
         @Watch("selectedMailbox")
         async onMailboxChanged() {
@@ -506,16 +518,18 @@
             }
 
             // Update URL route if not during initial load and not suppressed
-            if (!this.isInitialLoad && !this.suppressRouteUpdate && this.selectedMailbox) {
-                this.$router.push({ path: `/messages/mailbox/${encodeURIComponent(this.selectedMailbox)}` });
-            } else if (!this.isInitialLoad && !this.suppressRouteUpdate && !this.selectedMailbox) {
-                this.$router.push({ path: '/messages' });
+            if (!this.isInitialLoad && !this.suppressRouteUpdate) {
+                this.updateRouteWithCurrentState();
             }
         }
 
         @Watch("selectedFolder")
         async onFolderChanged() {
             await this.refresh(false);
+            // Update URL with folder filter
+            if (!this.suppressRouteUpdate && !this.isInitialLoad) {
+                this.updateRouteWithCurrentState();
+            }
         }
 
         async loadFolders() {
@@ -589,6 +603,24 @@
                     // Suppress route update during initial load to avoid redundant navigation
                     this.suppressRouteUpdate = true;
                     this.selectedMailbox = mailboxToSelect;
+                    
+                    // On initial load, restore filters from URL query parameters
+                    if (this.isInitialLoad) {
+                        const query = this.$route.query;
+                        if (query.search) {
+                            this.searchTerm = query.search as string;
+                        }
+                        if (query.folder) {
+                            this.selectedFolder = query.folder as string;
+                        }
+                        if (query.sort) {
+                            this.selectedSortColumn = query.sort as string;
+                        }
+                        if (query.order) {
+                            this.selectedSortDescending = query.order !== 'asc';
+                        }
+                    }
+                    
                     this.suppressRouteUpdate = false;
                 } else {
                     //Potentially removed mailbox
@@ -649,6 +681,19 @@
                     this.selectMessage(this.pendingSelectMessageAfterRefresh);
                     this.pendingSelectMessageAfterRefresh = null;
                 }
+                
+                // On initial load, select message from URL if specified
+                if (this.isInitialLoad) {
+                    const messageId = this.$route.params.messageId as string | undefined;
+                    if (messageId) {
+                        const message = this.messages.find(m => m.id === messageId);
+                        if (message) {
+                            this.suppressRouteUpdate = true;
+                            this.selectMessage(message);
+                            this.suppressRouteUpdate = false;
+                        }
+                    }
+                }
 
                 this.initialMailboxLoadDone = true;
                 this.lastSort = sortColumn;
@@ -675,6 +720,59 @@
                 this.selectedSortDescending = descending;
 
                 await this.refresh(false);
+                
+                // Update URL with sort parameters
+                if (!this.suppressRouteUpdate && !this.isInitialLoad) {
+                    this.updateRouteWithCurrentState();
+                }
+            }
+        }
+
+        // Method to update route with all current state (mailbox, message, filters)
+        updateRouteWithCurrentState() {
+            if (!this.selectedMailbox) {
+                try {
+                    this.$router.replace({ path: '/messages' });
+                } catch (e) {
+                    console.error("Error updating route:", e);
+                }
+                return;
+            }
+
+            // Build the path
+            let path = `/messages/mailbox/${encodeURIComponent(this.selectedMailbox)}`;
+            if (this.selectedmessage) {
+                path += `/message/${this.selectedmessage.id}`;
+            }
+
+            // Build query parameters for filters
+            const query: any = {};
+            if (this.searchTerm) {
+                query.search = this.searchTerm;
+            }
+            if (this.selectedFolder && this.selectedFolder !== 'INBOX') {
+                query.folder = this.selectedFolder;
+            }
+            if (this.selectedSortColumn !== 'receivedDate') {
+                query.sort = this.selectedSortColumn;
+            }
+            if (!this.selectedSortDescending) {
+                query.order = 'asc';
+            }
+
+            try {
+                const result = this.$router.replace({ path, query });
+                // Handle the promise if it's returned
+                if (result && typeof result.catch === 'function') {
+                    result.catch((err: any) => {
+                        // Ignore navigation cancelled errors
+                        if (err && err.name !== 'NavigationDuplicated' && err.type !== 16) {
+                            console.error("Error updating route:", err);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Error updating route:", e);
             }
         }
 
@@ -689,7 +787,12 @@
             // Handle route changes (e.g., browser back/forward)
             const newMailbox = newRoute.params.mailbox as string | undefined;
             const oldMailbox = oldRoute.params.mailbox as string | undefined;
+            const newMessageId = newRoute.params.messageId as string | undefined;
+            const oldMessageId = oldRoute.params.messageId as string | undefined;
             
+            this.suppressRouteUpdate = true;
+            
+            // Handle mailbox change
             if (newMailbox !== oldMailbox) {
                 const decodedMailbox = newMailbox ? decodeURIComponent(newMailbox) : null;
                 
@@ -697,12 +800,66 @@
                 if (decodedMailbox && this.availableMailboxes) {
                     const mailbox = this.availableMailboxes.find(m => m.name === decodedMailbox);
                     if (mailbox && mailbox.name !== this.selectedMailbox) {
-                        this.suppressRouteUpdate = true;
                         this.selectedMailbox = mailbox.name;
-                        this.suppressRouteUpdate = false;
                     }
                 }
             }
+            
+            // Handle message selection change
+            if (newMessageId !== oldMessageId) {
+                if (newMessageId) {
+                    // Select the message if it exists in current list
+                    const message = this.messages.find(m => m.id === newMessageId);
+                    if (message && message.id !== this.selectedmessage?.id) {
+                        this.selectMessage(message);
+                    }
+                } else if (this.selectedmessage) {
+                    // Clear selection
+                    this.handleCurrentChange(null);
+                }
+            }
+            
+            // Handle query parameter changes (filters)
+            const query = newRoute.query;
+            const oldQuery = oldRoute.query;
+            
+            if (JSON.stringify(query) !== JSON.stringify(oldQuery)) {
+                let needsRefresh = false;
+                
+                // Update search term
+                const newSearch = (query.search as string) ?? "";
+                if (newSearch !== this.searchTerm) {
+                    this.searchTerm = newSearch;
+                    needsRefresh = true;
+                }
+                
+                // Update folder
+                const newFolder = (query.folder as string) ?? "INBOX";
+                if (newFolder !== this.selectedFolder) {
+                    this.selectedFolder = newFolder;
+                    needsRefresh = true;
+                }
+                
+                // Update sort column
+                const newSort = (query.sort as string) ?? "receivedDate";
+                if (newSort !== this.selectedSortColumn) {
+                    this.selectedSortColumn = newSort;
+                    needsRefresh = true;
+                }
+                
+                // Update sort order
+                const newOrder = query.order === 'asc' ? false : true;
+                if (newOrder !== this.selectedSortDescending) {
+                    this.selectedSortDescending = newOrder;
+                    needsRefresh = true;
+                }
+                
+                if (needsRefresh && !this.isInitialLoad) {
+                    this.refresh(false);
+                }
+            }
+            
+            this.suppressRouteUpdate = false;
         }
 
         @Watch("connection")
