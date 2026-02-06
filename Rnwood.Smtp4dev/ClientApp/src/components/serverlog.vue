@@ -227,9 +227,9 @@
                 this.suppressRouteUpdate = true;
                 
                 const query = this.$route.query;
-                this.selectedLevel = query.level as string || null;
-                this.selectedSource = query.source as string || null;
-                this.searchText = query.search as string || "";
+                this.selectedLevel = (query.level as string) ?? null;
+                this.selectedSource = (query.source as string) ?? null;
+                this.searchText = (query.search as string) ?? "";
                 
                 // Apply filters
                 this.logEntries = this.filterLogEntries();

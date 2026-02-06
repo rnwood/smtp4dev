@@ -561,7 +561,7 @@
                     // 1. URL route parameter (for bookmarks/direct links)
                     // 2. localStorage (for persistent selection)
                     // 3. Server default mailbox
-                    // 4. Last mailbox in the list
+                    // 4. Last mailbox alphabetically
                     let mailboxToSelect: string | null = null;
                     
                     if (this.isInitialLoad) {
@@ -682,9 +682,6 @@
             this.loading = true;
             await this.refresh(true, false);
             this.isInitialLoad = false;
-        }
-
-        async created() {
         }
 
         @Watch("$route")
