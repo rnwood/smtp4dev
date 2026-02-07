@@ -164,6 +164,30 @@
                             <el-switch v-model="server.smtpAllowAnyCredentials" :disabled="server.lockedSettings.smtpAllowAnyCredentials" />
                         </el-form-item>
 
+                        <el-form-item label="OAuth2/XOAUTH2 Authority URL" prop="server.oauth2Authority">
+                            <el-input v-model="server.oauth2Authority" :disabled="server.lockedSettings.oauth2Authority" placeholder="e.g., https://login.microsoftonline.com/common/v2.0">
+                                <template #prefix>
+                                    <el-icon v-if="server.lockedSettings.oauth2Authority" :title="`Locked: ${server.lockedSettings.oauth2Authority}`"><Lock /></el-icon>
+                                </template>
+                            </el-input>
+                        </el-form-item>
+
+                        <el-form-item label="OAuth2/XOAUTH2 Audience" prop="server.oauth2Audience">
+                            <el-input v-model="server.oauth2Audience" :disabled="server.lockedSettings.oauth2Audience" placeholder="Required when Authority is specified">
+                                <template #prefix>
+                                    <el-icon v-if="server.lockedSettings.oauth2Audience" :title="`Locked: ${server.lockedSettings.oauth2Audience}`"><Lock /></el-icon>
+                                </template>
+                            </el-input>
+                        </el-form-item>
+
+                        <el-form-item label="OAuth2/XOAUTH2 Issuer" prop="server.oauth2Issuer">
+                            <el-input v-model="server.oauth2Issuer" :disabled="server.lockedSettings.oauth2Issuer" placeholder="Optional - defaults to authority's discovery document">
+                                <template #prefix>
+                                    <el-icon v-if="server.lockedSettings.oauth2Issuer" :title="`Locked: ${server.lockedSettings.oauth2Issuer}`"><Lock /></el-icon>
+                                </template>
+                            </el-input>
+                        </el-form-item>
+
                         <el-form-item label="Credentials validation expression" prop="server.credentialsValidationExpression">
                             <expressioninput 
                                 v-model="server.credentialsValidationExpression" 
