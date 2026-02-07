@@ -72,8 +72,35 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 
                 output.WriteLine($"Trace saved: {tracePath}");
             }
-            catch
+            catch (Exception ex)
             {
+                // Capture page structure dump on failure
+                try
+                {
+                    output.WriteLine($"Test failed with error: {ex.Message}");
+                    
+                    // Capture accessibility snapshot
+                    string snapshotPath = System.IO.Path.Combine(traceDir, $"{testName}_snapshot.txt");
+                    var snapshot = await page.Locator("body").AriaSnapshotAsync();
+                    await System.IO.File.WriteAllTextAsync(snapshotPath, snapshot);
+                    output.WriteLine($"Accessibility snapshot saved: {snapshotPath}");
+                    
+                    // Capture screenshot
+                    string screenshotPath = System.IO.Path.Combine(traceDir, $"{testName}_failure.png");
+                    await page.ScreenshotAsync(new PageScreenshotOptions { Path = screenshotPath, FullPage = true });
+                    output.WriteLine($"Screenshot saved: {screenshotPath}");
+                    
+                    // Capture HTML content
+                    string htmlPath = System.IO.Path.Combine(traceDir, $"{testName}_content.html");
+                    var htmlContent = await page.ContentAsync();
+                    await System.IO.File.WriteAllTextAsync(htmlPath, htmlContent);
+                    output.WriteLine($"HTML content saved: {htmlPath}");
+                }
+                catch (Exception dumpEx)
+                {
+                    output.WriteLine($"Failed to capture page structure dump: {dumpEx.Message}");
+                }
+                
                 // Stop tracing and save on failure
                 await browserContext.Tracing.StopAsync(new TracingStopOptions
                 {
