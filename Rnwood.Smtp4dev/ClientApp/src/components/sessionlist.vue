@@ -99,6 +99,8 @@
         selectedsession: SessionSummary | null = null;
         loading: boolean = true;
         private mutex = new Mutex();
+        private isInitialLoad = true;
+        private suppressRouteUpdate = false;
 
         @Emit("selected-session-changed")
         handleCurrentChange(session: SessionSummary | null) {
@@ -109,11 +111,42 @@
         async handlePaginationCurrentChange(page: number) {
             this.page = page;
             await this.refresh();
+            
+            // Update URL with page parameter
+            if (!this.suppressRouteUpdate && !this.isInitialLoad) {
+                this.updateRouteWithCurrentState();
+            }
         }
 
         async handlePaginationPageSizeChange(pageSize: number) {
             ClientSettingsManager.updateClientSettings({ pageSize });
             await this.refresh();
+        }
+
+        // Method to update route with current state
+        updateRouteWithCurrentState() {
+            let path = '/sessions';
+            if (this.selectedsession) {
+                path = `/sessions/session/${this.selectedsession.id}`;
+            }
+            
+            const query: any = {};
+            if (this.page > 1) {
+                query.page = this.page.toString();
+            }
+            
+            try {
+                const result = this.$router.replace({ path, query });
+                if (result && typeof result.catch === 'function') {
+                    result.catch((err: any) => {
+                        if (err && err.name !== 'NavigationDuplicated' && err.type !== 16) {
+                            console.error("Error updating route:", err);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Error updating route:", e);
+            }
         }
 
         formatDate(
@@ -197,6 +230,28 @@
                     (a: SessionSummary, b: SessionSummary) => a.id == b.id
                 );
 
+                // On initial load, check if there's a session ID in the route
+                if (this.isInitialLoad) {
+                    // Restore page from URL
+                    const pageQuery = this.$route.query.page as string | undefined;
+                    if (pageQuery) {
+                        const pageNum = parseInt(pageQuery, 10);
+                        if (!isNaN(pageNum) && pageNum > 0) {
+                            this.page = pageNum;
+                        }
+                    }
+                    
+                    const sessionId = this.$route.params.sessionId as string | undefined;
+                    if (sessionId && sessionId.trim()) {
+                        const session = this.sessions.find(s => s.id === sessionId);
+                        if (session) {
+                            this.suppressRouteUpdate = true;
+                            this.selectSession(session);
+                            this.suppressRouteUpdate = false;
+                        }
+                    }
+                }
+
                 if (
                     !this.sessions.some(
                         (m) => this.selectedsession != null && m.id == this.selectedsession.id
@@ -213,7 +268,8 @@
         }
 
         async mounted() {
-            this.refresh(false);
+            await this.refresh(false);
+            this.isInitialLoad = false;
         }
 
         async created() {
@@ -230,6 +286,43 @@
                 });
                 this.connection.addOnConnectedCallback(() => this.refresh(true));
             }
+        }
+
+        @Watch("$route")
+        onRouteChanged(newRoute: any, oldRoute: any) {
+            // Handle route changes for session selection (e.g., browser back/forward)
+            const newSessionId = newRoute.params.sessionId as string | undefined;
+            const oldSessionId = oldRoute.params.sessionId as string | undefined;
+            
+            this.suppressRouteUpdate = true;
+            
+            if (newSessionId !== oldSessionId && !this.isInitialLoad) {
+                if (newSessionId) {
+                    const session = this.sessions.find(s => s.id === newSessionId);
+                    if (session && session.id !== this.selectedsession?.id) {
+                        this.selectSession(session);
+                    }
+                } else {
+                    // Route changed to sessions root, clear selection
+                    this.handleCurrentChange(null);
+                }
+            }
+            
+            // Handle query parameter changes (pagination)
+            const query = newRoute.query;
+            const oldQuery = oldRoute.query;
+            
+            if (JSON.stringify(query) !== JSON.stringify(oldQuery) && !this.isInitialLoad) {
+                const pageQuery = query.page as string | undefined;
+                const newPage = pageQuery ? parseInt(pageQuery, 10) : 1;
+                
+                if (!isNaN(newPage) && newPage > 0 && newPage !== this.page) {
+                    this.page = newPage;
+                    this.refresh();
+                }
+            }
+            
+            this.suppressRouteUpdate = false;
         }
     }
 
