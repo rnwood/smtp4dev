@@ -122,7 +122,10 @@ namespace Rnwood.Smtp4dev.Controllers
                 CurrentUserDefaultMailboxName = currentUserDefaultMailbox,
                 HtmlValidateConfig = serverOptionsCurrentValue.HtmlValidateConfig != null ? serverOptionsCurrentValue.HtmlValidateConfig : null,
                 DisableHtmlValidation = serverOptionsCurrentValue.DisableHtmlValidation,
-                DisableHtmlCompatibilityCheck = serverOptionsCurrentValue.DisableHtmlCompatibilityCheck
+                DisableHtmlCompatibilityCheck = serverOptionsCurrentValue.DisableHtmlCompatibilityCheck,
+                OAuth2Authority = serverOptionsCurrentValue.OAuth2Authority,
+                OAuth2Audience = serverOptionsCurrentValue.OAuth2Audience,
+                OAuth2Issuer = serverOptionsCurrentValue.OAuth2Issuer
             };
         }
 
@@ -289,6 +292,9 @@ namespace Rnwood.Smtp4dev.Controllers
             newSettings.HtmlValidateConfig = serverUpdate.HtmlValidateConfig != defaultSettingsFile.ServerOptions.HtmlValidateConfig ?  serverUpdate.HtmlValidateConfig : null;
             newSettings.DisableHtmlValidation = serverUpdate.DisableHtmlValidation != defaultSettingsFile.ServerOptions.DisableHtmlValidation ? serverUpdate.DisableHtmlValidation : null;
             newSettings.DisableHtmlCompatibilityCheck = serverUpdate.DisableHtmlCompatibilityCheck != defaultSettingsFile.ServerOptions.DisableHtmlCompatibilityCheck ? serverUpdate.DisableHtmlCompatibilityCheck : null;
+            newSettings.OAuth2Authority = serverUpdate.OAuth2Authority != defaultSettingsFile.ServerOptions.OAuth2Authority ? serverUpdate.OAuth2Authority : null;
+            newSettings.OAuth2Audience = serverUpdate.OAuth2Audience != defaultSettingsFile.ServerOptions.OAuth2Audience ? serverUpdate.OAuth2Audience : null;
+            newSettings.OAuth2Issuer = serverUpdate.OAuth2Issuer != defaultSettingsFile.ServerOptions.OAuth2Issuer ? serverUpdate.OAuth2Issuer : null;
 
             newRelaySettings.SmtpServer = serverUpdate.RelaySmtpServer != defaultSettingsFile.RelayOptions.SmtpServer ? serverUpdate.RelaySmtpServer : null;
             newRelaySettings.SmtpPort = serverUpdate.RelaySmtpPort != defaultSettingsFile.RelayOptions.SmtpPort ? serverUpdate.RelaySmtpPort : null;

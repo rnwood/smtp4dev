@@ -34,7 +34,10 @@ export default class Server {
         mailboxes: Mailbox[],
         currentUserName: string,
         currentUserDefaultMailboxName: string,
-        htmlValidateConfig: string
+        htmlValidateConfig: string,
+        oauth2Authority: string,
+        oauth2Audience: string,
+        oauth2Issuer: string
     ) {
         
         this.isRunning = isRunning;
@@ -83,6 +86,9 @@ export default class Server {
         this.commandValidationExpression = commandValidationExpression;
         this.disableIPv6 = disableIPv6;
         this.users = users;
+        this.oauth2Authority = oauth2Authority;
+        this.oauth2Audience = oauth2Audience;
+        this.oauth2Issuer = oauth2Issuer;
     }
 
 
@@ -128,4 +134,7 @@ export default class Server {
     htmlValidateConfig: string;
     imapPort: number;
     pop3Port: number;
+    oauth2Authority: string;
+    oauth2Audience: string;
+    oauth2Issuer: string;
 }
