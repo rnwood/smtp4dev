@@ -1,0 +1,92 @@
+version: '3.8'
+
+services:
+  # JHipster Registry - OAuth2/OIDC Identity Provider
+  jhipster-registry:
+    image: jhipster/jhipster-registry:v7.4.0
+    container_name: jhipster-registry
+    ports:
+      - "8761:8761"
+    environment:
+      # Spring profiles
+      - SPRING_PROFILES_ACTIVE=dev,native
+      # Security configuration
+      - SPRING_SECURITY_USER_NAME=admin
+      - SPRING_SECURITY_USER_PASSWORD=admin
+      # OAuth2 configuration
+      - JHIPSTER_SECURITY_AUTHENTICATION_JWT_SECRET=my-secret-key-which-should-be-changed-in-production-and-be-base64-encoded
+      # Disable Eureka for simplicity (only using as OAuth2 server)
+      - EUREKA_CLIENT_ENABLED=false
+      - EUREKA_CLIENT_REGISTER_WITH_EUREKA=false
+      - EUREKA_CLIENT_FETCH_REGISTRY=false
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/management/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - smtp4dev-oauth2
+
+  # smtp4dev with OAuth2 authentication
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    container_name: smtp4dev-oauth2
+    ports:
+      - "5000:80"      # Web UI
+      - "2525:25"      # SMTP server
+      - "1143:143"     # IMAP server
+    environment:
+      # Server configuration
+      - ServerOptions__Urls=http://*:80
+      - ServerOptions__HostName=smtp4dev
+      
+      # SMTP port configuration
+      - ServerOptions__Port=25
+      
+      # Authentication configuration
+      - ServerOptions__AuthenticationRequired=true
+      - ServerOptions__SmtpAllowAnyCredentials=false
+      
+      # OAuth2 configuration for JHipster Registry
+      # Note: Using container name for internal DNS resolution
+      - ServerOptions__OAuth2Authority=http://jhipster-registry:8761
+      - ServerOptions__OAuth2Audience=internal
+      # Optional: You can specify issuer explicitly
+      # - ServerOptions__OAuth2Issuer=http://jhipster-registry:8761
+      
+      # Enable XOAUTH2 authentication
+      - ServerOptions__SmtpEnabledAuthTypesWhenNotSecureConnection=XOAUTH2
+      - ServerOptions__SmtpEnabledAuthTypesWhenSecureConnection=XOAUTH2
+      
+      # Configure allowed users
+      # Username must match the 'sub' claim in the JWT token
+      # For JHipster Registry, the 'sub' claim is the username (e.g., 'admin')
+      - ServerOptions__Users__0__Username=admin
+      - ServerOptions__Users__0__Password=not-used-for-oauth2
+      
+      # Optional: Add more users
+      # - ServerOptions__Users__1__Username=user
+      # - ServerOptions__Users__1__Password=not-used-for-oauth2
+      
+      # Database configuration (in-memory for demo)
+      - ServerOptions__Database=
+      
+      # Keep messages for demo
+      - ServerOptions__NumberOfMessagesToKeep=100
+      
+    depends_on:
+      jhipster-registry:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/api/server"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - smtp4dev-oauth2
+
+networks:
+  smtp4dev-oauth2:
+    driver: bridge

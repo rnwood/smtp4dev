@@ -1,0 +1,2 @@
+# Python dependencies for OAuth2/XOAUTH2 test script
+requests>=2.25.0
