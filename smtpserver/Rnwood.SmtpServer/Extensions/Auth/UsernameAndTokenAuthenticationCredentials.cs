@@ -8,7 +8,7 @@ namespace Rnwood.SmtpServer.Extensions.Auth;
 /// <summary>
 ///     Defines the <see cref="UsernameAndTokenAuthenticationCredentials" />.
 /// </summary>
-public abstract class UsernameAndTokenAuthenticationCredentials : IAuthenticationCredentials
+public abstract class UsernameAndTokenAuthenticationCredentials : IAuthenticationCredentials, IAuthenticationCredentialsCanValidateWithToken
 {
     /// <summary>
     ///     Initializes a new instance of the <see cref="UsernameAndTokenAuthenticationCredentials" /> class.

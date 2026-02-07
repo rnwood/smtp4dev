@@ -91,6 +91,26 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public string DeliverToStdout { get; set; } = "";
 
         public int? ExitAfterMessages { get; set; }
+
+        /// <summary>
+        /// OAuth2/XOAUTH2 Identity Provider (IDP) Authority URL for token validation.
+        /// Example: https://login.microsoftonline.com/common/v2.0 for Azure AD
+        /// When SmtpAllowAnyCredentials is false, tokens will be validated against this IDP.
+        /// </summary>
+        public string OAuth2Authority { get; set; }
+
+        /// <summary>
+        /// OAuth2/XOAUTH2 Audience value for token validation.
+        /// The token must be issued for this audience to be accepted.
+        /// </summary>
+        public string OAuth2Audience { get; set; }
+
+        /// <summary>
+        /// OAuth2/XOAUTH2 Issuer value for token validation.
+        /// The token must be issued by this issuer to be accepted.
+        /// If not specified, issuer validation is performed using the authority's discovery document.
+        /// </summary>
+        public string OAuth2Issuer { get; set; }
     }
 
 }

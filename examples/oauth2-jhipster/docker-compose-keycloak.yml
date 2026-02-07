@@ -1,0 +1,65 @@
+version: '3.8'
+
+services:
+  # Keycloak - OAuth2/OIDC Identity Provider
+  keycloak:
+    image: quay.io/keycloak/keycloak:23.0
+    container_name: keycloak-oauth2
+    command: 
+      - start-dev
+      - --import-realm
+    ports:
+      - "8080:8080"
+    environment:
+      KEYCLOAK_ADMIN: admin
+      KEYCLOAK_ADMIN_PASSWORD: admin
+      KC_HTTP_PORT: 8080
+      KC_HOSTNAME_STRICT: false
+      KC_HOSTNAME_STRICT_HTTPS: false
+      KC_HTTP_ENABLED: true
+    volumes:
+      - ./keycloak-realm.json:/opt/keycloak/data/import/realm.json:ro
+    healthcheck:
+      test: ["CMD-SHELL", "exec 3<>/dev/tcp/127.0.0.1/8080 && echo -e 'GET /health/ready HTTP/1.1\\r\\nHost: localhost\\r\\nConnection: close\\r\\n\\r\\n' >&3 && cat <&3 | grep -q '200 OK'"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 60s
+    networks:
+      - oauth2-net
+
+  # smtp4dev with OAuth2 authentication
+  smtp4dev:
+    image: rnwood/smtp4dev:v3
+    container_name: smtp4dev-oauth2
+    ports:
+      - "5000:80"
+      - "2525:25"
+    environment:
+      - ServerOptions__Urls=http://*:80
+      - ServerOptions__HostName=smtp4dev
+      - ServerOptions__Port=25
+      - ServerOptions__AuthenticationRequired=true
+      - ServerOptions__SmtpAllowAnyCredentials=false
+      - ServerOptions__OAuth2Authority=http://keycloak:8080/realms/smtp4dev
+      - ServerOptions__OAuth2Audience=smtp4dev-client
+      - ServerOptions__SmtpEnabledAuthTypesWhenNotSecureConnection=XOAUTH2
+      - ServerOptions__SmtpEnabledAuthTypesWhenSecureConnection=XOAUTH2
+      - ServerOptions__Users__0__Username=testuser
+      - ServerOptions__Users__0__Password=not-used-for-oauth2
+      - ServerOptions__Database=
+    depends_on:
+      keycloak:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/api/server"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+    networks:
+      - oauth2-net
+
+networks:
+  oauth2-net:
+    driver: bridge
