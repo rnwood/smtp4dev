@@ -20,8 +20,6 @@ public class OAuth2TokenValidator
     private readonly SemaphoreSlim configLock = new SemaphoreSlim(1, 1);
     private ConfigurationManager<OpenIdConnectConfiguration> configurationManager;
     private string currentAuthority;
-    private string currentAudience;
-    private string currentIssuer;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="OAuth2TokenValidator"/> class.
@@ -59,6 +57,7 @@ public class OAuth2TokenValidator
             }
 
             // Thread-safe initialization or update of configuration manager if authority changed
+            ConfigurationManager<OpenIdConnectConfiguration> manager;
             await configLock.WaitAsync();
             try
             {
@@ -72,17 +71,16 @@ public class OAuth2TokenValidator
                         new OpenIdConnectConfigurationRetriever(),
                         new HttpDocumentRetriever());
                     currentAuthority = authority;
-                    currentAudience = audience;
-                    currentIssuer = issuer;
                 }
+                manager = configurationManager;
             }
             finally
             {
                 configLock.Release();
             }
 
-            // Get OpenID Connect configuration
-            var config = await configurationManager.GetConfigurationAsync();
+            // Get OpenID Connect configuration using local reference
+            var config = await manager.GetConfigurationAsync();
 
             var validationParameters = new TokenValidationParameters
             {
@@ -115,15 +113,21 @@ public class OAuth2TokenValidator
             // Validate token
             var principal = handler.ValidateToken(token, validationParameters, out var validatedToken);
 
-            // Extract subject claim (typically 'sub', 'email', or 'preferred_username')
-            var subject = principal.FindFirst("sub")?.Value
-                ?? principal.FindFirst("email")?.Value
-                ?? principal.FindFirst("preferred_username")?.Value
-                ?? principal.FindFirst("upn")?.Value;
+            // Extract subject claim - match username against all supported claims
+            var subjectClaims = new[]
+            {
+                principal.FindFirst("preferred_username")?.Value,
+                principal.FindFirst("email")?.Value,
+                principal.FindFirst("upn")?.Value,
+                principal.FindFirst("sub")?.Value,
+                principal.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            };
+
+            var subject = subjectClaims.FirstOrDefault(c => !string.IsNullOrWhiteSpace(c));
 
             if (string.IsNullOrWhiteSpace(subject))
             {
-                return (false, null, "Token does not contain a valid subject claim (sub, email, preferred_username, or upn)");
+                return (false, null, "Token does not contain a valid subject claim (sub, email, preferred_username, upn, or NameIdentifier)");
             }
 
             log.Information("OAuth2 token validated successfully. Subject: {subject}", subject);

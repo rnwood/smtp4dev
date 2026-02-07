@@ -50,8 +50,8 @@ def test_xoauth2_mechanism():
     
     try:
         # Create XOAUTH2 auth string
-        # Format: user=<username>\x01auth=******
-        auth_string = f"user={username}\x01auth=******"
+        # Format: user=<username>\x01auth=Bearer <token>\x01\x01
+        auth_string = f"user={username}\x01auth=Bearer {fake_token}\x01\x01"
         auth_bytes = auth_string.encode('utf-8')
         auth_b64 = base64.b64encode(auth_bytes).decode('utf-8')
         
