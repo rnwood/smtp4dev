@@ -50,6 +50,39 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         }
 
         /// <summary>
+        /// Creates an SMTP client with protocol logging enabled.
+        /// Logs all SMTP protocol communication to test output for debugging.
+        /// </summary>
+        protected MailKit.Net.Smtp.SmtpClient CreateSmtpClientWithLogging()
+        {
+            var client = new MailKit.Net.Smtp.SmtpClient(new TestOutputProtocolLogger(output, "SMTP"));
+            output.WriteLine($"  [SMTP] Created SmtpClient with protocol logging enabled");
+            return client;
+        }
+
+        /// <summary>
+        /// Creates an IMAP client with protocol logging enabled.
+        /// Logs all IMAP protocol communication to test output for debugging.
+        /// </summary>
+        protected MailKit.Net.Imap.ImapClient CreateImapClientWithLogging()
+        {
+            var client = new MailKit.Net.Imap.ImapClient(new TestOutputProtocolLogger(output, "IMAP"));
+            output.WriteLine($"  [IMAP] Created ImapClient with protocol logging enabled");
+            return client;
+        }
+
+        /// <summary>
+        /// Creates a POP3 client with protocol logging enabled.
+        /// Logs all POP3 protocol communication to test output for debugging.
+        /// </summary>
+        protected MailKit.Net.Pop3.Pop3Client CreatePop3ClientWithLogging()
+        {
+            var client = new MailKit.Net.Pop3.Pop3Client(new TestOutputProtocolLogger(output, "POP3"));
+            output.WriteLine($"  [POP3] Created Pop3Client with protocol logging enabled");
+            return client;
+        }
+
+        /// <summary>
         /// Query Docker for the host port mapped to a container's internal port.
         /// Uses `docker port <container> <internal_port>` command.
         /// Includes retry logic to handle race conditions on slow systems (e.g., ARM64 with QEMU emulation).
