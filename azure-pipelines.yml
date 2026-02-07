@@ -1408,10 +1408,10 @@ stages:
                 File Name | Description
                 -- | --
                 [Winget package](https://winget.run/pkg/rnwood/smtp4dev/desktop)| Rnwood.Smtp4dev.Desktop Winget package (recommended easy option for Win10/11)
-                [Winget package](https://winget.run/pkg/rnwood/smtp4dev)| Rnwood.Smtp4dev Winget package Win10/11)
+                [Winget package](https://winget.run/pkg/rnwood/smtp4dev)| Rnwood.Smtp4dev Winget package (Win10/11)
                 [Rnwood.Smtp4dev-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-x64-$(tag).zip) | Windows x64 binary standalone - Server edition
                 [Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip) | Windows x64 binary standalone - Desktop app edition.
-                [Rnwood.Smtp4dev-win-arm64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip) | Windows ARM 62-bit binary standalone
+                [Rnwood.Smtp4dev-win-arm64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-win-arm64-$(tag).zip) | Windows ARM 64-bit binary standalone
                 [Rnwood.Smtp4dev-linux-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-linux-x64-$(tag).zip) | Linux x64 (Intel 64 bit) binary standalone
                 [Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip) | Linux MUSL x64 binary standalone for Linux distros using MUSL libc
                 [Rnwood.Smtp4dev-noruntime-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-noruntime-$(tag).zip) | Architecture independent version. Should run on any platform where the .NET 8.0 (or greater) runtime is installed
