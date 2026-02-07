@@ -37,20 +37,25 @@ namespace Rnwood.Smtp4dev.Controllers
         {
             string currentUserName = this.User?.Identity?.Name;
 
-            // If no user logged in or user is admin, return all mailboxes
-            if (string.IsNullOrEmpty(currentUserName) ||
-                currentUserName.Equals("admin", StringComparison.OrdinalIgnoreCase))
+            // If no user logged in, return all mailboxes
+            if (string.IsNullOrEmpty(currentUserName))
             {
                 return this.dbContext.Mailboxes.ToList();
             }
 
-            // Find user's default mailbox from configuration
+            // Find user in configuration
             var user = serverOptions.CurrentValue.Users
                 .FirstOrDefault(u => currentUserName.Equals(u.Username, StringComparison.OrdinalIgnoreCase));
 
-            if (user != null && !string.IsNullOrEmpty(user.DefaultMailbox))
+            // If user not found in config or has AllowAccessToOtherMailboxes, return all
+            if (user == null || user.AllowAccessToOtherMailboxes)
             {
-                // Return only user's mailbox
+                return this.dbContext.Mailboxes.ToList();
+            }
+
+            // Return only user's mailbox
+            if (!string.IsNullOrEmpty(user.DefaultMailbox))
+            {
                 var userMailbox = this.dbContext.Mailboxes
                     .Where(m => m.Name == user.DefaultMailbox)
                     .ToList();

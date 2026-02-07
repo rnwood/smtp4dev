@@ -42,29 +42,34 @@ namespace Rnwood.Smtp4dev.Controllers
 
         /// <summary>
         /// Returns the mailbox name that the current user is allowed to access.
-        /// Non-admin users are restricted to their own mailbox only.
+        /// Users without AllowAccessToOtherMailboxes are restricted to their own mailbox only.
         /// </summary>
         private string GetAllowedMailboxName(string requestedMailboxName)
         {
             string currentUserName = this.User?.Identity?.Name;
-            
-            // If no user logged in or user is admin, allow any mailbox
-            if (string.IsNullOrEmpty(currentUserName) || 
-                currentUserName.Equals("admin", StringComparison.OrdinalIgnoreCase))
+
+            // If no user logged in, allow any mailbox
+            if (string.IsNullOrEmpty(currentUserName))
             {
                 return requestedMailboxName;
             }
-            
-            // Find user's default mailbox from configuration
+
+            // Find user in configuration
             var user = serverOptions.CurrentValue.Users
                 .FirstOrDefault(u => currentUserName.Equals(u.Username, StringComparison.OrdinalIgnoreCase));
-            
-            if (user != null && !string.IsNullOrEmpty(user.DefaultMailbox))
+
+            // If user not found in config or has AllowAccessToOtherMailboxes, allow any mailbox
+            if (user == null || user.AllowAccessToOtherMailboxes)
             {
-                // Force user to only access their mailbox
+                return requestedMailboxName;
+            }
+
+            // Force user to only access their mailbox
+            if (!string.IsNullOrEmpty(user.DefaultMailbox))
+            {
                 return user.DefaultMailbox;
             }
-            
+
             // Fallback to Default
             return Rnwood.Smtp4dev.Server.Settings.MailboxOptions.DEFAULTNAME;
         }
