@@ -45,7 +45,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 // Verify URL still points to root (or redirects to /messages)
                 string currentUrl = homePage.GetCurrentUrl();
                 Assert.True(
-                    currentUrl.EndsWith("#/") || currentUrl.EndsWith("#/messages"),
+                    currentUrl.EndsWith("#/") || currentUrl.Contains("#/messages"),
                     $"Expected URL to be root or /messages, but got: {currentUrl}"
                 );
 
@@ -69,8 +69,12 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 await homePage.NavigateToUrlAsync($"{baseUrl}#/messages");
                 await homePage.WaitForTabsAsync();
 
-                // Verify URL is correct
-                Assert.EndsWith("#/messages", homePage.GetCurrentUrl());
+                // Verify URL is correct (accepts redirect to mailbox URL)
+                string currentUrl = homePage.GetCurrentUrl();
+                Assert.True(
+                    currentUrl.Contains("#/messages"),
+                    $"Expected URL to contain #/messages, got: {currentUrl}"
+                );
 
                 // Verify messages tab is active
                 var activeTab = await homePage.GetActiveTabNameAsync();
@@ -180,8 +184,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 // Verify URL updated to messages
                 string currentUrl = homePage.GetCurrentUrl();
                 Assert.True(
-                    currentUrl.EndsWith("#/messages") || currentUrl.EndsWith("#/"),
-                    $"Expected URL to end with #/messages or #/, but got: {currentUrl}"
+                    currentUrl.Contains("#/messages") || currentUrl.EndsWith("#/"),
+                    $"Expected URL to contain #/messages or end with #/, but got: {currentUrl}"
                 );
 
                 // Verify messages tab is active
@@ -234,8 +238,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 // Verify URL updated to messages
                 string currentUrl = homePage.GetCurrentUrl();
                 Assert.True(
-                    currentUrl.EndsWith("#/messages") || currentUrl.EndsWith("#/"),
-                    $"Expected URL to end with #/messages or #/, but got: {currentUrl}"
+                    currentUrl.Contains("#/messages") || currentUrl.EndsWith("#/"),
+                    $"Expected URL to contain #/messages or end with #/, but got: {currentUrl}"
                 );
 
                 // Verify messages tab is active
@@ -437,7 +441,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 // Verify we're on messages
                 string currentUrl = homePage.GetCurrentUrl();
                 Assert.True(
-                    currentUrl.EndsWith("#/messages") || currentUrl.EndsWith("#/"),
+                    currentUrl.Contains("#/messages") || currentUrl.EndsWith("#/"),
                     $"Expected to be on messages tab, got: {currentUrl}"
                 );
 
@@ -496,10 +500,10 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 // Use browser back button again
                 await homePage.GoBackAsync();
 
-                // Should be at messages
+                // Should be at messages (accepts redirect to mailbox URL)
                 string currentUrl = homePage.GetCurrentUrl();
                 Assert.True(
-                    currentUrl.EndsWith("#/messages") || currentUrl.EndsWith("#/"),
+                    currentUrl.Contains("#/messages") || currentUrl.EndsWith("#/"),
                     $"Expected to be at messages, got: {currentUrl}"
                 );
                 activeTab = await homePage.GetActiveTabNameAsync();
