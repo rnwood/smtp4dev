@@ -36,22 +36,21 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         {
             RunUITestAsync(nameof(RootUrl_ShouldDefaultToMessages), async (page, baseUrl, smtpPortNumber) =>
             {
+                var homePage = new HomePage(page);
+                
                 // Navigate to root URL
-                await page.GotoAsync($"{baseUrl}#/");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-                // Wait for tabs to render
-                await page.WaitForSelectorAsync("#maintabs");
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/");
+                await homePage.WaitForTabsAsync();
 
                 // Verify URL still points to root (or redirects to /messages)
-                string currentUrl = page.Url;
+                string currentUrl = homePage.GetCurrentUrl();
                 Assert.True(
                     currentUrl.EndsWith("#/") || currentUrl.EndsWith("#/messages"),
                     $"Expected URL to be root or /messages, but got: {currentUrl}"
                 );
 
                 // Verify messages tab is active
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Messages", activeTab);
             });
         }
@@ -64,18 +63,17 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         {
             RunUITestAsync(nameof(MessagesUrl_ShouldShowMessagesTab), async (page, baseUrl, smtpPortNumber) =>
             {
+                var homePage = new HomePage(page);
+                
                 // Navigate to messages URL
-                await page.GotoAsync($"{baseUrl}#/messages");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-                // Wait for tabs to render
-                await page.WaitForSelectorAsync("#maintabs");
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/messages");
+                await homePage.WaitForTabsAsync();
 
                 // Verify URL is correct
-                Assert.EndsWith("#/messages", page.Url);
+                Assert.EndsWith("#/messages", homePage.GetCurrentUrl());
 
                 // Verify messages tab is active
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Messages", activeTab);
 
                 // Verify messages list is visible
@@ -92,20 +90,18 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             RunUITestAsync(nameof(SessionsUrl_ShouldShowSessionsTab), async (page, baseUrl, smtpPortNumber) =>
             {
                 // Navigate to sessions URL
-                await page.GotoAsync($"{baseUrl}#/sessions");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-                // Wait for tabs to render
-                await page.WaitForSelectorAsync("#maintabs");
+                var homePage = new HomePage(page);
+                
+                // Navigate to sessions URL
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/sessions");
+                await homePage.WaitForTabsAsync();
 
                 // Verify URL is correct
-                Assert.EndsWith("#/sessions", page.Url);
+                Assert.EndsWith("#/sessions", homePage.GetCurrentUrl());
 
                 // Verify sessions tab is active
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Sessions", activeTab);
-
-                // Verify sessions list is visible
                 await page.WaitForSelectorAsync(".sessionlist");
             });
         }
@@ -119,17 +115,17 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
             RunUITestAsync(nameof(ServerLogUrl_ShouldShowServerLogTab), async (page, baseUrl, smtpPortNumber) =>
             {
                 // Navigate to server log URL
-                await page.GotoAsync($"{baseUrl}#/serverlog");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-
-                // Wait for tabs to render
-                await page.WaitForSelectorAsync("#maintabs");
+                var homePage = new HomePage(page);
+                
+                // Navigate to server log URL
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/serverlog");
+                await homePage.WaitForTabsAsync();
 
                 // Verify URL is correct
-                Assert.EndsWith("#/serverlog", page.Url);
+                Assert.EndsWith("#/serverlog", homePage.GetCurrentUrl());
 
                 // Verify server log tab is active
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Server Log", activeTab);
             });
         }
@@ -146,20 +142,20 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         {
             RunUITestAsync(nameof(TabSwitch_MessagesToSessions_ShouldUpdateUrl), async (page, baseUrl, smtpPortNumber) =>
             {
+                var homePage = new HomePage(page);
+                
                 // Start at messages
-                await page.GotoAsync($"{baseUrl}#/messages");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-                await page.WaitForSelectorAsync("#maintabs");
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/messages");
+                await homePage.WaitForTabsAsync();
 
                 // Click on Sessions tab
-                await page.Locator("#maintabs .el-tabs__item").Filter(new() { HasText = "Sessions" }).ClickAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.NavigateToSessionsAsync();
 
                 // Verify URL updated to sessions
-                Assert.EndsWith("#/sessions", page.Url);
+                Assert.EndsWith("#/sessions", homePage.GetCurrentUrl());
 
                 // Verify sessions tab is active
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Sessions", activeTab);
             });
         }
@@ -172,23 +168,24 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         {
             RunUITestAsync(nameof(TabSwitch_SessionsToMessages_ShouldUpdateUrl), async (page, baseUrl, smtpPortNumber) =>
             {
+                var homePage = new HomePage(page);
+                
                 // Start at sessions
-                await page.GotoAsync($"{baseUrl}#/sessions");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-                await page.WaitForSelectorAsync("#maintabs");
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/sessions");
+                await homePage.WaitForTabsAsync();
 
                 // Click on Messages tab
-                await page.Locator("#maintabs .el-tabs__item").Filter(new() { HasText = "Messages" }).ClickAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.NavigateToMessagesAsync();
 
                 // Verify URL updated to messages
+                string currentUrl = homePage.GetCurrentUrl();
                 Assert.True(
-                    page.Url.EndsWith("#/messages") || page.Url.EndsWith("#/"),
-                    $"Expected URL to end with #/messages or #/, but got: {page.Url}"
+                    currentUrl.EndsWith("#/messages") || currentUrl.EndsWith("#/"),
+                    $"Expected URL to end with #/messages or #/, but got: {currentUrl}"
                 );
 
                 // Verify messages tab is active
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Messages", activeTab);
             });
         }
@@ -200,21 +197,20 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         public void TabSwitch_MessagesToServerLog_ShouldUpdateUrl()
         {
             RunUITestAsync(nameof(TabSwitch_MessagesToServerLog_ShouldUpdateUrl), async (page, baseUrl, smtpPortNumber) =>
-            {
+            {var homePage = new HomePage(page);
+                
                 // Start at messages
-                await page.GotoAsync($"{baseUrl}#/messages");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-                await page.WaitForSelectorAsync("#maintabs");
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/messages");
+                await homePage.WaitForTabsAsync();
 
                 // Click on Server Log tab
-                await page.Locator("#maintabs .el-tabs__item").Filter(new() { HasText = "Server Log" }).ClickAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.NavigateToServerLogAsync();
 
                 // Verify URL updated to serverlog
-                Assert.EndsWith("#/serverlog", page.Url);
+                Assert.EndsWith("#/serverlog", homePage.GetCurrentUrl());
 
                 // Verify server log tab is active
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Server Log", activeTab);
             });
         }
@@ -226,24 +222,24 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         public void TabSwitch_ServerLogToMessages_ShouldUpdateUrl()
         {
             RunUITestAsync(nameof(TabSwitch_ServerLogToMessages_ShouldUpdateUrl), async (page, baseUrl, smtpPortNumber) =>
-            {
+            {var homePage = new HomePage(page);
+                
                 // Start at server log
-                await page.GotoAsync($"{baseUrl}#/serverlog");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-                await page.WaitForSelectorAsync("#maintabs");
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/serverlog");
+                await homePage.WaitForTabsAsync();
 
                 // Click on Messages tab
-                await page.Locator("#maintabs .el-tabs__item").Filter(new() { HasText = "Messages" }).ClickAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.NavigateToMessagesAsync();
 
                 // Verify URL updated to messages
+                string currentUrl = homePage.GetCurrentUrl();
                 Assert.True(
-                    page.Url.EndsWith("#/messages") || page.Url.EndsWith("#/"),
-                    $"Expected URL to end with #/messages or #/, but got: {page.Url}"
+                    currentUrl.EndsWith("#/messages") || currentUrl.EndsWith("#/"),
+                    $"Expected URL to end with #/messages or #/, but got: {currentUrl}"
                 );
 
                 // Verify messages tab is active
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Messages", activeTab);
             });
         }
@@ -255,21 +251,20 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         public void TabSwitch_ServerLogToSessions_ShouldUpdateUrl()
         {
             RunUITestAsync(nameof(TabSwitch_ServerLogToSessions_ShouldUpdateUrl), async (page, baseUrl, smtpPortNumber) =>
-            {
+            {var homePage = new HomePage(page);
+                
                 // Start at server log
-                await page.GotoAsync($"{baseUrl}#/serverlog");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-                await page.WaitForSelectorAsync("#maintabs");
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/serverlog");
+                await homePage.WaitForTabsAsync();
 
                 // Click on Sessions tab
-                await page.Locator("#maintabs .el-tabs__item").Filter(new() { HasText = "Sessions" }).ClickAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.NavigateToSessionsAsync();
 
                 // Verify URL updated to sessions
-                Assert.EndsWith("#/sessions", page.Url);
+                Assert.EndsWith("#/sessions", homePage.GetCurrentUrl());
 
                 // Verify sessions tab is active
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Sessions", activeTab);
             });
         }
@@ -282,20 +277,20 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         {
             RunUITestAsync(nameof(TabSwitch_SessionsToServerLog_ShouldUpdateUrl), async (page, baseUrl, smtpPortNumber) =>
             {
+                var homePage = new HomePage(page);
+                
                 // Start at sessions
-                await page.GotoAsync($"{baseUrl}#/sessions");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-                await page.WaitForSelectorAsync("#maintabs");
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/sessions");
+                await homePage.WaitForTabsAsync();
 
                 // Click on Server Log tab
-                await page.Locator("#maintabs .el-tabs__item").Filter(new() { HasText = "Server Log" }).ClickAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.NavigateToServerLogAsync();
 
                 // Verify URL updated to serverlog
-                Assert.EndsWith("#/serverlog", page.Url);
+                Assert.EndsWith("#/serverlog", homePage.GetCurrentUrl());
 
                 // Verify server log tab is active
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Server Log", activeTab);
             });
         }
@@ -313,68 +308,46 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         {
             RunUITestAsync(nameof(DeepLink_SessionWithId_ShouldSelectSession), async (page, baseUrl, smtpPortNumber) =>
             {
-                // First, send an email to create a session (before navigating to UI)
-                string sessionSubject = Guid.NewGuid().ToString();
-                using (var smtpClient = new SmtpClient())
-                {
-                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
-                    smtpClient.ServerCertificateValidationCallback = GetCertvalidationCallbackHandler();
-                    smtpClient.CheckCertificateRevocation = false;
-                    var message = new MimeMessage();
-                    message.To.Add(MailboxAddress.Parse("to@to.com"));
-                    message.From.Add(MailboxAddress.Parse("from@from.com"));
-                    message.Subject = sessionSubject;
-                    message.Body = new TextPart() { Text = "Test email to create session" };
-
-                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.StartTls,
-                        new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
-                    smtpClient.Send(message);
-                    smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
-                }
-
-                // Now navigate to sessions tab (will load sessions from database)
-                await page.GotoAsync($"{baseUrl}#/sessions");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-                await page.WaitForSelectorAsync(".sessionlist");
-
-                // Wait for the table body to be visible
-                await page.WaitForSelectorAsync(".sessionlist table.el-table__body", new() { State = WaitForSelectorState.Visible });
+                var homePage = new HomePage(page);
                 
-                // Wait for at least one session row to appear (sessions don't show subject, just connection info)
-                // Since we use a fresh database for each test, any row will be our session
-                var sessionRow = page.Locator(".sessionlist table.el-table__body tr:not(.el-table__empty-text)").First;
-                await sessionRow.WaitForAsync(new() { Timeout = 30000 });
+                // Send test email to create a session
+                string sessionSubject = Guid.NewGuid().ToString();
+                await HomePage.SendTestEmailAsync(
+                    smtpPort: smtpPortNumber,
+                    subject: sessionSubject,
+                    body: "Test email to create session",
+                    certValidationCallback: GetCertvalidationCallbackHandler()
+                );
 
-                //Click the session to select it and get the session ID from the URL
+                // Navigate to sessions tab
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/sessions");
+                
+                // Wait for session row to appear and click it
+                var sessionRow = await homePage.WaitForSessionRowAsync();
                 await sessionRow.ClickAsync();
                 await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
-                // Extract session ID from URL (format: #/sessions/session/{id})
-                string currentUrl = page.Url;
-                var sessionIdMatch = System.Text.RegularExpressions.Regex.Match(currentUrl, @"#/sessions/session/([^/]+)");
-                Assert.True(sessionIdMatch.Success, $"Could not extract session ID from URL: {currentUrl}");
-                string sessionId = sessionIdMatch.Groups[1].Value;
+                // Extract session ID from URL
+                string sessionId = homePage.ExtractSessionIdFromUrl();
+                Assert.NotNull(sessionId);
 
-                // Now test the deep link by navigating to a different tab first
-                await page.GotoAsync($"{baseUrl}#/messages");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                // Test deep link by navigating away first
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/messages");
 
                 // Navigate directly to the session deep link URL
                 string deepLinkUrl = $"{baseUrl}#/sessions/session/{sessionId}";
-                await page.GotoAsync(deepLinkUrl);
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.NavigateToUrlAsync(deepLinkUrl);
 
-                // Verify we're on the sessions tab (use First to avoid nested tabs)
-                await page.WaitForSelectorAsync("#maintabs");
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").First.TextContentAsync();
+                // Verify we're on the sessions tab
+                await homePage.WaitForTabsAsync();
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Sessions", activeTab);
 
                 // Verify the URL is correct
-                Assert.Contains($"#/sessions/session/{sessionId}", page.Url);
+                Assert.Contains($"#/sessions/session/{sessionId}", homePage.GetCurrentUrl());
 
-                // Verify the session is selected (has current-row class) 
-                // Note: Can't check for subject since sessions don't display message subjects
-                var selectedRow = page.Locator(".sessionlist table.el-table__body tr.current-row");
+                // Verify the session is selected - use current-row class which is set by the component
+                var selectedRow = homePage.GetSelectedSessionRow();
                 await selectedRow.WaitForAsync(new() { Timeout = 5000 });
                 var isSelected = await selectedRow.CountAsync() > 0;
                 Assert.True(isSelected, "Session row should be highlighted as selected");
@@ -395,46 +368,22 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         {
             RunUITestAsync(nameof(DeepLink_MessageListSelection_WorksCorrectly), async (page, baseUrl, smtpPortNumber) =>
             {
-                // First, send an email to create a message
+                var homePage = new HomePage(page);
+                
+                // Send test email to create a message
                 string messageSubject = Guid.NewGuid().ToString();
-                using (var smtpClient = new SmtpClient())
-                {
-                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
-                    smtpClient.ServerCertificateValidationCallback = GetCertvalidationCallbackHandler();
-                    smtpClient.CheckCertificateRevocation = false;
-                    var message = new MimeMessage();
-                    message.To.Add(MailboxAddress.Parse("to@to.com"));
-                    message.From.Add(MailboxAddress.Parse("from@from.com"));
-                    message.Subject = messageSubject;
-                    message.Body = new TextPart() { Text = "Test email for deep link" };
-
-                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.StartTls,
-                        new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
-                    smtpClient.Send(message);
-                    smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
-                }
+                await HomePage.SendTestEmailAsync(
+                    smtpPort: smtpPortNumber,
+                    subject: messageSubject,
+                    body: "Test email for deep link",
+                    certValidationCallback: GetCertvalidationCallbackHandler()
+                );
 
                 // Navigate to messages tab
-                await page.GotoAsync($"{baseUrl}#/messages");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/messages");
 
-                // Wait for message to appear
-                var homePage = new HomePage(page);
-                var messageList = await WaitForAsync(async () => await homePage.GetMessageListAsync());
-                var grid = await WaitForAsync(() => Task.FromResult(messageList.GetGrid()));
-                var messageRow = await WaitForAsync(async () =>
-                {
-                    var rows = await grid.GetRowsAsync();
-                    foreach (var row in rows)
-                    {
-                        if (await row.ContainsTextAsync(messageSubject))
-                        {
-                            return row;
-                        }
-                    }
-                    return null;
-                }, timeoutSeconds: 30);
-
+                // Wait for message row to appear
+                var messageRow = await homePage.WaitForMessageRowAsync(messageSubject);
                 Assert.NotNull(messageRow);
 
                 // Click the message to select it
@@ -445,12 +394,9 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
                 var isSelected = await messageRow.IsSelectedAsync();
                 Assert.True(isSelected, "Message row should be highlighted as selected");
 
-                // Verify we're still on the messages tab (use First to avoid nested tabs)
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").First.TextContentAsync();
+                // Verify we're still on the messages tab
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Messages", activeTab);
-
-                // Note: Removed message view verification as this is a routing test,
-                // not a message view test. The important part is that routing and selection work.
             });
         }
 
@@ -463,69 +409,50 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         {
             RunUITestAsync(nameof(SessionUrl_PersistsAcrossTabSwitches), async (page, baseUrl, smtpPortNumber) =>
             {
-                // Send an email to create a session (before navigating)
-                string sessionSubject = Guid.NewGuid().ToString();
-                using (var smtpClient = new SmtpClient())
-                {
-                    smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
-                    smtpClient.ServerCertificateValidationCallback = GetCertvalidationCallbackHandler();
-                    smtpClient.CheckCertificateRevocation = false;
-                    var message = new MimeMessage();
-                    message.To.Add(MailboxAddress.Parse("to@to.com"));
-                    message.From.Add(MailboxAddress.Parse("from@from.com"));
-                    message.Subject = sessionSubject;
-                    message.Body = new TextPart() { Text = "Test email" };
-
-                    smtpClient.Connect("localhost", smtpPortNumber, SecureSocketOptions.StartTls,
-                        new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
-                    smtpClient.Send(message);
-                    smtpClient.Disconnect(true, new CancellationTokenSource(TimeSpan.FromSeconds(10)).Token);
-                }
-
-                // Navigate to sessions tab (will load sessions from database)
-                await page.GotoAsync($"{baseUrl}#/sessions");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-                await page.WaitForSelectorAsync(".sessionlist");
-
-                // Wait for the table body to be visible
-                await page.WaitForSelectorAsync(".sessionlist table.el-table__body", new() { State = WaitForSelectorState.Visible });
+                var homePage = new HomePage(page);
                 
-                // Wait for at least one session row to appear (sessions don't show subject, just connection info)
-                // Since we use a fresh database for each test, any row will be our session
-                var sessionRow = page.Locator(".sessionlist table.el-table__body tr:not(.el-table__empty-text)").First;
-                await sessionRow.WaitForAsync(new() { Timeout = 30000 });
+                // Send test email to create a session
+                string sessionSubject = Guid.NewGuid().ToString();
+                await HomePage.SendTestEmailAsync(
+                    smtpPort: smtpPortNumber,
+                    subject: sessionSubject,
+                    certValidationCallback: GetCertvalidationCallbackHandler()
+                );
 
+                // Navigate to sessions tab
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/sessions");
+                
+                // Wait for session row and click it
+                var sessionRow = await homePage.WaitForSessionRowAsync();
                 await sessionRow.ClickAsync();
                 await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
 
                 // Capture the session URL
-                string sessionUrl = page.Url;
+                string sessionUrl = homePage.GetCurrentUrl();
                 Assert.Contains("#/sessions/session/", sessionUrl);
 
                 // Switch to messages tab
-                await page.Locator("#maintabs .el-tabs__item").Filter(new() { HasText = "Messages" }).ClickAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.NavigateToMessagesAsync();
 
                 // Verify we're on messages
+                string currentUrl = homePage.GetCurrentUrl();
                 Assert.True(
-                    page.Url.EndsWith("#/messages") || page.Url.EndsWith("#/"),
-                    $"Expected to be on messages tab, got: {page.Url}"
+                    currentUrl.EndsWith("#/messages") || currentUrl.EndsWith("#/"),
+                    $"Expected to be on messages tab, got: {currentUrl}"
                 );
 
                 // Switch back to sessions tab
-                await page.Locator("#maintabs .el-tabs__item").Filter(new() { HasText = "Sessions" }).ClickAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.NavigateToSessionsAsync();
 
-                // Verify the session URL is restored (or at least we're on sessions)
-                string currentUrl = page.Url;
+                // Verify we're on sessions
+                currentUrl = homePage.GetCurrentUrl();
                 Assert.True(
                     currentUrl.Contains("#/sessions"),
                     $"Expected to be on sessions tab, got: {currentUrl}"
                 );
 
                 // The session should still be selected
-                // Note: Can't check for subject since sessions don't display message subjects
-                var selectedRow = page.Locator(".sessionlist table.el-table__body tr.current-row");
+                var selectedRow = homePage.GetSelectedSessionRow();
                 var isSelected = await selectedRow.CountAsync() > 0;
                 Assert.True(isSelected, "Session should still be selected after tab switch");
             });
@@ -544,58 +471,54 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         {
             RunUITestAsync(nameof(BrowserNavigation_BackAndForward_WorksCorrectly), async (page, baseUrl, smtpPortNumber) =>
             {
+                var homePage = new HomePage(page);
+                
                 // Start at messages
-                await page.GotoAsync($"{baseUrl}#/messages");
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-                await page.WaitForSelectorAsync("#maintabs");
+                await homePage.NavigateToUrlAsync($"{baseUrl}#/messages");
+                await homePage.WaitForTabsAsync();
 
                 // Navigate to sessions
-                await page.Locator("#maintabs .el-tabs__item").Filter(new() { HasText = "Sessions" }).ClickAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-                Assert.EndsWith("#/sessions", page.Url);
+                await homePage.NavigateToSessionsAsync();
+                Assert.EndsWith("#/sessions", homePage.GetCurrentUrl());
 
                 // Navigate to server log
-                await page.Locator("#maintabs .el-tabs__item").Filter(new() { HasText = "Server Log" }).ClickAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
-                Assert.EndsWith("#/serverlog", page.Url);
+                await homePage.NavigateToServerLogAsync();
+                Assert.EndsWith("#/serverlog", homePage.GetCurrentUrl());
 
                 // Use browser back button
-                await page.GoBackAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.GoBackAsync();
 
                 // Should be at sessions
-                Assert.EndsWith("#/sessions", page.Url);
-                var activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                Assert.EndsWith("#/sessions", homePage.GetCurrentUrl());
+                var activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Sessions", activeTab);
 
                 // Use browser back button again
-                await page.GoBackAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.GoBackAsync();
 
                 // Should be at messages
+                string currentUrl = homePage.GetCurrentUrl();
                 Assert.True(
-                    page.Url.EndsWith("#/messages") || page.Url.EndsWith("#/"),
-                    $"Expected to be at messages, got: {page.Url}"
+                    currentUrl.EndsWith("#/messages") || currentUrl.EndsWith("#/"),
+                    $"Expected to be at messages, got: {currentUrl}"
                 );
-                activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Messages", activeTab);
 
                 // Use browser forward button
-                await page.GoForwardAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.GoForwardAsync();
 
                 // Should be at sessions
-                Assert.EndsWith("#/sessions", page.Url);
-                activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                Assert.EndsWith("#/sessions", homePage.GetCurrentUrl());
+                activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Sessions", activeTab);
 
                 // Use browser forward button again
-                await page.GoForwardAsync();
-                await page.WaitForLoadStateAsync(LoadState.NetworkIdle);
+                await homePage.GoForwardAsync();
 
                 // Should be at server log
-                Assert.EndsWith("#/serverlog", page.Url);
-                activeTab = await page.Locator("#maintabs .el-tabs__item.is-active").TextContentAsync();
+                Assert.EndsWith("#/serverlog", homePage.GetCurrentUrl());
+                activeTab = await homePage.GetActiveTabNameAsync();
                 Assert.Contains("Server Log", activeTab);
             });
         }

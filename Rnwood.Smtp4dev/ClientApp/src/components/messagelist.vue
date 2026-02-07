@@ -98,6 +98,7 @@
                   reserve-selection="true"
                   row-key="id"
                   :row-class-name="getRowClass"
+                  :row-attrs="getRowAttrs"
                   ref="table"
                   stripe>
             <el-table-column property="receivedDate"
@@ -270,6 +271,12 @@
 
         getRowClass(event: { row: MessageSummary }): string {
             return event.row.isUnread ? "unread" : "read";
+        }
+
+        getRowAttrs(event: { row: MessageSummary }): Record<string, string> {
+            return {
+                'data-message-id': event.row.id
+            };
         }
 
         async relaySelected() {

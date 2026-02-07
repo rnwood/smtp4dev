@@ -29,6 +29,7 @@
                   type="selection"
                   reserve-selection="true"
                   row-key="id"
+                  :row-attrs="getRowAttrs"
                   stripe
                   ref="table">
             <el-table-column property="endDate"
@@ -164,6 +165,12 @@
             index: number
         ): string {
             return cellValue?.toLocaleString();
+        }
+
+        getRowAttrs(event: { row: SessionSummary }): Record<string, string> {
+            return {
+                'data-session-id': event.row.id
+            };
         }
 
         selectSession(session: SessionSummary) {
