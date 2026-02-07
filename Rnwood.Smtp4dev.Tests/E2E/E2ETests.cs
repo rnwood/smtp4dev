@@ -20,6 +20,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         
         // Timeout constants for Docker operations
         private const int DockerPortQueryTimeoutMs = 5000;
+        private const int DockerPortQueryRetries = 5;  // Number of retry attempts for port queries
+        private const int DockerPortQueryRetryDelayMs = 1000;  // Delay between retries
         private const int DockerStopTimeoutMs = 10000;
         private const int DockerRemoveTimeoutMs = 5000;
 
@@ -50,64 +52,85 @@ namespace Rnwood.Smtp4dev.Tests.E2E
         /// <summary>
         /// Query Docker for the host port mapped to a container's internal port.
         /// Uses `docker port <container> <internal_port>` command.
+        /// Includes retry logic to handle race conditions on slow systems (e.g., ARM64 with QEMU emulation).
         /// </summary>
         private int? GetDockerHostPort(string containerName, int internalPort, ITestOutputHelper output)
         {
-            try
+            // Retry logic for ARM64/QEMU environments where port mappings may not be immediately available
+            for (int attempt = 1; attempt <= DockerPortQueryRetries; attempt++)
             {
-                output.WriteLine($"    [Docker] Executing: docker port {containerName} {internalPort}");
-                var startInfo = new ProcessStartInfo
+                try
                 {
-                    FileName = "docker",
-                    Arguments = $"port {containerName} {internalPort}",
-                    RedirectStandardOutput = true,
-                    RedirectStandardError = true,
-                    UseShellExecute = false,
-                    CreateNoWindow = true
-                };
-
-                using var process = Process.Start(startInfo);
-                if (process == null)
-                {
-                    output.WriteLine($"    [Docker] ERROR: Failed to start docker process");
-                    return null;
-                }
-
-                string portOutput = process.StandardOutput.ReadToEnd();
-                string errorOutput = process.StandardError.ReadToEnd();
-                process.WaitForExit(DockerPortQueryTimeoutMs);
-
-                if (process.ExitCode != 0)
-                {
-                    output.WriteLine($"    [Docker] ERROR: docker port command failed for {containerName}:{internalPort}");
-                    output.WriteLine($"    [Docker] Exit code: {process.ExitCode}");
-                    if (!string.IsNullOrWhiteSpace(errorOutput))
+                    if (attempt > 1)
                     {
-                        output.WriteLine($"    [Docker] Error output: {errorOutput}");
+                        output.WriteLine($"    [Docker] Retry attempt {attempt}/{DockerPortQueryRetries} after {DockerPortQueryRetryDelayMs}ms delay");
+                        System.Threading.Thread.Sleep(DockerPortQueryRetryDelayMs);
                     }
+                    
+                    output.WriteLine($"    [Docker] Executing: docker port {containerName} {internalPort}");
+                    var startInfo = new ProcessStartInfo
+                    {
+                        FileName = "docker",
+                        Arguments = $"port {containerName} {internalPort}",
+                        RedirectStandardOutput = true,
+                        RedirectStandardError = true,
+                        UseShellExecute = false,
+                        CreateNoWindow = true
+                    };
+
+                    using var process = Process.Start(startInfo);
+                    if (process == null)
+                    {
+                        output.WriteLine($"    [Docker] ERROR: Failed to start docker process");
+                        if (attempt < DockerPortQueryRetries) continue;
+                        return null;
+                    }
+
+                    string portOutput = process.StandardOutput.ReadToEnd();
+                    string errorOutput = process.StandardError.ReadToEnd();
+                    process.WaitForExit(DockerPortQueryTimeoutMs);
+
+                    if (process.ExitCode != 0)
+                    {
+                        output.WriteLine($"    [Docker] ERROR: docker port command failed for {containerName}:{internalPort}");
+                        output.WriteLine($"    [Docker] Exit code: {process.ExitCode}");
+                        if (!string.IsNullOrWhiteSpace(errorOutput))
+                        {
+                            output.WriteLine($"    [Docker] Error output: {errorOutput}");
+                        }
+                        if (attempt < DockerPortQueryRetries) continue;
+                        return null;
+                    }
+
+                    // Output format is like: "0.0.0.0:32768" or "[::]:32768" or "0.0.0.0:32768\n[::]:32768"
+                    // We need to extract the port number - when both IPv4 and IPv6 mappings exist,
+                    // Docker assigns the same host port for both, so we just extract the first one.
+                    var match = Regex.Match(portOutput, @":(\d+)");
+                    if (match.Success)
+                    {
+                        int hostPort = int.Parse(match.Groups[1].Value);
+                        output.WriteLine($"    [Docker] Port mapping: {containerName}:{internalPort} -> host:{hostPort} (attempt {attempt})");
+                        return hostPort;
+                    }
+
+                    output.WriteLine($"    [Docker] ERROR: Could not parse docker port output: '{portOutput}'");
+                    if (attempt < DockerPortQueryRetries) continue;
                     return null;
                 }
-
-                // Output format is like: "0.0.0.0:32768" or "[::]:32768" or "0.0.0.0:32768\n[::]:32768"
-                // We need to extract the port number - when both IPv4 and IPv6 mappings exist,
-                // Docker assigns the same host port for both, so we just extract the first one.
-                var match = Regex.Match(portOutput, @":(\d+)");
-                if (match.Success)
+                catch (Exception ex)
                 {
-                    int hostPort = int.Parse(match.Groups[1].Value);
-                    output.WriteLine($"    [Docker] Port mapping: {containerName}:{internalPort} -> host:{hostPort}");
-                    return hostPort;
+                    output.WriteLine($"    [Docker] ERROR: Exception querying docker port (attempt {attempt}): {ex.Message}");
+                    if (attempt < DockerPortQueryRetries)
+                    {
+                        output.WriteLine($"    [Docker] Will retry...");
+                        continue;
+                    }
+                    output.WriteLine($"    [Docker] Stack trace: {ex.StackTrace}");
+                    return null;
                 }
-
-                output.WriteLine($"    [Docker] ERROR: Could not parse docker port output: '{portOutput}'");
-                return null;
             }
-            catch (Exception ex)
-            {
-                output.WriteLine($"    [Docker] ERROR: Exception querying docker port: {ex.Message}");
-                output.WriteLine($"    [Docker] Stack trace: {ex.StackTrace}");
-                return null;
-            }
+            
+            return null;
         }
 
         /// <summary>
