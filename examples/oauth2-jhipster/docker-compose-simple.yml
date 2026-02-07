@@ -1,0 +1,32 @@
+version: '3.8'
+
+services:
+  # smtp4dev with XOAUTH2 support enabled (allow-any mode for demo)
+  smtp4dev-demo:
+    image: rnwood/smtp4dev:v3
+    container_name: smtp4dev-demo
+    ports:
+      - "5000:80"      # Web UI
+      - "2525:25"      # SMTP server
+    environment:
+      # Server configuration
+      - ServerOptions__Urls=http://*:80
+      - ServerOptions__HostName=smtp4dev
+      - ServerOptions__Port=25
+      
+      # For this demo, allow any credentials to show XOAUTH2 mechanism working
+      - ServerOptions__SmtpAllowAnyCredentials=true
+      
+      # Enable XOAUTH2 authentication type
+      - ServerOptions__SmtpEnabledAuthTypesWhenNotSecureConnection=PLAIN,LOGIN,XOAUTH2
+      - ServerOptions__SmtpEnabledAuthTypesWhenSecureConnection=PLAIN,LOGIN,XOAUTH2
+      
+      # In-memory database for demo
+      - ServerOptions__Database=
+      
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80/api/server"]
+      interval: 5s
+      timeout: 3s
+      retries: 3
+      start_period: 10s
