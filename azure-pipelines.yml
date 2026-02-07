@@ -48,7 +48,7 @@ variables:
     
   docker_repo: "rnwood/smtp4dev"
   docker_registry: "dockerhub-rnwood"
-  netcoresdk_version: "8.0.416"
+  netcoresdk_version: "10.0.102"
   
   # GitHub API token for PR notifications - should be configured as secret variable
   # GITHUB_TOKEN: $(GITHUB_API_TOKEN)

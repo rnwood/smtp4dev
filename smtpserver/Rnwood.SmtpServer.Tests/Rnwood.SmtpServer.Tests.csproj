@@ -2,14 +2,14 @@
 
   <PropertyGroup>
     <VersionPrefix>3.0</VersionPrefix>
-    <TargetFrameworks>net8.0</TargetFrameworks>
+    <TargetFrameworks>net10.0</TargetFrameworks>
     <AssemblyName>Rnwood.SmtpServer.Tests</AssemblyName>
     <OutputType>Library</OutputType>
     <LangVersion>latest</LangVersion>
 
     <PackageId>Rnwood.SmtpServer.Tests</PackageId>
     <GenerateRuntimeConfigurationFiles>true</GenerateRuntimeConfigurationFiles>
-    <RuntimeFrameworkVersion>8.0.0</RuntimeFrameworkVersion>
+    <RuntimeFrameworkVersion>10.0.0</RuntimeFrameworkVersion>
     <GenerateAssemblyTitleAttribute>false</GenerateAssemblyTitleAttribute>
     <GenerateAssemblyDescriptionAttribute>false</GenerateAssemblyDescriptionAttribute>
     <GenerateAssemblyConfigurationAttribute>false</GenerateAssemblyConfigurationAttribute>

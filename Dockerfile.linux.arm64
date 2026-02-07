@@ -1,4 +1,4 @@
-FROM --platform=linux/arm64 mcr.microsoft.com/dotnet/aspnet:8.0.23 AS runtime
+FROM --platform=linux/arm64 mcr.microsoft.com/dotnet/aspnet:10.0 AS runtime
 RUN apt update
 RUN apt install -y curl
 COPY out /app
