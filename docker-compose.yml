@@ -11,7 +11,7 @@ version: '3'
 services:
   smtp4dev:
     image: rnwood/smtp4dev:v3
-    restart: always
+    restart: on-failure
     ports:
       # Change the number before : to the port the web interface should be accessible on
       # Add 127.0.0.1: prefix for localhost-only access (recommended for security)

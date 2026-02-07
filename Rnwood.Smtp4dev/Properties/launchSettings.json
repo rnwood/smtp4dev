@@ -2,13 +2,13 @@
   "profiles": {
     "Rnwood.Smtp4dev": {
       "commandName": "Project",
-      "commandLineArgs": "--basepath=/smtp4dev",
+      "commandLineArgs": "",
       "launchBrowser": true,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development",
         "SERVEROPTIONS__URLS": "http://*:5005"
       },
-      "applicationUrl": "http://localhost:5005/smtp4dev"
+      "applicationUrl": "http://localhost:5005/"
     }
   },
   "iisSettings": {

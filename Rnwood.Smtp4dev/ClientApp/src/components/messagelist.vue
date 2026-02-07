@@ -98,6 +98,7 @@
                   reserve-selection="true"
                   row-key="id"
                   :row-class-name="getRowClass"
+                  :row-attrs="getRowAttrs"
                   ref="table"
                   stripe>
             <el-table-column property="receivedDate"
@@ -173,13 +174,13 @@
     import { debounce } from "ts-debounce";
     import ServerController from "../ApiClient/ServerController";
     import ClientSettingsManager from "../ApiClient/ClientSettingsManager";
+    import { getGlobalRouter } from "../router";
 
     import PagedResult, { EmptyPagedResult } from "@/ApiClient/PagedResult";
     import Messagelistpager from "@/components/messagelistpager.vue";
     import Mailbox from "../ApiClient/Mailbox";
     import MailboxesController from "../ApiClient/MailboxesController";
     import MessageCompose from "@/components/messagecompose.vue";
-
 
     @Component({
         components: {
@@ -191,6 +192,9 @@
 
         private selectedSortDescending: boolean = true;
         private selectedSortColumn: string = "receivedDate";
+        private static readonly MAILBOX_STORAGE_KEY = "smtp4dev-selected-mailbox";
+        private isInitialLoad: boolean = true;
+        private suppressRouteUpdate: boolean = false;
 
         page: number = 1;
 
@@ -241,6 +245,12 @@
         @Emit("selected-message-changed")
         handleCurrentChange(message: MessageSummary | null) {
             this.selectedmessage = message;
+            
+            // Update URL with selected message
+            if (!this.suppressRouteUpdate && !this.isInitialLoad) {
+                this.updateRouteWithCurrentState();
+            }
+            
             return message;
         }
 
@@ -261,6 +271,12 @@
 
         getRowClass(event: { row: MessageSummary }): string {
             return event.row.isUnread ? "unread" : "read";
+        }
+
+        getRowAttrs(event: { row: MessageSummary }): Record<string, string> {
+            return {
+                'data-message-id': event.row.id
+            };
         }
 
         async relaySelected() {
@@ -472,7 +488,9 @@
         @Watch("searchTerm")
         onSearchTermChanged() {
             this.debouncedDoSearch();
+            // Don't update URL for search - filters not stored in URL
         }
+        
         debouncedDoSearch = debounce(() => this.refresh(false), 200);
 
         @Watch("selectedMailbox")
@@ -494,11 +512,27 @@
             this.selectedFolder = "INBOX";
             await this.loadFolders();
             await this.refresh(true, false);
+
+            // Save selected mailbox to localStorage
+            if (this.selectedMailbox) {
+                localStorage.setItem(MessageList.MAILBOX_STORAGE_KEY, this.selectedMailbox);
+            } else {
+                localStorage.removeItem(MessageList.MAILBOX_STORAGE_KEY);
+            }
+
+            // Update URL route only AFTER initial load and not suppressed
+            if (!this.isInitialLoad && !this.suppressRouteUpdate) {
+                this.updateRouteWithCurrentState();
+            }
         }
 
         @Watch("selectedFolder")
         async onFolderChanged() {
             await this.refresh(false);
+            // Update URL with folder filter
+            if (!this.suppressRouteUpdate && !this.isInitialLoad) {
+                this.updateRouteWithCurrentState();
+            }
         }
 
         async loadFolders() {
@@ -540,7 +574,48 @@
                 const mailboxes = await new MailboxesController().getAll();
                 this.availableMailboxes = mailboxes.sort((a, b) => a.name.localeCompare(b.name));
                 if (!this.selectedMailbox) {
-                    this.selectedMailbox = this.availableMailboxes.find(m => m.name == server.currentUserDefaultMailboxName)?.name ?? this.availableMailboxes[this.availableMailboxes.length - 1]?.name ?? null;
+                    // Priority order for mailbox selection on initial load:
+                    // 1. URL route parameter (for bookmarks/direct links)
+                    // 2. localStorage (for persistent selection)
+                    // 3. Server default mailbox
+                    // 4. Last mailbox alphabetically
+                    let mailboxToSelect: string | null = null;
+                    
+                    if (this.isInitialLoad) {
+                        // Check URL route parameter first
+                        const routeMailbox = this.$route.params.mailbox as string | undefined;
+                        if (routeMailbox) {
+                            const decodedMailbox = decodeURIComponent(routeMailbox);
+                            mailboxToSelect = this.availableMailboxes.find(m => m.name === decodedMailbox)?.name ?? null;
+                        }
+                        
+                        // If not in URL, check localStorage
+                        if (!mailboxToSelect) {
+                            const storedMailbox = localStorage.getItem(MessageList.MAILBOX_STORAGE_KEY);
+                            if (storedMailbox) {
+                                mailboxToSelect = this.availableMailboxes.find(m => m.name === storedMailbox)?.name ?? null;
+                            }
+                        }
+                    }
+                    
+                    // Fall back to server default or last mailbox
+                    if (!mailboxToSelect) {
+                        mailboxToSelect = this.availableMailboxes.find(m => m.name == server.currentUserDefaultMailboxName)?.name ?? this.availableMailboxes[this.availableMailboxes.length - 1]?.name ?? null;
+                    }
+                    
+                    // Suppress route update during initial load to avoid redundant navigation
+                    this.suppressRouteUpdate = true;
+                    this.selectedMailbox = mailboxToSelect;
+                    
+                    // On initial load, restore folder from URL path params
+                    if (this.isInitialLoad) {
+                        const params = this.$route.params;
+                        if (params.folder) {
+                            this.selectedFolder = params.folder as string;
+                        }
+                    }
+                    
+                    this.suppressRouteUpdate = false;
                 } else {
                     //Potentially removed mailbox
                     this.selectedMailbox = this.availableMailboxes.find(m => m.name == this.selectedMailbox)?.name ?? null;
@@ -600,6 +675,19 @@
                     this.selectMessage(this.pendingSelectMessageAfterRefresh);
                     this.pendingSelectMessageAfterRefresh = null;
                 }
+                
+                // On initial load, select message from URL if specified
+                if (this.isInitialLoad) {
+                    const messageId = this.$route.params.message as string | undefined;
+                    if (messageId) {
+                        const message = this.messages.find(m => m.id === messageId);
+                        if (message) {
+                            this.suppressRouteUpdate = true;
+                            this.selectMessage(message);
+                            this.suppressRouteUpdate = false;
+                        }
+                    }
+                }
 
                 this.initialMailboxLoadDone = true;
                 this.lastSort = sortColumn;
@@ -629,12 +717,109 @@
             }
         }
 
+        // Method to update route with all current state (mailbox, message, filters)
+        updateRouteWithCurrentState() {
+            const router = getGlobalRouter();
+            
+            if (!router) {
+                console.warn("Router not available");
+                return;
+            }
+            
+            // Only update route if we're currently on a messages route
+            // This prevents the messagelist from overriding other tabs' routes on initial page load
+            const currentPath = this.$route.path;
+            if (!currentPath.startsWith('/messages') && currentPath !== '/') {
+                return;
+            }
+            
+            if (!this.selectedMailbox) {
+                try {
+                    router.replace({ path: '/messages' });
+                } catch (e) {
+                    console.error("Error updating route:", e);
+                }
+                return;
+            }
+
+            // Build the path
+            let path = `/messages/mailbox/${encodeURIComponent(this.selectedMailbox)}`;
+            if (this.selectedFolder) {
+                path += `/folder/${encodeURIComponent(this.selectedFolder)}`;
+            }
+            if (this.selectedmessage) {
+                path += `/message/${this.selectedmessage.id}`;
+            }
+
+            try {
+                const result = router.replace({ path });
+                // Handle the promise if it's returned
+                if (result && typeof result.catch === 'function') {
+                    result.catch((err: any) => {
+                        // Ignore navigation cancelled errors
+                        if (err && err.name !== 'NavigationDuplicated' && err.type !== 16) {
+                            console.error("Error updating route:", err);
+                        }
+                    });
+                }
+            } catch (e) {
+                console.error("Error updating route:", e);
+            }
+        }
+
         async mounted() {
             this.loading = true;
             await this.refresh(true, false);
+            this.isInitialLoad = false;
         }
 
-        async created() {
+        @Watch("$route")
+        onRouteChanged(newRoute: any, oldRoute: any) {
+            // Handle route changes (e.g., browser back/forward)
+            const newMailbox = newRoute.params.mailbox as string | undefined;
+            const oldMailbox = oldRoute.params.mailbox as string | undefined;
+            const newMessageId = newRoute.params.message as string | undefined;
+            const oldMessageId = oldRoute.params.message as string | undefined;
+            const newFolder = newRoute.params.folder as string | undefined;
+            const oldFolder = oldRoute.params.folder as string | undefined;
+            
+            this.suppressRouteUpdate = true;
+            
+            // Handle mailbox change
+            if (newMailbox !== oldMailbox) {
+                const decodedMailbox = newMailbox ? decodeURIComponent(newMailbox) : null;
+                
+                // Only update if the mailbox actually exists and is different from current selection
+                if (decodedMailbox && this.availableMailboxes) {
+                    const mailbox = this.availableMailboxes.find(m => m.name === decodedMailbox);
+                    if (mailbox && mailbox.name !== this.selectedMailbox) {
+                        this.selectedMailbox = mailbox.name;
+                    }
+                }
+            }
+            
+            // Handle folder change
+            if (newFolder !== oldFolder) {
+                this.selectedFolder = newFolder ?? "INBOX";
+            }
+            
+            // Handle message selection change
+            if (newMessageId !== oldMessageId) {
+                if (newMessageId) {
+                    // Select the message if it exists in current list
+                    const message = this.messages.find(m => m.id === newMessageId);
+                    if (message && message.id !== this.selectedmessage?.id) {
+                        this.selectMessage(message);
+                    }
+                } else if (this.selectedmessage) {
+                    // Clear selection
+                    this.handleCurrentChange(null);
+                }
+            }
+            
+            // Filters are not stored in URL, so no query parameter handling needed
+            
+            this.suppressRouteUpdate = false;
         }
 
         @Watch("connection")

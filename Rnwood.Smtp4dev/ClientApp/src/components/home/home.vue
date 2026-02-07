@@ -109,6 +109,7 @@
     import { Splitpanes, Pane } from 'splitpanes';
     import 'splitpanes/dist/splitpanes.css';
     import { ElIcon } from "element-plus";
+    import { Watch } from "vue-facing-decorator";
 
     @Component({
         components: {
@@ -130,6 +131,7 @@
         activeTabId = "messages";
         selectedMessage: MessageSummary | null = null;
         selectedSession: SessionSummary | null = null;
+        suppressRouteUpdate = false;
 
         connection: HubConnectionManager | null = null;
 
@@ -163,6 +165,70 @@
 
         selectedSessionChanged(selectedSession: SessionSummary | null) {
             this.selectedSession = selectedSession;
+            
+            // Update URL when session is selected
+            if (!this.suppressRouteUpdate && this.activeTabId === 'sessions') {
+                if (selectedSession) {
+                    this.$router.push({ path: `/sessions/session/${selectedSession.id}` });
+                } else {
+                    this.$router.push({ path: '/sessions' });
+                }
+            }
+        }
+
+        @Watch("activeTabId")
+        onActiveTabChanged(newTab: string) {
+            // Update URL when tab changes
+            if (!this.suppressRouteUpdate) {
+                switch (newTab) {
+                    case 'messages':
+                        if (this.selectedMessage) {
+                            // If a message is selected, let messagelist component handle the specific route
+                            // But we need to ensure we navigate to messages first
+                            if (!this.$route.path.startsWith('/messages/')) {
+                                this.$router.push({ path: '/messages' });
+                            }
+                        } else {
+                            // Navigate to base messages route if no message selected
+                            if (!this.$route.path.startsWith('/messages')) {
+                                this.$router.push({ path: '/messages' });
+                            }
+                        }
+                        break;
+                    case 'sessions':
+                        if (this.selectedSession) {
+                            this.$router.push({ path: `/sessions/session/${this.selectedSession.id}` });
+                        } else {
+                            // Don't override a more specific route with a less specific one
+                            // This prevents clearing the session ID from the URL when the session
+                            // hasn't been loaded yet on initial page load
+                            if (!this.$route.path.startsWith('/sessions/session/')) {
+                                this.$router.push({ path: '/sessions' });
+                            }
+                        }
+                        break;
+                    case 'serverlog':
+                        this.$router.push({ path: '/serverlog' });
+                        break;
+                }
+            }
+        }
+
+        @Watch("$route")
+        onRouteChanged() {
+            // Update active tab based on route
+            const path = this.$route.path;
+            this.suppressRouteUpdate = true;
+            
+            if (path.startsWith('/messages') || path === '/') {
+                this.activeTabId = 'messages';
+            } else if (path.startsWith('/sessions')) {
+                this.activeTabId = 'sessions';
+            } else if (path.startsWith('/serverlog')) {
+                this.activeTabId = 'serverlog';
+            }
+            
+            this.suppressRouteUpdate = false;
         }
 
         get messageListPaneSize(): number {
@@ -196,6 +262,9 @@
         async mounted() {
             this.connection = new HubConnectionManager("hubs/notifications")
             this.connection.start();
+            
+            // Initialize tab from route on mount BEFORE data loads
+            this.onRouteChanged();
         }
 
         destroyed() {
