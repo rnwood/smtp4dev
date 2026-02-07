@@ -1,12 +1,11 @@
 import './css/site.css';
 import { createApp } from 'vue';
-import { createRouter, createWebHashHistory } from 'vue-router';
 import Element from 'element-plus';
 import axios from "axios";
-import Home from '@/components/home/home.vue';
 import App from '@/components/app/app.vue';
 import useIcons from './icons';
 import ClientSettingsManager from "@/ApiClient/ClientSettingsManager";
+import { router, setGlobalRouter } from './router';
 
 // Manage initial theme based on client settings (stored value first for no-flash),
 // then merge with server defaults when available. Also listen for changes to
@@ -85,23 +84,11 @@ if (!supportedBrowser) {
     const app = createApp(App);
     app.use(Element);
     useIcons(app);
-
-    const routes = [
-        { path: '/', component: Home },
-        { path: '/messages', component: Home },
-        { path: '/messages/mailbox/:mailbox', component: Home },
-        { path: '/messages/mailbox/:mailbox/message/:messageId', component: Home },
-        { path: '/sessions', component: Home },
-        { path: '/sessions/session/:sessionId', component: Home },
-        { path: '/serverlog', component: Home },
-    ];
-
-    const router = createRouter({
-        history: createWebHashHistory(),
-        routes: routes,
-    });
-    
     app.use(router);
+    
+    // Store router globally for class components
+    setGlobalRouter(router);
+    
     app.mount('#app-root')
 
     axios.interceptors.response.use(response => {

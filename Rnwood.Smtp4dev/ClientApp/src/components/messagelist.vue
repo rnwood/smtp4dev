@@ -173,13 +173,13 @@
     import { debounce } from "ts-debounce";
     import ServerController from "../ApiClient/ServerController";
     import ClientSettingsManager from "../ApiClient/ClientSettingsManager";
+    import { getGlobalRouter } from "../router";
 
     import PagedResult, { EmptyPagedResult } from "@/ApiClient/PagedResult";
     import Messagelistpager from "@/components/messagelistpager.vue";
     import Mailbox from "../ApiClient/Mailbox";
     import MailboxesController from "../ApiClient/MailboxesController";
     import MessageCompose from "@/components/messagecompose.vue";
-
 
     @Component({
         components: {
@@ -481,14 +481,10 @@
         @Watch("searchTerm")
         onSearchTermChanged() {
             this.debouncedDoSearch();
-            // Update URL with search filter
-            if (!this.suppressRouteUpdate && !this.isInitialLoad) {
-                this.debouncedUpdateRoute();
-            }
+            // Don't update URL for search - filters not stored in URL
         }
         
         debouncedDoSearch = debounce(() => this.refresh(false), 200);
-        debouncedUpdateRoute = debounce(() => this.updateRouteWithCurrentState(), 300);
 
         @Watch("selectedMailbox")
         async onMailboxChanged() {
@@ -517,7 +513,7 @@
                 localStorage.removeItem(MessageList.MAILBOX_STORAGE_KEY);
             }
 
-            // Update URL route if not during initial load and not suppressed
+            // Update URL route only AFTER initial load and not suppressed
             if (!this.isInitialLoad && !this.suppressRouteUpdate) {
                 this.updateRouteWithCurrentState();
             }
@@ -604,20 +600,11 @@
                     this.suppressRouteUpdate = true;
                     this.selectedMailbox = mailboxToSelect;
                     
-                    // On initial load, restore filters from URL query parameters
+                    // On initial load, restore folder from URL path params
                     if (this.isInitialLoad) {
-                        const query = this.$route.query;
-                        if (query.search) {
-                            this.searchTerm = query.search as string;
-                        }
-                        if (query.folder) {
-                            this.selectedFolder = query.folder as string;
-                        }
-                        if (query.sort) {
-                            this.selectedSortColumn = query.sort as string;
-                        }
-                        if (query.order) {
-                            this.selectedSortDescending = query.order !== 'asc';
+                        const params = this.$route.params;
+                        if (params.folder) {
+                            this.selectedFolder = params.folder as string;
                         }
                     }
                     
@@ -684,7 +671,7 @@
                 
                 // On initial load, select message from URL if specified
                 if (this.isInitialLoad) {
-                    const messageId = this.$route.params.messageId as string | undefined;
+                    const messageId = this.$route.params.message as string | undefined;
                     if (messageId) {
                         const message = this.messages.find(m => m.id === messageId);
                         if (message) {
@@ -720,19 +707,28 @@
                 this.selectedSortDescending = descending;
 
                 await this.refresh(false);
-                
-                // Update URL with sort parameters
-                if (!this.suppressRouteUpdate && !this.isInitialLoad) {
-                    this.updateRouteWithCurrentState();
-                }
             }
         }
 
         // Method to update route with all current state (mailbox, message, filters)
         updateRouteWithCurrentState() {
+            const router = getGlobalRouter();
+            
+            if (!router) {
+                console.warn("Router not available");
+                return;
+            }
+            
+            // Only update route if we're currently on a messages route
+            // This prevents the messagelist from overriding other tabs' routes on initial page load
+            const currentPath = this.$route.path;
+            if (!currentPath.startsWith('/messages') && currentPath !== '/') {
+                return;
+            }
+            
             if (!this.selectedMailbox) {
                 try {
-                    this.$router.replace({ path: '/messages' });
+                    router.replace({ path: '/messages' });
                 } catch (e) {
                     console.error("Error updating route:", e);
                 }
@@ -741,27 +737,15 @@
 
             // Build the path
             let path = `/messages/mailbox/${encodeURIComponent(this.selectedMailbox)}`;
+            if (this.selectedFolder) {
+                path += `/folder/${encodeURIComponent(this.selectedFolder)}`;
+            }
             if (this.selectedmessage) {
                 path += `/message/${this.selectedmessage.id}`;
             }
 
-            // Build query parameters for filters
-            const query: any = {};
-            if (this.searchTerm) {
-                query.search = this.searchTerm;
-            }
-            if (this.selectedFolder && this.selectedFolder !== 'INBOX') {
-                query.folder = this.selectedFolder;
-            }
-            if (this.selectedSortColumn !== 'receivedDate') {
-                query.sort = this.selectedSortColumn;
-            }
-            if (!this.selectedSortDescending) {
-                query.order = 'asc';
-            }
-
             try {
-                const result = this.$router.replace({ path, query });
+                const result = router.replace({ path });
                 // Handle the promise if it's returned
                 if (result && typeof result.catch === 'function') {
                     result.catch((err: any) => {
@@ -787,8 +771,10 @@
             // Handle route changes (e.g., browser back/forward)
             const newMailbox = newRoute.params.mailbox as string | undefined;
             const oldMailbox = oldRoute.params.mailbox as string | undefined;
-            const newMessageId = newRoute.params.messageId as string | undefined;
-            const oldMessageId = oldRoute.params.messageId as string | undefined;
+            const newMessageId = newRoute.params.message as string | undefined;
+            const oldMessageId = oldRoute.params.message as string | undefined;
+            const newFolder = newRoute.params.folder as string | undefined;
+            const oldFolder = oldRoute.params.folder as string | undefined;
             
             this.suppressRouteUpdate = true;
             
@@ -805,6 +791,11 @@
                 }
             }
             
+            // Handle folder change
+            if (newFolder !== oldFolder) {
+                this.selectedFolder = newFolder ?? "INBOX";
+            }
+            
             // Handle message selection change
             if (newMessageId !== oldMessageId) {
                 if (newMessageId) {
@@ -819,45 +810,7 @@
                 }
             }
             
-            // Handle query parameter changes (filters)
-            const query = newRoute.query;
-            const oldQuery = oldRoute.query;
-            
-            if (JSON.stringify(query) !== JSON.stringify(oldQuery)) {
-                let needsRefresh = false;
-                
-                // Update search term
-                const newSearch = (query.search as string) ?? "";
-                if (newSearch !== this.searchTerm) {
-                    this.searchTerm = newSearch;
-                    needsRefresh = true;
-                }
-                
-                // Update folder
-                const newFolder = (query.folder as string) ?? "INBOX";
-                if (newFolder !== this.selectedFolder) {
-                    this.selectedFolder = newFolder;
-                    needsRefresh = true;
-                }
-                
-                // Update sort column
-                const newSort = (query.sort as string) ?? "receivedDate";
-                if (newSort !== this.selectedSortColumn) {
-                    this.selectedSortColumn = newSort;
-                    needsRefresh = true;
-                }
-                
-                // Update sort order
-                const newOrder = query.order === 'asc' ? false : true;
-                if (newOrder !== this.selectedSortDescending) {
-                    this.selectedSortDescending = newOrder;
-                    needsRefresh = true;
-                }
-                
-                if (needsRefresh && !this.isInitialLoad) {
-                    this.refresh(false);
-                }
-            }
+            // Filters are not stored in URL, so no query parameter handling needed
             
             this.suppressRouteUpdate = false;
         }

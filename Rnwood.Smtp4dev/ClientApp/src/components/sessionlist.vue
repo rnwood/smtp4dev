@@ -101,6 +101,7 @@
         private mutex = new Mutex();
         private isInitialLoad = true;
         private suppressRouteUpdate = false;
+        private pendingSessionIdToSelect: string | null = null;
 
         @Emit("selected-session-changed")
         handleCurrentChange(session: SessionSummary | null) {
@@ -125,6 +126,13 @@
 
         // Method to update route with current state
         updateRouteWithCurrentState() {
+            // Only update route if we're currently on a sessions route
+            // This prevents the sessionlist from overriding other tabs' routes on initial page load
+            const currentPath = this.$route.path;
+            if (!currentPath.startsWith('/sessions')) {
+                return;
+            }
+            
             let path = '/sessions';
             if (this.selectedsession) {
                 path = `/sessions/session/${this.selectedsession.id}`;
@@ -230,7 +238,7 @@
                     (a: SessionSummary, b: SessionSummary) => a.id == b.id
                 );
 
-                // On initial load, check if there's a session ID in the route
+                // On initial load, store the session ID to select after data loads
                 if (this.isInitialLoad) {
                     // Restore page from URL
                     const pageQuery = this.$route.query.page as string | undefined;
@@ -243,12 +251,18 @@
                     
                     const sessionId = this.$route.params.sessionId as string | undefined;
                     if (sessionId && sessionId.trim()) {
-                        const session = this.sessions.find(s => s.id === sessionId);
-                        if (session) {
-                            this.suppressRouteUpdate = true;
-                            this.selectSession(session);
-                            this.suppressRouteUpdate = false;
-                        }
+                        this.pendingSessionIdToSelect = sessionId;
+                    }
+                }
+                
+                // Try to select the pending session after data loads
+                if (this.pendingSessionIdToSelect) {
+                    const session = this.sessions.find(s => s.id === this.pendingSessionIdToSelect);
+                    if (session) {
+                        this.suppressRouteUpdate = true;
+                        this.selectSession(session);
+                        this.suppressRouteUpdate = false;
+                        this.pendingSessionIdToSelect = null;
                     }
                 }
 

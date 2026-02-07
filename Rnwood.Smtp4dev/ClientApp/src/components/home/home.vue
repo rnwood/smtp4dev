@@ -182,13 +182,29 @@
             if (!this.suppressRouteUpdate) {
                 switch (newTab) {
                     case 'messages':
-                        // Mailbox routing is handled by messagelist component
+                        if (this.selectedMessage) {
+                            // If a message is selected, let messagelist component handle the specific route
+                            // But we need to ensure we navigate to messages first
+                            if (!this.$route.path.startsWith('/messages/')) {
+                                this.$router.push({ path: '/messages' });
+                            }
+                        } else {
+                            // Navigate to base messages route if no message selected
+                            if (!this.$route.path.startsWith('/messages')) {
+                                this.$router.push({ path: '/messages' });
+                            }
+                        }
                         break;
                     case 'sessions':
                         if (this.selectedSession) {
                             this.$router.push({ path: `/sessions/session/${this.selectedSession.id}` });
                         } else {
-                            this.$router.push({ path: '/sessions' });
+                            // Don't override a more specific route with a less specific one
+                            // This prevents clearing the session ID from the URL when the session
+                            // hasn't been loaded yet on initial page load
+                            if (!this.$route.path.startsWith('/sessions/session/')) {
+                                this.$router.push({ path: '/sessions' });
+                            }
                         }
                         break;
                     case 'serverlog':
@@ -247,7 +263,7 @@
             this.connection = new HubConnectionManager("hubs/notifications")
             this.connection.start();
             
-            // Initialize tab from route on mount
+            // Initialize tab from route on mount BEFORE data loads
             this.onRouteChanged();
         }
 
