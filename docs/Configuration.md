@@ -450,3 +450,7 @@ The value from the first found claim must match the username provided in the XOA
 - OAuth2 tokens are validated against the IDP
 - Subject must match username
 - Username must be in configured Users list
+
+## Working Example
+
+See the [OAuth2/XOAUTH2 with JHipster Registry example](../examples/oauth2-jhipster/) for a complete working demonstration of OAuth2 authentication using Docker.
