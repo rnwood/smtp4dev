@@ -43,7 +43,7 @@ There are several fake SMTP servers available for development and testing. Here'
 | **Message Composition** | ✅ | ❌ | ❌ | ❌ | ❌ |
 | **Scripting & Error Simulation** | ✅ | ✅ Limited¹⁴ | ❌ | ❌ | ❌ |
 | **Dark Mode** | ✅ | ❌ | ❌ | ❌ | ❌ |
-| **Cross-Platform** | ✅ .NET 8 | ✅ Go | ✅ Ruby | ✅ Node.js | ✅ Java |
+| **Cross-Platform** | ✅ .NET 10 | ✅ Go | ✅ Ruby | ✅ Node.js | ✅ Java |
 | **Docker Support** | ✅ | ✅ | ✅ | ✅ | ❌ |
 
 ### Sources

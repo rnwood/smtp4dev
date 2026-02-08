@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
-    <TargetFramework>net8.0</TargetFramework>
+    <TargetFramework>net10.0</TargetFramework>
     <VersionPrefix>3.3.0-dev</VersionPrefix>
     <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
@@ -27,7 +27,7 @@
 
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0" />
-    <PackageReference Include="AspNetCore.Authentication.Basic" Version="8.0.0" />
+    <PackageReference Include="AspNetCore.Authentication.Basic" Version="9.0.0" />
     <PackageReference Include="CommandLiners.MonoOptions" Version="1.0.45" />
     <PackageReference Include="DeepEqual" Version="5.1.0" />
     <PackageReference Include="DotNet.Glob" Version="3.1.3" />
@@ -36,15 +36,15 @@
     <PackageReference Include="Linq.Expression.Optimizer" Version="1.0.34" />
     <PackageReference Include="LinqKit" Version="1.3.10" />
     <PackageReference Include="MailKit" Version="4.14.1" />
-     <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="8.0.23" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="8.0.23" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="8.0.23">
+     <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.2">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
       <PrivateAssets>all</PrivateAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="8.0.23" />
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.23" />
-    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="8.0.1" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="10.0.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Hosting.WindowsServices" Version="10.0.2" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.9.3">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -55,7 +55,7 @@
 
 
     <PackageReference Include="Serilog" Version="4.3.0" />
-    <PackageReference Include="Serilog.AspNetCore" Version="8.0.3" />
+    <PackageReference Include="Serilog.AspNetCore" Version="10.0.0" />
     <PackageReference Include="Serilog.Enrichers.Environment" Version="3.0.1" />
     <PackageReference Include="Serilog.Enrichers.Process" Version="3.0.0" />
     <PackageReference Include="Serilog.Enrichers.Thread" Version="4.0.0" />

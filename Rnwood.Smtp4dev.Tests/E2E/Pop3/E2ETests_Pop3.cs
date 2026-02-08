@@ -47,7 +47,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Pop3
                     msg.Subject = subject;
                     msg.Body = new TextPart("plain") { Text = "POP3 E2E Body" };
 
-                    using (var smtp = new SmtpClient())
+                    using (var smtp = CreateSmtpClientWithLogging())
                     {
                         smtp.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
                         smtp.CheckCertificateRevocation = false;
@@ -92,7 +92,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Pop3
                     }
 
                     // Connect to POP3 and retrieve the message
-                    using (var pop = new Pop3Client())
+                    using (var pop = CreatePop3ClientWithLogging())
                     {
                         pop.CheckCertificateRevocation = false;
                         pop.ServerCertificateValidationCallback = (s, c, h, e) => true;

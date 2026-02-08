@@ -15,7 +15,7 @@ namespace Rnwood.Smtp4dev.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "8.0.4");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
 
             modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.ImapState", b =>
                 {
@@ -73,6 +73,9 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.Property<int>("AttachmentCount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<string>("BodyText")
+                        .HasColumnType("TEXT");
+
                     b.Property<byte[]>("Data")
                         .HasColumnType("BLOB");
 
@@ -94,19 +97,16 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.Property<bool>("IsUnread")
                         .HasColumnType("INTEGER");
 
+                    b.Property<Guid?>("MailboxFolderId")
+                        .HasColumnType("TEXT");
+
                     b.Property<Guid?>("MailboxId")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("MimeMetadata")
                         .HasColumnType("TEXT");
 
-                    b.Property<Guid?>("MailboxFolderId")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("MimeParseError")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("BodyText")
                         .HasColumnType("TEXT");
 
                     b.Property<DateTime>("ReceivedDate")
@@ -132,9 +132,9 @@ namespace Rnwood.Smtp4dev.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MailboxId");
-
                     b.HasIndex("MailboxFolderId");
+
+                    b.HasIndex("MailboxId");
 
                     b.HasIndex("SessionId");
 
@@ -178,7 +178,7 @@ namespace Rnwood.Smtp4dev.Migrations
                     b.Property<DateTime?>("EndDate")
                         .HasColumnType("TEXT");
 
-                    b.Property<bool>("HasWarnings")
+                    b.Property<bool>("HasBareLineFeed")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("Log")
@@ -214,14 +214,14 @@ namespace Rnwood.Smtp4dev.Migrations
 
             modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.Message", b =>
                 {
-                    b.HasOne("Rnwood.Smtp4dev.DbModel.Mailbox", "Mailbox")
-                        .WithMany()
-                        .HasForeignKey("MailboxId")
-                        .OnDelete(DeleteBehavior.Cascade);
-
                     b.HasOne("Rnwood.Smtp4dev.DbModel.MailboxFolder", "MailboxFolder")
                         .WithMany("Messages")
                         .HasForeignKey("MailboxFolderId")
+                        .OnDelete(DeleteBehavior.Cascade);
+
+                    b.HasOne("Rnwood.Smtp4dev.DbModel.Mailbox", "Mailbox")
+                        .WithMany()
+                        .HasForeignKey("MailboxId")
                         .OnDelete(DeleteBehavior.Cascade);
 
                     b.HasOne("Rnwood.Smtp4dev.DbModel.Session", "Session")

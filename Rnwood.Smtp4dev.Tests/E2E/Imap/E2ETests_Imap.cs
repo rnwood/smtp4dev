@@ -31,7 +31,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
 
 
                 string messageSubject = Guid.NewGuid().ToString();
-                using (SmtpClient smtpClient = new SmtpClient())
+                using (SmtpClient smtpClient = CreateSmtpClientWithLogging())
                 {
                     smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
                     smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
@@ -52,7 +52,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
                 }
 
 
-                using (ImapClient imapClient = new ImapClient())
+                using (ImapClient imapClient = CreateImapClientWithLogging())
                 {
                     imapClient.Connect("localhost", context.ImapPortNumber);
                     imapClient.Authenticate("user", "password");
@@ -68,7 +68,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
                     imapClient.Inbox.Close();
                 }
 
-                using (ImapClient imapClient = new ImapClient())
+                using (ImapClient imapClient = CreateImapClientWithLogging())
                 {
                     imapClient.Connect("localhost", context.ImapPortNumber);
                     imapClient.Authenticate("user", "password");
@@ -101,7 +101,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
 
                 // Send first message (this will be "older")
                 string oldMessageSubject = "Old message " + Guid.NewGuid().ToString();
-                using (SmtpClient smtpClient = new SmtpClient())
+                using (SmtpClient smtpClient = CreateSmtpClientWithLogging())
                 {
                     smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
                     smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
@@ -130,7 +130,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
 
                 // Send second message (this will be "newer")  
                 string newMessageSubject = "New message " + Guid.NewGuid().ToString();
-                using (SmtpClient smtpClient = new SmtpClient())
+                using (SmtpClient smtpClient = CreateSmtpClientWithLogging())
                 {
                     smtpClient.SslProtocols = System.Security.Authentication.SslProtocols.Tls12;
                     smtpClient.ServerCertificateValidationCallback = (s, c, h, e) => true;
