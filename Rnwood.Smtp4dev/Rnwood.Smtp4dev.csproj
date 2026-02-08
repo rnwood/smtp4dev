@@ -36,7 +36,7 @@
     <PackageReference Include="HtmlAgilityPack" Version="1.12.4" />
     <PackageReference Include="Jint" Version="3.0.1" />
     <PackageReference Include="Linq.Expression.Optimizer" Version="1.0.34" />
-    <PackageReference Include="LinqKit" Version="1.3.10" />
+    <PackageReference Include="LinqKit" Version="1.3.11" />
     <PackageReference Include="MailKit" Version="4.14.1" />
      <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="10.0.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="10.0.2" />
