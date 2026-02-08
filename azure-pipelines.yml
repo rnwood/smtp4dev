@@ -502,7 +502,7 @@ stages:
             inputs:
               command: custom
               custom: pack
-              arguments: '-c Release -p:PackAsTool=true -p:version=$(version) -o "$(Build.ArtifactStagingDirectory)/dotnetglobaltool" Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj'
+              arguments: '-r any -c Release -p:PackAsTool=true -p:version=$(version) -o "$(Build.ArtifactStagingDirectory)/dotnetglobaltool" Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj'
           - publish: $(Build.ArtifactStagingDirectory)/dotnetglobaltool
             artifact: dotnetglobaltool
 
