@@ -439,6 +439,35 @@
 
                                     </el-input>
                                 </el-form-item>
+                                
+                                <!-- Header Filters Section -->
+                                <el-form-item label="Header Filters (optional)">
+                                    <div style="margin-left: 20px;">
+                                        <div v-if="!mailbox.headerFilters || mailbox.headerFilters.length === 0" style="color: #909399; font-style: italic; margin-bottom: 8px;">
+                                            No header filters. Messages will be routed by recipients only.
+                                        </div>
+                                        <div v-for="(filter, filterIndex) in mailbox.headerFilters" :key="filterIndex" style="margin-bottom: 10px; padding: 10px; border: 1px solid #dcdfe6; border-radius: 4px;">
+                                            <el-form-item label="Header Name" :prop="'server.mailboxes[' + index + '].headerFilters[' + filterIndex + '].header'" :rules="{required: true, message: 'Required'}" style="margin-bottom: 10px;">
+                                                <el-input v-model="filter.header" placeholder="e.g., X-Application, X-Priority" :disabled="server.lockedSettings.mailboxes" style="width: 300px;">
+                                                </el-input>
+                                            </el-form-item>
+                                            <el-form-item label="Pattern" :prop="'server.mailboxes[' + index + '].headerFilters[' + filterIndex + '].pattern'" :rules="{required: true, message: 'Required'}" style="margin-bottom: 10px;">
+                                                <el-input v-model="filter.pattern" placeholder="e.g., exact-value, /regex/, or .*" :disabled="server.lockedSettings.mailboxes" style="width: 300px;">
+                                                </el-input>
+                                                <div style="font-size: 12px; color: #909399; margin-top: 4px;">
+                                                    Exact: "value" | Regex: "/pattern/" | Exists: ".*"
+                                                </div>
+                                            </el-form-item>
+                                            <el-button size="small" @click="mailbox.headerFilters.splice(filterIndex, 1)" :disabled="server.lockedSettings.mailboxes">
+                                                <el-icon><Close /></el-icon> Remove Filter
+                                            </el-button>
+                                        </div>
+                                        <el-button size="small" @click="addHeaderFilter(mailbox)" :disabled="server.lockedSettings.mailboxes">
+                                            <el-icon><Plus /></el-icon> Add Header Filter
+                                        </el-button>
+                                    </div>
+                                </el-form-item>
+                                
                                 <el-button title="Remove" @click="server.mailboxes.splice(index, 1)" :disabled="server.lockedSettings.mailboxes">
                                     <el-icon><Close /></el-icon>
                                 </el-button>
@@ -446,7 +475,8 @@
                         </div>
                         <el-button size="small" @click="server.mailboxes.splice(0, 0, {
     name: '',
-    recipients: ''
+    recipients: '',
+    headerFilters: []
 })" :disabled="server.lockedSettings.mailboxes">New Mailbox</el-button>
 
 
@@ -575,6 +605,16 @@
                 this.server.relaySmtpServer = "";
                 this.server.relayAutomaticEmails.splice(0, this.server.relayAutomaticEmails.length);
             }
+        }
+
+        addHeaderFilter(mailbox: any) {
+            if (!mailbox.headerFilters) {
+                mailbox.headerFilters = [];
+            }
+            mailbox.headerFilters.push({
+                header: '',
+                pattern: ''
+            });
         }
 
         async save() {

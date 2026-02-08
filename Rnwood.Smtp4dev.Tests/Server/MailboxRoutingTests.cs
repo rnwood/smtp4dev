@@ -183,5 +183,44 @@ namespace Rnwood.Smtp4dev.Tests.Server
             Assert.NotNull(mailbox.HeaderFilters);
             Assert.Single(mailbox.HeaderFilters);
         }
+
+        [Fact]
+        public void MailboxFromStringConverter_ParsesJsonFormat()
+        {
+            // Test that JSON format can be parsed for command line support
+            var converter = new MailboxFromStringConverter();
+            var json = "{\"name\":\"SRS\",\"recipients\":\"*\",\"headerFilters\":[{\"header\":\"X-Application\",\"pattern\":\"srs\"}]}";
+            var result = converter.ConvertFrom(json) as MailboxOptions;
+            
+            Assert.NotNull(result);
+            Assert.Equal("SRS", result.Name);
+            Assert.Equal("*", result.Recipients);
+            Assert.NotNull(result.HeaderFilters);
+            Assert.Single(result.HeaderFilters);
+            Assert.Equal("X-Application", result.HeaderFilters[0].Header);
+            Assert.Equal("srs", result.HeaderFilters[0].Pattern);
+        }
+
+        [Fact]
+        public void MailboxFromStringConverter_ParsesLegacyFormat()
+        {
+            // Test that legacy "Name=Recipients" format still works
+            var converter = new MailboxFromStringConverter();
+            var result = converter.ConvertFrom("Sales=*@sales.com") as MailboxOptions;
+            
+            Assert.NotNull(result);
+            Assert.Equal("Sales", result.Name);
+            Assert.Equal("*@sales.com", result.Recipients);
+            Assert.Null(result.HeaderFilters); // No header filters in legacy format
+        }
+
+        [Fact]
+        public void MailboxFromStringConverter_InvalidJsonThrowsException()
+        {
+            // Test that invalid JSON throws an exception
+            var converter = new MailboxFromStringConverter();
+            
+            Assert.Throws<FormatException>(() => converter.ConvertFrom("{invalid json}"));
+        }
     }
 }

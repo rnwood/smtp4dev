@@ -638,7 +638,7 @@ namespace Rnwood.Smtp4dev.Server
                         bool isRegex = recipRule.StartsWith("/") && recipRule.EndsWith("/");
 
                         bool isMatch = isRegex ?
-                            Regex.IsMatch(to, recipRule.Substring(1, recipRule.Length - 2), RegexOptions.IgnoreCase) :
+                            Regex.IsMatch(to, recipRule.Substring(1, recipRule.Length - 2), RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1)) :
                             Glob.Parse(recipRule).IsMatch(to);
 
                         if (isMatch)
@@ -723,8 +723,9 @@ namespace Rnwood.Smtp4dev.Server
             if (isRegex)
             {
                 // Extract regex pattern and match (case-insensitive)
+                // Use timeout to prevent ReDoS (Regular Expression Denial of Service) attacks
                 string pattern = headerFilter.Pattern.Substring(1, headerFilter.Pattern.Length - 2);
-                return Regex.IsMatch(headerValue, pattern, RegexOptions.IgnoreCase);
+                return Regex.IsMatch(headerValue, pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
             }
             else
             {
