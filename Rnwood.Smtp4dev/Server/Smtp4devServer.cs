@@ -676,6 +676,8 @@ namespace Rnwood.Smtp4dev.Server
                 using (Stream messageData = await message.GetData())
                 {
                     // Use MimeKit to parse headers efficiently
+                    // The 'true' parameter tells MimeKit to parse only headers, not the entire message body,
+                    // which is more efficient for routing decisions
                     var mimeMessage = await MimeMessage.LoadAsync(messageData, true);
                     
                     foreach (var header in mimeMessage.Headers)
@@ -690,7 +692,7 @@ namespace Rnwood.Smtp4dev.Server
             }
             catch (Exception ex)
             {
-                log.Warning(ex, "Failed to parse message headers for filtering");
+                log.Warning(ex, "Failed to parse message headers for filtering; falling back to recipient-based routing only");
             }
             
             return headers;
