@@ -46,6 +46,7 @@ namespace Rnwood.Smtp4dev.Server
     {
         private readonly ILogger log = Log.ForContext<Smtp4devServer>();
         private readonly OAuth2TokenValidator oauth2TokenValidator;
+        private readonly MailboxRouter mailboxRouter;
 
         public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<Settings.ServerOptions> serverOptions,
             IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory,
@@ -59,6 +60,7 @@ namespace Rnwood.Smtp4dev.Server
             this.taskQueue = taskQueue;
             this.scriptingHost = scriptingHost;
             this.oauth2TokenValidator = new OAuth2TokenValidator(log);
+            this.mailboxRouter = new MailboxRouter();
 
             taskQueue.Start();
             StartWatchingServerOptionsForChanges();
@@ -605,54 +607,13 @@ namespace Rnwood.Smtp4dev.Server
                 messageHeaders = await ParseMessageHeaders(message);
             }
 
+            // Use the router to find mailboxes for each recipient
+            var mailboxes = serverOptions.CurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" } });
+            
             List<(MailboxOptions,string)> targetMailboxesWithMatchedRecipient = new List<(MailboxOptions, string)>();
             foreach (var to in recipients)
             {
-                MailboxOptions targetMailbox = null;
-
-                foreach (var mailbox in this.serverOptions.CurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" } }))
-                {
-                    // Check header filters first (if any)
-                    if (mailbox.HeaderFilters != null && mailbox.HeaderFilters.Length > 0)
-                    {
-                        bool allHeaderFiltersMatch = true;
-                        
-                        foreach (var headerFilter in mailbox.HeaderFilters)
-                        {
-                            if (!MatchesHeaderFilter(messageHeaders, headerFilter))
-                            {
-                                allHeaderFiltersMatch = false;
-                                break;
-                            }
-                        }
-                        
-                        if (!allHeaderFiltersMatch)
-                        {
-                            continue; // Skip this mailbox if header filters don't match
-                        }
-                    }
-
-                    // Then check recipient patterns
-                    foreach (var recipRule in mailbox.Recipients?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                    {
-                        bool isRegex = recipRule.StartsWith("/") && recipRule.EndsWith("/");
-
-                        bool isMatch = isRegex ?
-                            Regex.IsMatch(to, recipRule.Substring(1, recipRule.Length - 2), RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1)) :
-                            Glob.Parse(recipRule).IsMatch(to);
-
-                        if (isMatch)
-                        {
-                            targetMailbox = mailbox;
-                            break;
-                        }
-                    }
-
-                    if (targetMailbox != null)
-                    {
-                        break;
-                    }
-                }
+                var targetMailbox = mailboxRouter.FindMailboxForRecipient(to, mailboxes, messageHeaders);
 
                 if (targetMailbox != null)
                 {
@@ -698,41 +659,6 @@ namespace Rnwood.Smtp4dev.Server
             return headers;
         }
 
-        private bool MatchesHeaderFilter(Dictionary<string, string> messageHeaders, HeaderFilterOptions headerFilter)
-        {
-            if (messageHeaders == null || string.IsNullOrWhiteSpace(headerFilter.Header))
-            {
-                return false;
-            }
-
-            // Check if header exists
-            if (!messageHeaders.TryGetValue(headerFilter.Header, out string headerValue))
-            {
-                return false; // Header not present in message
-            }
-
-            // If no pattern specified, just check existence
-            if (string.IsNullOrWhiteSpace(headerFilter.Pattern))
-            {
-                return true;
-            }
-
-            // Check if pattern is a regex (surrounded by /)
-            bool isRegex = headerFilter.Pattern.StartsWith("/") && headerFilter.Pattern.EndsWith("/");
-
-            if (isRegex)
-            {
-                // Extract regex pattern and match (case-insensitive)
-                // Use timeout to prevent ReDoS (Regular Expression Denial of Service) attacks
-                string pattern = headerFilter.Pattern.Substring(1, headerFilter.Pattern.Length - 2);
-                return Regex.IsMatch(headerValue, pattern, RegexOptions.IgnoreCase, TimeSpan.FromSeconds(1));
-            }
-            else
-            {
-                // Exact match (case-insensitive) or wildcard match using glob
-                return Glob.Parse(headerFilter.Pattern).IsMatch(headerValue);
-            }
-        }
 
         private bool ShouldDeliverToStdout(string mailboxName)
         {
