@@ -143,17 +143,128 @@ If you want to customize the default mailbox behavior, you can explicitly config
 
 **Note**: Explicitly configuring the default mailbox is typically unnecessary since it's automatically added with the same pattern (`*`).
 
+### Header-Based Message Routing
+
+In addition to recipient-based routing, smtp4dev supports routing messages based on email headers. This is useful when:
+- Multiple applications share the same SMTP credentials but need separate mailboxes
+- You want to filter by spam scores, antivirus headers, or custom application headers
+- Messages need to be routed based on metadata that isn't in the recipient address
+
+#### Header Filter Configuration
+
+Add `HeaderFilters` to any mailbox configuration:
+
+```json
+{
+  "ServerOptions": {
+    "Mailboxes": [
+      {
+        "Name": "SRS",
+        "Recipients": "*",
+        "HeaderFilters": [
+          {
+            "Header": "X-Application",
+            "Pattern": "srs"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**How it works:**
+1. **All filters must match**: If multiple `HeaderFilters` are specified, ALL must match for the message to be routed to that mailbox
+2. **Header filters checked first**: Before checking recipient patterns, header filters are evaluated
+3. **First match wins**: Once a mailbox matches (headers + recipients), no other mailboxes are checked
+
+#### Header Pattern Types
+
+**Exact/Wildcard Match (Glob):**
+```json
+{ "Header": "X-Application", "Pattern": "srs" }
+{ "Header": "X-Mailer", "Pattern": "srs-*" }
+```
+
+**Regular Expression (case-insensitive, surround with `/`):**
+```json
+{ "Header": "X-Priority", "Pattern": "/^(high|urgent)$/" }
+{ "Header": "X-Spam-Score", "Pattern": "/^[0-4]\\./" }
+```
+
+**Header Existence Check (any value):**
+```json
+{ "Header": "X-Antivirus", "Pattern": ".*" }
+```
+
+#### Example Scenarios
+
+**Route by Application Identifier:**
+```json
+{
+  "Mailboxes": [
+    {
+      "Name": "SRS",
+      "Recipients": "*",
+      "HeaderFilters": [
+        { "Header": "X-Application", "Pattern": "srs" }
+      ]
+    },
+    {
+      "Name": "USOSapi",
+      "Recipients": "*"
+    }
+  ]
+}
+```
+Messages with `X-Application: srs` go to "SRS" mailbox, all others go to "USOSapi" mailbox.
+
+**Route Antivirus-Scanned Messages:**
+```json
+{
+  "Mailboxes": [
+    {
+      "Name": "Scanned",
+      "Recipients": "*",
+      "HeaderFilters": [
+        { "Header": "X-Antivirus", "Pattern": ".*" }
+      ]
+    }
+  ]
+}
+```
+Any message with an `X-Antivirus` header (regardless of value) goes to "Scanned" mailbox.
+
+**Combine Multiple Header Filters:**
+```json
+{
+  "Mailboxes": [
+    {
+      "Name": "Critical-Sales",
+      "Recipients": "*@sales.com",
+      "HeaderFilters": [
+        { "Header": "X-Priority", "Pattern": "/^(high|urgent)$/" },
+        { "Header": "X-Department", "Pattern": "sales" }
+      ]
+    }
+  ]
+}
+```
+Only messages to `@sales.com` with BOTH `X-Priority: high` (or `urgent`) AND `X-Department: sales` headers.
+
 ### Important Notes
 
 1. **No Message Duplication**: Due to "first match wins" logic, each recipient goes to exactly one mailbox
 
-2. **Case Sensitivity**: All pattern matching is case-insensitive
+2. **Case Sensitivity**: All pattern matching (recipients and headers) is case-insensitive
 
 3. **Multiple Recipients**: When an email has multiple recipients, each recipient is processed independently and may go to different mailboxes
 
 4. **Authenticated Users**: If `DeliverMessagesToUsersDefaultMailbox` is enabled and users are authenticated, messages go to the user's configured default mailbox instead of following recipient patterns
 
 5. **Performance**: Wildcard patterns are generally faster than regular expressions for simple matching
+
+6. **Header Filter Performance**: Headers are only parsed when at least one mailbox has `HeaderFilters` configured
 
 ### Troubleshooting
 

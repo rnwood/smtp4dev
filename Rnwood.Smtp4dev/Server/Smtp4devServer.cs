@@ -46,6 +46,7 @@ namespace Rnwood.Smtp4dev.Server
     {
         private readonly ILogger log = Log.ForContext<Smtp4devServer>();
         private readonly OAuth2TokenValidator oauth2TokenValidator;
+        private readonly MailboxRouter mailboxRouter;
 
         public Smtp4devServer(IServiceScopeFactory serviceScopeFactory, IOptionsMonitor<Settings.ServerOptions> serverOptions,
             IOptionsMonitor<RelayOptions> relayOptions, NotificationsHub notificationsHub, Func<RelayOptions, SmtpClient> relaySmtpClientFactory,
@@ -59,6 +60,7 @@ namespace Rnwood.Smtp4dev.Server
             this.taskQueue = taskQueue;
             this.scriptingHost = scriptingHost;
             this.oauth2TokenValidator = new OAuth2TokenValidator(log);
+            this.mailboxRouter = new MailboxRouter();
 
             taskQueue.Start();
             StartWatchingServerOptionsForChanges();
@@ -552,7 +554,7 @@ namespace Rnwood.Smtp4dev.Server
                 e.Message.Session.ClientAddress, e.Message.From, 
                 string.Join(", ", e.Message.Recipients), e.Message.SecureConnection, e.Message.DeclaredMessageSize);
 
-            var targetMailboxes = GetTargetMailboxes(e.Message.Recipients, e.Message.Session);
+            var targetMailboxes = await GetTargetMailboxes(e.Message.Recipients, e.Message.Session, e.Message);
 
             if (!targetMailboxes.Any())
             {
@@ -572,7 +574,7 @@ namespace Rnwood.Smtp4dev.Server
             }
         }
 
-        private ILookup<MailboxOptions, string> GetTargetMailboxes(IEnumerable<string> recipients, ISession messageSession)
+        private async Task<ILookup<MailboxOptions, string>> GetTargetMailboxes(IEnumerable<string> recipients, ISession messageSession, IMessage message)
         {
             if (serverOptions.CurrentValue.DeliverMessagesToUsersDefaultMailbox && messageSession.Authenticated && messageSession.AuthenticationCredentials is IAuthenticationCredentialsCanValidateWithPassword credentials)
             {
@@ -596,33 +598,22 @@ namespace Rnwood.Smtp4dev.Server
                     return recipients.ToLookup(_ => mailboxOption, recipient => recipient);
             }
 
+            // Parse message headers for header-based filtering
+            Dictionary<string, string> messageHeaders = null;
+            bool headersNeeded = serverOptions.CurrentValue.Mailboxes.Any(m => m.HeaderFilters != null && m.HeaderFilters.Length > 0);
+            
+            if (headersNeeded)
+            {
+                messageHeaders = await ParseMessageHeaders(message);
+            }
+
+            // Use the router to find mailboxes for each recipient
+            var mailboxes = serverOptions.CurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" } });
+            
             List<(MailboxOptions,string)> targetMailboxesWithMatchedRecipient = new List<(MailboxOptions, string)>();
             foreach (var to in recipients)
             {
-                MailboxOptions targetMailbox = null;
-
-                foreach (var mailbox in this.serverOptions.CurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" } }))
-                {
-                    foreach (var recipRule in mailbox.Recipients?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
-                    {
-                        bool isRegex = recipRule.StartsWith("/") && recipRule.EndsWith("/");
-
-                        bool isMatch = isRegex ?
-                            Regex.IsMatch(to, recipRule.Substring(1, recipRule.Length - 2), RegexOptions.IgnoreCase) :
-                            Glob.Parse(recipRule).IsMatch(to);
-
-                        if (isMatch)
-                        {
-                            targetMailbox = mailbox;
-                            break;
-                        }
-                    }
-
-                    if (targetMailbox != null)
-                    {
-                        break;
-                    }
-                }
+                var targetMailbox = mailboxRouter.FindMailboxForRecipient(to, mailboxes, messageHeaders);
 
                 if (targetMailbox != null)
                 {
@@ -636,6 +627,38 @@ namespace Rnwood.Smtp4dev.Server
 
             return targetMailboxesWithMatchedRecipient.ToLookup(t => t.Item1, t=> t.Item2);
         }
+
+        private async Task<Dictionary<string, string>> ParseMessageHeaders(IMessage message)
+        {
+            var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            
+            try
+            {
+                using (Stream messageData = await message.GetData())
+                {
+                    // Use MimeKit to parse headers efficiently
+                    // The 'true' parameter tells MimeKit to parse only headers, not the entire message body,
+                    // which is more efficient for routing decisions
+                    var mimeMessage = await MimeMessage.LoadAsync(messageData, true);
+                    
+                    foreach (var header in mimeMessage.Headers)
+                    {
+                        // Store only the first occurrence of each header (case-insensitive)
+                        if (!headers.ContainsKey(header.Field))
+                        {
+                            headers[header.Field] = header.Value;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Warning(ex, "Failed to parse message headers for filtering; falling back to recipient-based routing only");
+            }
+            
+            return headers;
+        }
+
 
         private bool ShouldDeliverToStdout(string mailboxName)
         {

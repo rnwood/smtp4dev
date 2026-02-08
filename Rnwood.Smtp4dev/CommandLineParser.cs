@@ -68,7 +68,7 @@ namespace Rnwood.Smtp4dev
                        map.Add(data, x => x.ServerOptions.SmtpEnabledAuthTypesWhenNotSecureConnection) },
                 { "SmtpAuthTypesSecure=", "SMTP auth type enabled when  using secure connection (choices: ANONYMOUS, PLAIN, LOGIN, CRAM-MD5). Separate values with comma.", data =>
                        map.Add(data, x => x.ServerOptions.SmtpEnabledAuthTypesWhenSecureConnection) },
-                { "mailbox=", "Adds a mailbox in Name=Recipients format (Recipients can contain comma separated wildcards or regex)see appsettings for more details). This option can be repeated to add multiple users.", data =>
+                { "mailbox=", "Adds a mailbox in Name=Recipients format or as JSON. See appsettings.json for JSON format with header filters. This option can be repeated to add multiple mailboxes.", data =>
                        map.Add(data, x => x.ServerOptions.Mailboxes)},
                 { "sslprotocols=", "Specifies the SSL/TLS protocol version(s) that will be allowed. Separate with commas. See https://learn.microsoft.com/en-us/dotnet/api/system.security.authentication.sslprotocols?view=net-9.0", data => map.Add(data, x => x.ServerOptions.SslProtocols)  },
                 { "tlsciphersuites=", "Specifies the TLS cipher suites to be allowed. Not supported on Windows. Separate with commas. See https://learn.microsoft.com/en-us/dotnet/api/system.net.security.tlsciphersuite?view=net-9.0", data => map.Add(data, x => x.ServerOptions.TlsCipherSuites) },
