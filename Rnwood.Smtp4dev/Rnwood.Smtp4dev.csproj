@@ -24,7 +24,9 @@
   <PropertyGroup Condition="'$(Configuration)'==''">
     <Configuration>Debug</Configuration>
   </PropertyGroup>
-
+<PropertyGroup>
+  <CreateRidSpecificToolPackages>false</CreateRidSpecificToolPackages>
+</PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0" />
     <PackageReference Include="AspNetCore.Authentication.Basic" Version="9.0.0" />
