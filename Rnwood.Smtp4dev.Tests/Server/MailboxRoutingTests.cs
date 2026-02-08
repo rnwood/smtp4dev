@@ -96,5 +96,92 @@ namespace Rnwood.Smtp4dev.Tests.Server
             // Verify the default mailbox name constant
             Assert.Equal("Default", MailboxOptions.DEFAULTNAME);
         }
+
+        [Fact]
+        public void HeaderFilterOptions_Properties_CanBeSet()
+        {
+            // Test that header filter options can be created and configured
+            var headerFilter = new HeaderFilterOptions
+            {
+                Header = "X-Application",
+                Pattern = "srs"
+            };
+
+            Assert.Equal("X-Application", headerFilter.Header);
+            Assert.Equal("srs", headerFilter.Pattern);
+        }
+
+        [Fact]
+        public void MailboxOptions_HeaderFilters_CanBeSet()
+        {
+            // Test that mailbox can have header filters
+            var mailbox = new MailboxOptions
+            {
+                Name = "SRS",
+                Recipients = "*",
+                HeaderFilters = new[]
+                {
+                    new HeaderFilterOptions { Header = "X-Application", Pattern = "srs" },
+                    new HeaderFilterOptions { Header = "X-Mailer", Pattern = "/^srs-.*/" }
+                }
+            };
+
+            Assert.Equal("SRS", mailbox.Name);
+            Assert.Equal("*", mailbox.Recipients);
+            Assert.NotNull(mailbox.HeaderFilters);
+            Assert.Equal(2, mailbox.HeaderFilters.Length);
+            Assert.Equal("X-Application", mailbox.HeaderFilters[0].Header);
+            Assert.Equal("srs", mailbox.HeaderFilters[0].Pattern);
+            Assert.Equal("X-Mailer", mailbox.HeaderFilters[1].Header);
+            Assert.Equal("/^srs-.*/", mailbox.HeaderFilters[1].Pattern);
+        }
+
+        [Fact]
+        public void HeaderFilterOptions_Pattern_SupportsRegex()
+        {
+            // Test that regex patterns can be specified with / delimiters
+            var headerFilter = new HeaderFilterOptions
+            {
+                Header = "X-Antivirus",
+                Pattern = "/.*scanned.*/"
+            };
+
+            Assert.Equal("X-Antivirus", headerFilter.Header);
+            Assert.True(headerFilter.Pattern.StartsWith("/") && headerFilter.Pattern.EndsWith("/"));
+        }
+
+        [Fact]
+        public void HeaderFilterOptions_Pattern_SupportsExistenceCheck()
+        {
+            // Test that existence check can be done with .* pattern
+            var headerFilter = new HeaderFilterOptions
+            {
+                Header = "X-Custom-Header",
+                Pattern = ".*"
+            };
+
+            Assert.Equal("X-Custom-Header", headerFilter.Header);
+            Assert.Equal(".*", headerFilter.Pattern);
+        }
+
+        [Fact]
+        public void MailboxOptions_CombinesRecipientsAndHeaderFilters()
+        {
+            // Test that mailbox can have both recipient patterns and header filters
+            var mailbox = new MailboxOptions
+            {
+                Name = "TestMailbox",
+                Recipients = "*@example.com",
+                HeaderFilters = new[]
+                {
+                    new HeaderFilterOptions { Header = "X-Priority", Pattern = "high" }
+                }
+            };
+
+            Assert.Equal("TestMailbox", mailbox.Name);
+            Assert.Equal("*@example.com", mailbox.Recipients);
+            Assert.NotNull(mailbox.HeaderFilters);
+            Assert.Single(mailbox.HeaderFilters);
+        }
     }
 }

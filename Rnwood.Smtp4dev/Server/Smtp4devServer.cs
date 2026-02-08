@@ -552,7 +552,7 @@ namespace Rnwood.Smtp4dev.Server
                 e.Message.Session.ClientAddress, e.Message.From, 
                 string.Join(", ", e.Message.Recipients), e.Message.SecureConnection, e.Message.DeclaredMessageSize);
 
-            var targetMailboxes = GetTargetMailboxes(e.Message.Recipients, e.Message.Session);
+            var targetMailboxes = await GetTargetMailboxes(e.Message.Recipients, e.Message.Session, e.Message);
 
             if (!targetMailboxes.Any())
             {
@@ -572,7 +572,7 @@ namespace Rnwood.Smtp4dev.Server
             }
         }
 
-        private ILookup<MailboxOptions, string> GetTargetMailboxes(IEnumerable<string> recipients, ISession messageSession)
+        private async Task<ILookup<MailboxOptions, string>> GetTargetMailboxes(IEnumerable<string> recipients, ISession messageSession, IMessage message)
         {
             if (serverOptions.CurrentValue.DeliverMessagesToUsersDefaultMailbox && messageSession.Authenticated && messageSession.AuthenticationCredentials is IAuthenticationCredentialsCanValidateWithPassword credentials)
             {
@@ -596,6 +596,15 @@ namespace Rnwood.Smtp4dev.Server
                     return recipients.ToLookup(_ => mailboxOption, recipient => recipient);
             }
 
+            // Parse message headers for header-based filtering
+            Dictionary<string, string> messageHeaders = null;
+            bool headersNeeded = serverOptions.CurrentValue.Mailboxes.Any(m => m.HeaderFilters != null && m.HeaderFilters.Length > 0);
+            
+            if (headersNeeded)
+            {
+                messageHeaders = await ParseMessageHeaders(message);
+            }
+
             List<(MailboxOptions,string)> targetMailboxesWithMatchedRecipient = new List<(MailboxOptions, string)>();
             foreach (var to in recipients)
             {
@@ -603,6 +612,27 @@ namespace Rnwood.Smtp4dev.Server
 
                 foreach (var mailbox in this.serverOptions.CurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" } }))
                 {
+                    // Check header filters first (if any)
+                    if (mailbox.HeaderFilters != null && mailbox.HeaderFilters.Length > 0)
+                    {
+                        bool allHeaderFiltersMatch = true;
+                        
+                        foreach (var headerFilter in mailbox.HeaderFilters)
+                        {
+                            if (!MatchesHeaderFilter(messageHeaders, headerFilter))
+                            {
+                                allHeaderFiltersMatch = false;
+                                break;
+                            }
+                        }
+                        
+                        if (!allHeaderFiltersMatch)
+                        {
+                            continue; // Skip this mailbox if header filters don't match
+                        }
+                    }
+
+                    // Then check recipient patterns
                     foreach (var recipRule in mailbox.Recipients?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
                     {
                         bool isRegex = recipRule.StartsWith("/") && recipRule.EndsWith("/");
@@ -635,6 +665,70 @@ namespace Rnwood.Smtp4dev.Server
             }
 
             return targetMailboxesWithMatchedRecipient.ToLookup(t => t.Item1, t=> t.Item2);
+        }
+
+        private async Task<Dictionary<string, string>> ParseMessageHeaders(IMessage message)
+        {
+            var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            
+            try
+            {
+                using (Stream messageData = await message.GetData())
+                {
+                    // Use MimeKit to parse headers efficiently
+                    var mimeMessage = await MimeMessage.LoadAsync(messageData, true);
+                    
+                    foreach (var header in mimeMessage.Headers)
+                    {
+                        // Store only the first occurrence of each header (case-insensitive)
+                        if (!headers.ContainsKey(header.Field))
+                        {
+                            headers[header.Field] = header.Value;
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                log.Warning(ex, "Failed to parse message headers for filtering");
+            }
+            
+            return headers;
+        }
+
+        private bool MatchesHeaderFilter(Dictionary<string, string> messageHeaders, HeaderFilterOptions headerFilter)
+        {
+            if (messageHeaders == null || string.IsNullOrWhiteSpace(headerFilter.Header))
+            {
+                return false;
+            }
+
+            // Check if header exists
+            if (!messageHeaders.TryGetValue(headerFilter.Header, out string headerValue))
+            {
+                return false; // Header not present in message
+            }
+
+            // If no pattern specified, just check existence
+            if (string.IsNullOrWhiteSpace(headerFilter.Pattern))
+            {
+                return true;
+            }
+
+            // Check if pattern is a regex (surrounded by /)
+            bool isRegex = headerFilter.Pattern.StartsWith("/") && headerFilter.Pattern.EndsWith("/");
+
+            if (isRegex)
+            {
+                // Extract regex pattern and match (case-insensitive)
+                string pattern = headerFilter.Pattern.Substring(1, headerFilter.Pattern.Length - 2);
+                return Regex.IsMatch(headerValue, pattern, RegexOptions.IgnoreCase);
+            }
+            else
+            {
+                // Exact match (case-insensitive) or wildcard match using glob
+                return Glob.Parse(headerFilter.Pattern).IsMatch(headerValue);
+            }
         }
 
         private bool ShouldDeliverToStdout(string mailboxName)

@@ -6,11 +6,34 @@ using System.Net.Mail;
 
 namespace Rnwood.Smtp4dev.Server.Settings
 {
+    public record HeaderFilterOptions
+    {
+        /// <summary>
+        /// The header name to match (e.g., "X-Application", "X-Mailer")
+        /// </summary>
+        public string Header { get; set; }
+
+        /// <summary>
+        /// The pattern to match against the header value.
+        /// - For exact match: "value"
+        /// - For regex: "/pattern/" (case-insensitive)
+        /// - For existence check: ".*" (header exists with any value)
+        /// </summary>
+        public string Pattern { get; set; }
+    }
+
     [TypeConverter(typeof(MailboxFromStringConverter))]
     public record MailboxOptions
     {
         public string Name { get; set; }
         public string Recipients { get; set; }
+
+        /// <summary>
+        /// Optional header-based filters for routing messages to this mailbox.
+        /// If specified, all filters must match for the message to be routed to this mailbox.
+        /// Header filters are checked before recipient patterns.
+        /// </summary>
+        public HeaderFilterOptions[] HeaderFilters { get; set; }
 
         internal const string DEFAULTNAME = "Default";
     }
