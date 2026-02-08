@@ -16,7 +16,7 @@
     "@fortawesome/free-solid-svg-icons": "^7.0.0",
     "@fortawesome/vue-fontawesome": "^3.0.6",
     "@jsx-email/doiuse-email": "^1.0.1",
-    "@microsoft/signalr": "^8.0.0",
+    "@microsoft/signalr": "^10.0.0",
     "@types/jest": "^30.0.0",
     "@types/sanitize-html": "^2.11.0",
     "@typescript-eslint/parser": "^8.0.0",
