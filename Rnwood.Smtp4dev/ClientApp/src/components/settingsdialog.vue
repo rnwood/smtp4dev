@@ -531,12 +531,7 @@
                                 </div>
                             </el-form-item>
                         </div>
-                        <el-button size="small" @click="server.mailboxes.splice(0, 0, {
-    name: '',
-    recipients: '',
-    headerFilters: [],
-    sourceFilters: []
-})" :disabled="server.lockedSettings.mailboxes">
+                        <el-button size="small" @click="server.mailboxes.splice(0, 0, createNewMailbox())" :disabled="server.lockedSettings.mailboxes">
                             <el-icon><Plus /></el-icon> New Mailbox
                         </el-button>
 
@@ -685,6 +680,15 @@
             mailbox.sourceFilters.push({
                 pattern: ''
             });
+        }
+
+        createNewMailbox() {
+            return {
+                name: '',
+                recipients: '',
+                headerFilters: [],
+                sourceFilters: []
+            };
         }
 
         async save() {
