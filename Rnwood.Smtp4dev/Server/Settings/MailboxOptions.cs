@@ -22,6 +22,17 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public string Pattern { get; set; }
     }
 
+    public record SourceFilterOptions
+    {
+        /// <summary>
+        /// The pattern to match against the client hostname (from EHLO/HELO) or IP address.
+        /// - For exact match: "hostname.example.com" or "192.168.1.1"
+        /// - For wildcard: "*.example.com" or "192.168.*"
+        /// - For regex: "/pattern/" (case-insensitive)
+        /// </summary>
+        public string Pattern { get; set; }
+    }
+
     [TypeConverter(typeof(MailboxFromStringConverter))]
     public record MailboxOptions
     {
@@ -34,6 +45,14 @@ namespace Rnwood.Smtp4dev.Server.Settings
         /// Header filters are checked before recipient patterns.
         /// </summary>
         public HeaderFilterOptions[] HeaderFilters { get; set; }
+
+        /// <summary>
+        /// Optional source-based filters for routing messages to this mailbox.
+        /// If specified, all filters must match for the message to be routed to this mailbox.
+        /// Source filters are checked before header filters and recipient patterns.
+        /// Matches against the client hostname (from EHLO/HELO) or IP address.
+        /// </summary>
+        public SourceFilterOptions[] SourceFilters { get; set; }
 
         internal const string DEFAULTNAME = "Default";
     }

@@ -9,16 +9,26 @@ export class HeaderFilter {
     }
 }
 
+export class SourceFilter {
+    pattern: string;
+ 
+    constructor(pattern: string = '') {
+        this.pattern = pattern;
+    }
+}
+
 export default class Mailbox {
     name: string;
     recipients: string;
     headerFilters?: HeaderFilter[];
+    sourceFilters?: SourceFilter[];
  
-    constructor(name: string, recipients: string, headerFilters?: HeaderFilter[]) {
+    constructor(name: string, recipients: string, headerFilters?: HeaderFilter[], sourceFilters?: SourceFilter[]) {
          
         this.name = name;
         this.recipients = recipients;
         this.headerFilters = headerFilters;
+        this.sourceFilters = sourceFilters;
     }
 
 

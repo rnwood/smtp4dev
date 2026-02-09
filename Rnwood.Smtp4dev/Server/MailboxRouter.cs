@@ -9,20 +9,24 @@ namespace Rnwood.Smtp4dev.Server
 {
     /// <summary>
     /// Handles routing logic for determining which mailbox(es) should receive a message
-    /// based on recipients and header filters.
+    /// based on recipients, source, and header filters.
     /// </summary>
     public class MailboxRouter
     {
         /// <summary>
-        /// Finds the target mailbox for a recipient based on mailbox configurations and message headers.
+        /// Finds the target mailbox for a recipient based on mailbox configurations, message source, and message headers.
         /// </summary>
         /// <param name="recipient">The recipient email address</param>
         /// <param name="mailboxes">Available mailbox configurations (in priority order)</param>
+        /// <param name="clientHostname">Client hostname from EHLO/HELO command</param>
+        /// <param name="clientAddress">Client IP address</param>
         /// <param name="messageHeaders">Parsed message headers (case-insensitive dictionary)</param>
         /// <returns>The matching mailbox or null if no match found</returns>
         public MailboxOptions FindMailboxForRecipient(
             string recipient, 
             IEnumerable<MailboxOptions> mailboxes,
+            string clientHostname,
+            string clientAddress,
             Dictionary<string, string> messageHeaders)
         {
             if (string.IsNullOrWhiteSpace(recipient))
@@ -32,7 +36,27 @@ namespace Rnwood.Smtp4dev.Server
 
             foreach (var mailbox in mailboxes)
             {
-                // Check header filters first (if any)
+                // Check source filters first (if any)
+                if (mailbox.SourceFilters != null && mailbox.SourceFilters.Length > 0)
+                {
+                    bool allSourceFiltersMatch = true;
+                    
+                    foreach (var sourceFilter in mailbox.SourceFilters)
+                    {
+                        if (!MatchesSourceFilter(clientHostname, clientAddress, sourceFilter))
+                        {
+                            allSourceFiltersMatch = false;
+                            break;
+                        }
+                    }
+                    
+                    if (!allSourceFiltersMatch)
+                    {
+                        continue; // Skip this mailbox if source filters don't match
+                    }
+                }
+
+                // Check header filters next (if any)
                 if (mailbox.HeaderFilters != null && mailbox.HeaderFilters.Length > 0)
                 {
                     bool allHeaderFiltersMatch = true;
@@ -129,6 +153,57 @@ namespace Rnwood.Smtp4dev.Server
             {
                 // Exact match (case-insensitive) or wildcard match using glob
                 return MatchesGlobPattern(headerValue, headerFilter.Pattern);
+            }
+        }
+
+        /// <summary>
+        /// Checks if a message source (client hostname or IP address) matches a source filter.
+        /// </summary>
+        /// <param name="clientHostname">Client hostname from EHLO/HELO command</param>
+        /// <param name="clientAddress">Client IP address</param>
+        /// <param name="sourceFilter">The source filter configuration</param>
+        /// <returns>True if the source matches the filter</returns>
+        public bool MatchesSourceFilter(string clientHostname, string clientAddress, SourceFilterOptions sourceFilter)
+        {
+            if (string.IsNullOrWhiteSpace(sourceFilter?.Pattern))
+            {
+                return false;
+            }
+
+            // Check if pattern is a regex (surrounded by /)
+            bool isRegex = sourceFilter.Pattern.StartsWith("/") && sourceFilter.Pattern.EndsWith("/");
+
+            if (isRegex)
+            {
+                string pattern = sourceFilter.Pattern.Substring(1, sourceFilter.Pattern.Length - 2);
+                
+                // Try to match against hostname first, then IP address
+                if (!string.IsNullOrWhiteSpace(clientHostname) && MatchesRegexPattern(clientHostname, pattern))
+                {
+                    return true;
+                }
+                
+                if (!string.IsNullOrWhiteSpace(clientAddress) && MatchesRegexPattern(clientAddress, pattern))
+                {
+                    return true;
+                }
+                
+                return false;
+            }
+            else
+            {
+                // Try to match against hostname first, then IP address using glob pattern
+                if (!string.IsNullOrWhiteSpace(clientHostname) && MatchesGlobPattern(clientHostname, sourceFilter.Pattern))
+                {
+                    return true;
+                }
+                
+                if (!string.IsNullOrWhiteSpace(clientAddress) && MatchesGlobPattern(clientAddress, sourceFilter.Pattern))
+                {
+                    return true;
+                }
+                
+                return false;
             }
         }
 

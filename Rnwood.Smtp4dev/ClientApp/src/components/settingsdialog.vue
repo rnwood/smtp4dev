@@ -422,84 +422,123 @@
 
 
 
-                        <div v-for="(mailbox, index) in server.mailboxes" :key="index" style="margin-bottom: 20px; padding: 15px; border: 2px solid #e4e7ed; border-radius: 8px; background-color: #fafafa;">
+                        <div v-for="(mailbox, index) in server.mailboxes" :key="index" style="margin-bottom: 20px; padding: 15px; border: 2px solid #e4e7ed; border-radius: 8px; background-color: #fafafa; position: relative;">
                             <el-form-item :prop="'server.mailboxes[' + index + ']'" :rules="{validator: checkMailboxNameUnique}">
                                 <!-- Mailbox Header with Order Controls -->
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #dcdfe6;">
-                                    <div style="display: flex; gap: 10px; align-items: center;">
-                                        <el-button @click="server.mailboxes.splice(index, 1); server.mailboxes.splice(index-1, 0, mailbox);" :disabled="server.lockedSettings.mailboxes || index==0" title="Move up">
-                                            <el-icon><ArrowUp /></el-icon>
-                                        </el-button>
-                                        <el-button @click="server.mailboxes.splice(index, 1); server.mailboxes.splice(index+1, 0, mailbox) " :disabled="server.lockedSettings.mailboxes || index==server.mailboxes.length-1" title="Move down">
-                                            <el-icon><ArrowDown /></el-icon>
-                                        </el-button>
-                                        <span style="font-weight: bold; font-size: 16px;">Mailbox #{{ index + 1 }}</span>
-                                    </div>
-                                    <el-button type="danger" title="Delete this entire mailbox" @click="server.mailboxes.splice(index, 1)" :disabled="server.lockedSettings.mailboxes">
-                                        <el-icon><Delete /></el-icon> Delete Mailbox
+                                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #dcdfe6;">
+                                    <el-button @click="server.mailboxes.splice(index, 1); server.mailboxes.splice(index-1, 0, mailbox);" :disabled="server.lockedSettings.mailboxes || index==0" title="Move up">
+                                        <el-icon><ArrowUp /></el-icon>
                                     </el-button>
+                                    <el-button @click="server.mailboxes.splice(index, 1); server.mailboxes.splice(index+1, 0, mailbox) " :disabled="server.lockedSettings.mailboxes || index==server.mailboxes.length-1" title="Move down">
+                                        <el-icon><ArrowDown /></el-icon>
+                                    </el-button>
+                                    <span style="font-weight: bold; font-size: 16px;">Mailbox #{{ index + 1 }}</span>
                                 </div>
 
-                                <!-- Basic Mailbox Configuration -->
-                                <div style="display: flex; gap: 15px; margin-bottom: 15px;">
-                                    <el-form-item label="Name" :prop="'server.mailboxes[' + index + '].name'" :rules="{required: true, message: 'Required'}" style="flex: 1;">
+                                <!-- Name Field with Delete Button -->
+                                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 15px;">
+                                    <el-form-item label="Name" :prop="'server.mailboxes[' + index + '].name'" :rules="{required: true, message: 'Required'}" style="flex: 1; margin-bottom: 0;">
                                         <el-input v-model="mailbox.name" :disabled="server.lockedSettings.mailboxes" placeholder="e.g., Sales, Support">
                                         </el-input>
                                     </el-form-item>
-                                    <el-form-item label="Recipients" :prop="'server.mailboxes[' + index + '].recipients'" :rules="{required: true, message: 'Required'}" style="flex: 1;">
-                                        <el-input v-model="mailbox.recipients" :disabled="server.lockedSettings.mailboxes" placeholder="e.g., *@example.com">
-                                        </el-input>
-                                    </el-form-item>
+                                    <div style="display: flex; align-items: flex-end; padding-bottom: 0;">
+                                        <el-button type="danger" title="Delete this entire mailbox" @click="server.mailboxes.splice(index, 1)" :disabled="server.lockedSettings.mailboxes">
+                                            <el-icon><Delete /></el-icon> Delete
+                                        </el-button>
+                                    </div>
                                 </div>
                                 
-                                <!-- Header Filters Section -->
-                                <div style="margin-top: 15px;">
-                                    <div style="font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
-                                        <el-icon><Filter /></el-icon>
-                                        Header Filters (optional)
-                                    </div>
+                                <!-- Responsive Filters Grid: Recipients | Headers | Source -->
+                                <div style="display: flex; flex-wrap: wrap; gap: 20px; align-items: flex-start;">
                                     
-                                    <div v-if="!mailbox.headerFilters || mailbox.headerFilters.length === 0" style="color: #909399; font-style: italic; margin-bottom: 10px; padding: 10px; background-color: #f5f7fa; border-radius: 4px;">
-                                        No header filters configured. Messages will be routed by recipients only.
-                                    </div>
-                                    
-                                    <!-- Each Header Filter -->
-                                    <div v-for="(filter, filterIndex) in mailbox.headerFilters" :key="filterIndex" style="margin-bottom: 12px; padding: 12px; border: 1px solid #409eff; border-left-width: 4px; border-radius: 4px; background-color: #ecf5ff;">
-                                        <div style="display: flex; gap: 15px; align-items: flex-start;">
-                                            <div style="flex: 1;">
-                                                <el-form-item label="Header Name" :prop="'server.mailboxes[' + index + '].headerFilters[' + filterIndex + '].header'" :rules="{required: true, message: 'Required'}" style="margin-bottom: 8px;">
-                                                    <el-input v-model="filter.header" placeholder="e.g., X-Application, X-Priority" :disabled="server.lockedSettings.mailboxes">
-                                                    </el-input>
-                                                </el-form-item>
-                                            </div>
-                                            <div style="flex: 1;">
-                                                <el-form-item label="Pattern" :prop="'server.mailboxes[' + index + '].headerFilters[' + filterIndex + '].pattern'" :rules="{required: true, message: 'Required'}" style="margin-bottom: 8px;">
-                                                    <el-input v-model="filter.pattern" placeholder="e.g., value, /regex/, or *" :disabled="server.lockedSettings.mailboxes">
-                                                    </el-input>
-                                                </el-form-item>
-                                            </div>
-                                            <div style="display: flex; align-items: flex-end; padding-bottom: 8px;">
-                                                <el-button type="warning" size="small" @click="mailbox.headerFilters.splice(filterIndex, 1)" :disabled="server.lockedSettings.mailboxes" title="Remove this header filter">
-                                                    <el-icon><Close /></el-icon>
-                                                </el-button>
-                                            </div>
+                                    <!-- Recipients Section -->
+                                    <div style="flex: 1; min-width: 280px;">
+                                        <div style="font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                            <el-icon><Message /></el-icon>
+                                            Recipients
                                         </div>
+                                        <el-form-item :prop="'server.mailboxes[' + index + '].recipients'" :rules="{required: true, message: 'Required'}" style="margin-bottom: 8px;">
+                                            <el-input v-model="mailbox.recipients" :disabled="server.lockedSettings.mailboxes" placeholder="e.g., *@example.com">
+                                            </el-input>
+                                        </el-form-item>
                                         <div style="font-size: 11px; color: #606266; margin-top: 4px; padding-left: 4px;">
-                                            💡 Exact match: <code>value</code> | Wildcard: <code>*value*</code> | Regex: <code>/pattern/</code> | Any value: <code>*</code>
+                                            💡 Exact: <code>user@example.com</code> | Wildcard: <code>*@example.com</code> | Regex: <code>/pattern/</code>
                                         </div>
                                     </div>
                                     
-                                    <el-button size="small" @click="addHeaderFilter(mailbox)" :disabled="server.lockedSettings.mailboxes" style="margin-top: 8px;">
-                                        <el-icon><Plus /></el-icon> Add Header Filter
-                                    </el-button>
+                                    <!-- Header Filters Section -->
+                                    <div style="flex: 1; min-width: 280px;">
+                                        <div style="font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                            <el-icon><Filter /></el-icon>
+                                            Headers (optional)
+                                        </div>
+                                        
+                                        <div v-if="!mailbox.headerFilters || mailbox.headerFilters.length === 0" style="color: #909399; font-style: italic; margin-bottom: 10px; padding: 10px; background-color: #f5f7fa; border-radius: 4px; font-size: 12px;">
+                                            No header filters
+                                        </div>
+                                        
+                                        <!-- Each Header Filter -->
+                                        <div v-for="(filter, filterIndex) in mailbox.headerFilters" :key="filterIndex" style="margin-bottom: 8px; padding: 10px; border: 1px solid #409eff; border-left-width: 4px; border-radius: 4px; background-color: #ecf5ff;">
+                                            <div style="margin-bottom: 6px;">
+                                                <el-form-item label="Header" :prop="'server.mailboxes[' + index + '].headerFilters[' + filterIndex + '].header'" :rules="{required: true, message: 'Required'}" style="margin-bottom: 4px;">
+                                                    <el-input v-model="filter.header" placeholder="e.g., X-Application" :disabled="server.lockedSettings.mailboxes" size="small">
+                                                    </el-input>
+                                                </el-form-item>
+                                            </div>
+                                            <div style="margin-bottom: 6px;">
+                                                <el-form-item label="Pattern" :prop="'server.mailboxes[' + index + '].headerFilters[' + filterIndex + '].pattern'" :rules="{required: true, message: 'Required'}" style="margin-bottom: 0;">
+                                                    <el-input v-model="filter.pattern" placeholder="e.g., value, /regex/" :disabled="server.lockedSettings.mailboxes" size="small">
+                                                    </el-input>
+                                                </el-form-item>
+                                            </div>
+                                            <el-button type="warning" size="small" @click="mailbox.headerFilters.splice(filterIndex, 1)" :disabled="server.lockedSettings.mailboxes" title="Remove this header filter">
+                                                <el-icon><Close /></el-icon> Remove
+                                            </el-button>
+                                        </div>
+                                        
+                                        <el-button size="small" @click="addHeaderFilter(mailbox)" :disabled="server.lockedSettings.mailboxes" style="margin-top: 4px;">
+                                            <el-icon><Plus /></el-icon> Add Header
+                                        </el-button>
+                                        <div style="font-size: 11px; color: #606266; margin-top: 6px; padding-left: 4px;">
+                                            💡 <code>value</code> | <code>*value*</code> | <code>/regex/</code>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Source Filters Section -->
+                                    <div style="flex: 1; min-width: 280px;">
+                                        <div style="font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                            <el-icon><Connection /></el-icon>
+                                            Source (optional)
+                                        </div>
+                                        
+                                        <div v-if="!mailbox.sourceFilters || mailbox.sourceFilters.length === 0" style="color: #909399; font-style: italic; margin-bottom: 10px; padding: 10px; background-color: #f5f7fa; border-radius: 4px; font-size: 12px;">
+                                            No source filters
+                                        </div>
+                                        
+                                        <!-- Each Source Filter -->
+                                        <div v-for="(filter, filterIndex) in mailbox.sourceFilters" :key="'source-' + filterIndex" style="margin-bottom: 8px; padding: 10px; border: 1px solid #67c23a; border-left-width: 4px; border-radius: 4px; background-color: #f0f9ff;">
+                                            <div style="margin-bottom: 6px;">
+                                                <el-form-item label="Pattern" :prop="'server.mailboxes[' + index + '].sourceFilters[' + filterIndex + '].pattern'" :rules="{required: true, message: 'Required'}" style="margin-bottom: 0;">
+                                                    <el-input v-model="filter.pattern" placeholder="e.g., *.example.org, 192.168.*" :disabled="server.lockedSettings.mailboxes" size="small">
+                                                    </el-input>
+                                                </el-form-item>
+                                            </div>
+                                            <el-button type="warning" size="small" @click="mailbox.sourceFilters.splice(filterIndex, 1)" :disabled="server.lockedSettings.mailboxes" title="Remove this source filter">
+                                                <el-icon><Close /></el-icon> Remove
+                                            </el-button>
+                                        </div>
+                                        
+                                        <el-button size="small" @click="addSourceFilter(mailbox)" :disabled="server.lockedSettings.mailboxes" style="margin-top: 4px;">
+                                            <el-icon><Plus /></el-icon> Add Source
+                                        </el-button>
+                                        <div style="font-size: 11px; color: #606266; margin-top: 6px; padding-left: 4px;">
+                                            💡 <code>host.com</code> | <code>*.example.org</code> | <code>192.168.*</code>
+                                        </div>
+                                    </div>
                                 </div>
                             </el-form-item>
                         </div>
-                        <el-button size="small" @click="server.mailboxes.splice(0, 0, {
-    name: '',
-    recipients: '',
-    headerFilters: []
-})" :disabled="server.lockedSettings.mailboxes">
+                        <el-button size="small" @click="server.mailboxes.splice(0, 0, createNewMailbox())" :disabled="server.lockedSettings.mailboxes">
                             <el-icon><Plus /></el-icon> New Mailbox
                         </el-button>
 
@@ -639,6 +678,24 @@
                 header: '',
                 pattern: ''
             });
+        }
+
+        addSourceFilter(mailbox: any) {
+            if (!mailbox.sourceFilters) {
+                mailbox.sourceFilters = [];
+            }
+            mailbox.sourceFilters.push({
+                pattern: ''
+            });
+        }
+
+        createNewMailbox() {
+            return {
+                name: '',
+                recipients: '',
+                headerFilters: [],
+                sourceFilters: []
+            };
         }
 
         async save() {
