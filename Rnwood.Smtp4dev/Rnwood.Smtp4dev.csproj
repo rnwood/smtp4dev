@@ -7,7 +7,7 @@
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
     <TargetLatestRuntimePatch>true</TargetLatestRuntimePatch>
     <RollForward>Major</RollForward>
-    <RuntimeIdentifiers>win-x64</RuntimeIdentifiers>
+    <RuntimeIdentifiers>win-x64;linux-x64;linux-musl-x64;win-arm64;linux-arm;any</RuntimeIdentifiers>
     <IsPackable>true</IsPackable>
     <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
     <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
@@ -24,9 +24,6 @@
   <PropertyGroup Condition="'$(Configuration)'==''">
     <Configuration>Debug</Configuration>
   </PropertyGroup>
-<PropertyGroup>
-  <CreateRidSpecificToolPackages>false</CreateRidSpecificToolPackages>
-</PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Ardalis.GuardClauses" Version="5.0.0" />
     <PackageReference Include="AspNetCore.Authentication.Basic" Version="9.0.0" />
