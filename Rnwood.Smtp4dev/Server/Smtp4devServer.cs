@@ -578,6 +578,31 @@ namespace Rnwood.Smtp4dev.Server
         {
             if (serverOptions.CurrentValue.DeliverMessagesToUsersDefaultMailbox && messageSession.Authenticated && messageSession.AuthenticationCredentials is IAuthenticationCredentialsCanValidateWithPassword credentials)
             {
+                // Check header filters first - they take priority over user's default mailbox
+                bool headersNeededForUser = serverOptions.CurrentValue.Mailboxes.Any(m => m.HeaderFilters != null && m.HeaderFilters.Length > 0);
+                if (headersNeededForUser)
+                {
+                    var headerFilteredMailboxes = serverOptions.CurrentValue.Mailboxes
+                        .Where(m => m.HeaderFilters != null && m.HeaderFilters.Length > 0);
+
+                    if (headerFilteredMailboxes.Any())
+                    {
+                        var userMessageHeaders = await ParseMessageHeaders(message);
+                        var allMailboxes = serverOptions.CurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" } });
+
+                        foreach (var to in recipients)
+                        {
+                            var headerMatch = mailboxRouter.FindMailboxForRecipient(to, headerFilteredMailboxes, userMessageHeaders);
+                            if (headerMatch != null)
+                            {
+                                // Header filter matched - route all recipients to that mailbox
+                                return recipients.ToLookup(_ => headerMatch, recipient => recipient);
+                            }
+                        }
+                    }
+                }
+
+                // No header filter matched - fall back to user's default mailbox
                 UserOptions userOptions = serverOptions.CurrentValue.Users.FirstOrDefault(u => string.Equals(u.Username, credentials.Username, StringComparison.OrdinalIgnoreCase));
                 MailboxOptions defaultMailboxOptions = new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" };
                 MailboxOptions mailboxOption = defaultMailboxOptions;
