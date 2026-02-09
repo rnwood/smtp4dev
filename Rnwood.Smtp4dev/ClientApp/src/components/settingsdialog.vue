@@ -424,28 +424,28 @@
 
                         <div v-for="(mailbox, index) in server.mailboxes" :key="index" style="margin-bottom: 20px; padding: 15px; border: 2px solid #e4e7ed; border-radius: 8px; background-color: #fafafa; position: relative;">
                             <el-form-item :prop="'server.mailboxes[' + index + ']'" :rules="{validator: checkMailboxNameUnique}">
-                                <!-- Mailbox Header with Order Controls and Delete Button -->
-                                <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #dcdfe6;">
-                                    <div style="display: flex; gap: 10px; align-items: center;">
-                                        <el-button @click="server.mailboxes.splice(index, 1); server.mailboxes.splice(index-1, 0, mailbox);" :disabled="server.lockedSettings.mailboxes || index==0" title="Move up">
-                                            <el-icon><ArrowUp /></el-icon>
-                                        </el-button>
-                                        <el-button @click="server.mailboxes.splice(index, 1); server.mailboxes.splice(index+1, 0, mailbox) " :disabled="server.lockedSettings.mailboxes || index==server.mailboxes.length-1" title="Move down">
-                                            <el-icon><ArrowDown /></el-icon>
-                                        </el-button>
-                                        <span style="font-weight: bold; font-size: 16px;">Mailbox #{{ index + 1 }}</span>
-                                    </div>
-                                    <el-button type="danger" title="Delete this entire mailbox" @click="server.mailboxes.splice(index, 1)" :disabled="server.lockedSettings.mailboxes">
-                                        <el-icon><Delete /></el-icon> Delete Mailbox
+                                <!-- Mailbox Header with Order Controls -->
+                                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #dcdfe6;">
+                                    <el-button @click="server.mailboxes.splice(index, 1); server.mailboxes.splice(index-1, 0, mailbox);" :disabled="server.lockedSettings.mailboxes || index==0" title="Move up">
+                                        <el-icon><ArrowUp /></el-icon>
                                     </el-button>
+                                    <el-button @click="server.mailboxes.splice(index, 1); server.mailboxes.splice(index+1, 0, mailbox) " :disabled="server.lockedSettings.mailboxes || index==server.mailboxes.length-1" title="Move down">
+                                        <el-icon><ArrowDown /></el-icon>
+                                    </el-button>
+                                    <span style="font-weight: bold; font-size: 16px;">Mailbox #{{ index + 1 }}</span>
                                 </div>
 
-                                <!-- Basic Mailbox Configuration -->
-                                <div style="margin-bottom: 15px;">
-                                    <el-form-item label="Name" :prop="'server.mailboxes[' + index + '].name'" :rules="{required: true, message: 'Required'}">
+                                <!-- Name Field with Delete Button -->
+                                <div style="display: flex; gap: 15px; align-items: flex-start; margin-bottom: 15px;">
+                                    <el-form-item label="Name" :prop="'server.mailboxes[' + index + '].name'" :rules="{required: true, message: 'Required'}" style="flex: 1; margin-bottom: 0;">
                                         <el-input v-model="mailbox.name" :disabled="server.lockedSettings.mailboxes" placeholder="e.g., Sales, Support">
                                         </el-input>
                                     </el-form-item>
+                                    <div style="display: flex; align-items: flex-end; padding-bottom: 0;">
+                                        <el-button type="danger" title="Delete this entire mailbox" @click="server.mailboxes.splice(index, 1)" :disabled="server.lockedSettings.mailboxes">
+                                            <el-icon><Delete /></el-icon> Delete
+                                        </el-button>
+                                    </div>
                                 </div>
                                 
                                 <!-- Responsive Filters Grid: Recipients | Headers | Source -->
