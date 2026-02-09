@@ -493,13 +493,45 @@
                                         <el-icon><Plus /></el-icon> Add Header Filter
                                     </el-button>
                                 </div>
+                                
+                                <!-- Source Filters Section -->
+                                <div style="margin-top: 20px;">
+                                    <div style="font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
+                                        <el-icon><Connection /></el-icon>
+                                        Source Filters (optional)
+                                    </div>
+                                    
+                                    <div v-if="!mailbox.sourceFilters || mailbox.sourceFilters.length === 0" style="color: #909399; font-style: italic; margin-bottom: 10px; padding: 10px; background-color: #f5f7fa; border-radius: 4px;">
+                                        No source filters configured. Messages from any source will be accepted.
+                                    </div>
+                                    
+                                    <!-- Each Source Filter -->
+                                    <div v-for="(filter, filterIndex) in mailbox.sourceFilters" :key="'source-' + filterIndex" style="margin-bottom: 12px; padding: 12px; border: 1px solid #67c23a; border-left-width: 4px; border-radius: 4px; background-color: #f0f9ff;">
+                                        <div style="display: flex; gap: 15px; align-items: flex-start;">
+                                            <div style="flex: 1;">
+                                                <el-form-item label="Pattern (Hostname or IP)" :prop="'server.mailboxes[' + index + '].sourceFilters[' + filterIndex + '].pattern'" :rules="{required: true, message: 'Required'}" style="margin-bottom: 8px;">
+                                                    <el-input v-model="filter.pattern" placeholder="e.g., legacy-stack.dev.example.org, 192.168.1.*, *.example.com" :disabled="server.lockedSettings.mailboxes">
+                                                    </el-input>
+                                                </el-form-item>
+                                            </div>
+                                            <div style="display: flex; align-items: flex-end; padding-bottom: 8px;">
+                                                <el-button type="warning" size="small" @click="mailbox.sourceFilters.splice(filterIndex, 1)" :disabled="server.lockedSettings.mailboxes" title="Remove this source filter">
+                                                    <el-icon><Close /></el-icon>
+                                                </el-button>
+                                            </div>
+                                        </div>
+                                        <div style="font-size: 11px; color: #606266; margin-top: 4px; padding-left: 4px;">
+                                            💡 Exact: <code>host.example.com</code> or <code>192.168.1.1</code> | Wildcard: <code>*.example.com</code> or <code>192.168.*</code> | Regex: <code>/pattern/</code>
+                                        </div>
+                                    </div>
+                                    
+                                    <el-button size="small" @click="addSourceFilter(mailbox)" :disabled="server.lockedSettings.mailboxes" style="margin-top: 8px;">
+                                        <el-icon><Plus /></el-icon> Add Source Filter
+                                    </el-button>
+                                </div>
                             </el-form-item>
                         </div>
-                        <el-button size="small" @click="server.mailboxes.splice(0, 0, {
-    name: '',
-    recipients: '',
-    headerFilters: []
-})" :disabled="server.lockedSettings.mailboxes">
+                        <el-button size="small" @click="server.mailboxes.splice(0, 0, createNewMailbox())" :disabled="server.lockedSettings.mailboxes">
                             <el-icon><Plus /></el-icon> New Mailbox
                         </el-button>
 
@@ -639,6 +671,24 @@
                 header: '',
                 pattern: ''
             });
+        }
+
+        addSourceFilter(mailbox: any) {
+            if (!mailbox.sourceFilters) {
+                mailbox.sourceFilters = [];
+            }
+            mailbox.sourceFilters.push({
+                pattern: ''
+            });
+        }
+
+        createNewMailbox() {
+            return {
+                name: '',
+                recipients: '',
+                headerFilters: [],
+                sourceFilters: []
+            };
         }
 
         async save() {

@@ -252,11 +252,154 @@ Any message with an `X-Antivirus` header (regardless of value) goes to "Scanned"
 ```
 Only messages to `@sales.com` with BOTH `X-Priority: high` (or `urgent`) AND `X-Department: sales` headers.
 
+### Source-Based Message Routing
+
+In addition to recipient and header-based routing, smtp4dev supports routing messages based on the source of the connection. This is useful when:
+- Multiple test environments send emails through the same smtp4dev instance
+- You want to compare outputs from different application stacks
+- Messages need to be stratified based on the sending host or IP address
+
+The source is determined from:
+1. **Client Hostname**: The hostname provided by the client during EHLO/HELO command
+2. **Client IP Address**: The IP address of the connecting client
+
+#### Source Filter Configuration
+
+Add `SourceFilters` to any mailbox configuration:
+
+```json
+{
+  "ServerOptions": {
+    "Mailboxes": [
+      {
+        "Name": "Legacy Stack",
+        "Recipients": "*",
+        "SourceFilters": [
+          {
+            "Pattern": "legacy-stack.dev.example.org"
+          }
+        ]
+      },
+      {
+        "Name": "Modern Stack",
+        "Recipients": "*",
+        "SourceFilters": [
+          {
+            "Pattern": "modern-stack.dev.example.org"
+          }
+        ]
+      }
+    ]
+  }
+}
+```
+
+**How it works:**
+1. **All filters must match**: If multiple `SourceFilters` are specified, ALL must match for the message to be routed to that mailbox
+2. **Source filters checked first**: Before checking header filters and recipient patterns, source filters are evaluated
+3. **Matches hostname or IP**: The pattern is matched against both the client hostname and IP address (first successful match wins)
+4. **First match wins**: Once a mailbox matches (source + headers + recipients), no other mailboxes are checked
+
+#### Source Pattern Types
+
+**Exact Match (hostname or IP):**
+```json
+{ "Pattern": "legacy-stack.dev.example.org" }
+{ "Pattern": "192.168.1.100" }
+```
+
+**Wildcard Match:**
+```json
+{ "Pattern": "*.dev.example.org" }
+{ "Pattern": "192.168.1.*" }
+{ "Pattern": "*-stack.dev.example.org" }
+```
+
+**Regular Expression (case-insensitive, surround with `/`):**
+```json
+{ "Pattern": "/^(legacy|modern)-stack\\.dev\\.example\\.org$/" }
+{ "Pattern": "/^192\\.168\\.(1|2)\\..*$/" }
+```
+
+#### Example Scenarios
+
+**Route by Test Environment:**
+```json
+{
+  "Mailboxes": [
+    {
+      "Name": "Legacy Stack",
+      "Recipients": "*",
+      "SourceFilters": [
+        { "Pattern": "legacy-stack.dev.example.org" }
+      ]
+    },
+    {
+      "Name": "Modern Stack (DB v15)",
+      "Recipients": "*",
+      "SourceFilters": [
+        { "Pattern": "p15.dev.example.org" }
+      ]
+    },
+    {
+      "Name": "Modern Stack (DB v18)",
+      "Recipients": "*",
+      "SourceFilters": [
+        { "Pattern": "p18.dev.example.org" }
+      ]
+    }
+  ]
+}
+```
+Messages from `legacy-stack.dev.example.org` go to "Legacy Stack" mailbox, messages from `p15.dev.example.org` go to "Modern Stack (DB v15)" mailbox, etc.
+
+**Route by IP Address Range:**
+```json
+{
+  "Mailboxes": [
+    {
+      "Name": "Production Network",
+      "Recipients": "*",
+      "SourceFilters": [
+        { "Pattern": "10.0.1.*" }
+      ]
+    },
+    {
+      "Name": "Staging Network",
+      "Recipients": "*",
+      "SourceFilters": [
+        { "Pattern": "10.0.2.*" }
+      ]
+    }
+  ]
+}
+```
+Messages from IPs in `10.0.1.*` range go to "Production Network" mailbox, messages from `10.0.2.*` go to "Staging Network" mailbox.
+
+**Combine Source, Header, and Recipient Filters:**
+```json
+{
+  "Mailboxes": [
+    {
+      "Name": "Critical-Legacy-Sales",
+      "Recipients": "*@sales.com",
+      "SourceFilters": [
+        { "Pattern": "legacy-stack.dev.example.org" }
+      ],
+      "HeaderFilters": [
+        { "Header": "X-Priority", "Pattern": "high" }
+      ]
+    }
+  ]
+}
+```
+Only messages from `legacy-stack.dev.example.org` to `@sales.com` with `X-Priority: high` header.
+
 ### Important Notes
 
 1. **No Message Duplication**: Due to "first match wins" logic, each recipient goes to exactly one mailbox
 
-2. **Case Sensitivity**: All pattern matching (recipients and headers) is case-insensitive
+2. **Case Sensitivity**: All pattern matching (recipients, headers, and source) is case-insensitive
 
 3. **Multiple Recipients**: When an email has multiple recipients, each recipient is processed independently and may go to different mailboxes
 
@@ -266,11 +409,15 @@ Only messages to `@sales.com` with BOTH `X-Priority: high` (or `urgent`) AND `X-
 
 6. **Header Filter Performance**: Headers are only parsed when at least one mailbox has `HeaderFilters` configured
 
+7. **Filter Evaluation Order**: Source filters → Header filters → Recipient patterns (all must match for a mailbox to be selected)
+
 ### Troubleshooting
 
 **Messages not appearing in expected mailbox**: Verify the order of mailboxes - earlier mailboxes take precedence over later ones due to "first match wins" logic.
 
 **Regex not working**: Ensure the pattern is surrounded by forward slashes (`/pattern/`) and test the regex with an online regex tester.
+
+**Source filter not matching**: Check the SMTP logs to see what hostname/IP the client is using. Remember that patterns match against both hostname and IP address.
 
 ## Deliver to Stdout Feature
 

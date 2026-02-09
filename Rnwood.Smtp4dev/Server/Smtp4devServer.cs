@@ -607,13 +607,17 @@ namespace Rnwood.Smtp4dev.Server
                 messageHeaders = await ParseMessageHeaders(message);
             }
 
+            // Extract source information from the session
+            string clientHostname = messageSession.ClientName;
+            string clientAddress = messageSession.ClientAddress.ToString();
+
             // Use the router to find mailboxes for each recipient
             var mailboxes = serverOptions.CurrentValue.Mailboxes.Concat(new[] { new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" } });
             
             List<(MailboxOptions,string)> targetMailboxesWithMatchedRecipient = new List<(MailboxOptions, string)>();
             foreach (var to in recipients)
             {
-                var targetMailbox = mailboxRouter.FindMailboxForRecipient(to, mailboxes, messageHeaders);
+                var targetMailbox = mailboxRouter.FindMailboxForRecipient(to, mailboxes, clientHostname, clientAddress, messageHeaders);
 
                 if (targetMailbox != null)
                 {
