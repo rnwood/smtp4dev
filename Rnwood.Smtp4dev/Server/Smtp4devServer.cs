@@ -576,16 +576,30 @@ namespace Rnwood.Smtp4dev.Server
 
         private async Task<ILookup<MailboxOptions, string>> GetTargetMailboxes(IEnumerable<string> recipients, ISession messageSession, IMessage message)
         {
-            if (serverOptions.CurrentValue.DeliverMessagesToUsersDefaultMailbox && messageSession.Authenticated && messageSession.AuthenticationCredentials is IAuthenticationCredentialsCanValidateWithPassword credentials)
+            // Extract authenticated user information
+            string authenticatedUsername = null;
+            string userDefaultMailbox = null;
+            
+            if (messageSession.Authenticated && messageSession.AuthenticationCredentials is IAuthenticationCredentialsCanValidateWithPassword credentials)
             {
-                UserOptions userOptions = serverOptions.CurrentValue.Users.FirstOrDefault(u => string.Equals(u.Username, credentials.Username, StringComparison.OrdinalIgnoreCase));
+                authenticatedUsername = credentials.Username;
+                UserOptions userOptions = serverOptions.CurrentValue.Users.FirstOrDefault(u => string.Equals(u.Username, authenticatedUsername, StringComparison.OrdinalIgnoreCase));
+                
+                if (userOptions != null)
+                {
+                    userDefaultMailbox = userOptions.DefaultMailbox;
+                }
+            }
+            
+            // Legacy support: If DeliverMessagesToUsersDefaultMailbox is enabled and user is authenticated,
+            // route all messages to user's default mailbox (bypassing all other routing rules)
+            if (serverOptions.CurrentValue.DeliverMessagesToUsersDefaultMailbox && !string.IsNullOrWhiteSpace(authenticatedUsername))
+            {
                 MailboxOptions defaultMailboxOptions = new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" };
                 MailboxOptions mailboxOption = defaultMailboxOptions;
 
-                if (userOptions != null)
+                if (!string.IsNullOrWhiteSpace(userDefaultMailbox))
                 {
-
-                    String userDefaultMailbox = userOptions.DefaultMailbox;
                     mailboxOption = serverOptions.CurrentValue.Mailboxes.FirstOrDefault(m => string.Equals(m.Name, userDefaultMailbox, StringComparison.OrdinalIgnoreCase));
 
                     if (mailboxOption == null)
@@ -595,7 +609,7 @@ namespace Rnwood.Smtp4dev.Server
                     }
                 }
 
-                    return recipients.ToLookup(_ => mailboxOption, recipient => recipient);
+                return recipients.ToLookup(_ => mailboxOption, recipient => recipient);
             }
 
             // Parse message headers for header-based filtering
@@ -617,7 +631,7 @@ namespace Rnwood.Smtp4dev.Server
             List<(MailboxOptions,string)> targetMailboxesWithMatchedRecipient = new List<(MailboxOptions, string)>();
             foreach (var to in recipients)
             {
-                var targetMailbox = mailboxRouter.FindMailboxForRecipient(to, mailboxes, clientHostname, clientAddress, messageHeaders);
+                var targetMailbox = mailboxRouter.FindMailboxForRecipient(to, mailboxes, clientHostname, clientAddress, messageHeaders, authenticatedUsername, userDefaultMailbox);
 
                 if (targetMailbox != null)
                 {
