@@ -72,6 +72,9 @@ smtp4dev supports multiple virtual mailboxes to organize incoming messages. This
 - `/.*@(sales|marketing)\.com$/` - Addresses ending with @sales.com or @marketing.com
 - `/^(admin|root)@.*$/` - Addresses starting with admin@ or root@
 
+**Special Keywords**:
+- `AuthenticatedUsers` - Routes messages from authenticated SMTP users to their configured `DefaultMailbox`
+
 ### Common Mailbox Scenarios
 
 #### Example: Department-Based Routing
@@ -395,6 +398,67 @@ Messages from IPs in `10.0.1.*` range go to "Production Network" mailbox, messag
 ```
 Only messages from `legacy-stack.dev.example.org` to `@sales.com` with `X-Priority: high` header.
 
+#### Example: Authenticated User Routing
+
+Use the `AuthenticatedUsers` recipient pattern to route messages from authenticated SMTP users to their configured mailbox, while still allowing other routing rules (like header filters) to take precedence.
+
+**Setup Users:**
+```json
+{
+  "ServerOptions": {
+    "Users": [
+      {
+        "Username": "USOSapi",
+        "Password": "secret",
+        "DefaultMailbox": "USOSapi"
+      }
+    ]
+  }
+}
+```
+
+**Scenario 1: Simple Authenticated User Routing**
+```json
+{
+  "Mailboxes": [
+    {
+      "Name": "USOSapi",
+      "Recipients": "AuthenticatedUsers"
+    }
+  ]
+}
+```
+All messages from authenticated users go to their configured `DefaultMailbox` (e.g., user `USOSapi` → mailbox `USOSapi`).
+
+**Scenario 2: Authenticated Users with Header-Based Override**
+
+This solves the common use case where multiple applications share SMTP credentials but need different routing based on custom headers:
+
+```json
+{
+  "Mailboxes": [
+    {
+      "Name": "SRS",
+      "Recipients": "*",
+      "HeaderFilters": [
+        { "Header": "X-Application", "Pattern": "srs" }
+      ]
+    },
+    {
+      "Name": "USOSapi",
+      "Recipients": "AuthenticatedUsers"
+    }
+  ]
+}
+```
+
+With user `USOSapi` configured with `DefaultMailbox: "USOSapi"`:
+- Messages **with** `X-Application: srs` header → **SRS** mailbox (even from authenticated user `USOSapi`)
+- Messages from `USOSapi` **without** that header → **USOSapi** mailbox
+- Messages from non-authenticated users → **Default** mailbox
+
+**Order matters!** Place specific routing rules (header filters, recipient patterns) before the `AuthenticatedUsers` rule to give them priority.
+
 ### Important Notes
 
 1. **No Message Duplication**: Due to "first match wins" logic, each recipient goes to exactly one mailbox
@@ -403,7 +467,7 @@ Only messages from `legacy-stack.dev.example.org` to `@sales.com` with `X-Priori
 
 3. **Multiple Recipients**: When an email has multiple recipients, each recipient is processed independently and may go to different mailboxes
 
-4. **Authenticated Users**: If `DeliverMessagesToUsersDefaultMailbox` is enabled and users are authenticated, messages go to the user's configured default mailbox instead of following recipient patterns
+4. **Authenticated Users (DEPRECATED)**: The `DeliverMessagesToUsersDefaultMailbox` setting is deprecated. Use a mailbox with `Recipients="AuthenticatedUsers"` instead for better flexibility. The old setting bypasses ALL routing rules (including header filters), while the new pattern allows you to position authenticated user routing anywhere in the mailbox order.
 
 5. **Performance**: Wildcard patterns are generally faster than regular expressions for simple matching
 
