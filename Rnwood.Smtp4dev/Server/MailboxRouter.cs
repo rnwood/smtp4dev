@@ -91,14 +91,14 @@ namespace Rnwood.Smtp4dev.Server
         }
 
         /// <summary>
-        /// Checks if a recipient matches the recipient pattern(s) of a mailbox.
+        /// Checks if a recipient matches the recipient pattern(s) of a mailbox, or if special patterns apply.
         /// </summary>
         /// <param name="recipient">The recipient email address</param>
         /// <param name="recipientPatterns">Comma-separated patterns (glob or regex), or special keyword "AuthenticatedUsers"</param>
-        /// <param name="authenticatedUsername">Username of authenticated user, or null if not authenticated</param>
+        /// <param name="authenticatedUsername">Username of authenticated user who sent the message, or null if not authenticated</param>
         /// <param name="userDefaultMailbox">Default mailbox name for the authenticated user, or null if not applicable</param>
-        /// <param name="mailbox">The mailbox being tested (used to match against user's default mailbox)</param>
-        /// <returns>True if the recipient matches any pattern</returns>
+        /// <param name="mailbox">The mailbox being tested (used to match against user's default mailbox for AuthenticatedUsers pattern)</param>
+        /// <returns>True if the recipient matches any pattern, or if AuthenticatedUsers pattern applies</returns>
         public bool MatchesRecipientPattern(string recipient, string recipientPatterns, string authenticatedUsername = null, string userDefaultMailbox = null, MailboxOptions mailbox = null)
         {
             if (string.IsNullOrWhiteSpace(recipientPatterns))
@@ -109,9 +109,11 @@ namespace Rnwood.Smtp4dev.Server
             foreach (var recipRule in recipientPatterns.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries))
             {
                 // Check for special "AuthenticatedUsers" pattern
+                // This matches when the SENDER is authenticated (not based on recipient)
                 if (string.Equals(recipRule, MailboxOptions.AUTHENTICATED_USERS_PATTERN, StringComparison.OrdinalIgnoreCase))
                 {
                     // Match if user is authenticated and this mailbox is the user's default mailbox
+                    // The recipient address doesn't matter - we're routing based on who SENT the message
                     if (!string.IsNullOrWhiteSpace(authenticatedUsername) && 
                         !string.IsNullOrWhiteSpace(userDefaultMailbox) &&
                         mailbox != null &&
