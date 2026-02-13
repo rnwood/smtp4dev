@@ -409,22 +409,10 @@
                     </el-tab-pane>
                     <el-tab-pane label="Mailboxes">
 
-                        <el-form-item label="Deliver messages to sending user's default mailbox (DEPRECATED)" prop="server.deliverMessagesToUsersDefaultMailbox">
+                        <el-form-item label="Deliver messages to sending user's default mailbox" prop="server.deliverMessagesToUsersDefaultMailbox">
                             <el-icon v-if="server.lockedSettings.deliverMessagesToUsersDefaultMailbox" :title="`Locked: ${server.lockedSettings.deliverMessagesToUsersDefaultMailbox}`"><Lock /></el-icon>
 
                             <el-switch v-model="server.deliverMessagesToUsersDefaultMailbox" :disabled="server.lockedSettings.deliverMessagesToUsersDefaultMailbox" />
-                            
-                            <div style="margin-top: 10px; padding: 10px; background-color: #fff3cd; border-left: 4px solid #ffc107; border-radius: 4px;">
-                                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 6px;">
-                                    <el-icon color="#ff9800" size="18"><Warning /></el-icon>
-                                    <span style="font-weight: bold; color: #856404;">Deprecated Feature</span>
-                                </div>
-                                <div style="color: #856404; font-size: 13px; line-height: 1.5;">
-                                    This setting is deprecated and will be removed in a future version.<br/>
-                                    For better flexibility, use a mailbox with <code style="background: #fff; padding: 2px 6px; border-radius: 3px;">Recipients="AuthenticatedUsers"</code> instead.<br/>
-                                    This allows you to position authenticated user routing in any order relative to other mailbox rules (including header filters).
-                                </div>
-                            </div>
                         </el-form-item>
 
                         <el-form-item>

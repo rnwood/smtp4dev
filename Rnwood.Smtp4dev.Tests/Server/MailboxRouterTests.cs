@@ -695,87 +695,25 @@ namespace Rnwood.Smtp4dev.Tests.Server
 
         #endregion
         
-        #region AuthenticatedUsers Pattern Tests
+        #region AuthenticatedUsers Filter Tests
         
         [Fact]
-        public void MatchesRecipientPattern_AuthenticatedUsers_MatchesWhenUserAuthenticated()
+        public void FindMailboxForRecipient_AuthenticatedUsers_SingleUser_Matches()
         {
-            // Test that AuthenticatedUsers pattern matches when user is authenticated
-            // and the mailbox name matches the user's default mailbox
-            var mailbox = new MailboxOptions { Name = "UserMailbox", Recipients = "AuthenticatedUsers" };
-            
-            bool result = router.MatchesRecipientPattern(
-                "anyone@example.com",
-                "AuthenticatedUsers",
-                authenticatedUsername: "testuser",
-                userDefaultMailbox: "UserMailbox",
-                mailbox: mailbox);
-            
-            Assert.True(result);
-        }
-        
-        [Fact]
-        public void MatchesRecipientPattern_AuthenticatedUsers_NoMatchWhenNotAuthenticated()
-        {
-            // Test that AuthenticatedUsers pattern doesn't match when user is not authenticated
-            var mailbox = new MailboxOptions { Name = "UserMailbox", Recipients = "AuthenticatedUsers" };
-            
-            bool result = router.MatchesRecipientPattern(
-                "anyone@example.com",
-                "AuthenticatedUsers",
-                authenticatedUsername: null,
-                userDefaultMailbox: null,
-                mailbox: mailbox);
-            
-            Assert.False(result);
-        }
-        
-        [Fact]
-        public void MatchesRecipientPattern_AuthenticatedUsers_NoMatchWhenWrongMailbox()
-        {
-            // Test that AuthenticatedUsers pattern doesn't match when mailbox name 
-            // doesn't match the user's default mailbox
-            var mailbox = new MailboxOptions { Name = "WrongMailbox", Recipients = "AuthenticatedUsers" };
-            
-            bool result = router.MatchesRecipientPattern(
-                "anyone@example.com",
-                "AuthenticatedUsers",
-                authenticatedUsername: "testuser",
-                userDefaultMailbox: "UserMailbox",
-                mailbox: mailbox);
-            
-            Assert.False(result);
-        }
-        
-        [Fact]
-        public void MatchesRecipientPattern_AuthenticatedUsers_CaseInsensitive()
-        {
-            // Test that AuthenticatedUsers pattern is case-insensitive
-            var mailbox = new MailboxOptions { Name = "UserMailbox", Recipients = "authenticatedusers" };
-            
-            bool result = router.MatchesRecipientPattern(
-                "anyone@example.com",
-                "authenticatedusers",
-                authenticatedUsername: "testuser",
-                userDefaultMailbox: "usermailbox",
-                mailbox: mailbox);
-            
-            Assert.True(result);
-        }
-        
-        [Fact]
-        public void FindMailboxForRecipient_AuthenticatedUsers_BeforeDefaultMailbox()
-        {
-            // Test that authenticated user routing works in the mailbox order
             var mailboxes = new[]
             {
-                new MailboxOptions { Name = "UserMailbox", Recipients = "AuthenticatedUsers" },
+                new MailboxOptions 
+                { 
+                    Name = "UserMailbox", 
+                    Recipients = "*",
+                    AuthenticatedUsers = new[] { "testuser" }
+                },
                 new MailboxOptions { Name = "Default", Recipients = "*" }
             };
             
-            // Authenticated user should go to UserMailbox
+            // Authenticated user should match
             var result = router.FindMailboxForRecipient(
-                "test@example.com",
+                "anyone@example.com",
                 mailboxes,
                 "client.example.com",
                 "192.168.1.1",
@@ -784,9 +722,78 @@ namespace Rnwood.Smtp4dev.Tests.Server
                 userDefaultMailbox: "UserMailbox");
             
             Assert.Equal("UserMailbox", result.Name);
+        }
+        
+        [Fact]
+        public void FindMailboxForRecipient_AuthenticatedUsers_SingleUser_NoMatch()
+        {
+            var mailboxes = new[]
+            {
+                new MailboxOptions 
+                { 
+                    Name = "UserMailbox", 
+                    Recipients = "*",
+                    AuthenticatedUsers = new[] { "otheruser" }
+                },
+                new MailboxOptions { Name = "Default", Recipients = "*" }
+            };
             
-            // Non-authenticated user should go to Default
-            result = router.FindMailboxForRecipient(
+            // Different authenticated user should not match
+            var result = router.FindMailboxForRecipient(
+                "anyone@example.com",
+                mailboxes,
+                "client.example.com",
+                "192.168.1.1",
+                null,
+                authenticatedUsername: "testuser",
+                userDefaultMailbox: "UserMailbox");
+            
+            Assert.Equal("Default", result.Name);
+        }
+        
+        [Fact]
+        public void FindMailboxForRecipient_AuthenticatedUsers_MultipleUsers_Matches()
+        {
+            var mailboxes = new[]
+            {
+                new MailboxOptions 
+                { 
+                    Name = "TeamMailbox", 
+                    Recipients = "*",
+                    AuthenticatedUsers = new[] { "alice", "bob", "charlie" }
+                },
+                new MailboxOptions { Name = "Default", Recipients = "*" }
+            };
+            
+            // Should match any user in the list
+            var result = router.FindMailboxForRecipient(
+                "test@example.com",
+                mailboxes,
+                "client.example.com",
+                "192.168.1.1",
+                null,
+                authenticatedUsername: "bob",
+                userDefaultMailbox: "TeamMailbox");
+            
+            Assert.Equal("TeamMailbox", result.Name);
+        }
+        
+        [Fact]
+        public void FindMailboxForRecipient_AuthenticatedUsers_NotAuthenticated_NoMatch()
+        {
+            var mailboxes = new[]
+            {
+                new MailboxOptions 
+                { 
+                    Name = "UserMailbox", 
+                    Recipients = "*",
+                    AuthenticatedUsers = new[] { "testuser" }
+                },
+                new MailboxOptions { Name = "Default", Recipients = "*" }
+            };
+            
+            // Non-authenticated user should not match
+            var result = router.FindMailboxForRecipient(
                 "test@example.com",
                 mailboxes,
                 "client.example.com",
@@ -799,10 +806,8 @@ namespace Rnwood.Smtp4dev.Tests.Server
         }
         
         [Fact]
-        public void FindMailboxForRecipient_HeaderFilterTakesPrecedenceOverAuthenticatedUsers()
+        public void FindMailboxForRecipient_AuthenticatedUsers_WithHeaderFilter_AllMustMatch()
         {
-            // Test that header filters are checked before AuthenticatedUsers pattern
-            // This is the key use case from the issue
             var headers = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase)
             {
                 { "X-Application", "srs" }
@@ -819,11 +824,16 @@ namespace Rnwood.Smtp4dev.Tests.Server
                         new HeaderFilterOptions { Header = "X-Application", Pattern = "srs" }
                     }
                 },
-                new MailboxOptions { Name = "USOSapi", Recipients = "AuthenticatedUsers" },
+                new MailboxOptions 
+                { 
+                    Name = "USOSapi", 
+                    Recipients = "*",
+                    AuthenticatedUsers = new[] { "USOSapi" }
+                },
                 new MailboxOptions { Name = "Default", Recipients = "*" }
             };
             
-            // Message WITH header from authenticated user should go to SRS (header filter wins)
+            // Message WITH header from authenticated user should go to SRS (header filter wins due to order)
             var result = router.FindMailboxForRecipient(
                 "test@example.com",
                 mailboxes,
@@ -846,18 +856,79 @@ namespace Rnwood.Smtp4dev.Tests.Server
                 userDefaultMailbox: "USOSapi");
             
             Assert.Equal("USOSapi", result.Name);
+        }
+        
+        [Fact]
+        public void FindMailboxForRecipient_AuthenticatedUsers_CaseInsensitive()
+        {
+            var mailboxes = new[]
+            {
+                new MailboxOptions 
+                { 
+                    Name = "UserMailbox", 
+                    Recipients = "*",
+                    AuthenticatedUsers = new[] { "TestUser" }
+                },
+                new MailboxOptions { Name = "Default", Recipients = "*" }
+            };
             
-            // Message WITHOUT header from non-authenticated user should go to Default
-            result = router.FindMailboxForRecipient(
+            // Should match case-insensitively
+            var result = router.FindMailboxForRecipient(
                 "test@example.com",
                 mailboxes,
                 "client.example.com",
                 "192.168.1.1",
-                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase),
-                authenticatedUsername: null,
-                userDefaultMailbox: null);
+                null,
+                authenticatedUsername: "testuser",
+                userDefaultMailbox: "usermailbox");
             
-            Assert.Equal("Default", result.Name);
+            Assert.Equal("UserMailbox", result.Name);
+        }
+        
+        [Fact]
+        public void FindMailboxForRecipient_SameMailboxName_MultipleRules()
+        {
+            // Test that mailbox names can appear multiple times with different rules
+            var mailboxes = new[]
+            {
+                new MailboxOptions 
+                { 
+                    Name = "TeamMailbox", 
+                    Recipients = "*@team.com",
+                    AuthenticatedUsers = new[] { "alice" }
+                },
+                new MailboxOptions 
+                { 
+                    Name = "TeamMailbox", 
+                    Recipients = "*",
+                    AuthenticatedUsers = new[] { "bob" }
+                },
+                new MailboxOptions { Name = "Default", Recipients = "*" }
+            };
+            
+            // Alice with team.com recipient
+            var result = router.FindMailboxForRecipient(
+                "someone@team.com",
+                mailboxes,
+                "client.example.com",
+                "192.168.1.1",
+                null,
+                authenticatedUsername: "alice",
+                userDefaultMailbox: "TeamMailbox");
+            
+            Assert.Equal("TeamMailbox", result.Name);
+            
+            // Bob with any recipient
+            result = router.FindMailboxForRecipient(
+                "anyone@anywhere.com",
+                mailboxes,
+                "client.example.com",
+                "192.168.1.1",
+                null,
+                authenticatedUsername: "bob",
+                userDefaultMailbox: "TeamMailbox");
+            
+            Assert.Equal("TeamMailbox", result.Name);
         }
         
         #endregion

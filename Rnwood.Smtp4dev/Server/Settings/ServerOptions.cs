@@ -70,13 +70,13 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public bool WebAuthenticationRequired { get; set; } = false;
         
         /// <summary>
-        /// DEPRECATED: Use a mailbox with Recipients="AuthenticatedUsers" instead for better flexibility.
+        /// DEPRECATED: Use mailbox configuration with AuthenticatedUsers property instead for better flexibility.
         /// When true, authenticated SMTP sessions will deliver messages to the user's DefaultMailbox, 
         /// bypassing all mailbox routing rules including header filters.
         /// For more flexible routing that allows header-based filtering even for authenticated users,
-        /// create a mailbox with Recipients="AuthenticatedUsers" and position it in the desired order.
+        /// configure mailboxes with the AuthenticatedUsers property and position them in the desired order.
         /// </summary>
-        [Obsolete("Use a mailbox with Recipients=\"AuthenticatedUsers\" instead for better flexibility")]
+        [Obsolete("Use mailbox configuration with AuthenticatedUsers property instead for better flexibility")]
         public bool DeliverMessagesToUsersDefaultMailbox { get; set; } = true;
 
         public string SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; } = "PLAIN,LOGIN,CRAM-MD5";
