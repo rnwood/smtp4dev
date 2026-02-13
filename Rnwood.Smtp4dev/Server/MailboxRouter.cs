@@ -21,13 +21,17 @@ namespace Rnwood.Smtp4dev.Server
         /// <param name="clientHostname">Client hostname from EHLO/HELO command</param>
         /// <param name="clientAddress">Client IP address</param>
         /// <param name="messageHeaders">Parsed message headers (case-insensitive dictionary)</param>
+        /// <param name="authenticatedUsername">Username of the authenticated user who sent the message, or null if not authenticated</param>
+        /// <param name="userDefaultMailbox">Default mailbox name for the authenticated user, or null if not applicable</param>
         /// <returns>The matching mailbox or null if no match found</returns>
         public MailboxOptions FindMailboxForRecipient(
             string recipient, 
             IEnumerable<MailboxOptions> mailboxes,
             string clientHostname,
             string clientAddress,
-            Dictionary<string, string> messageHeaders)
+            Dictionary<string, string> messageHeaders,
+            string authenticatedUsername = null,
+            string userDefaultMailbox = null)
         {
             if (string.IsNullOrWhiteSpace(recipient))
             {
@@ -36,7 +40,24 @@ namespace Rnwood.Smtp4dev.Server
 
             foreach (var mailbox in mailboxes)
             {
-                // Check source filters first (if any)
+                // Check authenticated users filter first (if any)
+                if (mailbox.AuthenticatedUsers != null && mailbox.AuthenticatedUsers.Length > 0)
+                {
+                    // Only match if the user is authenticated and this mailbox is the user's default mailbox
+                    // AND the authenticated username is in the AuthenticatedUsers list
+                    bool isAuthenticatedUserMatch = !string.IsNullOrWhiteSpace(authenticatedUsername) &&
+                                                    !string.IsNullOrWhiteSpace(userDefaultMailbox) &&
+                                                    string.Equals(mailbox.Name, userDefaultMailbox, StringComparison.OrdinalIgnoreCase) &&
+                                                    mailbox.AuthenticatedUsers.Any(u => string.Equals(u, authenticatedUsername, StringComparison.OrdinalIgnoreCase));
+                    
+                    if (!isAuthenticatedUserMatch)
+                    {
+                        continue; // Skip this mailbox if authenticated users filter doesn't match
+                    }
+                    // If it matches, continue to check other filters below
+                }
+                
+                // Check source filters next (if any)
                 if (mailbox.SourceFilters != null && mailbox.SourceFilters.Length > 0)
                 {
                     bool allSourceFiltersMatch = true;

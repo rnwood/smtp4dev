@@ -54,6 +54,15 @@ namespace Rnwood.Smtp4dev.Server.Settings
         /// </summary>
         public SourceFilterOptions[] SourceFilters { get; set; }
 
+        /// <summary>
+        /// Optional filter to route messages from specific authenticated users to this mailbox.
+        /// Accepts a single username or an array of usernames.
+        /// If specified, messages from these authenticated users will be routed to this mailbox
+        /// (matched against the user's DefaultMailbox setting).
+        /// This filter is checked before source, header, and recipient filters.
+        /// </summary>
+        public string[] AuthenticatedUsers { get; set; }
+
         internal const string DEFAULTNAME = "Default";
     }
 
