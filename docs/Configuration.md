@@ -60,6 +60,29 @@ smtp4dev supports multiple virtual mailboxes to organize incoming messages. This
 3. **Default Mailbox**: A default mailbox with `Recipients="*"` (catch-all) is automatically added as the last mailbox
 4. **Single Delivery**: Each message is delivered only once to each mailbox
 5. **No Duplication**: Due to "first match wins" logic, messages go to exactly one mailbox per recipient
+6. **Multiple Rules Per Mailbox**: The same mailbox name can appear multiple times with different filter combinations, enabling complex routing scenarios while maintaining a single mailbox instance
+
+### Mailbox Filters
+
+Mailboxes support multiple types of filters that can be combined:
+
+**AuthenticatedUsers** (checked first):
+- Matches messages from specific authenticated users
+- Accepts an array of usernames or a single username string
+- Messages are routed to the user's configured `DefaultMailbox`
+- Example: `"AuthenticatedUsers": ["alice", "bob"]` or `"AuthenticatedUsers": "alice"`
+
+**SourceFilters** (checked second):
+- Matches based on client hostname or IP address
+- Supports wildcards and regex patterns
+
+**HeaderFilters** (checked third):
+- Matches based on message header values
+- All header filters must match for the mailbox to be selected
+
+**Recipients** (checked last):
+- Matches based on recipient email addresses
+- Supports wildcards and regex patterns
 
 ### Recipient Pattern Syntax
 
@@ -395,21 +418,130 @@ Messages from IPs in `10.0.1.*` range go to "Production Network" mailbox, messag
 ```
 Only messages from `legacy-stack.dev.example.org` to `@sales.com` with `X-Priority: high` header.
 
+### Authenticated User Routing
+
+The `AuthenticatedUsers` property enables routing messages based on who sent them (the authenticated user), rather than just the recipient address. This is useful when multiple applications share the same SMTP credentials but need different routing.
+
+#### Setup Users
+
+First, configure users with their default mailboxes:
+
+```json
+{
+  "ServerOptions": {
+    "Users": [
+      {
+        "Username": "USOSapi",
+        "Password": "secret",
+        "DefaultMailbox": "USOSapi"
+      },
+      {
+        "Username": "alice",
+        "Password": "secret",
+        "DefaultMailbox": "TeamMailbox"
+      }
+    ]
+  }
+}
+```
+
+#### Example: Simple Authenticated User Routing
+
+Route messages from specific authenticated users to their mailboxes:
+
+```json
+{
+  "Mailboxes": [
+    {
+      "Name": "USOSapi",
+      "Recipients": "*",
+      "AuthenticatedUsers": ["USOSapi"]
+    },
+    {
+      "Name": "TeamMailbox",
+      "Recipients": "*",
+      "AuthenticatedUsers": ["alice", "bob"]
+    }
+  ]
+}
+```
+
+- Messages from user `USOSapi` → `USOSapi` mailbox
+- Messages from users `alice` or `bob` → `TeamMailbox` mailbox  
+- Messages from non-authenticated users → `Default` mailbox
+
+#### Example: Authenticated Users with Header-Based Override
+
+This solves the common use case where multiple applications share SMTP credentials but need different routing based on custom headers:
+
+```json
+{
+  "Mailboxes": [
+    {
+      "Name": "SRS",
+      "Recipients": "*",
+      "HeaderFilters": [
+        { "Header": "X-Application", "Pattern": "srs" }
+      ]
+    },
+    {
+      "Name": "USOSapi",
+      "Recipients": "*",
+      "AuthenticatedUsers": ["USOSapi"]
+    }
+  ]
+}
+```
+
+With user `USOSapi` configured with `DefaultMailbox: "USOSapi"`:
+- Messages **with** `X-Application: srs` header → **SRS** mailbox (even from authenticated user `USOSapi`)
+- Messages from `USOSapi` **without** that header → **USOSapi** mailbox
+- Messages from non-authenticated users → **Default** mailbox
+
+**Order matters!** Place specific routing rules (header filters, recipient patterns) before the `AuthenticatedUsers` rule to give them priority.
+
+#### Example: Same Mailbox with Multiple Rules
+
+Mailboxes can appear multiple times with different filter combinations:
+
+```json
+{
+  "Mailboxes": [
+    {
+      "Name": "TeamMailbox",
+      "Recipients": "*@team.com",
+      "AuthenticatedUsers": ["alice", "bob"]
+    },
+    {
+      "Name": "TeamMailbox",
+      "Recipients": "*",
+      "HeaderFilters": [
+        { "Header": "X-Team", "Pattern": "alpha" }
+      ]
+    }
+  ]
+}
+```
+
+This routes messages to `TeamMailbox` from multiple sources while maintaining a single mailbox instance:
+- Messages from `alice` or `bob` to `@team.com` addresses
+- Messages from anyone with `X-Team: alpha` header
+
 ### Important Notes
 
 1. **No Message Duplication**: Due to "first match wins" logic, each recipient goes to exactly one mailbox
 
-2. **Case Sensitivity**: All pattern matching (recipients, headers, and source) is case-insensitive
+2. **Case Sensitivity**: All pattern matching (recipients, headers, source, and authenticated users) is case-insensitive
 
 3. **Multiple Recipients**: When an email has multiple recipients, each recipient is processed independently and may go to different mailboxes
 
-4. **Authenticated Users**: If `DeliverMessagesToUsersDefaultMailbox` is enabled and users are authenticated, messages go to the user's configured default mailbox instead of following recipient patterns
+4. **Authenticated Users (DEPRECATED)**: The `DeliverMessagesToUsersDefaultMailbox` setting is deprecated. Use mailboxes with the `AuthenticatedUsers` property instead for better flexibility. The old setting bypasses ALL routing rules (including header filters), while the new property allows you to position authenticated user routing anywhere in the mailbox order.
 
 5. **Performance**: Wildcard patterns are generally faster than regular expressions for simple matching
 
 6. **Header Filter Performance**: Headers are only parsed when at least one mailbox has `HeaderFilters` configured
 
-7. **Filter Evaluation Order**: Source filters → Header filters → Recipient patterns (all must match for a mailbox to be selected)
+7. **Filter Evaluation Order**: AuthenticatedUsers → Source → Headers → Recipients (all applicable filters must match for a mailbox to be selected)
 
 ### Troubleshooting
 
