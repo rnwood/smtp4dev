@@ -422,10 +422,10 @@
 
 
 
-                        <div v-for="(mailbox, index) in server.mailboxes" :key="index" style="margin-bottom: 20px; padding: 15px; border: 2px solid #e4e7ed; border-radius: 8px; background-color: #fafafa; position: relative;">
+                        <div v-for="(mailbox, index) in server.mailboxes" :key="index" class="mailbox-card">
                             <el-form-item :prop="'server.mailboxes[' + index + ']'" :rules="{validator: checkMailboxNameUnique}">
                                 <!-- Mailbox Header with Order Controls -->
-                                <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #dcdfe6;">
+                                <div class="mailbox-header">
                                     <el-button @click="server.mailboxes.splice(index, 1); server.mailboxes.splice(index-1, 0, mailbox);" :disabled="server.lockedSettings.mailboxes || index==0" title="Move up">
                                         <el-icon><ArrowUp /></el-icon>
                                     </el-button>
@@ -461,8 +461,8 @@
                                             <el-input v-model="mailbox.recipients" :disabled="server.lockedSettings.mailboxes" placeholder="e.g., *@example.com">
                                             </el-input>
                                         </el-form-item>
-                                        <div style="font-size: 11px; color: #606266; margin-top: 4px; padding-left: 4px;">
-                                            💡 Exact: <code>user@example.com</code> | Wildcard: <code>*@example.com</code> | Regex: <code>/pattern/</code>
+                                        <div class="filter-hint">
+                                            Exact: <code>user@example.com</code> | Wildcard: <code>*@example.com</code> | Regex: <code>/pattern/</code>
                                         </div>
                                     </div>
                                     
@@ -473,12 +473,12 @@
                                             Headers (optional)
                                         </div>
                                         
-                                        <div v-if="!mailbox.headerFilters || mailbox.headerFilters.length === 0" style="color: #909399; font-style: italic; margin-bottom: 10px; padding: 10px; background-color: #f5f7fa; border-radius: 4px; font-size: 12px;">
+                                        <div v-if="!mailbox.headerFilters || mailbox.headerFilters.length === 0" class="filter-empty">
                                             No header filters
                                         </div>
                                         
                                         <!-- Each Header Filter -->
-                                        <div v-for="(filter, filterIndex) in mailbox.headerFilters" :key="filterIndex" style="margin-bottom: 8px; padding: 10px; border: 1px solid #409eff; border-left-width: 4px; border-radius: 4px; background-color: #ecf5ff;">
+                                        <div v-for="(filter, filterIndex) in mailbox.headerFilters" :key="filterIndex" class="filter-item filter-item--header">
                                             <div style="margin-bottom: 6px;">
                                                 <el-form-item label="Header" :prop="'server.mailboxes[' + index + '].headerFilters[' + filterIndex + '].header'" :rules="{required: true, message: 'Required'}" style="margin-bottom: 4px;">
                                                     <el-input v-model="filter.header" placeholder="e.g., X-Application" :disabled="server.lockedSettings.mailboxes" size="small">
@@ -499,11 +499,11 @@
                                         <el-button size="small" @click="addHeaderFilter(mailbox)" :disabled="server.lockedSettings.mailboxes" style="margin-top: 4px;">
                                             <el-icon><Plus /></el-icon> Add Header
                                         </el-button>
-                                        <div style="font-size: 11px; color: #606266; margin-top: 6px; padding-left: 4px;">
-                                            💡 <code>value</code> | <code>*value*</code> | <code>/regex/</code>
+                                        <div class="filter-hint">
+                                            <code>value</code> | <code>*value*</code> | <code>/regex/</code>
                                         </div>
                                     </div>
-                                    
+
                                     <!-- Source Filters Section -->
                                     <div style="flex: 1; min-width: 280px;">
                                         <div style="font-weight: bold; margin-bottom: 10px; display: flex; align-items: center; gap: 8px;">
@@ -511,12 +511,12 @@
                                             Source (optional)
                                         </div>
                                         
-                                        <div v-if="!mailbox.sourceFilters || mailbox.sourceFilters.length === 0" style="color: #909399; font-style: italic; margin-bottom: 10px; padding: 10px; background-color: #f5f7fa; border-radius: 4px; font-size: 12px;">
+                                        <div v-if="!mailbox.sourceFilters || mailbox.sourceFilters.length === 0" class="filter-empty">
                                             No source filters
                                         </div>
                                         
                                         <!-- Each Source Filter -->
-                                        <div v-for="(filter, filterIndex) in mailbox.sourceFilters" :key="'source-' + filterIndex" style="margin-bottom: 8px; padding: 10px; border: 1px solid #67c23a; border-left-width: 4px; border-radius: 4px; background-color: #f0f9ff;">
+                                        <div v-for="(filter, filterIndex) in mailbox.sourceFilters" :key="'source-' + filterIndex" class="filter-item filter-item--source">
                                             <div style="margin-bottom: 6px;">
                                                 <el-form-item label="Pattern" :prop="'server.mailboxes[' + index + '].sourceFilters[' + filterIndex + '].pattern'" :rules="{required: true, message: 'Required'}" style="margin-bottom: 0;">
                                                     <el-input v-model="filter.pattern" placeholder="e.g., *.example.org, 192.168.*" :disabled="server.lockedSettings.mailboxes" size="small">
@@ -531,8 +531,8 @@
                                         <el-button size="small" @click="addSourceFilter(mailbox)" :disabled="server.lockedSettings.mailboxes" style="margin-top: 4px;">
                                             <el-icon><Plus /></el-icon> Add Source
                                         </el-button>
-                                        <div style="font-size: 11px; color: #606266; margin-top: 6px; padding-left: 4px;">
-                                            💡 <code>host.com</code> | <code>*.example.org</code> | <code>192.168.*</code>
+                                        <div class="filter-hint">
+                                            <code>host.com</code> | <code>*.example.org</code> | <code>192.168.*</code>
                                         </div>
                                     </div>
                                 </div>
@@ -760,3 +760,59 @@
 
     export default toNative(SettingsDialog)
 </script>
+
+<style scoped>
+.mailbox-card {
+    margin-bottom: 20px;
+    padding: 15px;
+    border: 2px solid var(--el-border-color);
+    border-radius: 8px;
+    background-color: var(--el-fill-color-light);
+    position: relative;
+}
+
+.mailbox-header {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--el-border-color-light);
+}
+
+.filter-hint {
+    font-size: 11px;
+    color: var(--el-text-color-secondary);
+    margin-top: 6px;
+    padding-left: 4px;
+}
+
+.filter-empty {
+    color: var(--el-text-color-placeholder);
+    font-style: italic;
+    margin-bottom: 10px;
+    padding: 10px;
+    background-color: var(--el-fill-color-light);
+    border-radius: 4px;
+    font-size: 12px;
+}
+
+.filter-item {
+    margin-bottom: 8px;
+    padding: 10px;
+    border-width: 1px;
+    border-style: solid;
+    border-left-width: 4px;
+    border-radius: 4px;
+}
+
+.filter-item--header {
+    border-color: var(--el-color-primary);
+    background-color: var(--el-color-primary-light-9);
+}
+
+.filter-item--source {
+    border-color: var(--el-color-success);
+    background-color: var(--el-color-success-light-9);
+}
+</style>
