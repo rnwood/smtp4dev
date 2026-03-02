@@ -21,6 +21,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using Mono.Options;
 using Rnwood.Smtp4dev.Controllers;
 using Rnwood.Smtp4dev.DbModel;
@@ -147,7 +148,18 @@ namespace Rnwood.Smtp4dev
 
 
             if (!Debugger.IsAttached && args.Contains("--service"))
+            {
+                if (!WindowsServiceHelpers.IsWindowsService())
+                {
+                    string exePath = Environment.ProcessPath ?? "smtp4dev";
+                    throw new CommandLineOptionsException(
+                        "The --service flag is only valid when the application is running under the Windows Service Control Manager.\n" +
+                        "To register smtp4dev as a Windows service, run one of the following commands and then start the service:\n" +
+                        $"  sc.exe create Smtp4dev binPath= \"{exePath} --service\"\n" +
+                        $"  New-Service -Name Smtp4dev -BinaryPathName \"{exePath} --service\"");
+                }
                 IsService = true;
+            }
 
             MapOptions<CommandLineOptions> commandLineOptions = CommandLineParser.TryParseCommandLine(args, isDesktopApp);
 
