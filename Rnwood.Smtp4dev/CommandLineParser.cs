@@ -84,7 +84,9 @@ namespace Rnwood.Smtp4dev
 
             if (!isDesktopApp)
             {
-                options.Add("service", "Required to run when registered as a Windows service. To register service: sc.exe create Smtp4dev binPath= \"{PathToExe} --service\"", _ => { });
+                options.Add("service", "Required when running as a Windows service (started by the Service Control Manager). To install the service use --install-service.", _ => { });
+                options.Add("install-service", "Installs smtp4dev as a Windows service and exits. Requires administrator privileges. Windows only.", _ => { });
+                options.Add("uninstall-service", "Uninstalls the smtp4dev Windows service and exits. Requires administrator privileges. Windows only.", _ => { });
 
                 options.Add(
                  "urls=", "The URLs the web interface should listen on. For example, http://localhost:123. Use `*` in place of hostname to listen for requests on any IP address or hostname using the specified port and protocol (for example, http://*:5000). Separate multiple values with ;. For info about HTTPS see https://learn.microsoft.com/en-us/aspnet/core/fundamentals/servers/kestrel/endpoints?view=aspnetcore-8.0#configure-https-in-appsettingsjson", data => map.Add(data, x => x.Urls));

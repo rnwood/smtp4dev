@@ -5,6 +5,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.InteropServices;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Threading;
@@ -21,6 +22,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.Json;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Hosting.WindowsServices;
 using Mono.Options;
 using Rnwood.Smtp4dev.Controllers;
 using Rnwood.Smtp4dev.DbModel;
@@ -54,6 +56,63 @@ namespace Rnwood.Smtp4dev
 
         public static async Task Main(string[] args)
         {
+            bool isHelpRequest = args.Any(a => a == "-h" || a == "--help" || a == "-?");
+
+            if (!isHelpRequest && args.Contains("--install-service"))
+            {
+                SetupStaticLogger(args);
+                _log = Log.ForContext<Program>();
+                try
+                {
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        throw new PlatformNotSupportedException("Service installation is only supported on Windows.");
+                    }
+
+                    string exePath = Environment.ProcessPath
+                        ?? throw new InvalidOperationException("Could not determine the path to the current executable.");
+
+                    WindowsServiceManager.Install(exePath);
+                    _log.Information("Service 'Smtp4dev' installed successfully. Use 'sc.exe start Smtp4dev' or the Services manager to start it.");
+                }
+                catch (Exception ex)
+                {
+                    _log.Fatal(ex.Message);
+                    Environment.Exit(1);
+                }
+                finally
+                {
+                    Log.CloseAndFlush();
+                }
+                return;
+            }
+
+            if (!isHelpRequest && args.Contains("--uninstall-service"))
+            {
+                SetupStaticLogger(args);
+                _log = Log.ForContext<Program>();
+                try
+                {
+                    if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                    {
+                        throw new PlatformNotSupportedException("Service uninstallation is only supported on Windows.");
+                    }
+
+                    WindowsServiceManager.Uninstall();
+                    _log.Information("Service 'Smtp4dev' uninstalled successfully.");
+                }
+                catch (Exception ex)
+                {
+                    _log.Fatal(ex.Message);
+                    Environment.Exit(1);
+                }
+                finally
+                {
+                    Log.CloseAndFlush();
+                }
+                return;
+            }
+
             try
             {
 
@@ -147,7 +206,16 @@ namespace Rnwood.Smtp4dev
 
 
             if (!Debugger.IsAttached && args.Contains("--service"))
+            {
+                if (!WindowsServiceHelpers.IsWindowsService())
+                {
+                    throw new CommandLineOptionsException(
+                        "The --service flag is only valid when the application is running under the Windows Service Control Manager.\n" +
+                        "To install smtp4dev as a Windows service, run: smtp4dev --install-service\n" +
+                        "Then start it with: sc.exe start Smtp4dev");
+                }
                 IsService = true;
+            }
 
             MapOptions<CommandLineOptions> commandLineOptions = CommandLineParser.TryParseCommandLine(args, isDesktopApp);
 
