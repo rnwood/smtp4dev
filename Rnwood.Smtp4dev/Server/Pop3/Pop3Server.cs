@@ -409,6 +409,7 @@ namespace Rnwood.Smtp4dev.Server.Pop3
 				{"UIDL", GetOverrideOrDefault("UIDL", () => new UidlCommand())},
 				{"DELE", GetOverrideOrDefault("DELE", () => new DeleCommand())},
 				{"RSET", GetOverrideOrDefault("RSET", () => new RsetCommand())},
+				{"NOOP", GetOverrideOrDefault("NOOP", () => new NoopCommand())},
 				{"QUIT", GetOverrideOrDefault("QUIT", () => new QuitCommand())},
 			};
 
