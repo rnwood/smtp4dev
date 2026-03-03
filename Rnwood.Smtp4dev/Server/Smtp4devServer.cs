@@ -598,7 +598,7 @@ namespace Rnwood.Smtp4dev.Server
                 MailboxOptions defaultMailboxOptions = new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" };
                 MailboxOptions mailboxOption = defaultMailboxOptions;
 
-                if (!string.IsNullOrWhiteSpace(userDefaultMailbox))
+                if (!string.IsNullOrWhiteSpace(userDefaultMailbox) && !string.Equals(userDefaultMailbox, MailboxOptions.DEFAULTNAME, StringComparison.OrdinalIgnoreCase))
                 {
                     mailboxOption = serverOptions.CurrentValue.Mailboxes.FirstOrDefault(m => string.Equals(m.Name, userDefaultMailbox, StringComparison.OrdinalIgnoreCase));
 
