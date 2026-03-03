@@ -11,6 +11,8 @@ namespace Rnwood.Smtp4dev.ApiModel
         public Session(DbModel.Session dbSession)
         {
             this.Id = dbSession.Id;
+            this.ClientAddress = dbSession.ClientAddress;
+            this.ClientName = dbSession.ClientName;
             this.Error = dbSession.SessionError;
             this.ErrorType = dbSession.SessionErrorType?.ToString();
             this.StartDate = dbSession.StartDate;
@@ -23,6 +25,8 @@ namespace Rnwood.Smtp4dev.ApiModel
 
         public Guid Id { get; private set; }
 
+        public string ClientAddress { get; private set; }
+        public string ClientName { get; private set; }
         public string ErrorType { get; private set; }
         public DateTime StartDate { get; }
         public string Error { get; private set; }
