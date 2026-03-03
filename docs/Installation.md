@@ -102,13 +102,37 @@ The folder ``/smtp4dev`` will be used for the database and auto-generated TLS ce
 
 Download one the Windows standalone versions which is applicable for your OS/architecture.
 
-### Install service in PowerShell
+### Self-registration (recommended)
+
+Run the following command as Administrator to install smtp4dev as a Windows service:
 
 ```
+smtp4dev --install-service
+```
+
+Then start the service:
+
+```
+sc.exe start Smtp4dev
+```
+
+To uninstall the service, run as Administrator:
+
+```
+smtp4dev --uninstall-service
+```
+
+### Manual registration
+
+If you prefer to register the service manually using built-in Windows tools, run one of the following as Administrator:
+
+#### PowerShell
+
+```powershell
 New-Service -Name Smtp4dev -BinaryPathName "{PathToExe} --service"
 ```
 
-### Install service in Cmd or PowerShell
+#### Cmd or PowerShell (sc.exe)
 
 ```
 sc.exe create Smtp4dev binPath= "{PathToExe} --service"
