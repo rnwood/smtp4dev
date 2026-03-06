@@ -272,7 +272,7 @@ namespace Rnwood.Smtp4dev
         private static IHost BuildWebHost(string[] args, CommandLineOptions cmdLineOptions, MapOptions<CommandLineOptions> commandLineOptions)
         {
             var contentRoot = GetContentRoot();
-            var dataDir = GetOrCreateDataDir(cmdLineOptions);
+            var dataDir = GetOrCreateDataDir(cmdLineOptions, contentRoot);
             _log.Information("DataDir: {dataDir}", dataDir);
             Directory.SetCurrentDirectory(dataDir);
 
@@ -375,9 +375,24 @@ namespace Rnwood.Smtp4dev
             return builder.Build();
         }
 
-        private static string GetOrCreateDataDir(CommandLineOptions cmdLineOptions)
+        private static string GetOrCreateDataDir(CommandLineOptions cmdLineOptions, string contentRoot)
         {
-            var dataDir = DirectoryHelper.GetDataDir(cmdLineOptions);
+            string dataDir;
+
+            if (Service.HostingEnvironmentHelper.IsRunningInProcessIIS())
+            {
+                // Under IIS in-process hosting, use a subdirectory of the content root so that
+                // the user settings file is loaded from the same location it is saved to.
+                // An explicit --baseappdatapath still takes precedence if specified.
+                dataDir = !string.IsNullOrEmpty(cmdLineOptions.BaseAppDataPath)
+                    ? cmdLineOptions.BaseAppDataPath
+                    : Path.Join(contentRoot, "smtp4dev");
+            }
+            else
+            {
+                dataDir = DirectoryHelper.GetDataDir(cmdLineOptions);
+            }
+
             if (!Directory.Exists(dataDir))
             {
                 Directory.CreateDirectory(dataDir);
