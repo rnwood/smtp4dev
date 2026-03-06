@@ -307,6 +307,12 @@ namespace Rnwood.Smtp4dev.Controllers
 
             newDesktopSettings.MinimiseToTrayIcon = serverUpdate.DesktopMinimiseToTrayIcon;
 
+            string editableSettingsFileDir = System.IO.Path.GetDirectoryName(editableSettingsFilePath);
+            if (!System.IO.Directory.Exists(editableSettingsFileDir))
+            {
+                System.IO.Directory.CreateDirectory(editableSettingsFileDir);
+            }
+
             System.IO.File.WriteAllText(editableSettingsFilePath,
                 JsonSerializer.Serialize(new SettingsFile
                 {

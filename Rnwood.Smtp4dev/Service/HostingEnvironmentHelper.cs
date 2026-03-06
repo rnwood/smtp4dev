@@ -86,7 +86,14 @@ namespace Rnwood.Smtp4dev.Service
                 string settingsFolder = Path.GetDirectoryName(editableSettingsFile);
                 if (!Directory.Exists(settingsFolder))
                 {
-                    return false;
+                    try
+                    {
+                        Directory.CreateDirectory(settingsFolder);
+                    }
+                    catch (Exception)
+                    {
+                        return false;
+                    }
                 }
 
                 string testFileName;
