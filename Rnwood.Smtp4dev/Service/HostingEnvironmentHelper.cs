@@ -36,7 +36,7 @@ namespace Rnwood.Smtp4dev.Service
         /// Check if this process is running on Windows in an in process instance in IIS
         /// </summary>
         /// <returns>True if Windows and in an in process instance on IIS, false otherwise</returns>
-        private static bool IsRunningInProcessIIS()
+        internal static bool IsRunningInProcessIIS()
         {
             if (!RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
             {
@@ -130,13 +130,18 @@ namespace Rnwood.Smtp4dev.Service
         {
             string dataDir;
 
-            if (IsRunningInProcessIIS())
+            if (!string.IsNullOrEmpty(commandLineOptions.CurrentValue.BaseAppDataPath))
             {
-                dataDir = Path.Join(hostEnvironment.ContentRootPath, "smtp4dev");
+                // Explicit path always takes precedence
+                dataDir = commandLineOptions.CurrentValue.BaseAppDataPath;
             }
             else if (commandLineOptions.CurrentValue.NoUserSettings)
             {
                 return null;
+            }
+            else if (IsRunningInProcessIIS())
+            {
+                dataDir = Path.Join(hostEnvironment.ContentRootPath, "smtp4dev");
             }
             else
             {
