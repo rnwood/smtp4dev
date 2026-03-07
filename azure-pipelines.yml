@@ -222,9 +222,9 @@ stages:
                   
                   # Look for playwright.ps1 script in multiple possible locations
                   $possiblePaths = @(
-                    "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1",
-                    "Rnwood.Smtp4dev.Tests/bin/linux-x64/Release/net8.0/playwright.ps1",
-                    "Rnwood.Smtp4dev.Tests/bin/win-x64/Release/net8.0/playwright.ps1"
+                    "Rnwood.Smtp4dev.Tests/bin/Release/net10.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/linux-x64/Release/net10.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/win-x64/Release/net10.0/playwright.ps1"
                   )
                   
                   $playwrightScript = $null
@@ -646,9 +646,9 @@ stages:
                   
                   # Look for playwright.ps1 script in multiple possible locations
                   $possiblePaths = @(
-                    "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1",
-                    "Rnwood.Smtp4dev.Tests/bin/linux-x64/Release/net8.0/playwright.ps1",
-                    "Rnwood.Smtp4dev.Tests/bin/win-x64/Release/net8.0/playwright.ps1"
+                    "Rnwood.Smtp4dev.Tests/bin/Release/net10.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/linux-x64/Release/net10.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/win-x64/Release/net10.0/playwright.ps1"
                   )
                   
                   $playwrightScript = $null
@@ -946,9 +946,9 @@ stages:
                   
                   # Look for playwright.ps1 script in multiple possible locations
                   $possiblePaths = @(
-                    "Rnwood.Smtp4dev.Tests/bin/Release/net8.0/playwright.ps1",
-                    "Rnwood.Smtp4dev.Tests/bin/linux-x64/Release/net8.0/playwright.ps1",
-                    "Rnwood.Smtp4dev.Tests/bin/win-x64/Release/net8.0/playwright.ps1"
+                    "Rnwood.Smtp4dev.Tests/bin/Release/net10.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/linux-x64/Release/net10.0/playwright.ps1",
+                    "Rnwood.Smtp4dev.Tests/bin/win-x64/Release/net10.0/playwright.ps1"
                   )
                   
                   $playwrightScript = $null
@@ -1147,7 +1147,7 @@ stages:
                 [Rnwood.Smtp4dev-linux-arm64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-linux-arm64-$(tag).zip) | Linux ARM 64-bit binary standalone
                 [Rnwood.Smtp4dev-linux-arm-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-linux-arm-$(tag).zip) | Linux ARM 32-bit binary standalone
                 [Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-linux-musl-x64-$(tag).zip) | Linux MUSL x64 binary standalone for Linux distros using MUSL libc
-                [Rnwood.Smtp4dev-noruntime-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-noruntime-$(tag).zip) | Architecture independent version. Should run on any platform where the .NET 8.0 (or greater) runtime is installed
+                [Rnwood.Smtp4dev-noruntime-$(tag).zip](../../releases/download/$(tag)/Rnwood.Smtp4dev-noruntime-$(tag).zip) | Architecture independent version. Should run on any platform where the .NET 10.0 (or greater) runtime is installed
                 [Docker images for Windows and Linux](https://hub.docker.com/layers/rnwood/smtp4dev/$(tag)) - [How to use Docker image](https://github.com/rnwood/smtp4dev/blob/master/docs/Installation.md#how-to-run-smtp4dev-in-docker)
                 [.NET tool Rnwood.Smtp4dev $(tag)](https://www.nuget.org/packages/Rnwood.Smtp4dev/$(tag)) | .NET tool (recommended option for Mac OS) - [How to use dotnet tool](https://github.com/rnwood/smtp4dev/blob/master/docs/Installation.md#how-to-run-smtp4dev-as-a-dotnet-global-tool)
 
