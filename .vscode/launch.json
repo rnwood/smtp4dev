@@ -9,7 +9,7 @@
             "type": "coreclr",
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/net8.0/Rnwood.Smtp4dev.dll",
+            "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/net10.0/Rnwood.Smtp4dev.dll",
             "cwd": "${workspaceFolder}/Rnwood.Smtp4dev",
             "args": ["--recreatedb", "--urls", "http://localhost:5000", "--debugsettings"],
             "stopAtEntry": false,
@@ -25,7 +25,7 @@
             "type": "coreclr",
             "request": "launch",
             // If you have changed target frameworks, make sure to update the program path.
-            "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/net8.0/Rnwood.Smtp4dev.dll",
+            "program": "${workspaceFolder}/Rnwood.Smtp4dev/bin/Debug/net10.0/Rnwood.Smtp4dev.dll",
             "cwd": "${workspaceFolder}/Rnwood.Smtp4dev",
             "args": ["--recreatedb", "--urls", "http://localhost:5000", "--debugsettings", "--tui"],
             "stopAtEntry": false,

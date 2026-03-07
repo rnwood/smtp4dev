@@ -2,12 +2,12 @@
 
 **Always follow these instructions first and fallback to additional search and context gathering only if the information in the instructions is incomplete or found to be in error.**
 
-smtp4dev is a fake SMTP email server for development and testing, built as a .NET 8.0 web application with a Vue.js 3 frontend. It provides SMTP, IMAP, and web interfaces for testing email functionality during development.
+smtp4dev is a fake SMTP email server for development and testing, built as a .NET 10.0 web application with a Vue.js 3 frontend. It provides SMTP, IMAP, and web interfaces for testing email functionality during development.
 
 ## Working Effectively
 
 ### Prerequisites and Dependencies
-- .NET 8.0 SDK (tested with 8.0.119)
+- .NET 10.0 SDK
 - Node.js 20+ and npm 10+ (tested with Node.js 20.19.4, npm 10.8.2)
 - Git
 - Optional: Chrome/Chromium for E2E tests

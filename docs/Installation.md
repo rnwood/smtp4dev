@@ -54,7 +54,7 @@ If you don't want to use the dotnet global tool or Docker (see below if you know
 | Prefix | Description |
 | -      | -           |
 | Rnwood.Smtp4dev-win-x64 | Windows x64 (Intel 64 bit) binary standalone |
-| Rnwood.Smtp4dev-noruntime | Architecture dependent version. Should run on any platform where the [.NET 8+ runtime](https://dotnet.microsoft.com/download/dotnet-core/current/runtime) is installed |
+| Rnwood.Smtp4dev-noruntime | Architecture dependent version. Should run on any platform where the [.NET 10+ runtime](https://dotnet.microsoft.com/download/dotnet-core/current/runtime) is installed |
 | Rnwood.Smtp4dev-linux-x64 | Linux x64 (Intel 64 bit) binary standalone |
 | Rnwood.Smtp4dev-linux-musl-x64 | Linux x64 (Intel 64 bit) binary standalone for MUSL based distros (Alpine Linux) |
 |Rnwood.Smtp4dev-linux-arm | Linux ARM (Intel 32 bit) binary standalone |
@@ -68,7 +68,7 @@ If you don't want to use the dotnet global tool or Docker (see below if you know
 
 ## How to run smtp4dev as a dotnet global tool
 
-If you're using the [.NET 8+ SDK](https://dotnet.microsoft.com/en-us/download/dotnet/latest) you can install smtp4dev as a global tool using the following command:
+If you're using the [.NET 10+ SDK](https://dotnet.microsoft.com/en-us/download/dotnet/latest) you can install smtp4dev as a global tool using the following command:
 ```
 dotnet tool install -g Rnwood.Smtp4dev
 ```

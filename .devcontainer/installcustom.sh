@@ -2,11 +2,11 @@
 sudo apt update
 sudo apt install -y telnet curl
 
-# Install .NET 8.0 SDK (as specified in AGENTS.md: tested with 8.0.119)
+# Install .NET 10.0 SDK
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
 echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-prod.gpg] https://packages.microsoft.com/repos/microsoft-debian-bookworm-prod bookworm main" | sudo tee /etc/apt/sources.list.d/microsoft-prod.list
 sudo apt update
-sudo apt install -y dotnet-sdk-8.0
+sudo apt install -y dotnet-sdk-10.0
 
 # Install Node.js 20.x and npm (as specified in AGENTS.md)
 curl -fsSL https://deb.nodesource.com/setup_20.x | sudo -E bash -
