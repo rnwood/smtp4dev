@@ -92,7 +92,7 @@ Memory growth per message: 2.8 KB
 ## Running the Test
 
 ### Prerequisites
-- .NET 8.0 SDK
+- .NET 10.0 SDK
 - Available ports for SMTP (2525) and HTTP (5000) services
 
 ### Command Line

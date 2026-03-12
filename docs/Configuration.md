@@ -21,13 +21,13 @@ The search path of these files is printed when smtp4dev starts up. So the easies
 ```
 smtp4dev version 3.3.6-ci20240419116+60aff5ea69aa19c6fb9afa8573fd5f77ab40de3a
 https://github.com/rnwood/smtp4dev
-.NET Core runtime version: .NET 8.0.4
+.NET Core runtime version: .NET 10.0
 
  > For help use argument --help
 
 Install location: C:\Users\rob
 DataDir: C:\Users\rob\AppData\Roaming\smtp4dev
-Default settings file: C:\Users\rob\.dotnet\tools\.store\rnwood.smtp4dev\3.3.6-ci20240419116\rnwood.smtp4dev\3.3.6-ci20240419116\tools\net8.0\any\appsettings.json
+Default settings file: C:\Users\rob\.dotnet\tools\.store\rnwood.smtp4dev\3.3.6-ci20240419116\rnwood.smtp4dev\3.3.6-ci20240419116\tools\net10.0\any\appsettings.json
 User settings file: C:\Users\rob\AppData\Roaming\smtp4dev\appsettings.json
 ```
 
