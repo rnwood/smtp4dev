@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Http;
 using MimeKit;
 using HtmlAgilityPack;
 using Serilog;
+using Microsoft.Extensions.Options;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -31,17 +32,53 @@ namespace Rnwood.Smtp4dev.Controllers
     {
         private readonly ILogger log = Log.ForContext<MessagesController>();
         
-        public MessagesController(IMessagesRepository messagesRepository, ISmtp4devServer server, MimeProcessingService mimeProcessingService)
+        public MessagesController(IMessagesRepository messagesRepository, ISmtp4devServer server, MimeProcessingService mimeProcessingService, IOptionsMonitor<Rnwood.Smtp4dev.Server.Settings.ServerOptions> serverOptions)
         {
             this.messagesRepository = messagesRepository;
             this.server = server;
             this.mimeProcessingService = mimeProcessingService;
+            this.serverOptions = serverOptions;
+        }
+
+        /// <summary>
+        /// Returns the mailbox name that the current user is allowed to access.
+        /// Users without AllowAccessToOtherMailboxes are restricted to their own mailbox only.
+        /// </summary>
+        private string GetAllowedMailboxName(string requestedMailboxName)
+        {
+            string currentUserName = this.User?.Identity?.Name;
+
+            // If no user logged in, allow any mailbox
+            if (string.IsNullOrEmpty(currentUserName))
+            {
+                return requestedMailboxName;
+            }
+
+            // Find user in configuration
+            var user = serverOptions.CurrentValue.Users
+                .FirstOrDefault(u => currentUserName.Equals(u.Username, StringComparison.OrdinalIgnoreCase));
+
+            // If user not found in config or has AllowAccessToOtherMailboxes, allow any mailbox
+            if (user == null || user.AllowAccessToOtherMailboxes)
+            {
+                return requestedMailboxName;
+            }
+
+            // Force user to only access their mailbox
+            if (!string.IsNullOrEmpty(user.DefaultMailbox))
+            {
+                return user.DefaultMailbox;
+            }
+
+            // Fallback to Default
+            return Rnwood.Smtp4dev.Server.Settings.MailboxOptions.DEFAULTNAME;
         }
 
         private const int CACHE_DURATION = 31556926;
         private readonly IMessagesRepository messagesRepository;
         private readonly ISmtp4devServer server;
         private readonly MimeProcessingService mimeProcessingService;
+        private readonly IOptionsMonitor<Rnwood.Smtp4dev.Server.Settings.ServerOptions> serverOptions;
 
         /// <summary>
         /// Returns all new messages in the INBOX folder since the provided message ID. Returns only the summary without message content.
@@ -54,7 +91,7 @@ namespace Rnwood.Smtp4dev.Controllers
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(MessageSummary[]), Description = "")]
         public MessageSummary[] GetNewSummaries(Guid? lastSeenMessageId, string mailboxName = MailboxOptions.DEFAULTNAME, int pageSize = 50)
         {
-            return messagesRepository.GetMessageSummaries(mailboxName, MailboxFolder.INBOX)
+            return messagesRepository.GetMessageSummaries(GetAllowedMailboxName(mailboxName), MailboxFolder.INBOX)
                 .OrderByDescending(m => m.ReceivedDate)
                 .ThenByDescending(m => m.Id)
                 .AsEnumerable()
@@ -81,7 +118,7 @@ namespace Rnwood.Smtp4dev.Controllers
             bool sortIsDescending = true, int page = 1,
             int pageSize = 5)
         {
-            IQueryable<DbModel.Projections.MessageSummaryProjection> query = messagesRepository.GetMessageSummaries(mailboxName, folderName);
+            IQueryable<DbModel.Projections.MessageSummaryProjection> query = messagesRepository.GetMessageSummaries(GetAllowedMailboxName(mailboxName), folderName);
              
             query = query.OrderBy(sortColumn + (sortIsDescending ? " DESC" : ""));
 
@@ -311,7 +348,7 @@ namespace Rnwood.Smtp4dev.Controllers
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
         public Task MarkAllRead(string mailboxName = MailboxOptions.DEFAULTNAME)
         {
-            return messagesRepository.MarkAllMessagesRead(mailboxName);
+            return messagesRepository.MarkAllMessagesRead(GetAllowedMailboxName(mailboxName));
         }
 
         /// <summary>
@@ -627,7 +664,7 @@ namespace Rnwood.Smtp4dev.Controllers
         public async Task DeleteAll(string mailboxName = MailboxOptions.DEFAULTNAME)
         {
             log.Information("Deleting all messages. Mailbox: {mailboxName}", mailboxName);
-            await messagesRepository.DeleteAllMessages(mailboxName);
+            await messagesRepository.DeleteAllMessages(GetAllowedMailboxName(mailboxName));
         }
 
         /// <summary>
@@ -641,7 +678,7 @@ namespace Rnwood.Smtp4dev.Controllers
         {
             using var dbContext = messagesRepository.DbContext;
             return dbContext.MailboxFolders
-                .Where(f => f.Mailbox.Name == mailboxName)
+                .Where(f => f.Mailbox.Name == GetAllowedMailboxName(mailboxName))
                 .Select(f => f.Name)
                 .OrderBy(f => f == MailboxFolder.INBOX ? 0 : f == MailboxFolder.SENT ? 1 : 2).ThenBy(f => f)
                 .ToArray();
