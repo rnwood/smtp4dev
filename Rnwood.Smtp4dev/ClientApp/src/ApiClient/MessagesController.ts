@@ -134,7 +134,7 @@ export default class MessagesController {
         if (deliverToAll !== undefined) params.push(`deliverToAll=${encodeURIComponent(deliverToAll)}`);
         if (params.length > 0) url += '?' + params.join('&');
 
-        const body = typeof emlContent === 'string' ? new Blob([emlContent], { type: 'message/rfc822' }) : new Blob([emlContent], { type: 'message/rfc822' });
+        const body = new Blob([emlContent], { type: 'message/rfc822' });
         return (await axios.post(url, body, {
             headers: { "Content-Type": "message/rfc822" }
         })).data as void;

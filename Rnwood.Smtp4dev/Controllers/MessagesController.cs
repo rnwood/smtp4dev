@@ -292,9 +292,13 @@ namespace Rnwood.Smtp4dev.Controllers
                     using var emlStream = new MemoryStream(emlData);
                     mimeMessage = await MimeMessage.LoadAsync(emlStream);
                 }
-                catch (Exception ex)
+                catch (FormatException ex)
                 {
                     return BadRequest($"Failed to parse EML: {ex.Message}");
+                }
+                catch (IOException ex)
+                {
+                    return BadRequest($"Failed to read EML: {ex.Message}");
                 }
 
                 // Determine envelope sender: use query param if provided, else fall back to message From header
@@ -309,29 +313,29 @@ namespace Rnwood.Smtp4dev.Controllers
                 }
 
                 // Determine envelope recipients: use query params if provided, else fall back to message headers
-                List<string> envelopeRecips;
+                List<string> emlEnvelopeRecipients;
                 if (!string.IsNullOrEmpty(to))
                 {
-                    var toRecips = to.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
-                    var ccRecips = cc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-                    var bccRecips = bcc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-                    envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
+                    var emlToRecipients = to.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    var emlCcRecipients = cc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+                    var emlBccRecipients = bcc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+                    emlEnvelopeRecipients = deliverToAll ? [.. emlToRecipients, .. emlCcRecipients, .. emlBccRecipients] : [.. emlToRecipients];
                 }
                 else
                 {
-                    envelopeRecips = mimeMessage.To.OfType<MailboxAddress>().Select(a => a.Address).ToList();
+                    emlEnvelopeRecipients = mimeMessage.To.OfType<MailboxAddress>().Select(a => a.Address).ToList();
                     if (deliverToAll)
                     {
-                        envelopeRecips.AddRange(mimeMessage.Cc.OfType<MailboxAddress>().Select(a => a.Address));
-                        envelopeRecips.AddRange(mimeMessage.Bcc.OfType<MailboxAddress>().Select(a => a.Address));
+                        emlEnvelopeRecipients.AddRange(mimeMessage.Cc.OfType<MailboxAddress>().Select(a => a.Address));
+                        emlEnvelopeRecipients.AddRange(mimeMessage.Bcc.OfType<MailboxAddress>().Select(a => a.Address));
                     }
-                    if (!envelopeRecips.Any())
+                    if (!emlEnvelopeRecipients.Any())
                     {
                         return BadRequest("No recipients specified. Provide a 'to' query parameter or To/Cc/Bcc headers in the EML.");
                     }
                 }
 
-                this.server.SendRaw(mimeMessage, envelopeFrom, envelopeRecips.Distinct().ToArray());
+                this.server.SendRaw(mimeMessage, envelopeFrom, emlEnvelopeRecipients.Distinct().ToArray());
                 return Ok();
             }
 

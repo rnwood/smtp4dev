@@ -950,12 +950,7 @@ namespace Rnwood.Smtp4dev.Server
         public void Send(IDictionary<string, string> headers, string[] to, string[] cc, string from, string[] envelopeRecipients, string subject, string bodyHtml, IEnumerable<AttachmentInfo> attachments = null)
         {
             MailboxAddress sender = MailboxAddress.Parse(from);
-            var relaySmtpClient = this.relaySmtpClientFactory(this.relayOptions.CurrentValue);
-
-            if (relaySmtpClient == null)
-            {
-                throw new InvalidOperationException("Relay SMTP server must be configued to send messages.");
-            }
+            var relaySmtpClient = GetRelaySmtpClient();
 
             MimeMessage message = new MimeMessage();
             message.Subject = subject;
@@ -995,14 +990,18 @@ namespace Rnwood.Smtp4dev.Server
 
         public void SendRaw(MimeMessage message, string from, string[] envelopeRecipients)
         {
-            var relaySmtpClient = this.relaySmtpClientFactory(this.relayOptions.CurrentValue);
+            var relaySmtpClient = GetRelaySmtpClient();
+            relaySmtpClient.Send(message, MailboxAddress.Parse(from), envelopeRecipients.Select(t => MailboxAddress.Parse(t)));
+        }
 
+        private SmtpClient GetRelaySmtpClient()
+        {
+            var relaySmtpClient = this.relaySmtpClientFactory(this.relayOptions.CurrentValue);
             if (relaySmtpClient == null)
             {
                 throw new InvalidOperationException("Relay SMTP server must be configured to send messages.");
             }
-
-            relaySmtpClient.Send(message, MailboxAddress.Parse(from), envelopeRecipients.Select(t => MailboxAddress.Parse(t)));
+            return relaySmtpClient;
         }
     }
 }
