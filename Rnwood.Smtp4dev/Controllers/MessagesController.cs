@@ -529,12 +529,13 @@ namespace Rnwood.Smtp4dev.Controllers
         /// Imports a single EML file as a new message.
         /// </summary>
         /// <param name="mailboxName">Mailbox name to import the message into</param>
+        /// <param name="folderName">Folder name to import the message into (e.g. INBOX, Sent). Defaults to INBOX.</param>
         /// <returns>The ID of the imported message</returns>
         [HttpPut]
         [Consumes("message/rfc822")]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(Guid), Description = "ID of the imported message")]
         [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, typeof(void), Description = "If the EML content is invalid")]
-        public async Task<ActionResult<Guid>> ImportMessage(string mailboxName = MailboxOptions.DEFAULTNAME)
+        public async Task<ActionResult<Guid>> ImportMessage(string mailboxName = MailboxOptions.DEFAULTNAME, string folderName = MailboxFolder.INBOX)
         {
             try
             {
@@ -601,7 +602,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 }
 
                 dbMessage.Mailbox = mailbox;
-                dbMessage.MailboxFolder = await dbContext.MailboxFolders.FirstOrDefaultAsync(f => f.Mailbox.Name == mailboxName && f.Name == MailboxFolder.INBOX);
+                dbMessage.MailboxFolder = await dbContext.MailboxFolders.FirstOrDefaultAsync(f => f.Mailbox.Name == mailboxName && f.Name == folderName);
                 dbMessage.IsUnread = true;
 
                 // Add to database
