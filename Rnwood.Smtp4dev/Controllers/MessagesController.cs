@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Http;
 using MimeKit;
 using HtmlAgilityPack;
 using Serilog;
+using System.Text.Json;
 
 namespace Rnwood.Smtp4dev.Controllers
 {
@@ -241,20 +242,23 @@ namespace Rnwood.Smtp4dev.Controllers
 
         /// <summary>
         /// Sends a message via the configured upstream/relay SMTP server.
-        /// Accepts either text/html (for body only) or multipart/form-data (for body with optional attachments).
+        /// Accepts text/html (for body only), multipart/form-data (for body with optional attachments and custom headers),
+        /// or message/rfc822 (raw EML).
         /// </summary>
-        /// <param name="to">List of email addresses separated by commas</param>
+        /// <param name="to">List of email addresses separated by commas. When content type is message/rfc822, overrides the envelope recipients (optional - defaults to message To header).</param>
         /// <param name="cc">List of email addresses separated by commas</param>
         /// <param name="bcc">List of email addresses separated by commas</param>
-        /// <param name="from">Email address</param>
+        /// <param name="from">Email address. When content type is message/rfc822, overrides the envelope sender (optional - defaults to message From header).</param>
         /// <param name="deliverToAll">True if the message should be delivered to the CC and BCC recipients in addition to the TO recipients. When false, the message is only delivered to the TO recipients, but the message headers will show the specified other recipients.</param>
         /// <param name="subject">The subject of message</param>
         /// <param name="bodyHtml">HTML body content (when using multipart/form-data)</param>
+        /// <param name="headers">Optional JSON-encoded dictionary of custom headers to add to the message e.g. {"X-Custom-Header": "value"} (when using multipart/form-data or text/html)</param>
         /// <param name="attachments">Optional files to attach (when using multipart/form-data)</param>
         /// <returns></returns>
         [HttpPost("send")]
-        [Consumes("text/html", "multipart/form-data")]
+        [Consumes("text/html", "multipart/form-data", "message/rfc822")]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(void), Description = "")]
+        [SwaggerResponse(System.Net.HttpStatusCode.BadRequest, typeof(void), Description = "If custom headers JSON is invalid or EML content is invalid.")]
         [SwaggerResponse(System.Net.HttpStatusCode.InternalServerError, typeof(void), Description = "If message fails to send.")]
         public async Task<IActionResult> Send(
             string to, 
@@ -264,29 +268,105 @@ namespace Rnwood.Smtp4dev.Controllers
             bool deliverToAll, 
             string subject,
             [FromForm] string bodyHtml = null,
+            [FromForm] string headers = null,
             [FromForm] List<IFormFile> attachments = null)
         {
-            // Handle different content types
+            // Handle raw EML (message/rfc822) content type
+            if (HttpContext.Request.ContentType?.StartsWith("message/rfc822") == true)
+            {
+                byte[] emlData;
+                using (var stream = new MemoryStream())
+                {
+                    await HttpContext.Request.Body.CopyToAsync(stream);
+                    emlData = stream.ToArray();
+                }
+
+                if (emlData.Length == 0)
+                {
+                    return BadRequest("EML content is empty");
+                }
+
+                MimeMessage mimeMessage;
+                try
+                {
+                    using var emlStream = new MemoryStream(emlData);
+                    mimeMessage = await MimeMessage.LoadAsync(emlStream);
+                }
+                catch (Exception ex)
+                {
+                    return BadRequest($"Failed to parse EML: {ex.Message}");
+                }
+
+                // Determine envelope sender: use query param if provided, else fall back to message From header
+                string envelopeFrom = from;
+                if (string.IsNullOrEmpty(envelopeFrom))
+                {
+                    envelopeFrom = mimeMessage.From.OfType<MailboxAddress>().FirstOrDefault()?.Address;
+                    if (string.IsNullOrEmpty(envelopeFrom))
+                    {
+                        return BadRequest("No sender specified. Provide a 'from' query parameter or a From header in the EML.");
+                    }
+                }
+
+                // Determine envelope recipients: use query params if provided, else fall back to message headers
+                List<string> envelopeRecips;
+                if (!string.IsNullOrEmpty(to))
+                {
+                    var toRecips = to.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+                    var ccRecips = cc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+                    var bccRecips = bcc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+                    envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
+                }
+                else
+                {
+                    envelopeRecips = mimeMessage.To.OfType<MailboxAddress>().Select(a => a.Address).ToList();
+                    if (deliverToAll)
+                    {
+                        envelopeRecips.AddRange(mimeMessage.Cc.OfType<MailboxAddress>().Select(a => a.Address));
+                        envelopeRecips.AddRange(mimeMessage.Bcc.OfType<MailboxAddress>().Select(a => a.Address));
+                    }
+                    if (!envelopeRecips.Any())
+                    {
+                        return BadRequest("No recipients specified. Provide a 'to' query parameter or To/Cc/Bcc headers in the EML.");
+                    }
+                }
+
+                this.server.SendRaw(mimeMessage, envelopeFrom, envelopeRecips.Distinct().ToArray());
+                return Ok();
+            }
+
+            // Handle text/html or multipart/form-data
             if (HttpContext.Request.ContentType?.StartsWith("text/html") == true)
             {
                 bodyHtml = await HttpContext.Request.Body.ReadStringAsync(Encoding.UTF8);
             }
 
-            Dictionary<string, string> headers = new Dictionary<string, string>();
+            Dictionary<string, string> customHeaders = new Dictionary<string, string>();
+            if (!string.IsNullOrEmpty(headers))
+            {
+                try
+                {
+                    customHeaders = JsonSerializer.Deserialize<Dictionary<string, string>>(headers);
+                }
+                catch (JsonException ex)
+                {
+                    return BadRequest($"Invalid headers JSON: {ex.Message}");
+                }
+            }
       
-            var toRecips = to?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-            var ccRecips = cc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
-            var bccRecips = bcc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+            var toRecipients = to?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+            var ccRecipients = cc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
+            var bccRecipients = bcc?.Split(",", StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries) ?? [];
 
-            List<string> envelopeRecips = deliverToAll ? [.. toRecips, .. ccRecips, .. bccRecips] : [.. toRecips];
+            List<string> envelopeRecipients = deliverToAll ? [.. toRecipients, .. ccRecipients, .. bccRecipients] : [.. toRecipients];
 
             // Process attachments if provided
             var attachmentInfos = await ProcessAttachments(attachments);
 
-            this.server.Send(headers,
-                toRecips,
-                ccRecips,
-                from, envelopeRecips.Distinct().ToArray(), subject, bodyHtml, attachmentInfos);
+            this.server.Send(customHeaders,
+                toRecipients,
+                ccRecipients,
+                from, envelopeRecipients.Distinct().ToArray(), subject, bodyHtml, attachmentInfos);
 
             return Ok();
         }

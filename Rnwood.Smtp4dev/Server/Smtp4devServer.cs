@@ -992,5 +992,17 @@ namespace Rnwood.Smtp4dev.Server
 
             relaySmtpClient.Send(message, MailboxAddress.Parse(from), envelopeRecipients.Select(t => MailboxAddress.Parse(t)));
         }
+
+        public void SendRaw(MimeMessage message, string from, string[] envelopeRecipients)
+        {
+            var relaySmtpClient = this.relaySmtpClientFactory(this.relayOptions.CurrentValue);
+
+            if (relaySmtpClient == null)
+            {
+                throw new InvalidOperationException("Relay SMTP server must be configured to send messages.");
+            }
+
+            relaySmtpClient.Send(message, MailboxAddress.Parse(from), envelopeRecipients.Select(t => MailboxAddress.Parse(t)));
+        }
     }
 }
