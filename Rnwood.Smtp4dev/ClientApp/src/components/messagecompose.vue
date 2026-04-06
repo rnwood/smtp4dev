@@ -1,48 +1,82 @@
 <template>
     <div style="display: flex; flex-direction: column; gap: 12px;">
 
-        <el-form size="small">
-            <el-form-item label="From">
-                <el-input v-if="fromChoices.length <= 1" v-model="from" />
-                <el-select v-if="fromChoices.length > 1" filterable allow-create v-model="from">
-                    <el-option v-for="fromChoice in fromChoices"
-                               :key="fromChoice"
-                               :label="fromChoice"
-                               :value="fromChoice" />
-                </el-select>
-            </el-form-item>
-            <el-form-item label="To">
-                <el-input v-model="to" />
-            </el-form-item>
-            <el-form-item label="CC">
-                <el-input v-model="cc" />
-            </el-form-item>
-            <el-form-item>
-                <el-checkbox v-model="deliverToAll">Deliver to all recipients</el-checkbox>
-            </el-form-item>
-            <el-form-item label="BCC" v-if="deliverToAll">
-                <el-input v-model="bcc" />
-            </el-form-item>
+        <el-tabs v-if="!replyToMessage" v-model="sendMode">
+            <el-tab-pane label="Compose" name="compose" />
+            <el-tab-pane label="Send EML file" name="eml" />
+        </el-tabs>
+
+        <!-- Compose mode -->
+        <template v-if="sendMode === 'compose'">
+            <el-form size="small">
+                <el-form-item label="From">
+                    <el-input v-if="fromChoices.length <= 1" v-model="from" />
+                    <el-select v-if="fromChoices.length > 1" filterable allow-create v-model="from">
+                        <el-option v-for="fromChoice in fromChoices"
+                                   :key="fromChoice"
+                                   :label="fromChoice"
+                                   :value="fromChoice" />
+                    </el-select>
+                </el-form-item>
+                <el-form-item label="To">
+                    <el-input v-model="to" />
+                </el-form-item>
+                <el-form-item label="CC">
+                    <el-input v-model="cc" />
+                </el-form-item>
+                <el-form-item>
+                    <el-checkbox v-model="deliverToAll">Deliver to all recipients</el-checkbox>
+                </el-form-item>
+                <el-form-item label="BCC" v-if="deliverToAll">
+                    <el-input v-model="bcc" />
+                </el-form-item>
 
 
-            <el-form-item label="Subject">
-                <el-input v-model="subject" />
-            </el-form-item>
+                <el-form-item label="Subject">
+                    <el-input v-model="subject" />
+                </el-form-item>
 
-            <el-form-item label="Attachments">
-                <el-upload
-                    ref="upload"
-                    v-model:file-list="attachments"
-                    :auto-upload="false"
-                    multiple
-                    :on-remove="handleRemove"
-                    :on-change="handleChange">
-                    <el-button type="primary" size="small">Choose Files</el-button>
-                </el-upload>
-            </el-form-item>
-        </el-form>
+                <el-form-item label="Attachments">
+                    <el-upload
+                        ref="upload"
+                        v-model:file-list="attachments"
+                        :auto-upload="false"
+                        multiple
+                        :on-remove="handleRemove"
+                        :on-change="handleChange">
+                        <el-button type="primary" size="small">Choose Files</el-button>
+                    </el-upload>
+                </el-form-item>
+            </el-form>
 
-        <quillEditor style="height: 50vh" ref="editor"  content-type="html"></quillEditor>
+            <quillEditor style="height: 50vh" ref="editor"  content-type="html"></quillEditor>
+        </template>
+
+        <!-- Send EML file mode -->
+        <template v-if="sendMode === 'eml'">
+            <el-form size="small">
+                <el-form-item label="EML file">
+                    <el-upload
+                        ref="emlUpload"
+                        v-model:file-list="emlFiles"
+                        :auto-upload="false"
+                        :limit="1"
+                        accept=".eml,message/rfc822"
+                        :on-exceed="handleEmlExceed">
+                        <el-button type="primary" size="small">Choose EML file</el-button>
+                    </el-upload>
+                </el-form-item>
+                <el-form-item label="From override">
+                    <el-input v-model="emlFrom" placeholder="Leave empty to use From header in EML" />
+                </el-form-item>
+                <el-form-item label="To override">
+                    <el-input v-model="emlTo" placeholder="Leave empty to use To header in EML" />
+                </el-form-item>
+                <el-form-item>
+                    <el-checkbox v-model="deliverToAll">Deliver to all recipients</el-checkbox>
+                </el-form-item>
+            </el-form>
+        </template>
 
         <div style="display: flex; justify-content: end;">
             <el-button @click="send" type="primary" :loading="sendInProgress">Send</el-button>
@@ -58,7 +92,7 @@
     import Message from '../ApiClient/Message';
     import MessagesController from '../ApiClient/MessagesController';
     import { ElNotification } from 'element-plus';
-    import type { UploadFile, UploadUserFile } from 'element-plus';
+    import type { UploadFile, UploadInstance, UploadUserFile } from 'element-plus';
 
     @Component({ components: { quillEditor: QuillEditor } })
     class MessageCompose extends Vue {
@@ -72,6 +106,11 @@
         sendInProgress = false;
         fromChoices: string[] = [];
         attachments: UploadUserFile[] = [];
+
+        sendMode: 'compose' | 'eml' = 'compose';
+        emlFiles: UploadUserFile[] = [];
+        emlFrom = "";
+        emlTo = "";
 
         @Prop({ default: null })
         replyToMessage: Message | null = null;
@@ -95,21 +134,40 @@
             // File change is handled automatically by el-upload
         }
 
+        handleEmlExceed() {
+            (this.$refs.emlUpload as UploadInstance).clearFiles();
+        }
+
         async send() {
             try {
                 this.sendInProgress = true
 
-                const body = (this.$refs.editor as any).getHTML();
-
-                // Convert UploadUserFile to File objects
-                const files: File[] = this.attachments
-                    .filter(f => f.raw)
-                    .map(f => f.raw as File);
-
-                if (this.replyToMessage) {
-                    await new MessagesController().reply(this.replyToMessage?.id, this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body, files);
+                if (this.sendMode === 'eml') {
+                    if (this.emlFiles.length === 0 || !this.emlFiles[0].raw) {
+                        ElNotification.error({ title: "Send Failed", message: "Please select an EML file." });
+                        return;
+                    }
+                    const file = this.emlFiles[0].raw as File;
+                    const arrayBuffer = await file.arrayBuffer();
+                    await new MessagesController().sendRaw(
+                        arrayBuffer,
+                        this.emlFrom || undefined,
+                        this.emlTo || undefined,
+                        this.deliverToAll
+                    );
                 } else {
-                    await new MessagesController().send(this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body, files);
+                    const body = (this.$refs.editor as any).getHTML();
+
+                    // Convert UploadUserFile to File objects
+                    const files: File[] = this.attachments
+                        .filter(f => f.raw)
+                        .map(f => f.raw as File);
+
+                    if (this.replyToMessage) {
+                        await new MessagesController().reply(this.replyToMessage?.id, this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body, files);
+                    } else {
+                        await new MessagesController().send(this.from, this.to, this.cc, this.bcc, this.deliverToAll, this.subject, body, files);
+                    }
                 }
                 
                 ElNotification.success({ title: "Message sent" });
