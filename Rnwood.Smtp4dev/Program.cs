@@ -56,6 +56,16 @@ namespace Rnwood.Smtp4dev
 
         public static async Task Main(string[] args)
         {
+            // Register encoding provider for legacy code pages (ISO-8859-8-i, ISO-8859-1, cp1252, etc.)
+            // This must be done before any encoding operations occur
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+            // Re-enable UTF-7 encoding lookup by name for legacy email messages.
+            // .NET 5+ marks UTF-7 as obsolete but the encoding is still accessible via Encoding.UTF7.
+            // Some email clients encode headers/bodies as utf-7 and MimeKit resolves charsets by name,
+            // so we register a provider that maps the utf-7 name to the built-in instance.
+            System.Text.Encoding.RegisterProvider(new Utf7EncodingProvider());
+
             bool isHelpRequest = args.Any(a => a == "-h" || a == "--help" || a == "-?");
 
             if (!isHelpRequest && args.Contains("--install-service"))
@@ -507,5 +517,76 @@ namespace Rnwood.Smtp4dev
     internal partial class SettingsDebugInfoSerializationContext : JsonSerializerContext
     {
 
+    }
+
+    /// <summary>
+    /// Re-enables UTF-7 encoding for legacy email parsing on .NET 9+.
+    ///
+    /// Background: .NET 9+ blocks <c>Encoding.GetEncoding("utf-7")</c> and
+    /// <c>Encoding.GetEncoding(65000)</c> with a <see cref="NotSupportedException"/>
+    /// before registered providers are consulted for the codepage path.
+    /// However, the NAME-based path (<c>Encoding.GetEncoding(string)</c>) DOES
+    /// consult providers first.
+    ///
+    /// MimeKit resolves charset names by converting "utf-7" → codepage 65000 and
+    /// calling <c>Encoding.GetEncoding(65000)</c> — which throws. To work around this
+    /// we return a <see cref="Utf7WrapperEncoding"/> whose <c>CodePage</c> is set to
+    /// a private-use value (65002) that is NOT blocked by .NET. MimeKit then caches
+    /// "utf-7" → 65002 and calls <c>Encoding.GetEncoding(65002)</c>, which our
+    /// provider intercepts and returns the working wrapper.
+    /// </summary>
+    internal sealed class Utf7EncodingProvider : System.Text.EncodingProvider
+    {
+        private static readonly Utf7WrapperEncoding _instance = new();
+
+        public override System.Text.Encoding GetEncoding(string name)
+        {
+            if (name is null) return null;
+            return name.Equals("utf-7", StringComparison.OrdinalIgnoreCase)
+                || name.Equals("utf7", StringComparison.OrdinalIgnoreCase)
+                || name.Equals("unicode-1-1-utf-7", StringComparison.OrdinalIgnoreCase)
+                || name.Equals("csunicode11utf7", StringComparison.OrdinalIgnoreCase)
+                ? _instance : null;
+        }
+
+        // 65002 is our private-use stand-in for UTF-7; it is not in .NET's internal
+        // encoding table so providers ARE consulted for it.
+        public override System.Text.Encoding GetEncoding(int codepage)
+            => codepage == 65002 ? _instance : null;
+    }
+
+    /// <summary>
+    /// A thin wrapper around <see cref="System.Text.Encoding.UTF7"/> that reports
+    /// codepage 65002 instead of 65000, allowing it to be retrieved via
+    /// <c>Encoding.GetEncoding(65002)</c> without hitting .NET 9+'s UTF-7 block.
+    /// All actual encoding/decoding is delegated to the real UTF-7 encoding.
+    /// </summary>
+    internal sealed class Utf7WrapperEncoding : System.Text.Encoding
+    {
+#pragma warning disable SYSLIB0001
+        private static readonly System.Text.Encoding Inner = System.Text.Encoding.UTF7;
+#pragma warning restore SYSLIB0001
+
+        // Report 65002 so MimeKit caches this codepage instead of the blocked 65000.
+        public override int CodePage => 65002;
+        public override string WebName => "utf-7";
+        public override string EncodingName => "Unicode (UTF-7)";
+        public override string HeaderName => "utf-7";
+        public override string BodyName => "utf-7";
+        public override bool IsMailNewsDisplay => true;
+        public override bool IsMailNewsSave => true;
+
+        public override int GetByteCount(char[] chars, int index, int count)
+            => Inner.GetByteCount(chars, index, count);
+        public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex)
+            => Inner.GetBytes(chars, charIndex, charCount, bytes, byteIndex);
+        public override int GetCharCount(byte[] bytes, int index, int count)
+            => Inner.GetCharCount(bytes, index, count);
+        public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex)
+            => Inner.GetChars(bytes, byteIndex, byteCount, chars, charIndex);
+        public override int GetMaxByteCount(int charCount) => Inner.GetMaxByteCount(charCount);
+        public override int GetMaxCharCount(int byteCount) => Inner.GetMaxCharCount(byteCount);
+        public override System.Text.Decoder GetDecoder() => Inner.GetDecoder();
+        public override System.Text.Encoder GetEncoder() => Inner.GetEncoder();
     }
 }
