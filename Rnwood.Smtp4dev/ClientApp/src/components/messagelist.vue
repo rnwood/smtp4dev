@@ -22,14 +22,14 @@
             <el-button-group>
                 <el-button icon="Delete"
                            v-on:click="deleteSelected"
-                           :disabled="!selectedmessage"
-                           title="Delete">Delete</el-button>
+                           :disabled="selectedMessages.length === 0"
+                           title="Delete selected">Delete<span v-if="selectedMessages.length > 1"> ({{selectedMessages.length}})</span></el-button>
 
                 <el-button v-on:click="relaySelected"
                            icon="d-arrow-right"
-                           :disabled="!selectedmessage || !isRelayAvailable"
+                           :disabled="selectedMessages.length === 0 || !isRelayAvailable"
                            :loading="isRelayInProgress"
-                           title="Relay">Relay...</el-button>
+                           title="Relay selected">Relay...<span v-if="selectedMessages.length > 1"> ({{selectedMessages.length}})</span></el-button>
             </el-button-group>
 
             <el-button-group>
@@ -91,16 +91,16 @@
                   :empty-text="emptyText"
                   highlight-current-row
                   @current-change="handleCurrentChange"
+                  @selection-change="handleSelectionChange"
                   @sort-change="sort"
                   :default-sort="{ prop: 'receivedDate', order: 'descending' }"
                   class="table"
-                  type="selection"
-                  reserve-selection="true"
                   row-key="id"
                   :row-class-name="getRowClass"
                   :row-attrs="getRowAttrs"
                   ref="table"
                   stripe>
+            <el-table-column type="selection" width="40" reserve-selection />
             <el-table-column property="receivedDate"
                              label="Received"
                              width="160"
@@ -231,6 +231,7 @@
 
         error: Error | null = null;
         selectedmessage: MessageSummary | null = null;
+        selectedMessages: MessageSummary[] = [];
         searchTerm: string = "";
         loading: boolean = true;
         availableMailboxes: Mailbox[] | null = null;
@@ -240,6 +241,10 @@
         selectMessage(message: MessageSummary) {
             (this.$refs.table as TableInstance).setCurrentRow(message);
             this.handleCurrentChange(message);
+        }
+
+        handleSelectionChange(selection: MessageSummary[]) {
+            this.selectedMessages = selection;
         }
 
         @Emit("selected-message-changed")
@@ -280,19 +285,24 @@
         }
 
         async relaySelected() {
-            if (this.selectedmessage == null) {
+            if (this.selectedMessages.length === 0) {
                 return;
             }
+
+            const isBulk = this.selectedMessages.length > 1;
+            const defaultRecipients = [...new Set(this.selectedMessages.flatMap(m => m.to))].join(",");
 
             let emails: string[];
 
             try {
                 let dialogResult = await ElMessageBox.prompt(
-                    "Email address(es) to relay to (separate multiple with ,)",
-                    "Relay Message",
+                    isBulk
+                        ? `Email address(es) to relay ${this.selectedMessages.length} messages to (separate multiple with ,)`
+                        : "Email address(es) to relay to (separate multiple with ,)",
+                    isBulk ? `Relay ${this.selectedMessages.length} Messages` : "Relay Message",
                     {
                         confirmButtonText: "OK",
-                        inputValue: this.selectedmessage.to.join(","),
+                        inputValue: defaultRecipients,
                         cancelButtonText: "Cancel",
                         inputPattern: /[^, ]+(, *[^, ]+)*/,
                         inputErrorMessage: "Invalid email addresses",
@@ -306,43 +316,77 @@
 
             try {
                 this.isRelayInProgress = true;
-                await new MessagesController().relayMessage(this.selectedmessage.id, {
-                    overrideRecipientAddresses: emails,
-                });
+                const controller = new MessagesController();
+                let successCount = 0;
+                const errors: string[] = [];
 
-                ElNotification.success({
-                    title: "Relay Message Success",
-                    message: "Completed OK",
-                });
-            } catch (e: any) {
-                const message = e.response?.data?.detail ?? e.message;
+                for (const msg of this.selectedMessages) {
+                    try {
+                        await controller.relayMessage(msg.id, { overrideRecipientAddresses: emails });
+                        successCount++;
+                    } catch (e: any) {
+                        errors.push(e.response?.data?.detail ?? e.message);
+                    }
+                }
 
-                ElNotification.error({ title: "Relay Message Failed", message: message });
+                if (errors.length === 0) {
+                    ElNotification.success({
+                        title: "Relay Success",
+                        message: isBulk ? `${successCount} messages relayed successfully` : "Completed OK",
+                    });
+                } else {
+                    if (successCount > 0) {
+                        ElNotification.warning({
+                            title: "Relay Partial Success",
+                            message: `${successCount} succeeded, ${errors.length} failed: ${errors[0]}`,
+                        });
+                    } else {
+                        ElNotification.error({ title: "Relay Failed", message: errors[0] });
+                    }
+                }
             } finally {
                 this.isRelayInProgress = false;
             }
         }
 
         async deleteSelected() {
-            if (this.selectedmessage == null) {
+            if (this.selectedMessages.length === 0) {
                 return;
             }
 
+            const isBulk = this.selectedMessages.length > 1;
+
+            if (isBulk) {
+                try {
+                    await ElMessageBox.confirm(`Delete ${this.selectedMessages.length} selected messages?`);
+                } catch {
+                    return;
+                }
+            }
+
             this.loading = true;
+            const toDelete = [...this.selectedMessages];
 
-            let messageToDelete = this.selectedmessage;
-
-            let nextIndex = this.messages.indexOf(messageToDelete) + 1;
-            if (nextIndex < this.messages.length) {
-                this.selectMessage(this.messages[nextIndex]);
+            // Move current row selection to next undeleted message
+            if (this.selectedmessage) {
+                const deletingCurrent = toDelete.some(m => m.id === this.selectedmessage?.id);
+                if (deletingCurrent) {
+                    const nextMsg = this.messages.find(m => !toDelete.some(d => d.id === m.id) && this.messages.indexOf(m) > this.messages.indexOf(this.selectedmessage!));
+                    if (nextMsg) {
+                        this.selectMessage(nextMsg);
+                    } else {
+                        this.handleCurrentChange(null);
+                    }
+                }
             }
 
             try {
-                await new MessagesController().delete(messageToDelete.id);
+                const controller = new MessagesController();
+                await Promise.all(toDelete.map(m => controller.delete(m.id)));
                 await this.refresh(false);
             } catch (e: any) {
                 ElNotification.error({
-                    title: "Delete Message Failed",
+                    title: "Delete Failed",
                     message: e.message,
                 });
             } finally {
