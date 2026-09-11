@@ -478,6 +478,59 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             Assert.Equal("admin@example.com", result.Results[0].To[1]); // Should NOT have leading space
             Assert.DoesNotContain(result.Results[0].To, email => email.StartsWith(" "));
         }
+
+        [Fact]
+        public async Task ImportMessage_AssignsValidImapUid()
+        {
+            // Arrange
+            var sqliteForTesting = new SqliteInMemory();
+            var context = new Smtp4devDbContext(sqliteForTesting.ContextOptions);
+            context.Database.Migrate();
+
+            var messagesRepository = new MessagesRepository(Substitute.For<ITaskQueue>(), Substitute.For<NotificationsHub>(), context);
+            var messagesController = new MessagesController(messagesRepository, null, new MimeProcessingService());
+
+            string emlContent = @"From: sender@example.com
+To: recipient@example.com
+Subject: Test EML Import
+Date: Wed, 01 Jan 2025 12:00:00 +0000
+Content-Type: text/plain; charset=utf-8
+
+Test body content";
+            byte[] emlBytes = Encoding.UTF8.GetBytes(emlContent);
+
+            var httpContext = new Microsoft.AspNetCore.Http.DefaultHttpContext();
+            httpContext.Request.Body = new MemoryStream(emlBytes);
+            messagesController.ControllerContext = new ControllerContext
+            {
+                HttpContext = httpContext
+            };
+
+            // Act
+            var actionResult = await messagesController.ImportMessage();
+
+            // Assert
+            var okResult = Assert.IsType<OkObjectResult>(actionResult.Result);
+            Guid messageId = Assert.IsType<Guid>(okResult.Value);
+
+            var dbMessage = await context.Messages.FirstOrDefaultAsync(m => m.Id == messageId);
+            Assert.NotNull(dbMessage);
+            Assert.True(dbMessage.ImapUid >= 1, $"Expected ImapUid >= 1, but got {dbMessage.ImapUid}");
+
+            var imapState = await context.ImapState.FirstOrDefaultAsync();
+            Assert.NotNull(imapState);
+            Assert.Equal(dbMessage.ImapUid, imapState.LastUid);
+
+            // Verify IMAP_MessageInfo creation succeeds with the assigned ImapUid (throws ArgumentException if ImapUid < 1)
+            var imapMsgInfo = new LumiSoft.Net.IMAP.Server.IMAP_MessageInfo(
+                dbMessage.Id.ToString(),
+                dbMessage.ImapUid,
+                new[] { "Seen" },
+                dbMessage.Data.Length,
+                dbMessage.ReceivedDate
+            );
+            Assert.Equal(dbMessage.ImapUid, imapMsgInfo.UID);
+        }
     }
 
 }
