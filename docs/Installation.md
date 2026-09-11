@@ -17,7 +17,7 @@ winget install smtp4dev
 Or use the full package identifier:
 
 ```
-winget install RnwoodLtd.smtp4dev
+winget install Rnwood.Smtp4dev
 ```
 
 After installation, you can start smtp4dev by running:
