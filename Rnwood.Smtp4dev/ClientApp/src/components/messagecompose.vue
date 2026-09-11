@@ -134,8 +134,12 @@
             // File change is handled automatically by el-upload
         }
 
-        handleEmlExceed() {
-            (this.$refs.emlUpload as UploadInstance).clearFiles();
+        handleEmlExceed(files: File[]) {
+            const upload = this.$refs.emlUpload as UploadInstance;
+            upload.clearFiles();
+            if (files.length > 0) {
+                upload.handleStart(files[0]);
+            }
         }
 
         async send() {
@@ -191,6 +195,7 @@
             let body="";
 
             if (this.replyToMessage) {
+                this.sendMode = "compose";
 
                 this.subject = "Re: " + this.replyToMessage.subject;
                 this.from = this.replyToMessage.deliveredTo[0];
