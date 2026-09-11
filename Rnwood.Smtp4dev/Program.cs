@@ -56,6 +56,9 @@ namespace Rnwood.Smtp4dev
 
         public static async Task Main(string[] args)
         {
+            Encoding.RegisterProvider(CodePagesEncodingProvider.Instance);
+            Encoding.RegisterProvider(new Utf7EncodingProvider());
+
             bool isHelpRequest = args.Any(a => a == "-h" || a == "--help" || a == "-?");
 
             if (!isHelpRequest && args.Contains("--install-service"))
@@ -138,6 +141,51 @@ namespace Rnwood.Smtp4dev
                     else
                     {
                         await host.WaitForShutdownAsync();
+                    }
+
+                    internal sealed class Utf7EncodingProvider : EncodingProvider
+                    {
+                        private static readonly Encoding Instance = new Utf7WrapperEncoding();
+
+                        public override Encoding GetEncoding(string name)
+                        {
+                            if (name is null) return null;
+
+                            return name.Equals("utf-7", StringComparison.OrdinalIgnoreCase)
+                                || name.Equals("utf7", StringComparison.OrdinalIgnoreCase)
+                                || name.Equals("unicode-1-1-utf-7", StringComparison.OrdinalIgnoreCase)
+                                || name.Equals("csunicode11utf7", StringComparison.OrdinalIgnoreCase)
+                                ? Instance
+                                : null;
+                        }
+
+                        public override Encoding GetEncoding(int codepage) => codepage == 65002 ? Instance : null;
+                    }
+
+                    internal sealed class Utf7WrapperEncoding : Encoding
+                    {
+                #pragma warning disable SYSLIB0001
+                        private static readonly Encoding Inner = Encoding.UTF7;
+                #pragma warning restore SYSLIB0001
+
+                        public override int CodePage => 65002;
+                        public override string WebName => "utf-7";
+                        public override string EncodingName => "Unicode (UTF-7)";
+                        public override string HeaderName => "utf-7";
+                        public override string BodyName => "utf-7";
+                        public override bool IsMailNewsDisplay => true;
+                        public override bool IsMailNewsSave => true;
+
+                        public override int GetByteCount(char[] chars, int index, int count) => Inner.GetByteCount(chars, index, count);
+                        public override int GetBytes(char[] chars, int charIndex, int charCount, byte[] bytes, int byteIndex) =>
+                            Inner.GetBytes(chars, charIndex, charCount, bytes, byteIndex);
+                        public override int GetCharCount(byte[] bytes, int index, int count) => Inner.GetCharCount(bytes, index, count);
+                        public override int GetChars(byte[] bytes, int byteIndex, int byteCount, char[] chars, int charIndex) =>
+                            Inner.GetChars(bytes, byteIndex, byteCount, chars, charIndex);
+                        public override int GetMaxByteCount(int charCount) => Inner.GetMaxByteCount(charCount);
+                        public override int GetMaxCharCount(int byteCount) => Inner.GetMaxCharCount(byteCount);
+                        public override Decoder GetDecoder() => Inner.GetDecoder();
+                        public override Encoder GetEncoder() => Inner.GetEncoder();
                     }
                 }
                 Log.Information("Exiting");
