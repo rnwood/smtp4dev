@@ -56,7 +56,7 @@ namespace Rnwood.Smtp4dev.Desktop.Tests
                 //netcoreapp3.1
                 string folder = framework.TrimStart('.').Replace("CoreApp,Version=v", "").ToLower();
 
-                string mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev.Desktop/bin/Debug/{folder}/smtp4dev.dll");
+                string mainModule = Path.GetFullPath($"../../../../Rnwood.Smtp4dev.Desktop/bin/Debug/{folder}/Rnwood.Smtp4dev.Desktop.dll");
                 args.Insert(0, mainModule);
 
             }

@@ -182,12 +182,12 @@ stages:
           - powershell: |
               if ("$(platformName)" -like "win-*") {
                 '@echo off
-                "%~dp0smtp4dev.exe" %*' | Out-File "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.cmd" -Encoding ascii
+                "%~dp0smtp4dev.exe" %*' | Out-File "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.cmd" -Encoding ascii -Force
                 Copy-Item "$(Build.ArtifactStagingDirectory)/$(platformName)/smtp4dev.exe" "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.exe"
               } else {
                 '#!/bin/sh
                 script_dir=${0%/*}
-                exec "$script_dir/smtp4dev" "$@"' | Out-File "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev" -Encoding ascii
+                exec "$script_dir/smtp4dev" "$@"' | Out-File "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev" -Encoding ascii -Force
                 chmod +x "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev"
               }
               Compress-Archive -Path "$(Build.ArtifactStagingDirectory)/$(platformName)/*" -DestinationPath "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip"
@@ -563,6 +563,8 @@ stages:
               publishWebProjects: false
               zipAfterPublish: false
               arguments: '-c Release -r win-x64 -p:version=$(version) --self-contained -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
+          - powershell: Move-Item "$(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.exe" "$(Build.ArtifactStagingDirectory)/win-x64-desktop/smtp4dev.exe"
+            displayName: Rename desktop executable
           - powershell: |
               Copy-Item "$(Build.ArtifactStagingDirectory)/win-x64-desktop/smtp4dev.exe" "$(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.exe"
               Compress-Archive -Path "$(Build.ArtifactStagingDirectory)/win-x64-desktop/*" -DestinationPath "$(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip"
