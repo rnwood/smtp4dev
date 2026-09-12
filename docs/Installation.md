@@ -60,11 +60,11 @@ If you don't want to use the dotnet global tool or Docker (see below if you know
 |Rnwood.Smtp4dev-linux-arm | Linux ARM (Intel 32 bit) binary standalone |
 | Rnwood.Smtp4dev-win-arm | Windows ARM 32-bit binary standalone |
 
-- On Linux `chmod +x` the `Rnwood.Smtp4dev` file to make it executable
+- On Linux `chmod +x` the `smtp4dev` file to make it executable
 
 - Edit ``appsettings.json`` and set the port number you want the SMTP server to listen on.
 
-- Run `Rnwood.Smtp4dev` (`.exe` on Windows). (If you downloaded the ``noruntime`` version, you need the .NET Core 3.1 (.NET 6.0 if using smtp4dev version >= 3.2.x) runtime on your machine and you should execute ``dotnet Rnwood.Smtp4dev.dll`` to run it.)
+- Run `smtp4dev` (`.exe` on Windows). (If you downloaded the ``noruntime`` version, you need the .NET Core 3.1 (.NET 6.0 if using smtp4dev version >= 3.2.x) runtime on your machine and you should execute ``dotnet smtp4dev.dll`` to run it.)
 
 ## How to run smtp4dev as a dotnet global tool
 
@@ -158,4 +158,3 @@ Edit the application pool advanced settings and ensure:
 - 'Preload enabled' is set to 'True'.
 
 You can then access the site via the ports/hostname set in bindings that are set in IIS. If you see an error check the `Application` event log for details and you'll see any errors output from IIS.
-

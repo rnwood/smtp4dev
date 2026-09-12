@@ -1,6 +1,6 @@
 1. **Install smtp4dev** [by following the instruction here](Installation.md)
   
-2. **Run `Rnwood.Smtp4dev(.exe)`** (or if using the .NET tool or docker, it's different - see the link above)
+2. **Run `smtp4dev(.exe)`** (or if using the .NET tool or docker, it's different - see the link above)
 
 3. **Open the web interface in your browser**. 
 
