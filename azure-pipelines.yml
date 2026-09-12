@@ -174,6 +174,7 @@ stages:
               command: publish
               projects: Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj
               publishWebProjects: false
+              zipAfterPublish: false
               arguments: '-c Release $(buildArgs) -p:version=$(version) -o "$(Build.ArtifactStagingDirectory)/$(platformName)"'
             env:
               ${{ if ne(variables['Agent.OS'], 'Windows_NT') }}:
@@ -466,7 +467,13 @@ stages:
               targetPath: $(Agent.TempDirectory)/playwright-report
               artifact: 'PlaywrightReport_$(platformName)'
               publishLocation: 'pipeline'
-          - powershell: move-item $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip $(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev-$(platformName)-$(tag).zip
+          - powershell: |
+              if ("$(platformName)" -like "win-*") {
+                '@echo off
+                "%~dp0smtp4dev.exe" %*' | Out-File "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.cmd" -Encoding ascii
+              }
+              Compress-Archive -Path "$(Build.ArtifactStagingDirectory)/$(platformName)/*" -DestinationPath "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip"
+              Move-Item "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip" "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev-$(platformName)-$(tag).zip"
             displayName: Rename artifact
           - publish: $(Build.ArtifactStagingDirectory)/$(platformName)
             artifact: $(platformName)
@@ -547,6 +554,7 @@ stages:
               command: publish
               projects: "Rnwood.Smtp4dev.Desktop/Rnwood.Smtp4dev.Desktop.csproj"
               publishWebProjects: false
+              zipAfterPublish: false
               arguments: '-c Release -r win-x64 -p:version=$(version) --self-contained -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
           - task: ExtractFiles@1
             displayName: Extract files for E2E tests
@@ -563,7 +571,11 @@ stages:
               projects: Rnwood.Smtp4dev.Desktop.Tests
               configuration: release
               publishTestResults: true
-          - powershell: move-item $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip $(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip
+          - powershell: |
+              '@echo off
+              "%~dp0smtp4dev.exe" %*' | Out-File "$(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.cmd" -Encoding ascii
+              Compress-Archive -Path "$(Build.ArtifactStagingDirectory)/win-x64-desktop/*" -DestinationPath "$(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip"
+              Move-Item "$(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.zip" "$(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop-win-x64-$(tag).zip"
             displayName: Rename artifact
           - publish: $(Build.ArtifactStagingDirectory)/win-x64-desktop
             artifact: win-x64-desktop
