@@ -471,6 +471,11 @@ stages:
               if ("$(platformName)" -like "win-*") {
                 '@echo off
                 "%~dp0smtp4dev.exe" %*' | Out-File "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.cmd" -Encoding ascii
+              } else {
+                '#!/bin/sh
+                script_dir=${0%/*}
+                exec "$script_dir/smtp4dev" "$@"' | Out-File "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev" -Encoding ascii
+                chmod +x "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev"
               }
               Compress-Archive -Path "$(Build.ArtifactStagingDirectory)/$(platformName)/*" -DestinationPath "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip"
               Move-Item "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip" "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev-$(platformName)-$(tag).zip"
