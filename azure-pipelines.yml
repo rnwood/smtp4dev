@@ -187,7 +187,9 @@ stages:
               } else {
                 '#!/bin/sh
                 script_dir=${0%/*}
-                exec "$script_dir/smtp4dev" "$@"' | Out-File "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev" -Encoding ascii -Force
+                exec "$script_dir/smtp4dev" "$@"' | Out-File "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.new" -Encoding ascii -Force
+                Remove-Item "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev" -Force -ErrorAction SilentlyContinue
+                Move-Item "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.new" "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev"
                 chmod +x "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev"
               }
               Compress-Archive -Path "$(Build.ArtifactStagingDirectory)/$(platformName)/*" -DestinationPath "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip"
@@ -563,7 +565,13 @@ stages:
               publishWebProjects: false
               zipAfterPublish: false
               arguments: '-c Release -r win-x64 -p:version=$(version) --self-contained -p:PublishSingleFile=true -o "$(Build.ArtifactStagingDirectory)/win-x64-desktop"'
-          - powershell: Move-Item "$(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.exe" "$(Build.ArtifactStagingDirectory)/win-x64-desktop/smtp4dev.exe"
+          - powershell: |
+              $desktopPath = "$(Build.ArtifactStagingDirectory)/win-x64-desktop"
+              if (Test-Path "$desktopPath/Rnwood.Smtp4dev.Desktop.exe") {
+                Move-Item "$desktopPath/Rnwood.Smtp4dev.Desktop.exe" "$desktopPath/smtp4dev.exe"
+              } elseif (!(Test-Path "$desktopPath/smtp4dev.exe")) {
+                throw "Neither desktop executable was found in $desktopPath"
+              }
             displayName: Rename desktop executable
           - powershell: |
               Copy-Item "$(Build.ArtifactStagingDirectory)/win-x64-desktop/smtp4dev.exe" "$(Build.ArtifactStagingDirectory)/win-x64-desktop/Rnwood.Smtp4dev.Desktop.exe"
