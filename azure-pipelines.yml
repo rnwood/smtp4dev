@@ -201,6 +201,9 @@ stages:
             inputs:
               archiveFilePatterns: '$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.zip'
               destinationFolder: $(Agent.TempDirectory)/e2e
+          - powershell: chmod +x "$(Agent.TempDirectory)/e2e/smtp4dev"
+            displayName: Make extracted server executable
+            condition: and(succeeded(), eq(variables['runTests'], true), ne(variables['Agent.OS'], 'Windows_NT'))
           - task: DotNetCoreCLI@2
             condition: and(succeeded(), eq(variables['runTests'], true))
             displayName: Run SmtpServer Tests
