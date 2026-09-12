@@ -11,6 +11,8 @@ on:
 jobs:
   publish:
     if: github.event_name == 'workflow_dispatch' || (!github.event.release.prerelease && !contains(github.event.release.tag_name, '-ci'))
+    permissions:
+      contents: read
     runs-on: windows-latest
     steps:
       - name: Resolve release metadata
