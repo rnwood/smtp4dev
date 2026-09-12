@@ -1,7 +1,7 @@
 name: Publish to WinGet - stable builds
 on:
-#  release:
-#    types: [released]
+  release:
+    types: [published]
   workflow_dispatch:
     inputs:
       version:
@@ -10,21 +10,35 @@ on:
         description: Version
 jobs:
   publish:
+    if: github.event_name == 'workflow_dispatch' || (!github.event.release.prerelease && !contains(github.event.release.tag_name, '-ci'))
+    permissions:
+      contents: read
     runs-on: windows-latest
     steps:
+      - name: Resolve release metadata
+        id: release
+        shell: pwsh
+        run: |
+          $releaseTag = "${{ github.event.release.tag_name }}"
+          if ([string]::IsNullOrWhiteSpace($releaseTag)) {
+            $releaseTag = "${{ inputs.version }}"
+          }
+          $version = $releaseTag.TrimStart('v')
+          "release_tag=$releaseTag" >> $env:GITHUB_OUTPUT
+          "version=$version" >> $env:GITHUB_OUTPUT
       - name: Publish smtp4dev to WinGet
         uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: Rnwood.Smtp4dev
           installers-regex: 'Rnwood.Smtp4dev-win-(x64|arm64)-.*\.zip'
           token: ${{ secrets.WINGET_TOKEN }}
-          version: ${{ inputs.version }}
-          release-tag: ${{ inputs.version }}
+          version: ${{ steps.release.outputs.version }}
+          release-tag: ${{ steps.release.outputs.release_tag }}
       - name: Publish smtp4dev.Desktop to WinGet
         uses: vedantmgoyal9/winget-releaser@main
         with:
           identifier: Rnwood.Smtp4dev.Desktop
           installers-regex: 'Rnwood.Smtp4dev.Desktop-win-x64-.*\.zip'
           token: ${{ secrets.WINGET_TOKEN }}
-          version: ${{ inputs.version }}
-          release-tag: ${{ inputs.version }}
+          version: ${{ steps.release.outputs.version }}
+          release-tag: ${{ steps.release.outputs.release_tag }}
