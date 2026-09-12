@@ -20,6 +20,7 @@ public class EncodingProviderTests
     [InlineData("iso-8859-1", "é")]
     [InlineData("iso-8859-8", "א")]
     [InlineData("windows-1252", "€")]
+    [InlineData("windows-1251", "Привет")]
     public void LegacyCodePageEncoding_RoundTrips(string name, string value)
     {
         var encoding = Encoding.GetEncoding(name);
@@ -47,6 +48,7 @@ public class EncodingProviderTests
     [InlineData("iso-8859-8", "שלום")]
     [InlineData("iso-8859-8-i", "שלום")]
     [InlineData("windows-1252", "H€llo")]
+    [InlineData("windows-1251", "Привет")]
     [InlineData("utf-7", "Héllo")]
     public void MimeMessage_UsesRegisteredEncodingForTextBody(string charset, string expectedBody)
     {
