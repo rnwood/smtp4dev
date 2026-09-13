@@ -487,6 +487,7 @@
 
         @Watch("searchTerm")
         onSearchTermChanged() {
+            this.page = 1;
             this.debouncedDoSearch();
             // Don't update URL for search - filters not stored in URL
         }
