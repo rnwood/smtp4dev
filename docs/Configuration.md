@@ -47,7 +47,7 @@ For arrays, use the format `ServerOptions__Users__0__User` where `Users` is the 
 
 ## Command Line Options
 
-To see the command line options, run `Rnwood.Smtp4dev(.exe)` or `Rnwood.Smtp4dev.Desktop(.exe)` with `--help`.
+To see the command line options, run `smtp4dev(.exe)` with `--help`.
 
 ## Mailbox Configuration
 
