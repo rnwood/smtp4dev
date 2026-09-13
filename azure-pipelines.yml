@@ -186,6 +186,7 @@ stages:
                 "%~dp0smtp4dev.exe" %*' | Out-File "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.cmd" -Encoding ascii -Force
                 Copy-Item "$(Build.ArtifactStagingDirectory)/$(platformName)/smtp4dev.exe" "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.exe"
               } else {
+                chmod +x "$(Build.ArtifactStagingDirectory)/$(platformName)/smtp4dev"
                 '#!/bin/sh
                 script_dir=${0%/*}
                 exec "$script_dir/smtp4dev" "$@"' | Out-File "$(Build.ArtifactStagingDirectory)/$(platformName)/Rnwood.Smtp4dev.new" -Encoding ascii -Force
