@@ -105,12 +105,15 @@ export default class MessagesController {
         return `${this.apiBaseUrl}/send?from=${encodeURIComponent(from)}&to=${encodeURIComponent(to)}&cc=${encodeURIComponent(cc)}&bcc=${encodeURIComponent(bcc)}&deliverToAll=${encodeURIComponent(deliverToAll)}&subject=${encodeURIComponent(subject)}`;
     }
 
-    public async send(from: string, to: string, cc: string, bcc: string, deliverToAll: boolean, subject: string, bodyHtml: string, attachments?: File[]): Promise<void> {
-        // If attachments provided, use multipart/form-data, otherwise use text/html
-        if (attachments && attachments.length > 0) {
+    public async send(from: string, to: string, cc: string, bcc: string, deliverToAll: boolean, subject: string, bodyHtml: string, attachments?: File[], customHeaders?: Record<string, string>): Promise<void> {
+        // If attachments or custom headers provided, use multipart/form-data, otherwise use text/html
+        if ((attachments && attachments.length > 0) || customHeaders) {
             const formData = new FormData();
             formData.append('bodyHtml', bodyHtml);
-            attachments.forEach(file => {
+            if (customHeaders && Object.keys(customHeaders).length > 0) {
+                formData.append('headers', JSON.stringify(customHeaders));
+            }
+            attachments?.forEach(file => {
                 formData.append('attachments', file);
             });
             return (await axios.post(this.send_url(from, to, cc, bcc, deliverToAll, subject), formData, { 
@@ -121,6 +124,20 @@ export default class MessagesController {
                 headers: { "Content-Type": "text/html" } 
             })).data as void;
         }
+    }
+
+    public async sendRaw(emlContent: string | ArrayBuffer, from?: string, to?: string, deliverToAll?: boolean): Promise<void> {
+        let url = `${this.apiBaseUrl}/send`;
+        const params: string[] = [];
+        if (from) params.push(`from=${encodeURIComponent(from)}`);
+        if (to) params.push(`to=${encodeURIComponent(to)}`);
+        if (deliverToAll !== undefined) params.push(`deliverToAll=${encodeURIComponent(deliverToAll)}`);
+        if (params.length > 0) url += '?' + params.join('&');
+
+        const body = new Blob([emlContent], { type: 'message/rfc822' });
+        return (await axios.post(url, body, {
+            headers: { "Content-Type": "message/rfc822" }
+        })).data as void;
     }
 
     // get: api/Messages/${encodeURIComponent(id)}/part/${encodeURIComponent(partid)}/content  
