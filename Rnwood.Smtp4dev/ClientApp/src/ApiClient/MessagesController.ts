@@ -214,12 +214,12 @@ export default class MessagesController {
     }
 
     // put: api/Messages
-    public import_url(mailboxName: string): string {
-        return `${this.apiBaseUrl}?mailboxName=${encodeURIComponent(mailboxName)}`;
+    public import_url(mailboxName: string, folderName: string = "INBOX"): string {
+        return `${this.apiBaseUrl}?mailboxName=${encodeURIComponent(mailboxName)}&folderName=${encodeURIComponent(folderName)}`;
     }
 
-    public async import(emlContent: string, mailboxName: string): Promise<string> {
-        return (await axios.put(this.import_url(mailboxName), emlContent, {
+    public async import(emlContent: string, mailboxName: string, folderName: string = "INBOX"): Promise<string> {
+        return (await axios.put(this.import_url(mailboxName, folderName), emlContent, {
             headers: { 
                 'Content-Type': 'message/rfc822' 
             }
