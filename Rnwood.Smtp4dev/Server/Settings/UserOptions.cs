@@ -12,6 +12,8 @@ namespace Rnwood.Smtp4dev.Server.Settings
         public string Password { get; set; }
 
         public string DefaultMailbox { get; set; } = "Default";
+
+        public bool AllowAccessToOtherMailboxes { get; set; } = false;
     }
 
     public class UserFromStringConverter : TypeConverter
