@@ -70,18 +70,16 @@ namespace Rnwood.Smtp4dev.Server
                     }
 
                     // Create any superior hierarchical names that are needed (RFC 3501 6.3.3)
-                    foreach (var name in ImapFolderNames.GetAncestors(folderName).Append(folderName))
+                    foreach (var name in ImapFolderNames.GetAncestors(folderName).Append(folderName)
+                        .Where(n => !mailbox.MailboxFolders.Any(f => f.Name == n)))
                     {
-                        if (!mailbox.MailboxFolders.Any(f => f.Name == name))
+                        log.Information("Creating folder {folder} in mailbox {mailboxName}", name, mailbox.Name);
+                        mailbox.MailboxFolders.Add(new MailboxFolder
                         {
-                            log.Information("Creating folder {folder} in mailbox {mailboxName}", name, mailbox.Name);
-                            mailbox.MailboxFolders.Add(new MailboxFolder
-                            {
-                                Name = name,
-                                MailboxId = mailbox.Id,
-                                Mailbox = mailbox
-                            });
-                        }
+                            Name = name,
+                            MailboxId = mailbox.Id,
+                            Mailbox = mailbox
+                        });
                     }
 
                     dbContext.SaveChanges();
@@ -164,17 +162,15 @@ namespace Rnwood.Smtp4dev.Server
                     log.Information("Renaming folder {folder} to {newFolder} in mailbox {mailboxName}", currentName, newName, mailbox.Name);
 
                     // Create superior hierarchical names
-                    foreach (var ancestorName in ImapFolderNames.GetAncestors(newName))
+                    foreach (var ancestorName in ImapFolderNames.GetAncestors(newName)
+                        .Where(n => !mailbox.MailboxFolders.Any(f => f.Name == n)))
                     {
-                        if (!mailbox.MailboxFolders.Any(f => f.Name == ancestorName))
+                        mailbox.MailboxFolders.Add(new MailboxFolder
                         {
-                            mailbox.MailboxFolders.Add(new MailboxFolder
-                            {
-                                Name = ancestorName,
-                                MailboxId = mailbox.Id,
-                                Mailbox = mailbox
-                            });
-                        }
+                            Name = ancestorName,
+                            MailboxId = mailbox.Id,
+                            Mailbox = mailbox
+                        });
                     }
 
                     // Inferior hierarchical names must also be renamed (RFC 3501 6.3.5)
@@ -498,7 +494,7 @@ namespace Rnwood.Smtp4dev.Server
                         .Where(f => f.Mailbox.Name == mailboxName)
                         .Select(f => f.Name)
                         .ToList()
-                        .OrderBy(f => f == MailboxFolder.INBOX ? 0 : f == MailboxFolder.SENT ? 1 : 2).ThenBy(f => f, StringComparer.Ordinal)
+                        .OrderBy(SortDefaultFoldersFirst).ThenBy(f => f, StringComparer.Ordinal)
                         .ToList();
 
                     return folderNames
@@ -506,6 +502,21 @@ namespace Rnwood.Smtp4dev.Server
                         .Select(f => (f, new[] { folderNames.Any(c => ImapFolderNames.IsDescendantOf(c, f)) ? "\\HasChildren" : "\\HasNoChildren" }))
                         .ToList();
                 }
+            }
+
+            private static int SortDefaultFoldersFirst(string folderName)
+            {
+                if (folderName == MailboxFolder.INBOX)
+                {
+                    return 0;
+                }
+
+                if (folderName == MailboxFolder.SENT)
+                {
+                    return 1;
+                }
+
+                return 2;
             }
 
             private static void NotifyMessagesChanged(IServiceScope scope, string mailboxName)

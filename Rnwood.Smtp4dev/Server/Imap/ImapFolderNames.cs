@@ -60,8 +60,9 @@ namespace Rnwood.Smtp4dev.Server.Imap
                 _ => Regex.Escape(c.ToString())
             })) + "$";
 
-            var options = folderName == MailboxFolder.INBOX ? RegexOptions.IgnoreCase : RegexOptions.None;
-            return Regex.IsMatch(folderName, regex, options);
+            // The pattern comes from the client, so avoid backtracking and limit the execution time
+            var options = RegexOptions.NonBacktracking | (folderName == MailboxFolder.INBOX ? RegexOptions.IgnoreCase : RegexOptions.None);
+            return Regex.IsMatch(folderName, regex, options, TimeSpan.FromSeconds(1));
         }
     }
 }
