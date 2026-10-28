@@ -47,6 +47,14 @@
       "created_at": "2026-09-03T09:23:47Z",
       "repoId": 3171508,
       "pullRequestNo": 2117
+    },
+    {
+      "name": "michael-franz-bsi",
+      "id": 290762854,
+      "comment_id": 6466208586,
+      "created_at": "2026-10-28T10:09:23Z",
+      "repoId": 3171508,
+      "pullRequestNo": 2132
     }
   ]
 }
