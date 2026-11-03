@@ -2,7 +2,13 @@ using MailKit;
 using MailKit.Net.Imap;
 using MimeKit;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.Sockets;
+using System.Text;
+using System.Threading;
+using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -84,6 +90,84 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
         }
 
         [Fact]
+        public void EmptyListAndLSubPatternsReturnTheHierarchyRoot()
+        {
+            RunE2ETest(context =>
+            {
+                using var client = new TcpClient();
+                client.Connect("localhost", context.ImapPortNumber);
+                using var stream = client.GetStream();
+                using var reader = new StreamReader(stream, Encoding.ASCII, false, 1024, true);
+                using var writer = new StreamWriter(stream, Encoding.ASCII, 1024, true)
+                {
+                    AutoFlush = true,
+                    NewLine = "\r\n"
+                };
+
+                Assert.StartsWith("* OK", reader.ReadLine());
+
+                writer.WriteLine("a1 LOGIN user password");
+                ReadTaggedResponse(reader, "a1");
+
+                writer.WriteLine("a2 LIST \"\" \"\"");
+                Assert.Contains("* LIST (\\Noselect) \"/\" \"\"", ReadTaggedResponse(reader, "a2"));
+
+                writer.WriteLine("a3 LSUB \"\" \"\"");
+                Assert.Contains("* LSUB (\\Noselect) \"/\" \"\"", ReadTaggedResponse(reader, "a3"));
+
+                writer.WriteLine("a4 LOGOUT");
+                ReadTaggedResponse(reader, "a4");
+            });
+        }
+
+        [Fact]
+        public void ConcurrentCreateFolderOnlySucceedsOnce()
+        {
+            RunE2ETest(context =>
+            {
+                using var firstClient = CreateImapClientWithLogging();
+                using var secondClient = CreateImapClientWithLogging();
+                firstClient.Connect("localhost", context.ImapPortNumber);
+                firstClient.Authenticate("user", "password");
+                secondClient.Connect("localhost", context.ImapPortNumber);
+                secondClient.Authenticate("user", "password");
+
+                var roots = new[]
+                {
+                    firstClient.GetFolder(firstClient.PersonalNamespaces[0]),
+                    secondClient.GetFolder(secondClient.PersonalNamespaces[0])
+                };
+                using var start = new Barrier(roots.Length);
+                var createResults = roots.Select(root => Task.Factory.StartNew(() =>
+                {
+                    if (!start.SignalAndWait(TimeSpan.FromSeconds(30)))
+                    {
+                        throw new TimeoutException("Timed out waiting to start concurrent folder creation.");
+                    }
+
+                    try
+                    {
+                        root.Create("Concurrent", true);
+                        return true;
+                    }
+                    catch (ImapCommandException)
+                    {
+                        return false;
+                    }
+                }, CancellationToken.None, TaskCreationOptions.LongRunning, TaskScheduler.Default)).ToArray();
+
+                var results = Task.WhenAll(createResults).GetAwaiter().GetResult();
+
+                Assert.Single(results, created => created);
+                Assert.Single(results, created => !created);
+                Assert.Single(roots[0].GetSubfolders(false), folder => folder.FullName == "Concurrent");
+
+                firstClient.Disconnect(true);
+                secondClient.Disconnect(true);
+            });
+        }
+
+        [Fact]
         public void CreateSubfolder()
         {
             RunE2ETest(context =>
@@ -128,8 +212,41 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
                     // Default folders cannot be deleted
                     Assert.Throws<ImapCommandException>(() => root.GetSubfolder("Sent").Delete());
 
+                    var selectedFolder = root.Create("Selected", true);
+                    selectedFolder.Open(FolderAccess.ReadWrite);
+                    Assert.Throws<ImapCommandException>(() => selectedFolder.Delete());
+                    Assert.Contains(root.GetSubfolders(false), f => f.FullName == "Selected");
+
                     imapClient.Disconnect(true);
                 }
+            });
+        }
+
+        [Fact]
+        public void UidNextUsesTheGlobalAllocatorForAnEmptyFolder()
+        {
+            RunE2ETest(context =>
+            {
+                using var imapClient = CreateImapClientWithLogging();
+                imapClient.Connect("localhost", context.ImapPortNumber);
+                imapClient.Authenticate("user", "password");
+
+                imapClient.Inbox.Append(CreateMessage("UID seed " + Guid.NewGuid()), MessageFlags.None);
+
+                var root = imapClient.GetFolder(imapClient.PersonalNamespaces[0]);
+                var archiveFolder = root.Create("Archive", true);
+                imapClient.Inbox.Open(FolderAccess.ReadOnly);
+                var expectedUidNext = imapClient.Inbox.UidNext;
+                imapClient.Inbox.Close();
+
+                archiveFolder.Open(FolderAccess.ReadOnly);
+                var uidNext = archiveFolder.UidNext;
+
+                Assert.True(uidNext.HasValue);
+                Assert.Equal(expectedUidNext, uidNext);
+
+                archiveFolder.Close();
+                imapClient.Disconnect(true);
             });
         }
 
@@ -141,6 +258,25 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
             message.Subject = subject;
             message.Body = new TextPart() { Text = "Body of folder test" };
             return message;
+        }
+
+        private static string ReadTaggedResponse(StreamReader reader, string tag)
+        {
+            var lines = new List<string>();
+            string line;
+            do
+            {
+                line = reader.ReadLine();
+                if (line == null)
+                {
+                    throw new EndOfStreamException($"The IMAP server closed the connection before responding to {tag}.");
+                }
+
+                lines.Add(line);
+            }
+            while (!line.StartsWith(tag + " ", StringComparison.Ordinal));
+
+            return string.Join(Environment.NewLine, lines);
         }
     }
 }

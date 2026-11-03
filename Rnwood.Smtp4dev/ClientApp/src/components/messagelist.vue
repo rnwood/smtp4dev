@@ -540,9 +540,10 @@
             if (this.selectedMailbox) {
                 try {
                     this.availableFolders = await new MessagesController().getFolders(this.selectedMailbox);
-                    // Ensure INBOX folder exists, if not fall back to first available folder
-                    if (this.availableFolders.length > 0 && !this.availableFolders.includes("INBOX")) {
-                        this.selectedFolder = this.availableFolders[0];
+                    if (this.availableFolders.length > 0 && !this.availableFolders.includes(this.selectedFolder)) {
+                        this.selectedFolder = this.availableFolders.includes("INBOX")
+                            ? "INBOX"
+                            : this.availableFolders[0];
                     }
                 } catch (error) {
                     console.error("Failed to load folders:", error);
@@ -828,6 +829,11 @@
             if (this.connection) {
                 this.connection.on("messageschanged", async () => {
                     await this.refresh(true, true);
+                });
+                this.connection.on("folderschanged", async (mailbox: string) => {
+                    if (mailbox === this.selectedMailbox) {
+                        await this.loadFolders();
+                    }
                 });
                 this.connection.onServerChanged(async () => {
                     await this.refresh(true, true);

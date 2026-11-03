@@ -12,6 +12,7 @@ using Serilog;
 using Rnwood.Smtp4dev.Server.Settings;
 using Rnwood.Smtp4dev.Server.Imap;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.Sqlite;
 using System.IO;
 using Rnwood.Smtp4dev.DbModel;
 using Rnwood.Smtp4dev.Hubs;
@@ -82,8 +83,19 @@ namespace Rnwood.Smtp4dev.Server
                         });
                     }
 
-                    dbContext.SaveChanges();
+                    try
+                    {
+                        dbContext.SaveChanges();
+                    }
+                    catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+                    {
+                        log.Information(ex, "Folder {folder} was created concurrently in mailbox {mailboxName}", folderName, mailbox.Name);
+                        e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", $"Folder '{folderName}' already exists");
+                        return;
+                    }
+
                     NotifyMessagesChanged(scope, mailbox.Name);
+                    NotifyFoldersChanged(scope, mailbox.Name);
                 }
             }
 
@@ -109,6 +121,12 @@ namespace Rnwood.Smtp4dev.Server
                         return;
                     }
 
+                    if (ImapFolderNames.Normalize(this.session.SelectedFolderName) == folderName)
+                    {
+                        e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", $"Folder '{folderName}' is currently selected");
+                        return;
+                    }
+
                     if (mailbox.MailboxFolders.Any(f => ImapFolderNames.IsDescendantOf(f.Name, folderName)))
                     {
                         e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", $"Folder '{folderName}' has inferior hierarchical names");
@@ -120,6 +138,7 @@ namespace Rnwood.Smtp4dev.Server
                     dbContext.MailboxFolders.Remove(folder);
                     dbContext.SaveChanges();
                     NotifyMessagesChanged(scope, mailbox.Name);
+                    NotifyFoldersChanged(scope, mailbox.Name);
                 }
             }
 
@@ -140,6 +159,12 @@ namespace Rnwood.Smtp4dev.Server
                     return;
                 }
 
+                if (ImapFolderNames.Normalize(this.session.SelectedFolderName) == currentName)
+                {
+                    e.Response = new IMAP_r_ServerStatus(e.CmdTag, "NO", $"Folder '{currentName}' is currently selected");
+                    return;
+                }
+
                 using (var scope = this.serviceScopeFactory.CreateScope())
                 {
                     var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
@@ -153,9 +178,9 @@ namespace Rnwood.Smtp4dev.Server
                         return;
                     }
 
-                    if (mailbox.MailboxFolders.Any(f => f.Name == newName))
+                    if (ImapFolderNames.HasRenameCollision(mailbox.MailboxFolders.Select(f => f.Name), currentName, newName))
                     {
-                        e.Response = new IMAP_r_ServerStatus(e.CmdTag, "NO", $"Folder '{newName}' already exists");
+                        e.Response = new IMAP_r_ServerStatus(e.CmdTag, "NO", $"Renaming '{currentName}' would overwrite an existing folder");
                         return;
                     }
 
@@ -180,8 +205,19 @@ namespace Rnwood.Smtp4dev.Server
                     }
                     folder.Name = newName;
 
-                    dbContext.SaveChanges();
+                    try
+                    {
+                        dbContext.SaveChanges();
+                    }
+                    catch (DbUpdateException ex) when (IsUniqueConstraintViolation(ex))
+                    {
+                        log.Information(ex, "Folder {folder} could not be renamed to {newFolder} because the name was taken concurrently", currentName, newName);
+                        e.Response = new IMAP_r_ServerStatus(e.CmdTag, "NO", $"Folder '{newName}' already exists");
+                        return;
+                    }
+
                     NotifyMessagesChanged(scope, mailbox.Name);
+                    NotifyFoldersChanged(scope, mailbox.Name);
                 }
 
                 e.Response = new IMAP_r_ServerStatus(e.CmdTag, "OK", "RENAME completed");
@@ -196,19 +232,10 @@ namespace Rnwood.Smtp4dev.Server
                     var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
                     var dbContext = messagesRepository.DbContext;
                     var mailbox = GetMailbox(dbContext);
-
                     var targetFolder = mailbox.MailboxFolders.FirstOrDefault(f => f.Name == targetFolderName);
                     if (targetFolder == null)
                     {
                         e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", new IMAP_t_orc_Unknown("TRYCREATE"), $"Folder '{targetFolderName}' does not exist");
-                        return;
-                    }
-
-                    var imapState = dbContext.ImapState.SingleOrDefault();
-                    if (imapState == null)
-                    {
-                        log.Error("No IMAP state found in database");
-                        e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Internal server error during message processing");
                         return;
                     }
 
@@ -218,14 +245,12 @@ namespace Rnwood.Smtp4dev.Server
                         .Where(m => sourceIds.Contains(m.Id))
                         .OrderBy(m => m.ImapUid)
                         .ToList();
-
                     foreach (var source in sourceMessages)
                     {
-                        imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
-                        dbContext.Messages.Add(new DbModel.Message
+                        var copiedMessage = new DbModel.Message
                         {
                             Id = Guid.NewGuid(),
-                            ImapUid = imapState.LastUid,
+                            ImapUid = ImapUidAllocator.AllocateNextUid(dbContext),
                             Mailbox = mailbox,
                             MailboxFolder = targetFolder,
                             MailboxFolderId = targetFolder.Id,
@@ -246,7 +271,8 @@ namespace Rnwood.Smtp4dev.Server
                             HasBareLineFeed = source.HasBareLineFeed,
                             MimeMetadata = source.MimeMetadata,
                             BodyText = source.BodyText
-                        });
+                        };
+                        dbContext.Messages.Add(copiedMessage);
                     }
 
                     dbContext.SaveChanges();
@@ -333,16 +359,7 @@ namespace Rnwood.Smtp4dev.Server
                                 message.MailboxFolder = folder;
                                 message.MailboxFolderId = folder.Id;
 
-                                // Assign IMAP UID
-                                var imapState = dbContext.ImapState.SingleOrDefault();
-                                if (imapState == null)
-                                {
-                                    log.Error("No IMAP state found in database");
-                                    return;
-                                }
-
-                                imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
-                                message.ImapUid = imapState.LastUid;
+                                message.ImapUid = ImapUidAllocator.AllocateNextUid(dbContext);
 
                                 dbContext.SaveChanges();
 
@@ -455,6 +472,7 @@ namespace Rnwood.Smtp4dev.Server
                 {
                     var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
 
+                    e.UidNext = ImapUidAllocator.GetNextUid(messagesRepository.DbContext);
                     foreach (var message in messagesRepository.GetMessages(GetMailboxName(), ImapFolderNames.Normalize(e.Folder), true).OrderBy(m => m.ImapUid))
                     {
                         List<string> flags = new List<string>();
@@ -486,6 +504,14 @@ namespace Rnwood.Smtp4dev.Server
 
             private List<(string Name, string[] Attributes)> GetMatchingFolders(string referenceName, string pattern)
             {
+                if (string.IsNullOrEmpty(referenceName) && string.IsNullOrEmpty(pattern))
+                {
+                    return new List<(string Name, string[] Attributes)>
+                    {
+                        (string.Empty, new[] { "\\Noselect" })
+                    };
+                }
+
                 using (var scope = this.serviceScopeFactory.CreateScope())
                 {
                     var messagesRepository = scope.ServiceProvider.GetService<IMessagesRepository>();
@@ -496,10 +522,13 @@ namespace Rnwood.Smtp4dev.Server
                         .ToList()
                         .OrderBy(SortDefaultFoldersFirst).ThenBy(f => f, StringComparer.Ordinal)
                         .ToList();
+                    var foldersWithChildren = folderNames
+                        .SelectMany(ImapFolderNames.GetAncestors)
+                        .ToHashSet(StringComparer.Ordinal);
 
                     return folderNames
                         .Where(f => ImapFolderNames.IsMatch(f, referenceName, pattern))
-                        .Select(f => (f, new[] { folderNames.Any(c => ImapFolderNames.IsDescendantOf(c, f)) ? "\\HasChildren" : "\\HasNoChildren" }))
+                        .Select(f => (f, new[] { foldersWithChildren.Contains(f) ? "\\HasChildren" : "\\HasNoChildren" }))
                         .ToList();
                 }
             }
@@ -522,6 +551,17 @@ namespace Rnwood.Smtp4dev.Server
             private static void NotifyMessagesChanged(IServiceScope scope, string mailboxName)
             {
                 scope.ServiceProvider.GetService<NotificationsHub>()?.OnMessagesChanged(mailboxName).Wait();
+            }
+
+            private static void NotifyFoldersChanged(IServiceScope scope, string mailboxName)
+            {
+                scope.ServiceProvider.GetService<NotificationsHub>()?.OnFoldersChanged(mailboxName).Wait();
+            }
+
+            private static bool IsUniqueConstraintViolation(DbUpdateException exception)
+            {
+                return exception.GetBaseException() is SqliteException sqliteException
+                    && sqliteException.SqliteExtendedErrorCode == 2067;
             }
 
             private string GetMailboxName()

@@ -34,6 +34,13 @@ namespace Rnwood.Smtp4dev.Tests
             Assert.Equal(expected, ImapFolderNames.IsDescendantOf(folderName, ancestor));
         }
 
+        [Fact]
+        public void HasRenameCollisionIncludesProjectedDescendants()
+        {
+            Assert.True(ImapFolderNames.HasRenameCollision(new[] { "A", "A/C", "B/C" }, "A", "B"));
+            Assert.False(ImapFolderNames.HasRenameCollision(new[] { "A", "A/C" }, "A", "B"));
+        }
+
         [Theory]
         [InlineData("DONE", "", "*", true)]
         [InlineData("DONE", "", "%", true)]

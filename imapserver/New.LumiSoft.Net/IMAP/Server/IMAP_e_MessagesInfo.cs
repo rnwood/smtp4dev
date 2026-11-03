@@ -11,6 +11,7 @@ namespace LumiSoft.Net.IMAP.Server
     {
         private string                 m_Folder    = null;
         private List<IMAP_MessageInfo> m_pMessages = null;
+        private long?                  m_UidNext   = null;
 
         /// <summary>
         /// Default constructor.
@@ -113,11 +114,15 @@ namespace LumiSoft.Net.IMAP.Server
         }
 
         /// <summary>
-        /// Gets next message predicted UID value.
+        /// Gets or sets the next message predicted UID value. If not set, this is one greater than the highest UID in the folder.
         /// </summary>
-        internal long UidNext
+        public long UidNext
         {
-            get{ 
+            get{
+                if(m_UidNext.HasValue){
+                    return m_UidNext.Value;
+                }
+
                 long maxUID = 0;
                 foreach(IMAP_MessageInfo m in m_pMessages){
                     if(m.UID > maxUID){
@@ -127,6 +132,9 @@ namespace LumiSoft.Net.IMAP.Server
                 maxUID++;
                 
                 return maxUID; 
+            }
+            set{
+                m_UidNext = value;
             }
         }
 

@@ -34,6 +34,14 @@ namespace Rnwood.Smtp4dev.Hubs
             }
         }
 
+        public async Task OnFoldersChanged(string mailbox)
+        {
+            if (Clients != null)
+            {
+                await Clients.All.SendAsync("folderschanged", mailbox);
+            }
+        }
+
         public async Task onServerChanged()
         {
             if (Clients != null)

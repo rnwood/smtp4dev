@@ -46,6 +46,19 @@ namespace Rnwood.Smtp4dev.Server.Imap
             return folderName.StartsWith(ancestorFolderName + Delimiter, StringComparison.Ordinal);
         }
 
+        public static bool HasRenameCollision(IEnumerable<string> folderNames, string currentName, string newName)
+        {
+            var allFolderNames = folderNames.ToList();
+            var namesBeingRenamed = allFolderNames
+                .Where(name => name == currentName || IsDescendantOf(name, currentName))
+                .ToHashSet(StringComparer.Ordinal);
+            var existingNames = allFolderNames
+                .Where(name => !namesBeingRenamed.Contains(name))
+                .ToHashSet(StringComparer.Ordinal);
+
+            return namesBeingRenamed.Any(name => existingNames.Contains(newName + name.Substring(currentName.Length)));
+        }
+
         /// <summary>
         /// Checks if a folder name matches a LIST/LSUB reference name and mailbox pattern.
         /// '*' matches zero or more characters and '%' matches zero or more characters except the hierarchy delimiter.

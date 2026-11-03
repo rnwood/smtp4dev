@@ -20,14 +20,10 @@ namespace LumiSoft.Net.IMAP
         /// <param name="delimiter">Hierarchy delimiter char.</param>
         /// <param name="attributes">Folder attributes.</param>
         /// <exception cref="ArgumentNullException">Is raised when <b>folder</b> is null reference.</exception>
-        /// <exception cref="ArgumentException">Is raised when any of the arguments has invalid value.</exception>
         public IMAP_r_u_LSub(string folder,char delimiter,string[] attributes)
         {
             if(folder == null){
                 throw new ArgumentNullException("folder");
-            }
-            if(folder == string.Empty){
-                throw new ArgumentException("Argument 'folder' value must be specified.","folder");
             }
 
             m_FolderName = folder;
@@ -99,6 +95,10 @@ namespace LumiSoft.Net.IMAP
         /// <returns>Returns this as string.</returns>
         public override string ToString(IMAP_Mailbox_Encoding encoding)
         {
+            if(string.IsNullOrEmpty(m_FolderName)){
+                return "* LSUB (\\Noselect) \"/\" \"\"\r\n";
+            }
+
             // Example:    S: * LSUB (\Noselect) "/" ~/Mail/foo
 
             StringBuilder retVal = new StringBuilder();
