@@ -120,7 +120,7 @@ namespace Rnwood.Smtp4dev.Server
                 Bindings = bindings.ToArray(),
                 GreetingText = "smtp4dev"
             };
-            imapServer.SessionCreated += (o, ea) => new SessionHandler(ea.Session, scriptingHost, serverOptions, this.serviceScopeFactory);
+            imapServer.SessionCreated += (o, ea) => new SessionHandler(ea.Session, scriptingHost, serverOptions, this.serviceScopeFactory, imapServer);
 
 
             var errorTcs = new TaskCompletionSource<Error_EventArgs>();

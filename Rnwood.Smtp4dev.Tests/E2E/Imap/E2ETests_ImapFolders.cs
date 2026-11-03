@@ -90,6 +90,54 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
         }
 
         [Fact]
+        public void AppendToFolderDeletedDuringLiteralReturnsTryCreate()
+        {
+            RunE2ETest(context =>
+            {
+                using var deletingClient = CreateImapClientWithLogging();
+                deletingClient.Connect("localhost", context.ImapPortNumber);
+                deletingClient.Authenticate("user", "password");
+                var root = deletingClient.GetFolder(deletingClient.PersonalNamespaces[0]);
+                root.Create("AppendRace", true);
+
+                using var client = new TcpClient();
+                client.ReceiveTimeout = 10000;
+                client.Connect("localhost", context.ImapPortNumber);
+                using var stream = client.GetStream();
+                using var reader = new StreamReader(stream, Encoding.ASCII, false, 1024, true);
+                using var writer = new StreamWriter(stream, Encoding.ASCII, 1024, true)
+                {
+                    AutoFlush = true,
+                    NewLine = "\r\n"
+                };
+
+                Assert.StartsWith("* OK", reader.ReadLine());
+                writer.WriteLine("a1 LOGIN user password");
+                ReadTaggedResponse(reader, "a1");
+
+                using var messageStream = new MemoryStream();
+                CreateMessage("Append race " + Guid.NewGuid()).WriteTo(messageStream);
+                var messageData = messageStream.ToArray();
+
+                writer.WriteLine($"a2 APPEND \"AppendRace\" {{{messageData.Length}}}");
+                Assert.StartsWith("+", reader.ReadLine());
+
+                root.GetSubfolder("AppendRace").Delete();
+
+                stream.Write(messageData);
+                stream.Write(new byte[] { (byte)'\r', (byte)'\n' });
+                stream.Flush();
+
+                var appendResponse = ReadTaggedResponse(reader, "a2");
+                Assert.Contains("a2 NO [TRYCREATE]", appendResponse);
+
+                writer.WriteLine("a3 LOGOUT");
+                ReadTaggedResponse(reader, "a3");
+                deletingClient.Disconnect(true);
+            });
+        }
+
+        [Fact]
         public void EmptyListAndLSubPatternsReturnTheHierarchyRoot()
         {
             RunE2ETest(context =>
@@ -115,8 +163,16 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
                 writer.WriteLine("a3 LSUB \"\" \"\"");
                 Assert.Contains("* LSUB (\\Noselect) \"/\" \"\"", ReadTaggedResponse(reader, "a3"));
 
-                writer.WriteLine("a4 LOGOUT");
+                writer.WriteLine("a4 CREATE Archive");
                 ReadTaggedResponse(reader, "a4");
+
+                writer.WriteLine("a5 LSUB \"Archive/\" \"\"");
+                var referenceRootResponse = ReadTaggedResponse(reader, "a5");
+                Assert.Contains("* LSUB (\\Noselect) \"/\"", referenceRootResponse);
+                Assert.Contains("Archive/", referenceRootResponse);
+
+                writer.WriteLine("a6 LOGOUT");
+                ReadTaggedResponse(reader, "a6");
             });
         }
 
@@ -219,6 +275,34 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Imap
 
                     imapClient.Disconnect(true);
                 }
+            });
+        }
+
+        [Fact]
+        public void CannotRenameParentWhileAnotherSessionHasDescendantSelected()
+        {
+            RunE2ETest(context =>
+            {
+                using var selectedClient = CreateImapClientWithLogging();
+                using var renamingClient = CreateImapClientWithLogging();
+                selectedClient.Connect("localhost", context.ImapPortNumber);
+                selectedClient.Authenticate("user", "password");
+                renamingClient.Connect("localhost", context.ImapPortNumber);
+                renamingClient.Authenticate("user", "password");
+
+                var selectedRoot = selectedClient.GetFolder(selectedClient.PersonalNamespaces[0]);
+                selectedRoot.Create("Parent", true).Create("Child", true);
+                var selectedChild = selectedRoot.GetSubfolder("Parent").GetSubfolder("Child");
+                selectedChild.Open(FolderAccess.ReadOnly);
+
+                var renamingRoot = renamingClient.GetFolder(renamingClient.PersonalNamespaces[0]);
+                var parent = renamingRoot.GetSubfolder("Parent");
+                Assert.Throws<ImapCommandException>(() => parent.Rename(renamingRoot, "RenamedParent"));
+                Assert.Contains(renamingRoot.GetSubfolders(false), folder => folder.FullName == "Parent");
+                Assert.DoesNotContain(renamingRoot.GetSubfolders(false), folder => folder.FullName == "RenamedParent");
+
+                selectedClient.Disconnect(true);
+                renamingClient.Disconnect(true);
             });
         }
 

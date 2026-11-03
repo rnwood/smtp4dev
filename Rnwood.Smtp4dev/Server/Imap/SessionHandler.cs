@@ -24,9 +24,10 @@ namespace Rnwood.Smtp4dev.Server
         class SessionHandler
         {
             private readonly ILogger log = Log.ForContext<SessionHandler>();
-            public SessionHandler(IMAP_Session session, ScriptingHost scriptingHost, IOptionsMonitor<ServerOptions> serverOptions, IServiceScopeFactory serviceScopeFactory)
+            public SessionHandler(IMAP_Session session, ScriptingHost scriptingHost, IOptionsMonitor<ServerOptions> serverOptions, IServiceScopeFactory serviceScopeFactory, IMAP_Server imapServer)
             {
                 this.session = session;
+                this.imapServer = imapServer;
                 session.Create += Session_Create;
                 session.Delete += Session_Delete;
                 session.Rename += Session_Rename;
@@ -159,9 +160,9 @@ namespace Rnwood.Smtp4dev.Server
                     return;
                 }
 
-                if (ImapFolderNames.Normalize(this.session.SelectedFolderName) == currentName)
+                if (HasSelectedFolderInRenameScope(GetMailboxName(), currentName))
                 {
-                    e.Response = new IMAP_r_ServerStatus(e.CmdTag, "NO", $"Folder '{currentName}' is currently selected");
+                    e.Response = new IMAP_r_ServerStatus(e.CmdTag, "NO", $"Folder '{currentName}' or one of its descendants is currently selected");
                     return;
                 }
 
@@ -301,6 +302,7 @@ namespace Rnwood.Smtp4dev.Server
                                 if (messagesRepository == null)
                                 {
                                     log.Error("IMAP APPEND failed - MessagesRepository service not available");
+                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Internal server error during message processing");
                                     return;
                                 }
 
@@ -308,6 +310,7 @@ namespace Rnwood.Smtp4dev.Server
                                 if (dbContext == null)
                                 {
                                     log.Error("IMAP APPEND failed - Database context not available");
+                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Internal server error during message processing");
                                     return;
                                 }
 
@@ -318,6 +321,7 @@ namespace Rnwood.Smtp4dev.Server
                                 if (messageData.Length == 0)
                                 {
                                     log.Error("IMAP APPEND failed - No message data received in stream");
+                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "No message data received");
                                     return;
                                 }
 
@@ -345,6 +349,7 @@ namespace Rnwood.Smtp4dev.Server
                                 if (mailbox == null)
                                 {
                                     log.Error("IMAP APPEND failed - Mailbox not found. MailboxName: {mailboxName}", mailboxName);
+                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", "Internal server error during message processing");
                                     return;
                                 }
 
@@ -352,6 +357,7 @@ namespace Rnwood.Smtp4dev.Server
                                 if (folder == null)
                                 {
                                     log.Error("Folder {folder} not found in mailbox {mailboxName}", folderName, mailboxName);
+                                    e.Response = new IMAP_r_ServerStatus(e.Response.CommandTag, "NO", new IMAP_t_orc_Unknown("TRYCREATE"), $"Folder '{folderName}' does not exist");
                                     return;
                                 }
 
@@ -465,6 +471,7 @@ namespace Rnwood.Smtp4dev.Server
             private readonly IOptionsMonitor<ServerOptions> serverOptions;
             private readonly IServiceScopeFactory serviceScopeFactory;
             private readonly IMAP_Session session;
+            private readonly IMAP_Server imapServer;
 
             private void Session_GetMessagesInfo(object sender, IMAP_e_MessagesInfo e)
             {
@@ -504,11 +511,11 @@ namespace Rnwood.Smtp4dev.Server
 
             private List<(string Name, string[] Attributes)> GetMatchingFolders(string referenceName, string pattern)
             {
-                if (string.IsNullOrEmpty(referenceName) && string.IsNullOrEmpty(pattern))
+                if (string.IsNullOrEmpty(pattern))
                 {
                     return new List<(string Name, string[] Attributes)>
                     {
-                        (string.Empty, new[] { "\\Noselect" })
+                        (referenceName ?? string.Empty, new[] { "\\Noselect" })
                     };
                 }
 
@@ -558,6 +565,41 @@ namespace Rnwood.Smtp4dev.Server
                 scope.ServiceProvider.GetService<NotificationsHub>()?.OnFoldersChanged(mailboxName).Wait();
             }
 
+            private bool HasSelectedFolderInRenameScope(string mailboxName, string folderName)
+            {
+                foreach (var activeSession in this.imapServer.Sessions.ToArray().OfType<IMAP_Session>())
+                {
+                    var selectedFolderName = activeSession.SelectedFolderName;
+                    if (string.IsNullOrEmpty(selectedFolderName))
+                    {
+                        continue;
+                    }
+
+                    string selectedMailboxName;
+                    try
+                    {
+                        selectedMailboxName = GetMailboxName(activeSession);
+                    }
+                    catch (ObjectDisposedException)
+                    {
+                        continue;
+                    }
+
+                    if (!string.Equals(selectedMailboxName, mailboxName, StringComparison.Ordinal))
+                    {
+                        continue;
+                    }
+
+                    selectedFolderName = ImapFolderNames.Normalize(selectedFolderName);
+                    if (selectedFolderName == folderName || ImapFolderNames.IsDescendantOf(selectedFolderName, folderName))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+
             private static bool IsUniqueConstraintViolation(DbUpdateException exception)
             {
                 return exception.GetBaseException() is SqliteException sqliteException
@@ -566,8 +608,13 @@ namespace Rnwood.Smtp4dev.Server
 
             private string GetMailboxName()
             {
-                var configUser = this.serverOptions.CurrentValue.Users?.FirstOrDefault(u => this.session.AuthenticatedUserIdentity.Name.Equals(u.Username, StringComparison.OrdinalIgnoreCase));
+                return GetMailboxName(this.session);
+            }
 
+            private string GetMailboxName(IMAP_Session session)
+            {
+                var userName = session.AuthenticatedUserIdentity?.Name;
+                var configUser = this.serverOptions.CurrentValue.Users?.FirstOrDefault(u => string.Equals(userName, u.Username, StringComparison.OrdinalIgnoreCase));
                 return configUser?.DefaultMailbox ?? "Default";
             }
 
