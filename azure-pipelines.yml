@@ -772,7 +772,7 @@ stages:
               arguments: '--configuration Release --logger trx'
           - task: Docker@2
             displayName: Push image
-            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -866,7 +866,7 @@ stages:
           #     arguments: '--configuration Release --logger trx --filter "FullyQualifiedName!~Rnwood.Smtp4dev.Tests.E2E.WebUI"'
           - task: Docker@2
             displayName: Push image
-            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -1072,7 +1072,7 @@ stages:
               arguments: '--configuration Release --logger trx'
           - task: Docker@2
             displayName: Push image
-            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true))
+            condition: or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true))
             inputs:
               containerRegistry: $(docker_registry)
               repository: $(docker_repo)
@@ -1082,7 +1082,7 @@ stages:
                 windows-ltsc2022-amd64-$(tag)
       - job: DockerManifest
         displayName: Docker Create Manifest
-        condition: and(or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true)), succeeded('DockerBuildLinux'), succeeded('DockerBuildLinuxArm64'), succeeded('DockerBuildWindows'))
+        condition: and(or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true)), succeeded('DockerBuildLinux'), succeeded('DockerBuildLinuxArm64'), succeeded('DockerBuildWindows'))
 
         dependsOn:
           - DockerBuildLinux
@@ -1110,7 +1110,7 @@ stages:
   - stage: Release
     dependsOn: 
     - Build
-    condition: and(succeeded(), or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true), eq(variables['isprbuild'], true)))
+    condition: and(succeeded(), or(eq(variables['isreleasebuild'], true), eq(variables['iscibuild'], true)))
     displayName: Release
     jobs:
       - job: Release
@@ -1267,9 +1267,6 @@ stages:
         displayName: Notify Copilot of Build Failure
         pool:
           vmImage: "ubuntu-22.04"
-        variables:
-          - name: System.Debug
-            value: true
         steps:
           - checkout: none
           - task: PowerShell@2
@@ -1288,6 +1285,11 @@ stages:
                 $organizationUri = "$(System.TeamFoundationCollectionUri)"
                 $projectName = "$(System.TeamProject)"
                 
+                if ([string]::IsNullOrWhiteSpace($env:GITHUB_TOKEN)) {
+                  Write-Warning "GITHUB_TOKEN is unavailable; skipping Copilot failure notification."
+                  exit 0
+                }
+
                 # Check if PR is assigned to copilot before proceeding
                 $headers = @{
                   'Authorization' = "token $env:GITHUB_TOKEN"
@@ -1309,8 +1311,11 @@ stages:
                   
                   Write-Host "PR #$prNumber is assigned to @copilot. Proceeding with notification."
                 } catch {
-                  Write-Error "Failed to check PR assignees: $_"
-                  Write-Host "Proceeding with notification as fallback."
+                  $statusCode = "unavailable"
+                  if ($null -ne $_.Exception.Response -and $null -ne $_.Exception.Response.StatusCode) {
+                    $statusCode = [string]$_.Exception.Response.StatusCode
+                  }
+                  Write-Warning "GitHub PR assignee lookup failed (HTTP $statusCode); proceeding with a notification attempt. Response details omitted."
                 }
                 
                 # Note: We no longer extract detailed build logs here to reduce comment size
@@ -1364,9 +1369,9 @@ stages:
                   Write-Host "Successfully posted comment to PR #$prNumber"
                   Write-Host "Comment URL: $($response.html_url)"
                 } catch {
-                  Write-Error "Failed to post comment to PR #$prNumber : $_"
-                  Write-Host "URI: $uri"
-                  Write-Host "PR Number: $prNumber"
-                  Write-Host "Error Body Length: $($commentBody.Length)"
-                  exit 1
+                  $statusCode = "unavailable"
+                  if ($null -ne $_.Exception.Response -and $null -ne $_.Exception.Response.StatusCode) {
+                    $statusCode = [string]$_.Exception.Response.StatusCode
+                  }
+                  Write-Warning "Failed to post Copilot failure notification to PR #$prNumber (HTTP $statusCode). Response details omitted; notification failure is non-fatal."
                 }
