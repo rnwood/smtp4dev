@@ -39,6 +39,10 @@ namespace Rnwood.Smtp4dev.Data
                 .HasForeignKey(m => m.MailboxFolderId)
                 .OnDelete(DeleteBehavior.Cascade);
 
+            modelBuilder.Entity<MailboxFolder>()
+                .HasIndex(f => new { f.MailboxId, f.Name })
+                .IsUnique();
+
             // Keep legacy relationship for backwards compatibility
             modelBuilder.Entity<Mailbox>()
                 .HasMany<Message>()

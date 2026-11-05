@@ -604,15 +604,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 dbMessage.MailboxFolder = await dbContext.MailboxFolders.FirstOrDefaultAsync(f => f.Mailbox.Name == mailboxName && f.Name == MailboxFolder.INBOX);
                 dbMessage.IsUnread = true;
 
-                var imapState = await dbContext.ImapState.SingleOrDefaultAsync();
-                if (imapState == null)
-                {
-                    imapState = new ImapState { Id = Guid.Empty, LastUid = 0 };
-                    dbContext.ImapState.Add(imapState);
-                }
-
-                imapState.LastUid = Math.Max(0, imapState.LastUid) + 1;
-                dbMessage.ImapUid = imapState.LastUid;
+                dbMessage.ImapUid = ImapUidAllocator.AllocateNextUid(dbContext);
 
                 // Add to database
                 dbContext.Messages.Add(dbMessage);

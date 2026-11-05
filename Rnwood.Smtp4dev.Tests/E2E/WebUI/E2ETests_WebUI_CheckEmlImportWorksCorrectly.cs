@@ -70,15 +70,16 @@ E2E Test";
                     
                     // Handle the file chooser that appears
                     var fileChooser = await fileChooserTask;
-                    await fileChooser.SetFilesAsync(tempEmlFile);
 
-                    // Wait for progress notification to appear
                     var progressNotification = page.Locator(".el-notification", new PageLocatorOptions { HasText = "Import in Progress" });
-                    await progressNotification.WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
-
-                    // Wait for success notification to appear
+                    var progressNotificationTask = progressNotification.WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
                     var successNotification = page.Locator(".el-notification", new PageLocatorOptions { HasText = "Import Complete" });
-                    await successNotification.WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
+                    var successNotificationTask = successNotification.WaitForAsync(new LocatorWaitForOptions { Timeout = 10000 });
+
+                    // The import can finish and close the progress notification before SetFilesAsync returns.
+                    await fileChooser.SetFilesAsync(tempEmlFile);
+                    await progressNotificationTask;
+                    await successNotificationTask;
 
                     // Wait a moment for the message list to refresh
                     await page.WaitForTimeoutAsync(1000);

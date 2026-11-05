@@ -15,7 +15,7 @@ namespace Rnwood.Smtp4dev.Migrations
         protected override void BuildModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
-            modelBuilder.HasAnnotation("ProductVersion", "10.0.2");
+            modelBuilder.HasAnnotation("ProductVersion", "10.0.14");
 
             modelBuilder.Entity("Rnwood.Smtp4dev.DbModel.ImapState", b =>
                 {
@@ -59,7 +59,8 @@ namespace Rnwood.Smtp4dev.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MailboxId");
+                    b.HasIndex("MailboxId", "Name")
+                        .IsUnique();
 
                     b.ToTable("MailboxFolders");
                 });

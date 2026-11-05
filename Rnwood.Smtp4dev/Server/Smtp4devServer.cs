@@ -723,9 +723,7 @@ namespace Rnwood.Smtp4dev.Server
             var relayResult = TryRelayMessage(message, null);
             message.RelayError = string.Join("\n", relayResult.Exceptions.Select(e => e.Key + ": " + e.Value.Message));
             
-            ImapState imapState = dbContext.ImapState.Single();
-            imapState.LastUid = Math.Max(0, imapState.LastUid + 1);
-            message.ImapUid = imapState.LastUid;
+            message.ImapUid = ImapUidAllocator.AllocateNextUid(dbContext);
             if (relayResult.WasRelayed)
             {
                 foreach (var relay in relayResult.RelayRecipients)
