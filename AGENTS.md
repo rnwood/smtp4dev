@@ -45,7 +45,7 @@ dotnet run --project Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj --urls="http://local
 dotnet publish Rnwood.Smtp4dev/Rnwood.Smtp4dev.csproj -c Release -o ./published
 
 cd ./published
-./Rnwood.Smtp4dev --urls="http://localhost:5000" --smtpport=2525 --imapport=1143
+./smtp4dev --urls="http://localhost:5000" --smtpport=2525 --imapport=1143
 ```
 
 **Key startup arguments:**
