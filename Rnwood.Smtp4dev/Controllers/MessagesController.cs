@@ -368,6 +368,7 @@ namespace Rnwood.Smtp4dev.Controllers
         /// </summary>
         /// <param name="id">Message ID</param>
         /// <param name="partid">Part ID</param>
+        /// <param name="download">Whether to return the part as a downloadable attachment</param>
         /// <returns></returns>
         [HttpGet("{id}/part/{partid}/content")]
         [SwaggerResponse(System.Net.HttpStatusCode.OK, typeof(string), Description = "")]

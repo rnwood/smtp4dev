@@ -34,7 +34,8 @@
     <PackageReference Include="Jint" Version="3.0.1" />
     <PackageReference Include="Linq.Expression.Optimizer" Version="1.0.39" />
     <PackageReference Include="LinqKit" Version="1.3.11" />
-    <PackageReference Include="MailKit" Version="4.15.1" />
+    <PackageReference Include="MailKit" Version="4.18.2" />
+    <PackageReference Include="AngleSharp" Version="1.9.1" />
      <PackageReference Include="Microsoft.AspNetCore.Hosting.WindowsServices" Version="10.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Analyzers" Version="10.0.14" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.14">
@@ -48,7 +49,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="MimeKit" Version="4.15.1" />
+    <PackageReference Include="MimeKit" Version="4.18.2" />
     <PackageReference Include="Mono.Options" Version="6.12.0.148" />
     <PackageReference Include="NSwag.AspNetCore" Version="14.6.3" />
 
@@ -71,6 +72,7 @@
     <PackageReference Include="Microsoft.IdentityModel.Protocols.OpenIdConnect" Version="8.16.0" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.7.4" />
     <PackageReference Include="System.Reactive" Version="6.1.0" />
+    <PackageReference Include="System.Security.Cryptography.Pkcs" Version="10.0.14" />
     <PackageReference Include="VueCliMiddleware" Version="6.0.0" />
     </ItemGroup>
 

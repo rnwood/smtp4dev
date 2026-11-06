@@ -57,7 +57,7 @@ namespace Rnwood.Smtp4dev.Server
             var stream = new MemoryStream();
             store.Save(stream, "".ToCharArray(), random);
 
-            return new X509Certificate2(
+            return X509CertificateLoader.LoadPkcs12(
                 stream.ToArray(), "",
                 X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
         }

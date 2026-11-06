@@ -271,7 +271,7 @@ namespace Rnwood.Smtp4dev
 
                 SmtpClient result = new SmtpClient();
 #if NET5_0_OR_GREATER
-                if (relayOptions.SslCipherSuitesPolicy.Length > 0)
+                if (relayOptions.SslCipherSuitesPolicy.Length > 0 && !OperatingSystem.IsWindows())
                 {
                     try
                     {

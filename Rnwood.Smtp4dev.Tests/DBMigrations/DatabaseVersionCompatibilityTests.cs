@@ -60,8 +60,9 @@ namespace Rnwood.Smtp4dev.Tests.DBMigrations
             
             // Add a fake migration to the __EFMigrationsHistory table
             var fakeMigrationId = "99999999999999_FutureVersionMigration";
-            context.Database.ExecuteSqlRaw(
-                $"INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion) VALUES ('{fakeMigrationId}', '999.0.0')");
+            var fakeProductVersion = "999.0.0";
+            context.Database.ExecuteSql(
+                $"INSERT INTO __EFMigrationsHistory (MigrationId, ProductVersion) VALUES ({fakeMigrationId}, {fakeProductVersion})");
 
             // Act & Assert
             var validateMethod = typeof(Rnwood.Smtp4dev.Startup).GetMethod(

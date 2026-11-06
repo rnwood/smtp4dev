@@ -22,11 +22,8 @@ namespace Rnwood.Smtp4dev.Tests
     
     public class MemoryLeakStressTests : E2ETests
     {
-        private readonly ITestOutputHelper output;
-
         public MemoryLeakStressTests(ITestOutputHelper output) : base(output)
         {
-            this.output = output;
         }
 
         [Fact(Skip ="Long running test - enable manually")]

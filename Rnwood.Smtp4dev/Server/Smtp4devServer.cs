@@ -593,7 +593,7 @@ namespace Rnwood.Smtp4dev.Server
             
             // Legacy support: If DeliverMessagesToUsersDefaultMailbox is enabled and user is authenticated,
             // route all messages to user's default mailbox (bypassing all other routing rules)
-            if (serverOptions.CurrentValue.DeliverMessagesToUsersDefaultMailbox && !string.IsNullOrWhiteSpace(authenticatedUsername))
+            if (serverOptions.CurrentValue.GetDeliverMessagesToUsersDefaultMailbox() && !string.IsNullOrWhiteSpace(authenticatedUsername))
             {
                 MailboxOptions defaultMailboxOptions = new MailboxOptions { Name = MailboxOptions.DEFAULTNAME, Recipients = "*" };
                 MailboxOptions mailboxOption = defaultMailboxOptions;

@@ -14,7 +14,7 @@ namespace Rnwood.Smtp4dev.Server
     {
         public static X509Certificate2 LoadCertificateWithKey(string certificatePath, string certificateKeyPath, string password)
         {
-            var certNoKey = new X509Certificate2(certificatePath);
+            var certNoKey = X509CertificateLoader.LoadCertificateFromFile(certificatePath);
             string keyAlgo = certNoKey.GetKeyAlgorithm();
 
             byte[] pfxData;
@@ -53,11 +53,11 @@ namespace Rnwood.Smtp4dev.Server
 
             if (string.IsNullOrEmpty(password))
             {
-                return new X509Certificate2(pfxData);
+                return X509CertificateLoader.LoadPkcs12(pfxData, "");
             }
             else
             {
-                return new X509Certificate2(pfxData, password);
+                return X509CertificateLoader.LoadPkcs12(pfxData, password);
             }
         }
 
@@ -120,7 +120,7 @@ namespace Rnwood.Smtp4dev.Server
 
                     if (File.Exists(pfxPath))
                     {
-                        cert = new X509Certificate2(File.ReadAllBytes(pfxPath), "",
+                        cert = X509CertificateLoader.LoadPkcs12(File.ReadAllBytes(pfxPath), "",
                             X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
 
                         if (cert.Subject != $"CN={options.HostName}" ||
@@ -206,7 +206,7 @@ namespace Rnwood.Smtp4dev.Server
 
                     if (File.Exists(pfxPath))
                     {
-                        cert = new X509Certificate2(File.ReadAllBytes(pfxPath), "",
+                        cert = X509CertificateLoader.LoadPkcs12(File.ReadAllBytes(pfxPath), "",
                             X509KeyStorageFlags.PersistKeySet | X509KeyStorageFlags.Exportable);
 
                         if (cert.Subject != $"CN={options.HostName}" ||
@@ -246,14 +246,14 @@ namespace Rnwood.Smtp4dev.Server
 
         public static X509Certificate2 LoadCertificate(string certificatePath, string password)
         {
-            if (string.IsNullOrEmpty(password))
+            byte[] certificateData = File.ReadAllBytes(certificatePath);
+            if (X509Certificate2.GetCertContentType(certificateData) == X509ContentType.Pkcs12)
             {
-                return new X509Certificate2(certificatePath);
+                return X509CertificateLoader.LoadPkcs12(certificateData, password ?? "");
             }
             else
             {
-
-                return new X509Certificate2(certificatePath, password);
+                return X509CertificateLoader.LoadCertificate(certificateData);
             }
         }
 
