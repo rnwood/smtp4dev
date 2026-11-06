@@ -12,11 +12,8 @@ namespace Rnwood.Smtp4dev.Tests.E2E.Pop3
     [Collection("E2E")]
     public class E2ETests_Pop3_RetrieveAnd_Delete : E2ETests
     {
-        private readonly ITestOutputHelper output;
-
         public E2ETests_Pop3_RetrieveAnd_Delete(ITestOutputHelper output) : base(output)
         {
-            this.output = output;
         }
 
         [Theory]

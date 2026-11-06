@@ -437,6 +437,7 @@ namespace Rnwood.Smtp4dev.Tests.Controllers
             Assert.Contains("download=true", attachment.Url);
         }
       
+        [Fact]
         public async Task GetSummaries_MultipleRecipients_EmailsShouldNotHaveLeadingSpaces()
         {
             // Arrange - create a message with multiple recipients that will be joined with ", "

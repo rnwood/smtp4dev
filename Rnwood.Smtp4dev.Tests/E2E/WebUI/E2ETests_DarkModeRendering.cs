@@ -437,7 +437,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         {
             return (s, c, h, e) => 
             {
-                var cert = new System.Security.Cryptography.X509Certificates.X509Certificate2(c.GetRawCertData());
+                var cert = System.Security.Cryptography.X509Certificates.X509CertificateLoader.LoadCertificate(c.GetRawCertData());
                 return cert.Subject.Contains("localhost");
             };
         }

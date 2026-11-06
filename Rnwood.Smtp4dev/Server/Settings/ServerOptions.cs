@@ -79,6 +79,10 @@ namespace Rnwood.Smtp4dev.Server.Settings
         [Obsolete("Use mailbox configuration with AuthenticatedUsers property instead for better flexibility")]
         public bool DeliverMessagesToUsersDefaultMailbox { get; set; } = true;
 
+#pragma warning disable CS0618
+        internal bool GetDeliverMessagesToUsersDefaultMailbox() => DeliverMessagesToUsersDefaultMailbox;
+#pragma warning restore CS0618
+
         public string SmtpEnabledAuthTypesWhenNotSecureConnection { get; set; } = "PLAIN,LOGIN,CRAM-MD5";
 
         public string SmtpEnabledAuthTypesWhenSecureConnection { get; set; } = "PLAIN,LOGIN,CRAM-MD5";

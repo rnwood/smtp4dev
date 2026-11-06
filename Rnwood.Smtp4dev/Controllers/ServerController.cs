@@ -111,7 +111,7 @@ namespace Rnwood.Smtp4dev.Controllers
                 CommandValidationExpression = serverOptionsCurrentValue.CommandValidationExpression,
                 DisableIPv6 = serverOptionsCurrentValue.DisableIPv6,
                 WebAuthenticationRequired = serverOptionsCurrentValue.WebAuthenticationRequired,
-                DeliverMessagesToUsersDefaultMailbox = serverOptionsCurrentValue.DeliverMessagesToUsersDefaultMailbox,
+                DeliverMessagesToUsersDefaultMailbox = serverOptionsCurrentValue.GetDeliverMessagesToUsersDefaultMailbox(),
                 Users = serverOptionsCurrentValue.Users,
                 Mailboxes = serverOptionsCurrentValue.Mailboxes,
                 DesktopMinimiseToTrayIcon = desktopOptions.CurrentValue.MinimiseToTrayIcon,

@@ -168,7 +168,7 @@ namespace Rnwood.Smtp4dev.Tests.E2E.WebUI
         {
             return (s, c, h, e) => 
             {
-                var cert = new X509Certificate2(c.GetRawCertData());
+                var cert = X509CertificateLoader.LoadCertificate(c.GetRawCertData());
                 // Simple validation - check if certificate subject contains localhost
                 return cert.Subject.Contains("localhost");
             };

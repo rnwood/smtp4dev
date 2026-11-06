@@ -32,16 +32,18 @@ namespace Rnwood.Smtp4dev.Server
             byte[] data;
             using (Stream messageData = await message.GetData())
             {
-                data = new byte[messageData.Length];
-                await messageData.ReadAsync(data, 0, data.Length);
+                using var buffer = new MemoryStream();
+                await messageData.CopyToAsync(buffer);
+                data = buffer.ToArray();
 
                 bool foundHeaders = false;
                 bool foundSeparator = false;
                 using (StreamReader dataReader = new StreamReader(new MemoryStream(data)))
                 {
-                    while (!dataReader.EndOfStream)
+                    string line;
+                    while ((line = await dataReader.ReadLineAsync()) != null)
                     {
-                        if (dataReader.ReadLine().Length != 0)
+                        if (line.Length != 0)
                         {
                             foundHeaders = true;
                         }
