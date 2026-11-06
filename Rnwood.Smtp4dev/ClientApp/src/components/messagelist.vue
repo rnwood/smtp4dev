@@ -396,7 +396,7 @@
                         const emlContent = await this.readFileAsText(file);
                         
                         // Call the import API for this single file
-                        const messageId = await new MessagesController().import(emlContent, this.selectedMailbox);
+                        const messageId = await new MessagesController().import(emlContent, this.selectedMailbox, this.selectedFolder);
                         
                         successCount++;
                         importedIds.push(messageId);
