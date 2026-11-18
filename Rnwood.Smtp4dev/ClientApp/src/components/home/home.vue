@@ -74,6 +74,44 @@
                     </splitpanes>
                 </el-tab-pane>
 
+                <el-tab-pane v-if="hasSmsGateway" label="SMS" name="sms" class="vfillpanel">
+                    <template #label>
+                        <span data-testid="tab-sms">
+                            <el-icon><chat-dot-square /></el-icon> SMS
+                        </span>
+                    </template>
+
+                    <splitpanes class="default-theme fill" @resize="smsListPaneSize = $event[0].size">
+
+                        <pane class="hfillpanel" :size="smsListPaneSize">
+                            <smslist ref="smslist" class="fill" @selected-sms-changed="selectedSmsChanged"
+                                     :connection="connection" />
+                        </pane>
+                        <pane class="hfillpanel" :size="100 - smsListPaneSize">
+                            <smsview class="fill" :sms="selectedSms" @deleted="gatewayItemDeleted('smslist')" />
+                        </pane>
+                    </splitpanes>
+                </el-tab-pane>
+
+                <el-tab-pane v-if="hasTargitoGateway" label="Targito" name="targito" class="vfillpanel">
+                    <template #label>
+                        <span data-testid="tab-targito">
+                            <el-icon><promotion /></el-icon> Targito
+                        </span>
+                    </template>
+
+                    <splitpanes class="default-theme fill" @resize="targitoListPaneSize = $event[0].size">
+
+                        <pane class="hfillpanel" :size="targitoListPaneSize">
+                            <targitolist ref="targitolist" class="fill" @selected-targito-changed="selectedTargitoChanged"
+                                         :connection="connection" />
+                        </pane>
+                        <pane class="hfillpanel" :size="100 - targitoListPaneSize">
+                            <targitoview class="fill" :item="selectedTargito" @deleted="gatewayItemDeleted('targitolist')" />
+                        </pane>
+                    </splitpanes>
+                </el-tab-pane>
+
                 <el-tab-pane label="Server Log" name="serverlog" class="vfillpanel">
                     <template #label>
                         <span>
@@ -101,6 +139,11 @@
     import SessionList from "@/components/sessionlist.vue";
     import SessionView from "@/components/sessionview.vue";
     import ServerLog from "@/components/serverlog.vue";
+    import SmsList from "@/components/fakegateways/smslist.vue";
+    import SmsView from "@/components/fakegateways/smsview.vue";
+    import TargitoList from "@/components/fakegateways/targitolist.vue";
+    import TargitoView from "@/components/fakegateways/targitoview.vue";
+    import FakeGatewaysController, { SmsMessage, TargitoRecord } from "../../ApiClient/FakeGatewaysController";
     import VersionInfo from "@/components/versionInfo.vue";
     import HubConnectionManager from "@/HubConnectionManager";
     import ServerStatus from "@/components/serverstatus.vue";
@@ -118,6 +161,10 @@
             sessionlist: SessionList,
             sessionview: SessionView,
             serverlog: ServerLog,
+            smslist: SmsList,
+            smsview: SmsView,
+            targitolist: TargitoList,
+            targitoview: TargitoView,
             hubconnstatus: HubConnectionStatus,
             serverstatus: ServerStatus,
             settingsdialog: SettingsDialog,
@@ -131,6 +178,10 @@
         activeTabId = "messages";
         selectedMessage: MessageSummary | null = null;
         selectedSession: SessionSummary | null = null;
+        selectedSms: SmsMessage | null = null;
+        selectedTargito: TargitoRecord | null = null;
+        gatewayFeatures: string[] = [];
+        gatewayHealthLoaded = false;
         suppressRouteUpdate = false;
 
         connection: HubConnectionManager | null = null;
@@ -176,6 +227,42 @@
             }
         }
 
+        get hasSmsGateway(): boolean {
+            return this.gatewayFeatures.includes("konzulta");
+        }
+
+        get hasTargitoGateway(): boolean {
+            return this.gatewayFeatures.includes("targito");
+        }
+
+        selectedSmsChanged(selectedSms: SmsMessage | null, routeDriven: boolean = false) {
+            this.selectedSms = selectedSms;
+            if (routeDriven) {
+                return;
+            }
+
+            // Selections that merely follow the URL (routeDriven) are not written back, so a deep link
+            // to an item that has not been loaded (or does not exist) keeps its URL.
+            if (!this.suppressRouteUpdate && this.activeTabId === 'sms') {
+                void this.$router.push({ path: selectedSms ? `/sms/${encodeURIComponent(selectedSms.id)}` : '/sms' });
+            }
+        }
+
+        selectedTargitoChanged(selectedTargito: TargitoRecord | null, routeDriven: boolean = false) {
+            this.selectedTargito = selectedTargito;
+            if (routeDriven) {
+                return;
+            }
+
+            if (!this.suppressRouteUpdate && this.activeTabId === 'targito') {
+                void this.$router.push({ path: selectedTargito ? `/targito/${encodeURIComponent(selectedTargito.id)}` : '/targito' });
+            }
+        }
+
+        gatewayItemDeleted(listRef: string) {
+            void (this.$refs[listRef] as any)?.refresh?.(true);
+        }
+
         @Watch("activeTabId")
         onActiveTabChanged(newTab: string) {
             // Update URL when tab changes
@@ -207,6 +294,21 @@
                             }
                         }
                         break;
+                    case 'sms':
+                        if (this.selectedSms) {
+                            void this.$router.push({ path: `/sms/${encodeURIComponent(this.selectedSms.id)}` });
+                        } else if (!this.$route.path.startsWith('/sms/')) {
+                            // Keep the id of a deep link that the list has not selected yet
+                            void this.$router.push({ path: '/sms' });
+                        }
+                        break;
+                    case 'targito':
+                        if (this.selectedTargito) {
+                            void this.$router.push({ path: `/targito/${encodeURIComponent(this.selectedTargito.id)}` });
+                        } else if (!this.$route.path.startsWith('/targito/')) {
+                            void this.$router.push({ path: '/targito' });
+                        }
+                        break;
                     case 'serverlog':
                         this.$router.push({ path: '/serverlog' });
                         break;
@@ -224,6 +326,21 @@
                 this.activeTabId = 'messages';
             } else if (path.startsWith('/sessions')) {
                 this.activeTabId = 'sessions';
+            } else if (path.startsWith('/sms')) {
+                // Until the health check has answered the tab does not exist yet. mounted() re-evaluates the route.
+                if (this.hasSmsGateway) {
+                    this.activeTabId = 'sms';
+                } else if (this.gatewayHealthLoaded) {
+                    this.activeTabId = 'messages';
+                    void this.$router.replace('/messages');
+                }
+            } else if (path.startsWith('/targito')) {
+                if (this.hasTargitoGateway) {
+                    this.activeTabId = 'targito';
+                } else if (this.gatewayHealthLoaded) {
+                    this.activeTabId = 'messages';
+                    void this.$router.replace('/messages');
+                }
             } else if (path.startsWith('/serverlog')) {
                 this.activeTabId = 'serverlog';
             }
@@ -259,17 +376,60 @@
             window.localStorage.setItem("sessionlist-panelsize", value.toString());
         }
 
+        get smsListPaneSize(): number {
+
+            var storedValue = window.localStorage.getItem("smslist-panelsize");
+            if (storedValue) {
+                return Number(storedValue);
+            }
+
+            return 40;
+        }
+
+        set smsListPaneSize(value: number) {
+            window.localStorage.setItem("smslist-panelsize", value.toString());
+        }
+
+        get targitoListPaneSize(): number {
+
+            var storedValue = window.localStorage.getItem("targitolist-panelsize");
+            if (storedValue) {
+                return Number(storedValue);
+            }
+
+            return 40;
+        }
+
+        set targitoListPaneSize(value: number) {
+            window.localStorage.setItem("targitolist-panelsize", value.toString());
+        }
+
+        async loadGatewayFeatures() {
+            try {
+                const health = await new FakeGatewaysController().getHealth();
+                this.gatewayFeatures = health.features || [];
+            } catch {
+                this.gatewayFeatures = [];
+            } finally {
+                this.gatewayHealthLoaded = true;
+            }
+        }
+
         async mounted() {
             this.connection = new HubConnectionManager("hubs/notifications")
-            this.connection.start();
+            void this.connection.start();
             
             // Initialize tab from route on mount BEFORE data loads
+            this.onRouteChanged();
+
+            await this.loadGatewayFeatures();
+            // Now the SMS / Targito tabs exist, so a deep link to them can be honoured
             this.onRouteChanged();
         }
 
         destroyed() {
             if (this.connection) {
-                this.connection.stop();
+                void this.connection.stop();
             }
         }
 
