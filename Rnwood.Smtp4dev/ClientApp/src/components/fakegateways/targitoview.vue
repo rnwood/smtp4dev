@@ -25,6 +25,14 @@
             <div v-if="dataRows.length > 0">
                 <h4>Data</h4>
                 <table class="datatable" data-testid="targito-view-data">
+                    <thead>
+                        <tr>
+                            <th class="datakey" scope="col">Key</th>
+                            <th scope="col">Value</th>
+                            <th class="datacopy" scope="col"><span class="visually-hidden">Actions</span></th>
+                        </tr>
+                    </thead>
+                    <tbody>
                     <tr v-for="row in dataRows" :key="row.key" :data-key="row.key">
                         <td class="datakey">{{ row.key }}</td>
                         <td class="datavalue">
@@ -39,6 +47,7 @@
                             <el-button size="small" icon="CopyDocument" title="Copy value" :aria-label="'Copy value of ' + row.key" @click="copy(row.value)"></el-button>
                         </td>
                     </tr>
+                    </tbody>
                 </table>
             </div>
 
@@ -86,7 +95,7 @@
         }
 
         copy(value: string) {
-            copyToClipboard(value);
+            void copyToClipboard(value);
         }
 
         @Emit("deleted")
@@ -122,6 +131,22 @@
         border-bottom: 1px solid var(--el-border-color-lighter);
         vertical-align: top;
         word-break: break-all;
+    }
+
+    .targitoview .datatable th {
+        padding: 4px 8px;
+        text-align: left;
+        border-bottom: 1px solid var(--el-border-color);
+        color: var(--el-text-color-secondary);
+    }
+
+    .targitoview .visually-hidden {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        overflow: hidden;
+        clip: rect(0 0 0 0);
+        white-space: nowrap;
     }
 
     .targitoview .datakey {

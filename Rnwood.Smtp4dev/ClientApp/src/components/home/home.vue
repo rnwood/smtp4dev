@@ -244,7 +244,7 @@
             // Selections that merely follow the URL (routeDriven) are not written back, so a deep link
             // to an item that has not been loaded (or does not exist) keeps its URL.
             if (!this.suppressRouteUpdate && this.activeTabId === 'sms') {
-                this.$router.push({ path: selectedSms ? `/sms/${encodeURIComponent(selectedSms.id)}` : '/sms' });
+                void this.$router.push({ path: selectedSms ? `/sms/${encodeURIComponent(selectedSms.id)}` : '/sms' });
             }
         }
 
@@ -255,12 +255,12 @@
             }
 
             if (!this.suppressRouteUpdate && this.activeTabId === 'targito') {
-                this.$router.push({ path: selectedTargito ? `/targito/${encodeURIComponent(selectedTargito.id)}` : '/targito' });
+                void this.$router.push({ path: selectedTargito ? `/targito/${encodeURIComponent(selectedTargito.id)}` : '/targito' });
             }
         }
 
         gatewayItemDeleted(listRef: string) {
-            (this.$refs[listRef] as any)?.refresh?.(true);
+            void (this.$refs[listRef] as any)?.refresh?.(true);
         }
 
         @Watch("activeTabId")
@@ -296,17 +296,17 @@
                         break;
                     case 'sms':
                         if (this.selectedSms) {
-                            this.$router.push({ path: `/sms/${encodeURIComponent(this.selectedSms.id)}` });
+                            void this.$router.push({ path: `/sms/${encodeURIComponent(this.selectedSms.id)}` });
                         } else if (!this.$route.path.startsWith('/sms/')) {
                             // Keep the id of a deep link that the list has not selected yet
-                            this.$router.push({ path: '/sms' });
+                            void this.$router.push({ path: '/sms' });
                         }
                         break;
                     case 'targito':
                         if (this.selectedTargito) {
-                            this.$router.push({ path: `/targito/${encodeURIComponent(this.selectedTargito.id)}` });
+                            void this.$router.push({ path: `/targito/${encodeURIComponent(this.selectedTargito.id)}` });
                         } else if (!this.$route.path.startsWith('/targito/')) {
-                            this.$router.push({ path: '/targito' });
+                            void this.$router.push({ path: '/targito' });
                         }
                         break;
                     case 'serverlog':
@@ -332,14 +332,14 @@
                     this.activeTabId = 'sms';
                 } else if (this.gatewayHealthLoaded) {
                     this.activeTabId = 'messages';
-                    this.$router.replace('/messages');
+                    void this.$router.replace('/messages');
                 }
             } else if (path.startsWith('/targito')) {
                 if (this.hasTargitoGateway) {
                     this.activeTabId = 'targito';
                 } else if (this.gatewayHealthLoaded) {
                     this.activeTabId = 'messages';
-                    this.$router.replace('/messages');
+                    void this.$router.replace('/messages');
                 }
             } else if (path.startsWith('/serverlog')) {
                 this.activeTabId = 'serverlog';
@@ -417,7 +417,7 @@
 
         async mounted() {
             this.connection = new HubConnectionManager("hubs/notifications")
-            this.connection.start();
+            void this.connection.start();
             
             // Initialize tab from route on mount BEFORE data loads
             this.onRouteChanged();
@@ -429,7 +429,7 @@
 
         destroyed() {
             if (this.connection) {
-                this.connection.stop();
+                void this.connection.stop();
             }
         }
 

@@ -221,9 +221,9 @@
             if (this.connection && !this.connectionHandlersRegistered) {
                 this.connectionHandlersRegistered = true;
                 this.connection.on("smschanged", () => {
-                    this.refresh(true);
+                    void this.refresh(true);
                 });
-                this.connection.addOnConnectedCallback(() => this.refresh(true));
+                this.connection.addOnConnectedCallback(() => { void this.refresh(true); });
             }
         }
 

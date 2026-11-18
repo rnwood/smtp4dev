@@ -14,5 +14,5 @@ export function formatLocalTime(iso: string | null | undefined): string {
         return "";
     }
     const date = new Date(iso);
-    return isNaN(date.getTime()) ? iso : date.toLocaleString();
+    return Number.isNaN(date.getTime()) ? iso : date.toLocaleString();
 }

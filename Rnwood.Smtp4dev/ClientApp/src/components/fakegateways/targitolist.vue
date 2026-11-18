@@ -85,7 +85,7 @@
         private connectionHandlersRegistered = false;
 
         get methods(): string[] {
-            return Array.from(new Set(this.items.map(i => i.method))).sort();
+            return Array.from(new Set(this.items.map(i => i.method))).sort((a, b) => a.localeCompare(b));
         }
 
         get filteredItems(): TargitoRecord[] {
@@ -250,9 +250,9 @@
             if (this.connection && !this.connectionHandlersRegistered) {
                 this.connectionHandlersRegistered = true;
                 this.connection.on("targitochanged", () => {
-                    this.refresh(true);
+                    void this.refresh(true);
                 });
-                this.connection.addOnConnectedCallback(() => this.refresh(true));
+                this.connection.addOnConnectedCallback(() => { void this.refresh(true); });
             }
         }
 

@@ -73,13 +73,13 @@
 
         copyText() {
             if (this.sms) {
-                copyToClipboard(this.sms.text);
+                void copyToClipboard(this.sms.text);
             }
         }
 
         copyCode() {
             if (this.effectiveCode) {
-                copyToClipboard(this.effectiveCode);
+                void copyToClipboard(this.effectiveCode);
             }
         }
 
