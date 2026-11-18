@@ -252,7 +252,7 @@
                 this.connection.on("targitochanged", () => {
                     void this.refresh(true);
                 });
-                this.connection.addOnConnectedCallback(() => { void this.refresh(true); });
+                void this.connection.addOnConnectedCallback(() => { void this.refresh(true); });
             }
         }
 

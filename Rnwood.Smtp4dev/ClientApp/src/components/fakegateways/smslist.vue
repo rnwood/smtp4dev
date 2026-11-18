@@ -223,7 +223,7 @@
                 this.connection.on("smschanged", () => {
                     void this.refresh(true);
                 });
-                this.connection.addOnConnectedCallback(() => { void this.refresh(true); });
+                void this.connection.addOnConnectedCallback(() => { void this.refresh(true); });
             }
         }
 
