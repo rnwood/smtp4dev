@@ -42,5 +42,10 @@ namespace Rnwood.Smtp4dev.Server
         Task DeleteSession(Guid id);
         Task DeleteAllSessions();
         void Send(IDictionary<string, string> headers, string[] to, string[] cc, string from, string[] envelopeRecipients, string subject, string bodyHtml, IEnumerable<AttachmentInfo> attachments = null);
+
+        /// <summary>
+        /// Sends a pre-built MimeMessage via the configured relay SMTP server.
+        /// </summary>
+        void SendRaw(MimeMessage message, string from, string[] envelopeRecipients);
     }
 }
