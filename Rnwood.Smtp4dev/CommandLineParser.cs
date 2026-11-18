@@ -79,6 +79,7 @@ namespace Rnwood.Smtp4dev
                 { "exitafter=", "Specifies the number of messages to receive before exiting the application (used with delivertostdout)", data => map.Add(data, x => x.ServerOptions.ExitAfterMessages) },
                 { "oauth2authority=", "OAuth2/XOAUTH2 Identity Provider authority URL for token validation (e.g., https://login.microsoftonline.com/common/v2.0)", data => map.Add(data, x => x.ServerOptions.OAuth2Authority) },
                 { "oauth2audience=", "OAuth2/XOAUTH2 expected audience value for token validation", data => map.Add(data, x => x.ServerOptions.OAuth2Audience) },
+                { "fakegateways", "Enables the fake Konzulta (SMS) and Targito (e-mail) gateways and their API. Equivalent to environment variable FakeGateways__Enabled=true.", data => map.Add((data != null).ToString(), x => x.FakeGateways.Enabled) },
                 { "oauth2issuer=", "OAuth2/XOAUTH2 expected issuer value for token validation (optional, defaults to authority's issuer)", data => map.Add(data, x => x.ServerOptions.OAuth2Issuer) }
             };
 

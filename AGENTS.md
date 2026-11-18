@@ -239,3 +239,5 @@ The project uses Azure Pipelines (`azure-pipelines.yml`) with:
 - `win-x64`, `linux-x64`, `linux-musl-x64`, `linux-arm`, `win-arm64`
 - Desktop variants (Windows only)
 - Docker images (Linux and Windows)
+## Fork: Fake Gateways
+- Backend for fake SMS (Konzulta) and Targito gateways lives in `Rnwood.Smtp4dev/FakeGateways/`; frontend in `Rnwood.Smtp4dev/ClientApp/src/components/fakegateways/`. Enable with `--fakegateways` or `FakeGateways__Enabled=true`. See `docs/fake-gateways.md`.

@@ -9,6 +9,8 @@ namespace Rnwood.Smtp4dev
 
         public DesktopOptionsSource DesktopOptions { get; set; }
 
+        public Rnwood.Smtp4dev.FakeGateways.FakeGatewaysOptionsSource FakeGateways { get; set; }
+
         public string Urls { get; set; }
 
         public bool NoUserSettings { get; set; }
