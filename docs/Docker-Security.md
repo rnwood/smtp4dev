@@ -128,7 +128,7 @@ networks:
 ## Reference
 
 For more information about Docker port publishing security, see:
-- [Docker Documentation: Port Publishing](https://docs.docker.com/network/porting/)
+- [Docker Documentation: Port Publishing](https://docs.docker.com/engine/network/port-publishing/)
 - [Docker Security Best Practices](https://docs.docker.com/develop/security-best-practices/)
 
 ## Summary
