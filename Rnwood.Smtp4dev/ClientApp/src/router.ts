@@ -8,6 +8,10 @@ export const routes = [
     { path: '/messages/mailbox/:mailbox/folder/:folder/message/:message', component: Home },
     { path: '/sessions', component: Home },
     { path: '/sessions/session/:sessionId', component: Home },
+    { path: '/sms', component: Home },
+    { path: '/sms/:id', component: Home },
+    { path: '/targito', component: Home },
+    { path: '/targito/:id', component: Home },
     { path: '/serverlog', component: Home },
 ];
 

@@ -32,6 +32,7 @@ using Rnwood.Smtp4dev.Server.Settings;
 using Microsoft.AspNetCore.Authorization;
 using AspNetCore.Authentication.Basic;
 using System.Reflection;
+using Rnwood.Smtp4dev.FakeGateways;
 
 namespace Rnwood.Smtp4dev
 {
@@ -309,6 +310,7 @@ namespace Rnwood.Smtp4dev
             {
                 o.InputFormatters.Add(new HtmlBodyInputFormatter());
             });
+            services.AddFakeGateways(Configuration);
             services.AddRequestLocalization(options => { options.SupportedCultures = CultureInfo.GetCultures(CultureTypes.AllCultures); });
 
             services.AddSpaStaticFiles(o => o.RootPath = "ClientApp");
