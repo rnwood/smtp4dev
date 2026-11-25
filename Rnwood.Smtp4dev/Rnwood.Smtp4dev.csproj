@@ -2,6 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
+    <AssemblyName>smtp4dev</AssemblyName>
     <VersionPrefix>3.3.0-dev</VersionPrefix>
     <TypeScriptToolsVersion>3.0</TypeScriptToolsVersion>
     <TypeScriptCompileBlocked>true</TypeScriptCompileBlocked>
