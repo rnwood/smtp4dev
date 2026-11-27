@@ -50,7 +50,7 @@ namespace Rnwood.Smtp4dev.ApiModel
 
                 if (MimeMessage.From != null)
                 {
-                    From = MimeMessage.From.ToString();
+                    From = PunyCodeReplacer.DecodePunycode(MimeMessage.From.ToString());
                 }
 
                 var recipients = new List<string>(dbMessage.To.Split(",")

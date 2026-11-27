@@ -7,7 +7,7 @@ namespace Rnwood.Smtp4dev
     internal class PunyCodeReplacer
     {
 
-        private static Regex punycodeRegex = new Regex("xn--[a-z0-9]+", RegexOptions.Compiled);
+        private static Regex punycodeRegex = new Regex(@"(?<![a-z0-9-])xn--[a-z0-9-]+", RegexOptions.Compiled | RegexOptions.IgnoreCase);
 
         public static string DecodePunycode(string value)
         {
